@@ -1,1 +1,1 @@
-# pypsa-africa
+# PyPSA-Africa
