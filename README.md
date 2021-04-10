@@ -8,6 +8,6 @@ The environment can be installed and activated using
 
 .. code:: bash
 
-    .../pypsa-eur % conda env create -f envs/environment.yaml
+    .../pypsa-eur % conda env create -f envs/environment.yml
 
     .../pypsa-eur % conda activate pypsa-africa
