@@ -3,7 +3,7 @@
 Under development.
 
 
-The python package requirements are curated in the `envs/environment.yaml`_ file.
+The python package requirements are curated in the `envs/environment.yml`_ file.
 The environment can be installed and activated using
 
 .. code:: bash
