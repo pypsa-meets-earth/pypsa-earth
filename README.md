@@ -1,6 +1,4 @@
-# PyPSA-Africa
-
-Under development.
+# PyPSA meets Africa (currenlty under prototype development)
 
 
 The python package requirements are curated in the `envs/environment.yml`_ file.
