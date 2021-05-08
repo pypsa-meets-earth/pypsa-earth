@@ -267,11 +267,11 @@ AFRICA_CC = {
     "BF": "burkina-faso",
     "BI": "burundi",
     "CM": "cameroon",
-    # canary-islands
-    "CV": "cape-verde",
+    # canary-islands    # Island
+    # "CV": "cape-verde", # Island
     "CF": "central-african-republic",
     "TD": "chad",
-    "KM": "comores",
+    # "KM": "comores", # Island
     "CG": "congo-brazzaville",
     "CD": "congo-democratic-republic",
     "DJ": "djibouti",
@@ -281,7 +281,7 @@ AFRICA_CC = {
     "ET": "ethiopia",
     "GA": "gabon",
     "GH": "ghana",
-    "GW": "guinea-bissau",
+    # "GW": "guinea-bissau", # No Data
     "GN": "guinea",
     "CI": "ivory-coast",
     "KE": "kenya",
@@ -300,11 +300,11 @@ AFRICA_CC = {
     "NG": "nigeria",
     "RW": "rwanda",
     # saint-helena-ascension-and-tristan-da-cunha
-    "ST": "sao-tome-and-principe",
+    # "ST": "sao-tome-and-principe", #Island
     "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
-    "SC": "seychelles",
+    # "SC": "seychelles", #Island
     "SL": "sierra-leone",
-    "SO": "somalia",
+    # "SO": "somalia", # No Data
     # south-africa-and-lesotho
     "ZA": "south-africa",
     "SS": "south-sudan",

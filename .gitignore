@@ -11,3 +11,5 @@
 
 **/pbf
 *.pbf
+
+data_exploration/data/osm/
