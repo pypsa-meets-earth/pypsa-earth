@@ -6,25 +6,32 @@
 # 5. Exports to GeoJson
 
 
-from esy.osmfilter import run_filter, Node, Way, Relation
-import geoplot
-from shapely.geometry import Point, LineString
-import geopandas as gpd
-import numpy as np
-import pandas as pd
-from contextlib import contextmanager
-from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import export_geojson
-from esy.osmfilter import osm_colors as CC
-import shutil
-import requests
-from iso_country_codes import AFRICA_CC
-import os
-import sys
-import time
 
+import os, sys, time
+#IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('../scripts')
+from iso_country_codes import AFRICA_CC
+
+import requests
+import shutil
+
+# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+from esy.osmfilter import  osm_colors          as CC
+from esy.osmfilter import run_filter, Node,Way,Relation 
+from esy.osmfilter import export_geojson
+from esy.osmfilter import osm_info             as osm_info
+from esy.osmfilter import osm_pickle           as osm_pickle
+from contextlib import contextmanager
+
+import pandas as pd
+import numpy as np
+import geopandas as gpd
+from shapely.geometry import Point, LineString
+import geoplot
+import matplotlib.pyplot as plt
+
+
 
 
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
@@ -47,7 +54,7 @@ def download_pbf(country_code, update):  # update = true forces re-download of f
     PBF_inputfile = os.path.join(
         os.getcwd(), "data", "osm", "pbf", geofabrik_filename)  # Input filepath
 
-    if not os.path.exists(PBF_inputfile) or update:
+    if not os.path.exists(PBF_inputfile) or update is True:
         print(f"{geofabrik_filename} does not exist, downloading to {PBF_inputfile}")
         # create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
@@ -79,11 +86,11 @@ def download_and_filter(country_code, update=False):
         DataDict = {"Data": Data}
         osm_pickle.picklesave(DataDict, os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))))
-        print("Loading Pickle")  # TODO: Change to Logger
+        print(f'Loading Pickle for {AFRICA_CC[country_code]}')  # TODO: Change to Logger
     else:
         create_elements = True
         new_prefilter_data = True
-        print("Creating  New Elements")  # TODO: Change to Logger
+        print(f'Creating  New Elements for {AFRICA_CC[country_code]}')  # TODO: Change to Logger
 
     prefilter = {Node: {"power": ["substation", "line"]}, Way: {
         "power": ["substation", "line"]}, Relation: {"power": ["substation", "line"]}} #see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
@@ -160,7 +167,7 @@ def convert_pd_to_gdf_lines(df_way):
 # Convert Filtered Data, Elements to Pandas Dataframes
 
 
-def convert_filtered_data_to_dfs(feature_data, feature):
+def convert_filtered_data_to_dfs(country_code, feature_data, feature):
     [Data, Elements] = feature_data
     elementname = f'{country_code}_{feature}s'
     df_way = pd.json_normalize(Elements[elementname]["Way"].values())
@@ -168,9 +175,8 @@ def convert_filtered_data_to_dfs(feature_data, feature):
     return (df_node, df_way, Data)
 
 
-def process_substation_data(substation_data):
-    df_node, df_way, Data = convert_filtered_data_to_dfs(
-        substation_data, 'substation')
+def process_substation_data(country_code, substation_data):
+    df_node, df_way, Data = convert_filtered_data_to_dfs(country_code, substation_data, 'substation')
     convert_ways_nodes(df_way, Data)
     # Add Type Column
     df_node['Type'] = 'Node'
@@ -183,8 +189,8 @@ def process_substation_data(substation_data):
     return df_combined
 
 
-def process_line_data(line_data):
-    df_node, df_way, Data = convert_filtered_data_to_dfs(line_data, 'line')
+def process_line_data(country_code, line_data):
+    df_node, df_way, Data = convert_filtered_data_to_dfs(country_code, line_data, 'line')
     convert_ways_lines(df_way, Data)
     # Add Type Column
     df_way['Type'] = 'Way'
@@ -202,11 +208,11 @@ def process_data():
         substation_data, line_data = download_and_filter(country_code)
         for feature in ["substation", "line"]:
             if feature == 'substation':
-                df_substation = process_substation_data(substation_data)
+                df_substation = process_substation_data(country_code, substation_data)
                 df_all_substations = pd.concat(
                     [df_all_substations, df_substation])
             if feature == 'line':
-                df_line = process_line_data(line_data)
+                df_line = process_line_data(country_code, line_data)
                 df_all_lines = pd.concat([df_all_lines, df_line])
     
     #----------- SUBSTATIONS -----------
