@@ -92,12 +92,12 @@ def download_and_filter(country_code, update=False):
         new_prefilter_data = True
         print(f'Creating  New Elements for {AFRICA_CC[country_code]}')  # TODO: Change to Logger
 
-    prefilter = {Node: {"power": ["substation", "line"]}, Way: {
-        "power": ["substation", "line"]}, Relation: {"power": ["substation", "line"]}} #see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
+    prefilter = {Node: {"power": ["substation", "line","generator"]}, Way: {
+        "power": ["substation", "line","generator"]}, Relation: {"power": ["substation", "line","generator"]}} #see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
     blackfilter = [("pipeline", "substation"), ]
 
-    for feature in ["substation", "line"]:
+    for feature in ["substation", "line","generator"]:
         whitefilter = [[("power", feature), ], ]
         elementname = f'{country_code}_{feature}s'
 
@@ -108,8 +108,10 @@ def download_and_filter(country_code, update=False):
             substation_data = feature_data
         if feature == 'line':
             line_data = feature_data
+        if feature == 'generator':
+            generator_data = feature_data
 
-    return (substation_data, line_data)
+    return (substation_data, line_data, generator_data)
 
 # Convert Ways to Point Coordinates
 
@@ -200,13 +202,28 @@ def process_line_data(country_code, line_data):
     return df_way
 
 
+def process_generator_data(country_code, generator_data):
+    df_node, df_way, Data = convert_filtered_data_to_dfs(country_code, generator_data, 'generator')
+    convert_ways_nodes(df_way, Data)
+    # Add Type Column
+    df_node['Type'] = 'Node'
+    df_way['Type'] = 'Way'
+
+    df_combined = pd.concat([df_node, df_way], axis=0)
+    # Add Country Column
+    df_combined['Country'] = AFRICA_CC[country_code]
+
+    return df_combined
+
+
 def process_data():
     df_all_substations = pd.DataFrame()
     df_all_lines = pd.DataFrame()
+    df_all_generators = pd.DataFrame()
     # test_CC = {"DZ": "algeria", "EG": "egypt", "NG": "nigeria"}
     for country_code in AFRICA_CC.keys():
-        substation_data, line_data = download_and_filter(country_code)
-        for feature in ["substation", "line"]:
+        substation_data, line_data, generator_data = download_and_filter(country_code)
+        for feature in ["substation", "line","generator"]:
             if feature == 'substation':
                 df_substation = process_substation_data(country_code, substation_data)
                 df_all_substations = pd.concat(
@@ -214,12 +231,16 @@ def process_data():
             if feature == 'line':
                 df_line = process_line_data(country_code, line_data)
                 df_all_lines = pd.concat([df_all_lines, df_line])
+            if feature == 'generator':
+                df_generator = process_generator_data(country_code, generator_data)
+                df_all_generators = pd.concat(
+                    [df_all_generators, df_generator])
     
     #----------- SUBSTATIONS -----------
 
     # Clean
     df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
-    df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
+    #df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
 
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_substations.')
@@ -236,21 +257,33 @@ def process_data():
     # The following code keeps only the first information before the semicolon..
     # Needs to be corrected in future, creating two lines with the same bus ID.
     
-    # df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}, inplace = True)
-    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
-    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].astype(int)
-    # df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
-
-
-    df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
+    df_all_lines.dropna(subset=['tags.voltage'], inplace = True) # Drop any lines with Voltage = N/A
+    df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}, inplace = True) 
+    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
+    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].astype(int)
+    df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
+    #df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
 
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(), 'data', 'africa_all'+'_lines.')  
     df_all_lines.to_csv(outputfile_partial + 'csv')  # Generate CSV
-
     gdf_lines = convert_pd_to_gdf_lines(df_all_lines)
     gdf_lines.to_file(outputfile_partial+'geojson',
                 driver="GeoJSON")  # Generate GeoJson
+
+
+    # ----------- Generator -----------
+    
+    df_all_generators.drop(columns = ["tags.fixme","tags.frequency","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore')
+    df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')] #removes boolean 
+    df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
+    df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"}, inplace = True)
+
+    # Generate Files
+    outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_generator.')
+    df_all_generators.to_csv(outputfile_partial + 'csv') # Generate CSV
+    gdf_generators = convert_pd_to_gdf(df_all_generators)
+    gdf_generators.to_file(outputfile_partial+'geojson', driver="GeoJSON")  # Generate GeoJson
 
 
 if __name__ == "__main__":
