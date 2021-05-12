@@ -119,6 +119,8 @@ def download_and_filter(country_code, update=False):
 # TODO: Use shapely and merge with convert_ways_lines
 def convert_ways_nodes(df_way, Data):
     lonlat_column = []
+    col = "refs"
+    df_way[col] = pd.Series() if col not in df_way.columns else df_way[col] #create empty "refs" if not in dataframe
     for ref in df_way["refs"]:
         lonlats = []
         for r in ref:
@@ -127,8 +129,8 @@ def convert_ways_nodes(df_way, Data):
         lonlats = np.array(lonlats)
         lonlat = np.mean(lonlats, axis=0)  # Hacky Apporx Centroid
         lonlat_column.append(lonlat)
-    df_way.drop('refs', axis=1, inplace=True)
-    df_way.insert(1, "lonlat", lonlat_column)
+    df_way.drop('refs', axis=1, inplace=True, errors='ignore')
+    df_way.insert(0, "lonlat", lonlat_column)
 
 # Convert Ways to Line Coordinates
 
@@ -280,7 +282,7 @@ def process_data():
     df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"}, inplace = True)
 
     # Generate Files
-    outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_generator.')
+    outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_generators.')
     df_all_generators.to_csv(outputfile_partial + 'csv') # Generate CSV
     gdf_generators = convert_pd_to_gdf(df_all_generators)
     gdf_generators.to_file(outputfile_partial+'geojson', driver="GeoJSON")  # Generate GeoJson
