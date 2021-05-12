@@ -120,7 +120,7 @@ def download_and_filter(country_code, update=False):
 def convert_ways_nodes(df_way, Data):
     lonlat_column = []
     col = "refs"
-    df_way[col] = pd.Series() if col not in df_way.columns else df_way[col] #create empty "refs" if not in dataframe
+    df_way[col] = pd.Series().astype(float) if col not in df_way.columns else df_way[col] #create empty "refs" if not in dataframe
     for ref in df_way["refs"]:
         lonlats = []
         for r in ref:
@@ -261,8 +261,9 @@ def process_data():
     
     df_all_lines.dropna(subset=['tags.voltage'], inplace = True) # Drop any lines with Voltage = N/A
     df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}, inplace = True) 
+    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[1]
     df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
-    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].astype(int)
+    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].astype(float)
     df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
     #df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
 
