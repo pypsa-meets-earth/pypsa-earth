@@ -46,6 +46,20 @@ import matplotlib.pyplot as plt
 # Downloads PBF File for given Country Code
 
 def download_pbf(country_code, update):  # update = true forces re-download of files
+    """
+    TEST ONLY. FROM PYPSA.
+    Initializes variables for power dispatch for a given component and a
+    given attribute.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    c : str
+        name of the network component
+    attr : str
+        name of the attribute, e.g. 'p'
+
+    """
     country_name = AFRICA_CC[country_code]
     # Filename for geofabrik
     geofabrik_filename = f'{country_name}-latest.osm.pbf'
