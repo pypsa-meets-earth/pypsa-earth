@@ -12,4 +12,6 @@
 **/pbf
 *.pbf
 
+pypsa-eur
+
 data_exploration/data/osm/
