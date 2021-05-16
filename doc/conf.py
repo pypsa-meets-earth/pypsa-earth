@@ -31,7 +31,20 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+#    'sphinx.ext.pngmath',
+#    'sphinxcontrib.tikz',
+    #'rinoh.frontend.sphinx',
+    'sphinx.ext.imgconverter' # for SVG conversion
 ]
+
+autodoc_default_flags = ['members']
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
