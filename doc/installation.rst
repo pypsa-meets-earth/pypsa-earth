@@ -23,7 +23,7 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
     /some/other/path % cd /some/path/without/spaces
 
-    /some/path/without/spaces % git clone https://github.com/PyPSA/pypsa-eur.git
+    /some/path/without/spaces % git clone https://github.com/pz-max/pypsa-meets-africa
 
 
 .. _deps:
