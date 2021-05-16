@@ -47,7 +47,7 @@ extensions = [
 # autodoc_mock_imports leave the package out and does not require for building 
 # the documentation. If not mocked out errors can appear i.e. not automated
 # documentation 
-autodoc_mock_imports = ["esy-osmfilter", "esy", "numpy", "pandas"] 
+autodoc_mock_imports = ["esy-osmfilter", "esy", "numpy", "pandas","geopandas","shapely", "geoplot", "matplotlib"] 
 
 autodoc_default_flags = ['members']
 autosummary_generate = True
