@@ -24,16 +24,18 @@ Documentation
 
    installation
 
-**Automatic Code Documenation**
+**Code Documenation (automated)**
 
 * :doc:`api_reference`
+* :doc:`how_to_docs`
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: API
+   :caption: Code Documenation 
 
    api_reference
+   how_to_docs
 
 
 
