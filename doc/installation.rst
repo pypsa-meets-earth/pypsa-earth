@@ -36,7 +36,7 @@ We recommend using the package manager and environment management system ``conda
 Install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ that includes only ``conda`` and its dependencies or make sure ``conda`` is already installed on your system.
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
-The python package requirements are curated in the `envs/environment.yaml file.
+The python package requirements are curated in the envs/environment.yaml file.
 The environment can be installed and activated using
 
 .. code:: bash

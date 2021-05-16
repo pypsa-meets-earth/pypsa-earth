@@ -17,7 +17,7 @@ Documentation
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Getting Started
 
    installation
@@ -28,7 +28,7 @@ Documentation
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: API
 
    api_reference

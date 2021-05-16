@@ -5,6 +5,9 @@
 # 4. Exports to CSV
 # 5. Exports to GeoJson
 
+"""
+OSM extraction scrpt
+"""
 
 
 import os, sys, time
@@ -31,6 +34,8 @@ from shapely.geometry import Point, LineString
 import geoplot
 import matplotlib.pyplot as plt
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 
