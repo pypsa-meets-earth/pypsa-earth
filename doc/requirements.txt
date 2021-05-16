@@ -1,0 +1,4 @@
+``` Required for docs ```
+
+esy-osm-pbf==0.0.1
+esy-osmfilter==1.0.11
