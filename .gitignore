@@ -17,7 +17,3 @@ pypsa-eur
 data_exploration/data/osm/
 
 doc/_build
-
-../source
-
-../source/
