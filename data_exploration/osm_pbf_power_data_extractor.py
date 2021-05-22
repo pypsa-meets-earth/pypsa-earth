@@ -280,9 +280,9 @@ def process_data():
     
     df_all_lines.dropna(subset=['tags.voltage'], inplace = True) # Drop any lines with Voltage = N/A
     df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}, inplace = True) 
-    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[1]
+    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[0]
     df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
-    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].astype(float)
+    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].apply(lambda x: pd.to_numeric(x, errors='coerce')).dropna() ## if cell can't converted to float -> drop
     df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
     #df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
 
