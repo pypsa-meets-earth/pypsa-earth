@@ -260,6 +260,7 @@ def process_data():
     #----------- SUBSTATIONS -----------
 
     # Clean
+    df_all_substations.reset_index(drop=True, inplace=True)
     df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
     #df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
 
@@ -278,6 +279,7 @@ def process_data():
     # The following code keeps only the first information before the semicolon..
     # Needs to be corrected in future, creating two lines with the same bus ID.
     
+    df_all_lines.reset_index(drop=True, inplace=True)
     df_all_lines.dropna(subset=['tags.voltage'], inplace = True) # Drop any lines with Voltage = N/A
     df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}, inplace = True) 
     df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[0]
@@ -296,6 +298,7 @@ def process_data():
 
     # ----------- Generator -----------
     
+    df_all_generators.reset_index(drop=True, inplace=True)
     df_all_generators.drop(columns = ["tags.fixme","tags.frequency","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore')
     df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')] #removes boolean 
     df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
