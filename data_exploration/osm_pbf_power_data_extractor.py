@@ -9,7 +9,6 @@
 OSM extraction scrpt
 """
 
-
 import os, sys, time
 #IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -114,7 +113,7 @@ def download_and_filter(country_code, update=False):
     prefilter = {Node: {"power": ["substation", "line","generator"]}, Way: {
         "power": ["substation", "line","generator"]}, Relation: {"power": ["substation", "line","generator"]}} #see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
-    blackfilter = [("pipeline", "substation"), ]
+    blackfilter = [("", ""), ]
 
     for feature in ["substation", "line","generator"]:
         whitefilter = [[("power", feature), ], ]
@@ -180,8 +179,10 @@ def convert_pd_to_gdf(df_way):
 # Convert Lines Pandas Dataframe to GeoPandas Dataframe
 
 
-def convert_pd_to_gdf_lines(df_way):
+def convert_pd_to_gdf_lines(df_way, simplified=False):
     df_way['geometry'] = df_way['lonlat'].apply(lambda x: LineString(x))
+    if simplified is True:
+        df_way['geometry'] = df_way['geometry'].apply(lambda x: x.simplify(0.005, preserve_topology=False))
     gdf = gpd.GeoDataFrame(df_way, geometry="geometry", crs="EPSG:4326")
     gdf.drop(columns=['lonlat'], inplace=True)
 
@@ -241,7 +242,7 @@ def process_data():
     df_all_substations = pd.DataFrame()
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
-    # test_CC = {"DZ": "algeria", "EG": "egypt", "NG": "nigeria"}
+    # test_CC = {"NG": "nigeria"}
     for country_code in AFRICA_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line","generator"]:
@@ -262,7 +263,7 @@ def process_data():
     # Clean
     df_all_substations.reset_index(drop=True, inplace=True)
     df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
-    #df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
+    df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
 
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_substations.')
@@ -286,12 +287,12 @@ def process_data():
     df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
     df_all_lines['voltage_V'] = df_all_lines['voltage_V'].apply(lambda x: pd.to_numeric(x, errors='coerce')).dropna() ## if cell can't converted to float -> drop
     df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
-    #df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
+    df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
 
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(), 'data', 'africa_all'+'_lines.')  
     df_all_lines.to_csv(outputfile_partial + 'csv')  # Generate CSV
-    gdf_lines = convert_pd_to_gdf_lines(df_all_lines)
+    gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=True)
     gdf_lines.to_file(outputfile_partial+'geojson',
                 driver="GeoJSON")  # Generate GeoJson
 
@@ -303,6 +304,7 @@ def process_data():
     df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')] #removes boolean 
     df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
     df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"}, inplace = True)
+    df_all_generators.dropna(thresh=len(df_all_generators)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
 
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_generators.')
