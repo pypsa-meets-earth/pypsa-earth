@@ -23,7 +23,7 @@ import geopandas as gpd  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import requests  # noqa: E402
-# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+
 from esy.osmfilter import run_filter  # noqa: E402
 from esy.osmfilter import Node, Relation, Way  # noqa: E402
 from esy.osmfilter import osm_info as osm_info  # noqa: E402
@@ -32,7 +32,6 @@ from iso_country_codes import AFRICA_CC  # noqa: E402
 from shapely.geometry import LineString, Point  # noqa: E402
 
 logger = logging.getLogger(__name__)
-
 
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
