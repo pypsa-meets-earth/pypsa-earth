@@ -12,8 +12,7 @@ OSM extraction scrpt
 import os, sys, time
 #IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append('../scripts')
-from iso_country_codes import AFRICA_CC
+sys.path.append('../../scripts')
 
 import requests
 import shutil
@@ -32,6 +31,7 @@ import geopandas as gpd
 from shapely.geometry import Point, LineString
 import geoplot
 import matplotlib.pyplot as plt
+from iso_country_codes import AFRICA_CC
 
 import logging
 logger = logging.getLogger(__name__)
@@ -258,13 +258,11 @@ def process_data():
                 df_all_generators = pd.concat(
                     [df_all_generators, df_generator])
     
-    #----------- SUBSTATIONS -----------
+    ##---------- RAW DATA (not cleaned)--------------
+    # # ----------- SUBSTATIONS -----------
 
-    # Clean
-    df_all_substations.reset_index(drop=True, inplace=True)
-    df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
-    df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
-
+    # Columns of interest
+    df_all_substations = df_all_substations[{'id', 'lonlat', 'tags.power', 'tags.substation', 'tags.voltage', 'tags.frequency', 'Type', 'Country'}]
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_substations.')
     df_all_substations.to_csv(outputfile_partial + 'csv') # Generate CSV
@@ -272,41 +270,22 @@ def process_data():
     gdf_substations.to_file(outputfile_partial+'geojson', driver="GeoJSON")  # Generate GeoJson
 
 
-    # ----------- LINES -----------
+    # # ----------- LINES -----------
 
-    # Clean
-    # TODO: FIX Voltage Filter
-    # Some transmission lines carry multiple voltages, having voltage_V = 10000;20000  (two lines)
-    # The following code keeps only the first information before the semicolon..
-    # Needs to be corrected in future, creating two lines with the same bus ID.
-    
-    df_all_lines.reset_index(drop=True, inplace=True)
-    df_all_lines.dropna(subset=['tags.voltage'], inplace = True) # Drop any lines with Voltage = N/A
-    df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}, inplace = True) 
-    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[0]
-    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
-    df_all_lines['voltage_V'] = df_all_lines['voltage_V'].apply(lambda x: pd.to_numeric(x, errors='coerce')).dropna() ## if cell can't converted to float -> drop
-    df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
-    df_all_lines.dropna(thresh=len(df_all_lines)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
-
-    # Generate Files
+    # Columns of interest
+    df_all_lines = df_all_lines[{'id', 'lonlat', 'tags.power', 'tags.cables', 'tags.voltage', 'tags.circuits', 'tags.frequency', 'Type', 'Country'}]
+    # # Generate Files
     outputfile_partial = os.path.join(os.getcwd(), 'data', 'africa_all'+'_lines.')  
     df_all_lines.to_csv(outputfile_partial + 'csv')  # Generate CSV
     gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=True)
     gdf_lines.to_file(outputfile_partial+'geojson',
-                driver="GeoJSON")  # Generate GeoJson
+                 driver="GeoJSON")  # Generate GeoJson
 
+    # # ----------- Generator -----------
 
-    # ----------- Generator -----------
-    
-    df_all_generators.reset_index(drop=True, inplace=True)
-    df_all_generators.drop(columns = ["tags.fixme","tags.frequency","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore')
-    df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')] #removes boolean 
-    df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
-    df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"}, inplace = True)
-    df_all_generators.dropna(thresh=len(df_all_generators)*0.25, axis=1, how='all', inplace=True) # Drop Columns with 75% values as N/A
-
-    # Generate Files
+    # Columns of interest
+    df_all_generators = df_all_generators[{'id', 'lonlat', 'tags.power', 'tags.generator:type', 'tags.generator:method', 'tags.generator:source', 'tags.generator:output:electricity', 'Type', 'Country'}]
+    # # Generate Files
     outputfile_partial = os.path.join(os.getcwd(),'data','africa_all'+'_generators.')
     df_all_generators.to_csv(outputfile_partial + 'csv') # Generate CSV
     gdf_generators = convert_pd_to_gdf(df_all_generators)
