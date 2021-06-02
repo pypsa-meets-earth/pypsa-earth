@@ -9,32 +9,27 @@
 OSM extraction scrpt
 """
 
-import os 
-import sys 
-import time
+import os
+import sys
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("../../scripts")
 
-import logging
-import shutil
-from contextlib import contextmanager
+import logging  # noqa: E402
+import shutil  # noqa: E402
 
-import geopandas as gpd
-import geoplot
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import requests
+import geopandas as gpd  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import requests  # noqa: E402
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-from esy.osmfilter import osm_colors as CC
-from esy.osmfilter import run_filter, Node, Way, Relation 
-from esy.osmfilter import export_geojson
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import osm_pickle as osm_pickle
-from iso_country_codes import AFRICA_CC
-from shapely.geometry import Point, LineString
+from esy.osmfilter import Node, Relation, Way  # noqa: E402
+from esy.osmfilter import osm_info as osm_info  # noqa: E402
+from esy.osmfilter import osm_pickle as osm_pickle  # noqa: E402
+from esy.osmfilter import run_filter  # noqa: E402
+from iso_country_codes import AFRICA_CC  # noqa: E402
+from shapely.geometry import LineString, Point  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +44,7 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARNING)
 
 # Downloads PBF File for given Country Code
+
 
 def download_pbf(country_code, update):  # update = true forces re-download of files
     """
@@ -91,8 +87,8 @@ def download_and_filter(country_code, update=False):
     filter_file_exists = False
     # json file for the Data dictionary
     JSON_outputfile = os.path.join(
-        os.getcwd(), "data", "osm", country_code+"_power.json"
-    ) # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
+        os.getcwd(), "data", "osm", country_code + "_power.json"
+    )  # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
@@ -105,7 +101,7 @@ def download_and_filter(country_code, update=False):
         Data = osm_info.ReadJason(JSON_outputfile, verbose="no")
         DataDict = {"Data": Data}
         osm_pickle.picklesave(
-            DataDict, 
+            DataDict,
             os.path.realpath(
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
             ),
@@ -119,17 +115,17 @@ def download_and_filter(country_code, update=False):
         )  # TODO: Change to Logger
 
     prefilter = {
-        Node: {"power": ["substation", "line","generator"]}, 
-        Way: {"power": ["substation", "line","generator"]}, 
-        Relation: {"power": ["substation", "line","generator"]}
-    } #see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
+        Node: {"power": ["substation", "line", "generator"]},
+        Way: {"power": ["substation", "line", "generator"]},
+        Relation: {"power": ["substation", "line", "generator"]}
+    }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
 
     blackfilter = [
         ("", ""),
         ]
 
-    for feature in ["substation", "line","generator"]:
+    for feature in ["substation", "line", "generator"]:
         whitefilter = [
             [
                 ("power", feature),
@@ -139,15 +135,15 @@ def download_and_filter(country_code, update=False):
 
         feature_data = run_filter(
             elementname,
-            PBF_inputfile, 
-            JSON_outputfile, 
-            prefilter, 
-            whitefilter, 
+            PBF_inputfile,
+            JSON_outputfile,
+            prefilter,
+            whitefilter,
             blackfilter,
-            NewPreFilterData=new_prefilter_data, 
-            CreateElements=create_elements, 
-            LoadElements=True, 
-            verbose=False, 
+            NewPreFilterData=new_prefilter_data,
+            CreateElements=create_elements,
+            LoadElements=True,
+            verbose=False,
             multiprocess=True,
             )
 
@@ -170,7 +166,7 @@ def convert_ways_nodes(df_way, Data):
     col = "refs"
     df_way[col] = (
         pd.Series().astype(float) if col not in df_way.columns else df_way[col]
-    ) #create empty "refs" if not in dataframe
+    ) # create empty "refs" if not in dataframe
     for ref in df_way["refs"]:
         lonlats = []
         for r in ref:
@@ -299,51 +295,52 @@ def process_data():
                 df_generator = process_generator_data(country_code, generator_data)
                 df_all_generators = pd.concat([df_all_generators, df_generator])
     
-    ##---------- RAW DATA (not cleaned)--------------
+    # ---------- RAW DATA (not cleaned)--------------
     # # ----------- SUBSTATIONS -----------
 
     # Columns of interest
     df_all_substations = df_all_substations[
         {
-            "id", 
-            "lonlat", 
-            "tags.power", 
-            "tags.substation", 
-            "tags.voltage", 
+            "id",
+            "lonlat",
+            "tags.power",
+            "tags.substation",
+            "tags.voltage",
             "tags.frequency",
-            "Type", 
+            "Type",
             "Country",
         }
     ]
     # Generate Files
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "africa_all" + "_substations.")
-    df_all_substations.to_csv(outputfile_partial + "csv") # Generate CSV
+        os.getcwd(), "data", "africa_all" + "_substations."
+    )
+    df_all_substations.to_csv(outputfile_partial + "csv")  # Generate CSV
     gdf_substations = convert_pd_to_gdf(df_all_substations)
     gdf_substations.to_file(
         outputfile_partial + "geojson", driver="GeoJSON"
-    )  # Generate GeoJson
-
+    ) # Generate GeoJson
 
     # # ----------- LINES -----------
 
     # Columns of interest
     df_all_lines = df_all_lines[
         {
-            "id", 
-            "lonlat", 
-            "tags.power", 
-            "tags.cables", 
-            "tags.voltage", 
-            "tags.circuits", 
-            "tags.frequency", 
-            "Type", 
+            "id",
+            "lonlat",
+            "tags.power",
+            "tags.cables",
+            "tags.voltage",
+            "tags.circuits",
+            "tags.frequency",
+            "Type",
             "Country",
         }
     ]
     # # Generate Files
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "africa_all" + "_lines.")  
+        os.getcwd(), "data", "africa_all" + "_lines."
+    )
     df_all_lines.to_csv(outputfile_partial + "csv")  # Generate CSV
     gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=True)
     gdf_lines.to_file(
@@ -355,21 +352,22 @@ def process_data():
     # Columns of interest
     df_all_generators = df_all_generators[
         {
-            "id", 
-            "lonlat", 
-            "tags.power", 
-            "tags.generator:type", 
-            "tags.generator:method", 
-            "tags.generator:source", 
-            "tags.generator:output:electricity", 
-            "Type", 
+            "id",
+            "lonlat",
+            "tags.power",
+            "tags.generator:type",
+            "tags.generator:method",
+            "tags.generator:source",
+            "tags.generator:output:electricity",
+            "Type",
             "Country",
         }
     ]
     # # Generate Files
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "africa_all" + "_generators.")
-    df_all_generators.to_csv(outputfile_partial + "csv") # Generate CSV
+        os.getcwd(), "data", "africa_all" + "_generators."
+    )
+    df_all_generators.to_csv(outputfile_partial + "csv")  # Generate CSV
     gdf_generators = convert_pd_to_gdf(df_all_generators)
     gdf_generators.to_file(
         outputfile_partial + "geojson", driver="GeoJSON"
