@@ -23,11 +23,12 @@ import geopandas as gpd  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import requests  # noqa: E402
+
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+from esy.osmfilter import run_filter  # noqa: E402
 from esy.osmfilter import Node, Relation, Way  # noqa: E402
 from esy.osmfilter import osm_info as osm_info  # noqa: E402
 from esy.osmfilter import osm_pickle as osm_pickle  # noqa: E402
-from esy.osmfilter import run_filter  # noqa: E402
 from iso_country_codes import AFRICA_CC  # noqa: E402
 from shapely.geometry import LineString, Point  # noqa: E402
 
@@ -72,7 +73,7 @@ def download_pbf(country_code, update):  # update = true forces re-download of f
 
     if not os.path.exists(PBF_inputfile) or update is True:
         print(f"{geofabrik_filename} does not exist, downloading to {PBF_inputfile}")
-        # create data/osm directory
+        #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True) as r:
             with open(PBF_inputfile, "wb") as f:
@@ -117,13 +118,13 @@ def download_and_filter(country_code, update=False):
     prefilter = {
         Node: {"power": ["substation", "line", "generator"]},
         Way: {"power": ["substation", "line", "generator"]},
-        Relation: {"power": ["substation", "line", "generator"]}
+        Relation: {"power": ["substation", "line", "generator"]},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
 
     blackfilter = [
         ("", ""),
-        ]
+    ]
 
     for feature in ["substation", "line", "generator"]:
         whitefilter = [
@@ -145,7 +146,7 @@ def download_and_filter(country_code, update=False):
             LoadElements=True,
             verbose=False,
             multiprocess=True,
-            )
+        )
 
         if feature == "substation":
             substation_data = feature_data
@@ -166,7 +167,7 @@ def convert_ways_nodes(df_way, Data):
     col = "refs"
     df_way[col] = (
         pd.Series().astype(float) if col not in df_way.columns else df_way[col]
-    ) # create empty "refs" if not in dataframe
+    )  # create empty "refs" if not in dataframe
     for ref in df_way["refs"]:
         lonlats = []
         for r in ref:
@@ -294,7 +295,7 @@ def process_data():
             if feature == "generator":
                 df_generator = process_generator_data(country_code, generator_data)
                 df_all_generators = pd.concat([df_all_generators, df_generator])
-    
+
     # ---------- RAW DATA (not cleaned)--------------
     # # ----------- SUBSTATIONS -----------
 
@@ -319,7 +320,7 @@ def process_data():
     gdf_substations = convert_pd_to_gdf(df_all_substations)
     gdf_substations.to_file(
         outputfile_partial + "geojson", driver="GeoJSON"
-    ) # Generate GeoJson
+    )  # Generate GeoJson
 
     # # ----------- LINES -----------
 
@@ -338,9 +339,7 @@ def process_data():
         }
     ]
     # # Generate Files
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "africa_all" + "_lines."
-    )
+    outputfile_partial = os.path.join(os.getcwd(), "data", "africa_all" + "_lines.")
     df_all_lines.to_csv(outputfile_partial + "csv")  # Generate CSV
     gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=True)
     gdf_lines.to_file(
