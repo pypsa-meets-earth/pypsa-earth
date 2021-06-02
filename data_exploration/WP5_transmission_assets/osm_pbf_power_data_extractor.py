@@ -23,7 +23,6 @@ import geopandas as gpd  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import requests  # noqa: E402
-
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 from esy.osmfilter import run_filter  # noqa: E402
 from esy.osmfilter import Node, Relation, Way  # noqa: E402
