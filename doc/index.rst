@@ -32,12 +32,24 @@ Documentation
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Code Documenation 
+   :caption: Code Documenation (automated)
 
    api_reference
    how_to_docs
 
+**Project Info**
 
+* :doc:`contributing`
+* :doc:`project_structure_and_credits`
+* :doc:`talks_and_papers`
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Getting Started
 
+   contributing
+   project_structure_and_credits
+   talks_and_papers
+   
 
