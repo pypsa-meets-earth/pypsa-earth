@@ -15,7 +15,7 @@ Therefore, the structure is not here to dictate, it is rather a structure that l
 
 We all have the same goal. We want to create a long-term maintained, supported and steadily improving energy system model that is useful for industry and research. Every person helping towards achieving this goal is listed in the credits.
 
-.. _deps:
+.. _project_structure:
 
 Project structure
 ====================
@@ -33,15 +33,15 @@ The structure might be adjusted in future:
 
 
 
-.. _deps:
+.. _credits:
 
 Credits 
 ===============================
 
 (sorted by continent, country, institution)
 
-Code Team:
--------------------------------------------------------
+Code Team
+----------
 
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants aka. EMRC, Nigeria)
 - Nse-Abasi Ayara (University of Abuja, Nigeria)
@@ -57,8 +57,8 @@ Code Team:
 - Max Parzen (University of Edinburgh, United Kingdom)
 - Olukunle Owolabi (Tufts University, United States)
 
-Outreach Team:
--------------------------------
+Outreach Team
+--------------
 
 - Stuart James (VDMA, Germany)
 - Max Parzen (University of Edinburgh, United Kingdom)
@@ -67,16 +67,16 @@ Outreach Team:
 - Rebecca Grant (University of Edinburgh, United Kingdom)
 
 
-Finance Team:
--------------------------------
+Finance Team
+-------------
 
 
-HR Team:
--------------------------------
+HR Team
+--------
 
 
-Advisor Team:
------------------------------------------------------------
+Advisor Team
+--------------
 
 - Nafiu Tijjani (Assistant Chief Scientific Officer in the Renewable Energy Department of Energy Commission of Nigeria)
 - Aminu Haruna Isa (Energy Planning and Analysis Dep't at the Energy Commission of Nigeria)

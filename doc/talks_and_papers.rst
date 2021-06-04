@@ -3,14 +3,14 @@
 
   SPDX-License-Identifier: CC-BY-4.0
 
-.. _installation:
+.. _talks_and_papers:
 
 ##########################################
 Talks and papers
 ##########################################
 
 
-.. _deps:
+.. _PyPSA_Africa:
 
 PyPSA-Africa
 ====================
@@ -25,11 +25,16 @@ Some publications:
 
 Coming soon
 
-.. _deps:
+.. _PyPSA_Eur:
 
 PyPSA, PyPSA-Eur, PyPSA-Eur-Sec
 ================================
 
+
+.. figure:: img/EU_generation_map.png
+    :width: 80%
+    :align: center
+    
 
 Excellent videos and maybe the best introduction to PyPSA:
 ------------------------------------------------------------
