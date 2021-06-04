@@ -309,6 +309,9 @@ def process_data():
             "Country",
         }
     ]
+    df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='industrial'].index, inplace=True) # Drop industrial substations
+    df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='distribution'].index, inplace=True) # Drop distribution substations
+
     # Generate Files
     outputfile_partial = os.path.join(
         os.getcwd(), "data", "africa_all" + "_substations."
