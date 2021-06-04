@@ -46,7 +46,7 @@ Documentation
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Getting Started
+   :caption: Project Info
 
    contributing
    project_structure_and_credits
