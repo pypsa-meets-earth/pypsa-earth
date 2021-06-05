@@ -14,10 +14,7 @@ Watch our latest discusson with African leaders about `Open Energy System Modell
     :width: 60%
     :align: center
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e50b6ff7b64c4f6901654bc19c46ada2adcb8987
+=============
 Documentation
 =============
 
