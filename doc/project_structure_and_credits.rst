@@ -87,10 +87,8 @@ Advisor Team
 - Dave Dorrell (Distinguished Professor at University of Witwatersrand, South Africa)
 - Matija Pavicevic (Creator of Dispa-Set Africa, KU Leuven, Belgium)
 - Sylvain Quoilin (Professor and creator of Dispa-Set Africa, KU Leuven, Belgium)
-- Sambeet Mishra (Researcher at Tallinn University of Technology, Estonia)
 - Fabian Neumann (PyPSA-Eur maintainer at TU Berlin, Germany)
 - Tom Brown (PyPSA creator, Professor and Head of Energy System Analysis Department at the TU Berlin, Germany)
-- Chiara Bordin (Professor at University of Tromso, Norway)
 - Aristides Kiprakis (Professor at University of Edinburgh, United Kingdom)
 
 
