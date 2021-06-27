@@ -16,19 +16,19 @@ import sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("../../scripts")
 
-import logging  # noqa: E402
-import shutil  # noqa: E402
+import logging
+import shutil
 
-import geopandas as gpd  # noqa: E402
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
-import requests  # noqa: E402
-from esy.osmfilter import run_filter  # noqa: E402
-from esy.osmfilter import Node, Relation, Way  # noqa: E402
-from esy.osmfilter import osm_info as osm_info  # noqa: E402
-from esy.osmfilter import osm_pickle as osm_pickle  # noqa: E402
-from iso_country_codes import AFRICA_CC  # noqa: E402
-from shapely.geometry import LineString, Point  # noqa: E402
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+import requests
+from esy.osmfilter import run_filter
+from esy.osmfilter import Node, Relation, Way
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import osm_pickle as osm_pickle
+from iso_country_codes import AFRICA_CC
+from shapely.geometry import LineString, Point
 
 logger = logging.getLogger(__name__)
 
@@ -44,20 +44,16 @@ logger = logging.getLogger(__name__)
 # Downloads PBF File for given Country Code
 
 
-def download_pbf(country_code, update):  # update = true forces re-download of files
+def download_pbf(country_code, update):
     """
-    TEST ONLY. FROM PYPSA.
-    Initializes variables for power dispatch for a given component and a
-    given attribute.
+    Downloads the pbf file from geofabrik for a given country code (see scripts/iso_country_codes.py).
 
     Parameters
     ----------
-    n : pypsa.Network
-    c : str
+    country_code : str
+    update : bool
         name of the network component
-    attr : str
-        name of the attribute, e.g. "p"
-
+        update = true forces re-download of files
     """
     country_name = AFRICA_CC[country_code]
     # Filename for geofabrik
@@ -199,7 +195,7 @@ def convert_ways_lines(df_way, Data):
 
 
 def convert_pd_to_gdf(df_way):
-    gdf = gpd.GeoDataFrame(df_way, geometry=[Point(x, y) for x, y in df_way.lonlat])
+    gdf = gpd.GeoDataFrame(df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326")
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
 
@@ -279,8 +275,8 @@ def process_data():
     df_all_substations = pd.DataFrame()
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
-    # test_CC = {"NG": "nigeria"}
-    for country_code in AFRICA_CC.keys():
+    test_CC = {"NG": "nigeria"}
+    for country_code in test_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
             if feature == "substation":
@@ -293,12 +289,12 @@ def process_data():
                 df_generator = process_generator_data(country_code, generator_data)
                 df_all_generators = pd.concat([df_all_generators, df_generator])
 
-    # ---------- RAW DATA (not cleaned)--------------
-    # # ----------- SUBSTATIONS -----------
+    # ----------- SUBSTATIONS -----------
 
     # Columns of interest
     df_all_substations = df_all_substations[
-        {
+        df_all_substations.columns &
+        [
             "id",
             "lonlat",
             "tags.power",
@@ -307,7 +303,7 @@ def process_data():
             "tags.frequency",
             "Type",
             "Country",
-        }
+        ]
     ]
     df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='industrial'].index, inplace=True) # Drop industrial substations
     df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='distribution'].index, inplace=True) # Drop distribution substations
@@ -322,11 +318,12 @@ def process_data():
         outputfile_partial + "geojson", driver="GeoJSON"
     )  # Generate GeoJson
 
-    # # ----------- LINES -----------
+    # ----------- LINES -----------
 
     # Columns of interest
     df_all_lines = df_all_lines[
-        {
+        df_all_lines.columns &
+        [
             "id",
             "lonlat",
             "tags.power",
@@ -336,9 +333,9 @@ def process_data():
             "tags.frequency",
             "Type",
             "Country",
-        }
+        ]
     ]
-    # # Generate Files
+    # Generate Files
     outputfile_partial = os.path.join(os.getcwd(), "data", "africa_all" + "_lines.")
     df_all_lines.to_csv(outputfile_partial + "csv")  # Generate CSV
     gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=True)
@@ -346,11 +343,12 @@ def process_data():
         outputfile_partial + "geojson", driver="GeoJSON"
     )  # Generate GeoJson
 
-    # # ----------- Generator -----------
+    # ----------- Generator -----------
 
     # Columns of interest
     df_all_generators = df_all_generators[
-        {
+        df_all_generators.columns &
+        [
             "id",
             "lonlat",
             "tags.power",
@@ -360,9 +358,9 @@ def process_data():
             "tags.generator:output:electricity",
             "Type",
             "Country",
-        }
+        ]
     ]
-    # # Generate Files
+    # Generate Files
     outputfile_partial = os.path.join(
         os.getcwd(), "data", "africa_all" + "_generators."
     )
