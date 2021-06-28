@@ -140,7 +140,7 @@ def download_and_filter(country_code, update=False):
             verbose=False,
             multiprocess=True,
         )
-
+        # For better performance yield feature_data here
         if feature == "substation":
             substation_data = feature_data
         if feature == "line":
