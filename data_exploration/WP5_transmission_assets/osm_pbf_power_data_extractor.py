@@ -184,7 +184,7 @@ def lonlat_lookup(df_way, Data):
 # Convert Ways to Point Coordinates
 
 
-def convert_ways_point(df_way, Data):
+def convert_ways_points(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     lonlat_column = []
     area_column = []
@@ -239,7 +239,7 @@ def process_bus_data(country_code, feature_data, feature):
         country_code, feature_data, feature
     )
 
-    convert_ways_point(df_way, Data)
+    convert_ways_points(df_way, Data)
     # Add Type Column
     df_node["Type"] = "Node"
     df_way["Type"] = "Way"
@@ -291,6 +291,7 @@ def process_data():
         [
             "id",
             "lonlat",
+            "Area",
             "tags.power",
             "tags.substation",
             "tags.voltage",
@@ -364,6 +365,7 @@ def process_data():
         [
             "id",
             "lonlat",
+            # "Area",
             "tags.power",
             "tags.generator:type",
             "tags.generator:method",
