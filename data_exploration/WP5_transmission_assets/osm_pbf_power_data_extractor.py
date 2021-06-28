@@ -150,6 +150,15 @@ def download_and_filter(country_code, update=False):
 
     return (substation_data, line_data, generator_data)
 
+# Convert Filtered Data, Elements to Pandas Dataframes
+
+
+def convert_filtered_data_to_dfs(country_code, feature_data, feature):
+    [Data, Elements] = feature_data
+    elementname = f"{country_code}_{feature}s"
+    df_way = pd.json_normalize(Elements[elementname]["Way"].values())
+    df_node = pd.json_normalize(Elements[elementname]["Node"].values())
+    return (df_node, df_way, Data)
 
 # Convert Ways to Point Coordinates
 
@@ -215,15 +224,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     return gdf
 
 
-# Convert Filtered Data, Elements to Pandas Dataframes
 
-
-def convert_filtered_data_to_dfs(country_code, feature_data, feature):
-    [Data, Elements] = feature_data
-    elementname = f"{country_code}_{feature}s"
-    df_way = pd.json_normalize(Elements[elementname]["Way"].values())
-    df_node = pd.json_normalize(Elements[elementname]["Node"].values())
-    return (df_node, df_way, Data)
 
 
 def process_substation_data(country_code, substation_data):
