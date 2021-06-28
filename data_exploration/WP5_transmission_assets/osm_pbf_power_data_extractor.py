@@ -301,6 +301,7 @@ def process_data():
         ]
     ]
 
+    # Clean Data
     df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='industrial'].index, inplace=True) # Drop industrial substations
     df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='distribution'].index, inplace=True) # Drop distribution substations
     # df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
@@ -335,6 +336,18 @@ def process_data():
             "Country"
         ]
     ]
+
+    # Clean Data
+    # TODO: Fix Cleaning by uncommenting and verifying results
+    # df_all_lines = df_all_lines.dropna(subset=['tags.voltage']) # Drop any lines with Voltage = N/A
+    # df_all_lines = df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}) 
+    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[0] #just keeps the 
+    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
+    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].apply(lambda x: pd.to_numeric(x, errors='coerce')).dropna() ## if cell can't converted to float -> drop
+    # df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
+    df_all_lines = df_all_lines.reset_index(drop=True)
+
+
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(), "data", "africa_all" + "_lines.")
     df_all_lines.to_csv(outputfile_partial + "csv")  # Generate CSV
@@ -361,6 +374,16 @@ def process_data():
             "Country",
         ]
     ]
+
+    # Clean Data
+    # TODO: Fix Cleaning by uncommenting and verifying results
+    # TODO: Should Probably drop columns (as in the line below) or find a better solution for the above fix for selecting columns
+    # df_all_generators.drop(columns = ["tags.fixme","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore') #
+    # df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')] #removes boolean 
+    # df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
+    # df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"}, inplace = True)
+    # df_all_generators.reset_index(drop=True, inplace=True)
+
     # Generate Files
     outputfile_partial = os.path.join(
         os.getcwd(), "data", "africa_all" + "_generators."
