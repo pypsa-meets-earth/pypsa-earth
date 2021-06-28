@@ -205,17 +205,7 @@ def convert_ways_point(df_way, Data):
 
 
 def convert_ways_lines(df_way, Data):
-    lonlat_column = []
-    for ref in df_way["refs"]:  # goes through each row in df_way["refs"]
-        lonlats = []
-        # picks each element in ref & replaces ID by coordinate tuple (A multiline consist of several points)
-        for r in ref:
-            # "r" is the ID in Data["Node"], ["lonlat"] a list of [x1,y1] (coordinates)
-            lonlat = Data["Node"][str(r)]["lonlat"]
-            lonlat = tuple(lonlat)
-            lonlats.append(lonlat)  # a list with tuples
-        lonlat_column.append(lonlats)  # adding a new list of tuples every row
-    df_way.drop("refs", axis=1, inplace=True)
+    lonlat_column = lonlat_lookup(df_way, Data)
     df_way.insert(1, "lonlat", lonlat_column)
 
 
