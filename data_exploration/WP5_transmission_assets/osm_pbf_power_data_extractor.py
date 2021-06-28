@@ -160,25 +160,44 @@ def convert_filtered_data_to_dfs(country_code, feature_data, feature):
     df_node = pd.json_normalize(Elements[elementname]["Node"].values())
     return (df_node, df_way, Data)
 
+
+# Lookup refs and convert to list of longlats
+
+
+def lonlat_lookup(df_way, Data):
+    lonlat_list = []
+
+    col = "refs"
+    if col not in df_way.columns:
+        print ("refs column not found")
+        df_way[col] = pd.Series().astype(float) # create empty "refs" if not in dataframe
+      
+    for ref in df_way["refs"]:
+        lonlat_row = []
+        for r in ref:
+            lonlat = tuple(Data["Node"][str(r)]["lonlat"])
+            lonlat_row.append(lonlat)
+        lonlat_list.append(lonlat_row)
+    return lonlat_list
+
+
 # Convert Ways to Point Coordinates
 
 
 # TODO: Use shapely and merge with convert_ways_lines
-def convert_ways_nodes(df_way, Data):
+def convert_ways_point(df_way, Data):
+    lonlat_list = lonlat_lookup(df_way, Data)
     lonlat_column = []
-    col = "refs"
-    df_way[col] = (
-        pd.Series().astype(float) if col not in df_way.columns else df_way[col]
-    )  # create empty "refs" if not in dataframe
-    for ref in df_way["refs"]:
-        lonlats = []
-        for r in ref:
-            lonlat = Data["Node"][str(r)]["lonlat"]
-            lonlats.append(lonlat)
-        lonlats = np.array(lonlats)
-        lonlat = np.mean(lonlats, axis=0)  # Hacky Apporx Centroid
-        lonlat_column.append(lonlat)
-    df_way.drop("refs", axis=1, inplace=True, errors="ignore")
+    area_column = []
+    for lonlat in lonlat_list:
+        way_polygon = Polygon(lonlat)
+        polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens
+        # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
+        area_column.append(polygon_area)
+        center_point = way_polygon.centroid
+        lonlat_column.append(list((center_point.x, center_point.y)))
+
+    # df_way.drop("refs", axis=1, inplace=True, errors="ignore")
     df_way.insert(0, "lonlat", lonlat_column)
 
 
@@ -231,7 +250,7 @@ def process_substation_data(country_code, substation_data):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, substation_data, "substation"
     )
-    convert_ways_nodes(df_way, Data)
+    convert_ways_point(df_way, Data)
     # Add Type Column
     df_node["Type"] = "Node"
     df_way["Type"] = "Way"
@@ -260,7 +279,7 @@ def process_generator_data(country_code, generator_data):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, generator_data, "generator"
     )
-    convert_ways_nodes(df_way, Data)
+    convert_ways_point(df_way, Data)
     # Add Type Column
     df_node["Type"] = "Node"
     df_way["Type"] = "Way"
