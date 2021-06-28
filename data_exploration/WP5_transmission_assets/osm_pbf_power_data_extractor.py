@@ -28,7 +28,7 @@ from esy.osmfilter import Node, Relation, Way
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from iso_country_codes import AFRICA_CC
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, Polygon
 
 logger = logging.getLogger(__name__)
 
