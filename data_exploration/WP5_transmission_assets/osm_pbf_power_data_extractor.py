@@ -1,6 +1,6 @@
 # This script does the following
 # 1. Downloads OSM files for specified countries from Geofabrik
-# 2. Filters files for substations and lines
+# 2. Filters files for substations, lines and generators
 # 3. Process and clean data
 # 4. Exports to CSV
 # 5. Exports to GeoJson
@@ -184,20 +184,20 @@ def lonlat_lookup(df_way, Data):
 # Convert Ways to Point Coordinates
 
 
-# TODO: Use shapely and merge with convert_ways_lines
 def convert_ways_point(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     lonlat_column = []
     area_column = []
     for lonlat in lonlat_list:
         way_polygon = Polygon(lonlat)
-        polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens
+        polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens m2
         # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
         area_column.append(polygon_area)
         center_point = way_polygon.centroid
         lonlat_column.append(list((center_point.x, center_point.y)))
 
     # df_way.drop("refs", axis=1, inplace=True, errors="ignore")
+    df_way.insert(2, "Area", area_column)
     df_way.insert(0, "lonlat", lonlat_column)
 
 
@@ -206,7 +206,7 @@ def convert_ways_point(df_way, Data):
 
 def convert_ways_lines(df_way, Data):
     lonlat_column = lonlat_lookup(df_way, Data)
-    df_way.insert(1, "lonlat", lonlat_column)
+    df_way.insert(0, "lonlat", lonlat_column)
 
 
 # Convert Points Pandas Dataframe to GeoPandas Dataframe
@@ -233,13 +233,12 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     return gdf
 
 
+def process_bus_data(country_code, feature_data, feature):
 
-
-
-def process_substation_data(country_code, substation_data):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
-        country_code, substation_data, "substation"
+        country_code, feature_data, feature
     )
+
     convert_ways_point(df_way, Data)
     # Add Type Column
     df_node["Type"] = "Node"
@@ -265,21 +264,6 @@ def process_line_data(country_code, line_data):
     return df_way
 
 
-def process_generator_data(country_code, generator_data):
-    df_node, df_way, Data = convert_filtered_data_to_dfs(
-        country_code, generator_data, "generator"
-    )
-    convert_ways_point(df_way, Data)
-    # Add Type Column
-    df_node["Type"] = "Node"
-    df_way["Type"] = "Way"
-
-    df_combined = pd.concat([df_node, df_way], axis=0)
-    # Add Country Column
-    df_combined["Country"] = AFRICA_CC[country_code]
-
-    return df_combined
-
 
 def process_data():
     df_all_substations = pd.DataFrame()
@@ -290,13 +274,13 @@ def process_data():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
             if feature == "substation":
-                df_substation = process_substation_data(country_code, substation_data)
+                df_substation = process_bus_data(country_code, substation_data, feature)
                 df_all_substations = pd.concat([df_all_substations, df_substation])
             if feature == "line":
                 df_line = process_line_data(country_code, line_data)
                 df_all_lines = pd.concat([df_all_lines, df_line])
             if feature == "generator":
-                df_generator = process_generator_data(country_code, generator_data)
+                df_generator = process_bus_data(country_code, generator_data, feature)
                 df_all_generators = pd.concat([df_all_generators, df_generator])
 
     # ----------- SUBSTATIONS -----------
@@ -312,11 +296,16 @@ def process_data():
             "tags.voltage",
             "tags.frequency",
             "Type",
+            # "refs",
             "Country",
         ]
     ]
+
     df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='industrial'].index, inplace=True) # Drop industrial substations
     df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='distribution'].index, inplace=True) # Drop distribution substations
+    # df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
+    # df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
+    # df_all_substations.reset_index(drop=True, inplace=True)
 
     # Generate Files
     outputfile_partial = os.path.join(
@@ -342,13 +331,14 @@ def process_data():
             "tags.circuits",
             "tags.frequency",
             "Type",
-            "Country",
+            # "refs",
+            "Country"
         ]
     ]
     # Generate Files
     outputfile_partial = os.path.join(os.getcwd(), "data", "africa_all" + "_lines.")
     df_all_lines.to_csv(outputfile_partial + "csv")  # Generate CSV
-    gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=True)
+    gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=False) # Set simplified = True to simplify lines
     gdf_lines.to_file(
         outputfile_partial + "geojson", driver="GeoJSON"
     )  # Generate GeoJson
@@ -367,6 +357,7 @@ def process_data():
             "tags.generator:source",
             "tags.generator:output:electricity",
             "Type",
+            # "refs",
             "Country",
         ]
     ]
