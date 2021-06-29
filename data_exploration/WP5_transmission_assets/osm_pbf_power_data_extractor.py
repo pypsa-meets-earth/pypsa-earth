@@ -189,15 +189,20 @@ def convert_ways_points(df_way, Data):
     lonlat_column = []
     area_column = []
     for lonlat in lonlat_list:
-        way_polygon = Polygon(lonlat)
-        polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens m2
-        # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
-        area_column.append(polygon_area)
-        center_point = way_polygon.centroid
-        lonlat_column.append(list((center_point.x, center_point.y)))
+        if len(lonlat) >= 3: #Minimum for a triangle
+            way_polygon = Polygon(lonlat)
+            polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens m2
+            # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
+            area_column.append(polygon_area)
+            center_point = way_polygon.centroid
+            lonlat_column.append(list((center_point.x, center_point.y)))
+        else:
+            area_column.append(0)
+            center_point = lonlat[0]
+            lonlat_column.append(list(center_point))
 
     # df_way.drop("refs", axis=1, inplace=True, errors="ignore")
-    df_way.insert(2, "Area", area_column)
+    df_way.insert(0, "Area", area_column)
     df_way.insert(0, "lonlat", lonlat_column)
 
 
@@ -269,7 +274,8 @@ def process_data():
     df_all_substations = pd.DataFrame()
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
-    test_CC = {"NG": "nigeria"}
+    # test_CC = {"NG": "nigeria"}
+    test_CC = {"MA": "morocco"}
     for country_code in test_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
