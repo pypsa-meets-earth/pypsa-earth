@@ -275,8 +275,8 @@ def process_data():
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
     # test_CC = {"NG": "nigeria"}
-    test_CC = {"MA": "morocco"}
-    for country_code in test_CC.keys():
+    # test_CC = {"MA": "morocco"}
+    for country_code in AFRICA_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
             if feature == "substation":
