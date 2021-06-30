@@ -170,7 +170,7 @@ def lonlat_lookup(df_way, Data):
     col = "refs"
     if col not in df_way.columns:
         print ("refs column not found")
-        df_way[col] = pd.Series().astype(float) # create empty "refs" if not in dataframe
+        df_way[col] = pd.Series([],dtype=pd.StringDtype()).astype(float) # create empty "refs" if not in dataframe
       
     for ref in df_way["refs"]:
         lonlat_row = []
