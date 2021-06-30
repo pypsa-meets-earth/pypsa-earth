@@ -271,11 +271,49 @@ def process_line_data(country_code, line_data):
 
 
 def process_data():
-    df_all_substations = pd.DataFrame()
-    df_all_lines = pd.DataFrame()
+    columns_substation = [ 
+            "id",
+            "lonlat",
+            "tags.power",
+            "tags.substation",
+            "tags.voltage",
+            "Type",
+            "Country",
+        ]
+
+    columns_line = [
+            "id",
+            "lonlat",
+            "tags.power",
+            "tags.cables",
+            "tags.voltage",
+            "tags.circuits",
+            "tags.frequency",
+            "Type",
+            # "refs",
+            "Country"
+        ]
+    
+    columns_generator= [
+            "id",
+            "lonlat",
+            "Area",
+            "tags.power",
+            "tags.generator:type",
+            "tags.generator:method",
+            "tags.generator:source",
+            "tags.generator:output:electricity",
+            "Type",
+            # "refs",
+            "Country",
+        ]
+
+    df_all_substations = pd.DataFrame(columns=columns_substation)
+    df_all_lines = pd.DataFrame(columns=columns_line)
     df_all_generators = pd.DataFrame()
     # test_CC = {"NG": "nigeria"}
     # test_CC = {"MA": "morocco"}
+    # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
     for country_code in AFRICA_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
@@ -292,20 +330,8 @@ def process_data():
     # ----------- SUBSTATIONS -----------
 
     # Columns of interest
-    df_all_substations = df_all_substations[
-        df_all_substations.columns &
-        [
-            "id",
-            "lonlat",
-            "Area",
-            "tags.power",
-            "tags.substation",
-            "tags.voltage",
-            "tags.frequency",
-            "Type",
-            # "refs",
-            "Country",
-        ]
+    df_all_substations = df_all_substations[ 
+        columns_generator
     ]
 
     # Clean Data
@@ -329,19 +355,7 @@ def process_data():
 
     # Columns of interest
     df_all_lines = df_all_lines[
-        df_all_lines.columns &
-        [
-            "id",
-            "lonlat",
-            "tags.power",
-            "tags.cables",
-            "tags.voltage",
-            "tags.circuits",
-            "tags.frequency",
-            "Type",
-            # "refs",
-            "Country"
-        ]
+        columns_line
     ]
 
     # Clean Data
@@ -367,20 +381,7 @@ def process_data():
 
     # Columns of interest
     df_all_generators = df_all_generators[
-        df_all_generators.columns &
-        [
-            "id",
-            "lonlat",
-            # "Area",
-            "tags.power",
-            "tags.generator:type",
-            "tags.generator:method",
-            "tags.generator:source",
-            "tags.generator:output:electricity",
-            "Type",
-            # "refs",
-            "Country",
-        ]
+        columns_generator
     ]
 
     # Clean Data
