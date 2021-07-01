@@ -338,7 +338,7 @@ def process_data():
 
     df_all_substations = pd.DataFrame(columns=columns_substation)
     df_all_lines = pd.DataFrame(columns=columns_line)
-    df_all_generators = pd.DataFrame()
+    df_all_generators = pd.DataFrame(columns=columns_generator)
     # test_CC = {"NG": "nigeria"}
     # test_CC = {"MA": "morocco"}
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
@@ -359,7 +359,7 @@ def process_data():
 
     # Columns of interest
     df_all_substations = df_all_substations[ 
-        columns_generator
+        columns_substation
     ]
 
     # Clean Data
