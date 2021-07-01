@@ -5,9 +5,7 @@
 # 4. Exports to CSV
 # 5. Exports to GeoJson
 
-"""
-OSM extraction scrpt
-"""
+""" OSM extraction script."""
 
 import os
 import sys
@@ -46,14 +44,20 @@ logger = logging.getLogger(__name__)
 
 def download_pbf(country_code, update):
     """
-    Downloads the pbf file from geofabrik for a given country code (see scripts/iso_country_codes.py).
+    Download pbf file from geofabrik for a given country code
 
     Parameters
     ----------
-    country_code : str
-    update : bool
-        name of the network component
-        update = true forces re-download of files
+    country_code : str 
+        Three letter country codes of the downloaded files 
+    update : bool 
+        Name of the network component 
+        Update = true, forces re-download of files
+
+    Returns
+    -------
+    Pbf file per country
+
     """
     country_name = AFRICA_CC[country_code]
     # Filename for geofabrik
@@ -76,13 +80,37 @@ def download_pbf(country_code, update):
 
 
 def download_and_filter(country_code, update=False):
+    """
+    Download OpenStreetMap raw file for selected tag.
+
+    Apply pbf download and filter with esy.osmfilter selected OpenStreetMap
+    tags or data. Examples of possible tags are listed at `OpenStreetMap wiki <https://wiki.openstreetmap.org/wiki/Key:power>`_.
+    More information on esy.osmfilter `here <https://gitlab.com/dlr-ve-esy/esy-osmfilter>`_.
+
+    Parameters
+    ----------
+    country_code : str 
+        Three letter country codes of the downloaded files 
+    update : bool 
+        Name of the network component 
+        Update = true, forces re-download of files
+        Update = false, uses existing or previously downloaded files to safe time
+
+    Returns
+    -------
+    substation_data : Data, Elements
+    line_data : Data, Elements
+    generator_data : Data, Elements
+        Nested dictionary with all OpenStreetMap keys of specific component.
+        Example of lines. See https://wiki.openstreetmap.org/wiki/Tag:power%3Dline
+    """
     PBF_inputfile = download_pbf(country_code, update)
 
     filter_file_exists = False
     # json file for the Data dictionary
     JSON_outputfile = os.path.join(
         os.getcwd(), "data", "osm", country_code + "_power.json"
-    )  # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
+    ) # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
