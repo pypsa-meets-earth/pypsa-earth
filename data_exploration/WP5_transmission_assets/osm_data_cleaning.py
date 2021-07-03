@@ -31,7 +31,7 @@ def clean_data():
     # Load raw data
     df_all_lines = gpd.read_file(raw_outputfile_partial + "_lines" + ".geojson")
 
-    # TODO : Cleaning 
+    # TODO : Cleaning Goes here
 
     # Modification - create final dataframe layout
     df_all_lines = df_all_lines.rename(
@@ -68,7 +68,7 @@ def clean_data():
     df_all_generators = gpd.read_file(raw_outputfile_partial + "_generators" + ".geojson")
 
 
-
+    # TODO : Cleaning goes here
 
     df_all_generators.to_file(outputfile_partial + "_generators"+ ".geojson", driver="GeoJSON")
 
