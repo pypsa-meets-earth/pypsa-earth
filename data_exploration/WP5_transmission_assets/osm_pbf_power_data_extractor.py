@@ -354,7 +354,7 @@ def process_data():
     test_CC = {"NG": "nigeria"}
     # test_CC = {"MA": "morocco"}
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    for country_code in test_CC.keys():
+    for country_code in AFRICA_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
             if feature == "substation":
