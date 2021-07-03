@@ -238,7 +238,15 @@ def convert_ways_points(df_way, Data):
 
 
 def convert_ways_lines(df_way, Data):
-    lonlat_column = lonlat_lookup(df_way, Data)
+    lonlat_list = lonlat_lookup(df_way, Data)
+    lonlat_column = lonlat_list
+    length_column = []
+    for lonlat in lonlat_list:
+        way_linestring = LineString(lonlat)
+        line_length = gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+        length_column.append(float(line_length))
+
+    df_way.insert(0, "Length", length_column)
     df_way.insert(0, "lonlat", lonlat_column)
 
 
@@ -266,7 +274,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     return gdf
 
 
-def process_bus_data(country_code, feature_data, feature):
+def process_node_data(country_code, feature_data, feature):
 
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, feature_data, feature
@@ -289,6 +297,7 @@ def process_line_data(country_code, line_data):
         country_code, line_data, "line"
     )
     convert_ways_lines(df_way, Data)
+    
     # Add Type Column
     df_way["Type"] = "Way"
 
@@ -302,16 +311,19 @@ def process_data():
     columns_substation = [ 
             "id",
             "lonlat",
+            "Area",
             "tags.power",
             "tags.substation",
             "tags.voltage",
             "Type",
+            # "refs",
             "Country",
         ]
 
     columns_line = [
             "id",
             "lonlat",
+            "Length",
             "tags.power",
             "tags.cables",
             "tags.voltage",
@@ -336,100 +348,63 @@ def process_data():
             "Country",
         ]
 
-    df_all_substations = pd.DataFrame(columns=columns_substation)
-    df_all_lines = pd.DataFrame(columns=columns_line)
-    df_all_generators = pd.DataFrame(columns=columns_generator)
-    # test_CC = {"NG": "nigeria"}
+    df_all_substations = pd.DataFrame()
+    df_all_lines = pd.DataFrame()
+    df_all_generators = pd.DataFrame()
+    test_CC = {"NG": "nigeria"}
     # test_CC = {"MA": "morocco"}
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    for country_code in AFRICA_CC.keys():
+    for country_code in test_CC.keys():
         substation_data, line_data, generator_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator"]:
             if feature == "substation":
-                df_substation = process_bus_data(country_code, substation_data, feature)
+                df_substation = process_node_data(country_code, substation_data, feature)
                 df_all_substations = pd.concat([df_all_substations, df_substation])
             if feature == "line":
                 df_line = process_line_data(country_code, line_data)
                 df_all_lines = pd.concat([df_all_lines, df_line])
             if feature == "generator":
-                df_generator = process_bus_data(country_code, generator_data, feature)
+                df_generator = process_node_data(country_code, generator_data, feature)
                 df_all_generators = pd.concat([df_all_generators, df_generator])
+
+
+    outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw") # Output file directory
+
+    if not os.path.exists(outputfile_partial):
+        os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True) #  create raw directory
+
 
     # ----------- SUBSTATIONS -----------
 
-    # Columns of interest
-    df_all_substations = df_all_substations[ 
-        columns_substation
-    ]
-
-    # Clean Data
-    df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='industrial'].index, inplace=True) # Drop industrial substations
-    df_all_substations.drop(df_all_substations.loc[df_all_substations['tags.substation']=='distribution'].index, inplace=True) # Drop distribution substations
-    # df_all_substations.dropna(subset=['tags.voltage'], inplace = True) # Drop any substations with Voltage = N/A
-    # df_all_substations.dropna(thresh=len(df_all_substations)*0.25, axis=1, how='all', inplace = True) #Drop Columns with 75% values as N/A
-    # df_all_substations.reset_index(drop=True, inplace=True)
+    df_all_substations = df_all_substations[df_all_substations.columns.intersection(set(columns_substation))]
+    df_all_substations.reset_index(drop=True, inplace=True)
 
     # Generate Files
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "africa_all" + "_substations."
-    )
-    df_all_substations.to_csv(outputfile_partial + "csv")  # Generate CSV
+    df_all_substations.to_csv(outputfile_partial + "_substations" + ".csv")  # Generate CSV
     gdf_substations = convert_pd_to_gdf(df_all_substations)
-    gdf_substations.to_file(
-        outputfile_partial + "geojson", driver="GeoJSON"
-    )  # Generate GeoJson
+    gdf_substations.to_file(outputfile_partial + "_substations" + ".geojson", driver="GeoJSON")  # Generate GeoJson
 
     # ----------- LINES -----------
 
-    # Columns of interest
-    df_all_lines = df_all_lines[
-        columns_line
-    ]
-
-    # Clean Data
-    # TODO: Fix Cleaning by uncommenting and verifying results
-    # df_all_lines = df_all_lines.dropna(subset=['tags.voltage']) # Drop any lines with Voltage = N/A
-    # df_all_lines = df_all_lines.rename(columns = {'tags.voltage':"voltage_V"}) 
-    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split('*').str[0] #just keeps the 
-    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].str.split(';').str[0]
-    # df_all_lines['voltage_V'] = df_all_lines['voltage_V'].apply(lambda x: pd.to_numeric(x, errors='coerce')).dropna() ## if cell can't converted to float -> drop
-    # df_all_lines = df_all_lines[df_all_lines.voltage_V > 10000]
-    df_all_lines = df_all_lines.reset_index(drop=True)
+    df_all_lines = df_all_lines[df_all_lines.columns.intersection(set(columns_line))]
+    df_all_lines.reset_index(drop=True, inplace=True)
 
 
     # Generate Files
-    outputfile_partial = os.path.join(os.getcwd(), "data", "africa_all" + "_lines.")
-    df_all_lines.to_csv(outputfile_partial + "csv")  # Generate CSV
+    df_all_lines.to_csv(outputfile_partial + "_lines"+ ".csv")  # Generate CSV
     gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=False) # Set simplified = True to simplify lines
-    gdf_lines.to_file(
-        outputfile_partial + "geojson", driver="GeoJSON"
-    )  # Generate GeoJson
+    gdf_lines.to_file(outputfile_partial + "_lines"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
 
     # ----------- Generator -----------
 
-    # Columns of interest
-    df_all_generators = df_all_generators[
-        columns_generator
-    ]
-
-    # Clean Data
-    # TODO: Fix Cleaning by uncommenting and verifying results
-    # TODO: Should Probably drop columns (as in the line below) or find a better solution for the above fix for selecting columns
-    # df_all_generators.drop(columns = ["tags.fixme","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore') #
-    # df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')] #removes boolean 
-    # df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
-    # df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"}, inplace = True)
-    # df_all_generators.reset_index(drop=True, inplace=True)
+    df_all_generators = df_all_generators[df_all_generators.columns.intersection(set(columns_generator))]
+    df_all_generators.reset_index(drop=True, inplace=True)
+    # df_all_generators.drop(columns = ["tags.fixme","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore') # TODO: Should Probably drop columns inatead of selecting
 
     # Generate Files
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "africa_all" + "_generators."
-    )
-    df_all_generators.to_csv(outputfile_partial + "csv")  # Generate CSV
+    df_all_generators.to_csv(outputfile_partial + "_generators" + ".csv")  # Generate CSV
     gdf_generators = convert_pd_to_gdf(df_all_generators)
-    gdf_generators.to_file(
-        outputfile_partial + "geojson", driver="GeoJSON"
-    )  # Generate GeoJson
+    gdf_generators.to_file(outputfile_partial +"_generators"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
 
 
 if __name__ == "__main__":
