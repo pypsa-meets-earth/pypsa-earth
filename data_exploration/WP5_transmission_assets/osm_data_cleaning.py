@@ -18,10 +18,9 @@ def clean_data():
 
     # ----------- SUBSTATIONS -----------
 
-    df_all_substations = gpd.read_file(raw_outputfile_partial + "_substations" + ".geojson")
+    df_all_substations = gpd.read_file(raw_outputfile_partial + "_substations" + ".geojson").set_crs(epsg=4326, inplace=True)
 
     # TODO : Cleaning goes here
-
 
     df_all_substations.to_file(outputfile_partial + "_substations"+ ".geojson", driver="GeoJSON")
 
@@ -29,7 +28,7 @@ def clean_data():
     # ----------- LINES -----------
 
     # Load raw data
-    df_all_lines = gpd.read_file(raw_outputfile_partial + "_lines" + ".geojson")
+    df_all_lines = gpd.read_file(raw_outputfile_partial + "_lines" + ".geojson").set_crs(epsg=4326, inplace=True)
 
     # TODO : Cleaning Goes here
 
@@ -65,7 +64,7 @@ def clean_data():
     # ----------- Generator -----------
 
 
-    df_all_generators = gpd.read_file(raw_outputfile_partial + "_generators" + ".geojson")
+    df_all_generators = gpd.read_file(raw_outputfile_partial + "_generators" + ".geojson").set_crs(epsg=4326, inplace=True)
 
 
     # TODO : Cleaning goes here
