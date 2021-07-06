@@ -137,9 +137,9 @@ def download_and_filter(country_code, update=False):
         )  # TODO: Change to Logger
 
     prefilter = {
-        Node: {"power": ["substation", "line", "generator"]},
-        Way: {"power": ["substation", "line", "generator"]},
-        Relation: {"power": ["substation", "line", "generator"]},
+        Node: {"power": ["substation", "line", "generator", "cable"]},
+        Way: {"power": ["substation", "line", "generator", "cable"]},
+        Relation: {"power": ["substation", "line", "generator", "cable"]},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
 
@@ -147,7 +147,7 @@ def download_and_filter(country_code, update=False):
         ("", ""),
     ]
 
-    for feature in ["substation", "line", "generator"]:
+    for feature in ["substation", "line", "generator", "cable"]:
         whitefilter = [
             [
                 ("power", feature),
@@ -175,8 +175,10 @@ def download_and_filter(country_code, update=False):
             line_data = feature_data
         if feature == "generator":
             generator_data = feature_data
+        if feature == "cable":
+            cable_data = feature_data
 
-    return (substation_data, line_data, generator_data)
+    return (substation_data, line_data, generator_data, cable_data)
 
 # Convert Filtered Data, Elements to Pandas Dataframes
 
@@ -275,7 +277,6 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
 
 
 def process_node_data(country_code, feature_data, feature):
-
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, feature_data, feature
     )
@@ -292,9 +293,9 @@ def process_node_data(country_code, feature_data, feature):
     return df_combined
 
 
-def process_line_data(country_code, line_data):
+def process_line_data(country_code, feature_data, feature):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
-        country_code, line_data, "line"
+        country_code, feature_data, feature
     )
     convert_ways_lines(df_way, Data)
     
@@ -348,24 +349,43 @@ def process_data():
             "Country",
         ]
 
+    columns_cable= [
+            "id",
+            "lonlat",
+            "Length",
+            "tags.power",
+            "tags.cables",
+            "tags.voltage",
+            "tags.circuits",
+            "tags.frequency",
+            "tags.location",
+            "Type",
+            # "refs",
+            "Country"
+        ]
+
     df_all_substations = pd.DataFrame()
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
-    test_CC = {"NG": "nigeria"}
-    # test_CC = {"MA": "morocco"}
+    df_all_cables = pd.DataFrame()
+    # test_CC = {"NG": "nigeria"}
+    test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    for country_code in AFRICA_CC.keys():
-        substation_data, line_data, generator_data = download_and_filter(country_code)
-        for feature in ["substation", "line", "generator"]:
+    for country_code in test_CC.keys(): # replace Africa_CC by test_CC to only download data for one country
+        substation_data, line_data, generator_data, cable_data = download_and_filter(country_code)
+        for feature in ["substation", "line", "generator", "cable"]:
             if feature == "substation":
                 df_substation = process_node_data(country_code, substation_data, feature)
                 df_all_substations = pd.concat([df_all_substations, df_substation])
             if feature == "line":
-                df_line = process_line_data(country_code, line_data)
+                df_line = process_line_data(country_code, line_data, feature)
                 df_all_lines = pd.concat([df_all_lines, df_line])
             if feature == "generator":
                 df_generator = process_node_data(country_code, generator_data, feature)
                 df_all_generators = pd.concat([df_all_generators, df_generator])
+            if feature == "cable":
+                df_cable = process_line_data(country_code, cable_data, feature)
+                df_all_cables = pd.concat([df_all_cables, df_cable])
 
 
     outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw") # Output file directory
@@ -405,6 +425,17 @@ def process_data():
     df_all_generators.to_csv(outputfile_partial + "_generators" + ".csv")  # Generate CSV
     gdf_generators = convert_pd_to_gdf(df_all_generators)
     gdf_generators.to_file(outputfile_partial +"_generators"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
+    
+    # ----------- Cables -----------
+
+    df_all_cables = df_all_cables[df_all_cables.columns.intersection(set(columns_cable))]
+    df_all_cables.reset_index(drop=True, inplace=True)
+
+
+    # Generate Files
+    df_all_cables.to_csv(outputfile_partial + "_cables"+ ".csv")  # Generate CSV
+    gdf_cables = convert_pd_to_gdf_lines(df_all_cables, simplified=False) # Set simplified = True to simplify lines
+    gdf_cables.to_file(outputfile_partial + "_cables"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
 
 
 if __name__ == "__main__":
