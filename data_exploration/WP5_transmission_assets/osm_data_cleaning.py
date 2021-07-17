@@ -53,6 +53,22 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["dc"] = False
 
 
+def set_unique_bus_id(df_all_substations):
+    """
+    Create unique bus id's
+    The steps below create unique bus id's without loosing the original OSM bus_id 
+
+    Unique bus_id are created by simply adding -1,-2,-3 to the original bus_id
+    Every unique id gets a -1 
+    If a bus_id exist i.e. three times it it will the counted by cumcount -1,-2,-3 making the id unique
+    """
+    if df_all_substations["bus_id"].count() != df_all_substations["bus_id"].nunique(): # operate only if line_id is not already unique (nunique counts unique values)
+        df_all_substations["cumcount"] = df_all_substations.groupby(["bus_id"]).cumcount() # create cumcount column. Cumcount counts 0,1,2,3 the number of duplicates
+        df_all_substations["cumcount"] = df_all_substations["cumcount"] + 1 # avoid 0 value for better understanding
+        df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(str) + "-" + df_all_substations["cumcount"].values.astype(str) # add cumcount to line_id to make line_id unique
+        df_all_substations.drop(columns = "cumcount", inplace=True) # remove cumcount column
+
+
 def filter_substations(df_all_substations, tag_substation = "transmission", threshold_voltage = 110000):
     """
     Filter substations according to substation type and voltage.
@@ -99,6 +115,9 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
     # filter substations
     filter_substations(df_all_substations, tag_substation, threshold_voltage)
+
+    # set unique bus ids
+    set_unique_bus_id(df_all_substations)
 
     # finalize dataframe types
     finalize_substation_types(df_all_substations)
