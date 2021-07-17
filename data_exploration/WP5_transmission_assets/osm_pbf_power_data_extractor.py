@@ -202,7 +202,7 @@ def lonlat_lookup(df_way, Data):
 
     col = "refs"
     if col not in df_way.columns:
-        print ("refs column not found")
+        print ("refs column not found") # TODO : Change to logger and do not create a hacky empty ref col
         df_way[col] = pd.Series([],dtype=pd.StringDtype()).astype(float) # create empty "refs" if not in dataframe
       
     for ref in df_way["refs"]:
@@ -224,6 +224,7 @@ def convert_ways_points(df_way, Data):
     for lonlat in lonlat_list:
         if len(lonlat) >= 3: #Minimum for a triangle
             way_polygon = Polygon(lonlat)
+            # TODO : Do set_crs and to_crs for whole lonlat_list and not indivudually, expected big performance boost.
             polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens m2
             # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
             area_column.append(polygon_area)
@@ -372,9 +373,9 @@ def process_data():
     df_all_generators = pd.DataFrame()
     df_all_cables = pd.DataFrame()
     # test_CC = {"NG": "nigeria"}
-    test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
+    # test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    for country_code in test_CC.keys(): # replace Africa_CC by test_CC to only download data for one country
+    for country_code in AFRICA_CC.keys(): # replace Africa_CC by test_CC to only download data for one country
         substation_data, line_data, generator_data, cable_data = download_and_filter(country_code)
         for feature in ["substation", "line", "generator", "cable"]:
             if feature == "substation":
