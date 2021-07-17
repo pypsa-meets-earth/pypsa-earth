@@ -83,7 +83,16 @@ def filter_substations(df_all_substations, tag_substation = "transmission", thre
     df_all_substations['voltage'] = df_all_substations['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
 
     # Drop any row with N/A voltage
-    df_all_substations = df_all_substations.dropna(subset=['voltage']) 
+    df = df_all_substations.dropna(subset=['voltage']) 
+
+    #Split semicolon separated cells i.e. [66000;220000] and create new identical rows
+    lst_col = 'voltage'
+    x = df.assign(**{lst_col:df[lst_col].str.split(';')})
+    x = pd.DataFrame({
+        col:np.repeat(x[col].values, x[lst_col].str.len())
+        for col in x.columns.difference([lst_col])
+        }).assign(**{lst_col:np.concatenate(x[lst_col].values)})[x.columns.tolist()]
+    df_all_substations = x
 
     # keep only lines with a voltage no lower than than threshold_voltage
     df_all_substations = df_all_substations[df_all_substations.voltage >= threshold_voltage]
@@ -96,7 +105,49 @@ def finalize_substation_types(df_all_substations):
     # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
     df_all_substations.loc[:,"voltage"]  = df_all_substations['voltage'].astype(int)
+
+
+def prepare_lines_df(df_lines):
+    """
+    This function prepares the dataframe for lines and cables
     
+    Parameters
+    ----------
+    df_lines : dataframe
+        Raw lines or cables dataframe as downloaded from OpenStreetMap
+    """
+    # Modification - create final dataframe layout
+    df_lines = df_lines.rename(
+        columns = {
+            "id": "line_id",
+            "tags.voltage": "voltage",
+            "tags.circuits": "circuits",
+            "tags.cables": "cables",
+            "tags.frequency": "tag_frequency",
+            "tags.power": "tag_type",
+            "lonlat": "geometry",
+            "Country": "country",  # new/different to PyPSA-Eur
+            "Length": "length",
+        }
+    )
+
+    # Add NaN as default
+    df_lines["bus0"] = np.nan
+    df_lines["bus1"] = np.nan
+    df_lines["underground"] = np.nan
+    df_lines["under_construction"] = np.nan
+
+    #Rearrange columns
+    clist = ["line_id","bus0","bus1","voltage","circuits","length","underground",
+            "under_construction","tag_type","tag_frequency", "cables","geometry", "country"]
+    df_lines = df_lines[clist]
+
+def finalize_lines_type(df_lines):
+    """
+    This function is aimed at finalizing the type of the columns of the dataframe
+    """
+    df_lines["line_id"] = df_lines["line_id"].astype(int)
+
 
 def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
@@ -107,8 +158,6 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
     # ----------- SUBSTATIONS -----------
 
     df_all_substations = gpd.read_file(raw_outputfile_partial + "_substations" + ".geojson").set_crs(epsg=4326, inplace=True)
-
-    # TODO : Cleaning goes here
 
     # prepare dataset for substations
     prepare_substation_df(df_all_substations)
@@ -126,12 +175,24 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
     df_all_substations.to_file(outputfile_partial + "_substations"+ ".geojson", driver="GeoJSON")
 
 
-    # ----------- LINES -----------
+    # ----------- LINES AND CABLES -----------
 
-    # Load raw data
-    df_all_lines = gpd.read_file(raw_outputfile_partial + "_lines" + ".geojson").set_crs(epsg=4326, inplace=True)
+    # Load raw data lines
+    df_lines = gpd.read_file(raw_outputfile_partial + "_lines" + ".geojson").set_crs(epsg=4326, inplace=True)
+    
+    # prepare lines dataframe and data types
+    prepare_lines_df(df_lines)
+    finalize_lines_type(df_lines)
+    
+    # Load raw data lines
+    df_cables = gpd.read_file(raw_outputfile_partial + "_cables" + ".geojson").set_crs(epsg=4326, inplace=True)
 
-    # TODO : Cleaning Goes here
+    # prepare cables dataframe and data types
+    prepare_lines_df(df_cables)
+    finalize_lines_type(df_cables)
+
+    # concatenate lines and cables in a single dataframe
+    df_all_lines = pd.concat([df_lines,df_cables])
 
     # Modification - create final dataframe layout
     df_all_lines = df_all_lines.rename(
