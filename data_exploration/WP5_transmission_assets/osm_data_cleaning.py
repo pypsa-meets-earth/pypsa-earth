@@ -125,7 +125,7 @@ def finalize_substation_types(df_all_substations):
     """
     # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
-    df_all_substations["voltage"]  = df_all_substations['voltage'].astype(int)
+    df_all_substations.loc[:, "voltage"]  = df_all_substations['voltage'].astype(int)
 
     return df_all_substations
 
@@ -225,8 +225,8 @@ def prepare_generators_df(df_all_generators):
     df_all_generators = df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"})
 
     # convert electricity column from string to float value
-    df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')]
-    df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
+    df_all_generators = df_all_generators[df_all_generators['power_output_MW'].astype(str).str.contains('MW')]
+    df_all_generators['power_output_MW'] = df_all_generators['power_output_MW'].str.extract('(\d+)').astype(float)
 
     return df_all_generators
 
@@ -246,22 +246,19 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
     # filter substations by tag
     df_all_substations = df_all_substations[df_all_substations["tag_substation"] == tag_substation]
-    print(df_all_substations.head())
 
     # filter substation by voltage
     df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
-    print(df_all_substations.head())
-
-    # set unique bus ids
-    df_all_substations = set_unique_id(df_all_substations, "bus_id")
-    print(df_all_substations.head())
 
     # finalize dataframe types
     df_all_substations = finalize_substation_types(df_all_substations)
 
-    # save to csv file
-    df_all_substations.to_file(outputfile_partial + "_substations"+ ".geojson", driver="GeoJSON")
+    # set unique bus ids
+    df_all_substations = set_unique_id(df_all_substations, "bus_id")
 
+    # save to csv file
+    df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry",crs="EPSG:4326")
+    df_all_substations.to_file(outputfile_partial + "_substations"+ ".geojson", driver="GeoJSON") 
 
     # ----------- LINES AND CABLES -----------
 
@@ -269,31 +266,31 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
     df_lines = gpd.read_file(raw_outputfile_partial + "_lines" + ".geojson").set_crs(epsg=4326, inplace=True)
     
     # prepare lines dataframe and data types
-    prepare_lines_df(df_lines)
-    finalize_lines_type(df_lines)
+    df_lines = prepare_lines_df(df_lines)
+    df_lines = finalize_lines_type(df_lines)
     
     # Load raw data lines
     df_cables = gpd.read_file(raw_outputfile_partial + "_cables" + ".geojson").set_crs(epsg=4326, inplace=True)
 
     # prepare cables dataframe and data types
-    prepare_lines_df(df_cables)
-    finalize_lines_type(df_cables)
+    df_cables = prepare_lines_df(df_cables)
+    df_cables = finalize_lines_type(df_cables)
 
     # concatenate lines and cables in a single dataframe
-    df_all_lines = pd.concat([df_lines,df_cables])
-
+    df_all_lines = pd.concat([df_lines, df_cables])
+    
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns 
-    integrate_lines_df(df_all_lines)
+    df_all_lines = integrate_lines_df(df_all_lines)
 
     # filter lines by voltage
-    filter_voltage(df_all_lines, threshold_voltage)
+    df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
     
     # set unique line ids
-    set_unique_id(df_all_lines, "line_id")
+    df_all_lines = set_unique_id(df_all_lines, "line_id")
 
-    df_all_lines.to_file(outputfile_partial + "_lines"+ ".geojson", driver="GeoJSON")
-
+    df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry",crs="EPSG:4326")
+    df_all_lines.to_file(outputfile_partial + "_lines" + ".geojson", driver="GeoJSON")
 
     # ----------- Generator -----------
 
@@ -303,11 +300,9 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
     # TODO : Cleaning goes here
     # prepare the generator dataset
-    prepare_generators_df(df_all_generators)
+    df_all_generators = prepare_generators_df(df_all_generators)
 
     df_all_generators.to_file(outputfile_partial + "_generators"+ ".geojson", driver="GeoJSON")
-
-
 
     return None
 
