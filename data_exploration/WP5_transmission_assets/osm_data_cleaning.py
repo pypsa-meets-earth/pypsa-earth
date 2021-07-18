@@ -1,13 +1,15 @@
-from shapely.geometry import LineString, Point, Polygon
-from iso_country_codes import AFRICA_CC
-import pandas as pd
-import numpy as np
-import geopandas as gpd
+
 import os
 import sys
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("../../scripts")
+
+from shapely.geometry import LineString, Point, Polygon
+from iso_country_codes import AFRICA_CC
+import pandas as pd
+import numpy as np
+import geopandas as gpd
 
 
 def prepare_substation_df(df_all_substations):
@@ -53,6 +55,8 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["under_construction"] = True
     df_all_substations["dc"] = False
 
+    return df_all_substations
+
 
 def set_unique_id(df, col):
     """
@@ -75,6 +79,8 @@ def set_unique_id(df, col):
         df["cumcount"] = df["cumcount"] + 1 # avoid 0 value for better understanding
         df[col] = df[col].astype(str) + "-" + df["cumcount"].values.astype(str) # add cumcount to id to make id unique
         df.drop(columns = "cumcount", inplace=True) # remove cumcount column
+    
+    return df
 
 
 def split_cells(df, lst_col = 'voltage'):
@@ -97,17 +103,20 @@ def split_cells(df, lst_col = 'voltage'):
 
 
 def filter_voltage(df, threshold_voltage = 110000):
-    # Convert voltage to float, or set to nan the value
-    df['voltage'] = df['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
-
-    # Drop any row with N/A voltage
+   # Drop any row with N/A voltage
     df = df.dropna(subset=['voltage']) 
 
     #Split semicolon separated cells i.e. [66000;220000] and create new identical rows
     df = split_cells(df)
 
+     # Convert voltage to float, if impossible, discard row
+    df['voltage'] = df['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
+    df = df.dropna(subset=['voltage']) # Drop any row with Voltage = N/A
+
     # keep only lines with a voltage no lower than than threshold_voltage
     df = df[df.voltage >= threshold_voltage]
+
+    return df
 
 
 def finalize_substation_types(df_all_substations):
@@ -116,7 +125,9 @@ def finalize_substation_types(df_all_substations):
     """
     # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
-    df_all_substations.loc[:,"voltage"]  = df_all_substations['voltage'].astype(int)
+    df_all_substations["voltage"]  = df_all_substations['voltage'].astype(int)
+
+    return df_all_substations
 
 
 def prepare_lines_df(df_lines):
@@ -154,12 +165,16 @@ def prepare_lines_df(df_lines):
             "under_construction","tag_type","tag_frequency", "cables","geometry", "country"]
     df_lines = df_lines[clist]
 
+    return df_lines
+
 
 def finalize_lines_type(df_lines):
     """
     This function is aimed at finalizing the type of the columns of the dataframe
     """
     df_lines["line_id"] = df_lines["line_id"].astype(int)
+
+    return df_lines
 
 
 def integrate_lines_df(df_all_lines):
@@ -195,6 +210,8 @@ def integrate_lines_df(df_all_lines):
     if 'cables' in df_all_lines: # drop column if exist
         df_all_lines.drop(columns = "cables", inplace=True)
 
+    return df_all_lines
+
 
 def prepare_generators_df(df_all_generators):
     """
@@ -211,6 +228,7 @@ def prepare_generators_df(df_all_generators):
     df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')]
     df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
 
+    return df_all_generators
 
 
 def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
@@ -222,21 +240,24 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
     # ----------- SUBSTATIONS -----------
 
     df_all_substations = gpd.read_file(raw_outputfile_partial + "_substations" + ".geojson").set_crs(epsg=4326, inplace=True)
-
+    
     # prepare dataset for substations
-    prepare_substation_df(df_all_substations)
+    df_all_substations = prepare_substation_df(df_all_substations)
 
     # filter substations by tag
     df_all_substations = df_all_substations[df_all_substations["tag_substation"] == tag_substation]
+    print(df_all_substations.head())
 
     # filter substation by voltage
-    filter_voltage(df_all_substations, threshold_voltage)
+    df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
+    print(df_all_substations.head())
 
     # set unique bus ids
-    set_unique_id(df_all_substations, "bus_id")
+    df_all_substations = set_unique_id(df_all_substations, "bus_id")
+    print(df_all_substations.head())
 
     # finalize dataframe types
-    finalize_substation_types(df_all_substations)
+    df_all_substations = finalize_substation_types(df_all_substations)
 
     # save to csv file
     df_all_substations.to_file(outputfile_partial + "_substations"+ ".geojson", driver="GeoJSON")
