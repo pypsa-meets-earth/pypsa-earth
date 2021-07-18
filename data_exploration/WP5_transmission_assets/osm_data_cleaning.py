@@ -9,6 +9,7 @@ import sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("../../scripts")
 
+
 def prepare_substation_df(df_all_substations):
     """
     Prepare raw substations dataframe to the structure compatible with PyPSA-Eur
@@ -53,49 +54,60 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["dc"] = False
 
 
-def set_unique_bus_id(df_all_substations):
+def set_unique_id(df, col):
     """
-    Create unique bus id's
+    Create unique id's, where id is specified by the column "col"
     The steps below create unique bus id's without loosing the original OSM bus_id 
 
     Unique bus_id are created by simply adding -1,-2,-3 to the original bus_id
     Every unique id gets a -1 
     If a bus_id exist i.e. three times it it will the counted by cumcount -1,-2,-3 making the id unique
-    """
-    if df_all_substations["bus_id"].count() != df_all_substations["bus_id"].nunique(): # operate only if line_id is not already unique (nunique counts unique values)
-        df_all_substations["cumcount"] = df_all_substations.groupby(["bus_id"]).cumcount() # create cumcount column. Cumcount counts 0,1,2,3 the number of duplicates
-        df_all_substations["cumcount"] = df_all_substations["cumcount"] + 1 # avoid 0 value for better understanding
-        df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(str) + "-" + df_all_substations["cumcount"].values.astype(str) # add cumcount to line_id to make line_id unique
-        df_all_substations.drop(columns = "cumcount", inplace=True) # remove cumcount column
-
-
-def filter_substations(df_all_substations, tag_substation = "transmission", threshold_voltage = 110000):
-    """
-    Filter substations according to substation type and voltage.
-    Substations corresponding to non-numeric voltages or nan are excluded
     
+    Parameters
+    ----------
+    df : dataframe
+        Dataframe considered for the analysis
+    col : str
+        Column name for the analyses; examples: "bus_id" for substations or "line_id" for lines
     """
+    if df[col].count() != df[col].nunique(): # operate only if id is not already unique (nunique counts unique values)
+        df["cumcount"] = df.groupby([col]).cumcount() # create cumcount column. Cumcount counts 0,1,2,3 the number of duplicates
+        df["cumcount"] = df["cumcount"] + 1 # avoid 0 value for better understanding
+        df[col] = df[col].astype(str) + "-" + df["cumcount"].values.astype(str) # add cumcount to id to make id unique
+        df.drop(columns = "cumcount", inplace=True) # remove cumcount column
 
-    # filter only entries corresponding to transmission elements ("transmission")
-    df_all_substations = df_all_substations[df_all_substations["tag_substation"] == tag_substation]
 
-    # Covnert voltage to float, or set to nan the value
-    df_all_substations['voltage'] = df_all_substations['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
-
-    # Drop any row with N/A voltage
-    df = df_all_substations.dropna(subset=['voltage']) 
-
-    #Split semicolon separated cells i.e. [66000;220000] and create new identical rows
-    lst_col = 'voltage'
+def split_cells(df, lst_col = 'voltage'):
+    """
+    Split semicolon separated cells i.e. [66000;220000] and create new identical rows
+    
+        Parameters
+    ----------
+    df : dataframe
+        Dataframe under analysis
+    lst_col : str
+        Target column over which to perform the analysis
+    """
     x = df.assign(**{lst_col:df[lst_col].str.split(';')})
     x = pd.DataFrame({
         col:np.repeat(x[col].values, x[lst_col].str.len())
         for col in x.columns.difference([lst_col])
         }).assign(**{lst_col:np.concatenate(x[lst_col].values)})[x.columns.tolist()]
-    df_all_substations = x
+    return x
+
+
+def filter_voltage(df, threshold_voltage = 110000):
+    # Convert voltage to float, or set to nan the value
+    df['voltage'] = df['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
+
+    # Drop any row with N/A voltage
+    df = df.dropna(subset=['voltage']) 
+
+    #Split semicolon separated cells i.e. [66000;220000] and create new identical rows
+    df = split_cells(df)
 
     # keep only lines with a voltage no lower than than threshold_voltage
-    df_all_substations = df_all_substations[df_all_substations.voltage >= threshold_voltage]
+    df = df[df.voltage >= threshold_voltage]
 
 
 def finalize_substation_types(df_all_substations):
@@ -142,11 +154,63 @@ def prepare_lines_df(df_lines):
             "under_construction","tag_type","tag_frequency", "cables","geometry", "country"]
     df_lines = df_lines[clist]
 
+
 def finalize_lines_type(df_lines):
     """
     This function is aimed at finalizing the type of the columns of the dataframe
     """
     df_lines["line_id"] = df_lines["line_id"].astype(int)
+
+
+def integrate_lines_df(df_all_lines):
+    """
+    Function to add underground, under_construction, frequency and circuits
+    """
+
+    # Add under construction info
+    df_all_lines["under_construction"] = False # default. Not more information atm available
+
+    # Add underground flag to check whether the line (cable) is underground
+    df_all_lines["underground"] = (df_all_lines["tag_type"] == "cable") # Simplified. If tag_type cable then underground is True. 
+
+    # More information extractable for "underground" by looking at "tag_location".
+    if 'tag_location' in df_all_lines: # drop column if exist
+        df_all_lines.drop(columns = "tag_location", inplace=True)
+
+    # Add frequency column
+    df_all_lines["tag_frequency"] = 50
+
+    # Add circuits information
+    if df_all_lines["cables"].dtype != int: # if not int make int
+        df_all_lines.loc[(df_all_lines["cables"] < "3") | df_all_lines["cables"].isna(), "cables"] = "0" #HERE. "0" if cables "None", "nan" or "1"
+        df_all_lines["cables"] = df_all_lines["cables"].astype("int")
+    if 4 or 5 in df_all_lines["cables"].values: # downgrade 4 and 5 cables to 3... 
+        # Reason: 4 cables have 1 lighting protection cables, 5 cables has 2 LP cables - not transferring energy; 
+        # see https://hackaday.com/2019/06/11/a-field-guide-to-transmission-lines/
+        df_all_lines.loc[(df_all_lines["cables"] == 4) | (df_all_lines["cables"] == 5), "cables"] = 3 # where circuits are "0" make "1"
+    df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = df_all_lines.loc[df_all_lines['circuits'].isna(), "cables"] / 3 # one circuit contains 3 cables
+    df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
+    df_all_lines.loc[(df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0), "circuits"] = 1 # where circuits are "0" make "1"
+
+    if 'cables' in df_all_lines: # drop column if exist
+        df_all_lines.drop(columns = "cables", inplace=True)
+
+
+def prepare_generators_df(df_all_generators):
+    """
+    Prepare the dataframe for generators
+    """
+
+    # reset index
+    df_all_generators = df_all_generators.reset_index(drop=True)
+
+    # rename columns
+    df_all_generators = df_all_generators.rename(columns = {'tags.generator:output:electricity':"power_output_MW"})
+
+    # convert electricity column from string to float value
+    df_all_generators = df_all_generators[df_all_generators['tags.generator:output:electricity'].astype(str).str.contains('MW')]
+    df_all_generators['tags.generator:output:electricity'] = df_all_generators['tags.generator:output:electricity'].str.extract('(\d+)').astype(float)
+
 
 
 def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
@@ -162,11 +226,14 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
     # prepare dataset for substations
     prepare_substation_df(df_all_substations)
 
-    # filter substations
-    filter_substations(df_all_substations, tag_substation, threshold_voltage)
+    # filter substations by tag
+    df_all_substations = df_all_substations[df_all_substations["tag_substation"] == tag_substation]
+
+    # filter substation by voltage
+    filter_voltage(df_all_substations, threshold_voltage)
 
     # set unique bus ids
-    set_unique_bus_id(df_all_substations)
+    set_unique_id(df_all_substations, "bus_id")
 
     # finalize dataframe types
     finalize_substation_types(df_all_substations)
@@ -194,31 +261,15 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
     # concatenate lines and cables in a single dataframe
     df_all_lines = pd.concat([df_lines,df_cables])
 
-    # Modification - create final dataframe layout
-    df_all_lines = df_all_lines.rename(
-        columns={
-            "id": "line_id",
-            "tags.voltage": "voltage",
-            "tags.circuits": "circuits",
-            "tags.cables": "cables",
-            "tags.frequency": "tag_frequency",
-            "tags.power": "tag_type",
-            "lonlat": "geometry",
-        }
-    )
+    # Add underground, under_construction, frequency and circuits columns to the dataframe
+    # and drop corresponding unused columns 
+    integrate_lines_df(df_all_lines)
 
-    # Add NaN as default
-    df_all_lines["bus0"] = np.nan
-    df_all_lines["bus1"] = np.nan
-    df_all_lines["length"] = np.nan
-    df_all_lines["underground"] = np.nan
-    df_all_lines["under_construction"] = np.nan
-
-    #Rearrange columns
-    clist = ["line_id","bus0","bus1","voltage","circuits","length","underground",
-         "under_construction","tag_type","tag_frequency","geometry"]
-
-    df_all_lines = df_all_lines[clist]
+    # filter lines by voltage
+    filter_voltage(df_all_lines, threshold_voltage)
+    
+    # set unique line ids
+    set_unique_id(df_all_lines, "line_id")
 
     df_all_lines.to_file(outputfile_partial + "_lines"+ ".geojson", driver="GeoJSON")
 
@@ -230,6 +281,8 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
 
     # TODO : Cleaning goes here
+    # prepare the generator dataset
+    prepare_generators_df(df_all_generators)
 
     df_all_generators.to_file(outputfile_partial + "_generators"+ ".geojson", driver="GeoJSON")
 
