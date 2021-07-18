@@ -56,7 +56,7 @@ The environment can be installed and activated using
         <a href="https://github.com/euronion">
             <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
             <br />
-            <sub><b>euronion</b></sub>
+            <sub><b>Euronion</b></sub>
         </a>
     </td>
     <td align="center">
