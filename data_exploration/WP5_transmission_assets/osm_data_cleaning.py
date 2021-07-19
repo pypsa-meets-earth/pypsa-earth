@@ -113,6 +113,9 @@ def filter_voltage(df, threshold_voltage = 110000):
     df['voltage'] = df['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
     df = df.dropna(subset=['voltage']) # Drop any row with Voltage = N/A
 
+    # convert voltage to int
+    df.loc[:,"voltage"]  = df['voltage'].astype(int)
+
     # keep only lines with a voltage no lower than than threshold_voltage
     df = df[df.voltage >= threshold_voltage]
 
@@ -233,7 +236,7 @@ def prepare_generators_df(df_all_generators):
 
 def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
-    outputfile_partial = os.path.join(os.getcwd(), "data", "africa_all") # Output file directory
+    outputfile_partial = os.path.join(os.getcwd(), "data", "clean", "africa_all") # Output file directory
 
     raw_outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw") # Output file directory
 
