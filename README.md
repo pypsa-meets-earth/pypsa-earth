@@ -121,7 +121,7 @@ The environment can be installed and activated using
         <a href="https://github.com/davide-f">
             <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
             <br />
-            <sub><b>davide-f</b></sub>
+            <sub><b>Davide-f</b></sub>
         </a>
     </td></tr>
 </table>
