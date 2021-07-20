@@ -5,8 +5,8 @@ import sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("../../scripts")
 
-from shapely.geometry import LineString, Point, Polygon
-from iso_country_codes import AFRICA_CC
+# from shapely.geometry import LineString, Point, Polygon
+# from iso_country_codes import AFRICA_CC
 import pandas as pd
 import numpy as np
 import geopandas as gpd
@@ -20,6 +20,7 @@ def prepare_substation_df(df_all_substations):
     ----------
     df_all_substations : dataframe
         Raw substations dataframe as downloaded from OpenStreetMap
+
     """
 
     # Modify the naming of the DataFrame columns to adapt to the PyPSA-Eur-like format
@@ -33,7 +34,7 @@ def prepare_substation_df(df_all_substations):
             "tags.substation": "tag_substation",
             "Country": "country",  # new/different to PyPSA-Eur
             "Area": "tag_area",
-            "lonlat": "geometry",
+            "lonlat": "geometry"
         }
     )
 
@@ -46,9 +47,10 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["dc"] = np.nan
     df_all_substations["under_construction"] = np.nan
 
-    #Rearrange columns
-    clist = ["bus_id","station_id","voltage","dc","symbol","under_construction","tag_substation",
-            "tag_area","lon", "lat", "geometry","country"]
+    # Rearrange columns
+    clist = ["bus_id", "station_id", "voltage", "dc",
+            "symbol", "under_construction", "tag_substation",
+            "tag_area", "lon", "lat", "geometry", "country"]
     df_all_substations = df_all_substations[clist]
 
     # add the under_construction and dc
@@ -74,11 +76,12 @@ def set_unique_id(df, col):
     col : str
         Column name for the analyses; examples: "bus_id" for substations or "line_id" for lines
     """
-    if df[col].count() != df[col].nunique(): # operate only if id is not already unique (nunique counts unique values)
-        df["cumcount"] = df.groupby([col]).cumcount() # create cumcount column. Cumcount counts 0,1,2,3 the number of duplicates
-        df["cumcount"] = df["cumcount"] + 1 # avoid 0 value for better understanding
-        df[col] = df[col].astype(str) + "-" + df["cumcount"].values.astype(str) # add cumcount to id to make id unique
-        df.drop(columns = "cumcount", inplace=True) # remove cumcount column
+    
+    if df[col].count() != df[col].nunique():  # operate only if id is not already unique (nunique counts unique values)
+        df["cumcount"] = df.groupby([col]).cumcount()  # create cumcount column. Cumcount counts 0,1,2,3 the number of duplicates
+        df["cumcount"] = df["cumcount"] + 1  # avoid 0 value for better understanding
+        df[col] = df[col].astype(str) + "-" + df["cumcount"].values.astype(str)  # add cumcount to id to make id unique
+        df.drop(columns = "cumcount", inplace=True)  # remove cumcount column
     
     return df
 
@@ -103,6 +106,7 @@ def split_cells(df, lst_col = 'voltage'):
 
 
 def filter_voltage(df, threshold_voltage = 110000):
+    
    # Drop any row with N/A voltage
     df = df.dropna(subset=['voltage']) 
 
@@ -111,7 +115,7 @@ def filter_voltage(df, threshold_voltage = 110000):
 
      # Convert voltage to float, if impossible, discard row
     df['voltage'] = df['voltage'].apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
-    df = df.dropna(subset=['voltage']) # Drop any row with Voltage = N/A
+    df = df.dropna(subset=['voltage'])  # Drop any row with Voltage = N/A
 
     # convert voltage to int
     df.loc[:,"voltage"]  = df['voltage'].astype(int)
@@ -126,6 +130,7 @@ def finalize_substation_types(df_all_substations):
     """
     Specify bus_id and voltage columns as integer
     """
+
     # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
     df_all_substations.loc[:, "voltage"]  = df_all_substations['voltage'].astype(int)
@@ -142,6 +147,7 @@ def prepare_lines_df(df_lines):
     df_lines : dataframe
         Raw lines or cables dataframe as downloaded from OpenStreetMap
     """
+
     # Modification - create final dataframe layout
     df_lines = df_lines.rename(
         columns = {
@@ -153,7 +159,7 @@ def prepare_lines_df(df_lines):
             "tags.power": "tag_type",
             "lonlat": "geometry",
             "Country": "country",  # new/different to PyPSA-Eur
-            "Length": "length",
+            "Length": "length"
         }
     )
 
@@ -163,9 +169,9 @@ def prepare_lines_df(df_lines):
     df_lines["underground"] = np.nan
     df_lines["under_construction"] = np.nan
 
-    #Rearrange columns
-    clist = ["line_id","bus0","bus1","voltage","circuits","length","underground",
-            "under_construction","tag_type","tag_frequency", "cables","geometry", "country"]
+    # Rearrange columns
+    clist = ["line_id", "bus0", "bus1", "voltage", "circuits", "length", "underground",
+            "under_construction", "tag_type", "tag_frequency", "cables", "geometry", "country"]
     df_lines = df_lines[clist]
 
     return df_lines
@@ -236,9 +242,9 @@ def prepare_generators_df(df_all_generators):
 
 def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
-    outputfile_partial = os.path.join(os.getcwd(), "data", "clean", "africa_all") # Output file directory
+    outputfile_partial = os.path.join(os.getcwd(), "data", "clean", "africa_all")  # Output file directory
 
-    raw_outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw") # Output file directory
+    raw_outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw")  # Output file directory
 
     # ----------- SUBSTATIONS -----------
 
@@ -300,8 +306,6 @@ def clean_data(tag_substation = "transmission", threshold_voltage = 110000):
 
     df_all_generators = gpd.read_file(raw_outputfile_partial + "_generators" + ".geojson").set_crs(epsg=4326, inplace=True)
 
-
-    # TODO : Cleaning goes here
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
 
