@@ -116,5 +116,13 @@ The environment can be installed and activated using
             <sub><b>Lukas Franken</b></sub>
         </a>
     </td></tr>
+<tr>
+    <td align="center">
+        <a href="https://github.com/davide-f">
+            <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
+            <br />
+            <sub><b>davide-f</b></sub>
+        </a>
+    </td></tr>
 </table>
 <!-- readme: collaborators,contributors -end -->
