@@ -14,7 +14,7 @@ Watch our latest discusson with African leaders about [Open Energy System Modell
 ## Development Notes
 
 The python package requirements are curated in the `envs/environment.yml` file.
-The environment can be installed and activated using
+The environment can be installed and activated using:
 
     .../pypsa_meets_africa % conda env create -f envs/environment.yml
 
