@@ -96,17 +96,17 @@ The environment can be installed and activated using:
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AymKHI">
-            <img src="https://avatars.githubusercontent.com/u/65019030?v=4" width="100;" alt="AymKHI"/>
+        <a href="https://github.com/Ay-Khi">
+            <img src="https://avatars.githubusercontent.com/u/65019030?v=4" width="100;" alt="Ay-Khi"/>
             <br />
-            <sub><b>AymKHI</b></sub>
+            <sub><b>Ayman Alkhirbash</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/koen-vg">
             <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
             <br />
-            <sub><b>Koen van Greevenbroek</b></sub>
+            <sub><b>Koen Van Greevenbroek</b></sub>
         </a>
     </td>
     <td align="center">
