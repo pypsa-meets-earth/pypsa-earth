@@ -106,7 +106,7 @@ The environment can be installed and activated using:
         <a href="https://github.com/koen-vg">
             <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
             <br />
-            <sub><b>Koen Van Greevenbroek</b></sub>
+            <sub><b>Koen van Greevenbroek</b></sub>
         </a>
     </td>
     <td align="center">
