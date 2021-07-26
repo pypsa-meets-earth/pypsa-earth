@@ -133,8 +133,6 @@ def download_and_filter(country_code, update=False):
             ),
         )
         
-        print("Stuff got saved at: ", os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile)))
-        
         print(f"Loading Pickle for {AFRICA_CC[country_code]}")  # TODO: Change to Logger
     else:
         create_elements = True
@@ -483,8 +481,7 @@ def process_data():
     # Generate Files
     df_all_cables.to_csv(outputfile_partial + "_cables"+ ".csv")  # Generate CSV
     gdf_cables = convert_pd_to_gdf_lines(df_all_cables, simplified=False) # Set simplified = True to simplify lines
-    if len(gdf_cables) > 0:
-        gdf_cables.to_file(outputfile_partial + "_cables"+ ".geojson", driver="GeoJSON")
+    gdf_cables.to_file(outputfile_partial + "_cables"+ ".geojson", driver="GeoJSON")
 
 
 
