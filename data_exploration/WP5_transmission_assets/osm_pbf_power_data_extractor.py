@@ -120,10 +120,11 @@ def download_and_filter(country_code, update=False):
 
     # Load Previously Pre-Filtered Files
     if update is False and filter_file_exists is True:
-        create_elements = False  # Do not create elements again
+        create_elements = True  # Do not create elements again
         new_prefilter_data = False  # Do not pre-filter data again
         # HACKY: esy.osmfilter code to re-create Data.pickle
         Data = osm_info.ReadJason(JSON_outputfile, verbose="no")
+        
         DataDict = {"Data": Data}
         osm_pickle.picklesave(
             DataDict,
@@ -131,6 +132,9 @@ def download_and_filter(country_code, update=False):
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
             ),
         )
+        
+        print("Stuff got saved at: ", os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile)))
+        
         print(f"Loading Pickle for {AFRICA_CC[country_code]}")  # TODO: Change to Logger
     else:
         create_elements = True
@@ -140,9 +144,9 @@ def download_and_filter(country_code, update=False):
         )  # TODO: Change to Logger
 
     prefilter = {
-        Node: {"power": ["substation", "line", "generator", "cable"]},
-        Way: {"power": ["substation", "line", "generator", "cable"]},
-        Relation: {"power": ["substation", "line", "generator", "cable"]},
+        Node: {"power": ["substation", "tower", "line", "generator", "cable"]},
+        Way: {"power": ["substation", "tower", "line", "generator", "cable"]},
+        Relation: {"power": ["substation", "tower", "line", "generator", "cable"]},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
 
@@ -150,7 +154,7 @@ def download_and_filter(country_code, update=False):
         ("", ""),
     ]
 
-    for feature in ["substation", "line", "generator", "cable"]:
+    for feature in ["substation", "tower", "line", "generator", "cable"]:
         whitefilter = [
             [
                 ("power", feature),
@@ -172,6 +176,8 @@ def download_and_filter(country_code, update=False):
             multiprocess=True,
         )
         # For better performance yield feature_data here
+        if feature == "tower":
+            tower_data = feature_data
         if feature == "substation":
             substation_data = feature_data
         if feature == "line":
@@ -181,7 +187,7 @@ def download_and_filter(country_code, update=False):
         if feature == "cable":
             cable_data = feature_data
 
-    return (substation_data, line_data, generator_data, cable_data)
+    return (tower_data, substation_data, line_data, generator_data, cable_data)
 
 # Convert Filtered Data, Elements to Pandas Dataframes
 
@@ -313,6 +319,24 @@ def process_line_data(country_code, feature_data, feature):
 
 
 def process_data():
+    
+    columns_tower = [
+            "id",
+            "lonlat",
+            "Area",
+            "tags.power",
+            "tags.tower",
+            "tags.material",
+            "tags.structure",
+            "tags.operator",
+            "tags.line_attachment",
+            "tags.line_management",
+            "tags.ref",
+            "tags.height",
+            "Type",
+            "Country"
+        ]
+    
     columns_substation = [ 
             "id",
             "lonlat",
@@ -372,12 +396,21 @@ def process_data():
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
     df_all_cables = pd.DataFrame()
+    df_all_towers = pd.DataFrame()
+    
     # test_CC = {"NG": "nigeria"}
     # test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
+    test_CC = {"ZW": "zimbabwe"}
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    for country_code in AFRICA_CC.keys(): # replace Africa_CC by test_CC to only download data for one country
-        substation_data, line_data, generator_data, cable_data = download_and_filter(country_code)
-        for feature in ["substation", "line", "generator", "cable"]:
+    
+    for country_code in test_CC.keys():
+    #for country_code in AFRICA_CC.keys(): # replace Africa_CC by test_CC to only download data for one country
+    
+        tower_data, substation_data, line_data, generator_data, cable_data = download_and_filter(country_code)
+        for feature in ["tower", "substation", "line", "generator", "cable"]:
+            if feature == "tower":
+                df_tower = process_node_data(country_code, tower_data, feature)
+                df_all_towers = pd.concat([df_all_towers, df_tower])
             if feature == "substation":
                 df_substation = process_node_data(country_code, substation_data, feature)
                 df_all_substations = pd.concat([df_all_substations, df_substation])
@@ -396,6 +429,17 @@ def process_data():
 
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True) #  create raw directory
+        
+        
+    # ----------- TOWERS -----------
+
+    df_all_towers = df_all_towers[df_all_towers.columns.intersection(set(columns_tower))]
+    df_all_towers.reset_index(drop=True, inplace=True)
+
+    # Generate Files
+    df_all_towers.to_csv(outputfile_partial + "_towers" + ".csv")  # Generate CSV
+    gdf_towers = convert_pd_to_gdf(df_all_towers)
+    gdf_towers.to_file(outputfile_partial + "_towers" + ".geojson", driver="GeoJSON")  # Generate GeoJson
 
 
     # ----------- SUBSTATIONS -----------
@@ -439,7 +483,9 @@ def process_data():
     # Generate Files
     df_all_cables.to_csv(outputfile_partial + "_cables"+ ".csv")  # Generate CSV
     gdf_cables = convert_pd_to_gdf_lines(df_all_cables, simplified=False) # Set simplified = True to simplify lines
-    gdf_cables.to_file(outputfile_partial + "_cables"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
+    if len(gdf_cables) > 0:
+        gdf_cables.to_file(outputfile_partial + "_cables"+ ".geojson", driver="GeoJSON")
+
 
 
 if __name__ == "__main__":
