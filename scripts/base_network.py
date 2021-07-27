@@ -110,31 +110,6 @@ logger = logging.getLogger(__name__)
 #                         index=new_links.index[found_i]).sort_values(by='D')\
 #                         [lambda ds: ~ds.index.duplicated(keep='first')]\
 #                          .sort_index()['i']
-def _rebase_voltage_to_config(component):
-    """
-    Rebase the voltage of components to the config.yaml input
-
-    Components such as line and buses have voltage levels between
-    110 kV up to around 850 kV. PyPSA-Africa uses 3 voltages as config input.
-    This function rebases all inputs to the lower, middle and upper voltage 
-    bound.
-
-    Parameters
-    ----------
-    component : dataframe
-    """
-    v_min = 110 # min. filtered value in dataset
-    v_low = snakemake.config['electricity']['voltages'][0]
-    v_mid = snakemake.config['electricity']['voltages'][1]
-    v_up = snakemake.config['electricity']['voltages'][2]
-    v_low_mid = (v_mid-v_low)/2+v_low # between low and mid voltage
-    v_mid_up = (v_up-v_mid)/2+v_mid # between mid and upper voltage
-    
-    component.loc[(v_min <= component['v_nom']) & (component['v_nom'] < v_low_mid), "v_nom"] = v_low
-    component.loc[(v_low_mid <= component['v_nom']) & (component['v_nom'] < v_mid_up), "v_nom"] = v_mid
-    component.loc[v_mid_up <= component['v_nom'], "v_nom"] = v_up
-    
-    return component
 
 
 def _load_buses_from_osm():
@@ -148,16 +123,17 @@ def _load_buses_from_osm():
     buses['carrier'] = buses.pop('dc').map({True: 'DC', False: 'AC'})
     buses['under_construction'] = buses['under_construction'].fillna(False).astype(bool)
 
+    # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
-
+    
+    #TODO Deprecated. No influence because of new rebase. Remove?
+    buses_with_v_nom_to_keep_b = buses.v_nom.isin(snakemake.config['electricity']['voltages']) | buses.v_nom.isnull()
+    logger.info("Removing buses with voltages {}".format(pd.Index(buses.v_nom.unique()).dropna().difference(snakemake.config['electricity']['voltages'])))
 
     #TODO remove all buses outside of all countries including exclusive economic zones (offshore)
     # europe_shape = gpd.read_file(snakemake.input.europe_shape).loc[0, 'geometry']
     # europe_shape_prepped = shapely.prepared.prep(europe_shape)
     # buses_in_europe_b = buses[['x', 'y']].apply(lambda p: europe_shape_prepped.contains(Point(p)), axis=1)
-
-    buses_with_v_nom_to_keep_b = buses.v_nom.isin(snakemake.config['electricity']['voltages']) | buses.v_nom.isnull()
-    logger.info("Removing buses with voltages {}".format(pd.Index(buses.v_nom.unique()).dropna().difference(snakemake.config['electricity']['voltages'])))
 
     #TODO Add remove buses outside of Area (currently commented out)
     return pd.DataFrame(buses.loc[buses_with_v_nom_to_keep_b])
@@ -279,15 +255,18 @@ def _add_links_from_tyndp(buses, links):
 
 
 def _load_lines_from_osm(buses):
-    lines = (pd.read_csv(snakemake.input.eg_lines, quotechar="'", true_values='t', false_values='f',
+    lines = (pd.read_csv(snakemake.input.osm_lines,
                          dtype=dict(line_id='str', bus0='str', bus1='str',
                                     underground="bool", under_construction="bool"))
              .set_index('line_id')
-             .rename(columns=dict(voltage='v_nom', circuits='num_parallel')))
-
-    lines['length'] /= 1e3
-
-    lines = _remove_dangling_branches(lines, buses)
+             .rename(columns=dict(voltage='v_nom', circuits='num_parallel'))
+             )
+            
+    lines['length'] /= 1e3 # m to km conversion
+    lines['v_nom'] /= 1e3 # V to kV conversion
+    lines = lines.loc[:, ~lines.columns.str.contains('^Unnamed')] # remove unnamed col
+    lines = _rebase_voltage_to_config(lines) # rebase voltage to config inputs
+    #lines = _remove_dangling_branches(lines, buses)
 
     return lines
 
@@ -563,6 +542,32 @@ def _adjust_capacities_of_under_construction_branches(n):
 
     return n
 
+def _rebase_voltage_to_config(component):
+    """
+    Rebase the voltage of components to the config.yaml input
+
+    Components such as line and buses have voltage levels between
+    110 kV up to around 850 kV. PyPSA-Africa uses 3 voltages as config input.
+    This function rebases all inputs to the lower, middle and upper voltage 
+    bound.
+
+    Parameters
+    ----------
+    component : dataframe
+    """
+    v_min = 110 # min. filtered value in dataset
+    v_low = snakemake.config['electricity']['voltages'][0]
+    v_mid = snakemake.config['electricity']['voltages'][1]
+    v_up = snakemake.config['electricity']['voltages'][2]
+    v_low_mid = (v_mid-v_low)/2+v_low # between low and mid voltage
+    v_mid_up = (v_up-v_mid)/2+v_mid # between mid and upper voltage
+    
+    component.loc[(v_min <= component['v_nom']) & (component['v_nom'] < v_low_mid), "v_nom"] = v_low
+    component.loc[(v_low_mid <= component['v_nom']) & (component['v_nom'] < v_mid_up), "v_nom"] = v_mid
+    component.loc[v_mid_up <= component['v_nom'], "v_nom"] = v_up
+    
+    return component
+
 
 def base_network():
     buses = _load_buses_from_osm()
@@ -573,7 +578,7 @@ def base_network():
 
     # converters = _load_converters_from_eg(buses)
 
-    # lines = _load_lines_from_osm(buses)
+    lines = _load_lines_from_osm(buses)
     # transformers = _load_transformers_from_eg(buses)
 
     # lines = _set_electrical_parameters_lines(lines)
@@ -588,7 +593,7 @@ def base_network():
     n.snapshot_weightings[:] *= 8760. / n.snapshot_weightings.sum()
 
     n.import_components_from_dataframe(buses, "Bus")
-    # n.import_components_from_dataframe(lines, "Line")
+    n.import_components_from_dataframe(lines, "Line")
     # n.import_components_from_dataframe(transformers, "Transformer")
     # n.import_components_from_dataframe(links, "Link")
     # n.import_components_from_dataframe(converters, "Link")
