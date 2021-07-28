@@ -23,11 +23,12 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*"
 
-
 rule base_network:
     input:
-        osm_buses='data/osm/africa_all_buses_clean.csv',
-        osm_lines='data/osm/africa_all_lines_clean.csv',
+        osm_buses='data/osm/africa_all_buses_build_network.csv',
+        osm_lines='data/osm/africa_all_lines_build_network.csv',
+        # osm_buses='data/osm/africa_all_buses_clean.csv',
+        # osm_lines='data/osm/africa_all_lines_clean.csv',
         # eg_buses='data/entsoegridkit/buses.csv',
         # eg_lines='data/entsoegridkit/lines.csv',
         # eg_links='data/entsoegridkit/links.csv',
