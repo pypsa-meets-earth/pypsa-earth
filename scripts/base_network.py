@@ -111,11 +111,12 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
 
     return (
         pd.DataFrame(
-            dict(D=dist[found_b],i=links.index[ind[found_b] % len(links)]),
-            index=new_links.index[found_i]
+            dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
+            index=new_links.index[found_i],
+        )
+        .sort_values(by="D")[lambda ds: ~ds.index.duplicated(keep="first")]
+        .sort_index()["i"]
     )
-    .sort_values(by="D")[lambda ds: ~ds.index.duplicated(keep="first")]
-    .sort_index()["i"]
 
 
 def _load_buses_from_osm():
@@ -321,7 +322,7 @@ def _load_lines_from_osm(buses):
                 bus1="str",
                 underground="bool",
                 under_construction="bool",
-            )
+            ),
         )
         .set_index("line_id")
         .rename(columns=dict(voltage="v_nom", circuits="num_parallel"))
@@ -456,7 +457,7 @@ def _remove_unconnected_components(network):
         "Removing {} unconnected network components with less than {} buses. In total {} buses.".format(
             len(components_to_remove),
             components_to_remove.max(),
-            components_to_remove.sum()
+            components_to_remove.sum(),
         )
     )
 
@@ -473,7 +474,7 @@ def _set_countries_and_substations(n):
             np.fromiter(
                 (
                     shape.contains(Point(x, y))
-                    for x, y in buses.loc[:,["x", "y"]].values
+                    for x, y in buses.loc[:, ["x", "y"]].values
                 ),
                 dtype=bool,
                 count=len(buses),
@@ -568,7 +569,7 @@ def _set_countries_and_substations(n):
                 .dropna()
             )
             assert (
-                not df.empty,
+                not df.empty
             ), "No buses with defined country within 200km of bus `{}`".format(b)
             n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(), "country"]
 
@@ -618,7 +619,7 @@ def _replace_b2b_converter_at_country_border_by_link(n):
                 n.links.at[i, "p_nom"], n.lines.at[line, "s_nom"]
             )
             n.links.at[i, "carrier"] = "DC"
-            n.links.at[i, "underwater_fraction"] = 0.
+            n.links.at[i, "underwater_fraction"] = 0.0
             n.links.at[i, "length"] = n.lines.at[line, "length"]
 
             n.remove("Line", line)
@@ -691,8 +692,8 @@ def _rebase_voltage_to_config(component):
     v_low = snakemake.config["electricity"]["voltages"][0]
     v_mid = snakemake.config["electricity"]["voltages"][1]
     v_up = snakemake.config["electricity"]["voltages"][2]
-    v_low_mid = (v_mid-v_low)/2+v_low  # between low and mid voltage
-    v_mid_up = (v_up-v_mid)/2+v_mid  # between mid and upper voltage
+    v_low_mid = (v_mid - v_low) / 2 + v_low  # between low and mid voltage
+    v_mid_up = (v_up - v_mid) / 2 + v_mid  # between mid and upper voltage
     component.loc[
         (v_min <= component["v_nom"]) & (component["v_nom"] < v_low_mid), "v_nom"
     ] = v_low

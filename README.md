@@ -1,7 +1,6 @@
-[![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
-
 # PyPSA meets Africa
-### Development Status: **Prototype**
+## Development Status: **Prototype**
+[![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa.
 
@@ -19,12 +18,12 @@ The environment can be installed and activated using:
     .../pypsa_meets_africa % conda env create -f envs/environment.yml
 
     .../pypsa_meets_africa % conda activate pypsa-africa
-    
- ## Documentation
- 
- The documentation is available here: [documentation](https://pypsa-meets-africa.readthedocs.io/en/latest/index.html).
 
-## Collaborators 
+## Documentation
+
+The documentation is available here: [documentation](https://pypsa-meets-africa.readthedocs.io/en/latest/index.html).
+
+## Collaborators
 
 <!-- https://github.com/marketplace/actions/contribute-list -->
 

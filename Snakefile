@@ -12,16 +12,20 @@ HTTP = HTTPRemoteProvider()
 if not exists("config.yaml"):
     copyfile("config.default.yaml", "config.yaml")
 
+
 configfile: "config.yaml"
+
 
 COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
+
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+m?|all",
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
+
 
 rule base_network:
     input:
@@ -52,7 +56,7 @@ rule base_network:
     # notebook: "scripts/base_network.py.ipynb"
     script:
         "scripts/base_network.py"
-    
+
 
 # rule build_shapes:
 #     input:
@@ -127,4 +131,5 @@ rule base_network:
 #     rule retrieve_natura_raster:
 #         input: HTTP.remote("zenodo.org/record/4706686/files/natura.tiff", keep_local=True)
 #         output: "resources/natura.tiff"
-#         shell: "mv {input} {output}"
+#         shell: "mv {input} {output}
+#

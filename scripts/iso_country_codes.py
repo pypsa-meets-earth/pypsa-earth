@@ -263,7 +263,7 @@ AFRICA_CC = {
     "DZ": "algeria",
     "AO": "angola",
     "BJ": "benin",
-    "BW": "botswana", 
+    "BW": "botswana",
     "BF": "burkina-faso",
     "BI": "burundi",
     "CM": "cameroon",
@@ -315,5 +315,5 @@ AFRICA_CC = {
     "TN": "tunisia",
     "UG": "uganda",
     "ZM": "zambia",
-    "ZW": "zimbabwe"
+    "ZW": "zimbabwe",
 }
