@@ -6,6 +6,7 @@ from os.path import normpath, exists
 from shutil import copyfile
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+
 HTTP = HTTPRemoteProvider()
 
 if not exists("config.yaml"):
@@ -13,20 +14,19 @@ if not exists("config.yaml"):
 
 configfile: "config.yaml"
 
-COSTS="data/costs.csv"
-ATLITE_NPROCESSES = config['atlite'].get('nprocesses', 4)
-
+COSTS = "data/costs.csv"
+ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+m?|all",
     ll="(v|c)([0-9\.]+|opt|all)|all",
-    opts="[-+a-zA-Z0-9\.]*"
+    opts="[-+a-zA-Z0-9\.]*",
 
 rule base_network:
     input:
-        osm_buses='data/osm/africa_all_buses_build_network.csv',
-        osm_lines='data/osm/africa_all_lines_build_network.csv',
+        osm_buses="data/osm/africa_all_buses_build_network.csv",
+        osm_lines="data/osm/africa_all_lines_build_network.csv",
         # osm_buses='data/osm/africa_all_buses_clean.csv',
         # osm_lines='data/osm/africa_all_lines_clean.csv',
         # eg_buses='data/entsoegridkit/buses.csv',
@@ -40,13 +40,18 @@ rule base_network:
         # country_shapes='resources/country_shapes.geojson',
         # offshore_shapes='resources/offshore_shapes.geojson',
         # europe_shape='resources/europe_shape.geojson'
-    output: "networks/base.nc"
-    log: "logs/base_network.log"
-    benchmark: "benchmarks/base_network"
+    output:
+    "networks/base.nc",
+    log:
+    "logs/base_network.log",
+    benchmark:
+    "benchmarks/base_network"
     threads: 1
-    resources: mem=500
-    #notebook: "scripts/base_network.py.ipynb"
-    script: "scripts/base_network.py"
+    resources:
+        mem=500,
+    # notebook: "scripts/base_network.py.ipynb"
+    script:
+        "scripts/base_network.py"
     
 
 # rule build_shapes:
@@ -67,15 +72,12 @@ rule base_network:
 #     script: "scripts/build_shapes.py"
 
 
-
 #####################################################################################
 
 
-
-# datafiles = ['eez/World_EEZ_v8_2014.shp', 'naturalearth/ne_10m_admin_0_countries.shp', 
-#             'NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp', 'nama_10r_3popgdp.tsv.gz', 
+# datafiles = ['eez/World_EEZ_v8_2014.shp', 'naturalearth/ne_10m_admin_0_countries.shp',
+#             'NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp', 'nama_10r_3popgdp.tsv.gz',
 #             'nama_10r_3gdp.tsv.gz']
-            
 
 # if config['enable'].get('prepare_links_p_nom', False):
 #     rule prepare_links_p_nom:
@@ -85,17 +87,15 @@ rule base_network:
 #         resources: mem=500
 #         script: 'scripts/prepare_links_p_nom.py'
 
-
 # if config['enable'].get('retrieve_databundle', True):
 #     rule retrieve_databundle:
 #         output: expand('data/bundle/{file}', file=datafiles)
 #         log: "logs/retrieve_databundle.log"
 #         script: 'scripts/retrieve_databundle.py'
 
-
 # if config['enable'].get('build_cutout', False):
 #     rule build_cutout:
-#         input: 
+#         input:
 #             regions_onshore="resources/regions_onshore.geojson",
 #             regions_offshore="resources/regions_offshore.geojson"
 #         output: "cutouts/{cutout}.nc"
@@ -128,4 +128,3 @@ rule base_network:
 #         input: HTTP.remote("zenodo.org/record/4706686/files/natura.tiff", keep_local=True)
 #         output: "resources/natura.tiff"
 #         shell: "mv {input} {output}"
-
