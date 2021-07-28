@@ -16,5 +16,7 @@
 data_exploration/WP5_transmission_assets/data/osm/
 data_exploration/WP5_transmission_assets/data/raw/
 data_exploration/WP5_transmission_assets/data/base_network/
+data/osm/africa_all_buses_build_networks.csv
+data/osm/africa_all_lines_build_networks.csv
 
 doc/_build
