@@ -41,11 +41,11 @@ rule base_network:
         # offshore_shapes='resources/offshore_shapes.geojson',
         # europe_shape='resources/europe_shape.geojson'
     output:
-    "networks/base.nc",
+        "networks/base.nc",
     log:
-    "logs/base_network.log",
+        "logs/base_network.log",
     benchmark:
-    "benchmarks/base_network"
+        "benchmarks/base_network"
     threads: 1
     resources:
         mem=500,
