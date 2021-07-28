@@ -7,29 +7,26 @@
 
 """ OSM extraction script."""
 
+import logging
 import os
+import shutil
 import sys
+
+import geopandas as gpd
+import pandas as pd
+import requests
+from esy.osmfilter import Node, Relation, Way
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import run_filter
+from iso_country_codes import AFRICA_CC
+from shapely.geometry import LineString, Point, Polygon
+
+# from ..scripts.iso_country_codes import AFRICA_CC
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("./../../scripts")
-
-import logging
-import shutil
-
-import geopandas as gpd
-import numpy as np
-import pandas as pd
-import requests
-from esy.osmfilter import run_filter
-from esy.osmfilter import Node, Relation, Way
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import osm_pickle as osm_pickle
-
-from iso_country_codes import AFRICA_CC
-#from ..scripts.iso_country_codes import AFRICA_CC
-
-from shapely.geometry import LineString, Point, Polygon
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +48,10 @@ def download_pbf(country_code, update):
 
     Parameters
     ----------
-    country_code : str 
-        Three letter country codes of the downloaded files 
-    update : bool 
-        Name of the network component 
+    country_code : str
+        Three letter country codes of the downloaded files
+    update : bool
+        Name of the network component
         Update = true, forces re-download of files
 
     Returns
@@ -87,15 +84,16 @@ def download_and_filter(country_code, update=False):
     Download OpenStreetMap raw file for selected tag.
 
     Apply pbf download and filter with esy.osmfilter selected OpenStreetMap
-    tags or data. Examples of possible tags are listed at `OpenStreetMap wiki <https://wiki.openstreetmap.org/wiki/Key:power>`_.
+    tags or data. Examples of possible tags are listed at `OpenStreetMap wiki
+    <https://wiki.openstreetmap.org/wiki/Key:power>`_.
     More information on esy.osmfilter `here <https://gitlab.com/dlr-ve-esy/esy-osmfilter>`_.
 
     Parameters
     ----------
-    country_code : str 
-        Three letter country codes of the downloaded files 
-    update : bool 
-        Name of the network component 
+    country_code : str
+        Three letter country codes of the downloaded files
+    update : bool
+        Name of the network component
         Update = true, forces re-download of files
         Update = false, uses existing or previously downloaded files to safe time
 
@@ -113,7 +111,7 @@ def download_and_filter(country_code, update=False):
     # json file for the Data dictionary
     JSON_outputfile = os.path.join(
         os.getcwd(), "data", "osm", country_code + "_power.json"
-    ) # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
+    )  # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
@@ -124,7 +122,6 @@ def download_and_filter(country_code, update=False):
         new_prefilter_data = False  # Do not pre-filter data again
         # HACKY: esy.osmfilter code to re-create Data.pickle
         Data = osm_info.ReadJason(JSON_outputfile, verbose="no")
-        
         DataDict = {"Data": Data}
         osm_pickle.picklesave(
             DataDict,
@@ -132,7 +129,6 @@ def download_and_filter(country_code, update=False):
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
             ),
         )
-        
         print(f"Loading Pickle for {AFRICA_CC[country_code]}")  # TODO: Change to Logger
     else:
         create_elements = True
@@ -187,6 +183,7 @@ def download_and_filter(country_code, update=False):
 
     return (tower_data, substation_data, line_data, generator_data, cable_data)
 
+
 # Convert Filtered Data, Elements to Pandas Dataframes
 
 
@@ -206,9 +203,13 @@ def lonlat_lookup(df_way, Data):
 
     col = "refs"
     if col not in df_way.columns:
-        print ("refs column not found") # TODO : Change to logger and do not create a hacky empty ref col
-        df_way[col] = pd.Series([],dtype=pd.StringDtype()).astype(float) # create empty "refs" if not in dataframe
-      
+        print(
+            "refs column not found"
+        )  # TODO : Change to logger and do not create a hacky empty ref col
+        df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(
+            float
+        )  # create empty "refs" if not in dataframe
+
     for ref in df_way["refs"]:
         lonlat_row = []
         for r in ref:
@@ -226,10 +227,18 @@ def convert_ways_points(df_way, Data):
     lonlat_column = []
     area_column = []
     for lonlat in lonlat_list:
-        if len(lonlat) >= 3: #Minimum for a triangle
+        if len(lonlat) >= 3:  # Minimum for a triangle
             way_polygon = Polygon(lonlat)
             # TODO : Do set_crs and to_crs for whole lonlat_list and not indivudually, expected big performance boost.
-            polygon_area = int(round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)) # nearest tens m2
+            polygon_area = int(
+                round(
+                    gpd.GeoSeries(way_polygon)
+                    .set_crs("EPSG:4326")
+                    .to_crs("EPSG:3857")
+                    .area,
+                    -1,
+                )
+            )  # nearest tens m2
             # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
             area_column.append(polygon_area)
             center_point = way_polygon.centroid
@@ -253,7 +262,12 @@ def convert_ways_lines(df_way, Data):
     length_column = []
     for lonlat in lonlat_list:
         way_linestring = LineString(lonlat)
-        line_length = gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+        line_length = (
+            gpd.GeoSeries(way_linestring)
+            .set_crs("EPSG:4326")
+            .to_crs("EPSG:3857")
+            .length
+        )
         length_column.append(float(line_length))
 
     df_way.insert(0, "Length", length_column)
@@ -264,7 +278,9 @@ def convert_ways_lines(df_way, Data):
 
 
 def convert_pd_to_gdf(df_way):
-    gdf = gpd.GeoDataFrame(df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(
+        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
+    )
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
 
@@ -288,7 +304,6 @@ def process_node_data(country_code, feature_data, feature):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, feature_data, feature
     )
-
     convert_ways_points(df_way, Data)
     # Add Type Column
     df_node["Type"] = "Node"
@@ -306,7 +321,6 @@ def process_line_data(country_code, feature_data, feature):
         country_code, feature_data, feature
     )
     convert_ways_lines(df_way, Data)
-    
     # Add Type Column
     df_way["Type"] = "Way"
 
@@ -315,102 +329,106 @@ def process_line_data(country_code, feature_data, feature):
     return df_way
 
 
-
 def process_data():
-    
     columns_tower = [
-            "id",
-            "lonlat",
-            "Area",
-            "tags.power",
-            "tags.tower",
-            "tags.material",
-            "tags.structure",
-            "tags.operator",
-            "tags.line_attachment",
-            "tags.line_management",
-            "tags.ref",
-            "tags.height",
-            "Type",
-            "Country"
-        ]
-    
-    columns_substation = [ 
-            "id",
-            "lonlat",
-            "Area",
-            "tags.power",
-            "tags.substation",
-            "tags.voltage",
-            "Type",
-            # "refs",
-            "Country",
-        ]
+        "id",
+        "lonlat",
+        "Area",
+        "tags.power",
+        "tags.tower",
+        "tags.material",
+        "tags.structure",
+        "tags.operator",
+        "tags.line_attachment",
+        "tags.line_management",
+        "tags.ref",
+        "tags.height",
+        "Type",
+        "Country",
+    ]
+
+    columns_substation = [
+        "id",
+        "lonlat",
+        "Area",
+        "tags.power",
+        "tags.substation",
+        "tags.voltage",
+        "Type",
+        # "refs",
+        "Country",
+    ]
 
     columns_line = [
-            "id",
-            "lonlat",
-            "Length",
-            "tags.power",
-            "tags.cables",
-            "tags.voltage",
-            "tags.circuits",
-            "tags.frequency",
-            "Type",
-            # "refs",
-            "Country"
-        ]
-    
-    columns_generator= [
-            "id",
-            "lonlat",
-            "Area",
-            "tags.power",
-            "tags.generator:type",
-            "tags.generator:method",
-            "tags.generator:source",
-            "tags.generator:output:electricity",
-            "Type",
-            # "refs",
-            "Country",
-        ]
+        "id",
+        "lonlat",
+        "Length",
+        "tags.power",
+        "tags.cables",
+        "tags.voltage",
+        "tags.circuits",
+        "tags.frequency",
+        "Type",
+        # "refs",
+        "Country",
+    ]
 
-    columns_cable= [
-            "id",
-            "lonlat",
-            "Length",
-            "tags.power",
-            "tags.cables",
-            "tags.voltage",
-            "tags.circuits",
-            "tags.frequency",
-            "tags.location",
-            "Type",
-            # "refs",
-            "Country"
-        ]
+    columns_generator = [
+        "id",
+        "lonlat",
+        "Area",
+        "tags.power",
+        "tags.generator:type",
+        "tags.generator:method",
+        "tags.generator:source",
+        "tags.generator:output:electricity",
+        "Type",
+        # "refs",
+        "Country",
+    ]
+
+    columns_cable = [
+        "id",
+        "lonlat",
+        "Length",
+        "tags.power",
+        "tags.cables",
+        "tags.voltage",
+        "tags.circuits",
+        "tags.frequency",
+        "tags.location",
+        "Type",
+        # "refs",
+        "Country",
+    ]
 
     df_all_substations = pd.DataFrame()
     df_all_lines = pd.DataFrame()
     df_all_generators = pd.DataFrame()
     df_all_cables = pd.DataFrame()
     df_all_towers = pd.DataFrame()
-    
     # test_CC = {"NG": "nigeria"}
     # test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
     test_CC = {"ZW": "zimbabwe"}
     # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    
     for country_code in test_CC.keys():
-    #for country_code in AFRICA_CC.keys(): # replace Africa_CC by test_CC to only download data for one country
-    
-        tower_data, substation_data, line_data, generator_data, cable_data = download_and_filter(country_code)
+        # for country_code in AFRICA_CC.keys():
+        # replace Africa_CC by test_CC to only download data for one country
+        (
+            tower_data,
+            substation_data,
+            line_data,
+            generator_data,
+            cable_data,
+        ) = download_and_filter(country_code)
         for feature in ["tower", "substation", "line", "generator", "cable"]:
             if feature == "tower":
                 df_tower = process_node_data(country_code, tower_data, feature)
                 df_all_towers = pd.concat([df_all_towers, df_tower])
             if feature == "substation":
-                df_substation = process_node_data(country_code, substation_data, feature)
+                df_substation = process_node_data(
+                    country_code, substation_data, feature
+                )
                 df_all_substations = pd.concat([df_all_substations, df_substation])
             if feature == "line":
                 df_line = process_line_data(country_code, line_data, feature)
@@ -422,67 +440,92 @@ def process_data():
                 df_cable = process_line_data(country_code, cable_data, feature)
                 df_all_cables = pd.concat([df_all_cables, df_cable])
 
-
-    outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw") # Output file directory
+    outputfile_partial = os.path.join(
+        os.getcwd(), "data", "raw", "africa_all" + "_raw"
+    )  # Output file directory
 
     if not os.path.exists(outputfile_partial):
-        os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True) #  create raw directory
-        
-        
+        os.makedirs(
+            os.path.dirname(outputfile_partial), exist_ok=True
+        )  # create raw directory
+
     # ----------- TOWERS -----------
 
-    df_all_towers = df_all_towers[df_all_towers.columns.intersection(set(columns_tower))]
+    df_all_towers = df_all_towers[
+        df_all_towers.columns.intersection(set(columns_tower))
+    ]
     df_all_towers.reset_index(drop=True, inplace=True)
 
     # Generate Files
     df_all_towers.to_csv(outputfile_partial + "_towers" + ".csv")  # Generate CSV
     gdf_towers = convert_pd_to_gdf(df_all_towers)
-    gdf_towers.to_file(outputfile_partial + "_towers" + ".geojson", driver="GeoJSON")  # Generate GeoJson
-
+    gdf_towers.to_file(
+        outputfile_partial + "_towers" + ".geojson", driver="GeoJSON"
+    )  # Generate GeoJson
 
     # ----------- SUBSTATIONS -----------
 
-    df_all_substations = df_all_substations[df_all_substations.columns.intersection(set(columns_substation))]
+    df_all_substations = df_all_substations[
+        df_all_substations.columns.intersection(set(columns_substation))
+    ]
     df_all_substations.reset_index(drop=True, inplace=True)
 
     # Generate Files
-    df_all_substations.to_csv(outputfile_partial + "_substations" + ".csv")  # Generate CSV
+    df_all_substations.to_csv(
+        outputfile_partial + "_substations" + ".csv"
+    )  # Generate CSV
     gdf_substations = convert_pd_to_gdf(df_all_substations)
-    gdf_substations.to_file(outputfile_partial + "_substations" + ".geojson", driver="GeoJSON")  # Generate GeoJson
+    gdf_substations.to_file(
+        outputfile_partial + "_substations" + ".geojson", driver="GeoJSON"
+    )  # Generate GeoJson
 
     # ----------- LINES -----------
 
     df_all_lines = df_all_lines[df_all_lines.columns.intersection(set(columns_line))]
     df_all_lines.reset_index(drop=True, inplace=True)
 
-
     # Generate Files
-    df_all_lines.to_csv(outputfile_partial + "_lines"+ ".csv")  # Generate CSV
-    gdf_lines = convert_pd_to_gdf_lines(df_all_lines, simplified=False) # Set simplified = True to simplify lines
-    gdf_lines.to_file(outputfile_partial + "_lines"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
+    df_all_lines.to_csv(outputfile_partial + "_lines" + ".csv")  # Generate CSV
+    gdf_lines = convert_pd_to_gdf_lines(
+        df_all_lines, simplified=False
+    )  # Set simplified = True to simplify lines
+    gdf_lines.to_file(
+        outputfile_partial + "_lines" + ".geojson", driver="GeoJSON"
+    )  # Generate GeoJson
 
     # ----------- Generator -----------
 
-    df_all_generators = df_all_generators[df_all_generators.columns.intersection(set(columns_generator))]
+    df_all_generators = df_all_generators[
+        df_all_generators.columns.intersection(set(columns_generator))
+    ]
     df_all_generators.reset_index(drop=True, inplace=True)
-    # df_all_generators.drop(columns = ["tags.fixme","tags.name:ar","tags.building","tags.barrier"], inplace = True, errors='ignore') # TODO: Should Probably drop columns inatead of selecting
+    # df_all_generators.drop(columns =
+    # ["tags.fixme","tags.name:ar","tags.building","tags.barrier"],
+    # inplace = True, errors='ignore')
+    # TODO: Should Probably drop columns instead of selecting
 
     # Generate Files
-    df_all_generators.to_csv(outputfile_partial + "_generators" + ".csv")  # Generate CSV
+    df_all_generators.to_csv(
+        outputfile_partial + "_generators" + ".csv"
+    )  # Generate CSV
     gdf_generators = convert_pd_to_gdf(df_all_generators)
-    gdf_generators.to_file(outputfile_partial +"_generators"+ ".geojson", driver="GeoJSON")  # Generate GeoJson
-    
+    gdf_generators.to_file(
+        outputfile_partial + "_generators" + ".geojson", driver="GeoJSON"
+    )  # Generate GeoJson
+
     # ----------- Cables -----------
 
-    df_all_cables = df_all_cables[df_all_cables.columns.intersection(set(columns_cable))]
+    df_all_cables = df_all_cables[
+        df_all_cables.columns.intersection(set(columns_cable))
+    ]
     df_all_cables.reset_index(drop=True, inplace=True)
 
-
     # Generate Files
-    df_all_cables.to_csv(outputfile_partial + "_cables"+ ".csv")  # Generate CSV
-    gdf_cables = convert_pd_to_gdf_lines(df_all_cables, simplified=False) # Set simplified = True to simplify lines
-    gdf_cables.to_file(outputfile_partial + "_cables"+ ".geojson", driver="GeoJSON")
-
+    df_all_cables.to_csv(outputfile_partial + "_cables" + ".csv")  # Generate CSV
+    gdf_cables = convert_pd_to_gdf_lines(
+        df_all_cables, simplified=False
+    )  # Set simplified = True to simplify lines
+    gdf_cables.to_file(outputfile_partial + "_cables" + ".geojson", driver="GeoJSON")
 
 
 if __name__ == "__main__":
