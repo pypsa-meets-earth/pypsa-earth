@@ -48,10 +48,15 @@ jobs:
       # Run Linter against code base #
       ################################
       - name: Lint Code Base
-        uses: github/super-linter@v3
+        uses: docker://ghcr.io/github/super-linter:slim-v4
         env:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_SNAKEMAKE_LINT: false
           VALIDATE_SNAKEMAKE_SNAKEFMT: false
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_PYTHON_MYPY: false
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_PYLINT: true
