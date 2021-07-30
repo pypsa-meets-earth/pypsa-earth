@@ -374,6 +374,7 @@ def cluster_regions(busmaps, input=None, output=None):
         regions_c.index.name = "name"
         save_to_geojson(regions_c, getattr(output, which))
 
+
 # TODO: E1120 error in linter. Commented out for now
 # def plot_busmap_for_n_clusters(n, n_clusters, fn=None):
 #     busmap = busmap_for_n_clusters(n, n_clusters)
@@ -383,7 +384,6 @@ def cluster_regions(busmaps, input=None, output=None):
 #     if fn is not None:
 #         plt.savefig(fn, bbox_inches="tight")
 #     del cs, cr
-
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
