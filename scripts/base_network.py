@@ -62,7 +62,6 @@ Description
 -----------
 
 """
-
 import logging
 import os
 from itertools import product
@@ -73,13 +72,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-import shapely
 import shapely.prepared
 import shapely.wkt
 import yaml
 from _helpers import configure_logging
 from scipy.sparse import csgraph
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
+from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 

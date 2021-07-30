@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 # coding: utf-8
 """
 Creates networks clustered to ``{cluster}`` number of zones with aggregated buses, generators and transmission corridors.
@@ -120,7 +119,6 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 
 """
-
 import logging
 import os
 from functools import reduce
@@ -133,11 +131,13 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
-from _helpers import configure_logging, update_p_nom_max
+from _helpers import configure_logging
+from _helpers import update_p_nom_max
 from add_electricity import load_costs
-from pypsa.networkclustering import (_make_consense, busmap_by_kmeans,
-                                     busmap_by_spectral_clustering,
-                                     get_clustering_from_busmap)
+from pypsa.networkclustering import _make_consense
+from pypsa.networkclustering import busmap_by_kmeans
+from pypsa.networkclustering import busmap_by_spectral_clustering
+from pypsa.networkclustering import get_clustering_from_busmap
 
 idx = pd.IndexSlice
 
