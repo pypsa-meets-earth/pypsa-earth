@@ -103,13 +103,15 @@ def _get_country(df):
 
 def _find_closest_links(links, new_links, distance_upper_bound=1.5):
     treecoords = np.asarray(
-        [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten() for s in links.geometry]
+        [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten()
+         for s in links.geometry]
     )
     querycoords = np.vstack(
         [new_links[["x1", "y1", "x2", "y2"]], new_links[["x2", "y2", "x1", "y1"]]]
     )
     tree = sp.spatial.KDTree(treecoords)
-    dist, ind = tree.query(querycoords, distance_upper_bound=distance_upper_bound)
+    dist, ind = tree.query(
+        querycoords, distance_upper_bound=distance_upper_bound)
     found_b = ind < len(links)
     found_i = np.arange(len(new_links) * 2)[found_b] % len(new_links)
 
@@ -134,7 +136,8 @@ def _load_buses_from_osm():
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
     buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
-    buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
+    buses["under_construction"] = buses["under_construction"].fillna(
+        False).astype(bool)
 
     # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
@@ -197,7 +200,8 @@ def _load_links_from_eg(buses):
         quotechar="'",
         true_values="t",
         false_values="f",
-        dtype=dict(link_id="str", bus0="str", bus1="str", under_construction="bool"),
+        dtype=dict(link_id="str", bus0="str", bus1="str",
+                   under_construction="bool"),
     ).set_index("link_id")
 
     links["length"] /= 1e3
@@ -217,7 +221,8 @@ def _add_links_from_tyndp(buses, links):
     links_tyndp = pd.read_csv(snakemake.input.links_tyndp)
 
     # remove all links from list which lie outside all of the desired countries
-    europe_shape = gpd.read_file(snakemake.input.europe_shape).loc[0, "geometry"]
+    europe_shape = gpd.read_file(
+        snakemake.input.europe_shape).loc[0, "geometry"]
     europe_shape_prepped = shapely.prepared.prep(europe_shape)
     x1y1_in_europe_b = links_tyndp[["x1", "y1"]].apply(
         lambda p: europe_shape_prepped.contains(Point(p)), axis=1
@@ -282,7 +287,8 @@ def _add_links_from_tyndp(buses, links):
         )
         links_tyndp = links_tyndp.loc[links_tyndp_located_b]
 
-    logger.info("Adding the following TYNDP links: " + ", ".join(links_tyndp["Name"]))
+    logger.info("Adding the following TYNDP links: " +
+                ", ".join(links_tyndp["Name"]))
 
     links_tyndp = links_tyndp[["bus0", "bus1"]].assign(
         carrier="DC",
@@ -333,7 +339,8 @@ def _load_lines_from_osm(buses):
 
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
-    lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
+    lines = lines.loc[:, ~lines.columns.str.contains(
+        "^Unnamed")]  # remove unnamed col
     lines = _rebase_voltage_to_config(lines)  # rebase voltage to config inputs
     # lines = _remove_dangling_branches(lines, buses)
 
@@ -398,13 +405,15 @@ def _set_electrical_parameters_links(links):
     links_p_nom = pd.read_csv(snakemake.input.links_p_nom)
 
     # filter links that are not in operation anymore
-    removed_b = links_p_nom.Remarks.str.contains("Shut down|Replaced", na=False)
+    removed_b = links_p_nom.Remarks.str.contains(
+        "Shut down|Replaced", na=False)
     links_p_nom = links_p_nom[~removed_b]
 
     # find closest link for all links in links_p_nom
     links_p_nom["j"] = _find_closest_links(links, links_p_nom)
 
-    links_p_nom = links_p_nom.groupby(["j"], as_index=False).agg({"Power (MW)": "sum"})
+    links_p_nom = links_p_nom.groupby(
+        ["j"], as_index=False).agg({"Power (MW)": "sum"})
 
     p_nom = links_p_nom.dropna(subset=["j"]).set_index("j")["Power (MW)"]
 
@@ -446,12 +455,14 @@ def _set_electrical_parameters_transformers(transformers):
 
 def _remove_dangling_branches(branches, buses):
     return pd.DataFrame(
-        branches.loc[branches.bus0.isin(buses.index) & branches.bus1.isin(buses.index)]
+        branches.loc[branches.bus0.isin(
+            buses.index) & branches.bus1.isin(buses.index)]
     )
 
 
 def _remove_unconnected_components(network):
-    _, labels = csgraph.connected_components(network.adjacency_matrix(), directed=False)
+    _, labels = csgraph.connected_components(
+        network.adjacency_matrix(), directed=False)
     component = pd.Series(labels, index=network.buses.index)
 
     component_sizes = component.value_counts()
@@ -512,9 +523,11 @@ def _set_countries_and_substations(n):
         ["x", "y"], as_index=False, group_keys=False, sort=False
     )
     bus_map_low = gb.apply(prefer_voltage, "min")
-    lv_b = (bus_map_low == bus_map_low.index).reindex(buses.index, fill_value=False)
+    lv_b = (bus_map_low == bus_map_low.index).reindex(
+        buses.index, fill_value=False)
     bus_map_high = gb.apply(prefer_voltage, "max")
-    hv_b = (bus_map_high == bus_map_high.index).reindex(buses.index, fill_value=False)
+    hv_b = (bus_map_high == bus_map_high.index).reindex(
+        buses.index, fill_value=False)
 
     onshore_b = pd.Series(False, buses.index)
     offshore_b = pd.Series(False, buses.index)
@@ -578,7 +591,8 @@ def _set_countries_and_substations(n):
             assert (
                 not df.empty
             ), "No buses with defined country within 200km of bus `{}`".format(b)
-            n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(), "country"]
+            n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(),
+                                              "country"]
 
         logger.warning(
             "{} buses are not in any country or offshore shape,"
@@ -646,7 +660,8 @@ def _set_links_underwater_fraction(n):
     if not hasattr(n.links, "geometry"):
         n.links["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
+        offshore_shape = gpd.read_file(
+            snakemake.input.offshore_shapes).unary_union
         links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
         n.links["underwater_fraction"] = (
             links.intersection(offshore_shape).length / links.length
@@ -702,10 +717,12 @@ def _rebase_voltage_to_config(component):
     v_low_mid = (v_mid - v_low) / 2 + v_low  # between low and mid voltage
     v_mid_up = (v_up - v_mid) / 2 + v_mid  # between mid and upper voltage
     component.loc[
-        (v_min <= component["v_nom"]) & (component["v_nom"] < v_low_mid), "v_nom"
+        (v_min <= component["v_nom"]) & (
+            component["v_nom"] < v_low_mid), "v_nom"
     ] = v_low
     component.loc[
-        (v_low_mid <= component["v_nom"]) & (component["v_nom"] < v_mid_up), "v_nom"
+        (v_low_mid <= component["v_nom"]) & (
+            component["v_nom"] < v_mid_up), "v_nom"
     ] = v_mid
     component.loc[v_mid_up <= component["v_nom"], "v_nom"] = v_up
 
