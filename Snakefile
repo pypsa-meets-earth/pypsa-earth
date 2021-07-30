@@ -94,6 +94,28 @@ rule simplify_network:
     resources: mem=4000
     script: "scripts/simplify_network.py"
 
+
+rule cluster_network:
+    input:
+        # network='networks/elec_s.nc',
+        # regions_onshore="resources/regions_onshore_elec_s.geojson",
+        # regions_offshore="resources/regions_offshore_elec_s.geojson",
+        # busmap=ancient('resources/busmap_elec_s.csv'),
+        # custom_busmap=("data/custom_busmap_elec_s_1000.csv"
+        #                if config["enable"].get("custom_busmap", False) else []),
+        # tech_costs=COSTS
+    output:
+        # network='networks/elec_s_1000.nc',
+        # regions_onshore="resources/regions_onshore_elec_s_1000.geojson",
+        # regions_offshore="resources/regions_offshore_elec_s_1000.geojson",
+        # busmap="resources/busmap_elec_s_1000.csv",
+        # linemap="resources/linemap_elec_s_1000.csv"
+    log: "logs/cluster_network/elec_s_1000.log"
+    benchmark: "benchmarks/cluster_network/elec_s_1000"
+    threads: 1
+    resources: mem=3000
+    script: "scripts/cluster_network.py"
+
 # rule build_shapes:
 #     input:
 #         naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',

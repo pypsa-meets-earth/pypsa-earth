@@ -274,9 +274,10 @@ def busmap_for_n_clusters(n,
         elif algorithm == "spectral":
             return prefix + busmap_by_spectral_clustering(
                 reduce_network(n, x), n_clusters[x.name], **algorithm_kwds)
-        elif algorithm == "louvain":
-            return prefix + busmap_by_louvain(reduce_network(
-                n, x), n_clusters[x.name], **algorithm_kwds)
+        # TODO: Check where it is imported from
+        # elif algorithm == "louvain":
+        #     return prefix + busmap_by_louvain(reduce_network(
+        #         n, x), n_clusters[x.name], **algorithm_kwds)
         else:
             raise ValueError(
                 f"`algorithm` must be one of 'kmeans', 'spectral' or 'louvain'. Is {algorithm}."
@@ -394,69 +395,69 @@ if __name__ == "__main__":
                                    clusters="5")
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.network)
+    # n = pypsa.Network(snakemake.input.network)
 
-    focus_weights = snakemake.config.get("focus_weights", None)
+    # focus_weights = snakemake.config.get("focus_weights", None)
 
-    renewable_carriers = pd.Index([
-        tech for tech in n.generators.carrier.unique()
-        if tech in snakemake.config["renewable"]
-    ])
+    # renewable_carriers = pd.Index([
+    #     tech for tech in n.generators.carrier.unique()
+    #     if tech in snakemake.config["renewable"]
+    # ])
 
-    if snakemake.wildcards.clusters.endswith("m"):
-        n_clusters = int(snakemake.wildcards.clusters[:-1])
-        aggregate_carriers = pd.Index(
-            n.generators.carrier.unique()).difference(renewable_carriers)
-    else:
-        n_clusters = int(snakemake.wildcards.clusters)
-        aggregate_carriers = None  # All
+    # if snakemake.wildcards.clusters.endswith("m"):
+    #     n_clusters = int(snakemake.wildcards.clusters[:-1])
+    #     aggregate_carriers = pd.Index(
+    #         n.generators.carrier.unique()).difference(renewable_carriers)
+    # else:
+    #     n_clusters = int(snakemake.wildcards.clusters)
+    #     aggregate_carriers = None  # All
 
-    if n_clusters == len(n.buses):
-        # Fast-path if no clustering is necessary
-        busmap = n.buses.index.to_series()
-        linemap = n.lines.index.to_series()
-        clustering = pypsa.networkclustering.Clustering(
-            n, busmap, linemap, linemap, pd.Series(dtype="O"))
-    else:
-        line_length_factor = snakemake.config["lines"]["length_factor"]
-        hvac_overhead_cost = load_costs(
-            n.snapshot_weightings.sum() / 8760,
-            tech_costs=snakemake.input.tech_costs,
-            config=snakemake.config["costs"],
-            elec_config=snakemake.config["electricity"],
-        ).at["HVAC overhead", "capital_cost"]
+    # if n_clusters == len(n.buses):
+    #     # Fast-path if no clustering is necessary
+    #     busmap = n.buses.index.to_series()
+    #     linemap = n.lines.index.to_series()
+    #     clustering = pypsa.networkclustering.Clustering(
+    #         n, busmap, linemap, linemap, pd.Series(dtype="O"))
+    # else:
+    #     line_length_factor = snakemake.config["lines"]["length_factor"]
+    #     hvac_overhead_cost = load_costs(
+    #         n.snapshot_weightings.sum() / 8760,
+    #         tech_costs=snakemake.input.tech_costs,
+    #         config=snakemake.config["costs"],
+    #         elec_config=snakemake.config["electricity"],
+    #     ).at["HVAC overhead", "capital_cost"]
 
-        def consense(x):
-            v = x.iat[0]
-            assert (x == v).all() or x.isnull().all(
-            ), "The `potential` configuration option must agree for all renewable carriers, for now!"
-            return v
+    #     def consense(x):
+    #         v = x.iat[0]
+    #         assert (x == v).all() or x.isnull().all(
+    #         ), "The `potential` configuration option must agree for all renewable carriers, for now!"
+    #         return v
 
-        potential_mode = consense(
-            pd.Series([
-                snakemake.config["renewable"][tech]["potential"]
-                for tech in renewable_carriers
-            ]))
-        custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
-        clustering = clustering_for_n_clusters(
-            n,
-            n_clusters,
-            custom_busmap,
-            aggregate_carriers,
-            line_length_factor=line_length_factor,
-            potential_mode=potential_mode,
-            solver_name=snakemake.config["solving"]["solver"]["name"],
-            extended_link_costs=hvac_overhead_cost,
-            focus_weights=focus_weights,
-        )
+    #     potential_mode = consense(
+    #         pd.Series([
+    #             snakemake.config["renewable"][tech]["potential"]
+    #             for tech in renewable_carriers
+    #         ]))
+    #     custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
+    #     clustering = clustering_for_n_clusters(
+    #         n,
+    #         n_clusters,
+    #         custom_busmap,
+    #         aggregate_carriers,
+    #         line_length_factor=line_length_factor,
+    #         potential_mode=potential_mode,
+    #         solver_name=snakemake.config["solving"]["solver"]["name"],
+    #         extended_link_costs=hvac_overhead_cost,
+    #         focus_weights=focus_weights,
+    #     )
 
-    update_p_nom_max(n)
+    # update_p_nom_max(n)
 
-    clustering.network.export_to_netcdf(snakemake.output.network)
-    for attr in (
-            "busmap",
-            "linemap",
-    ):  # also available: linemap_positive, linemap_negative
-        getattr(clustering, attr).to_csv(snakemake.output[attr])
+    # clustering.network.export_to_netcdf(snakemake.output.network)
+    # for attr in (
+    #         "busmap",
+    #         "linemap",
+    # ):  # also available: linemap_positive, linemap_negative
+    #     getattr(clustering, attr).to_csv(snakemake.output[attr])
 
-    cluster_regions((clustering.busmap, ))
+    # cluster_regions((clustering.busmap, ))
