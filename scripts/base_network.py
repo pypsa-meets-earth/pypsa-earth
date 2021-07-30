@@ -77,8 +77,7 @@ import shapely.wkt
 import yaml
 from _helpers import configure_logging
 from scipy.sparse import csgraph
-from shapely.geometry import LineString
-from shapely.geometry import Point
+from shapely.geometry import LineString, Point
 
 logger = logging.getLogger(__name__)
 
