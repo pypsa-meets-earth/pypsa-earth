@@ -53,10 +53,46 @@ rule base_network:
     threads: 1
     resources:
         mem=500,
-    # notebook: "scripts/base_network.py.ipynb"
     script:
         "scripts/base_network.py"
 
+
+rule add_electricity:
+    input:
+        base_network='networks/base.nc',
+        tech_costs=COSTS,
+        # regions="resources/regions_onshore.geojson",
+        # powerplants='resources/powerplants.csv',
+        # hydro_capacities='data/bundle/hydro_capacities.csv',
+        # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
+        # load='resources/load.csv',
+        # nuts3_shapes='resources/nuts3_shapes.geojson',
+        # **{f"profile_{tech}": f"resources/profile_{tech}.nc"
+        #    for tech in config['renewable']}
+    output: "networks/elec.nc"
+    log: "logs/add_electricity.log"
+    benchmark: "benchmarks/add_electricity"
+    threads: 1
+    resources: mem=3000
+    script: "scripts/add_electricity.py"
+
+
+rule simplify_network:
+    input:
+        network='networks/elec.nc',
+        tech_costs=COSTS,
+        # regions_onshore="resources/regions_onshore.geojson",
+        # regions_offshore="resources/regions_offshore.geojson"
+    output:
+        network='networks/elec_s{simpl}.nc',
+        # regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
+        # regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
+        # busmap='resources/busmap_elec_s{simpl}.csv'
+    log: "logs/simplify_network/elec_s{simpl}.log"
+    benchmark: "benchmarks/simplify_network/elec_s{simpl}"
+    threads: 1
+    resources: mem=4000
+    script: "scripts/simplify_network.py"
 
 # rule build_shapes:
 #     input:
