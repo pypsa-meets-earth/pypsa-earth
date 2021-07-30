@@ -152,6 +152,7 @@ def _load_buses_from_osm():
         )
     )
 
+
     # TODO remove all buses outside of all countries including exclusive economic zones (offshore)
     # europe_shape = gpd.read_file(snakemake.input.europe_shape).loc[0, "geometry"]
     # europe_shape_prepped = shapely.prepared.prep(europe_shape)
@@ -336,7 +337,7 @@ def _load_lines_from_osm(buses):
     lines["v_nom"] /= 1e3  # V to kV conversion
     lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
     lines = _rebase_voltage_to_config(lines)  # rebase voltage to config inputs
-    # lines = _remove_dangling_branches(lines, buses)
+    #lines = _remove_dangling_branches(lines, buses)
 
     return lines
 
@@ -381,7 +382,7 @@ def _set_electrical_parameters_lines(lines):
 def _set_lines_s_nom_from_linetypes(n):
     n.lines["s_nom"] = (
         np.sqrt(3)
-        * n.lines["type"].map(n.line_types.i_nom)
+        * n.lines["type"].map(n.line_types.i_nom)  # n.line_types is a lineregister from pypsa/pandapowers
         * n.lines["v_nom"]
         * n.lines.num_parallel
     )
@@ -546,6 +547,7 @@ def _set_countries_and_substations(n):
         ~buses["under_construction"]
     )
 
+    # Busses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:
         c_tag = _get_country(buses.loc[c_nan_b])
@@ -556,6 +558,8 @@ def _set_countries_and_substations(n):
 
         # Nearest country in path length defines country of still homeless buses
         # Work-around until commit 705119 lands in pypsa release
+        # pypsa-africa comment: Important to connect 'homeless' offshore assets
+        # Otherwise
         n.transformers["length"] = 0.0
         graph = n.graph(weight="length")
         n.transformers.drop("length", axis=1, inplace=True)
@@ -721,7 +725,7 @@ def base_network():
     lines = _load_lines_from_osm(buses)
     # transformers = _load_transformers_from_eg(buses)
 
-    # lines = _set_electrical_parameters_lines(lines)
+    lines = _set_electrical_parameters_lines(lines)
     # transformers = _set_electrical_parameters_transformers(transformers)
     # links = _set_electrical_parameters_links(links)
     # converters = _set_electrical_parameters_converters(converters)
@@ -738,13 +742,15 @@ def base_network():
     # n.import_components_from_dataframe(links, "Link")
     # n.import_components_from_dataframe(converters, "Link")
 
-    # _set_lines_s_nom_from_linetypes(n)
+    _set_lines_s_nom_from_linetypes(n)
 
-    # _apply_parameter_corrections(n)
+    # _apply_parameter_corrections(n)  # hand corrections from pypsa-eur
 
-    # n = _remove_unconnected_components(n)
+    # TODO: Run when pypsa-africa is connected. Removes small network structures.
+    # n = _remove_unconnected_components(n)  
 
-    # _set_countries_and_substations(n)
+    # TODO: Add when shapes are available. Adds homeless buses i.e. offshore to country & assigns LV-bus as demand..
+    # _set_countries_and_substations(n)  
 
     # _set_links_underwater_fraction(n)
 
@@ -752,7 +758,10 @@ def base_network():
 
     # n = _adjust_capacities_of_under_construction_branches(n)
 
-    return n
+    return n  
+    # PyPSA-Africa. This grid is still not full connected! Lines are loosely connected to bus areas.
+    # Won't change even in other parts 
+
 
 
 if __name__ == "__main__":
