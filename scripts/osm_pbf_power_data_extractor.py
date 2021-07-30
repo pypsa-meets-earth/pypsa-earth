@@ -13,6 +13,7 @@ import shutil
 import sys
 
 import geopandas as gpd
+from numpy import append
 import pandas as pd
 import requests
 from esy.osmfilter import Node, Relation, Way
@@ -21,12 +22,10 @@ from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter
 from iso_country_codes import AFRICA_CC
 from shapely.geometry import LineString, Point, Polygon
+import hashlib
 
-# from ..scripts.iso_country_codes import AFRICA_CC
 
-# IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append("./../../scripts")
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +40,16 @@ logger = logging.getLogger(__name__)
 
 # Downloads PBF File for given Country Code
 
+feature_list = ["substation", "tower", "line", "generator", "cable"]
+# feature_list = ["substation", "line"]
+
+feature_category = {
+    "substation": "node",
+    "generator": "node",
+    "line": "way",
+    "tower": "node",
+    "cable": "way"
+}
 
 def download_pbf(country_code, update):
     """
@@ -68,18 +77,59 @@ def download_pbf(country_code, update):
         os.getcwd(), "data", "osm", "pbf", geofabrik_filename
     )  # Input filepath
 
-    if not os.path.exists(PBF_inputfile) or update is True:
-        print(f"{geofabrik_filename} does not exist, downloading to {PBF_inputfile}")
+    if not os.path.exists(PBF_inputfile):
+        print(f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True) as r:
             with open(PBF_inputfile, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
+    
+    if update is True:
+        if verify_pbf(PBF_inputfile, geofabrik_url) is False:
+            print(f"md5 mismatch, deleting {geofabrik_filename}")
+            if os.path.exists(PBF_inputfile):
+                os.remove(PBF_inputfile)
 
+            download_pbf(country_code, update=False) # Only try downloading once
+
+
+        
     return PBF_inputfile
 
 
-def download_and_filter(country_code, update=False):
+
+
+def verify_pbf(PBF_inputfile, geofabrik_url):
+    geofabrik_md5_url = geofabrik_url + ".md5"
+    PBF_md5file = PBF_inputfile + ".md5"
+
+    def calculate_md5(fname):
+        hash_md5 = hashlib.md5()
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+
+    with requests.get(geofabrik_md5_url, stream=True) as r:
+        with open(PBF_md5file, "wb") as f:
+            shutil.copyfileobj(r.raw, f)
+
+    local_md5 = calculate_md5(PBF_inputfile)
+
+    with open(PBF_md5file) as f:
+        contents = f.read()
+        remote_md5 = contents.split()[0]
+
+    if local_md5 == remote_md5:
+        return True
+    else:
+        print(local_md5, remote_md5)
+        return False
+
+
+pre_filtered = []
+def download_and_filter(feature, country_code, update=False):
     """
     Download OpenStreetMap raw file for selected tag.
 
@@ -116,9 +166,12 @@ def download_and_filter(country_code, update=False):
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
 
+    if not os.path.exists(os.path.join(os.getcwd(), "data", "osm", "Elements", country_code + f"_{feature}.json")):
+        filter_file_exists = False
+
     # Load Previously Pre-Filtered Files
     if update is False and filter_file_exists is True:
-        create_elements = True  # Do not create elements again
+        create_elements = False  # Do not create elements again
         new_prefilter_data = False  # Do not pre-filter data again
         # HACKY: esy.osmfilter code to re-create Data.pickle
         Data = osm_info.ReadJason(JSON_outputfile, verbose="no")
@@ -132,15 +185,19 @@ def download_and_filter(country_code, update=False):
         print(f"Loading Pickle for {AFRICA_CC[country_code]}")  # TODO: Change to Logger
     else:
         create_elements = True
-        new_prefilter_data = True
+        if country_code not in pre_filtered:
+            new_prefilter_data = True
+            pre_filtered.append(country_code)
+        else:
+            new_prefilter_data = False
         print(
             f"Creating  New Elements for {AFRICA_CC[country_code]}"
         )  # TODO: Change to Logger
 
     prefilter = {
-        Node: {"power": ["substation", "tower", "line", "generator", "cable"]},
-        Way: {"power": ["substation", "tower", "line", "generator", "cable"]},
-        Relation: {"power": ["substation", "tower", "line", "generator", "cable"]},
+        Node: {"power": feature_list},
+        Way: {"power": feature_list},
+        Relation: {"power": feature_list},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
     # HACKY: due to esy.osmfilter validation
 
@@ -148,41 +205,31 @@ def download_and_filter(country_code, update=False):
         ("", ""),
     ]
 
-    for feature in ["substation", "tower", "line", "generator", "cable"]:
-        whitefilter = [
-            [
-                ("power", feature),
-            ],
-        ]
-        elementname = f"{country_code}_{feature}s"
+    whitefilter = [
+        [
+            ("power", feature),
+        ],
+    ]
+    elementname = f"{country_code}_{feature}s"
 
-        feature_data = run_filter(
-            elementname,
-            PBF_inputfile,
-            JSON_outputfile,
-            prefilter,
-            whitefilter,
-            blackfilter,
-            NewPreFilterData=new_prefilter_data,
-            CreateElements=create_elements,
-            LoadElements=True,
-            verbose=False,
-            multiprocess=True,
-        )
-        # For better performance yield feature_data here
-        if feature == "tower":
-            tower_data = feature_data
-        if feature == "substation":
-            substation_data = feature_data
-        if feature == "line":
-            line_data = feature_data
-        if feature == "generator":
-            generator_data = feature_data
-        if feature == "cable":
-            cable_data = feature_data
+    feature_data = run_filter(
+        elementname,
+        PBF_inputfile,
+        JSON_outputfile,
+        prefilter,
+        whitefilter,
+        blackfilter,
+        NewPreFilterData=new_prefilter_data,
+        CreateElements=create_elements,
+        LoadElements=True,
+        verbose=False,
+        multiprocess=True,
+    )
+    # For better performance yield feature_data here
 
-    return (tower_data, substation_data, line_data, generator_data, cable_data)
 
+
+    return feature_data
 
 # Convert Filtered Data, Elements to Pandas Dataframes
 
@@ -259,25 +306,28 @@ def convert_ways_points(df_way, Data):
 def convert_ways_lines(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     lonlat_column = lonlat_list
-    length_column = []
-    for lonlat in lonlat_list:
-        way_linestring = LineString(lonlat)
-        line_length = (
-            gpd.GeoSeries(way_linestring)
-            .set_crs("EPSG:4326")
-            .to_crs("EPSG:3857")
-            .length
-        )
-        length_column.append(float(line_length))
+    df_way.insert(0, "lonlat", lonlat_column)
+
+    way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
+    length_column = gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+    # for lonlat in lonlat_list:
+    #     way_linestring = LineString(lonlat)
+    #     line_length = (
+    #         gpd.GeoSeries(way_linestring)
+    #         .set_crs("EPSG:4326")
+    #         .to_crs("EPSG:3857")
+    #         .length
+    #     )
+    #     length_column.append(float(line_length))
 
     df_way.insert(0, "Length", length_column)
-    df_way.insert(0, "lonlat", lonlat_column)
+    
 
 
 # Convert Points Pandas Dataframe to GeoPandas Dataframe
 
 
-def convert_pd_to_gdf(df_way):
+def convert_pd_to_gdf_nodes(df_way):
     gdf = gpd.GeoDataFrame(
         df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
     )
@@ -289,12 +339,12 @@ def convert_pd_to_gdf(df_way):
 
 
 def convert_pd_to_gdf_lines(df_way, simplified=False):
-    df_way["geometry"] = df_way["lonlat"].apply(lambda x: LineString(x))
+    # df_way["geometry"] = df_way["lonlat"].apply(lambda x: LineString(x))
     if simplified is True:
         df_way["geometry"] = df_way["geometry"].apply(
             lambda x: x.simplify(0.005, preserve_topology=False)
         )
-    gdf = gpd.GeoDataFrame(df_way, geometry="geometry", crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326")
     gdf.drop(columns=["lonlat"], inplace=True)
 
     return gdf
@@ -329,7 +379,7 @@ def process_line_data(country_code, feature_data, feature):
     return df_way
 
 
-def process_data():
+def process_data(update):
     columns_tower = [
         "id",
         "lonlat",
@@ -402,131 +452,60 @@ def process_data():
         "Country",
     ]
 
-    df_all_substations = pd.DataFrame()
-    df_all_lines = pd.DataFrame()
-    df_all_generators = pd.DataFrame()
-    df_all_cables = pd.DataFrame()
-    df_all_towers = pd.DataFrame()
+    def output_csv_geojson(df_all_feature, columns_feature, feature):
+        outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw")  # Output file directory
+
+        if not os.path.exists(outputfile_partial):
+            os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)  # create raw directory
+        
+        df_all_feature = df_all_feature[df_all_feature.columns.intersection(set(columns_feature))]
+        df_all_feature.reset_index(drop=True, inplace=True)
+
+        # Generate Files
+        df_all_feature.to_csv(
+            outputfile_partial + f"_{feature}s" + ".csv"
+        )  # Generate CSV
+
+        if feature_category[feature] == "way":
+            gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
+        else:
+            gdf_feature = convert_pd_to_gdf_nodes(df_all_feature)
+
+        
+        gdf_feature.to_file(
+            outputfile_partial + f"_{feature}s" + ".geojson", driver="GeoJSON"
+        )  # Generate GeoJson   
+
     # test_CC = {"NG": "nigeria"}
     # test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
-    test_CC = {"ZW": "zimbabwe"}
-    # Africa_CC = {list of all African countries that are imported from script -> iso_countries_codes}
-    for country_code in test_CC.keys():
-        # for country_code in AFRICA_CC.keys():
-        # replace Africa_CC by test_CC to only download data for one country
-        (
-            tower_data,
-            substation_data,
-            line_data,
-            generator_data,
-            cable_data,
-        ) = download_and_filter(country_code)
-        for feature in ["tower", "substation", "line", "generator", "cable"]:
+    test_CC = {"DZ": "algeria"}
+    # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}        
+    for feature in feature_list:
+        df_all_feature = pd.DataFrame()
+        for country_code in AFRICA_CC.keys():
+            # for country_code in AFRICA_CC.keys():
+            # replace Africa_CC by test_CC to only download data for one country
+            feature_data = download_and_filter(feature, country_code, update)
+            
+            if feature_category[feature] == "way":
+                df_feature = process_line_data(country_code, feature_data, feature)
+            else:
+                df_feature = process_node_data(country_code, feature_data, feature)
+
+
+            df_all_feature = pd.concat([df_all_feature, df_feature])
+
             if feature == "tower":
-                df_tower = process_node_data(country_code, tower_data, feature)
-                df_all_towers = pd.concat([df_all_towers, df_tower])
+                output_csv_geojson(df_all_feature, columns_tower, "tower")
             if feature == "substation":
-                df_substation = process_node_data(
-                    country_code, substation_data, feature
-                )
-                df_all_substations = pd.concat([df_all_substations, df_substation])
+                output_csv_geojson(df_all_feature, columns_substation, "substation")
             if feature == "line":
-                df_line = process_line_data(country_code, line_data, feature)
-                df_all_lines = pd.concat([df_all_lines, df_line])
+                output_csv_geojson(df_all_feature, columns_line, "line")
             if feature == "generator":
-                df_generator = process_node_data(country_code, generator_data, feature)
-                df_all_generators = pd.concat([df_all_generators, df_generator])
+                output_csv_geojson(df_all_feature, columns_generator, "generator")
             if feature == "cable":
-                df_cable = process_line_data(country_code, cable_data, feature)
-                df_all_cables = pd.concat([df_all_cables, df_cable])
-
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "raw", "africa_all" + "_raw"
-    )  # Output file directory
-
-    if not os.path.exists(outputfile_partial):
-        os.makedirs(
-            os.path.dirname(outputfile_partial), exist_ok=True
-        )  # create raw directory
-
-    # ----------- TOWERS -----------
-
-    df_all_towers = df_all_towers[
-        df_all_towers.columns.intersection(set(columns_tower))
-    ]
-    df_all_towers.reset_index(drop=True, inplace=True)
-
-    # Generate Files
-    df_all_towers.to_csv(outputfile_partial + "_towers" + ".csv")  # Generate CSV
-    gdf_towers = convert_pd_to_gdf(df_all_towers)
-    gdf_towers.to_file(
-        outputfile_partial + "_towers" + ".geojson", driver="GeoJSON"
-    )  # Generate GeoJson
-
-    # ----------- SUBSTATIONS -----------
-
-    df_all_substations = df_all_substations[
-        df_all_substations.columns.intersection(set(columns_substation))
-    ]
-    df_all_substations.reset_index(drop=True, inplace=True)
-
-    # Generate Files
-    df_all_substations.to_csv(
-        outputfile_partial + "_substations" + ".csv"
-    )  # Generate CSV
-    gdf_substations = convert_pd_to_gdf(df_all_substations)
-    gdf_substations.to_file(
-        outputfile_partial + "_substations" + ".geojson", driver="GeoJSON"
-    )  # Generate GeoJson
-
-    # ----------- LINES -----------
-
-    df_all_lines = df_all_lines[df_all_lines.columns.intersection(set(columns_line))]
-    df_all_lines.reset_index(drop=True, inplace=True)
-
-    # Generate Files
-    df_all_lines.to_csv(outputfile_partial + "_lines" + ".csv")  # Generate CSV
-    gdf_lines = convert_pd_to_gdf_lines(
-        df_all_lines, simplified=False
-    )  # Set simplified = True to simplify lines
-    gdf_lines.to_file(
-        outputfile_partial + "_lines" + ".geojson", driver="GeoJSON"
-    )  # Generate GeoJson
-
-    # ----------- Generator -----------
-
-    df_all_generators = df_all_generators[
-        df_all_generators.columns.intersection(set(columns_generator))
-    ]
-    df_all_generators.reset_index(drop=True, inplace=True)
-    # df_all_generators.drop(columns =
-    # ["tags.fixme","tags.name:ar","tags.building","tags.barrier"],
-    # inplace = True, errors='ignore')
-    # TODO: Should Probably drop columns instead of selecting
-
-    # Generate Files
-    df_all_generators.to_csv(
-        outputfile_partial + "_generators" + ".csv"
-    )  # Generate CSV
-    gdf_generators = convert_pd_to_gdf(df_all_generators)
-    gdf_generators.to_file(
-        outputfile_partial + "_generators" + ".geojson", driver="GeoJSON"
-    )  # Generate GeoJson
-
-    # ----------- Cables -----------
-
-    df_all_cables = df_all_cables[
-        df_all_cables.columns.intersection(set(columns_cable))
-    ]
-    df_all_cables.reset_index(drop=True, inplace=True)
-
-    # Generate Files
-    df_all_cables.to_csv(outputfile_partial + "_cables" + ".csv")  # Generate CSV
-    gdf_cables = convert_pd_to_gdf_lines(
-        df_all_cables, simplified=False
-    )  # Set simplified = True to simplify lines
-    gdf_cables.to_file(outputfile_partial + "_cables" + ".geojson", driver="GeoJSON")
+                output_csv_geojson(df_all_feature, columns_cable, "cable")
 
 
 if __name__ == "__main__":
-    process_data()
+    process_data(update=True) # Set update 
