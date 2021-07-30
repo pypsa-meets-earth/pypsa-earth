@@ -378,9 +378,10 @@ def _set_electrical_parameters_lines(lines):
 
 
 def _set_lines_s_nom_from_linetypes(n):
+    # n.line_types is a lineregister from pypsa/pandapowers
     n.lines["s_nom"] = (
         np.sqrt(3)
-        * n.lines["type"].map(n.line_types.i_nom)  # n.line_types is a lineregister from pypsa/pandapowers
+        * n.lines["type"].map(n.line_types.i_nom)
         * n.lines["v_nom"]
         * n.lines.num_parallel
     )
@@ -755,7 +756,7 @@ def base_network():
     # _replace_b2b_converter_at_country_border_by_link(n)
 
     # n = _adjust_capacities_of_under_construction_branches(n)
-    
+
     # PyPSA-Africa. This grid is still not full connected! Lines are loosely connected to bus areas.
     # Won't change even in other parts
     return n
