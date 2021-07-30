@@ -16,7 +16,7 @@ import geopandas as gpd
 from numpy import append
 import pandas as pd
 import requests
-from esy.osmfilter import Node, Relation, Way
+from esy.osmfilter import Node, Relation, Way # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter
@@ -24,19 +24,13 @@ from iso_country_codes import AFRICA_CC
 from shapely.geometry import LineString, Point, Polygon
 import hashlib
 
-
-os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-logger = logging.getLogger(__name__)
-
-# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-
-
-# import logging
-# logging.basicConfig()
-# logger=logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
+import logging
+logging.basicConfig()
+logger=logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
+
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # move up to root directory
 
 # Downloads PBF File for given Country Code
 
@@ -78,7 +72,7 @@ def download_pbf(country_code, update):
     )  # Input filepath
 
     if not os.path.exists(PBF_inputfile):
-        print(f"{geofabrik_filename} downloading to {PBF_inputfile}")
+        logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True) as r:
@@ -87,7 +81,7 @@ def download_pbf(country_code, update):
     
     if update is True:
         if verify_pbf(PBF_inputfile, geofabrik_url) is False:
-            print(f"md5 mismatch, deleting {geofabrik_filename}")
+            logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
             if os.path.exists(PBF_inputfile):
                 os.remove(PBF_inputfile)
 
@@ -124,7 +118,7 @@ def verify_pbf(PBF_inputfile, geofabrik_url):
     if local_md5 == remote_md5:
         return True
     else:
-        print(local_md5, remote_md5)
+        # print(local_md5, remote_md5)
         return False
 
 
@@ -166,7 +160,8 @@ def download_and_filter(feature, country_code, update=False):
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
 
-    if not os.path.exists(os.path.join(os.getcwd(), "data", "osm", "Elements", country_code + f"_{feature}.json")):
+    if not os.path.exists(os.path.join(os.getcwd(), "data", "osm", "Elements", country_code + f"_{feature}s.json")):
+        logger.warning("Element file not found so pre-filtering")
         filter_file_exists = False
 
     # Load Previously Pre-Filtered Files
@@ -182,17 +177,18 @@ def download_and_filter(feature, country_code, update=False):
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
             ),
         )
-        print(f"Loading Pickle for {AFRICA_CC[country_code]}")  # TODO: Change to Logger
+        logger.info(f"Loading Pickle for {AFRICA_CC[country_code]}")
     else:
         create_elements = True
-        if country_code not in pre_filtered:
+        if country_code not in pre_filtered: # Ensures pre-filter is not run everytime
             new_prefilter_data = True
+            logger.info(f"pre-filtering {AFRICA_CC[country_code]} ")
             pre_filtered.append(country_code)
         else:
             new_prefilter_data = False
-        print(
-            f"Creating  New Elements for {AFRICA_CC[country_code]}"
-        )  # TODO: Change to Logger
+        logger.info(
+            f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}"
+        ) 
 
     prefilter = {
         Node: {"power": feature_list},
@@ -250,9 +246,8 @@ def lonlat_lookup(df_way, Data):
 
     col = "refs"
     if col not in df_way.columns:
-        print(
-            "refs column not found"
-        )  # TODO : Change to logger and do not create a hacky empty ref col
+        logger.warning("refs column not found")  # TODO : do not create a hacky empty ref col
+        print(df_way.columns)
         df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(
             float
         )  # create empty "refs" if not in dataframe
@@ -271,29 +266,41 @@ def lonlat_lookup(df_way, Data):
 
 def convert_ways_points(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
-    lonlat_column = []
-    area_column = []
-    for lonlat in lonlat_list:
-        if len(lonlat) >= 3:  # Minimum for a triangle
-            way_polygon = Polygon(lonlat)
-            # TODO : Do set_crs and to_crs for whole lonlat_list and not indivudually, expected big performance boost.
-            polygon_area = int(
-                round(
-                    gpd.GeoSeries(way_polygon)
-                    .set_crs("EPSG:4326")
-                    .to_crs("EPSG:3857")
-                    .area,
-                    -1,
-                )
-            )  # nearest tens m2
-            # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
-            area_column.append(polygon_area)
-            center_point = way_polygon.centroid
-            lonlat_column.append(list((center_point.x, center_point.y)))
+    # lonlat_column = []
+    # area_column = []
+    way_polygon = list(map(lambda lonlat: Polygon(lonlat) if len(lonlat)>=3 else Point(lonlat[0]), lonlat_list))
+    area_column = list(map(int,round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area,-1)))
+
+    def find_center_point(p):
+        if p.geom_type == 'Polygon':
+            center_point = p.centroid
         else:
-            area_column.append(0)
-            center_point = lonlat[0]
-            lonlat_column.append(list(center_point))
+            center_point = p
+        return list((center_point.x, center_point.y))
+
+    lonlat_column = list(map(find_center_point, way_polygon))
+
+    # for lonlat in lonlat_list:
+    #     if len(lonlat) >= 3:  # Minimum for a triangle
+    #         way_polygon = Polygon(lonlat)
+    #         # TODO : Do set_crs and to_crs for whole lonlat_list and not indivudually, expected big performance boost.
+    #         polygon_area = int(
+    #             round(
+    #                 gpd.GeoSeries(way_polygon)
+    #                 .set_crs("EPSG:4326")
+    #                 .to_crs("EPSG:3857")
+    #                 .area,
+    #                 -1,
+    #             )
+    #         )  # nearest tens m2
+    #         # print('{:g}'.format(float('{:.3g}'.format(float(polygon_area))))) # For significant numbers
+    #         area_column.append(polygon_area)
+    #         center_point = way_polygon.centroid
+    #         lonlat_column.append(list((center_point.x, center_point.y)))
+    #     else:
+    #         area_column.append(0)
+    #         center_point = lonlat[0]
+    #         lonlat_column.append(list(center_point))
 
     # df_way.drop("refs", axis=1, inplace=True, errors="ignore")
     df_way.insert(0, "Area", area_column)
@@ -354,7 +361,9 @@ def process_node_data(country_code, feature_data, feature):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, feature_data, feature
     )
-    convert_ways_points(df_way, Data)
+    if not df_way.empty:
+        convert_ways_points(df_way, Data)
+    
     # Add Type Column
     df_node["Type"] = "Node"
     df_way["Type"] = "Way"
@@ -462,9 +471,8 @@ def process_data(update):
         df_all_feature.reset_index(drop=True, inplace=True)
 
         # Generate Files
-        df_all_feature.to_csv(
-            outputfile_partial + f"_{feature}s" + ".csv"
-        )  # Generate CSV
+
+        df_all_feature.to_csv(outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
 
         if feature_category[feature] == "way":
             gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
@@ -508,4 +516,4 @@ def process_data(update):
 
 
 if __name__ == "__main__":
-    process_data(update=True) # Set update 
+    process_data(update=False) # Set update 
