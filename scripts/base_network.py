@@ -151,8 +151,6 @@ def _load_buses_from_osm():
             .difference(snakemake.config["electricity"]["voltages"])
         )
     )
-
-
     # TODO remove all buses outside of all countries including exclusive economic zones (offshore)
     # europe_shape = gpd.read_file(snakemake.input.europe_shape).loc[0, "geometry"]
     # europe_shape_prepped = shapely.prepared.prep(europe_shape)
@@ -337,7 +335,7 @@ def _load_lines_from_osm(buses):
     lines["v_nom"] /= 1e3  # V to kV conversion
     lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
     lines = _rebase_voltage_to_config(lines)  # rebase voltage to config inputs
-    #lines = _remove_dangling_branches(lines, buses)
+    # lines = _remove_dangling_branches(lines, buses)
 
     return lines
 
@@ -747,21 +745,20 @@ def base_network():
     # _apply_parameter_corrections(n)  # hand corrections from pypsa-eur
 
     # TODO: Run when pypsa-africa is connected. Removes small network structures.
-    # n = _remove_unconnected_components(n)  
+    # n = _remove_unconnected_components(n)
 
     # TODO: Add when shapes are available. Adds homeless buses i.e. offshore to country & assigns LV-bus as demand..
-    # _set_countries_and_substations(n)  
+    # _set_countries_and_substations(n)
 
     # _set_links_underwater_fraction(n)
 
     # _replace_b2b_converter_at_country_border_by_link(n)
 
     # n = _adjust_capacities_of_under_construction_branches(n)
-
-    return n  
+    
     # PyPSA-Africa. This grid is still not full connected! Lines are loosely connected to bus areas.
-    # Won't change even in other parts 
-
+    # Won't change even in other parts
+    return n
 
 
 if __name__ == "__main__":
