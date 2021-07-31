@@ -58,3 +58,33 @@ AFRICA_CC = {
     "ZM": "zambia",
     "ZW": "zimbabwe",
 }
+
+
+
+COMP_CC = {
+    "DZ": "algeria",
+    "AO": "angola",
+    "CM": "cameroon",
+    "CF": "central-african-republic",
+    "TD": "chad",
+    "CG": "congo-brazzaville",
+    "CD": "congo-democratic-republic",
+    "EG": "egypt",
+    "GQ": "equatorial-guinea",
+    "ER": "eritrea",
+    "ET": "ethiopia",
+    "CI": "ivory-coast",
+    "LS": "lesotho",
+    "LR": "liberia",
+    "LY": "libya",
+    "MR": "mauritania",
+    "MU": "mauritius",
+    "MA": "morocco",
+    "MZ": "mozambique",
+    "RW": "rwanda",
+    "TZ": "tanzania",
+    "TG": "togo",
+    "TN": "tunisia",
+    "ZM": "zambia",
+    "ZW": "zimbabwe",
+}

@@ -24,7 +24,7 @@ from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter
 from _helpers import _sets_path_to_root
-from iso_country_codes import AFRICA_CC
+from iso_country_codes import AFRICA_CC, COMP_CC
 from shapely.geometry import LineString, Point, Polygon
 import hashlib
 
