@@ -117,17 +117,17 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
     </td></tr>
 <tr>
     <td align="center">
-        <a href="https://github.com/LukasFrankenQ">
-            <img src="https://avatars.githubusercontent.com/u/55196140?v=4" width="100;" alt="LukasFrankenQ"/>
-            <br />
-            <sub><b>Lukas Franken</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/davide-f">
             <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
             <br />
             <sub><b>Davide-f</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/LukasFrankenQ">
+            <img src="https://avatars.githubusercontent.com/u/55196140?v=4" width="100;" alt="LukasFrankenQ"/>
+            <br />
+            <sub><b>Lukas Franken</b></sub>
         </a>
     </td></tr>
 </table>
