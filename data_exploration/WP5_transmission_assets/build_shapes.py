@@ -27,12 +27,9 @@ from shapely.geometry import Polygon
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("./../../scripts")
 
-
 # from ..scripts.iso_country_codes import AFRICA_CC
 
-
 logger = logging.getLogger(__name__)
-
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
