@@ -16,6 +16,8 @@ import geopandas as gpd
 from numpy import append
 import pandas as pd
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from esy.osmfilter import Node, Relation, Way # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
@@ -36,8 +38,11 @@ _sets_path_to_root("pypsa-africa")
 
 # Downloads PBF File for given Country Code
 
-feature_list = ["substation", "tower", "line", "generator", "cable"]
+# feature_list = ["substation", "tower", "line", "generator", "cable"]
+feature_list = ["substation", "line", "generator", "cable"]
 # feature_list = ["substation", "line"]
+# feature_list = ["line"]
+# feature_list = ["substation"]
 
 feature_category = {
     "substation": "node",
@@ -77,7 +82,7 @@ def download_pbf(country_code, update):
         logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
-        with requests.get(geofabrik_url, stream=True) as r:
+        with requests.get(geofabrik_url, stream=True, verify=False) as r:
             with open(PBF_inputfile, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
     
@@ -95,8 +100,11 @@ def download_pbf(country_code, update):
 
 
 
-
+verified_pbf =[]
 def verify_pbf(PBF_inputfile, geofabrik_url):
+    if PBF_inputfile in verified_pbf:
+        return True
+
     geofabrik_md5_url = geofabrik_url + ".md5"
     PBF_md5file = PBF_inputfile + ".md5"
 
@@ -107,7 +115,7 @@ def verify_pbf(PBF_inputfile, geofabrik_url):
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    with requests.get(geofabrik_md5_url, stream=True) as r:
+    with requests.get(geofabrik_md5_url, stream=True, verify=False) as r:
         with open(PBF_md5file, "wb") as f:
             shutil.copyfileobj(r.raw, f)
 
@@ -118,6 +126,7 @@ def verify_pbf(PBF_inputfile, geofabrik_url):
         remote_md5 = contents.split()[0]
 
     if local_md5 == remote_md5:
+        verified_pbf.append(PBF_inputfile)
         return True
     else:
         # print(local_md5, remote_md5)
@@ -225,7 +234,7 @@ def download_and_filter(feature, country_code, update=False):
     )
     # For better performance yield feature_data here
 
-
+    print(new_prefilter_data, create_elements, feature, country_code)
 
     return feature_data
 
@@ -253,6 +262,15 @@ def lonlat_lookup(df_way, Data):
         df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(
             float
         )  # create empty "refs" if not in dataframe
+
+    # def look(ref):
+    #     lonlat_row = []
+    #     for r in ref:
+    #         lonlat = tuple(Data["Node"][str(r)]["lonlat"])
+    #         lonlat_row.append(lonlat)
+    #     return lonlat_row
+
+    # lonlat_list = df_way["refs"].apply(look)
 
     for ref in df_way["refs"]:
         lonlat_row = []
@@ -381,7 +399,10 @@ def process_line_data(country_code, feature_data, feature):
     df_node, df_way, Data = convert_filtered_data_to_dfs(
         country_code, feature_data, feature
     )
-    convert_ways_lines(df_way, Data)
+
+    if not df_way.empty:
+        convert_ways_lines(df_way, Data)
+    
     # Add Type Column
     df_way["Type"] = "Way"
 
@@ -474,6 +495,10 @@ def process_data(update):
 
         # Generate Files
 
+        if df_all_feature.empty:
+            logger.warning(f"All feature data frame empty for {feature}")
+            return None
+
         df_all_feature.to_csv(outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
 
         if feature_category[feature] == "way":
@@ -487,8 +512,8 @@ def process_data(update):
         )  # Generate GeoJson   
 
     # test_CC = {"NG": "nigeria"}
-    # test_CC = {"ZA": "SOUTH AFRICA"} # or any other country
-    test_CC = {"DZ": "algeria"}
+    # test_CC = {"DZ": "algeria"}
+    # test_CC = {"BJ": "benin"}
     # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}        
     for feature in feature_list:
         df_all_feature = pd.DataFrame()
@@ -505,17 +530,17 @@ def process_data(update):
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
-            if feature == "tower":
-                output_csv_geojson(df_all_feature, columns_tower, "tower")
-            if feature == "substation":
-                output_csv_geojson(df_all_feature, columns_substation, "substation")
-            if feature == "line":
-                output_csv_geojson(df_all_feature, columns_line, "line")
-            if feature == "generator":
-                output_csv_geojson(df_all_feature, columns_generator, "generator")
-            if feature == "cable":
-                output_csv_geojson(df_all_feature, columns_cable, "cable")
+        if feature == "tower":
+            output_csv_geojson(df_all_feature, columns_tower, "tower")
+        if feature == "substation":
+            output_csv_geojson(df_all_feature, columns_substation, "substation")
+        if feature == "line":
+            output_csv_geojson(df_all_feature, columns_line, "line")
+        if feature == "generator":
+            output_csv_geojson(df_all_feature, columns_generator, "generator")
+        if feature == "cable":
+            output_csv_geojson(df_all_feature, columns_cable, "cable")
 
 
 if __name__ == "__main__":
-    process_data(update=False) # Set update 
+    process_data(update=False) # Set update
