@@ -5,6 +5,8 @@
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
+import pycountry as pyc
 
 
 def _sets_path_to_root(root_directory_name):
@@ -361,3 +363,95 @@ def mock_snakemake(rulename, **wildcards):
 
     os.chdir(script_dir)
     return snakemake
+
+def _get_country(target, **keys):
+    """
+    Function to convert country codes using pycountry
+    
+    Parameters
+    ----------
+    target: str
+        Desired type of country code.
+        Examples:
+            - 'alpha_3' for 3-digit
+            - 'alpha_2' for 2-digit
+            - 'name' for full country name
+    
+    keys: dict
+        Specification of the country name and reference system.
+        Examples:
+            - alpha_3="ZAF" for 3-digit
+            - alpha_2="ZA" for 2-digit
+            - name="South Africa" for full country name
+    
+    Returns
+    -------
+    country code as requested in keys or np.nan, when country code is not recognized
+
+    Example of usage
+    -------
+    - Convert 2-digit code to 3-digit codes: _get_country('alpha_3', alpha_2="ZA")
+    - Convert 3-digit code to 2-digit codes: _get_country('alpha_2', alpha_3="ZAF")
+    - Convert 2-digit code to full name: _get_country('name', alpha_2="ZA")
+    
+    """
+    
+    assert len(keys) == 1
+    try:
+        return getattr(pyc.countries.get(**keys), target)
+    except (KeyError, AttributeError):
+        return np.nan
+        
+
+def _two_2_three_digits_country(two_code_country):
+    """
+    Convert 2-digit to 3-digit country code:
+    
+    Parameters
+    ----------
+    two_code_country: str
+        2-digit country name
+    
+    Returns
+    ----------
+    three_code_country: str
+        3-digit country name
+    """
+    three_code_country = _get_country('alpha_3', alpha_2=two_code_country)
+    return three_code_country
+        
+
+def _three_2_two_digits_country(three_code_country):
+    """
+    Convert 3-digit to 2-digit country code:
+    
+    Parameters
+    ----------
+    three_code_country: str
+        3-digit country name
+    
+    Returns
+    ----------
+    two_code_country: str
+        2-digit country name
+    """
+    two_code_country = _get_country('alpha_2', alpha_3=three_code_country)
+    return two_code_country
+        
+
+def _two_digits_2_name_country(two_code_country):
+    """
+    Convert 2-digit country code to full name country:
+    
+    Parameters
+    ----------
+    two_code_country: str
+        2-digit country name
+    
+    Returns
+    ----------
+    full_name: str
+        full country name
+    """
+    full_name = _get_country('name', alpha_2=two_code_country)
+    return full_name
