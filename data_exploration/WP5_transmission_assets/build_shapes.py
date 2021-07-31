@@ -1,4 +1,3 @@
-
 # import
 from shapely.geometry import LineString, Point, Polygon
 from iso_country_codes import AFRICA_CC
@@ -24,16 +23,17 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("./../../scripts")
 
 
-#from ..scripts.iso_country_codes import AFRICA_CC
+# from ..scripts.iso_country_codes import AFRICA_CC
 
 
 logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    if 'snakemake' not in globals():
+    if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        snakemake = mock_snakemake('build_shapes')
+
+        snakemake = mock_snakemake("build_shapes")
     configure_logging(snakemake)
 
     out = snakemake.output
