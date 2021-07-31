@@ -5,11 +5,13 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+from _helpers import _sets_path_to_root
 # from shapely.geometry import LineString, Point, Polygon
 # from iso_country_codes import AFRICA_CC
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append("../../scripts")
+_sets_path_to_root("pypsa-africa")
+
 
 
 def prepare_substation_df(df_all_substations):
@@ -204,6 +206,12 @@ def prepare_lines_df(df_lines):
         "geometry",
         "country",
     ]
+
+    # Check. If column is not in df create an empty one.
+    for c in clist:
+        if c not in df_lines:
+            df_lines[c] = np.nan
+
     df_lines = df_lines[clist]
 
     return df_lines

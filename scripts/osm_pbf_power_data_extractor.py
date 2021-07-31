@@ -20,6 +20,7 @@ from esy.osmfilter import Node, Relation, Way # https://gitlab.com/dlr-ve-esy/es
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter
+from _helpers import _sets_path_to_root
 from iso_country_codes import AFRICA_CC
 from shapely.geometry import LineString, Point, Polygon
 import hashlib
@@ -30,7 +31,8 @@ logger=logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
-os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # move up to root directory
+_sets_path_to_root("pypsa-africa")
+# os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # move up to root directory
 
 # Downloads PBF File for given Country Code
 

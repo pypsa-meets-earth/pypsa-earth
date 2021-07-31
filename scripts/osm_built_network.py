@@ -6,12 +6,15 @@ import sys
 import geopandas as gpd
 import numpy as np
 
+from _helpers import _sets_path_to_root
+
 # import pandas as pd
 
 # from shapely.geometry import LineString, Point
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append("./../../scripts")
+_sets_path_to_root("pypsa-africa")
+#sys.path.append("./../../scripts")
 
 
 def line_endings_to_bus_conversion(lines):
@@ -92,8 +95,8 @@ def create_station_at_equal_bus_locations(lines, buses):
 
 def built_network():
     # ----------- LOAD DATA -----------
-    paths = os.path.realpath("data/clean") + "/africa_all_buses_clean.geojson"
-    pathl = os.path.realpath("data/clean") + "/africa_all_lines_clean.geojson"
+    paths = os.path.realpath("data/clean") + "/africa_all_substations.geojson"
+    pathl = os.path.realpath("data/clean") + "/africa_all_lines.geojson"
     substations = gpd.read_file(paths).set_crs(epsg=4326, inplace=True)
     lines = gpd.read_file(pathl).set_crs(epsg=4326, inplace=True)
 
