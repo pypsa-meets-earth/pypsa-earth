@@ -32,43 +32,6 @@ logger = logging.getLogger(__name__)
 _sets_path_to_root("scripts")
 
 
-def _get_country(target, **keys):
-    """
-    Function to convert country codes using pycountry
-    
-    Parameters
-    ----------
-    target: str
-        Desired type of country code.
-        Examples:
-            'alpha_3' for 3-digit
-            'alpha_2' for 2-digit
-            'name' for full country name
-    keys: 
-        Specification of the country name and reference system.
-        Examples:
-            alpha_3="ZAF" for 3-digit
-            alpha_2="ZA" for 2-digit
-            name="South Africa" for full country name
-    
-    Returns
-    -------
-    country code as requested in keys or np.nan, when country code is not recognized
-
-    Example of usage
-    -------
-    _get_country('alpha_3', alpha_2="ZA")
-    _get_country('alpha_2', alpha_3="ZAF")
-    _get_country('name', alpha_2="ZA")
-    
-    """
-    assert len(keys) == 1
-    try:
-        return getattr(pyc.countries.get(**keys), target)
-    except (KeyError, AttributeError):
-        return np.nan
-
-
 def download_GADM(country_code, update=False):
     """
     Download gpkg file from GADM for a given country code
