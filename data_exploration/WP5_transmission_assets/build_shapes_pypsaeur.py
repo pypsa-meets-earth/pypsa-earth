@@ -86,27 +86,36 @@ def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
 
 def countries():
     cntries = snakemake.config['countries']
-    if 'RS' in cntries: cntries.append('KV')
+    if 'RS' in cntries:
+        cntries.append('KV')
 
     df = gpd.read_file(snakemake.input.naturalearth)
 
     # Names are a hassle in naturalearth, try several fields
-    fieldnames = (df[x].where(lambda s: s!='-99') for x in ('ISO_A2', 'WB_A2', 'ADM0_A3'))
-    df['name'] = reduce(lambda x,y: x.fillna(y), fieldnames, next(fieldnames)).str[0:2]
+    fieldnames = (df[x].where(lambda s: s != '-99')
+                  for x in ('ISO_A2', 'WB_A2', 'ADM0_A3'))
+    df['name'] = reduce(lambda x, y: x.fillna(
+        y), fieldnames, next(fieldnames)).str[0:2]
 
-    df = df.loc[df.name.isin(cntries) & ((df['scalerank'] == 0) | (df['scalerank'] == 5))]
+    df = df.loc[df.name.isin(cntries) & (
+        (df['scalerank'] == 0) | (df['scalerank'] == 5))]
     s = df.set_index('name')['geometry'].map(_simplify_polys)
-    if 'RS' in cntries: s['RS'] = s['RS'].union(s.pop('KV'))
+    if 'RS' in cntries:
+        s['RS'] = s['RS'].union(s.pop('KV'))
 
     return s
 
 
 def eez(country_shapes):
     df = gpd.read_file(snakemake.input.eez)
-    df = df.loc[df['ISO_3digit'].isin([_get_country('alpha_3', alpha_2=c) for c in snakemake.config['countries']])]
-    df['name'] = df['ISO_3digit'].map(lambda c: _get_country('alpha_2', alpha_3=c))
-    s = df.set_index('name').geometry.map(lambda s: _simplify_polys(s, filterremote=False))
-    s = gpd.GeoSeries({k:v for k,v in s.iteritems() if v.distance(country_shapes[k]) < 1e-3})
+    df = df.loc[df['ISO_3digit'].isin(
+        [_get_country('alpha_3', alpha_2=c) for c in snakemake.config['countries']])]
+    df['name'] = df['ISO_3digit'].map(
+        lambda c: _get_country('alpha_2', alpha_3=c))
+    s = df.set_index('name').geometry.map(
+        lambda s: _simplify_polys(s, filterremote=False))
+    s = gpd.GeoSeries({k: v for k, v in s.iteritems()
+                      if v.distance(country_shapes[k]) < 1e-3})
     s.index.name = "name"
     return s
 
@@ -126,15 +135,18 @@ def nuts3(country_shapes):
     df = gpd.read_file(snakemake.input.nuts3)
     df = df.loc[df['STAT_LEVL_'] == 3]
     df['geometry'] = df['geometry'].map(_simplify_polys)
-    df = df.rename(columns={'NUTS_ID': 'id'})[['id', 'geometry']].set_index('id')
+    df = df.rename(columns={'NUTS_ID': 'id'})[
+        ['id', 'geometry']].set_index('id')
 
-    pop = pd.read_table(snakemake.input.nuts3pop, na_values=[':'], delimiter=' ?\t', engine='python')
+    pop = pd.read_table(snakemake.input.nuts3pop, na_values=[
+                        ':'], delimiter=' ?\t', engine='python')
     pop = (pop
            .set_index(pd.MultiIndex.from_tuples(pop.pop('unit,geo\\time').str.split(','))).loc['THS']
            .applymap(lambda x: pd.to_numeric(x, errors='coerce'))
            .fillna(method='bfill', axis=1))['2014']
 
-    gdp = pd.read_table(snakemake.input.nuts3gdp, na_values=[':'], delimiter=' ?\t', engine='python')
+    gdp = pd.read_table(snakemake.input.nuts3gdp, na_values=[
+                        ':'], delimiter=' ?\t', engine='python')
     gdp = (gdp
            .set_index(pd.MultiIndex.from_tuples(gdp.pop('unit,geo\\time').str.split(','))).loc['EUR_HAB']
            .applymap(lambda x: pd.to_numeric(x, errors='coerce'))
@@ -148,7 +160,8 @@ def nuts3(country_shapes):
     swiss.columns = swiss.columns.to_series().map(cantons)
 
     pop = pop.append(pd.to_numeric(swiss.loc['Residents in 1000', 'CH040':]))
-    gdp = gdp.append(pd.to_numeric(swiss.loc['Gross domestic product per capita in Swiss francs', 'CH040':]))
+    gdp = gdp.append(pd.to_numeric(
+        swiss.loc['Gross domestic product per capita in Swiss francs', 'CH040':]))
 
     df = df.join(pd.DataFrame(dict(pop=pop, gdp=gdp)))
 
@@ -156,7 +169,7 @@ def nuts3(country_shapes):
 
     excludenuts = pd.Index(('FRA10', 'FRA20', 'FRA30', 'FRA40', 'FRA50',
                             'PT200', 'PT300',
-                            'ES707', 'ES703', 'ES704','ES705', 'ES706', 'ES708', 'ES709',
+                            'ES707', 'ES703', 'ES704', 'ES705', 'ES706', 'ES708', 'ES709',
                             'FI2', 'FR9'))
     excludecountry = pd.Index(('MT', 'TR', 'LI', 'IS', 'CY', 'KV'))
 

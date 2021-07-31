@@ -1,5 +1,21 @@
 
 # import
+from shapely.geometry import LineString, Point, Polygon
+from iso_country_codes import AFRICA_CC
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import Node, Relation, Way
+from esy.osmfilter import run_filter
+import matplotlib.pyplot as plt
+import zipfile
+import requests
+import pandas as pd
+import numpy as np
+import fiona
+import geoplot
+import geopandas as gpd
+import shutil
+import logging
 import os
 import sys
 
@@ -7,30 +23,11 @@ import sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append("./../../scripts")
 
-import logging
-import shutil
 
-import geopandas as gpd
-import geoplot
-import fiona
-
-import numpy as np
-import pandas as pd
-import requests
-import zipfile
-import matplotlib.pyplot as plt
-from esy.osmfilter import run_filter
-from esy.osmfilter import Node, Relation, Way
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import osm_pickle as osm_pickle
-
-from iso_country_codes import AFRICA_CC
 #from ..scripts.iso_country_codes import AFRICA_CC
 
-from shapely.geometry import LineString, Point, Polygon
 
 logger = logging.getLogger(__name__)
-
 
 
 if __name__ == "__main__":
