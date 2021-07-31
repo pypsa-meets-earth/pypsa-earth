@@ -26,6 +26,22 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
 
+rule build_shapes:
+    input:
+        # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
+        # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
+        # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
+        # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
+        # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
+    output:
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
+        africa_shape='resources/africa_shape.geojson',
+        nuts3_shapes='resources/nuts3_shapes.geojson'
+    log: "logs/build_shapes.log"
+    threads: 1
+    resources: mem=500
+    script: "scripts/build_shapes.py"
 
 rule base_network:
     input:
