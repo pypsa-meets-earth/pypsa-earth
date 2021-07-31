@@ -42,7 +42,7 @@ AFRICA_CC = {
     "RW": "rwanda",
     # saint-helena-ascension-and-tristan-da-cunha
     # "ST": "sao-tome-and-principe", #Island
-    "SN-GM": "senegal-and-gambia",  # Merged Country Code, See Map, See https://github.com/pypsa-meets-africa/pypsa-africa/issues/40#issuecomment-885424094
+    # "SN-GM": "senegal-and-gambia",  # Merged Country Code, See Map, See https://github.com/pypsa-meets-africa/pypsa-africa/issues/40#issuecomment-885424094
     # "SC": "seychelles", #Island
     "SL": "sierra-leone",
     # "SO": "somalia", # No Data
