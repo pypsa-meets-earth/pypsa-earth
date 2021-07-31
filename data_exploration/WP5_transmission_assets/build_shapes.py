@@ -12,12 +12,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
-from esy.osmfilter import Node, Relation, Way
+from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
+from esy.osmfilter import Way
 from iso_country_codes import AFRICA_CC
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString
+from shapely.geometry import Point
+from shapely.geometry import Polygon
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 """
 Creates GIS shape files of the countries, exclusive economic zones and `NUTS3 <https://en.wikipedia.org/wiki/Nomenclature_of_Territorial_Units_for_Statistics>`_ areas.
 Relevant Settings
@@ -43,7 +42,6 @@ Outputs
 Description
 -----------
 """
-
 import logging
 import os
 from functools import reduce
@@ -55,7 +53,8 @@ import numpy as np
 import pandas as pd
 import pycountry as pyc
 from _helpers import configure_logging
-from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import MultiPolygon
+from shapely.geometry import Polygon
 from shapely.ops import cascaded_union
 
 logger = logging.getLogger(__name__)
