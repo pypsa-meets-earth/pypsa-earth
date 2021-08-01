@@ -24,7 +24,7 @@ from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter
 from _helpers import _sets_path_to_root
-from iso_country_codes import AFRICA_CC, COMP_CC
+from osm_data_config import AFRICA_CC, COMP_CC
 from shapely.geometry import LineString, Point, Polygon
 import hashlib
 
@@ -519,18 +519,12 @@ def process_data(update):
             outputfile_partial + f"_{feature}s" + ".geojson", driver="GeoJSON"
         )  # Generate GeoJson   
 
-    # test_CC = {"NG": "nigeria"}
-    # test_CC = {"DZ": "algeria"}
-    # test_CC = {"DZ": "algeria", "AO": "angola"}
-    # test_CC = {"AO": "angola"}
-    # test_CC = {"MZ": "mozambique", "NA": "namibia"}
-    # test_CC = {"MZ": "mozambique"}
-    # test_CC = {"BJ": "benin"}
+    SNGM_CC = {"SN-GM": "senegal-and-gambia"}
     test_CC = {"LY": "libya", "SZ": "swaziland"}
     # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}        
     for feature in feature_list:
         df_all_feature = pd.DataFrame()
-        for country_code in AFRICA_CC.keys():
+        for country_code in SNGM_CC.keys():
             # replace Africa_CC by test_CC to only download data for one country
             feature_data = download_and_filter(feature, country_code, update)
 

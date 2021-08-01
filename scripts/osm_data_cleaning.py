@@ -7,7 +7,7 @@ import pandas as pd
 
 from _helpers import _sets_path_to_root
 # from shapely.geometry import LineString, Point, Polygon
-# from iso_country_codes import AFRICA_CC
+# from osm_data_config import AFRICA_CC
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 _sets_path_to_root("pypsa-africa")
