@@ -1,26 +1,22 @@
 # import
-from shapely.geometry import LineString, Point, Polygon
-from iso_country_codes import AFRICA_CC
-from shapely.ops import cascaded_union
-from shapely.geometry import MultiPolygon, Polygon
-from operator import attrgetter
+import logging
+import os
+import shutil
 import zipfile
-import requests
 from itertools import takewhile
-import numpy as np
-from rasterio.mask import mask
-import rasterio
+from operator import attrgetter
+
 import fiona
 import geopandas as gpd
-import shutil
-import logging
-from _helpers import (
-    configure_logging,
-    _sets_path_to_root,
-    _two_2_three_digits_country,
-    _three_2_two_digits_country,
-)
-import os
+import numpy as np
+import rasterio
+import requests
+from _helpers import (_sets_path_to_root, _three_2_two_digits_country,
+                      _two_2_three_digits_country, configure_logging)
+from iso_country_codes import AFRICA_CC
+from rasterio.mask import mask
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.ops import cascaded_union
 
 # import sys
 
