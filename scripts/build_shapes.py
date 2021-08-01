@@ -1,34 +1,30 @@
 
 # import
+from shapely.geometry import LineString, Point, Polygon
+from iso_country_codes import AFRICA_CC
+from shapely.ops import cascaded_union
+from shapely.geometry import MultiPolygon, Polygon
+from operator import attrgetter
+import zipfile
+import requests
+from itertools import takewhile
+import numpy as np
+from rasterio.mask import mask
+import rasterio
+import fiona
+import geopandas as gpd
+import shutil
+import logging
+from _helpers import configure_logging, _sets_path_to_root, _two_2_three_digits_country, _three_2_two_digits_country
 import os
 # import sys
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from _helpers import configure_logging, _sets_path_to_root, _two_2_three_digits_country, _three_2_two_digits_country
 
-import logging
-import shutil
-
-import geopandas as gpd
-import fiona
-import rasterio
-from rasterio.mask import mask
-
-import numpy as np
-from itertools import takewhile
-
-import requests
-import zipfile
-from operator import attrgetter
-from shapely.geometry import MultiPolygon, Polygon
-from shapely.ops import cascaded_union
-
-from iso_country_codes import AFRICA_CC
 #from ..scripts.iso_country_codes import AFRICA_CC
 
-from shapely.geometry import LineString, Point, Polygon
 
 logger = logging.getLogger(__name__)
 _sets_path_to_root("scripts")
@@ -55,11 +51,13 @@ def download_GADM(country_code, update=False):
     GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
 
     GADM_inputfile_zip = os.path.join(
-        os.path.dirname(os.getcwd()), "data", "raw", "gadm", GADM_filename, GADM_filename + ".zip"
+        os.path.dirname(
+            os.getcwd()), "data", "raw", "gadm", GADM_filename, GADM_filename + ".zip"
     )  # Input filepath zip
 
     GADM_inputfile_gpkg = os.path.join(
-        os.path.dirname(os.getcwd()), "data", "raw", "gadm", GADM_filename, GADM_filename + ".gpkg"
+        os.path.dirname(
+            os.getcwd()), "data", "raw", "gadm", GADM_filename, GADM_filename + ".gpkg"
     )  # Input filepath gpkg
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
@@ -71,9 +69,9 @@ def download_GADM(country_code, update=False):
             with open(GADM_inputfile_zip, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-        with zipfile.ZipFile(GADM_inputfile_zip,"r") as zip_ref:
+        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
             zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
-    
+
     return GADM_inputfile_gpkg, GADM_filename
 
 
@@ -93,14 +91,15 @@ def get_GADM_layer(country_list, layer_id, update=False):
         list_layers = fiona.listlayers(file_gpkg)
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer = list_layers[layer_id])
+        geodf_temp = gpd.read_file(file_gpkg, layer=list_layers[layer_id])
 
         # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [_three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]]
+        geodf_temp["GID_0"] = [_three_2_two_digits_country(
+            twoD_c) for twoD_c in geodf_temp["GID_0"]]
 
         # append geodataframes
         geodf_GADM = geodf_GADM.append(geodf_temp)
-    
+
     geodf_GADM.reset_index(drop=True, inplace=True)
 
     return geodf_GADM
@@ -121,8 +120,7 @@ def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
     return polys.simplify(tolerance=tolerance)
 
 
-
-def countries(update = False):
+def countries(update=False):
     countries = snakemake.config['countries']
 
     # download data if needed and get the layer id 0, corresponding to the countries
@@ -130,7 +128,7 @@ def countries(update = False):
 
     # select and rename columns
     df_countries = df_countries[["GID_0", "geometry"]].copy()
-    df_countries.rename(columns = {"GID_0": "name"}, inplace=True)
+    df_countries.rename(columns={"GID_0": "name"}, inplace=True)
 
     # set index and simplify polygons
     ret_df = df_countries.set_index('name')['geometry'].map(_simplify_polys)
@@ -151,7 +149,7 @@ def country_cover(country_shapes, eez_shapes=None):
 
 def save_to_geojson(df, fn):
     if os.path.exists(fn):
-        os.unlink(fn) # remove file if it exists
+        os.unlink(fn)  # remove file if it exists
     if not isinstance(df, gpd.GeoDataFrame):
         df = gpd.GeoDataFrame(dict(geometry=df))
 
@@ -162,34 +160,39 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver='GeoJSON', schema=schema)
 
 
-def load_EEZ(selected_countries_codes, name_file = "eez_v11.gpkg"):
+def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
     EEZ_gpkg = os.path.join(
         os.path.dirname(os.getcwd()), "data", "raw", "eez", name_file
     )  # Input filepath gpkg
 
     if not os.path.exists(EEZ_gpkg):
-        raise Exception(f"File EEZ {name_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}")
-    
+        raise Exception(
+            f"File EEZ {name_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}")
+
     geodf_EEZ = gpd.read_file(EEZ_gpkg)
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
-    geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]  # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
-    geodf_EEZ = geodf_EEZ[[any([_three_2_two_digits_country(x) in selected_countries_codes]) for x in geodf_EEZ["ISO_TER1"]]]
+    # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
+    geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
+    geodf_EEZ = geodf_EEZ[[any([_three_2_two_digits_country(
+        x) in selected_countries_codes]) for x in geodf_EEZ["ISO_TER1"]]]
     geodf_EEZ.reset_index(drop=True, inplace=True)
-    
-    geodf_EEZ.rename(columns = {"ISO_TER1": "name"}, inplace=True)
+
+    geodf_EEZ.rename(columns={"ISO_TER1": "name"}, inplace=True)
 
     return geodf_EEZ
 
 
-def eez(update = False, tol=1e-3):
+def eez(update=False, tol=1e-3):
     countries = snakemake.config['countries']
 
     # load data
     df_eez = load_EEZ(countries)
 
     # set index and simplify polygons
-    ret_df = df_eez.set_index('name')['geometry'].map(lambda s: _simplify_polys(s, filterremote=False))
-    ret_df = gpd.GeoSeries({k:v for k,v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol})
+    ret_df = df_eez.set_index('name')['geometry'].map(
+        lambda s: _simplify_polys(s, filterremote=False))
+    ret_df = gpd.GeoSeries(
+        {k: v for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol})
     ret_df.index.name = "name"
 
     return ret_df
@@ -212,7 +215,7 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
     gpkg file per country
 
     """
-    
+
     # UN not adjusted
     # WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_constrained.tif"
     # WorldPop_url = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
@@ -221,19 +224,21 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
     WorldPop_url = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
 
     WorldPop_inputfile = os.path.join(
-        os.path.dirname(os.getcwd()), "data", "raw", "WorldPop", WorldPop_filename
+        os.path.dirname(
+            os.getcwd()), "data", "raw", "WorldPop", WorldPop_filename
     )  # Input filepath zip
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
-            print(f"{WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}")
+            print(
+                f"{WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
 
         with requests.get(WorldPop_url, stream=True) as r:
             with open(WorldPop_inputfile, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
-    
+
     return WorldPop_inputfile, WorldPop_filename
 
 
@@ -243,15 +248,17 @@ def add_population_data(df_gadm, country_codes, year=2020, out_logging=False):
     df_gadm["pop"] = 0
 
     for c_code in country_codes:
-        WorldPop_inputfile, WorldPop_filename = download_WorldPop(c_code, 2020, update=False, out_logging=False)
+        WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+            c_code, 2020, update=False, out_logging=False)
 
         with rasterio.open(WorldPop_inputfile) as src:
             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
             for index, row in country_rows.iterrows():
                 # select the desired area of the raster corresponding to each polygon
-                out_image, out_transform = mask(src, row["geometry"], all_touched=True, invert = False, nodata=0.0)
-                
+                out_image, out_transform = mask(
+                    src, row["geometry"], all_touched=True, invert=False, nodata=0.0)
+
                 # calculate total population in the selected geometry
                 pop_by_geom = sum(sum(out_image[0]))
 
@@ -262,14 +269,14 @@ def add_population_data(df_gadm, country_codes, year=2020, out_logging=False):
                 df_gadm.loc[index, "pop"] = pop_by_geom
 
 
-def gadm(update = False, year = 2020):
+def gadm(update=False, year=2020):
     countries = snakemake.config['countries']
 
     # download data if needed and get the last layer id [-1], corresponding to the highest resolution
     df_gadm = get_GADM_layer(countries, -1, update)
 
     # select and rename columns
-    df_gadm.rename(columns = {"GID_0": "country"}, inplace=True)
+    df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
 
     # add the population data to the dataset
     add_population_data(df_gadm, countries, year)
@@ -277,8 +284,6 @@ def gadm(update = False, year = 2020):
     # set index and simplify polygons
     ret_df = df_gadm.set_index('country')['geometry'].map(_simplify_polys)
     ret_df.index.name = "name"
-
-
 
     # df = gpd.read_file(snakemake.input.nuts3)
     # df = df.loc[df['STAT_LEVL_'] == 3]
