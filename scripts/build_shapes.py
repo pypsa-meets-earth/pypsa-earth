@@ -10,15 +10,10 @@ import fiona
 import geopandas as gpd
 import numpy as np
 import requests
-from _helpers import _sets_path_to_root
-from _helpers import _three_2_two_digits_country
-from _helpers import _two_2_three_digits_country
-from _helpers import configure_logging
+from _helpers import (_sets_path_to_root, _three_2_two_digits_country,
+                      _two_2_three_digits_country, configure_logging)
 from iso_country_codes import AFRICA_CC
-from shapely.geometry import LineString
-from shapely.geometry import MultiPolygon
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.ops import cascaded_union
 
 # import sys
