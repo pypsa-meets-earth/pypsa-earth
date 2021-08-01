@@ -194,18 +194,18 @@ def eez(update = False, tol=1e-3):
 
 
 
-def nuts3(update = False):
+def gadm(update = False):
     countries = snakemake.config['countries']
 
     # download data if needed and get the last layer id [-1], corresponding to the highest resolution
-    df_eez = get_GADM_layer(countries, -1, update)
+    df_gadm = get_GADM_layer(countries, -1, update)
 
     # select and rename columns
     # df_eez = df_eez[["GID_0", "geometry"]].copy()
-    df_eez.rename(columns = {"GID_0": "country"}, inplace=True)
+    df_gadm.rename(columns = {"GID_0": "country"}, inplace=True)
 
     # set index and simplify polygons
-    ret_df = df_eez.set_index('country')['geometry'].map(_simplify_polys)
+    ret_df = df_gadm.set_index('country')['geometry'].map(_simplify_polys)
     ret_df.index.name = "name"
 
 
@@ -286,5 +286,5 @@ if __name__ == "__main__":
     africa_shape = country_cover(country_shapes, offshore_shapes)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    nuts3_shapes = nuts3()
-    save_to_geojson(nuts3_shapes, out.nuts3_shapes)
+    gadm_shapes = gadm()
+    save_to_geojson(gadm_shapes, out.gadm_shapes)

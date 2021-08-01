@@ -37,7 +37,7 @@ rule build_shapes:
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
         africa_shape='resources/africa_shape.geojson',
-        nuts3_shapes='resources/nuts3_shapes.geojson'
+        gadm_shapes='resources/gadm_shapes.geojson'
     log: "logs/build_shapes.log"
     threads: 1
     resources: mem=500
