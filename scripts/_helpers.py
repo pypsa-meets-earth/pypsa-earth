@@ -22,7 +22,7 @@ def _sets_path_to_root(root_directory_name):
 
     """
     import os
-    
+
     repo_name = root_directory_name
     n = 8  # check max 8 levels above. Random default.
     n0 = n
@@ -41,7 +41,8 @@ def _sets_path_to_root(root_directory_name):
             print('Cant find the repo path.')
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(os.path.abspath('.'))  # name of upper folder
+            upper_path = os.path.dirname(
+                os.path.abspath('.'))  # name of upper folder
             os.chdir(upper_path)
 
 
@@ -157,7 +158,8 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
     n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+        n.links.bus0.map(n.buses.carrier) + "-" +
+        n.links.bus1.map(n.buses.carrier)
     )
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
@@ -175,7 +177,8 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.sum() / 8760.0
-    costs = load_costs(Nyears, tech_costs, config["costs"], config["electricity"])
+    costs = load_costs(Nyears, tech_costs,
+                       config["costs"], config["electricity"])
     update_transmission_costs(n, costs)
 
     return n
@@ -256,7 +259,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(components.keys(), skip_empty=False), components.values()
+        n.iterate_components(
+            components.keys(), skip_empty=False), components.values()
     ):
         if c.df.empty:
             continue
@@ -364,10 +368,11 @@ def mock_snakemake(rulename, **wildcards):
     os.chdir(script_dir)
     return snakemake
 
+
 def _get_country(target, **keys):
     """
     Function to convert country codes using pycountry
-    
+
     Parameters
     ----------
     target: str
@@ -376,14 +381,14 @@ def _get_country(target, **keys):
             - 'alpha_3' for 3-digit
             - 'alpha_2' for 2-digit
             - 'name' for full country name
-    
+
     keys: dict
         Specification of the country name and reference system.
         Examples:
             - alpha_3="ZAF" for 3-digit
             - alpha_2="ZA" for 2-digit
             - name="South Africa" for full country name
-    
+
     Returns
     -------
     country code as requested in keys or np.nan, when country code is not recognized
@@ -393,25 +398,25 @@ def _get_country(target, **keys):
     - Convert 2-digit code to 3-digit codes: _get_country('alpha_3', alpha_2="ZA")
     - Convert 3-digit code to 2-digit codes: _get_country('alpha_2', alpha_3="ZAF")
     - Convert 2-digit code to full name: _get_country('name', alpha_2="ZA")
-    
+
     """
-    
+
     assert len(keys) == 1
     try:
         return getattr(pyc.countries.get(**keys), target)
     except (KeyError, AttributeError):
         return np.nan
-        
+
 
 def _two_2_three_digits_country(two_code_country):
     """
     Convert 2-digit to 3-digit country code:
-    
+
     Parameters
     ----------
     two_code_country: str
         2-digit country name
-    
+
     Returns
     ----------
     three_code_country: str
@@ -419,17 +424,17 @@ def _two_2_three_digits_country(two_code_country):
     """
     three_code_country = _get_country('alpha_3', alpha_2=two_code_country)
     return three_code_country
-        
+
 
 def _three_2_two_digits_country(three_code_country):
     """
     Convert 3-digit to 2-digit country code:
-    
+
     Parameters
     ----------
     three_code_country: str
         3-digit country name
-    
+
     Returns
     ----------
     two_code_country: str
@@ -437,17 +442,17 @@ def _three_2_two_digits_country(three_code_country):
     """
     two_code_country = _get_country('alpha_2', alpha_3=three_code_country)
     return two_code_country
-        
+
 
 def _two_digits_2_name_country(two_code_country):
     """
     Convert 2-digit country code to full name country:
-    
+
     Parameters
     ----------
     two_code_country: str
         2-digit country name
-    
+
     Returns
     ----------
     full_name: str
