@@ -40,8 +40,7 @@ def download_GADM(country_code, update=False):
     ----------
     country_code : str 
         Two letter country codes of the downloaded files 
-    update : bool 
-        Name of the network component 
+    update : bool
         Update = true, forces re-download of files
 
     Returns
