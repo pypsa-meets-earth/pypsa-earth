@@ -26,9 +26,7 @@ from shapely.ops import cascaded_union
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
 # from ..scripts.iso_country_codes import AFRICA_CC
-
 
 logger = logging.getLogger(__name__)
 _sets_path_to_root("scripts")
@@ -73,7 +71,9 @@ def download_GADM(country_code, update=False):
     )  # Input filepath gpkg
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
-        print(f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}")
+        print(
+            f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
+        )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
 
@@ -107,7 +107,8 @@ def get_GADM_layer(country_list, layer_id, update=False):
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
-            _three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
+            _three_2_two_digits_country(twoD_c)
+            for twoD_c in geodf_temp["GID_0"]
         ]
 
         # append geodataframes
@@ -125,13 +126,10 @@ def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
-            polys = MultiPolygon(
-                [
-                    p
-                    for p in takewhile(lambda p: p.area > minarea, polys)
-                    if not filterremote or (mainpoly.distance(p) < mainlength)
-                ]
-            )
+            polys = MultiPolygon([
+                p for p in takewhile(lambda p: p.area > minarea, polys)
+                if not filterremote or (mainpoly.distance(p) < mainlength)
+            ])
         else:
             polys = mainpoly
     return polys.simplify(tolerance=tolerance)
@@ -178,9 +176,8 @@ def save_to_geojson(df, fn):
 
 
 def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
-    EEZ_gpkg = os.path.join(
-        os.path.dirname(os.getcwd()), "data", "raw", "eez", name_file
-    )  # Input filepath gpkg
+    EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "eez",
+                            name_file)  # Input filepath gpkg
 
     if not os.path.exists(EEZ_gpkg):
         raise Exception(
@@ -191,12 +188,10 @@ def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
-    geodf_EEZ = geodf_EEZ[
-        [
-            any([_three_2_two_digits_country(x) in selected_countries_codes])
-            for x in geodf_EEZ["ISO_TER1"]
-        ]
-    ]
+    geodf_EEZ = geodf_EEZ[[
+        any([_three_2_two_digits_country(x) in selected_countries_codes])
+        for x in geodf_EEZ["ISO_TER1"]
+    ]]
     geodf_EEZ.reset_index(drop=True, inplace=True)
 
     geodf_EEZ.rename(columns={"ISO_TER1": "name"}, inplace=True)
@@ -212,11 +207,11 @@ def eez(update=False, tol=1e-3):
 
     # set index and simplify polygons
     ret_df = df_eez.set_index("name")["geometry"].map(
-        lambda s: _simplify_polys(s, filterremote=False)
-    )
-    ret_df = gpd.GeoSeries(
-        {k: v for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol}
-    )
+        lambda s: _simplify_polys(s, filterremote=False))
+    ret_df = gpd.GeoSeries({
+        k: v
+        for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol
+    })
     ret_df.index.name = "name"
 
     return ret_df
