@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 from pathlib import Path
 
 import numpy as np
