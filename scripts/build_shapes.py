@@ -39,7 +39,7 @@ def download_GADM(country_code, update=False):
     Parameters
     ----------
     country_code : str 
-        Three letter country codes of the downloaded files 
+        Two letter country codes of the downloaded files 
     update : bool 
         Name of the network component 
         Update = true, forces re-download of files
@@ -106,6 +106,7 @@ def get_GADM_layer(country_list, layer_id, update=False):
 
 
 def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
+    "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys, key=attrgetter('area'), reverse=True)
         mainpoly = polys[0]
