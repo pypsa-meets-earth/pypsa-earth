@@ -30,19 +30,18 @@ def _sets_path_to_root(root_directory_name):
     while n >= 0:
         n -= 1
         # if repo_name is current folder name, stop and set path
-        if repo_name == os.path.basename(os.path.abspath('.')):
+        if repo_name == os.path.basename(os.path.abspath(".")):
             repo_path = os.getcwd()  # os.getcwd() = current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
-            print("Had to go %d folder(s) up." % (n0-1-n))
+            print("Had to go %d folder(s) up." % (n0 - 1 - n))
             break
         # if repo_name NOT current folder name for 5 levels then stop
         if n == 0:
-            print('Cant find the repo path.')
+            print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(
-                os.path.abspath('.'))  # name of upper folder
+            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
 
 
@@ -158,8 +157,7 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
     n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" +
-        n.links.bus1.map(n.buses.carrier)
+        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
     )
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
@@ -177,8 +175,7 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.sum() / 8760.0
-    costs = load_costs(Nyears, tech_costs,
-                       config["costs"], config["electricity"])
+    costs = load_costs(Nyears, tech_costs, config["costs"], config["electricity"])
     update_transmission_costs(n, costs)
 
     return n
@@ -259,8 +256,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(
-            components.keys(), skip_empty=False), components.values()
+        n.iterate_components(components.keys(), skip_empty=False), components.values()
     ):
         if c.df.empty:
             continue
@@ -422,7 +418,7 @@ def _two_2_three_digits_country(two_code_country):
     three_code_country: str
         3-digit country name
     """
-    three_code_country = _get_country('alpha_3', alpha_2=two_code_country)
+    three_code_country = _get_country("alpha_3", alpha_2=two_code_country)
     return three_code_country
 
 
@@ -440,7 +436,7 @@ def _three_2_two_digits_country(three_code_country):
     two_code_country: str
         2-digit country name
     """
-    two_code_country = _get_country('alpha_2', alpha_3=three_code_country)
+    two_code_country = _get_country("alpha_2", alpha_3=three_code_country)
     return two_code_country
 
 
@@ -458,5 +454,5 @@ def _two_digits_2_name_country(two_code_country):
     full_name: str
         full country name
     """
-    full_name = _get_country('name', alpha_2=two_code_country)
+    full_name = _get_country("name", alpha_2=two_code_country)
     return full_name
