@@ -237,15 +237,42 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
     return WorldPop_inputfile, WorldPop_filename
 
 
-def gadm(update = False):
+def add_population_data(df_gadm, country_codes, year=2020, out_logging=False):
+    """Function to add the population info for each country shape in the gadm dataset"""
+    # initialize new population column
+    df_gadm["pop"] = 0
+
+    for c_code in country_codes:
+        WorldPop_inputfile, WorldPop_filename = download_WorldPop(c_code, 2020, update=False, out_logging=False)
+
+        with rasterio.open(WorldPop_inputfile) as src:
+            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+
+            for index, row in country_rows.iterrows():
+                # select the desired area of the raster corresponding to each polygon
+                out_image, out_transform = mask(src, row["geometry"], all_touched=True, invert = False, nodata=0.0)
+                
+                # calculate total population in the selected geometry
+                pop_by_geom = sum(sum(out_image[0]))
+
+                if out_logging == True:
+                    print(index, " out of ", country_rows.shape[0])
+
+                # update the population data in the dataset
+                df_gadm.loc[index, "pop"] = pop_by_geom
+
+
+def gadm(update = False, year = 2020):
     countries = snakemake.config['countries']
 
     # download data if needed and get the last layer id [-1], corresponding to the highest resolution
     df_gadm = get_GADM_layer(countries, -1, update)
 
     # select and rename columns
-    # df_eez = df_eez[["GID_0", "geometry"]].copy()
     df_gadm.rename(columns = {"GID_0": "country"}, inplace=True)
+
+    # add the population data to the dataset
+    add_population_data(df_gadm, countries, year)
 
     # set index and simplify polygons
     ret_df = df_gadm.set_index('country')['geometry'].map(_simplify_polys)
