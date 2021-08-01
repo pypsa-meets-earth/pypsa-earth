@@ -13,6 +13,8 @@ import shutil
 
 import geopandas as gpd
 import fiona
+import rasterio
+from rasterio.mask import mask
 
 import numpy as np
 from itertools import takewhile
@@ -192,6 +194,47 @@ def eez(update = False, tol=1e-3):
 
     return ret_df
 
+
+def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
+    """
+    Download tiff file for each country code
+
+    Parameters
+    ----------
+    country_code : str 
+        Two letter country codes of the downloaded files.
+        Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+    update : bool 
+        Update = true, forces re-download of files
+
+    Returns
+    -------
+    gpkg file per country
+
+    """
+    
+    # UN not adjusted
+    # WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_constrained.tif"
+    # WorldPop_url = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
+
+    WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
+    WorldPop_url = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
+
+    WorldPop_inputfile = os.path.join(
+        os.path.dirname(os.getcwd()), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath zip
+
+    if not os.path.exists(WorldPop_inputfile) or update is True:
+        if out_logging:
+            print(f"{WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}")
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
+
+        with requests.get(WorldPop_url, stream=True) as r:
+            with open(WorldPop_inputfile, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+    
+    return WorldPop_inputfile, WorldPop_filename
 
 
 def gadm(update = False):
