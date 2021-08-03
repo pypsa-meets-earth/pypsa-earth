@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pycountry as pyc
 
 
 def _sets_path_to_root(root_directory_name):
@@ -20,7 +21,7 @@ def _sets_path_to_root(root_directory_name):
 
     """
     import os
-    
+
     repo_name = root_directory_name
     n = 8  # check max 8 levels above. Random default.
     n0 = n
@@ -28,18 +29,19 @@ def _sets_path_to_root(root_directory_name):
     while n >= 0:
         n -= 1
         # if repo_name is current folder name, stop and set path
-        if repo_name == os.path.basename(os.path.abspath('.')):
+        if repo_name == os.path.basename(os.path.abspath(".")):
             repo_path = os.getcwd()  # os.getcwd() = current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
-            print("Had to go %d folder(s) up." % (n0-1-n))
+            print("Had to go %d folder(s) up." % (n0 - 1 - n))
             break
         # if repo_name NOT current folder name for 5 levels then stop
         if n == 0:
-            print('Cant find the repo path.')
+            print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(os.path.abspath('.'))  # name of upper folder
+            upper_path = os.path.dirname(
+                os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
 
 
@@ -69,21 +71,17 @@ def configure_logging(snakemake, skip_handlers=False):
 
     if skip_handlers is False:
         fallback_path = Path(__file__).parent.joinpath(
-            "..", "logs", f"{snakemake.rule}.log"
-        )
+            "..", "logs", f"{snakemake.rule}.log")
         logfile = snakemake.log.get(
-            "python", snakemake.log[0] if snakemake.log else fallback_path
-        )
-        kwargs.update(
-            {
-                "handlers": [
-                    # Prefer the "python" log, otherwise take the first log for each
-                    # Snakemake rule
-                    logging.FileHandler(logfile),
-                    logging.StreamHandler(),
-                ]
-            }
-        )
+            "python", snakemake.log[0] if snakemake.log else fallback_path)
+        kwargs.update({
+            "handlers": [
+                # Prefer the "python" log, otherwise take the first log for each
+                # Snakemake rule
+                logging.FileHandler(logfile),
+                logging.StreamHandler(),
+            ]
+        })
     logging.basicConfig(**kwargs)
 
 
@@ -122,13 +120,12 @@ def load_network(import_name=None, custom_components=None):
     if custom_components is not None:
         override_components = pypsa.components.components.copy()
         override_component_attrs = Dict(
-            {k: v.copy() for k, v in pypsa.components.component_attrs.items()}
-        )
+            {k: v.copy()
+             for k, v in pypsa.components.component_attrs.items()})
         for k, v in custom_components.items():
             override_components.loc[k] = v["component"]
             override_component_attrs[k] = pd.DataFrame(
-                columns=["type", "unit", "default", "description", "status"]
-            )
+                columns=["type", "unit", "default", "description", "status"])
             for attr, val in v["attributes"].items():
                 override_component_attrs[k].loc[attr] = val
 
@@ -140,9 +137,9 @@ def load_network(import_name=None, custom_components=None):
 
 
 def pdbcast(v, h):
-    return pd.DataFrame(
-        v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
-    )
+    return pd.DataFrame(v.values.reshape((-1, 1)) * h.values,
+                        index=v.index,
+                        columns=h.index)
 
 
 def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
@@ -154,9 +151,8 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     n.loads["carrier"] = n.loads.bus.map(n.buses.carrier) + " load"
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
-    n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
-    )
+    n.links["carrier"] = (n.links.bus0.map(n.buses.carrier) + "-" +
+                          n.links.bus1.map(n.buses.carrier))
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
 
@@ -164,16 +160,16 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     n.links["p_nom"] = n.links["p_nom_min"]
 
     if combine_hydro_ps:
-        n.storage_units.loc[
-            n.storage_units.carrier.isin({"PHS", "hydro"}), "carrier"
-        ] = "hydro+PHS"
+        n.storage_units.loc[n.storage_units.carrier.isin({"PHS", "hydro"}),
+                            "carrier"] = "hydro+PHS"
 
     # if the carrier was not set on the heat storage units
     # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.sum() / 8760.0
-    costs = load_costs(Nyears, tech_costs, config["costs"], config["electricity"])
+    costs = load_costs(Nyears, tech_costs, config["costs"],
+                       config["electricity"])
     update_transmission_costs(n, costs)
 
     return n
@@ -189,56 +185,38 @@ def update_p_nom_max(n):
 
 
 def aggregate_p_nom(n):
-    return pd.concat(
-        [
-            n.generators.groupby("carrier").p_nom_opt.sum(),
-            n.storage_units.groupby("carrier").p_nom_opt.sum(),
-            n.links.groupby("carrier").p_nom_opt.sum(),
-            n.loads_t.p.groupby(n.loads.carrier, axis=1).sum().mean(),
-        ]
-    )
+    return pd.concat([
+        n.generators.groupby("carrier").p_nom_opt.sum(),
+        n.storage_units.groupby("carrier").p_nom_opt.sum(),
+        n.links.groupby("carrier").p_nom_opt.sum(),
+        n.loads_t.p.groupby(n.loads.carrier, axis=1).sum().mean(),
+    ])
 
 
 def aggregate_p(n):
-    return pd.concat(
-        [
-            n.generators_t.p.sum().groupby(n.generators.carrier).sum(),
-            n.storage_units_t.p.sum().groupby(n.storage_units.carrier).sum(),
-            n.stores_t.p.sum().groupby(n.stores.carrier).sum(),
-            -n.loads_t.p.sum().groupby(n.loads.carrier).sum(),
-        ]
-    )
+    return pd.concat([
+        n.generators_t.p.sum().groupby(n.generators.carrier).sum(),
+        n.storage_units_t.p.sum().groupby(n.storage_units.carrier).sum(),
+        n.stores_t.p.sum().groupby(n.stores.carrier).sum(),
+        -n.loads_t.p.sum().groupby(n.loads.carrier).sum(),
+    ])
 
 
 def aggregate_e_nom(n):
-    return pd.concat(
-        [
-            (n.storage_units["p_nom_opt"] * n.storage_units["max_hours"])
-            .groupby(n.storage_units["carrier"])
-            .sum(),
-            n.stores["e_nom_opt"].groupby(n.stores.carrier).sum(),
-        ]
-    )
+    return pd.concat([
+        (n.storage_units["p_nom_opt"] * n.storage_units["max_hours"]).groupby(
+            n.storage_units["carrier"]).sum(),
+        n.stores["e_nom_opt"].groupby(n.stores.carrier).sum(),
+    ])
 
 
 def aggregate_p_curtailed(n):
-    return pd.concat(
-        [
-            (
-                (
-                    n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
-                    - n.generators_t.p.sum()
-                )
-                .groupby(n.generators.carrier)
-                .sum()
-            ),
-            (
-                (n.storage_units_t.inflow.sum() - n.storage_units_t.p.sum())
-                .groupby(n.storage_units.carrier)
-                .sum()
-            ),
-        ]
-    )
+    return pd.concat([
+        ((n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt) -
+          n.generators_t.p.sum()).groupby(n.generators.carrier).sum()),
+        ((n.storage_units_t.inflow.sum() - n.storage_units_t.p.sum()).groupby(
+            n.storage_units.carrier).sum()),
+    ])
 
 
 def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
@@ -254,22 +232,22 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(components.keys(), skip_empty=False), components.values()
-    ):
+            n.iterate_components(components.keys(), skip_empty=False),
+            components.values()):
         if c.df.empty:
             continue
         if not existing_only:
             p_nom += "_opt"
-        costs[(c.list_name, "capital")] = (
-            (c.df[p_nom] * c.df.capital_cost).groupby(c.df.carrier).sum()
-        )
+        costs[(c.list_name,
+               "capital")] = ((c.df[p_nom] * c.df.capital_cost).groupby(
+                   c.df.carrier).sum())
         if p_attr is not None:
             p = c.pnl[p_attr].sum()
             if c.name == "StorageUnit":
                 p = p.loc[p > 0]
-            costs[(c.list_name, "marginal")] = (
-                (p * c.df.marginal_cost).groupby(c.df.carrier).sum()
-            )
+            costs[(c.list_name,
+                   "marginal")] = ((p * c.df.marginal_cost).groupby(
+                       c.df.carrier).sum())
     costs = pd.concat(costs)
 
     if flatten:
@@ -278,7 +256,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
         costs = costs.reset_index(level=0, drop=True)
         costs = costs["capital"].add(
-            costs["marginal"].rename({t: t + " marginal" for t in conv_techs}),
+            costs["marginal"].rename({t: t + " marginal"
+                                      for t in conv_techs}),
             fill_value=0.0,
         )
 
@@ -361,3 +340,96 @@ def mock_snakemake(rulename, **wildcards):
 
     os.chdir(script_dir)
     return snakemake
+
+
+def _get_country(target, **keys):
+    """
+    Function to convert country codes using pycountry
+
+    Parameters
+    ----------
+    target: str
+        Desired type of country code.
+        Examples:
+            - 'alpha_3' for 3-digit
+            - 'alpha_2' for 2-digit
+            - 'name' for full country name
+
+    keys: dict
+        Specification of the country name and reference system.
+        Examples:
+            - alpha_3="ZAF" for 3-digit
+            - alpha_2="ZA" for 2-digit
+            - name="South Africa" for full country name
+
+    Returns
+    -------
+    country code as requested in keys or np.nan, when country code is not recognized
+
+    Example of usage
+    -------
+    - Convert 2-digit code to 3-digit codes: _get_country('alpha_3', alpha_2="ZA")
+    - Convert 3-digit code to 2-digit codes: _get_country('alpha_2', alpha_3="ZAF")
+    - Convert 2-digit code to full name: _get_country('name', alpha_2="ZA")
+
+    """
+
+    assert len(keys) == 1
+    try:
+        return getattr(pyc.countries.get(**keys), target)
+    except (KeyError, AttributeError):
+        return np.nan
+
+
+def _two_2_three_digits_country(two_code_country):
+    """
+    Convert 2-digit to 3-digit country code:
+
+    Parameters
+    ----------
+    two_code_country: str
+        2-digit country name
+
+    Returns
+    ----------
+    three_code_country: str
+        3-digit country name
+    """
+    three_code_country = _get_country("alpha_3", alpha_2=two_code_country)
+    return three_code_country
+
+
+def _three_2_two_digits_country(three_code_country):
+    """
+    Convert 3-digit to 2-digit country code:
+
+    Parameters
+    ----------
+    three_code_country: str
+        3-digit country name
+
+    Returns
+    ----------
+    two_code_country: str
+        2-digit country name
+    """
+    two_code_country = _get_country("alpha_2", alpha_3=three_code_country)
+    return two_code_country
+
+
+def _two_digits_2_name_country(two_code_country):
+    """
+    Convert 2-digit country code to full name country:
+
+    Parameters
+    ----------
+    two_code_country: str
+        2-digit country name
+
+    Returns
+    ----------
+    full_name: str
+        full country name
+    """
+    full_name = _get_country("name", alpha_2=two_code_country)
+    return full_name
