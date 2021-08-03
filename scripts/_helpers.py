@@ -436,9 +436,6 @@ def _two_digits_2_name_country(two_code_country):
         full country name
     """
     if two_code_country == 'SN-GM': return f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
-    
+
     full_name = _get_country("name", alpha_2=two_code_country)
     return full_name
-
-
-print(_two_2_three_digits_country('SN-GM'))
