@@ -453,9 +453,10 @@ def add_gdp_data(df_gadm, year=2020, update=False, out_logging=False, name_file_
         
         for index, row in df_gadm.iterrows():
             # select the desired area of the raster corresponding to each polygon
-            # Approximation: the gdp is measured including the pixels
-            #   where the border of the shape lays. This has an averaging effect
-            #   that may be noisy when shapes are too small
+            # Approximation: the gdp is measured excluding the pixels
+            #   where the border of the shape lays. This may affect the computation
+            #   but it is conservative and avoids considering multiple times the same
+            #   pixels
             out_image, out_transform = mask(src,
                                             row["geometry"],
                                             all_touched=False,
@@ -506,59 +507,6 @@ def gadm(update=False, out_logging=False, year=2020):
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
 
-    # df = gpd.read_file(snakemake.input.nuts3)
-    # df = df.loc[df['STAT_LEVL_'] == 3]
-    # df['geometry'] = df['geometry'].map(_simplify_polys)
-    # df = df.rename(columns={'NUTS_ID': 'id'})[['id', 'geometry']].set_index('id')
-
-    # pop = pd.read_table(snakemake.input.nuts3pop, na_values=[':'], delimiter=' ?\t', engine='python')
-    # pop = (pop
-    #        .set_index(pd.MultiIndex.from_tuples(pop.pop('unit,geo\\time').str.split(','))).loc['THS']
-    #        .applymap(lambda x: pd.to_numeric(x, errors='coerce'))
-    #        .fillna(method='bfill', axis=1))['2014']
-
-    # gdp = pd.read_table(snakemake.input.nuts3gdp, na_values=[':'], delimiter=' ?\t', engine='python')
-    # gdp = (gdp
-    #        .set_index(pd.MultiIndex.from_tuples(gdp.pop('unit,geo\\time').str.split(','))).loc['EUR_HAB']
-    #        .applymap(lambda x: pd.to_numeric(x, errors='coerce'))
-    #        .fillna(method='bfill', axis=1))['2014']
-
-    # cantons = pd.read_csv(snakemake.input.ch_cantons)
-    # cantons = cantons.set_index(cantons['HASC'].str[3:])['NUTS']
-    # cantons = cantons.str.pad(5, side='right', fillchar='0')
-
-    # swiss = pd.read_excel(snakemake.input.ch_popgdp, skiprows=3, index_col=0)
-    # swiss.columns = swiss.columns.to_series().map(cantons)
-
-    # pop = pop.append(pd.to_numeric(swiss.loc['Residents in 1000', 'CH040':]))
-    # gdp = gdp.append(pd.to_numeric(swiss.loc['Gross domestic product per capita in Swiss francs', 'CH040':]))
-
-    # df = df.join(pd.DataFrame(dict(pop=pop, gdp=gdp)))
-
-    # df['country'] = df.index.to_series().str[:2].replace(dict(UK='GB', EL='GR'))
-
-    # excludenuts = pd.Index(('FRA10', 'FRA20', 'FRA30', 'FRA40', 'FRA50',
-    #                         'PT200', 'PT300',
-    #                         'ES707', 'ES703', 'ES704','ES705', 'ES706', 'ES708', 'ES709',
-    #                         'FI2', 'FR9'))
-    # excludecountry = pd.Index(('MT', 'TR', 'LI', 'IS', 'CY', 'KV'))
-
-    # df = df.loc[df.index.difference(excludenuts)]
-    # df = df.loc[~df.country.isin(excludecountry)]
-
-    # manual = gpd.GeoDataFrame(
-    #     [['BA1', 'BA', 3871.],
-    #      ['RS1', 'RS', 7210.],
-    #      ['AL1', 'AL', 2893.]],
-    #     columns=['NUTS_ID', 'country', 'pop']
-    # ).set_index('NUTS_ID')
-    # manual['geometry'] = manual['country'].map(country_shapes)
-    # manual = manual.dropna()
-
-    # df = df.append(manual, sort=False)
-
-    # df.loc['ME000', 'pop'] = 650.
-
     return df_gadm
 
 
@@ -588,5 +536,3 @@ if __name__ == "__main__":
 
     gadm_shapes = gadm(update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
-
-    print(gadm_shapes.gdp.sum())
