@@ -1,25 +1,23 @@
 # import
-from shapely.ops import cascaded_union
-from shapely.geometry import Polygon
-from shapely.geometry import MultiPolygon
-from rasterio.mask import mask
-from _helpers import configure_logging
-from _helpers import _two_2_three_digits_country
-from _helpers import _three_2_two_digits_country
-from _helpers import _sets_path_to_root
-import requests
-import rasterio
-import rioxarray
-import xarray as xr
-import numpy as np
-import geopandas as gpd
-import fiona
 import logging
 import os
 import shutil
 import zipfile
 from itertools import takewhile
 from operator import attrgetter
+
+import fiona
+import geopandas as gpd
+import numpy as np
+import rasterio
+import requests
+import rioxarray
+import xarray as xr
+from _helpers import (_sets_path_to_root, _three_2_two_digits_country,
+                      _two_2_three_digits_country, configure_logging)
+from rasterio.mask import mask
+from shapely.geometry import MultiPolygon, Polygon
+from shapely.ops import cascaded_union
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
