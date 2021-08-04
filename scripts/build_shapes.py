@@ -20,11 +20,8 @@ from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
 from _helpers import _two_2_three_digits_country
 from _helpers import configure_logging
-#from iso_country_codes import AFRICA_CC
 from rasterio.mask import mask
-from shapely.geometry import LineString
 from shapely.geometry import MultiPolygon
-from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.ops import cascaded_union
 
@@ -305,7 +302,7 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=False, 
 
     WorldPop_inputfile = os.path.join(os.path.dirname(os.getcwd()), "data",
                                       "raw", "WorldPop",
-                                      WorldPop_filename)  # Input filepath zip
+                                      WorldPop_filename)  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
@@ -416,6 +413,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
         
     return GDP_tif, name_file_tif
 
+
 def load_GDP(countries_codes, year=2015, update=False, out_logging=False, name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
@@ -434,10 +432,52 @@ def load_GDP(countries_codes, year=2015, update=False, out_logging=False, name_f
         if out_logging:
             print(f"File {name_file_tif} not found, the file will be produced by processing {name_file_nc}")
         convert_GDP(name_file_nc, year, out_logging)
+    
+    return GDP_tif, name_file_tif
 
     
+def add_gdp_data(df_gadm, year=2020, update=False, out_logging=False, name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
+    """Function to add the population info for each country shape in the gadm dataset"""
+    
+    if out_logging:
+        print("Add population data to GADM GeoDataFrame")
+
+    # initialize new population column
+    df_gadm["gdp"] = 0
+
+    GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
+    
+    with rasterio.open(GDP_tif) as src:
+        #data_GDP = src.read(1)
+        # resample data to target shape
         
-    return GDP_tif, name_file_tif
+        for index, row in df_gadm.iterrows():
+            # select the desired area of the raster corresponding to each polygon
+            # Approximation: the gdp is measured including the pixels
+            #   where the border of the shape lays. This has an averaging effect
+            #   that may be noisy when shapes are too small
+            out_image, out_transform = mask(src,
+                                            row["geometry"],
+                                            all_touched=False,
+                                            invert=False,
+                                            nodata=0.0)
+            # out_image_int, out_transform = mask(src,
+            #                                row["geometry"],
+            #                                all_touched=False,
+            #                                invert=False,
+            #                                nodata=0.0)
+
+            # calculate total gdp in the selected geometry
+            gdp_by_geom = np.nansum(out_image)
+            print(gdp_by_geom)
+            # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
+            
+            if out_logging == True:
+                print("shape: ", index, " out of ", df_gadm.shape[0])
+
+            # update the gdp data in the dataset
+            df_gadm.loc[index, "gdp"] = gdp_by_geom
+    return df_gadm
 
 
 
@@ -459,6 +499,9 @@ def gadm(update=False, out_logging=False, year=2020):
 
     # add the population data to the dataset
     add_population_data(df_gadm, countries, year, update, out_logging)
+
+    # add the gdp data to the dataset
+    add_gdp_data(df_gadm, year, update, out_logging, name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc")
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -546,3 +589,5 @@ if __name__ == "__main__":
 
     gadm_shapes = gadm(update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
+
+    print(gadm_shapes.gdp.sum())
