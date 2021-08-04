@@ -117,17 +117,18 @@ def get_GADM_layer(country_list, layer_id, update=False):
         # get layer name
         if layer_id < 0 | layer_id >= len(list_layers):
             # when layer id is negative or larger than the number of layers, select the last layer
-            layer_id = len(list_layers)-1
+            layer_id = len(list_layers) - 1
         code_layer = np.mod(layer_id, len(list_layers))
-        layer_name = f"gadm36_{_two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        layer_name = (
+            f"gadm36_{_two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        )
 
         # read gpkg file
         geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
-            _three_2_two_digits_country(twoD_c)
-            for twoD_c in geodf_temp["GID_0"]
+            _three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
         ]
 
         # create a subindex column that is useful
@@ -149,10 +150,13 @@ def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
-            polys = MultiPolygon([
-                p for p in takewhile(lambda p: p.area > minarea, polys)
-                if not filterremote or (mainpoly.distance(p) < mainlength)
-            ])
+            polys = MultiPolygon(
+                [
+                    p
+                    for p in takewhile(lambda p: p.area > minarea, polys)
+                    if not filterremote or (mainpoly.distance(p) < mainlength)
+                ]
+            )
         else:
             polys = mainpoly
     return polys.simplify(tolerance=tolerance)
@@ -213,8 +217,9 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
     The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
     """
 
-    EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "eez",
-                            name_file)  # Input filepath gpkg
+    EEZ_gpkg = os.path.join(
+        os.path.dirname(os.getcwd()), "data", "raw", "eez", name_file
+    )  # Input filepath gpkg
 
     if not os.path.exists(EEZ_gpkg):
         raise Exception(
@@ -226,13 +231,14 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
     selected_countries_codes_3D = [
-        _two_2_three_digits_country(x) for x in countries_codes]
-    geodf_EEZ = geodf_EEZ[[
-        any([x in selected_countries_codes_3D])
-        for x in geodf_EEZ["ISO_TER1"]
-    ]]
+        _two_2_three_digits_country(x) for x in countries_codes
+    ]
+    geodf_EEZ = geodf_EEZ[
+        [any([x in selected_countries_codes_3D]) for x in geodf_EEZ["ISO_TER1"]]
+    ]
     geodf_EEZ["ISO_TER1"] = geodf_EEZ["ISO_TER1"].map(
-        lambda x: _three_2_two_digits_country(x))
+        lambda x: _three_2_two_digits_country(x)
+    )
     geodf_EEZ.reset_index(drop=True, inplace=True)
 
     geodf_EEZ.rename(columns={"ISO_TER1": "name"}, inplace=True)
@@ -252,18 +258,20 @@ def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
 
     # set index and simplify polygons
     ret_df = df_eez.set_index("name").geometry.map(
-        lambda x: _simplify_polys(x, filterremote=False))
+        lambda x: _simplify_polys(x, filterremote=False)
+    )
 
-    ret_df = gpd.GeoSeries({
-        k: v
-        for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol
-    })
+    ret_df = gpd.GeoSeries(
+        {k: v for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol}
+    )
     ret_df.index.name = "name"
 
     return ret_df
 
 
-def download_WorldPop(country_code, year=2020, update=False, out_logging=False, size_min=300):
+def download_WorldPop(
+    country_code, year=2020, update=False, out_logging=False, size_min=300
+):
     """
     Download tiff file for each country code
 
@@ -299,12 +307,12 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=False, 
     # Urls used to possibly download the file
     WorldPop_urls = [
         f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
-        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
+        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
     ]
 
-    WorldPop_inputfile = os.path.join(os.path.dirname(os.getcwd()), "data",
-                                      "raw", "WorldPop",
-                                      WorldPop_filename)  # Input filepath tif
+    WorldPop_inputfile = os.path.join(
+        os.path.dirname(os.getcwd()), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
@@ -328,7 +336,9 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=False, 
     return WorldPop_inputfile, WorldPop_filename
 
 
-def add_population_data(df_gadm, country_codes, year=2020, update=False, out_logging=False):
+def add_population_data(
+    df_gadm, country_codes, year=2020, update=False, out_logging=False
+):
     """Function to add the population info for each country shape in the gadm dataset"""
 
     if out_logging:
@@ -339,7 +349,8 @@ def add_population_data(df_gadm, country_codes, year=2020, update=False, out_log
 
     for c_code in country_codes:
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, year, update, out_logging)
+            c_code, year, update, out_logging
+        )
 
         with rasterio.open(WorldPop_inputfile) as src:
             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
@@ -350,11 +361,9 @@ def add_population_data(df_gadm, country_codes, year=2020, update=False, out_log
                 #   where the border of the shape lays. This leads to slightly overestimate
                 #   the population, but the error is limited and it enables halving the
                 #   computational time
-                out_image, out_transform = mask(src,
-                                                row["geometry"],
-                                                all_touched=True,
-                                                invert=False,
-                                                nodata=0.0)
+                out_image, out_transform = mask(
+                    src, row["geometry"], all_touched=True, invert=False, nodata=0.0
+                )
                 # out_image_int, out_transform = mask(src,
                 #                                row["geometry"],
                 #                                all_touched=False,
@@ -366,8 +375,7 @@ def add_population_data(df_gadm, country_codes, year=2020, update=False, out_log
                 # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
                 if out_logging == True:
-                    print(c_code, ": ", index, " out of ",
-                          country_rows.shape[0])
+                    print(c_code, ": ", index, " out of ", country_rows.shape[0])
 
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
@@ -387,12 +395,14 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     print(name_file_tif)
 
     # path of the nc file
-    GDP_nc = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
-                          name_file_nc)  # Input filepath nc
+    GDP_nc = os.path.join(
+        os.path.dirname(os.getcwd()), "data", "raw", "GDP", name_file_nc
+    )  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
-                           name_file_tif)  # Input filepath nc
+    GDP_tif = os.path.join(
+        os.path.dirname(os.getcwd()), "data", "raw", "GDP", name_file_tif
+    )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
@@ -408,7 +418,8 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     if not year in list_years:
         if out_logging:
             print(
-                f"GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})")
+                f"GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+            )
         year = float(list_years[-1])
 
     # subset of the database and conversion to dataframe
@@ -418,7 +429,13 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     return GDP_tif, name_file_tif
 
 
-def load_GDP(countries_codes, year=2015, update=False, out_logging=False, name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
+def load_GDP(
+    countries_codes,
+    year=2015,
+    update=False,
+    out_logging=False,
+    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
     The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
@@ -429,19 +446,27 @@ def load_GDP(countries_codes, year=2015, update=False, out_logging=False, name_f
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
-                           name_file_tif)  # Input filepath tif
+    GDP_tif = os.path.join(
+        os.path.dirname(os.getcwd()), "data", "raw", "GDP", name_file_tif
+    )  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
             print(
-                f"File {name_file_tif} not found, the file will be produced by processing {name_file_nc}")
+                f"File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
+            )
         convert_GDP(name_file_nc, year, out_logging)
 
     return GDP_tif, name_file_tif
 
 
-def add_gdp_data(df_gadm, year=2020, update=False, out_logging=False, name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
+def add_gdp_data(
+    df_gadm,
+    year=2020,
+    update=False,
+    out_logging=False,
+    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+):
     """Function to add the population info for each country shape in the gadm dataset"""
 
     if out_logging:
@@ -453,7 +478,7 @@ def add_gdp_data(df_gadm, year=2020, update=False, out_logging=False, name_file_
     GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
 
     with rasterio.open(GDP_tif) as src:
-        #data_GDP = src.read(1)
+        # data_GDP = src.read(1)
         # resample data to target shape
 
         for index, row in df_gadm.iterrows():
@@ -462,11 +487,9 @@ def add_gdp_data(df_gadm, year=2020, update=False, out_logging=False, name_file_
             #   where the border of the shape lays. This may affect the computation
             #   but it is conservative and avoids considering multiple times the same
             #   pixels
-            out_image, out_transform = mask(src,
-                                            row["geometry"],
-                                            all_touched=False,
-                                            invert=False,
-                                            nodata=0.0)
+            out_image, out_transform = mask(
+                src, row["geometry"], all_touched=False, invert=False, nodata=0.0
+            )
             # out_image_int, out_transform = mask(src,
             #                                row["geometry"],
             #                                all_touched=False,
@@ -505,8 +528,13 @@ def gadm(update=False, out_logging=False, year=2020):
     add_population_data(df_gadm, countries, year, update, out_logging)
 
     # add the gdp data to the dataset
-    add_gdp_data(df_gadm, year, update, out_logging,
-                 name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc")
+    add_gdp_data(
+        df_gadm,
+        year,
+        update,
+        out_logging,
+        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
