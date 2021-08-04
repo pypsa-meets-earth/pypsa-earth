@@ -12,6 +12,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 import fiona
 import geopandas as gpd
 import numpy as np
+import xarray as xr
+import rioxarray
 import rasterio
 import requests
 from _helpers import _sets_path_to_root
@@ -208,7 +210,12 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON", schema=schema)
 
 
-def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
+def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
+    """
+    Function to load the database of the Exclusive Economic Zones.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    """
+
     EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "eez",
                             name_file)  # Input filepath gpkg
 
@@ -221,7 +228,7 @@ def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
-    selected_countries_codes_3D = [_two_2_three_digits_country(x) for x in selected_countries_codes]
+    selected_countries_codes_3D = [_two_2_three_digits_country(x) for x in countries_codes]
     geodf_EEZ = geodf_EEZ[[
         any([x in selected_countries_codes_3D])
         for x in geodf_EEZ["ISO_TER1"]
@@ -340,20 +347,98 @@ def add_population_data(df_gadm, country_codes, year=2020, update=False, out_log
 
             for index, row in country_rows.iterrows():
                 # select the desired area of the raster corresponding to each polygon
+                # Approximation: the population is measured including the pixels
+                #   where the border of the shape lays. This leads to slightly overestimate
+                #   the population, but the error is limited and it enables halving the
+                #   computational time
                 out_image, out_transform = mask(src,
                                                 row["geometry"],
                                                 all_touched=True,
                                                 invert=False,
                                                 nodata=0.0)
+                # out_image_int, out_transform = mask(src,
+                #                                row["geometry"],
+                #                                all_touched=False,
+                #                                invert=False,
+                #                                nodata=0.0)
 
                 # calculate total population in the selected geometry
-                pop_by_geom = sum(sum(out_image[0]))
+                pop_by_geom = out_image.sum()
+                # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
                 if out_logging == True:
                     print(c_code, ": ", index, " out of ", country_rows.shape[0])
 
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
+
+
+def convert_GDP(name_file_nc, year=2015, out_logging=False):
+    """
+    Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    """
+
+    if out_logging:
+        print("Access to GDP raster data")
+
+    # tif namefile
+    name_file_tif = name_file_nc[:-2] + "tif"
+    print(name_file_tif)
+
+    # path of the nc file
+    GDP_nc = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+                            name_file_nc)  # Input filepath nc
+
+    # path of the tif file
+    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+                            name_file_tif)  # Input filepath nc
+
+    # Check if file exists, otherwise throw exception
+    if not os.path.exists(GDP_nc):
+        raise Exception(
+            f"File EEZ {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
+        )
+
+    # open nc dataset
+    GDP_dataset = xr.open_dataset(GDP_nc)
+
+    # get the requested year of data or its closest one
+    list_years = GDP_dataset["time"]
+    if not year in list_years:
+        if out_logging:
+            print(f"GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})")
+        year = float(list_years[-1])
+
+    # subset of the database and conversion to dataframe
+    GDP_dataset = GDP_dataset.sel(time=year).drop("time")
+    GDP_dataset.rio.to_raster(GDP_tif)
+        
+    return GDP_tif, name_file_tif
+
+def load_GDP(countries_codes, year=2015, update=False, out_logging=False, name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc"):
+    """
+    Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    """
+
+    if out_logging:
+        print("Access to GDP raster data")
+
+    # path of the nc file
+    name_file_tif = name_file_nc[:-2] + "tif"
+    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+                            name_file_tif)  # Input filepath tif
+
+    if update | (not os.path.exists(GDP_tif)):
+        if out_logging:
+            print(f"File {name_file_tif} not found, the file will be produced by processing {name_file_nc}")
+        convert_GDP(name_file_nc, year, out_logging)
+
+    
+        
+    return GDP_tif, name_file_tif
+
 
 
 def gadm(update=False, out_logging=False, year=2020):
