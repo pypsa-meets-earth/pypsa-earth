@@ -469,7 +469,6 @@ def add_gdp_data(df_gadm, year=2020, update=False, out_logging=False, name_file_
 
             # calculate total gdp in the selected geometry
             gdp_by_geom = np.nansum(out_image)
-            print(gdp_by_geom)
             # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
             
             if out_logging == True:
