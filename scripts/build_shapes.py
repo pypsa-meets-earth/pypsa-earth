@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 _sets_path_to_root("scripts")
 
 
-def download_GADM(country_code, update=False):
+def download_GADM(country_code, update=False, out_logging=False):
     """
     Download gpkg file from GADM for a given country code
 
@@ -73,9 +73,10 @@ def download_GADM(country_code, update=False):
     )  # Input filepath gpkg
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
-        print(
-            f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
-        )
+        if out_logging:
+            print(
+                f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
+            )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
 
@@ -92,6 +93,16 @@ def download_GADM(country_code, update=False):
 def get_GADM_layer(country_list, layer_id, update=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
+
+    Parameters
+    ----------
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+    
     """
 
     # initialization of the geoDataFrame
@@ -105,6 +116,9 @@ def get_GADM_layer(country_list, layer_id, update=False):
         list_layers = fiona.listlayers(file_gpkg)
 
         # get layer name
+        if layer_id < 0 | layer_id >= len(list_layers):
+            # when layer id is negative or larger than the number of layers, select the last layer
+            layer_id = len(list_layers)-1
         code_layer = np.mod(layer_id, len(list_layers))
         layer_name = f"gadm36_{_two_2_three_digits_country(country_code).upper()}_{code_layer}"
 
@@ -145,7 +159,12 @@ def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(update=False):
+def countries(update=False, out_logging=False):
+    "Create country shapes"
+
+    if out_logging:
+        print("Create country shapes")
+
     countries = snakemake.config["countries"]
 
     # download data if needed and get the layer id 0, corresponding to the countries
@@ -161,7 +180,11 @@ def countries(update=False):
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False):
+    
+    if out_logging:
+        print("Merge country shapes")
+    
     shapes = list(country_shapes)
     if eez_shapes is not None:
         shapes += list(eez_shapes)
@@ -211,7 +234,11 @@ def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(country_shapes, update=False, tol=1e-3):
+def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
+    
+    if out_logging:
+        print("Create offshore shapes")
+
     countries = snakemake.config["countries"]
 
     # load data
@@ -230,7 +257,7 @@ def eez(country_shapes, update=False, tol=1e-3):
     return ret_df
 
 
-def download_WorldPop(country_code, year=2020, update=False, out_logging=True, size_min=300):
+def download_WorldPop(country_code, year=2020, update=False, out_logging=False, size_min=300):
     """
     Download tiff file for each country code
 
@@ -254,6 +281,9 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True, s
         Name of the file
 
     """
+    
+    if out_logging:
+        print("Download WorldPop datasets")
 
     # UN not adjusted
     # WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_constrained.tif"
@@ -292,14 +322,18 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True, s
     return WorldPop_inputfile, WorldPop_filename
 
 
-def add_population_data(df_gadm, country_codes, year=2020, out_logging=False):
+def add_population_data(df_gadm, country_codes, year=2020, update=False, out_logging=False):
     """Function to add the population info for each country shape in the gadm dataset"""
+    
+    if out_logging:
+        print("Add population data to GADM GeoDataFrame")
+
     # initialize new population column
     df_gadm["pop"] = 0
 
     for c_code in country_codes:
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, 2020, update=False, out_logging=False)
+            c_code, year, update, out_logging)
 
         with rasterio.open(WorldPop_inputfile) as src:
             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
@@ -316,13 +350,17 @@ def add_population_data(df_gadm, country_codes, year=2020, out_logging=False):
                 pop_by_geom = sum(sum(out_image[0]))
 
                 if out_logging == True:
-                    print(index, " out of ", country_rows.shape[0])
+                    print(c_code, ": ", index, " out of ", country_rows.shape[0])
 
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
 
 
-def gadm(update=False, year=2020):
+def gadm(update=False, out_logging=False, year=2020):
+    
+    if out_logging:
+        print("Creation GADM GeoDataFrame")
+
     countries = snakemake.config["countries"]
 
     # download data if needed and get the last layer id [-1], corresponding to the highest resolution
@@ -335,7 +373,7 @@ def gadm(update=False, year=2020):
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
     # add the population data to the dataset
-    add_population_data(df_gadm, countries, year)
+    add_population_data(df_gadm, countries, year, update, out_logging)
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -406,17 +444,20 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     out = snakemake.output
+    update = False
+    out_logging = True
+    year = 2020
 
     # print(snakemake.config)
 
-    country_shapes = countries()
+    country_shapes = countries(update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(country_shapes)
+    offshore_shapes = eez(country_shapes, update, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
-    africa_shape = country_cover(country_shapes, offshore_shapes)
+    africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm()
+    gadm_shapes = gadm(update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
