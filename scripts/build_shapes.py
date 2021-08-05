@@ -509,15 +509,15 @@ def add_gdp_data(
     return df_gadm
 
 
-def gadm(update=False, out_logging=False, year=2020):
+def gadm(layer_id=2, update=False, out_logging=False, year=2020):
 
     if out_logging:
         print("Creation GADM GeoDataFrame")
 
     countries = snakemake.config["countries"]
 
-    # download data if needed and get the last layer id [-1], corresponding to the highest resolution
-    df_gadm = get_GADM_layer(countries, -1, update)
+    # download data if needed and get the desired layer_id
+    df_gadm = get_GADM_layer(countries, layer_id, update)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -553,6 +553,9 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     out = snakemake.output
+
+    # Parameters to be later initialized through snakemake
+    layer_id = 2
     update = False
     out_logging = True
     year = 2020
@@ -568,5 +571,5 @@ if __name__ == "__main__":
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm(update, out_logging, year)
+    gadm_shapes = gadm(layer_id, update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
