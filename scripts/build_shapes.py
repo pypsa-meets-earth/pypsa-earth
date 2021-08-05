@@ -11,22 +11,21 @@ import geopandas as gpd
 import numpy as np
 import rasterio
 import requests
+import rioxarray
+import xarray as xr
 from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
 from _helpers import _two_2_three_digits_country
 from _helpers import configure_logging
-from iso_country_codes import AFRICA_CC
 from rasterio.mask import mask
-from shapely.geometry import LineString
 from shapely.geometry import MultiPolygon
-from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.ops import cascaded_union
 
-# import sys
-
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# import sys
 
 # from ..scripts.iso_country_codes import AFRICA_CC
 
@@ -34,7 +33,7 @@ logger = logging.getLogger(__name__)
 _sets_path_to_root("scripts")
 
 
-def download_GADM(country_code, update=False):
+def download_GADM(country_code, update=False, out_logging=False):
     """
     Download gpkg file from GADM for a given country code
 
@@ -73,9 +72,10 @@ def download_GADM(country_code, update=False):
     )  # Input filepath gpkg
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
-        print(
-            f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
-        )
+        if out_logging:
+            print(
+                f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
+            )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
 
@@ -92,6 +92,16 @@ def download_GADM(country_code, update=False):
 def get_GADM_layer(country_list, layer_id, update=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
+
+    Parameters
+    ----------
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+
     """
 
     # initialization of the geoDataFrame
@@ -104,14 +114,27 @@ def get_GADM_layer(country_list, layer_id, update=False):
         # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
 
+        # get layer name
+        if layer_id < 0 | layer_id >= len(list_layers):
+            # when layer id is negative or larger than the number of layers, select the last layer
+            layer_id = len(list_layers) - 1
+        code_layer = np.mod(layer_id, len(list_layers))
+        layer_name = (
+            f"gadm36_{_two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        )
+
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=list_layers[layer_id])
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
             _three_2_two_digits_country(twoD_c)
             for twoD_c in geodf_temp["GID_0"]
         ]
+
+        # create a subindex column that is useful
+        # in the GADM processing of sub-national zones
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
 
         # append geodataframes
         geodf_GADM = geodf_GADM.append(geodf_temp)
@@ -137,7 +160,12 @@ def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(update=False):
+def countries(update=False, out_logging=False):
+    "Create country shapes"
+
+    if out_logging:
+        print("Create country shapes")
+
     countries = snakemake.config["countries"]
 
     # download data if needed and get the layer id 0, corresponding to the countries
@@ -153,7 +181,11 @@ def countries(update=False):
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False):
+
+    if out_logging:
+        print("Merge country shapes")
+
     shapes = list(country_shapes)
     if eez_shapes is not None:
         shapes += list(eez_shapes)
@@ -177,7 +209,12 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON", schema=schema)
 
 
-def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
+def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
+    """
+    Function to load the database of the Exclusive Economic Zones.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    """
+
     EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "eez",
                             name_file)  # Input filepath gpkg
 
@@ -190,10 +227,14 @@ def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
+    selected_countries_codes_3D = [
+        _two_2_three_digits_country(x) for x in countries_codes
+    ]
     geodf_EEZ = geodf_EEZ[[
-        any([_three_2_two_digits_country(x) in selected_countries_codes])
-        for x in geodf_EEZ["ISO_TER1"]
+        any([x in selected_countries_codes_3D]) for x in geodf_EEZ["ISO_TER1"]
     ]]
+    geodf_EEZ["ISO_TER1"] = geodf_EEZ["ISO_TER1"].map(
+        lambda x: _three_2_two_digits_country(x))
     geodf_EEZ.reset_index(drop=True, inplace=True)
 
     geodf_EEZ.rename(columns={"ISO_TER1": "name"}, inplace=True)
@@ -201,15 +242,20 @@ def load_EEZ(selected_countries_codes, name_file="eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(update=False, tol=1e-3):
+def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
+
+    if out_logging:
+        print("Create offshore shapes")
+
     countries = snakemake.config["countries"]
 
     # load data
     df_eez = load_EEZ(countries)
 
     # set index and simplify polygons
-    ret_df = df_eez.set_index("name")["geometry"].map(
-        lambda s: _simplify_polys(s, filterremote=False))
+    ret_df = df_eez.set_index("name").geometry.map(
+        lambda x: _simplify_polys(x, filterremote=False))
+
     ret_df = gpd.GeoSeries({
         k: v
         for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol
@@ -219,7 +265,11 @@ def eez(update=False, tol=1e-3):
     return ret_df
 
 
-def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
+def download_WorldPop(country_code,
+                      year=2020,
+                      update=False,
+                      out_logging=False,
+                      size_min=300):
     """
     Download tiff file for each country code
 
@@ -228,25 +278,39 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
     country_code : str
         Two letter country codes of the downloaded files.
         Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+    year : int
+        Year of the data to download
     update : bool
         Update = true, forces re-download of files
+    size_min : int
+        Minimum size of each file to download
 
     Returns
     -------
-    gpkg file per country
+    WorldPop_inputfile : str
+        Path of the file
+    WorldPop_filename : str
+        Name of the file
 
     """
+
+    if out_logging:
+        print("Download WorldPop datasets")
 
     # UN not adjusted
     # WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_constrained.tif"
     # WorldPop_url = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
 
     WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
-    WorldPop_url = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
+    # Urls used to possibly download the file
+    WorldPop_urls = [
+        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
+        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
+    ]
 
     WorldPop_inputfile = os.path.join(os.path.dirname(os.getcwd()), "data",
                                       "raw", "WorldPop",
-                                      WorldPop_filename)  # Input filepath zip
+                                      WorldPop_filename)  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
@@ -256,44 +320,200 @@ def download_WorldPop(country_code, year=2020, update=False, out_logging=True):
         #  create data/osm directory
         os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
 
-        with requests.get(WorldPop_url, stream=True) as r:
-            with open(WorldPop_inputfile, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+        loaded = False
+        for WorldPop_url in WorldPop_urls:
+            with requests.get(WorldPop_url, stream=True) as r:
+                with open(WorldPop_inputfile, "wb") as f:
+                    if float(r.headers["Content-length"]) > size_min:
+                        shutil.copyfileobj(r.raw, f)
+                        loaded = True
+                        break
+        if not loaded:
+            print(f"Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
 
-def add_population_data(df_gadm, country_codes, year=2020, out_logging=False):
+def add_population_data(df_gadm,
+                        country_codes,
+                        year=2020,
+                        update=False,
+                        out_logging=False):
     """Function to add the population info for each country shape in the gadm dataset"""
+
+    if out_logging:
+        print("Add population data to GADM GeoDataFrame")
+
     # initialize new population column
     df_gadm["pop"] = 0
 
     for c_code in country_codes:
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, 2020, update=False, out_logging=False)
+            c_code, year, update, out_logging)
 
         with rasterio.open(WorldPop_inputfile) as src:
             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
             for index, row in country_rows.iterrows():
                 # select the desired area of the raster corresponding to each polygon
+                # Approximation: the population is measured including the pixels
+                #   where the border of the shape lays. This leads to slightly overestimate
+                #   the population, but the error is limited and it enables halving the
+                #   computational time
                 out_image, out_transform = mask(src,
                                                 row["geometry"],
                                                 all_touched=True,
                                                 invert=False,
                                                 nodata=0.0)
+                # out_image_int, out_transform = mask(src,
+                #                                row["geometry"],
+                #                                all_touched=False,
+                #                                invert=False,
+                #                                nodata=0.0)
 
                 # calculate total population in the selected geometry
-                pop_by_geom = sum(sum(out_image[0]))
+                pop_by_geom = out_image.sum()
+                # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
                 if out_logging == True:
-                    print(index, " out of ", country_rows.shape[0])
+                    print(c_code, ": ", index, " out of ",
+                          country_rows.shape[0])
 
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
 
 
-def gadm(update=False, year=2020):
+def convert_GDP(name_file_nc, year=2015, out_logging=False):
+    """
+    Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    """
+
+    if out_logging:
+        print("Access to GDP raster data")
+
+    # tif namefile
+    name_file_tif = name_file_nc[:-2] + "tif"
+    print(name_file_tif)
+
+    # path of the nc file
+    GDP_nc = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+                          name_file_nc)  # Input filepath nc
+
+    # path of the tif file
+    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+                           name_file_tif)  # Input filepath nc
+
+    # Check if file exists, otherwise throw exception
+    if not os.path.exists(GDP_nc):
+        raise Exception(
+            f"File EEZ {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
+        )
+
+    # open nc dataset
+    GDP_dataset = xr.open_dataset(GDP_nc)
+
+    # get the requested year of data or its closest one
+    list_years = GDP_dataset["time"]
+    if not year in list_years:
+        if out_logging:
+            print(
+                f"GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+            )
+        year = float(list_years[-1])
+
+    # subset of the database and conversion to dataframe
+    GDP_dataset = GDP_dataset.sel(time=year).drop("time")
+    GDP_dataset.rio.to_raster(GDP_tif)
+
+    return GDP_tif, name_file_tif
+
+
+def load_GDP(
+    countries_codes,
+    year=2015,
+    update=False,
+    out_logging=False,
+    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+):
+    """
+    Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    """
+
+    if out_logging:
+        print("Access to GDP raster data")
+
+    # path of the nc file
+    name_file_tif = name_file_nc[:-2] + "tif"
+    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+                           name_file_tif)  # Input filepath tif
+
+    if update | (not os.path.exists(GDP_tif)):
+        if out_logging:
+            print(
+                f"File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
+            )
+        convert_GDP(name_file_nc, year, out_logging)
+
+    return GDP_tif, name_file_tif
+
+
+def add_gdp_data(
+    df_gadm,
+    year=2020,
+    update=False,
+    out_logging=False,
+    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+):
+    """Function to add the population info for each country shape in the gadm dataset"""
+
+    if out_logging:
+        print("Add population data to GADM GeoDataFrame")
+
+    # initialize new population column
+    df_gadm["gdp"] = 0
+
+    GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
+
+    with rasterio.open(GDP_tif) as src:
+        # data_GDP = src.read(1)
+        # resample data to target shape
+
+        for index, row in df_gadm.iterrows():
+            # select the desired area of the raster corresponding to each polygon
+            # Approximation: the gdp is measured excluding the pixels
+            #   where the border of the shape lays. This may affect the computation
+            #   but it is conservative and avoids considering multiple times the same
+            #   pixels
+            out_image, out_transform = mask(src,
+                                            row["geometry"],
+                                            all_touched=False,
+                                            invert=False,
+                                            nodata=0.0)
+            # out_image_int, out_transform = mask(src,
+            #                                row["geometry"],
+            #                                all_touched=False,
+            #                                invert=False,
+            #                                nodata=0.0)
+
+            # calculate total gdp in the selected geometry
+            gdp_by_geom = np.nansum(out_image)
+            # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
+
+            if out_logging == True:
+                print("shape: ", index, " out of ", df_gadm.shape[0])
+
+            # update the gdp data in the dataset
+            df_gadm.loc[index, "gdp"] = gdp_by_geom
+    return df_gadm
+
+
+def gadm(update=False, out_logging=False, year=2020):
+
+    if out_logging:
+        print("Creation GADM GeoDataFrame")
+
     countries = snakemake.config["countries"]
 
     # download data if needed and get the last layer id [-1], corresponding to the highest resolution
@@ -302,67 +522,26 @@ def gadm(update=False, year=2020):
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
 
+    # drop useless columns
+    df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
+
     # add the population data to the dataset
-    add_population_data(df_gadm, countries, year)
+    add_population_data(df_gadm, countries, year, update, out_logging)
+
+    # add the gdp data to the dataset
+    add_gdp_data(
+        df_gadm,
+        year,
+        update,
+        out_logging,
+        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    )
 
     # set index and simplify polygons
-    ret_df = df_gadm.set_index("country")["geometry"].map(_simplify_polys)
-    ret_df.index.name = "name"
+    df_gadm.set_index("GADM_ID", inplace=True)
+    df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
 
-    # df = gpd.read_file(snakemake.input.nuts3)
-    # df = df.loc[df['STAT_LEVL_'] == 3]
-    # df['geometry'] = df['geometry'].map(_simplify_polys)
-    # df = df.rename(columns={'NUTS_ID': 'id'})[['id', 'geometry']].set_index('id')
-
-    # pop = pd.read_table(snakemake.input.nuts3pop, na_values=[':'], delimiter=' ?\t', engine='python')
-    # pop = (pop
-    #        .set_index(pd.MultiIndex.from_tuples(pop.pop('unit,geo\\time').str.split(','))).loc['THS']
-    #        .applymap(lambda x: pd.to_numeric(x, errors='coerce'))
-    #        .fillna(method='bfill', axis=1))['2014']
-
-    # gdp = pd.read_table(snakemake.input.nuts3gdp, na_values=[':'], delimiter=' ?\t', engine='python')
-    # gdp = (gdp
-    #        .set_index(pd.MultiIndex.from_tuples(gdp.pop('unit,geo\\time').str.split(','))).loc['EUR_HAB']
-    #        .applymap(lambda x: pd.to_numeric(x, errors='coerce'))
-    #        .fillna(method='bfill', axis=1))['2014']
-
-    # cantons = pd.read_csv(snakemake.input.ch_cantons)
-    # cantons = cantons.set_index(cantons['HASC'].str[3:])['NUTS']
-    # cantons = cantons.str.pad(5, side='right', fillchar='0')
-
-    # swiss = pd.read_excel(snakemake.input.ch_popgdp, skiprows=3, index_col=0)
-    # swiss.columns = swiss.columns.to_series().map(cantons)
-
-    # pop = pop.append(pd.to_numeric(swiss.loc['Residents in 1000', 'CH040':]))
-    # gdp = gdp.append(pd.to_numeric(swiss.loc['Gross domestic product per capita in Swiss francs', 'CH040':]))
-
-    # df = df.join(pd.DataFrame(dict(pop=pop, gdp=gdp)))
-
-    # df['country'] = df.index.to_series().str[:2].replace(dict(UK='GB', EL='GR'))
-
-    # excludenuts = pd.Index(('FRA10', 'FRA20', 'FRA30', 'FRA40', 'FRA50',
-    #                         'PT200', 'PT300',
-    #                         'ES707', 'ES703', 'ES704','ES705', 'ES706', 'ES708', 'ES709',
-    #                         'FI2', 'FR9'))
-    # excludecountry = pd.Index(('MT', 'TR', 'LI', 'IS', 'CY', 'KV'))
-
-    # df = df.loc[df.index.difference(excludenuts)]
-    # df = df.loc[~df.country.isin(excludecountry)]
-
-    # manual = gpd.GeoDataFrame(
-    #     [['BA1', 'BA', 3871.],
-    #      ['RS1', 'RS', 7210.],
-    #      ['AL1', 'AL', 2893.]],
-    #     columns=['NUTS_ID', 'country', 'pop']
-    # ).set_index('NUTS_ID')
-    # manual['geometry'] = manual['country'].map(country_shapes)
-    # manual = manual.dropna()
-
-    # df = df.append(manual, sort=False)
-
-    # df.loc['ME000', 'pop'] = 650.
-
-    return ret_df
+    return df_gadm
 
 
 if __name__ == "__main__":
@@ -374,17 +553,20 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     out = snakemake.output
+    update = False
+    out_logging = True
+    year = 2020
 
     # print(snakemake.config)
 
-    country_shapes = countries()
+    country_shapes = countries(update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez()
+    offshore_shapes = eez(country_shapes, update, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
-    africa_shape = country_cover(country_shapes, offshore_shapes)
+    africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm()
+    gadm_shapes = gadm(update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
