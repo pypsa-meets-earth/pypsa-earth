@@ -13,8 +13,8 @@
 *.pbf
 
 
-data/osm/
-data/raw/
+data/osm
+data/raw
 data/base_network/
 data/osm/africa_all_buses_build_networks.csv
 data/osm/africa_all_lines_build_networks.csv
