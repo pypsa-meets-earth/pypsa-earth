@@ -8,11 +8,14 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries:
-  - SL
-  #- MA
-  #- NE
-  #- NG
+countries: ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
+'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
+'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW', 'SN-GM',
+'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
+  #- SL  # Sierra Leone
+  #- MA  # Morroco
+  #- NE  # Niger
+  #- NG  # Nigeria
 
 summary_dir: results
 
