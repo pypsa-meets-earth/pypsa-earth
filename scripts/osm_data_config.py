@@ -1,3 +1,6 @@
+# osm_data_config
+# configuration paramaters necessary for osm_data_ level scripts
+
 
 # OFFICIAL TWO DIGIT COUNTRY CODES WITH OSM/GEOFABRIK STRING NAMES
 AFRICA_CC = {
@@ -55,6 +58,49 @@ AFRICA_CC = {
     "TG": "togo",
     "TN": "tunisia",
     "UG": "uganda",
+    "ZM": "zambia",
+    "ZW": "zimbabwe",
+}
+
+
+# The feature category represents the final representation of the feature
+# For node features: ways are converted to nodes
+# For way features: only ways are used
+
+feature_category = {
+    "substation": "node",
+    "generator": "node",
+    "line": "way",
+    "tower": "node",
+    "cable": "way"
+}
+
+
+
+COMP_CC = {
+    "DZ": "algeria",
+    "AO": "angola",
+    "CM": "cameroon",
+    "CF": "central-african-republic",
+    "TD": "chad",
+    "CG": "congo-brazzaville",
+    "CD": "congo-democratic-republic",
+    "EG": "egypt",
+    "GQ": "equatorial-guinea",
+    "ER": "eritrea",
+    "ET": "ethiopia",
+    "CI": "ivory-coast",
+    "LS": "lesotho",
+    "LR": "liberia",
+    "LY": "libya",
+    "MR": "mauritania",
+    "MU": "mauritius",
+    "MA": "morocco",
+    "MZ": "mozambique",
+    "RW": "rwanda",
+    "TZ": "tanzania",
+    "TG": "togo",
+    "TN": "tunisia",
     "ZM": "zambia",
     "ZW": "zimbabwe",
 }
