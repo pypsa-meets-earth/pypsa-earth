@@ -25,7 +25,7 @@ from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter
 from _helpers import _sets_path_to_root
-from osm_data_config import AFRICA_CC, COMP_CC, feature_category
+from osm_data_config import AFRICA_CC, COMP_CC, feature_category, feature_columns
 from shapely.geometry import LineString, Point, Polygon
 import hashlib
 
@@ -175,27 +175,28 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     # Load Previously Pre-Filtered Files
     if update is False and verify is False and filter_file_exists is True:
-        create_elements = False  # Do not create elements again
+        create_elements = True  # Do not create elements again
+        # TODO: There is a bug somewhere, the line above create_elements should be set to False and the elements loaded from the pickle
 
-        ElementsDict = {elementname:{}}
-        Elements = osm_pickle.pickleload(ElementsDict,os.path.join(os.getcwd(),os.path.dirname(JSON_outputfile), 'Elements'))
+        # ElementsDict = {elementname:{}}
+        # Elements = osm_pickle.pickleload(ElementsDict,os.path.join(os.getcwd(),os.path.dirname(JSON_outputfile), 'Elements'))
 
         new_prefilter_data = False  # Do not pre-filter data again
         # HACKY: esy.osmfilter code to re-create Data.pickle
-        with open(JSON_outputfile,encoding="utf-8") as f:
-            Data = json.load(f)
-        # DataDict = {"Data": Data}
-        # osm_pickle.picklesave(
-        #     DataDict,
-        #     os.path.realpath(
-        #         os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
-        #     ),
-        # )
-        # Data = DataDict["Data"]
+        # with open(JSON_outputfile,encoding="utf-8") as f:
+        #     Data = json.load(f)
+        Data = osm_info.ReadJason(JSON_outputfile, verbose="no")
+        DataDict = {"Data": Data}
+        osm_pickle.picklesave(
+            DataDict,
+            os.path.realpath(
+                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
+            ),
+        )
 
         _logger.info(f"Loading {feature} Pickle for {AFRICA_CC[country_code]}")
-        feature_data = Data, Elements
-        return feature_data
+        # feature_data = Data, Elements
+        # return feature_data
 
     else:
         create_elements = True
@@ -294,7 +295,7 @@ def convert_ways_points(df_way, Data):
     # lonlat_column = []
     # area_column = []
     way_polygon = list(map(lambda lonlat: Polygon(lonlat) if len(lonlat)>=3 else Point(lonlat[0]), lonlat_list))
-    area_column = list(map(int,round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area,-1)))
+    area_column = list(map(int,round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area,-1))) #TODO: Rounding should be down in cleaning scripts
 
     def find_center_point(p):
         if p.geom_type == 'Polygon':
@@ -419,77 +420,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
 def process_data(update, verify):
 
     # TODO : Remove columns in favour of a set that drops columns
-    columns_tower = [
-        "id",
-        "lonlat",
-        "Area",
-        "tags.power",
-        "tags.tower",
-        "tags.material",
-        "tags.structure",
-        "tags.operator",
-        "tags.line_attachment",
-        "tags.line_management",
-        "tags.ref",
-        "tags.height",
-        "Type",
-        "Country",
-    ]
 
-    columns_substation = [
-        "id",
-        "lonlat",
-        "Area",
-        "tags.power",
-        "tags.substation",
-        "tags.voltage",
-        "Type",
-        # "refs",
-        "Country",
-    ]
-
-    columns_line = [
-        "id",
-        "lonlat",
-        "Length",
-        "tags.power",
-        "tags.cables",
-        "tags.voltage",
-        "tags.circuits",
-        "tags.frequency",
-        "Type",
-        # "refs",
-        "Country",
-    ]
-
-    columns_generator = [
-        "id",
-        "lonlat",
-        "Area",
-        "tags.power",
-        "tags.generator:type",
-        "tags.generator:method",
-        "tags.generator:source",
-        "tags.generator:output:electricity",
-        "Type",
-        # "refs",
-        "Country",
-    ]
-
-    columns_cable = [
-        "id",
-        "lonlat",
-        "Length",
-        "tags.power",
-        "tags.cables",
-        "tags.voltage",
-        "tags.circuits",
-        "tags.frequency",
-        "tags.location",
-        "Type",
-        # "refs",
-        "Country",
-    ]
 
     def output_csv_geojson(df_all_feature, columns_feature, feature):
         outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw")  # Output file directory
@@ -518,13 +449,14 @@ def process_data(update, verify):
             outputfile_partial + f"_{feature}s" + ".geojson", driver="GeoJSON"
         )  # Generate GeoJson   
 
-    SNGM_CC = {"SN-GM": "senegal-and-gambia"}
-    ZW_CC = {"ZW": "zimbabwe"}
-    test_CC = {"LY": "libya", "SZ": "swaziland"}
+    # SNGM_CC = {"SN-GM": "senegal-and-gambia"}
+    # ZW_CC = {"ZW": "zimbabwe"}
+    # test_CC = {"LY": "libya", "SZ": "swaziland"}
+    
     # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}        
     for feature in feature_list:
         df_all_feature = pd.DataFrame()
-        for country_code in SNGM_CC.keys():
+        for country_code in AFRICA_CC.keys():
             # replace Africa_CC by test_CC to only download data for one country
             feature_data = download_and_filter(feature, country_code, update, verify)
 
@@ -551,17 +483,7 @@ def process_data(update, verify):
             
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
-        # TODO : Remove columns in favour of a set that drops columns
-        if feature == "tower":
-            output_csv_geojson(df_all_feature, columns_tower, "tower")
-        if feature == "substation":
-            output_csv_geojson(df_all_feature, columns_substation, "substation")
-        if feature == "line":
-            output_csv_geojson(df_all_feature, columns_line, "line")
-        if feature == "generator":
-            output_csv_geojson(df_all_feature, columns_generator, "generator")
-        if feature == "cable":
-            output_csv_geojson(df_all_feature, columns_cable, "cable")
+        output_csv_geojson(df_all_feature, feature_columns[feature], feature)
 
 
 if __name__ == "__main__":
