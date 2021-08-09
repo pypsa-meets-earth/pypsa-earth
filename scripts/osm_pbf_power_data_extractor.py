@@ -33,6 +33,7 @@ from osm_data_config import feature_category
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
+
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
