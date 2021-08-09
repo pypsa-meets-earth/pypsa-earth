@@ -20,19 +20,13 @@ import pandas as pd
 import requests
 import urllib3
 from _helpers import _sets_path_to_root
-from esy.osmfilter import Node
+from esy.osmfilter import Node, Relation, Way
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
-from esy.osmfilter import Way
 from numpy import append
-from osm_data_config import AFRICA_CC
-from osm_data_config import COMP_CC
-from osm_data_config import feature_category
-from shapely.geometry import LineString
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from osm_data_config import AFRICA_CC, COMP_CC, feature_category
+from shapely.geometry import LineString, Point, Polygon
 
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
