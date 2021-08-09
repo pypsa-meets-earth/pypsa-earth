@@ -60,7 +60,6 @@ AFRICA_CC = {
     "ZW": "zimbabwe",
 }
 
-
 # The feature category represents the final representation of the feature
 # For node features: ways are converted to nodes
 # For way features: only ways are used
@@ -72,7 +71,6 @@ feature_category = {
     "tower": "node",
     "cable": "way",
 }
-
 
 COMP_CC = {
     "DZ": "algeria",
