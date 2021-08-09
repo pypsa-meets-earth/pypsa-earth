@@ -104,7 +104,7 @@ COMP_CC = {
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
-# These configurations are used to specify which OSM tags are kept as columns in DataFrame. 
+# These configurations are used to specify which OSM tags are kept as columns in DataFrame.
 # Follows the OSM Wiki: https://wiki.openstreetmap.org/wiki/Power
 
 
@@ -139,7 +139,7 @@ columns_substation = [
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
-    ]
+]
 
 # ========================
 # GENERATOR TAGS
@@ -221,7 +221,7 @@ columns_tower = [
     # "TODO:ADD Tags not kept here",
 ]
 
-## FINAL DICTIONARY
+# FINAL DICTIONARY
 
 feature_columns = {
     "substation": columns_basic + columns_substation,

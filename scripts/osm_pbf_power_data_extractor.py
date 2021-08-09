@@ -7,6 +7,18 @@
 # Disables pylint problem in this scripts
 # pylint: disable=E1120
 """ OSM extraction script."""
+from shapely.geometry import LineString, Point, Polygon
+from osm_data_config import AFRICA_CC, COMP_CC, feature_category, feature_columns
+from _helpers import _sets_path_to_root
+from esy.osmfilter import run_filter
+from esy.osmfilter import Relation
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import (
+    Node,
+    Relation,
+    Way,
+)  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 import hashlib
 import json
 import logging
@@ -21,21 +33,7 @@ import requests
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-from esy.osmfilter import (
-    Node,
-    Relation,
-    Way,
-)  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import Relation
-from esy.osmfilter import run_filter
-from _helpers import _sets_path_to_root
-from osm_data_config import AFRICA_CC, COMP_CC, feature_category, feature_columns
-from shapely.geometry import LineString, Point, Polygon
-import hashlib
 
-import logging
 
 # logging.basicConfig()
 _logger = logging.getLogger("osm_data_extractor")
@@ -94,7 +92,8 @@ def download_pbf(country_code, update, verify):
             if os.path.exists(PBF_inputfile):
                 os.remove(PBF_inputfile)
 
-            download_pbf(country_code, update=False)  # Only try downloading once
+            # Only try downloading once
+            download_pbf(country_code, update=False)
 
     return PBF_inputfile
 
@@ -177,7 +176,8 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     if not os.path.exists(
         os.path.join(
-            os.getcwd(), "data", "osm", "Elements", country_code + f"_{feature}s.json"
+            os.getcwd(), "data", "osm", "Elements", country_code +
+            f"_{feature}s.json"
         )
     ):
         _logger.warning("Element file not found so pre-filtering")
@@ -218,7 +218,8 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             pre_filtered.append(country_code)
         else:
             new_prefilter_data = False
-        _logger.info(f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}")
+        _logger.info(
+            f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}")
 
     prefilter = {
         Node: {
@@ -290,7 +291,8 @@ def lonlat_lookup(df_way, Data):
         # df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(float)  # create empty "refs" if not in dataframe
 
     def look(ref):
-        lonlat_row = list(map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
+        lonlat_row = list(
+            map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
         return lonlat_row
 
     lonlat_list = df_way["refs"].apply(look)
@@ -305,7 +307,8 @@ def convert_ways_points(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     way_polygon = list(
         map(
-            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
+            lambda lonlat: Polygon(lonlat) if len(
+                lonlat) >= 3 else Point(lonlat[0]),
             lonlat_list,
         )
     )
@@ -346,7 +349,8 @@ def convert_ways_lines(df_way, Data):
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
     length_column = (
-        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+        gpd.GeoSeries(way_linestring).set_crs(
+            "EPSG:4326").to_crs("EPSG:3857").length
     )
 
     df_way.insert(0, "Length", length_column)
