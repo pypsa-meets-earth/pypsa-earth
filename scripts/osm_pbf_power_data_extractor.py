@@ -35,6 +35,9 @@ _logger=logging.getLogger('osm_data_extractor')
 _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
+# Disables verify linter problem in this scripts
+# pylint: disable=E1120
+
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # move up to root directory
 
 # Downloads PBF File for given Country Code
