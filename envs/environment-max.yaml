@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: toast
+channels:
+  - conda-forge
+  - bioconda
+  - http://conda.anaconda.org/gurobi
+dependencies:
+  - python>=3.8
+  - pip
+  - mamba # esp for windows build
+
+  - pypsa>=0.17.1 
+  - atlite>=0.2.4
+  - dask<=2021.3.1 # until https://github.com/dask/dask/issues/7583 is solved
+
+  # Dependencies of the workflow itself
+  - xlrd
+  - openpyxl
+  - pycountry
+  - seaborn
+  - snakemake-minimal
+  - memory_profiler
+  - yaml
+  - pytables
+  - lxml
+  - powerplantmatching>=0.4.8
+  - numpy
+  - pandas
+  - geopandas
+  - xarray
+  - netcdf4
+  - networkx
+  - scipy
+  - shapely
+  - progressbar2
+  - pyomo
+  - matplotlib
+
+  # Keep in conda environment when calling ipython
+  - ipython
+
+  # GIS dependencies:
+  - cartopy
+  - descartes
+  - rasterio
+
+  # PyPSA-Eur-Sec Dependencies
+  - geopy
+  - tqdm
+  - pytz
+  - country_converter
+
+  - pip:
+    - git+https://github.com/pypsa/pypsa.git#egg=pypsa
+    - vresutils==0.3.1
+    - tsam>=1.1.0
