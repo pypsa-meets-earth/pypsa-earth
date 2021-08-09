@@ -1,7 +1,5 @@
 # osm_data_config
 # configuration paramaters necessary for osm_data_ level scripts
-
-
 # OFFICIAL TWO DIGIT COUNTRY CODES WITH OSM/GEOFABRIK STRING NAMES
 AFRICA_CC = {
     "DZ": "algeria",
@@ -62,7 +60,6 @@ AFRICA_CC = {
     "ZW": "zimbabwe",
 }
 
-
 # The feature category represents the final representation of the feature
 # For node features: ways are converted to nodes
 # For way features: only ways are used
@@ -72,10 +69,8 @@ feature_category = {
     "generator": "node",
     "line": "way",
     "tower": "node",
-    "cable": "way"
+    "cable": "way",
 }
-
-
 
 COMP_CC = {
     "DZ": "algeria",
