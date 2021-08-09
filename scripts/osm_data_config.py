@@ -1,7 +1,5 @@
 # osm_data_config
 # configuration paramaters necessary for osm_data_ level scripts
-
-
 # OFFICIAL TWO DIGIT COUNTRY CODES WITH OSM/GEOFABRIK STRING NAMES
 AFRICA_CC = {
     "DZ": "algeria",
