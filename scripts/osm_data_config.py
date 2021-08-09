@@ -100,13 +100,11 @@ COMP_CC = {
     "ZW": "zimbabwe",
 }
 
-
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
 # These configurations are used to specify which OSM tags are kept as columns in DataFrame.
 # Follows the OSM Wiki: https://wiki.openstreetmap.org/wiki/Power
-
 
 # "Length" is added for way features
 # "Area" is added for node features
