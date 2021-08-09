@@ -11,15 +11,6 @@
 """ OSM extraction script."""
 
 import hashlib
-from shapely.geometry import LineString, Point, Polygon
-from osm_data_config import AFRICA_CC, COMP_CC, feature_category
-from _helpers import _sets_path_to_root
-from esy.osmfilter import run_filter
-from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import osm_info as osm_info
-
-# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-from esy.osmfilter import Node, Relation, Way
 import json
 import logging
 import os
@@ -28,10 +19,18 @@ import shutil
 import sys
 
 import geopandas as gpd
-from numpy import append
 import pandas as pd
 import requests
 import urllib3
+from _helpers import _sets_path_to_root
+# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+from esy.osmfilter import Node, Relation, Way
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import run_filter
+from numpy import append
+from osm_data_config import AFRICA_CC, COMP_CC, feature_category
+from shapely.geometry import LineString, Point, Polygon
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
