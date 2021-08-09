@@ -135,7 +135,6 @@ columns_substation = [
     "Area",
     "tags.substation",
     "tags.voltage",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -172,7 +171,6 @@ columns_line = [
     "tags.voltage",
     "tags.circuits",
     "tags.frequency",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -192,7 +190,6 @@ columns_cable = [
     "tags.circuits",
     "tags.frequency",
     "tags.location",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -215,7 +212,6 @@ columns_tower = [
     "tags.line_management",
     "tags.ref",
     "tags.height",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",

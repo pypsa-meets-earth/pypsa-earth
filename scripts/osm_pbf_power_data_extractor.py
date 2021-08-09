@@ -75,8 +75,9 @@ def download_pbf(country_code, update, verify):
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
     geofabrik_url = f"https://download.geofabrik.de/africa/{geofabrik_filename}"
-    PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", "pbf",
-                                 geofabrik_filename)  # Input filepath
+    PBF_inputfile = os.path.join(
+        os.getcwd(), "data", "osm", "pbf", geofabrik_filename
+    )  # Input filepath
 
     if not os.path.exists(PBF_inputfile):
         _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
@@ -176,8 +177,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     if not os.path.exists(
         os.path.join(
-            os.getcwd(), "data", "osm", "Elements", country_code +
-            f"_{feature}s.json"
+            os.getcwd(), "data", "osm", "Elements", country_code + f"_{feature}s.json"
         )
     ):
         _logger.warning("Element file not found so pre-filtering")
@@ -218,19 +218,12 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             pre_filtered.append(country_code)
         else:
             new_prefilter_data = False
-        _logger.info(
-            f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}")
+        _logger.info(f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}")
 
     prefilter = {
-        Node: {
-            "power": feature_list
-        },
-        Way: {
-            "power": feature_list
-        },
-        Relation: {
-            "power": feature_list
-        },
+        Node: {"power": feature_list},
+        Way: {"power": feature_list},
+        Relation: {"power": feature_list},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
 
     blackfilter = [
@@ -291,8 +284,7 @@ def lonlat_lookup(df_way, Data):
         # df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(float)  # create empty "refs" if not in dataframe
 
     def look(ref):
-        lonlat_row = list(
-            map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
+        lonlat_row = list(map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
         return lonlat_row
 
     lonlat_list = df_way["refs"].apply(look)
@@ -307,8 +299,7 @@ def convert_ways_points(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     way_polygon = list(
         map(
-            lambda lonlat: Polygon(lonlat) if len(
-                lonlat) >= 3 else Point(lonlat[0]),
+            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
             lonlat_list,
         )
     )
@@ -349,8 +340,7 @@ def convert_ways_lines(df_way, Data):
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
     length_column = (
-        gpd.GeoSeries(way_linestring).set_crs(
-            "EPSG:4326").to_crs("EPSG:3857").length
+        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
     )
 
     df_way.insert(0, "Length", length_column)
@@ -360,9 +350,9 @@ def convert_ways_lines(df_way, Data):
 
 
 def convert_pd_to_gdf_nodes(df_way):
-    gdf = gpd.GeoDataFrame(df_way,
-                           geometry=[Point(x, y) for x, y in df_way.lonlat],
-                           crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(
+        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
+    )
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
 
@@ -429,8 +419,7 @@ def process_data(update, verify):
         df_all_feature = pd.DataFrame()
         for country_code in AFRICA_CC.keys():
             # replace Africa_CC by test_CC to only download data for one country
-            feature_data = download_and_filter(feature, country_code, update,
-                                               verify)
+            feature_data = download_and_filter(feature, country_code, update, verify)
 
             df_node, df_way, Data = convert_filtered_data_to_dfs(
                 country_code, feature_data, feature
