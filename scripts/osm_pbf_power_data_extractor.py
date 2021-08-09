@@ -10,6 +10,15 @@
 
 """ OSM extraction script."""
 
+import hashlib
+from shapely.geometry import LineString, Point, Polygon
+from osm_data_config import AFRICA_CC, COMP_CC, feature_category
+from _helpers import _sets_path_to_root
+from esy.osmfilter import run_filter
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import osm_info as osm_info
+# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+from esy.osmfilter import Node, Relation, Way
 import json
 import logging
 import os
@@ -23,18 +32,9 @@ import pandas as pd
 import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-from esy.osmfilter import Node, Relation, Way # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import run_filter
-from _helpers import _sets_path_to_root
-from osm_data_config import AFRICA_CC, COMP_CC, feature_category
-from shapely.geometry import LineString, Point, Polygon
-import hashlib
 
-import logging
 # logging.basicConfig()
-_logger=logging.getLogger('osm_data_extractor')
+_logger = logging.getLogger('osm_data_extractor')
 _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
@@ -49,7 +49,6 @@ feature_list = ["substation", "generator", "line", "cable", "tower"]
 # feature_list = ["substation", "line"]
 # feature_list = ["line"]
 # feature_list = ["substation"]
-
 
 
 def download_pbf(country_code, update, verify):
@@ -85,22 +84,22 @@ def download_pbf(country_code, update, verify):
         with requests.get(geofabrik_url, stream=True, verify=False) as r:
             with open(PBF_inputfile, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
-    
+
     if verify is True:
         if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
             _logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
             if os.path.exists(PBF_inputfile):
                 os.remove(PBF_inputfile)
 
-            download_pbf(country_code, update=False) # Only try downloading once
+            # Only try downloading once
+            download_pbf(country_code, update=False)
 
-
-        
     return PBF_inputfile
 
 
+verified_pbf = []
 
-verified_pbf =[]
+
 def verify_pbf(PBF_inputfile, geofabrik_url, update):
     if PBF_inputfile in verified_pbf:
         return True
@@ -135,6 +134,8 @@ def verify_pbf(PBF_inputfile, geofabrik_url, update):
 
 
 pre_filtered = []
+
+
 def download_and_filter(feature, country_code, update=False, verify=False):
     """
     Download OpenStreetMap raw file for selected tag.
@@ -182,12 +183,13 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     if update is False and verify is False and filter_file_exists is True:
         create_elements = False  # Do not create elements again
 
-        ElementsDict = {elementname:{}}
-        Elements = osm_pickle.pickleload(ElementsDict,os.path.join(os.getcwd(),os.path.dirname(JSON_outputfile), 'Elements'))
+        ElementsDict = {elementname: {}}
+        Elements = osm_pickle.pickleload(ElementsDict, os.path.join(
+            os.getcwd(), os.path.dirname(JSON_outputfile), 'Elements'))
 
         new_prefilter_data = False  # Do not pre-filter data again
         # HACKY: esy.osmfilter code to re-create Data.pickle
-        with open(JSON_outputfile,encoding="utf-8") as f:
+        with open(JSON_outputfile, encoding="utf-8") as f:
             Data = json.load(f)
         # DataDict = {"Data": Data}
         # osm_pickle.picklesave(
@@ -204,7 +206,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     else:
         create_elements = True
-        if country_code not in pre_filtered: # Ensures pre-filter is not run everytime
+        if country_code not in pre_filtered:  # Ensures pre-filter is not run everytime
             new_prefilter_data = True
             _logger.info(f"Pre-filtering {AFRICA_CC[country_code]} ")
             pre_filtered.append(country_code)
@@ -212,14 +214,13 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             new_prefilter_data = False
         _logger.info(
             f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}"
-        ) 
+        )
 
     prefilter = {
         Node: {"power": feature_list},
         Way: {"power": feature_list},
         Relation: {"power": feature_list},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
-
 
     blackfilter = [
         ("", ""),
@@ -230,7 +231,6 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             ("power", feature),
         ],
     ]
-
 
     Data, Elements = run_filter(
         elementname,
@@ -246,8 +246,10 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         multiprocess=True,
     )
 
-    logging.disable(logging.NOTSET) # Re-enable logging as run_filter disables logging.INFO
-    _logger.info(f"Pre: {new_prefilter_data}, Elem: {create_elements}, for {feature} in {country_code}")
+    # Re-enable logging as run_filter disables logging.INFO
+    logging.disable(logging.NOTSET)
+    _logger.info(
+        f"Pre: {new_prefilter_data}, Elem: {create_elements}, for {feature} in {country_code}")
 
     feature_data = Data, Elements
 
@@ -272,12 +274,13 @@ def lonlat_lookup(df_way, Data):
     # lonlat_list = []
 
     if "refs" not in df_way.columns:
-        _logger.warning("refs column not found") 
+        _logger.warning("refs column not found")
         print(df_way.columns)
         # df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(float)  # create empty "refs" if not in dataframe
 
     def look(ref):
-        lonlat_row = list(map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]),ref))
+        lonlat_row = list(
+            map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
         return lonlat_row
 
     lonlat_list = df_way["refs"].apply(look)
@@ -298,8 +301,10 @@ def convert_ways_points(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     # lonlat_column = []
     # area_column = []
-    way_polygon = list(map(lambda lonlat: Polygon(lonlat) if len(lonlat)>=3 else Point(lonlat[0]), lonlat_list))
-    area_column = list(map(int,round(gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area,-1)))
+    way_polygon = list(map(lambda lonlat: Polygon(lonlat) if len(
+        lonlat) >= 3 else Point(lonlat[0]), lonlat_list))
+    area_column = list(map(int, round(gpd.GeoSeries(
+        way_polygon).set_crs("EPSG:4326").to_crs("EPSG:3857").area, -1)))
 
     def find_center_point(p):
         if p.geom_type == 'Polygon':
@@ -346,7 +351,8 @@ def convert_ways_lines(df_way, Data):
     df_way.insert(0, "lonlat", lonlat_column)
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
-    length_column = gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+    length_column = gpd.GeoSeries(way_linestring).set_crs(
+        "EPSG:4326").to_crs("EPSG:3857").length
     # for lonlat in lonlat_list:
     #     way_linestring = LineString(lonlat)
     #     line_length = (
@@ -358,7 +364,6 @@ def convert_ways_lines(df_way, Data):
     #     length_column.append(float(line_length))
 
     df_way.insert(0, "Length", length_column)
-    
 
 
 # Convert Points Pandas Dataframe to GeoPandas Dataframe
@@ -381,7 +386,8 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
         df_way["geometry"] = df_way["geometry"].apply(
             lambda x: x.simplify(0.005, preserve_topology=False)
         )
-    gdf = gpd.GeoDataFrame(df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(df_way, geometry=[LineString(
+        x) for x in df_way.lonlat], crs="EPSG:4326")
     gdf.drop(columns=["lonlat"], inplace=True)
 
     return gdf
@@ -393,7 +399,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
 #     )
 #     if not df_way.empty:
 #         convert_ways_points(df_way, Data)
-    
+
 #     # Add Type Column
 #     df_node["Type"] = "Node"
 #     df_way["Type"] = "Way"
@@ -412,7 +418,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
 
 #     if not df_way.empty:
 #         convert_ways_lines(df_way, Data)
-    
+
 #     # Add Type Column
 #     df_way["Type"] = "Way"
 
@@ -497,12 +503,15 @@ def process_data(update, verify):
     ]
 
     def output_csv_geojson(df_all_feature, columns_feature, feature):
-        outputfile_partial = os.path.join(os.getcwd(), "data", "raw", "africa_all" + "_raw")  # Output file directory
+        outputfile_partial = os.path.join(
+            os.getcwd(), "data", "raw", "africa_all" + "_raw")  # Output file directory
 
         if not os.path.exists(outputfile_partial):
-            os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)  # create raw directory
-        
-        df_all_feature = df_all_feature[df_all_feature.columns.intersection(set(columns_feature))]
+            os.makedirs(os.path.dirname(outputfile_partial),
+                        exist_ok=True)  # create raw directory
+
+        df_all_feature = df_all_feature[df_all_feature.columns.intersection(
+            set(columns_feature))]
         df_all_feature.reset_index(drop=True, inplace=True)
 
         # Generate Files
@@ -511,7 +520,8 @@ def process_data(update, verify):
             _logger.warning(f"All feature data frame empty for {feature}")
             return None
 
-        df_all_feature.to_csv(outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
+        df_all_feature.to_csv(outputfile_partial +
+                              f"_{feature}s" + ".csv")  # Generate CSV
 
         if feature_category[feature] == "way":
             gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
@@ -521,46 +531,50 @@ def process_data(update, verify):
         _logger.info("Writing GeoJSON file")
         gdf_feature.to_file(
             outputfile_partial + f"_{feature}s" + ".geojson", driver="GeoJSON"
-        )  # Generate GeoJson   
+        )  # Generate GeoJson
 
     SNGM_CC = {"SN-GM": "senegal-and-gambia"}
     ZW_CC = {"ZW": "zimbabwe"}
     test_CC = {"LY": "libya", "SZ": "swaziland"}
-    # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}        
+    # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}
     for feature in feature_list:
         df_all_feature = pd.DataFrame()
         for country_code in SNGM_CC.keys():
             # replace Africa_CC by test_CC to only download data for one country
-            feature_data = download_and_filter(feature, country_code, update, verify)
+            feature_data = download_and_filter(
+                feature, country_code, update, verify)
 
-            df_node, df_way, Data = convert_filtered_data_to_dfs(country_code, feature_data, feature)
+            df_node, df_way, Data = convert_filtered_data_to_dfs(
+                country_code, feature_data, feature)
 
             if feature_category[feature] == "way":
-                convert_ways_lines(df_way, Data) if not df_way.empty else _logger.warning(f"Empty Way Dataframe for {feature} in {country_code}")
+                convert_ways_lines(df_way, Data) if not df_way.empty else _logger.warning(
+                    f"Empty Way Dataframe for {feature} in {country_code}")
                 if not df_node.empty:
-                    _logger.warning(f"Node dataframe not empty for {feature} in {country_code}")
-
+                    _logger.warning(
+                        f"Node dataframe not empty for {feature} in {country_code}")
 
             if feature_category[feature] == "node":
                 convert_ways_points(df_way, Data) if not df_way.empty else None
-            
+
             # Add Type Column
             df_node["Type"] = "Node"
             df_way["Type"] = "Way"
-            
+
             # Concatinate Nodes and Ways
             df_feature = pd.concat([df_node, df_way], axis=0)
 
             # Add Country Column
             df_feature["Country"] = AFRICA_CC[country_code]
-            
+
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
         # TODO : Remove columns in favour of a set that drops columns
         if feature == "tower":
             output_csv_geojson(df_all_feature, columns_tower, "tower")
         if feature == "substation":
-            output_csv_geojson(df_all_feature, columns_substation, "substation")
+            output_csv_geojson(
+                df_all_feature, columns_substation, "substation")
         if feature == "line":
             output_csv_geojson(df_all_feature, columns_line, "line")
         if feature == "generator":
@@ -570,4 +584,5 @@ def process_data(update, verify):
 
 
 if __name__ == "__main__":
-    process_data(update=False, verify=False) # Set update # Verify = True checks local md5s and pre-filters data again
+    # Set update # Verify = True checks local md5s and pre-filters data again
+    process_data(update=False, verify=False)
