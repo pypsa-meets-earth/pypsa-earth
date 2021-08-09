@@ -72,7 +72,7 @@ feature_category = {
     "generator": "node",
     "line": "way",
     "tower": "node",
-    "cable": "way"
+    "cable": "way",
 }
 
 
