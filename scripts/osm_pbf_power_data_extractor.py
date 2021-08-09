@@ -38,7 +38,9 @@ _logger.setLevel(logging.INFO)
 # Disables verify linter problem in this scripts
 # pylint: disable=E1120
 
-os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # move up to root directory
+os.chdir(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+) # move up to root directory
 
 # Downloads PBF File for given Country Code
 
