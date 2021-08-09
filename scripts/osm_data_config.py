@@ -1,7 +1,5 @@
 # osm_data_config
 # configuration paramaters necessary for osm_data_ level scripts
-
-
 # OFFICIAL TWO DIGIT COUNTRY CODES WITH OSM/GEOFABRIK STRING NAMES
 AFRICA_CC = {
     "DZ": "algeria",
@@ -45,7 +43,7 @@ AFRICA_CC = {
     "RW": "rwanda",
     # saint-helena-ascension-and-tristan-da-cunha
     # "ST": "sao-tome-and-principe", #Island
-    "SN-GM": "senegal-and-gambia",  # Merged Country Code, See Map, See https://github.com/pypsa-meets-africa/pypsa-africa/issues/40#issuecomment-885424094
+    # "SN-GM": "senegal-and-gambia",  # Merged Country Code, See Map, See https://github.com/pypsa-meets-africa/pypsa-africa/issues/40#issuecomment-885424094
     # "SC": "seychelles", #Island
     "SL": "sierra-leone",
     # "SO": "somalia", # No Data
@@ -62,7 +60,6 @@ AFRICA_CC = {
     "ZW": "zimbabwe",
 }
 
-
 # The feature category represents the final representation of the feature
 # For node features: ways are converted to nodes
 # For way features: only ways are used
@@ -72,9 +69,8 @@ feature_category = {
     "generator": "node",
     "line": "way",
     "tower": "node",
-    "cable": "way"
+    "cable": "way",
 }
-
 
 COMP_CC = {
     "DZ": "algeria",
@@ -104,13 +100,11 @@ COMP_CC = {
     "ZW": "zimbabwe",
 }
 
-
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
-# These configurations are used to specify which OSM tags are kept as columns in DataFrame. 
+# These configurations are used to specify which OSM tags are kept as columns in DataFrame.
 # Follows the OSM Wiki: https://wiki.openstreetmap.org/wiki/Power
-
 
 # "Length" is added for way features
 # "Area" is added for node features
@@ -139,11 +133,10 @@ columns_substation = [
     "Area",
     "tags.substation",
     "tags.voltage",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
-    ]
+]
 
 # ========================
 # GENERATOR TAGS
@@ -176,7 +169,6 @@ columns_line = [
     "tags.voltage",
     "tags.circuits",
     "tags.frequency",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -196,7 +188,6 @@ columns_cable = [
     "tags.circuits",
     "tags.frequency",
     "tags.location",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -219,13 +210,12 @@ columns_tower = [
     "tags.line_management",
     "tags.ref",
     "tags.height",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
 ]
 
-## FINAL DICTIONARY
+# FINAL DICTIONARY
 
 feature_columns = {
     "substation": columns_basic + columns_substation,
