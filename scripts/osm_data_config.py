@@ -100,13 +100,11 @@ COMP_CC = {
     "ZW": "zimbabwe",
 }
 
-
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
-# These configurations are used to specify which OSM tags are kept as columns in DataFrame. 
+# These configurations are used to specify which OSM tags are kept as columns in DataFrame.
 # Follows the OSM Wiki: https://wiki.openstreetmap.org/wiki/Power
-
 
 # "Length" is added for way features
 # "Area" is added for node features
@@ -135,11 +133,10 @@ columns_substation = [
     "Area",
     "tags.substation",
     "tags.voltage",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
-    ]
+]
 
 # ========================
 # GENERATOR TAGS
@@ -172,7 +169,6 @@ columns_line = [
     "tags.voltage",
     "tags.circuits",
     "tags.frequency",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -192,7 +188,6 @@ columns_cable = [
     "tags.circuits",
     "tags.frequency",
     "tags.location",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -215,13 +210,12 @@ columns_tower = [
     "tags.line_management",
     "tags.ref",
     "tags.height",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
 ]
 
-## FINAL DICTIONARY
+# FINAL DICTIONARY
 
 feature_columns = {
     "substation": columns_basic + columns_substation,
