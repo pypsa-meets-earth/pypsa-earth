@@ -7,18 +7,6 @@
 # Disables pylint problem in this scripts
 # pylint: disable=E1120
 """ OSM extraction script."""
-from shapely.geometry import LineString, Point, Polygon
-from osm_data_config import AFRICA_CC, COMP_CC, feature_category, feature_columns
-from _helpers import _sets_path_to_root
-from esy.osmfilter import run_filter
-from esy.osmfilter import Relation
-from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import (
-    Node,
-    Relation,
-    Way,
-)  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 import hashlib
 import json
 import logging
@@ -31,6 +19,16 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
+from _helpers import _sets_path_to_root
+from esy.osmfilter import (  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+    Node, Relation, Way)
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import \
+    run_filter  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+from osm_data_config import (AFRICA_CC, COMP_CC, feature_category,
+                             feature_columns)
+from shapely.geometry import LineString, Point, Polygon
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
