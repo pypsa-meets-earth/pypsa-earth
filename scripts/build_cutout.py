@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2021 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 """
 Create cutouts with `atlite <https://atlite.readthedocs.io/en/latest/>`_.
 
