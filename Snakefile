@@ -59,7 +59,7 @@ if config['enable'].get('build_cutout', False):
 if config['enable'].get('build_natura_raster', False):
     rule build_natura_raster:
         input:
-            natura="data/bundle/natura/Natura2000_end2015.shp",
+            natura="data/raw/landcover/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-polygons.shp",
             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"
