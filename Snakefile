@@ -56,14 +56,14 @@ if config['enable'].get('build_cutout', False):
         script: "scripts/build_cutout.py"
 
 
-# if config['enable'].get('build_natura_raster', False):
-#     rule build_natura_raster:
-#         input:
-#             natura="data/bundle/natura/Natura2000_end2015.shp",
-#             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
-#         output: "resources/natura.tiff"
-#         log: "logs/build_natura_raster.log"
-#         script: "scripts/build_natura_raster.py"
+if config['enable'].get('build_natura_raster', False):
+    rule build_natura_raster:
+        input:
+            natura="data/bundle/natura/Natura2000_end2015.shp",
+            cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
+        output: "resources/natura.tiff"
+        log: "logs/build_natura_raster.log"
+        script: "scripts/build_natura_raster.py"
 
 
 rule base_network:
