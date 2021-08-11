@@ -67,7 +67,7 @@ def determine_cutout_xXyY(cutout_name):
     assert cutout.crs.to_epsg() == 4326
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
-    return [x - dx/2., X + dx/2., y - dy/2., Y + dy/2.]
+    return [x - dx / 2.0, X + dx / 2.0, y - dy / 2.0, Y + dy / 2.0]
 
 
 def get_transform_and_shape(bounds, res):
@@ -82,7 +82,7 @@ def unify_protected_shape_areas():
     """
     Iterates thorugh all snakemake rule inputs and unifies shapefiles (.shp) only.
 
-    The input is given in the Snakefile and shapefiles are given by .shp 
+    The input is given in the Snakefile and shapefiles are given by .shp
 
 
     Returns
@@ -98,33 +98,32 @@ def unify_protected_shape_areas():
     # Create one geodataframe with all geometries, of all .shp files
     for i in shp_files:
         shape = gpd.GeoDataFrame(
-            pd.concat(
-                [gpd.read_file(i) for i in shp_files]
-            )
+            pd.concat([gpd.read_file(i) for i in shp_files])
         ).to_crs(3035)
     # Removes shapely geometry with null values. Returns geoseries.
-    shape = [geom if geom.is_valid else geom.buffer(
-        0) for geom in shape["geometry"]]
+    shape = [geom if geom.is_valid else geom.buffer(0) for geom in shape["geometry"]]
     # Create Geodataframe with crs(3035)
     shape = gpd.GeoDataFrame(shape)
-    shape = shape.rename(columns={0: 'geometry'}).set_geometry(
-        'geometry')  # .set_crs(3035)
+    shape = shape.rename(columns={0: "geometry"}).set_geometry(
+        "geometry"
+    )  # .set_crs(3035)
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
-    unified_shape = gpd.GeoDataFrame(
-        geometry=[unary_union(shape["geometry"])]).set_crs(3035)
+    unified_shape = gpd.GeoDataFrame(geometry=[unary_union(shape["geometry"])]).set_crs(
+        3035
+    )
 
     return unified_shape
 
 
 if __name__ == "__main__":
-    if 'snakemake' not in globals():
+    if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        snakemake = mock_snakemake('build_natura_raster')
+
+        snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
 
     cutouts = snakemake.input.cutouts
-    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout)
-                         for cutout in cutouts))
+    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout) for cutout in cutouts))
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
     transform, out_shape = get_transform_and_shape(bounds, res=100)
 
@@ -133,7 +132,16 @@ if __name__ == "__main__":
     raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
     raster = raster.astype(rio.uint8)
 
-    with rio.open(snakemake.output[0], 'w', driver='GTiff', dtype=rio.uint8,
-                  count=1, transform=transform, crs=3035, compress='lzw',
-                  width=raster.shape[1], height=raster.shape[0]) as dst:
+    with rio.open(
+        snakemake.output[0],
+        "w",
+        driver="GTiff",
+        dtype=rio.uint8,
+        count=1,
+        transform=transform,
+        crs=3035,
+        compress="lzw",
+        width=raster.shape[1],
+        height=raster.shape[0],
+    ) as dst:
         dst.write(raster, indexes=1)
