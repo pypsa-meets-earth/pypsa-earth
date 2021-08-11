@@ -46,13 +46,13 @@ Steps to retrieve the protected area data (as apparently no API is given for the
 
 Tip: The output file `natura.tiff` contains now the 100x100m rasters of protective areas. This operation can make the filesize of that TIFF quite large and leads to problems when trying to open. QGIS, an open source tool helps exploring the file.
 """
-import os
 import logging
-from _helpers import configure_logging
+import os
 
 import atlite
 import geopandas as gpd
 import rasterio as rio
+from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
