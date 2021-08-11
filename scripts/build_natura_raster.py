@@ -97,19 +97,19 @@ def unify_protected_shape_areas():
     # Create one geodataframe with all geometries, of all .shp files
     for i in shp_files:
         shape = gpd.GeoDataFrame(
-            pd.concat([gpd.read_file(i) for i in shp_files])
-        ).to_crs(3035)
+            pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(3035)
     # Removes shapely geometry with null values. Returns geoseries.
-    shape = [geom if geom.is_valid else geom.buffer(0) for geom in shape["geometry"]]
+    shape = [
+        geom if geom.is_valid else geom.buffer(0) for geom in shape["geometry"]
+    ]
     # Create Geodataframe with crs(3035)
     shape = gpd.GeoDataFrame(shape)
-    shape = shape.rename(columns={0: "geometry"}).set_geometry(
-        "geometry"
-    )  # .set_crs(3035)
+    shape = shape.rename(columns={
+        0: "geometry"
+    }).set_geometry("geometry")  # .set_crs(3035)
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
-    unified_shape = gpd.GeoDataFrame(geometry=[unary_union(shape["geometry"])]).set_crs(
-        3035
-    )
+    unified_shape = gpd.GeoDataFrame(
+        geometry=[unary_union(shape["geometry"])]).set_crs(3035)
 
     return unified_shape
 
@@ -122,7 +122,8 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     cutouts = snakemake.input.cutouts
-    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout) for cutout in cutouts))
+    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout)
+                           for cutout in cutouts))
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
     transform, out_shape = get_transform_and_shape(bounds, res=100)
 
@@ -132,15 +133,15 @@ if __name__ == "__main__":
     raster = raster.astype(rio.uint8)
 
     with rio.open(
-        snakemake.output[0],
-        "w",
-        driver="GTiff",
-        dtype=rio.uint8,
-        count=1,
-        transform=transform,
-        crs=3035,
-        compress="lzw",
-        width=raster.shape[1],
-        height=raster.shape[0],
+            snakemake.output[0],
+            "w",
+            driver="GTiff",
+            dtype=rio.uint8,
+            count=1,
+            transform=transform,
+            crs=3035,
+            compress="lzw",
+            width=raster.shape[1],
+            height=raster.shape[0],
     ) as dst:
         dst.write(raster, indexes=1)
