@@ -59,7 +59,10 @@ if config['enable'].get('build_cutout', False):
 if config['enable'].get('build_natura_raster', False):
     rule build_natura_raster:
         input:
-            natura="data/raw/landcover/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-polygons.shp",
+            natura = "data/raw/landcover/world_protected_area/WDPA_WDOECM_Aug2021_Public_AF_shp-polygons.shp",
+            za_conserved = "data/raw/landcover/za_conservation_area/SACAD_OR_2021_Q1.shp",
+            za_protected = "data/raw/landcover/za_protected_area/SAPAD_OR_2021_Q1.shp",
+            za_marine = "data/raw/landcover/za_marine_protected_area/SAMPAZ_OR_2021_Q1.shp",
             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"

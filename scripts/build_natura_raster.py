@@ -77,6 +77,40 @@ def get_transform_and_shape(bounds, res):
     transform = rio.Affine(res, 0, left, 0, -res, top)
     return transform, shape
 
+def unify_protected_shape_areas():
+    """
+    Iterates thorugh all snakemake rule inputs and unifies shapefiles (.shp) only.
+
+    The input is given in the Snakefile and shapefiles are given by .shp 
+
+
+    Returns
+    -------
+    unified_shape : GeoDataFrame with a unified "multishape" (crs=3035)
+
+    """
+    import pandas as pd
+    from shapely.ops import unary_union
+    
+    # Filter snakemake.inputs to only ".shp" files
+    shp_files = [string for string in snakemake.input if ".shp" in string]
+    # Create one geodataframe with all geometries, of all .shp files
+    for i in shp_files:
+        shape = gpd.GeoDataFrame(
+            pd.concat(
+                [gpd.read_file(i) for i in shp_files]
+            )
+        ).to_crs(3035)
+    # Removes shapely geometry with null values. Returns geoseries.
+    shape = [geom if geom.is_valid else geom.buffer(0) for geom in shape["geometry"]]
+    # Create Geodataframe with crs(3035)
+    shape = gpd.GeoDataFrame(shape)
+    shape = shape.rename(columns={0:'geometry'}).set_geometry('geometry')  # .set_crs(3035)
+    # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
+    unified_shape = gpd.GeoDataFrame(geometry=[unary_union(shape["geometry"])]).set_crs(3035)
+
+    return unified_shape
+
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
@@ -91,7 +125,7 @@ if __name__ == "__main__":
     transform, out_shape = get_transform_and_shape(bounds, res=100)
 
     # adjusted boundaries
-    shapes = gpd.read_file(snakemake.input.natura).to_crs(3035)
+    shapes = unify_protected_shape_areas()
     raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
     raster = raster.astype(rio.uint8)
 
