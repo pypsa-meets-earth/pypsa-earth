@@ -178,6 +178,3 @@ rule cluster_network:
 #     threads: 1
 #     resources: mem=500
 #     script: "scripts/build_shapes.py"
-
-
-
