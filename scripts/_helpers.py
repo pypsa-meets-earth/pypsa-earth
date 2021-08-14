@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pycountry as pyc
 
 
 def _sets_path_to_root(root_directory_name):
@@ -373,7 +372,9 @@ def _get_country(target, **keys):
     - Convert 2-digit code to full name: _get_country('name', alpha_2="ZA")
 
     """
-
+    import pycountry as pyc
+    
+    
     assert len(keys) == 1
     try:
         return getattr(pyc.countries.get(**keys), target)
