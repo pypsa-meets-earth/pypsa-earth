@@ -36,18 +36,35 @@ rule build_shapes:
     output:
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
-        africa_shape='resources/africa_shape.geojson',
-        gadm_shapes='resources/gadm_shapes.geojson'
+        offshore_shapes_old="resources/offshore_shapes_old.geojson",
+        # africa_shape='resources/africa_shape.geojson',
+        # gadm_shapes='resources/gadm_shapes.geojson'
     log: "logs/build_shapes.log"
     threads: 1
     resources: mem=500
     script: "scripts/build_shapes.py"
 
+
+rule build_bus_regions:
+    input:
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
+        base_network="networks/base.nc"
+    output:
+        regions_onshore="resources/regions_onshore.geojson",
+        regions_offshore="resources/regions_offshore.geojson"
+    log: "logs/build_bus_regions.log"
+    threads: 1
+    resources: mem=1000
+    script: "scripts/build_bus_regions.py"
+    # notebook: "scripts/build_bus_regions.py.ipynb"
+
+
 if config['enable'].get('build_cutout', False):
     rule build_cutout:
         input:
-            regions_onshore="data/shapes/regions_onshore.geojson",
-            regions_offshore="data/shapes/regions_offshore.geojson"
+            regions_onshore="resource/regions_onshore.geojson",
+            regions_offshore="resource/regions_offshore.geojson"
         output: "cutouts/{cutout}.nc"
         log: "logs/build_cutout/{cutout}.log"
         benchmark: "benchmarks/build_cutout_{cutout}"
@@ -59,14 +76,10 @@ if config['enable'].get('build_cutout', False):
 if config['enable'].get('build_natura_raster', False):
     rule build_natura_raster:
         input:
-<<<<<<< HEAD
             natura = "data/raw/landcover/world_protected_area/WDPA_WDOECM_Aug2021_Public_AF_shp-polygons.shp",
             za_conserved = "data/raw/landcover/za_conservation_area/SACAD_OR_2021_Q1.shp",
             za_protected = "data/raw/landcover/za_protected_area/SAPAD_OR_2021_Q1.shp",
             za_marine = "data/raw/landcover/za_marine_protected_area/SAMPAZ_OR_2021_Q1.shp",
-=======
-            natura="data/raw/landcover/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-polygons.shp",
->>>>>>> origin/new-main
             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"
@@ -77,6 +90,8 @@ rule base_network:
     input:
         osm_buses="data/base_network/africa_all_buses_build_network.csv",
         osm_lines="data/base_network/africa_all_lines_build_network.csv",
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
         # osm_buses='data/osm/africa_all_buses_clean.csv',
         # osm_lines='data/osm/africa_all_lines_clean.csv',
         # eg_buses='data/entsoegridkit/buses.csv',
@@ -87,8 +102,6 @@ rule base_network:
         # parameter_corrections='data/parameter_corrections.yaml',
         # links_p_nom='data/links_p_nom.csv',
         # links_tyndp='data/links_tyndp.csv',
-        # country_shapes='resources/country_shapes.geojson',
-        # offshore_shapes='resources/offshore_shapes.geojson',
         # europe_shape='resources/europe_shape.geojson'
     output:
         "networks/base.nc",
@@ -101,6 +114,28 @@ rule base_network:
         mem=500,
     script:
         "scripts/base_network.py"
+
+
+rule build_renewable_profiles:
+    input:
+        base_network="networks/base.nc",
+        natura="resources/natura.tiff",
+        # corine="data/bundle/corine/g250_clc06_V18_5.tif",
+        # gebco=lambda w: ("data/bundle/GEBCO_2014_2D.nc"
+        #                  if "max_depth" in config["renewable"][w.technology].keys()
+        #                  else []),
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
+        regions=lambda w: ("resources/regions_onshore.geojson"
+                                   if w.technology in ('onwind', 'solar')
+                                   else "resources/regions_offshore.geojson"),
+        cutout=lambda w: "cutouts/" + config["renewable"][w.technology]['cutout'] + ".nc"
+    output: profile="resources/profile_{technology}.nc",
+    log: "logs/build_renewable_profile_{technology}.log"
+    benchmark: "benchmarks/build_renewable_profiles_{technology}"
+    threads: ATLITE_NPROCESSES
+    resources: mem=ATLITE_NPROCESSES * 5000
+    script: "scripts/build_renewable_profiles.py"
 
 
 rule add_electricity:

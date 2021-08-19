@@ -11,7 +11,7 @@ import geopandas as gpd
 import numpy as np
 import rasterio
 import requests
-import rioxarray
+#import rioxarray
 import xarray as xr
 from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
@@ -22,15 +22,17 @@ from shapely.geometry import MultiPolygon
 from shapely.geometry import Polygon
 from shapely.ops import cascaded_union
 
+
+logger = logging.getLogger(__name__)
+
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # import sys
 
 # from ..scripts.iso_country_codes import AFRICA_CC
 
-logger = logging.getLogger(__name__)
-_sets_path_to_root("scripts")
+#_sets_path_to_root("scripts")
 
 
 def download_GADM(country_code, update=False, out_logging=False):
@@ -215,7 +217,7 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
     The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
     """
 
-    EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "eez",
+    EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()),"pypsa-africa", "data", "raw", "eez",
                             name_file)  # Input filepath gpkg
 
     if not os.path.exists(EEZ_gpkg):
@@ -265,6 +267,64 @@ def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
     return ret_df
 
 
+# def eez2(country_shapes, update=False, out_logging=False, tol=1e-3):
+
+#     if out_logging:
+#         print("Create offshore shapes")
+
+#     countries = snakemake.config["countries"]
+
+#     # load data
+#     df_eez = load_EEZ(countries)
+
+#     # set index and simplify polygons
+#     # ret_df = df_eez.set_index("name").geometry.map(
+#     #     lambda x: _simplify_polys(x, filterremote=False))
+
+#     # ret_df = gpd.GeoSeries({
+#     #     k: v
+#     #     for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol
+#     # })
+#     # ret_df.index.name = "name"
+#     ret_df = df_eez.set_index("name")["geometry"].map(_simplify_polys)
+
+#     return ret_df
+
+
+def eez_new(country_shapes, out_logging=False):
+    """
+    Creates offshore shapes by 
+    - buffer smooth countryshape (=offset country shape)
+    - and differ that with the offshore shape
+    Leads to for instance a 100m non-build coastline
+
+    """
+    from shapely.validation import make_valid
+
+    if out_logging:
+        print("Create offshore shapes")
+
+    countries = snakemake.config["countries"]
+
+    # load data
+    df_eez = load_EEZ(countries)
+
+    # simplified offshore_shape
+    ret_df = df_eez.set_index("name")["geometry"].map(_simplify_polys)
+
+
+    ret_df = ret_df.apply(lambda x: make_valid(x))
+    country_shapes = country_shapes.apply(lambda x: make_valid(x))
+
+    country_shapes_with_buffer = country_shapes.buffer(0.01) # about 1000m
+    ret_df_new = ret_df.difference(country_shapes_with_buffer)
+
+    # Drops empty geometry
+    ret_df = ret_df_new.dropna()
+
+    return ret_df
+
+
 def download_WorldPop(country_code,
                       year=2020,
                       update=False,
@@ -293,7 +353,6 @@ def download_WorldPop(country_code,
         Name of the file
 
     """
-
     if out_logging:
         print("Download WorldPop datasets")
 
@@ -378,7 +437,7 @@ def add_population_data(df_gadm,
                 if out_logging == True:
                     print(c_code, ": ", index, " out of ",
                           country_rows.shape[0])
-
+                print(pop_by_geom)
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
 
@@ -526,7 +585,7 @@ def gadm(layer_id=2, update=False, out_logging=False, year=2020):
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
     # add the population data to the dataset
-    add_population_data(df_gadm, countries, year, update, out_logging)
+    #add_population_data(df_gadm, countries, year, update, out_logging) #TODO: uncomment without making file running with bug
 
     # add the gdp data to the dataset
     add_gdp_data(
@@ -548,7 +607,6 @@ if __name__ == "__main__":
     # print(os.path.dirname(os.path.abspath(__file__)))
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("build_shapes")
     configure_logging(snakemake)
 
@@ -565,11 +623,14 @@ if __name__ == "__main__":
     country_shapes = countries(update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(country_shapes, update, out_logging)
+    offshore_shapes_old = eez(country_shapes, update, out_logging)
+    save_to_geojson(offshore_shapes_old, out.offshore_shapes_old)
+
+    offshore_shapes = eez_new(country_shapes, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
-    africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
-    save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
+    # africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
+    # save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm(layer_id, update, out_logging, year)
-    save_to_geojson(gadm_shapes, out.gadm_shapes)
+    # gadm_shapes = gadm(layer_id, update, out_logging, year)
+    # save_to_geojson(gadm_shapes, out.gadm_shapes)

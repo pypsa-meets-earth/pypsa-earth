@@ -8,10 +8,10 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
-'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
-'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
-'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
+countries: ["NG"]  # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
+# 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
+# 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
+# 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
   #- SL  # Sierra Leone
   #- MA  # Morroco
   #- NE  # Niger
@@ -100,6 +100,78 @@ atlite:
     #   sarah_interpolate: false
     #   sarah_dir:
     #   features: [influx, temperature]
+
+renewable:
+  onwind:
+    cutout: africa-2013-era5
+    resource:
+      method: wind
+      turbine: Vestas_V112_3MW
+    capacity_per_sqkm: 3 # ScholzPhd Tab 4.3.1: 10MW/km^2
+    # correction_factor: 0.93
+    corine:
+      # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
+      #  development of the REMix model and application for Europe. ( p.42 / p.28)
+      grid_codes: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                   24, 25, 26, 27, 28, 29, 31, 32]
+      distance: 1000
+      distance_grid_codes: [1, 2, 3, 4, 5, 6]
+    natura: true
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+  offwind-ac:
+    cutout: africa-2013-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    capacity_per_sqkm: 3
+    # correction_factor: 0.93
+    corine: [44, 255]
+    natura: true
+    max_depth: 50
+    max_shore_distance: 30000
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+  offwind-dc:
+    cutout: africa-2013-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    # ScholzPhd Tab 4.3.1: 10MW/km^2
+    capacity_per_sqkm: 3
+    # correction_factor: 0.93
+    corine: [44, 255]
+    natura: true
+    max_depth: 50
+    min_shore_distance: 30000
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+  solar:
+    cutout: africa-2013-era5
+    resource:
+      method: pv
+      panel: CSi
+      orientation:
+        slope: 35.
+        azimuth: 180.
+    capacity_per_sqkm: 1.7 # ScholzPhd Tab 4.3.1: 170 MW/km^2
+    # Determined by comparing uncorrected area-weighted full-load hours to those
+    # published in Supplementary Data to
+    # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
+    # sector: The economic potential of photovoltaics and concentrating solar
+    # power." Applied Energy 135 (2014): 704-720.
+    correction_factor: 0.854337
+    corine: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+             14, 15, 16, 17, 18, 19, 20, 26, 31, 32]
+    natura: true
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+  hydro:
+    cutout: africa-2013-era5
+    carriers: [ror, PHS, hydro]
+    PHS_max_hours: 6
+    hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
+    clip_min_inflow: 1.0
 
 # TODO: Needs to be adjusted for Africa
 costs:

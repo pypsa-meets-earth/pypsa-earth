@@ -83,7 +83,7 @@ from shapely.geometry import Point
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _get_oid(df):
@@ -131,7 +131,10 @@ def _load_buses_from_osm():
     buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
     buses["under_construction"] = buses["under_construction"].fillna(
         False).astype(bool)
-
+    buses["x"] = buses["lon"]
+    buses["y"] = buses["lat"]
+    # TODO: Drop NAN maybe somewhere else?
+    buses = buses.dropna(axis="index", subset=["x", "y","country"])
     # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
 
@@ -443,7 +446,7 @@ def _set_countries_and_substations(n):
     buses = n.buses
 
     def buses_in_shape(shape):
-        shape = shapely.prepared.prep(shape)
+        # shape = shapely.prepared.prep(shape)
         return pd.Series(
             np.fromiter(
                 (shape.contains(Point(x, y))
@@ -456,11 +459,13 @@ def _set_countries_and_substations(n):
 
     countries = snakemake.config["countries"]
     country_shapes = gpd.read_file(
-        snakemake.input.country_shapes).set_index("name")["geometry"]
+        snakemake.input.country_shapes).set_index("name")["geometry"].set_crs(4326)
     offshore_shapes = gpd.read_file(
-        snakemake.input.offshore_shapes).set_index("name")["geometry"]
-    substation_b = buses["symbol"].str.contains("substation|converter station",
-                                                case=False)
+        snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(4326)
+    # TODO: At the moment buses["symbol"] = False. This was set as default values
+    # and need to be adjusted. What values should we put in?
+    substation_b = buses["symbol"]#.str.contains("substation|converter station",
+    #                                             case=False)
 
     def prefer_voltage(x, which):
         index = x.index
@@ -474,41 +479,59 @@ def _set_countries_and_substations(n):
                                          as_index=False,
                                          group_keys=False,
                                          sort=False)
-    bus_map_low = gb.apply(prefer_voltage, "min")
-    lv_b = (bus_map_low == bus_map_low.index).reindex(buses.index,
-                                                      fill_value=False)
-    bus_map_high = gb.apply(prefer_voltage, "max")
-    hv_b = (bus_map_high == bus_map_high.index).reindex(buses.index,
-                                                        fill_value=False)
+    # bus_map_low = gb.apply(prefer_voltage, "min")
+    # lv_b = bus_map_low
+    # TODO: implement missing
+    # lv_b = (bus_map_low == bus_map_low.index).reindex(buses.index,
+    #                                                   fill_value=False)
 
-    onshore_b = pd.Series(False, buses.index)
-    offshore_b = pd.Series(False, buses.index)
+    # bus_map_high = gb.apply(prefer_voltage, "max")
+    # hv_b = bus_map_high
+    # TODO: implement missing
+    # hv_b = (bus_map_high == bus_map_high.index).reindex(buses.index,
+    #                                                     fill_value=False)
 
-    for country in countries:
-        onshore_shape = country_shapes[country]
-        onshore_country_b = buses_in_shape(onshore_shape)
-        onshore_b |= onshore_country_b
+    # TODO: Implement?
+    # onshore_b = pd.Series(False, buses.index)
+    # offshore_b = pd.Series(False, buses.index)
+    # for country in countries:
+    #     onshore_shape = country_shapes[country]
+    #     onshore_country_b = buses_in_shape(onshore_shape)
+    #     onshore_b |= onshore_country_b
 
-        buses.loc[onshore_country_b, "country"] = country
+    #     buses.loc[onshore_country_b, "country"] = country
 
-        if country not in offshore_shapes.index:
-            continue
-        offshore_country_b = buses_in_shape(offshore_shapes[country])
-        offshore_b |= offshore_country_b
+    #     if country not in offshore_shapes.index:
+    #         continue
+    #     offshore_country_b = buses_in_shape(offshore_shapes[country])
+    #     offshore_b |= offshore_country_b
 
-        buses.loc[offshore_country_b, "country"] = country
-
+    #     buses.loc[offshore_country_b, "country"] = country
+    
+    # TODO: Build in under-construction distinction
     # Only accept buses as low-voltage substations (where load is attached), if
     # they have at least one connection which is not under_construction
-    has_connections_b = pd.Series(False, index=buses.index)
-    for b, df in product(("bus0", "bus1"), (n.lines, n.links)):
-        has_connections_b |= ~df.groupby(b).under_construction.min()
+    # has_connections_b = pd.Series(False, index=buses.index)
+    # for b, df in product(("bus0", "bus1"), (n.lines, n.links)):
+    #     has_connections_b |= ~df.groupby(b).under_construction.min()
 
-    buses["substation_lv"] = (lv_b & onshore_b & (~buses["under_construction"])
-                              & has_connections_b)
-    buses["substation_off"] = (offshore_b | (hv_b & onshore_b)) & (
-        ~buses["under_construction"])
+    # buses["substation_lv"] = (lv_b & onshore_b & (~buses["under_construction"])
+    #                           & has_connections_b)
+    # buses["substation_off"] = (offshore_b | (hv_b & onshore_b)) & (
+    #     ~buses["under_construction"])
+    # has_connections_b = pd.Series(False, index=buses.index)
+    # for b, df in product(("bus0", "bus1"), (n.lines, n.links)):
+    #     has_connections_b |= ~df.groupby(b).under_construction.min()
 
+    # buses["substation_lv"] = True # TODO:remove as done in osm_build_network?
+    # TODO: New implementation below
+    bus_locations = buses
+    bus_locations = gpd.GeoDataFrame(bus_locations,geometry=gpd.points_from_xy(buses.x,buses.y), crs = 4326)
+    offshore_b = (bus_locations.within(offshore_shapes))[:-offshore_shapes.size]  # Check if bus is in shape
+    offshore_b = offshore_b
+    offshore_hvb = buses["v_nom"] > 220  # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
+    buses["substation_off"] = (offshore_b | offshore_hvb)  # Compares two lists & makes list value true if at least one is true
+    
     # Busses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:
@@ -697,7 +720,7 @@ def base_network():
     # n = _remove_unconnected_components(n)
 
     # TODO: Add when shapes are available. Adds homeless buses i.e. offshore to country & assigns LV-bus as demand..
-    # _set_countries_and_substations(n)
+    _set_countries_and_substations(n)
 
     # _set_links_underwater_fraction(n)
 
@@ -713,10 +736,9 @@ def base_network():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)
 
     n = base_network()
-
+    n.buses = pd.DataFrame(n.buses.drop(columns='geometry'))
     n.export_to_netcdf(snakemake.output[0])

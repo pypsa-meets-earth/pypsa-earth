@@ -61,6 +61,7 @@ def create_bus_df_from_lines(substations, lines):
     buses["under_construction"] = "False"
     buses["tag_substation"] = "False"
     buses["tag_area"] = "False"
+    buses["substation_lv"] = True
 
     return buses
 
@@ -84,11 +85,23 @@ def create_station_at_equal_bus_locations(lines, buses):
     bus_all = buses
     bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
 
+    # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
+    bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(keep=False)].sort_values(by=["station_id","voltage"])
+    lv_bus_at_station_duplicates = bus_all[bus_all.station_id.duplicated(keep=False)].sort_values(by=["station_id","voltage"]).drop_duplicates(subset=["station_id"])
+    # Set all buses with station duplicates "False"
+    bus_all.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
+    # Set lv_buses with station duplicates "True"
+    bus_all.loc[lv_bus_at_station_duplicates.index, "substation_lv"] = True
+
     # Add station_id to line dataframe
     n_row = int(bus_all.shape[0] / 2)  # row length
     lines = lines.reset_index(drop=True)
     lines["bus0"] = bus_all.loc[: (n_row - 1), ["bus_id"]]
     lines["bus1"] = bus_all.loc[n_row:, ["bus_id"]].reset_index(drop=True)
+
+    # TRY: Keep only buses that are not duplicated & lv_substation = True
+    # TODO: Check if this is necessary. What effetc do duplicates have?
+    bus_all = bus_all[bus_all["substation_lv"] == True]
 
     return lines, buses
 
