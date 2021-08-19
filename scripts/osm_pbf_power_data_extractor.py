@@ -440,7 +440,7 @@ def process_data(update, verify):
             df_feature = pd.concat([df_node, df_way], axis=0)
 
             # Add Country Column
-            df_feature["Country"] = AFRICA_CC[country_code]
+            df_feature["Country"] = country_code
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
