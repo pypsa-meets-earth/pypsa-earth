@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
 
 # coding=utf-8
 #
@@ -15,7 +13,7 @@
 continents = {
     'LA': 'latin_america',
     'SA': 'south_america', 
-    'CA': 'central_america'
+    'CA': 'central_america',
     'AS': 'asia',
     'OC': 'australia',
     'AF': 'africa',
@@ -428,3 +426,4 @@ feature_columns = {
 
 
 
+# %%

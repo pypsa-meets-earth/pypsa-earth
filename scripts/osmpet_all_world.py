@@ -36,9 +36,7 @@ from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
-from osm_data_config import world, continent_regions
-
-from osm_data_config import world, continent_regions
+from _osm_data_config import world, continent_regions
 from osm_data_config import feature_category, feature_columns 
 
 from shapely.geometry import LineString, Point, Polygon
@@ -569,7 +567,7 @@ if __name__ == "__main__":
     
     # 3. A country code according to ISO codes (ex. France = FR, Germany DE, South Africa = ZA)
     
-    value1 = "europe"
+    value1 = "DE"
     
     if value1 in world.keys():
         codes_list = world[value1].keys()

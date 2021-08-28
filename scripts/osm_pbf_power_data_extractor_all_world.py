@@ -36,9 +36,7 @@ from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import run_filter  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
-from _osm_data_config import world, continent_regions
-
-from _osm_data_config import world, continent_regions
+from _osm_data_config import world, continent_regions, continents
 from _osm_data_config import feature_category, feature_columns 
 
 from shapely.geometry import LineString, Point, Polygon
@@ -569,16 +567,43 @@ if __name__ == "__main__":
     
     # 3. A country code according to ISO codes (ex. France = FR, Germany DE, South Africa = ZA)
     
-    value1 = "europe"
+    ### TESTS
+    # value1 = "world"
+    # value1 = "africa"
+    # value1 = "SER"
+    input = ["FR"]
+    full_codes_list = []
     
-    if value1 in world.keys():
-        codes_list = world[value1].keys()
+    for value1 in input:
 
-    elif value1 in continent_regions.keys():
-        codes_list = world_regions[value1].keys()
+        codes_list = []
 
-    for country_code in codes_list: 
+        # extract countries in world
+        if value1 == "world":
+            for continent in world.keys():
+                codes_list.extend(list(world[continent]))
+
+        # extract countries in continent
+        elif value1 in world.keys():
+            codes_list = list(world[value1])
+
+        # extract countries in regions
+        elif value1 in continent_regions.keys():
+            codes_list = continent_regions[value1]
+
+        # extract countries
+        else:
+            codes_list.extend([value1])
+
+        # create a list with all countries
+        full_codes_list.extend(codes_list)
+
+    full_codes_list = list(set(full_codes_list)) # Removing duplicates
+
+    for country_code in full_codes_list: 
         # Set update # Verify = True checks local md5s and pre-filters data again
         process_data(update=False, verify=False)
         
 
+
+# %%
