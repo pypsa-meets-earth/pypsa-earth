@@ -12,6 +12,7 @@ import numpy as np
 import rasterio
 import requests
 #import rioxarray
+import rioxarray as rx
 import xarray as xr
 from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
@@ -19,7 +20,7 @@ from _helpers import _two_2_three_digits_country
 from _helpers import configure_logging
 from rasterio.mask import mask
 from shapely.geometry import MultiPolygon
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import cascaded_union
 
 
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 # from ..scripts.iso_country_codes import AFRICA_CC
 
-#_sets_path_to_root("scripts")
+_sets_path_to_root("pypsa-africa")
 
 
 def download_GADM(country_code, update=False, out_logging=False):
@@ -56,7 +57,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
 
     GADM_inputfile_zip = os.path.join(
-        os.path.dirname(os.getcwd()),
+        os.getcwd(),
         "data",
         "raw",
         "gadm",
@@ -65,7 +66,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     )  # Input filepath zip
 
     GADM_inputfile_gpkg = os.path.join(
-        os.path.dirname(os.getcwd()),
+        os.getcwd(),
         "data",
         "raw",
         "gadm",
@@ -217,7 +218,7 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
     The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
     """
 
-    EEZ_gpkg = os.path.join(os.path.dirname(os.getcwd()),"pypsa-africa", "data", "raw", "eez",
+    EEZ_gpkg = os.path.join(os.getcwd(), "data", "raw", "eez",
                             name_file)  # Input filepath gpkg
 
     if not os.path.exists(EEZ_gpkg):
@@ -291,7 +292,7 @@ def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
 #     return ret_df
 
 
-def eez_new(country_shapes, out_logging=False):
+def eez_new(country_shapes, out_logging=False, distance=0.01):
     """
     Creates offshore shapes by 
     - buffer smooth countryshape (=offset country shape)
@@ -312,14 +313,14 @@ def eez_new(country_shapes, out_logging=False):
     # simplified offshore_shape
     ret_df = df_eez.set_index("name")["geometry"].map(_simplify_polys)
 
-    # ret_df = ret_df.apply(lambda x: make_valid(x))
-    # country_shapes = country_shapes.apply(lambda x: make_valid(x))
+    ret_df = ret_df.apply(lambda x: make_valid(x))
+    country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
-    # country_shapes_with_buffer = country_shapes.buffer(0.01) # about 1000m
-    # ret_df_new = ret_df.difference(country_shapes_with_buffer)
+    country_shapes_with_buffer = country_shapes.buffer(distance)
+    ret_df_new = ret_df.difference(country_shapes_with_buffer)
 
     # Drops empty geometry
-    # ret_df = ret_df_new.dropna()
+    ret_df = ret_df_new.dropna()
 
     return ret_df
 
@@ -366,7 +367,7 @@ def download_WorldPop(country_code,
         f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
     ]
 
-    WorldPop_inputfile = os.path.join(os.path.dirname(os.getcwd()), "data",
+    WorldPop_inputfile = os.path.join(os.getcwd(), "data",
                                       "raw", "WorldPop",
                                       WorldPop_filename)  # Input filepath tif
 
@@ -403,7 +404,7 @@ def add_population_data(df_gadm,
         print("Add population data to GADM GeoDataFrame")
 
     # initialize new population column
-    df_gadm["pop"] = 0
+    df_gadm["pop"] = 0.0
 
     for c_code in country_codes:
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
@@ -436,7 +437,7 @@ def add_population_data(df_gadm,
                 if out_logging == True:
                     print(c_code, ": ", index, " out of ",
                           country_rows.shape[0])
-                print(pop_by_geom)
+
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
 
@@ -455,11 +456,11 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     print(name_file_tif)
 
     # path of the nc file
-    GDP_nc = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+    GDP_nc = os.path.join(os.getcwd(), "data", "raw", "GDP",
                           name_file_nc)  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+    GDP_tif = os.path.join(os.getcwd(), "data", "raw", "GDP",
                            name_file_tif)  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
@@ -473,7 +474,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
 
     # get the requested year of data or its closest one
     list_years = GDP_dataset["time"]
-    if not year in list_years:
+    if year not in list_years:
         if out_logging:
             print(
                 f"GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
@@ -504,7 +505,7 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(os.path.dirname(os.getcwd()), "data", "raw", "GDP",
+    GDP_tif = os.path.join(os.getcwd(), "data", "raw", "GDP",
                            name_file_tif)  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
@@ -530,7 +531,7 @@ def add_gdp_data(
         print("Add population data to GADM GeoDataFrame")
 
     # initialize new population column
-    df_gadm["gdp"] = 0
+    df_gadm["gdp"] = 0.0
 
     GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
 
@@ -584,16 +585,16 @@ def gadm(layer_id=2, update=False, out_logging=False, year=2020):
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
     # add the population data to the dataset
-    #add_population_data(df_gadm, countries, year, update, out_logging) #TODO: uncomment without making file running with bug
+    add_population_data(df_gadm, countries, year, update, out_logging)
 
     # add the gdp data to the dataset
-    # add_gdp_data(
-    #     df_gadm,
-    #     year,
-    #     update,
-    #     out_logging,
-    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    # )
+    add_gdp_data(
+        df_gadm,
+        year,
+        update,
+        out_logging,
+        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -628,8 +629,8 @@ if __name__ == "__main__":
     offshore_shapes = eez_new(country_shapes, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
-    # africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
-    # save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
+    africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
+    save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
     gadm_shapes = gadm(layer_id, update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
