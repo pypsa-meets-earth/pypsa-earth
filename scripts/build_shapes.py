@@ -146,7 +146,7 @@ def get_GADM_layer(country_list, layer_id, update=False):
     return geodf_GADM
 
 
-def _simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True):
+def _simplify_polys(polys, minarea=0.0001, tolerance=0.01, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys, key=attrgetter("area"), reverse=True)
@@ -256,7 +256,7 @@ def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
 
     # set index and simplify polygons
     ret_df = df_eez.set_index("name").geometry.map(
-        lambda x: _simplify_polys(x, filterremote=False))
+       lambda x: _simplify_polys(x, filterremote=False))
 
     ret_df = gpd.GeoSeries({
         k: v
@@ -312,15 +312,14 @@ def eez_new(country_shapes, out_logging=False):
     # simplified offshore_shape
     ret_df = df_eez.set_index("name")["geometry"].map(_simplify_polys)
 
+    # ret_df = ret_df.apply(lambda x: make_valid(x))
+    # country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
-    ret_df = ret_df.apply(lambda x: make_valid(x))
-    country_shapes = country_shapes.apply(lambda x: make_valid(x))
-
-    country_shapes_with_buffer = country_shapes.buffer(0.01) # about 1000m
-    ret_df_new = ret_df.difference(country_shapes_with_buffer)
+    # country_shapes_with_buffer = country_shapes.buffer(0.01) # about 1000m
+    # ret_df_new = ret_df.difference(country_shapes_with_buffer)
 
     # Drops empty geometry
-    ret_df = ret_df_new.dropna()
+    # ret_df = ret_df_new.dropna()
 
     return ret_df
 
@@ -588,13 +587,13 @@ def gadm(layer_id=2, update=False, out_logging=False, year=2020):
     #add_population_data(df_gadm, countries, year, update, out_logging) #TODO: uncomment without making file running with bug
 
     # add the gdp data to the dataset
-    add_gdp_data(
-        df_gadm,
-        year,
-        update,
-        out_logging,
-        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    )
+    # add_gdp_data(
+    #     df_gadm,
+    #     year,
+    #     update,
+    #     out_logging,
+    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    # )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -632,5 +631,5 @@ if __name__ == "__main__":
     # africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     # save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    # gadm_shapes = gadm(layer_id, update, out_logging, year)
-    # save_to_geojson(gadm_shapes, out.gadm_shapes)
+    gadm_shapes = gadm(layer_id, update, out_logging, year)
+    save_to_geojson(gadm_shapes, out.gadm_shapes)
