@@ -393,55 +393,6 @@ def download_WorldPop(country_code,
     return WorldPop_inputfile, WorldPop_filename
 
 
-def add_population_data(df_gadm,
-                        country_codes,
-                        year=2020,
-                        update=False,
-                        out_logging=False):
-    """Function to add the population info for each country shape in the gadm dataset"""
-
-    if out_logging:
-        print("Add population data to GADM GeoDataFrame")
-
-    # initialize new population column
-    df_gadm["pop"] = 0.0
-
-    for c_code in country_codes:
-        WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, year, update, out_logging)
-
-        with rasterio.open(WorldPop_inputfile) as src:
-            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
-
-            for index, row in country_rows.iterrows():
-                # select the desired area of the raster corresponding to each polygon
-                # Approximation: the population is measured including the pixels
-                #   where the border of the shape lays. This leads to slightly overestimate
-                #   the population, but the error is limited and it enables halving the
-                #   computational time
-                out_image, out_transform = mask(src,
-                                                row["geometry"],
-                                                all_touched=True,
-                                                invert=False,
-                                                nodata=0.0)
-                # out_image_int, out_transform = mask(src,
-                #                                row["geometry"],
-                #                                all_touched=False,
-                #                                invert=False,
-                #                                nodata=0.0)
-
-                # calculate total population in the selected geometry
-                pop_by_geom = out_image.sum()
-                # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
-
-                if out_logging == True:
-                    print(c_code, ": ", index, " out of ",
-                          country_rows.shape[0])
-
-                # update the population data in the dataset
-                df_gadm.loc[index, "pop"] = pop_by_geom
-
-
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
@@ -566,6 +517,58 @@ def add_gdp_data(
             # update the gdp data in the dataset
             df_gadm.loc[index, "gdp"] = gdp_by_geom
     return df_gadm
+
+
+
+
+
+def add_population_data(df_gadm,
+                        country_codes,
+                        year=2020,
+                        update=False,
+                        out_logging=False):
+    """Function to add the population info for each country shape in the gadm dataset"""
+
+    if out_logging:
+        print("Add population data to GADM GeoDataFrame")
+
+    # initialize new population column
+    df_gadm["pop"] = 0.0
+
+    for c_code in country_codes:
+        WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+            c_code, year, update, out_logging)
+
+        with rasterio.open(WorldPop_inputfile) as src:
+            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+
+            for index, row in country_rows.iterrows():
+                # select the desired area of the raster corresponding to each polygon
+                # Approximation: the population is measured including the pixels
+                #   where the border of the shape lays. This leads to slightly overestimate
+                #   the population, but the error is limited and it enables halving the
+                #   computational time
+                out_image, out_transform = mask(src,
+                                                row["geometry"],
+                                                all_touched=True,
+                                                invert=False,
+                                                nodata=0.0)
+                # out_image_int, out_transform = mask(src,
+                #                                row["geometry"],
+                #                                all_touched=False,
+                #                                invert=False,
+                #                                nodata=0.0)
+
+                # calculate total population in the selected geometry
+                pop_by_geom = out_image.sum()
+                # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
+
+                if out_logging == True:
+                    print(c_code, ": ", index, " out of ",
+                          country_rows.shape[0])
+
+                # update the population data in the dataset
+                df_gadm.loc[index, "pop"] = pop_by_geom
 
 
 def gadm(layer_id=2, update=False, out_logging=False, year=2020):
