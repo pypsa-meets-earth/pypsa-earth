@@ -18,12 +18,13 @@ AFRICA_CC = {
     "CD": "congo-democratic-republic",
     "DJ": "djibouti",
     "EG": "egypt",
+    "EH": "western-sahara",
     "GQ": "equatorial-guinea",
     "ER": "eritrea",
     "ET": "ethiopia",
     "GA": "gabon",
     "GH": "ghana",
-    # "GW": "guinea-bissau", # No Data
+    "GW": "guinea-bissau", # No Data
     "GN": "guinea",
     "CI": "ivory-coast",
     "KE": "kenya",
@@ -45,8 +46,10 @@ AFRICA_CC = {
     # "ST": "sao-tome-and-principe", #Island
     # "SN-GM": "senegal-and-gambia",  # Merged Country Code, See Map, See https://github.com/pypsa-meets-africa/pypsa-africa/issues/40#issuecomment-885424094
     # "SC": "seychelles", #Island
+    "SN": "senegal",
+    "GM": "gambia",
     "SL": "sierra-leone",
-    # "SO": "somalia", # No Data
+    "SO": "somalia", # No Data
     # south-africa-and-lesotho
     "ZA": "south-africa",
     "SS": "south-sudan",
