@@ -13,6 +13,7 @@ import rasterio
 import requests
 #import rioxarray
 import rioxarray as rx
+from shapely.geometry.base import BaseGeometry
 import xarray as xr
 from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
@@ -22,6 +23,7 @@ from rasterio.mask import mask
 from shapely.geometry import MultiPolygon
 from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import cascaded_union
+from osm_data_config import AFRICA_CC
 
 
 logger = logging.getLogger(__name__)
@@ -92,7 +94,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def get_GADM_layer(country_list, layer_id, update=False):
+def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
 
@@ -112,7 +114,7 @@ def get_GADM_layer(country_list, layer_id, update=False):
 
     for country_code in country_list:
         # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, False)
+        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
 
         # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
@@ -170,7 +172,7 @@ def countries(countries, update=False, out_logging=False):
         print("Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
-    df_countries = get_GADM_layer(countries, 0, update)
+    df_countries = get_GADM_layer(countries, 0, update, out_logging)
 
     # select and rename columns
     df_countries = df_countries[["GID_0", "geometry"]].copy()
@@ -191,10 +193,10 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False):
     if eez_shapes is not None:
         shapes += list(eez_shapes)
 
-    europe_shape = cascaded_union(shapes)
-    if isinstance(europe_shape, MultiPolygon):
-        europe_shape = max(europe_shape, key=attrgetter("area"))
-    return Polygon(shell=europe_shape.exterior)
+    africa_shape = cascaded_union(shapes)
+    if isinstance(africa_shape, MultiPolygon):
+        africa_shape = max(africa_shape, key=attrgetter("area"))
+    return Polygon(shell=africa_shape.exterior)
 
 
 def save_to_geojson(df, fn):
@@ -253,7 +255,7 @@ def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 
     # set index and simplify polygons
     ret_df = df_eez.set_index("name").geometry.map(
-       lambda x: _simplify_polys(x, filterremote=False))
+       lambda x: _simplify_polys(x, minarea=0.1, tolerance=0.01, filterremote=True))
 
     ret_df = gpd.GeoSeries({
         k: v
@@ -303,13 +305,19 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
     df_eez = load_EEZ(countries)
 
     # simplified offshore_shape
-    ret_df = df_eez.set_index("name")["geometry"].map(_simplify_polys)
+    ret_df = df_eez.set_index("name")["geometry"].map(
+        lambda x: _simplify_polys(x, minarea=0.1, tolerance=0.01, filterremote=True))
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
     country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
+
+    # repeat to simplify after the buffer correction
+    ret_df_new = ret_df_new.map(
+        lambda x: x if x is None else _simplify_polys(x, minarea=0.1, tolerance=0.01, filterremote=True))
+    ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
@@ -604,11 +612,13 @@ if __name__ == "__main__":
     out = snakemake.output
 
     # Parameters to be later initialized through snakemake
-    countries_list = snakemake.config["countries"]
+    countries_list = snakemake.config["countries"] #list(AFRICA_CC) # 
     layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
     update = snakemake.config['build_shape_options']['update_file']
     out_logging = snakemake.config['build_shape_options']['out_logging']
     year = snakemake.config['build_shape_options']['year']
+
+    print(countries_list)
 
     # print(snakemake.config)
 
