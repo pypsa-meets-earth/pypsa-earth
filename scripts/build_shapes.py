@@ -152,7 +152,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
-        polys = sorted(polys, key=attrgetter("area"), reverse=True)
+        polys = sorted(polys, key=attrgetter("area"), reverse=True) # here deprecation warning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
@@ -199,7 +199,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False):
     return Polygon(shell=africa_shape.exterior)
 
 
-def save_to_geojson(df, fn):
+def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
     if not isinstance(df, gpd.GeoDataFrame):
@@ -210,6 +210,9 @@ def save_to_geojson(df, fn):
         df = df.reset_index()
         schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
         df.to_file(fn, driver="GeoJSON", schema=schema)
+    else:
+        # create empty file to avoid issues with snakemake
+        os.open(fn, "w").close()
 
 
 def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
@@ -255,7 +258,7 @@ def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 
     # set index and simplify polygons
     ret_df = df_eez.set_index("name").geometry.map(
-       lambda x: _simplify_polys(x, minarea=0.1, tolerance=0.01, filterremote=True))
+       lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
 
     ret_df = gpd.GeoSeries({
         k: v
@@ -304,11 +307,12 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
     # load data
     df_eez = load_EEZ(countries)
 
+    print("aaa")
     # simplified offshore_shape
     ret_df = df_eez.set_index("name")["geometry"].map(
-        lambda x: _simplify_polys(x, minarea=0.1, tolerance=0.01, filterremote=True))
+        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
 
-    ret_df = ret_df.apply(lambda x: make_valid(x))
+    ret_df = ret_df.apply(lambda x: make_valid(x))  # hole lies outside occurs here
     country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
@@ -316,8 +320,9 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
 
     # repeat to simplify after the buffer correction
     ret_df_new = ret_df_new.map(
-        lambda x: x if x is None else _simplify_polys(x, minarea=0.1, tolerance=0.01, filterremote=True))
+        lambda x: x if x is None else _simplify_polys(x, minarea=0.001, tolerance=0.0001))
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
+
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
@@ -496,9 +501,16 @@ def add_gdp_data(
             #   where the border of the shape lays. This may affect the computation
             #   but it is conservative and avoids considering multiple times the same
             #   pixels
-            out_image, out_transform = mask(src,
+            if row["geometry"].geom_type == 'Polygon':
+                out_image, out_transform = mask(src,
+                                            [row["geometry"]],
+                                            all_touched=True,
+                                            invert=False,
+                                            nodata=0.0)
+            else:
+                out_image, out_transform = mask(src,
                                             row["geometry"],
-                                            all_touched=False,
+                                            all_touched=True,
                                             invert=False,
                                             nodata=0.0)
             # out_image_int, out_transform = mask(src,
@@ -533,6 +545,9 @@ def add_population_data(df_gadm,
     # initialize new population column
     df_gadm["pop"] = 0.0
 
+    # count elements
+    count = 0
+
     for c_code in country_codes:
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
             c_code, year, update, out_logging)
@@ -546,7 +561,14 @@ def add_population_data(df_gadm,
                 #   where the border of the shape lays. This leads to slightly overestimate
                 #   the population, but the error is limited and it enables halving the
                 #   computational time
-                out_image, out_transform = mask(src,
+                if row["geometry"].geom_type == 'Polygon':
+                    out_image, out_transform = mask(src,
+                                                [row["geometry"]],
+                                                all_touched=True,
+                                                invert=False,
+                                                nodata=0.0)
+                else:
+                    out_image, out_transform = mask(src,
                                                 row["geometry"],
                                                 all_touched=True,
                                                 invert=False,
@@ -561,12 +583,15 @@ def add_population_data(df_gadm,
                 pop_by_geom = out_image.sum()
                 # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
-                if out_logging == True:
-                    print(c_code, ": ", index, " out of ",
-                          country_rows.shape[0])
-
                 # update the population data in the dataset
                 df_gadm.loc[index, "pop"] = pop_by_geom
+
+                count += 1
+
+                if out_logging == True:
+                    print(count, " out of ", df_gadm.shape[0], " [", c_code, "]")
+                    # print(c_code, ": ", index, " out of ",
+                    #      country_rows.shape[0])
 
 
 def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
@@ -583,17 +608,17 @@ def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
     # drop useless columns
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
-    # # add the population data to the dataset
-    # add_population_data(df_gadm, countries, year, update, out_logging)
+    # add the population data to the dataset
+    add_population_data(df_gadm, countries, year, update, out_logging)
 
-    # # add the gdp data to the dataset
-    # add_gdp_data(
-    #     df_gadm,
-    #     year,
-    #     update,
-    #     out_logging,
-    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    # )
+    # add the gdp data to the dataset
+    add_gdp_data(
+        df_gadm,
+        year,
+        update,
+        out_logging,
+        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -612,7 +637,8 @@ if __name__ == "__main__":
     out = snakemake.output
 
     # Parameters to be later initialized through snakemake
-    countries_list = snakemake.config["countries"] #list(AFRICA_CC) # 
+    # countries_list = list(AFRICA_CC) # TODO: implement some coding to automatically process all africa by config.yaml
+    countries_list = snakemake.config["countries"]
     layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
     update = snakemake.config['build_shape_options']['update_file']
     out_logging = snakemake.config['build_shape_options']['out_logging']
