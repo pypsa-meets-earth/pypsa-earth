@@ -147,7 +147,7 @@ def get_GADM_layer(country_list, layer_id, update=False):
     return geodf_GADM
 
 
-def _simplify_polys(polys, minarea=0.0001, tolerance=0.01, filterremote=False):
+def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys, key=attrgetter("area"), reverse=True)
@@ -163,13 +163,11 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.01, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(update=False, out_logging=False):
+def countries(countries, update=False, out_logging=False):
     "Create country shapes"
 
     if out_logging:
         print("Create country shapes")
-
-    countries = snakemake.config["countries"]
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(countries, 0, update)
@@ -245,12 +243,10 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
+def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 
     if out_logging:
         print("Create offshore shapes")
-
-    countries = snakemake.config["countries"]
 
     # load data
     df_eez = load_EEZ(countries)
@@ -268,12 +264,10 @@ def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
     return ret_df
 
 
-# def eez2(country_shapes, update=False, out_logging=False, tol=1e-3):
+# def eez2(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 
 #     if out_logging:
 #         print("Create offshore shapes")
-
-#     countries = snakemake.config["countries"]
 
 #     # load data
 #     df_eez = load_EEZ(countries)
@@ -292,7 +286,7 @@ def eez(country_shapes, update=False, out_logging=False, tol=1e-3):
 #     return ret_df
 
 
-def eez_new(country_shapes, out_logging=False, distance=0.01):
+def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
     """
     Creates offshore shapes by 
     - buffer smooth countryshape (=offset country shape)
@@ -304,8 +298,6 @@ def eez_new(country_shapes, out_logging=False, distance=0.01):
 
     if out_logging:
         print("Create offshore shapes")
-
-    countries = snakemake.config["countries"]
 
     # load data
     df_eez = load_EEZ(countries)
@@ -520,8 +512,6 @@ def add_gdp_data(
 
 
 
-
-
 def add_population_data(df_gadm,
                         country_codes,
                         year=2020,
@@ -571,12 +561,10 @@ def add_population_data(df_gadm,
                 df_gadm.loc[index, "pop"] = pop_by_geom
 
 
-def gadm(layer_id=2, update=False, out_logging=False, year=2020):
+def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
 
     if out_logging:
         print("Creation GADM GeoDataFrame")
-
-    countries = snakemake.config["countries"]
 
     # download data if needed and get the desired layer_id
     df_gadm = get_GADM_layer(countries, layer_id, update)
@@ -587,17 +575,17 @@ def gadm(layer_id=2, update=False, out_logging=False, year=2020):
     # drop useless columns
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
-    # add the population data to the dataset
-    add_population_data(df_gadm, countries, year, update, out_logging)
+    # # add the population data to the dataset
+    # add_population_data(df_gadm, countries, year, update, out_logging)
 
-    # add the gdp data to the dataset
-    add_gdp_data(
-        df_gadm,
-        year,
-        update,
-        out_logging,
-        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    )
+    # # add the gdp data to the dataset
+    # add_gdp_data(
+    #     df_gadm,
+    #     year,
+    #     update,
+    #     out_logging,
+    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    # )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -616,24 +604,25 @@ if __name__ == "__main__":
     out = snakemake.output
 
     # Parameters to be later initialized through snakemake
-    layer_id = 2
-    update = False
-    out_logging = True
-    year = 2020
+    countries_list = snakemake.config["countries"]
+    layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
+    update = snakemake.config['build_shape_options']['update_file']
+    out_logging = snakemake.config['build_shape_options']['out_logging']
+    year = snakemake.config['build_shape_options']['year']
 
     # print(snakemake.config)
 
-    country_shapes = countries(update, out_logging)
+    country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes_old = eez(country_shapes, update, out_logging)
+    offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
     save_to_geojson(offshore_shapes_old, out.offshore_shapes_old)
 
-    offshore_shapes = eez_new(country_shapes, out_logging)
+    offshore_shapes = eez_new(countries_list, country_shapes, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm(layer_id, update, out_logging, year)
+    gadm_shapes = gadm(countries_list, layer_id, update, out_logging, year)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
