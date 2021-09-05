@@ -142,14 +142,14 @@ rule add_electricity:
     input:
         base_network='networks/base.nc',
         tech_costs=COSTS,
-        # regions="resources/regions_onshore.geojson",
+        regions="resources/regions_onshore.geojson",
         # powerplants='resources/powerplants.csv',
         # hydro_capacities='data/bundle/hydro_capacities.csv',
         # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         # load='resources/load.csv',
         # nuts3_shapes='resources/nuts3_shapes.geojson',
-        # **{f"profile_{tech}": f"resources/profile_{tech}.nc"
-        #    for tech in config['renewable']}
+        **{f"profile_{tech}": f"resources/profile_{tech}.nc"
+            for tech in config['renewable']}
     output: "networks/elec.nc"
     log: "logs/add_electricity.log"
     benchmark: "benchmarks/add_electricity"
@@ -162,12 +162,12 @@ rule simplify_network:
     input:
         network='networks/elec.nc',
         tech_costs=COSTS,
-        # regions_onshore="resources/regions_onshore.geojson",
-        # regions_offshore="resources/regions_offshore.geojson"
+        regions_onshore="resources/regions_onshore.geojson",
+        regions_offshore="resources/regions_offshore.geojson"
     output:
         network='networks/elec_s{simpl}.nc',
-        # regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
-        # regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
         # busmap='resources/busmap_elec_s{simpl}.csv'
     log: "logs/simplify_network/elec_s{simpl}.log"
     benchmark: "benchmarks/simplify_network/elec_s{simpl}"
@@ -178,38 +178,23 @@ rule simplify_network:
 
 rule cluster_network:
     input:
-        # network='networks/elec_s.nc',
-        # regions_onshore="resources/regions_onshore_elec_s.geojson",
-        # regions_offshore="resources/regions_offshore_elec_s.geojson",
-        # busmap=ancient('resources/busmap_elec_s.csv'),
-        # custom_busmap=("data/custom_busmap_elec_s_1000.csv"
+        network='networks/elec_s{simpl}.nc',
+        regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
+        # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
+        # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
         #                if config["enable"].get("custom_busmap", False) else []),
-        # tech_costs=COSTS
+        tech_costs=COSTS
     output:
-        # network='networks/elec_s_1000.nc',
-        # regions_onshore="resources/regions_onshore_elec_s_1000.geojson",
-        # regions_offshore="resources/regions_offshore_elec_s_1000.geojson",
-        # busmap="resources/busmap_elec_s_1000.csv",
-        # linemap="resources/linemap_elec_s_1000.csv"
-    log: "logs/cluster_network/elec_s_1000.log"
-    benchmark: "benchmarks/cluster_network/elec_s_1000"
+        network='networks/elec_s{simpl}_{clusters}.nc',
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        # busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
+        # linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
+    log: "logs/cluster_network/elec_s{simpl}_{clusters}.log"
+    benchmark: "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
     threads: 1
     resources: mem=3000
     script: "scripts/cluster_network.py"
 
-# rule build_shapes:
-#     input:
-#         naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
-#         eez='data/bundle/eez/World_EEZ_v8_2014.shp',
-#         nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
-#         nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
-#         nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
-#     output:
-#         country_shapes='resources/country_shapes.geojson',
-#         offshore_shapes='resources/offshore_shapes.geojson',
-#         europe_shape='resources/europe_shape.geojson',
-#         nuts3_shapes='resources/nuts3_shapes.geojson'
-#     log: "logs/build_shapes.log"
-#     threads: 1
-#     resources: mem=500
-#     script: "scripts/build_shapes.py"
+

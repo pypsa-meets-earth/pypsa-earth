@@ -430,15 +430,15 @@ if __name__ == "__main__":
 
     # busmaps = [trafo_map, simplify_links_map, stub_map]
 
-    # if snakemake.wildcards.simpl:
-    #     n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))
-    #     busmaps.append(cluster_map)
-    # else:
-    #     n.buses = n.buses.drop(['symbol', 'tags', 'under_construction', 'substation_lv', 'substation_off'], axis=1)
+    if snakemake.wildcards.simpl:
+        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))
+        busmaps.append(cluster_map)
+    else:
+        n.buses = n.buses.drop(['symbol', 'under_construction', 'substation_lv', 'substation_off'], axis=1) #TODO: Remove other unnecessary columns
 
-    # update_p_nom_max(n)
+    update_p_nom_max(n)
 
-    # n.export_to_netcdf(snakemake.output.network)
+    n.export_to_netcdf(snakemake.output.network)
 
     # busmap_s = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
     # busmap_s.to_csv(snakemake.output.busmap)

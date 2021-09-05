@@ -102,7 +102,7 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def normed(s):
@@ -306,28 +306,34 @@ def attach_wind_and_solar(n, costs):
             continue
 
         n.add("Carrier", name=tech)
+        #TODO: Uncomment this out. MAX
+        # with xr.open_dataset(getattr(snakemake.input,
+        #                              "profile_" + tech)) as ds:
+        #TODO: Remove the 2 lines below
         with xr.open_dataset(getattr(snakemake.input,
-                                     "profile_" + tech)) as ds:
+                                     "profile_" + "solar")) as ds:
             if ds.indexes["bus"].empty:
                 continue
 
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
-                underwater_fraction = ds["underwater_fraction"].to_pandas()
-                connection_cost = (
-                    snakemake.config["lines"]["length_factor"] *
-                    ds["average_distance"].to_pandas() *
-                    (underwater_fraction *
-                     costs.at[tech + "-connection-submarine", "capital_cost"] +
-                     (1.0 - underwater_fraction) *
-                     costs.at[tech + "-connection-underground", "capital_cost"]
-                     ))
-                capital_cost = (costs.at["offwind", "capital_cost"] +
-                                costs.at[tech + "-station", "capital_cost"] +
-                                connection_cost)
-                logger.info(
-                    "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".
-                    format(connection_cost.min(), connection_cost.max(), tech))
+                continue
+                #TODO: Uncomment this out. MAX
+                # underwater_fraction = ds["underwater_fraction"].to_pandas()
+                # connection_cost = (
+                #     snakemake.config["lines"]["length_factor"] *
+                #     ds["average_distance"].to_pandas() *
+                #     (underwater_fraction *
+                #      costs.at[tech + "-connection-submarine", "capital_cost"] +
+                #      (1.0 - underwater_fraction) *
+                #      costs.at[tech + "-connection-underground", "capital_cost"]
+                #      ))
+                # capital_cost = (costs.at["offwind", "capital_cost"] +
+                #                 costs.at[tech + "-station", "capital_cost"] +
+                #                 connection_cost)
+                # logger.info(
+                #     "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".
+                #     format(connection_cost.min(), connection_cost.max(), tech))
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
@@ -665,13 +671,13 @@ if __name__ == "__main__":
     # update_transmission_costs(n, costs)
 
     # attach_conventional_generators(n, costs, ppl)
-    # attach_wind_and_solar(n, costs)
+    attach_wind_and_solar(n, costs)
     # attach_hydro(n, costs, ppl)
     # attach_extendable_generators(n, costs, ppl)
 
     # estimate_renewable_capacities(n)
     # attach_OPSD_renewables(n)
-    # update_p_nom_max(n)
+    update_p_nom_max(n)
 
     add_nice_carrier_names(n)
 
