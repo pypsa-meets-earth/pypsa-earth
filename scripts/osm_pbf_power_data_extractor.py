@@ -19,16 +19,17 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
-from _helpers import _sets_path_to_root
+# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import Relation
-from esy.osmfilter import \
-    run_filter  # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+from esy.osmfilter import run_filter
 from esy.osmfilter import Way
-from osm_data_config import AFRICA_CC
-from osm_data_config import COMP_CC
+from _helpers import _sets_path_to_root
+from osm_data_config import world
+from osm_data_config import continents
+from osm_data_config import continent_regions
 from osm_data_config import feature_category
 from osm_data_config import feature_columns
 from shapely.geometry import LineString
@@ -37,21 +38,27 @@ from shapely.geometry import Polygon
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# logging.basicConfig()
+## logging.basicConfig()
 _logger = logging.getLogger("osm_data_extractor")
 _logger.setLevel(logging.INFO)
-# logger.setLevel(logging.WARNING)
+## logger.setLevel(logging.WARNING)
 
-os.chdir(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__))))  # move up to root directory
+from _helpers import configure_logging
+logger = logging.getLogger(__name__)
+
+# Requirement to set path to filepath for execution
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 # Downloads PBF File for given Country Code
 
-feature_list = ["substation", "generator", "line", "cable", "tower"]
-# feature_list = ["substation", "line", "generator", "cable"]
-# feature_list = ["substation", "line"]
-# feature_list = ["line"]
-# feature_list = ["substation"]
+
+def getContinentCountry (code):
+    for continent in world:
+        country = world[continent].get(code, 0)
+        if country:
+            return continent,country
+    return continent,country
 
 
 def download_pbf(country_code, update, verify):
@@ -71,12 +78,12 @@ def download_pbf(country_code, update, verify):
     Pbf file per country
 
     """
-    country_name = AFRICA_CC[country_code]
+    continent, country_name = getContinentCountry(country_code)
     # Filename for geofabrik
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
-    geofabrik_url = f"https://download.geofabrik.de/africa/{geofabrik_filename}"
-    PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", "pbf",
+    geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
+    PBF_inputfile = os.path.join(os.getcwd(), "data","osm", continent, "pbf",
                                  geofabrik_filename)  # Input filepath
 
     if not os.path.exists(PBF_inputfile):
@@ -166,17 +173,18 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     """
     PBF_inputfile = download_pbf(country_code, update, verify)
 
+    continent, country_name = getContinentCountry(country_code)
+
     filter_file_exists = False
     # json file for the Data dictionary
-    JSON_outputfile = os.path.join(
-        os.getcwd(), "data", "osm", country_code + "_power.json"
-    )  # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
+    JSON_outputfile = os.path.join(os.getcwd(), "data","osm", continent, country_code + "_power.json")
+    # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
 
     if not os.path.exists(
-            os.path.join(os.getcwd(), "data", "osm", "Elements",
+            os.path.join(os.getcwd(), "data", "osm", continent, "Elements",
                          country_code + f"_{feature}s.json")):
         _logger.warning("Element file not found so pre-filtering")
         filter_file_exists = False
@@ -203,7 +211,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))),
         )
 
-        _logger.info(f"Loading {feature} Pickle for {AFRICA_CC[country_code]}")
+        _logger.info(f"Loading {feature} Pickle for {country_name}")
         # feature_data = Data, Elements
         # return feature_data
 
@@ -211,12 +219,12 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         create_elements = True
         if country_code not in pre_filtered:  # Ensures pre-filter is not run everytime
             new_prefilter_data = True
-            _logger.info(f"Pre-filtering {AFRICA_CC[country_code]} ")
+            _logger.info(f"Pre-filtering {country_name} ")
             pre_filtered.append(country_code)
         else:
             new_prefilter_data = False
         _logger.info(
-            f"Creating  New {feature} Elements for {AFRICA_CC[country_code]}")
+            f"Creating  New {feature} Elements for {country_name}")
 
     prefilter = {
         Node: {
@@ -375,8 +383,9 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
 
 def process_data(update, verify):
     def output_csv_geojson(df_all_feature, columns_feature, feature):
+        continent, country_name = getContinentCountry(country_code)
         outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-                                          "africa_all" +
+                                          continent + "_all"
                                           "_raw")  # Output file directory
 
         if not os.path.exists(outputfile_partial):
@@ -405,15 +414,11 @@ def process_data(update, verify):
         gdf_feature.to_file(outputfile_partial + f"_{feature}s" + ".geojson",
                             driver="GeoJSON")  # Generate GeoJson
 
-    # SNGM_CC = {"SN-GM": "senegal-and-gambia"}
-    # ZW_CC = {"ZW": "zimbabwe"}
-    # test_CC = {"LY": "libya", "SZ": "swaziland"}
 
-    # AFRICA_CC = {list of all African countries that are imported from script -> iso_countries_codes}
     for feature in feature_list:
         df_all_feature = pd.DataFrame()
-        for country_code in AFRICA_CC.keys():
-            # replace Africa_CC by test_CC to only download data for one country
+        for country_code in country_list:
+            continent, country_name = getContinentCountry(country_code)
             feature_data = download_and_filter(feature, country_code, update,
                                                verify)
 
@@ -440,14 +445,82 @@ def process_data(update, verify):
             df_feature = pd.concat([df_node, df_way], axis=0)
 
             # Add Country Column
-            df_feature["Country"] = country_code
+            df_feature["Country"] = country_name
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
         output_csv_geojson(df_all_feature, feature_columns[feature], feature)
 
 
+def create_country_list(input):
+    """
+    Create a country list for defined regions in osm_data_config.py
+
+    Parameters
+    ----------
+    input : str
+        Any two-letter country name, regional name, or continent given in osm_data_config.py
+        Country name duplications won't distort the result.
+        Examples are:
+        ["NG","ZA"], downloading osm data for Nigeria and South Africa
+        ["africa"], downloading data for Africa
+        ["NAR"], downloading data for the North African Power Pool
+        ["TEST"], downloading data for a customized test set.
+        ["NG","ZA","NG"], won't distort result.
+
+    Returns
+    -------
+    full_codes_list : list
+        Example ["NG","ZA"]
+    """
+    full_codes_list = []
+    
+    for value1 in input:
+
+        codes_list = []
+
+        # extract countries in world
+        if value1 == "world":
+            for continent in world.keys():
+                codes_list.extend(list(world[continent]))
+
+        # extract countries in continent
+        elif value1 in world.keys():
+            codes_list = list(world[value1])
+
+        # extract countries in regions
+        elif value1 in continent_regions.keys():
+            codes_list = continent_regions[value1]
+
+        # extract countries
+        else:
+            codes_list.extend([value1])
+
+        # create a list with all countries
+        full_codes_list.extend(codes_list)
+
+    full_codes_list = list(set(full_codes_list)) # Removing duplicates
+
+    return full_codes_list
+
+
 if __name__ == "__main__":
-    process_data(
-        update=False, verify=False
-    )  # Set update # Verify = True checks local md5s and pre-filters data again
+    if "snakemake" not in globals():    
+        from _helpers import mock_snakemake
+        snakemake = mock_snakemake("download_osm_data")
+    configure_logging(snakemake)
+
+    # Required to set path to pypsa-africa
+    _sets_path_to_root("pypsa-africa")
+
+    feature_list = ["substation", "generator", "line", "cable"]  # ["substation", "generator", "line", "cable", "tower"]
+
+    input = snakemake.config["countries"]
+
+    country_list = create_country_list(input)
+
+    for country_code in country_list: 
+        # Set update # Verify = True checks local md5s and pre-filters data again
+        process_data(update=False, verify=False)
+
+

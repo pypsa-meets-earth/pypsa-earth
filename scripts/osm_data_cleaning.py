@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 
 import geopandas as gpd
 import numpy as np
@@ -8,10 +9,12 @@ import pandas as pd
 from _helpers import _sets_path_to_root
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
+from _helpers import configure_logging
+logger = logging.getLogger(__name__)
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-_sets_path_to_root("pypsa-africa")
 
+# Requirement to set path to filepath for execution
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def prepare_substation_df(df_all_substations):
@@ -398,4 +401,12 @@ def clean_data(tag_substation="transmission", threshold_voltage=110000):
 
 
 if __name__ == "__main__":
+    if "snakemake" not in globals():    
+        from _helpers import mock_snakemake
+        snakemake = mock_snakemake("clean_osm_data")
+    configure_logging(snakemake)
+
+    # Required to set path to pypsa-africa
+    _sets_path_to_root("pypsa-africa")
+
     clean_data()

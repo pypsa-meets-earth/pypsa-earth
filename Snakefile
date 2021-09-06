@@ -26,6 +26,43 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
 
+
+rule download_osm_data:
+    output:
+        cables="data/raw/africa_all_raw_cables.geojson",
+        generators="data/raw/africa_all_raw_generators.geojson",
+        lines="data/raw/africa_all_raw_lines.geojson",
+        substations="data/raw/africa_all_raw_substations.geojson",
+    log: "logs/download_osm_data.log"
+    script: "scripts/osm_pbf_power_data_extractor.py"
+
+
+rule clean_osm_data:
+    input:
+        cables="data/raw/africa_all_raw_cables.geojson",
+        generators="data/raw/africa_all_raw_generators.geojson",
+        lines="data/raw/africa_all_raw_lines.geojson",
+        substations="data/raw/africa_all_raw_substations.geojson",
+    output:
+        generators="data/clean/africa_all_generators.geojson",
+        lines="data/clean/africa_all_lines.geojson",
+        substations="data/clean/africa_all_substations.geojson",
+    log: "logs/clean_osm_data.log"
+    script: "scripts/osm_data_cleaning.py"
+
+
+rule build_osm_network:
+    input:
+        generators="data/clean/africa_all_generators.geojson",
+        lines="data/clean/africa_all_lines.geojson",
+        substations="data/clean/africa_all_substations.geojson",
+    output:
+        lines="data/base_network/africa_all_lines_build_network.csv",
+        substations="data/base_network/africa_all_buses_build_network.csv",   
+    log: "logs/build_osm_network.log"
+    script: "scripts/osm_built_network.py"
+
+
 rule build_shapes:
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',

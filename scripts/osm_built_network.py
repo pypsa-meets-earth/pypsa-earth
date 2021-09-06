@@ -2,19 +2,16 @@
 
 import os
 import sys
+import logging
 
 import geopandas as gpd
 import numpy as np
 
-from _helpers import _sets_path_to_root
+from _helpers import configure_logging, _sets_path_to_root
+logger = logging.getLogger(__name__)
 
-# import pandas as pd
-
-# from shapely.geometry import LineString, Point
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-_sets_path_to_root("pypsa-africa")
-#sys.path.append("./../../scripts")
+# Requirement to set path to filepath for execution
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def line_endings_to_bus_conversion(lines):
@@ -156,4 +153,12 @@ def built_network():
 
 
 if __name__ == "__main__":
+    if "snakemake" not in globals():    
+        from _helpers import mock_snakemake
+        snakemake = mock_snakemake("build_osm_network")
+    configure_logging(snakemake)
+
+    _sets_path_to_root("pypsa-africa")
+    #sys.path.append("./../../scripts")  ## alternative
+
     built_network()
