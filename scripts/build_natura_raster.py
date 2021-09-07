@@ -35,6 +35,9 @@ Outputs
 
 Description
 -----------
+To operate the script you need all input files. The Snakefile describes what goes in and out. Make sure you didn't skip one of these.
+Maybe not so obvious is the cutout input. An example is this `africa-2013-era5.nc`
+
 Steps to retrieve the protected area data (as apparently no API is given for the WDPA data):
     - 1. Download the WPDA Dataset: World Database on Protected Areas. UNEP-WCMC and IUCN (2021), Protected Planet: The World Database on Protected Areas (WDPA) and World Database on Other Effective Area-based Conservation Measures (WD-OECM) [Online], August 2021, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
     - 2. Unzipp and rename the folder containing the .shp file to `protected_areas`
@@ -58,8 +61,7 @@ from rasterio.warp import transform_bounds
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def determine_cutout_xXyY(cutout_name):
     cutout = atlite.Cutout(cutout_name)
