@@ -9,6 +9,9 @@ _helpers
 
 .. automodule:: scripts._helpers
     :members:
+    
+add_electricity
+------------------
 
 .. automodule:: scripts.add_electricity
     :members:
