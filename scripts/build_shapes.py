@@ -27,7 +27,8 @@ from shapely.ops import cascaded_union
 #from osm_data_config import AFRICA_CC
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger("build_shapes")
+_logger.setLevel(logging.INFO)
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -79,8 +80,8 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
-            print(
-                f"{GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
+            _logger.info(
+                f"Stage 4/4: {GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
@@ -170,7 +171,7 @@ def countries(countries, update=False, out_logging=False):
     "Create country shapes"
 
     if out_logging:
-        print("Create country shapes")
+        _logger.info("Stage 1 of 4: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(countries, 0, update, out_logging)
@@ -188,7 +189,7 @@ def countries(countries, update=False, out_logging=False):
 def country_cover(country_shapes, eez_shapes=None, out_logging=False):
 
     if out_logging:
-        print("Merge country shapes")
+        _logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
     shapes = list(country_shapes)
     if eez_shapes is not None:
@@ -252,7 +253,7 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
 def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 
     if out_logging:
-        print("Create offshore shapes")
+        _logger.info("Stage 2bis of 4: Create offshore shapes - old method")
 
     # load data
     df_eez = load_EEZ(countries)
@@ -302,13 +303,13 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
     """
     from shapely.validation import make_valid
 
+    
     if out_logging:
-        print("Create offshore shapes")
+        _logger.info("Stage 2 of 4: Create offshore shapes")
 
     # load data
     df_eez = load_EEZ(countries)
 
-    print("aaa")
     # simplified offshore_shape
     ret_df = df_eez.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
@@ -360,7 +361,7 @@ def download_WorldPop(country_code,
 
     """
     if out_logging:
-        print("Download WorldPop datasets")
+        _logger.info("Stage 3/4: Download WorldPop datasets")
 
     # UN not adjusted
     # WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_constrained.tif"
@@ -379,8 +380,8 @@ def download_WorldPop(country_code,
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
-            print(
-                f"{WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
+            _logger.info(
+                f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
@@ -394,7 +395,7 @@ def download_WorldPop(country_code,
                         loaded = True
                         break
         if not loaded:
-            print(f"Impossible to download {WorldPop_filename}")
+            _logger.info(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -406,11 +407,10 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
 
     if out_logging:
-        print("Access to GDP raster data")
+        _logger.info("Stage 4/4: Access to GDP raster data")
 
     # tif namefile
     name_file_tif = name_file_nc[:-2] + "tif"
-    print(name_file_tif)
 
     # path of the nc file
     GDP_nc = os.path.join(os.getcwd(), "data", "raw", "GDP",
@@ -433,8 +433,8 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     list_years = GDP_dataset["time"]
     if year not in list_years:
         if out_logging:
-            print(
-                f"GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+            _logger.info(
+                f"Stage 3/4 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
             )
         year = float(list_years[-1])
 
@@ -458,7 +458,7 @@ def load_GDP(
     """
 
     if out_logging:
-        print("Access to GDP raster data")
+        _logger.info("Stage 4/4: Access to GDP raster data")
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -467,8 +467,8 @@ def load_GDP(
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
-            print(
-                f"File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
+            _logger.info(
+                f"Stage 4/4: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
             )
         convert_GDP(name_file_nc, year, out_logging)
 
@@ -485,7 +485,7 @@ def add_gdp_data(
     """Function to add the population info for each country shape in the gadm dataset"""
 
     if out_logging:
-        print("Add population data to GADM GeoDataFrame")
+        _logger.info("Stage 4/4: Add population data to GADM GeoDataFrame")
 
     # initialize new population column
     df_gadm["gdp"] = 0.0
@@ -525,7 +525,7 @@ def add_gdp_data(
             # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
             if out_logging == True:
-                print("shape: ", index, " out of ", df_gadm.shape[0])
+                _logger.info("Stage 4/4 GDP: shape: " + str(index) + " out of " + str(df_gadm.shape[0]))
 
             # update the gdp data in the dataset
             df_gadm.loc[index, "gdp"] = gdp_by_geom
@@ -541,7 +541,7 @@ def add_population_data(df_gadm,
     """Function to add the population info for each country shape in the gadm dataset"""
 
     if out_logging:
-        print("Add population data to GADM GeoDataFrame")
+        _logger.info("Stage 4/4 POP: Add population data to GADM GeoDataFrame")
 
     # initialize new population column
     df_gadm["pop"] = 0.0
@@ -590,7 +590,7 @@ def add_population_data(df_gadm,
                 count += 1
 
                 if out_logging == True:
-                    print(count, " out of ", df_gadm.shape[0], " [", c_code, "]")
+                    _logger.info("Stage 4/4 POP: " + str(count) + " out of " + str(df_gadm.shape[0]) + " [" + c_code + "]")
                     # print(c_code, ": ", index, " out of ",
                     #      country_rows.shape[0])
 
@@ -598,7 +598,7 @@ def add_population_data(df_gadm,
 def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
 
     if out_logging:
-        print("Creation GADM GeoDataFrame")
+        _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
     df_gadm = get_GADM_layer(countries, layer_id, update)
@@ -645,18 +645,16 @@ if __name__ == "__main__":
     out_logging = snakemake.config['build_shape_options']['out_logging']
     year = snakemake.config['build_shape_options']['year']
 
-    print(countries_list)
-
     # print(snakemake.config)
 
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
-    save_to_geojson(offshore_shapes_old, out.offshore_shapes_old)
-
     offshore_shapes = eez_new(countries_list, country_shapes, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
+
+    offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
+    save_to_geojson(offshore_shapes_old, out.offshore_shapes_old)
 
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
