@@ -19,11 +19,12 @@ from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
 from _helpers import _two_2_three_digits_country
 from _helpers import configure_logging
+from osm_pbf_power_data_extractor import create_country_list
 from rasterio.mask import mask
 from shapely.geometry import MultiPolygon
 from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import cascaded_union
-from osm_data_config import AFRICA_CC
+#from osm_data_config import AFRICA_CC
 
 
 logger = logging.getLogger(__name__)
@@ -638,7 +639,7 @@ if __name__ == "__main__":
 
     # Parameters to be later initialized through snakemake
     # countries_list = list(AFRICA_CC) # TODO: implement some coding to automatically process all africa by config.yaml
-    countries_list = snakemake.config["countries"]
+    countries_list = create_country_list(snakemake.config["countries"])
     layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
     update = snakemake.config['build_shape_options']['update_file']
     out_logging = snakemake.config['build_shape_options']['out_logging']

@@ -92,6 +92,7 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
+from osm_pbf_power_data_extractor import create_country_list
 from powerplantmatching.export import map_country_bus
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
@@ -225,7 +226,7 @@ def attach_load(n):
         snakemake.input.regions).set_index("name").reindex(substation_lv_i))
     opsd_load = pd.read_csv(
         snakemake.input.load, index_col=0,
-        parse_dates=True).filter(items=snakemake.config["countries"])
+        parse_dates=True).filter(items=create_country_list(snakemake.config["countries"]))
 
     scaling = snakemake.config.get("load", {}).get("scaling_factor", 1.0)
     logger.info(f"Load data scaled with scalling factor {scaling}.")

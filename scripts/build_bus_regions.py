@@ -43,6 +43,7 @@ Description
 
 import logging
 from _helpers import configure_logging
+from osm_pbf_power_data_extractor import create_country_list
 
 import pypsa
 import os
@@ -70,7 +71,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake('build_bus_regions')
     configure_logging(snakemake)
 
-    countries = snakemake.config['countries']
+    countries = create_country_list(snakemake.config['countries'])
 
     n = pypsa.Network(snakemake.input.base_network)
 

@@ -27,6 +27,7 @@ from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
 from esy.osmfilter import Way
 from _helpers import _sets_path_to_root
+from _helpers import create_country_list
 from osm_data_config import world
 from osm_data_config import continents
 from osm_data_config import continent_regions
