@@ -47,6 +47,7 @@ dependencies:
   - cartopy
   - descartes
   - rasterio
+  - rioxarray
   - geoviews
   - hvplot
 
@@ -60,3 +61,5 @@ dependencies:
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
     - vresutils==0.3.1
     - tsam>=1.1.0
+    - esy-osm-pbf
+    - esy-osmfilter
