@@ -10,7 +10,11 @@
 **/pbf
 *.pbf
 
-# Untracked folders
+# Untracked files
+config.yaml
+dag.svg
+
+# Untracked folders (in files within)
 .snakemake/
 benchmarks/
 cutouts/
