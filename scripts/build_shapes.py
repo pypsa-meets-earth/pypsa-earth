@@ -80,7 +80,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
-            _logger.info(
+            _logger.warning(
                 f"Stage 4/4: {GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
             )
         #  create data/osm directory
@@ -380,7 +380,7 @@ def download_WorldPop(country_code,
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
-            _logger.info(
+            _logger.warning(
                 f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
@@ -395,7 +395,7 @@ def download_WorldPop(country_code,
                         loaded = True
                         break
         if not loaded:
-            _logger.info(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -433,7 +433,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     list_years = GDP_dataset["time"]
     if year not in list_years:
         if out_logging:
-            _logger.info(
+            _logger.warning(
                 f"Stage 3/4 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
             )
         year = float(list_years[-1])
@@ -467,7 +467,7 @@ def load_GDP(
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
-            _logger.info(
+            _logger.warning(
                 f"Stage 4/4: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
             )
         convert_GDP(name_file_nc, year, out_logging)

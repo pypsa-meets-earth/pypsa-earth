@@ -440,3 +440,23 @@ def _two_digits_2_name_country(two_code_country):
 
     full_name = _get_country("name", alpha_2=two_code_country)
     return full_name
+
+
+def _country_name_2_two_digits(country_name):
+    """
+    Convert full country name to 2-digit country code
+
+    Parameters
+    ----------
+    country_name: str
+        country name
+
+    Returns
+    ----------
+    two_code_country: str
+        2-digit country name
+    """
+    if country_name == f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}": return 'SN-GM'
+
+    full_name = _get_country("alpha_2", name=country_name)
+    return full_name
