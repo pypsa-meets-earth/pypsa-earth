@@ -412,5 +412,5 @@ continent_regions = {
     "CACR" : ["BZ", "GT", "SV", "HN", "NI", "CR"], # CENTRAL AMERICAN REGION 
 
     # Customized test set
-    "TEST" : ["NG", "NE", "SL", "MR"],
+    "TEST" : ["NG", "NE", "SL", "MA"],
 }

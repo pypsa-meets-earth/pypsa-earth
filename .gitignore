@@ -5,18 +5,32 @@
 *.py[cod]
 *$py.class
 
-**/.ipynb_checkpoints
-
+# General untracked file formats
 *.log
-
 **/pbf
 *.pbf
 
-
-data/osm
-data/raw
+# Untracked folders
+.snakemake/
+benchmarks/
+cutouts/
+data/
+data/osm/
+data/raw/
 data/base_network/
-data/osm/africa_all_buses_build_networks.csv
-data/osm/africa_all_lines_build_networks.csv
+networks/
+resources/
 
+# Untrack some Jupyter changes
+.ipynb_checkpoints
+notebooks/*.nc
+notebooks/*.csv
+notebooks/*.zip
+notebooks/*.tif
+notebooks/old_notebooks/*.nc
+notebooks/old_notebooks/*.csv
+notebooks/old_notebooks/*.zip
+notebooks/old_notebooks/*.tif
+
+# Untrack test doc builds
 doc/_build
