@@ -382,6 +382,8 @@ world = {"africa": {"DZ": "algeria",
                     }
 }
 
+world_countries = {country_2D: country_name for d in world.values() for (country_2D, country_name) in d.items()}
+
 continent_regions = { 
     # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/ 
     # Eurpean regions 
