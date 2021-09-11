@@ -82,6 +82,36 @@ rule build_shapes:
     script: "scripts/build_shapes.py"
 
 
+rule base_network:
+    input:
+        osm_buses="data/base_network/africa_all_buses_build_network.csv",
+        osm_lines="data/base_network/africa_all_lines_build_network.csv",
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
+        # osm_buses='data/osm/africa_all_buses_clean.csv',
+        # osm_lines='data/osm/africa_all_lines_clean.csv',
+        # eg_buses='data/entsoegridkit/buses.csv',
+        # eg_lines='data/entsoegridkit/lines.csv',
+        # eg_links='data/entsoegridkit/links.csv',
+        # eg_converters='data/entsoegridkit/converters.csv',
+        # eg_transformers='data/entsoegridkit/transformers.csv',
+        # parameter_corrections='data/parameter_corrections.yaml',
+        # links_p_nom='data/links_p_nom.csv',
+        # links_tyndp='data/links_tyndp.csv',
+        # africa_shape='resources/africa_shape.geojson'
+    output:
+        "networks/base.nc",
+    log:
+        "logs/base_network.log",
+    benchmark:
+        "benchmarks/base_network"
+    threads: 1
+    resources:
+        mem=500,
+    script:
+        "scripts/base_network.py"
+
+
 rule build_bus_regions:
     input:
         country_shapes='resources/country_shapes.geojson',
@@ -121,36 +151,6 @@ if config['enable'].get('build_natura_raster', False):
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"
         script: "scripts/build_natura_raster.py"
-
-
-rule base_network:
-    input:
-        osm_buses="data/base_network/africa_all_buses_build_network.csv",
-        osm_lines="data/base_network/africa_all_lines_build_network.csv",
-        country_shapes='resources/country_shapes.geojson',
-        offshore_shapes='resources/offshore_shapes.geojson',
-        # osm_buses='data/osm/africa_all_buses_clean.csv',
-        # osm_lines='data/osm/africa_all_lines_clean.csv',
-        # eg_buses='data/entsoegridkit/buses.csv',
-        # eg_lines='data/entsoegridkit/lines.csv',
-        # eg_links='data/entsoegridkit/links.csv',
-        # eg_converters='data/entsoegridkit/converters.csv',
-        # eg_transformers='data/entsoegridkit/transformers.csv',
-        # parameter_corrections='data/parameter_corrections.yaml',
-        # links_p_nom='data/links_p_nom.csv',
-        # links_tyndp='data/links_tyndp.csv',
-        # europe_shape='resources/europe_shape.geojson'
-    output:
-        "networks/base.nc",
-    log:
-        "logs/base_network.log",
-    benchmark:
-        "benchmarks/base_network"
-    threads: 1
-    resources:
-        mem=500,
-    script:
-        "scripts/base_network.py"
 
 
 rule build_renewable_profiles:
