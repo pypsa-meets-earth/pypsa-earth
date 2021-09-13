@@ -58,12 +58,15 @@ from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)  # name of this file = "build_natura_raster"
+_logger.setLevel(logging.INFO)
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-def determine_cutout_xXyY(cutout_name):
+def determine_cutout_xXyY(cutout_name, out_logging):
+    if out_logging:
+        _logger.info("Stage 1/5: Determine cutout boundaries")
     cutout = atlite.Cutout(cutout_name)
     assert cutout.crs.to_epsg() == 4326
     x, X, y, Y = cutout.extent
@@ -71,7 +74,9 @@ def determine_cutout_xXyY(cutout_name):
     return [x - dx / 2.0, X + dx / 2.0, y - dy / 2.0, Y + dy / 2.0]
 
 
-def get_transform_and_shape(bounds, res):
+def get_transform_and_shape(bounds, res, out_logging):
+    if out_logging:
+        _logger.info("Stage 2/5: Get transform and shape")
     left, bottom = [(b // res) * res for b in bounds[:2]]
     right, top = [(b // res + 1) * res for b in bounds[2:]]
     shape = int((top - bottom) // res), int((right - left) / res)
@@ -79,7 +84,7 @@ def get_transform_and_shape(bounds, res):
     return transform, shape
 
 
-def unify_protected_shape_areas():
+def unify_protected_shape_areas(inputs, out_logging):
     """
     Iterates thorugh all snakemake rule inputs and unifies shapefiles (.shp) only.
 
@@ -94,9 +99,14 @@ def unify_protected_shape_areas():
     import pandas as pd
     from shapely.ops import unary_union
 
-    # Filter snakemake.inputs to only ".shp" files
-    shp_files = [string for string in snakemake.input if ".shp" in string]
+    if out_logging:
+        _logger.info("Stage 3/5: Unify protected shape area.")
+
+    # Read only .shp snakemake inputs
+    shp_files = [string for string in inputs if ".shp" in string]
     # Create one geodataframe with all geometries, of all .shp files
+    if out_logging:
+        _logger.info("Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")
     for i in shp_files:
         shape = gpd.GeoDataFrame(
             pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(3035)
@@ -110,8 +120,13 @@ def unify_protected_shape_areas():
         0: "geometry"
     }).set_geometry("geometry")  # .set_crs(3035)
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
+    if out_logging:
+        _logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
+    unified_shape_file = unary_union(shape["geometry"])
+    if out_logging:
+        _logger.info("Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape")
     unified_shape = gpd.GeoDataFrame(
-        geometry=[unary_union(shape["geometry"])]).set_crs(3035)
+        geometry=[unified_shape_file]).set_crs(3035)
 
     return unified_shape
 
@@ -123,17 +138,23 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
 
-    cutouts = snakemake.input.cutouts
-    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout)
+    out_logging = True
+    inputs = snakemake.input
+    cutouts = inputs.cutouts
+    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout, out_logging=out_logging)
                            for cutout in cutouts))
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
-    transform, out_shape = get_transform_and_shape(bounds, res=100)
-
+    transform, out_shape = get_transform_and_shape(bounds, res=100, out_logging=out_logging)
     # adjusted boundaries
-    shapes = unify_protected_shape_areas()
+    shapes = unify_protected_shape_areas(inputs, out_logging=out_logging)
+
+    if out_logging:
+        _logger.info("Stage 4/5: Mask geometry")
     raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
     raster = raster.astype(rio.uint8)
 
+    if out_logging:
+        _logger.info("Stage 5/5: Export as .tiff")
     with rio.open(
             snakemake.output[0],
             "w",
