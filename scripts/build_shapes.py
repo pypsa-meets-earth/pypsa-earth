@@ -260,29 +260,29 @@ def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
     # load data
     df_eez = load_EEZ(countries)
 
-    ret_df = df_eez[["name", "geometry"]]
+    ret_df_old = df_eez[["name", "geometry"]]
     # create unique shape if country is described by multiple shapes
     for c_code in countries:
-        selection = (ret_df.name == c_code)
+        selection = (ret_df_old.name == c_code)
         n_offshore_shapes = selection.sum()
 
         if n_offshore_shapes > 1:
             # when multiple shapes per country, then merge polygons
             
-            geom = ret_df[selection].geometry.unary_union
-            ret_df.drop(ret_df[selection].index, inplace=True)
-            ret_df = ret_df.append({"name":c_code, "geometry": geom}, ignore_index=True)
+            geom = ret_df_old[selection].geometry.unary_union
+            ret_df_old.drop(ret_df_old[selection].index, inplace=True)
+            ret_df_old = ret_df_old.append({"name": c_code, "geometry": geom}, ignore_index=True)
 
-    ret_df = ret_df.set_index("name")["geometry"].map(
+    ret_df_old = ret_df_old.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
 
-    ret_df = gpd.GeoSeries({
+    ret_df_old = gpd.GeoSeries({
         k: v
-        for k, v in ret_df.iteritems() if v.distance(country_shapes[k]) < tol
+        for k, v in ret_df_old.iteritems() if v.distance(country_shapes[k]) < tol
     })
-    ret_df.index.name = "name"
+    ret_df_old.index.name = "name"
 
-    return ret_df
+    return ret_df_old
 
 
 # def eez2(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
@@ -339,7 +339,7 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
             
             geom = ret_df[selection].geometry.unary_union
             ret_df.drop(ret_df[selection].index, inplace=True)
-            ret_df = ret_df.append({"name":c_code, "geometry": geom}, ignore_index=True)
+            ret_df = ret_df.append({"name": c_code, "geometry": geom}, ignore_index=True)
 
     ret_df = ret_df.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
