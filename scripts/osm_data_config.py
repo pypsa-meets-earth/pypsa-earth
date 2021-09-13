@@ -163,7 +163,7 @@ world = {"africa": {"DZ": "algeria",
                     "AO": "angola",
                     "BJ": "benin",
                     "BW": "botswana", 
-                    "BF": "burkina faso",
+                    "BF": "burkina-faso",
                     "BI": "burundi",
                     "CM": "cameroon",
                     # canary-islands    # Island
@@ -200,7 +200,9 @@ world = {"africa": {"DZ": "algeria",
                     "RW": "rwanda",
                     # saint-helena-ascension-and-tristan-da-cunha
                     # "ST": "sao-tome-and-principe", #Island
-                    "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
+                    #"SNGM": "senegal-and-gambia",  # See Map # Self-created country code
+                    # "SN": "senegal",
+                    # "GM": "gambia",
                     # "SC": "seychelles", #Island
                     "SL": "sierra-leone",
                     "SO": "somalia", # No Data
