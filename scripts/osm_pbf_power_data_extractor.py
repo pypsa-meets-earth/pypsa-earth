@@ -519,8 +519,7 @@ if __name__ == "__main__":
 
     country_list = create_country_list(input)
 
-    for country_code in country_list: 
-        # Set update # Verify = True checks local md5s and pre-filters data again
-        process_data(update=False, verify=False)
+    # Set update # Verify = True checks local md5s and pre-filters data again
+    process_data(update=False, verify=False)
 
 
