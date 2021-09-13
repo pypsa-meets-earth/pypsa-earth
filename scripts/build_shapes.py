@@ -505,6 +505,14 @@ def load_GDP(
     return GDP_tif, name_file_tif
 
 
+def generalized_mask(src, geom, **kwargs):
+    "Generalize mask function to account for Polygon and MultiPolygon"
+    if geom.geom_type == 'Polygon':
+        return mask(src, [geom], **kwargs)
+    else:
+        return mask(src, geom, **kwargs)
+
+
 def add_gdp_data(
     df_gadm,
     year=2020,
@@ -532,14 +540,7 @@ def add_gdp_data(
             #   where the border of the shape lays. This may affect the computation
             #   but it is conservative and avoids considering multiple times the same
             #   pixels
-            if row["geometry"].geom_type == 'Polygon':
-                out_image, out_transform = mask(src,
-                                            [row["geometry"]],
-                                            all_touched=True,
-                                            invert=False,
-                                            nodata=0.0)
-            else:
-                out_image, out_transform = mask(src,
+            out_image, out_transform = generalized_mask(src,
                                             row["geometry"],
                                             all_touched=True,
                                             invert=False,
@@ -592,18 +593,11 @@ def add_population_data(df_gadm,
                 #   where the border of the shape lays. This leads to slightly overestimate
                 #   the population, but the error is limited and it enables halving the
                 #   computational time
-                if row["geometry"].geom_type == 'Polygon':
-                    out_image, out_transform = mask(src,
-                                                [row["geometry"]],
-                                                all_touched=True,
-                                                invert=False,
-                                                nodata=0.0)
-                else:
-                    out_image, out_transform = mask(src,
-                                                row["geometry"],
-                                                all_touched=True,
-                                                invert=False,
-                                                nodata=0.0)
+                out_image, out_transform = generalized_mask(src,
+                                            row["geometry"],
+                                            all_touched=True,
+                                            invert=False,
+                                            nodata=0.0)
                 # out_image_int, out_transform = mask(src,
                 #                                row["geometry"],
                 #                                all_touched=False,
@@ -639,17 +633,17 @@ def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
     # drop useless columns
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
-    # # add the population data to the dataset
-    # add_population_data(df_gadm, countries, year, update, out_logging)
+    # add the population data to the dataset
+    add_population_data(df_gadm, countries, year, update, out_logging)
 
-    # # add the gdp data to the dataset
-    # add_gdp_data(
-    #     df_gadm,
-    #     year,
-    #     update,
-    #     out_logging,
-    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    # )
+    # add the gdp data to the dataset
+    add_gdp_data(
+        df_gadm,
+        year,
+        update,
+        out_logging,
+        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
