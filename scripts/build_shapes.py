@@ -18,6 +18,7 @@ import xarray as xr
 from _helpers import _sets_path_to_root
 from _helpers import _three_2_two_digits_country
 from _helpers import _two_2_three_digits_country
+from _helpers import _two_digits_2_name_country
 from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
 from rasterio.mask import mask
@@ -27,7 +28,7 @@ from shapely.ops import cascaded_union
 #from osm_data_config import AFRICA_CC
 
 
-_logger = logging.getLogger(__name__)
+_logger = logging.getLogger("build_shapes")
 _logger.setLevel(logging.INFO)
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
@@ -81,7 +82,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
             _logger.warning(
-                f"Stage 4/4: {GADM_filename} does not exist, downloading to {GADM_inputfile_zip}"
+                f"Stage 4/4: {GADM_filename} of country {_two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
@@ -637,17 +638,17 @@ def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
     # drop useless columns
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
-    # add the population data to the dataset
-    add_population_data(df_gadm, countries, year, update, out_logging)
+    # # add the population data to the dataset
+    # add_population_data(df_gadm, countries, year, update, out_logging)
 
-    # add the gdp data to the dataset
-    add_gdp_data(
-        df_gadm,
-        year,
-        update,
-        out_logging,
-        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    )
+    # # add the gdp data to the dataset
+    # add_gdp_data(
+    #     df_gadm,
+    #     year,
+    #     update,
+    #     out_logging,
+    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    # )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)

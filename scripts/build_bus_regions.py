@@ -52,7 +52,7 @@ import geopandas as gpd
 
 from vresutils.graph import voronoi_partition_pts
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger("build_bus_regions")
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -95,12 +95,14 @@ if __name__ == "__main__":
 
         c_b = n.buses.country == country
         # Check if lv_buses exist in onshape. TD has no buses!
-        if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty: continue # TODO: Log warning! Something is going wrong.
-        print(country)
+        if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty:
+            _logger.warning(f"No low voltage buses found for {country}!")
+            
+        # print(country)
         onshore_shape = make_valid(country_shapes[country])
-        print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
+        # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
-        print(onshore_locs.values)
+        # print(onshore_locs.values)
         onshore_regions.append(gpd.GeoDataFrame({
                 'name': onshore_locs.index,
                 'x': onshore_locs['x'],
@@ -109,11 +111,11 @@ if __name__ == "__main__":
                 'country': country
             }))
 
-        if country not in offshore_shapes.index: continue
-        if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty: continue
-        # # TODO: fix issues : fixes should be solved
-        # if country == "CD": continue # TODO: Remove error for Voronoi aggregation..
-        # if country == "SD": continue # TODO: Remove validity error..
+        # These two logging could be commented out
+        if country not in offshore_shapes.index: 
+            _logger.warning(f"No off-shore shapes for {country}")
+        if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty:
+            _logger.info(f"No off-shore substations found for {country}").
 
         offshore_shape = offshore_shapes[country]
         print(offshore_shape)
