@@ -191,7 +191,7 @@ world = {"africa": {"DZ": "algeria",
                     "MW": "malawi",
                     "ML": "mali",
                     "MR": "mauritania",
-                    "MU": "mauritius",
+                    # "MU": "mauritius", Island
                     "MA": "morocco",
                     "MZ": "mozambique",
                     "NA": "namibia",
@@ -217,6 +217,7 @@ world = {"africa": {"DZ": "algeria",
                     "UG": "uganda",
                     "ZM": "zambia",
                     "ZW": "zimbabwe"
+                    # "EH": "western-sahara"
                     },
 
         "asia" : {

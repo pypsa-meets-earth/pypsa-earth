@@ -58,11 +58,21 @@ _logger = logging.getLogger("build_bus_regions")
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def save_to_geojson(s, fn):
+def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
     if os.path.exists(fn):
-        os.unlink(fn)
-    schema = {**gpd.io.file.infer_schema(s), 'geometry': 'Unknown'}
-    s.to_file(fn, driver='GeoJSON', schema=schema)
+        os.unlink(fn)  # remove file if it exists
+    if not isinstance(df, gpd.GeoDataFrame):
+        df = gpd.GeoDataFrame(dict(geometry=df))
+
+    # save file if the GeoDataFrame is non-empty
+    if df.shape[0] > 0:
+        df = df.reset_index()
+        schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
+        df.to_file(fn, driver="GeoJSON", schema=schema)
+    else:
+        # create empty file to avoid issues with snakemake
+        with os.open(fn, "w") as fp:
+            pass
 
 
 if __name__ == "__main__":
@@ -97,6 +107,7 @@ if __name__ == "__main__":
         # Check if lv_buses exist in onshape. TD has no buses!
         if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty:
             _logger.warning(f"No low voltage buses found for {country}!")
+            continue
             
         # print(country)
         onshore_shape = make_valid(country_shapes[country])
@@ -114,17 +125,20 @@ if __name__ == "__main__":
         # These two logging could be commented out
         if country not in offshore_shapes.index: 
             _logger.warning(f"No off-shore shapes for {country}")
+            continue
         if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty:
-            _logger.info(f"No off-shore substations found for {country}").
+            _logger.warning(f"No off-shore substations found for {country}")
+            continue
 
         offshore_shape = offshore_shapes[country]
-        print(offshore_shape)
-        if offshore_shape.is_empty: continue
+        # print(offshore_shape)
+        if offshore_shape.is_empty:
+            continue
 
         offshore_shape = make_valid(offshore_shape) # Issue with CM reqired buffer
-        print(offshore_shape.is_valid)
-        print(offshore_shape.is_simple)
-        print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
+        # print(offshore_shape.is_valid)
+        # print(offshore_shape.is_simple)
+        # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
         offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
         offshore_regions_c = gpd.GeoDataFrame({
                 'name': offshore_locs.index,
@@ -135,7 +149,7 @@ if __name__ == "__main__":
             })
         offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
         offshore_regions.append(offshore_regions_c)
-
+    
     save_to_geojson(pd.concat(onshore_regions, ignore_index=True), snakemake.output.regions_onshore)
     if len(offshore_regions) != 0: 
         offshore_regions= pd.concat(offshore_regions, ignore_index=True)

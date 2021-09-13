@@ -215,7 +215,8 @@ def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgu
         df.to_file(fn, driver="GeoJSON", schema=schema)
     else:
         # create empty file to avoid issues with snakemake
-        os.open(fn, "w").close()
+        with os.open(fn, "w") as fp:
+            pass
 
 
 def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
