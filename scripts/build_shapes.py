@@ -271,7 +271,7 @@ def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
             
             geom = ret_df[selection].geometry.unary_union
             ret_df.drop(ret_df[selection].index, inplace=True)
-            ret_df.iloc[-1] = [c_code, geom]
+            ret_df.loc[ret_df.shape[0]] = [c_code, geom]
 
     ret_df = ret_df.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
