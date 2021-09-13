@@ -111,12 +111,12 @@ if __name__ == "__main__":
 
         if country not in offshore_shapes.index: continue
         if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty: continue
-        # TODO: fix issues 
-        if country == "CD": continue # TODO: Remove error for Voronoi aggregation..
-        if country == "KE": continue # TODO: Remove validity error..
-        if country == "SD": continue # TODO: Remove validity error..
+        # # TODO: fix issues : fixes should be solved
+        # if country == "CD": continue # TODO: Remove error for Voronoi aggregation..
+        # if country == "SD": continue # TODO: Remove validity error..
 
         offshore_shape = offshore_shapes[country]
+        print(offshore_shape)
         if offshore_shape.is_empty: continue
 
         offshore_shape = make_valid(offshore_shape) # Issue with CM reqired buffer

@@ -27,7 +27,7 @@ from shapely.ops import cascaded_union
 #from osm_data_config import AFRICA_CC
 
 
-_logger = logging.getLogger("build_shapes")
+_logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
@@ -258,9 +258,21 @@ def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
     # load data
     df_eez = load_EEZ(countries)
 
-    # set index and simplify polygons
-    ret_df = df_eez.set_index("name").geometry.map(
-       lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+    ret_df = df_eez[["name", "geometry"]]
+    # create unique shape if country is described by multiple shapes
+    for c_code in countries:
+        selection = (ret_df.name == c_code)
+        n_offshore_shapes = selection.sum()
+
+        if n_offshore_shapes > 1:
+            # when multiple shapes per country, then merge polygons
+            
+            geom = ret_df[selection].geometry.unary_union
+            ret_df.drop(ret_df[selection].index, inplace=True)
+            ret_df.iloc[-1] = [c_code, geom]
+
+    ret_df = ret_df.set_index("name")["geometry"].map(
+        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
 
     ret_df = gpd.GeoSeries({
         k: v
@@ -311,8 +323,25 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
     df_eez = load_EEZ(countries)
 
     # simplified offshore_shape
-    ret_df = df_eez.set_index("name")["geometry"].map(
+    # ret_df = df_eez.set_index("name")["geometry"].map(
+    #     lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+    
+    ret_df = df_eez[["name", "geometry"]]
+    # create unique shape if country is described by multiple shapes
+    for c_code in countries:
+        selection = (ret_df.name == c_code)
+        n_offshore_shapes = selection.sum()
+
+        if n_offshore_shapes > 1:
+            # when multiple shapes per country, then merge polygons
+            
+            geom = ret_df[selection].geometry.unary_union
+            ret_df.drop(ret_df[selection].index, inplace=True)
+            ret_df.iloc[-1] = [c_code, geom]
+
+    ret_df = ret_df.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+
 
     ret_df = ret_df.apply(lambda x: make_valid(x))  # hole lies outside occurs here
     country_shapes = country_shapes.apply(lambda x: make_valid(x))
@@ -324,7 +353,6 @@ def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
     ret_df_new = ret_df_new.map(
         lambda x: x if x is None else _simplify_polys(x, minarea=0.001, tolerance=0.0001))
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
-
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
