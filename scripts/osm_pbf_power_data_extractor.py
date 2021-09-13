@@ -224,7 +224,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         else:
             new_prefilter_data = False
         _logger.info(
-            f"Creating  New {feature} Elements for {country_name}")
+            f"Creating new {feature} Elements for {country_name}")
 
     prefilter = {
         Node: {
