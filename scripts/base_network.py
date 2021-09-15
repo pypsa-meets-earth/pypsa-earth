@@ -121,7 +121,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
@@ -136,14 +136,14 @@ def _load_buses_from_osm():
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
     # TODO: Drop NAN maybe somewhere else?
-    buses = buses.dropna(axis="index", subset=["x", "y","country"])
+    buses = buses.dropna(axis="index", subset=["x", "y", "country"])
     # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
 
     # TODO Deprecated. No influence because of new rebase. Remove?
     buses_with_v_nom_to_keep_b = (buses.v_nom.isin(
         snakemake.config["electricity"]["voltages"])
-                                  | buses.v_nom.isnull())
+        | buses.v_nom.isnull())
     logger.info("Removing buses with voltages {}".format(
         pd.Index(buses.v_nom.unique()).dropna().difference(
             snakemake.config["electricity"]["voltages"])))
@@ -466,7 +466,8 @@ def _set_countries_and_substations(n):
         snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(4326)
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
-    substation_b = buses["symbol"]#.str.contains("substation|converter station",
+    # .str.contains("substation|converter station",
+    substation_b = buses["symbol"]
     #                                             case=False)
 
     def prefer_voltage(x, which):
@@ -509,7 +510,7 @@ def _set_countries_and_substations(n):
     #     offshore_b |= offshore_country_b
 
     #     buses.loc[offshore_country_b, "country"] = country
-    
+
     # TODO: Build in under-construction distinction
     # Only accept buses as low-voltage substations (where load is attached), if
     # they have at least one connection which is not under_construction
@@ -528,12 +529,16 @@ def _set_countries_and_substations(n):
     # buses["substation_lv"] = True # TODO:remove as done in osm_build_network?
     # TODO: New implementation below
     bus_locations = buses
-    bus_locations = gpd.GeoDataFrame(bus_locations,geometry=gpd.points_from_xy(buses.x,buses.y), crs = 4326)
-    offshore_b = (bus_locations.within(offshore_shapes))[:-offshore_shapes.size]  # Check if bus is in shape
+    bus_locations = gpd.GeoDataFrame(
+        bus_locations, geometry=gpd.points_from_xy(buses.x, buses.y), crs=4326)
+    offshore_b = (bus_locations.within(offshore_shapes))[
+        :-offshore_shapes.size]  # Check if bus is in shape
     offshore_b = offshore_b
-    offshore_hvb = buses["v_nom"] > 220  # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
-    buses["substation_off"] = (offshore_b | offshore_hvb)  # Compares two lists & makes list value true if at least one is true
-    
+    # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
+    offshore_hvb = buses["v_nom"] > 220
+    # Compares two lists & makes list value true if at least one is true
+    buses["substation_off"] = (offshore_b | offshore_hvb)
+
     # Busses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:

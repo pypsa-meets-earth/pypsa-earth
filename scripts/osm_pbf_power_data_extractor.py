@@ -7,6 +7,7 @@
 # Disables pylint problem in this scripts
 # pylint: disable=E1120
 """ OSM extraction script."""
+from _helpers import configure_logging
 import hashlib
 import json
 import logging
@@ -39,12 +40,11 @@ from shapely.geometry import Polygon
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-## logging.basicConfig()
+# logging.basicConfig()
 _logger = logging.getLogger("osm_data_extractor")
 _logger.setLevel(logging.INFO)
-## logger.setLevel(logging.WARNING)
+# logger.setLevel(logging.WARNING)
 
-from _helpers import configure_logging
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
@@ -54,12 +54,12 @@ logger = logging.getLogger(__name__)
 # Downloads PBF File for given Country Code
 
 
-def getContinentCountry (code):
+def getContinentCountry(code):
     for continent in world:
         country = world[continent].get(code, 0)
         if country:
-            return continent,country
-    return continent,country
+            return continent, country
+    return continent, country
 
 
 def download_pbf(country_code, update, verify):
@@ -84,7 +84,7 @@ def download_pbf(country_code, update, verify):
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
     geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
-    PBF_inputfile = os.path.join(os.getcwd(), "data","osm", continent, "pbf",
+    PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
                                  geofabrik_filename)  # Input filepath
 
     if not os.path.exists(PBF_inputfile):
@@ -178,7 +178,8 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     filter_file_exists = False
     # json file for the Data dictionary
-    JSON_outputfile = os.path.join(os.getcwd(), "data","osm", continent, country_code + "_power.json")
+    JSON_outputfile = os.path.join(
+        os.getcwd(), "data", "osm", continent, country_code + "_power.json")
     # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
     if os.path.exists(JSON_outputfile):
@@ -387,8 +388,8 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
 
     continent, country_name = getContinentCountry(country_code)
     outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-                                        continent + "_all"
-                                        "_raw")  # Output file directory
+                                      continent + "_all"
+                                      "_raw")  # Output file directory
 
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial),
@@ -405,7 +406,7 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
         return None
 
     _to_csv_nafix(df_all_feature, outputfile_partial + f"_{feature}s" +
-                            ".csv")  # Generate CSV
+                  ".csv")  # Generate CSV
 
     if feature_category[feature] == "way":
         gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
@@ -424,11 +425,11 @@ def process_data(update, verify):
 
     # loop the request for each feature
 
-    for feature in feature_list: # feature dataframe
+    for feature in feature_list:  # feature dataframe
 
         df_all_feature = pd.DataFrame()
         for country_code in country_list:
-            
+
             feature_data = download_and_filter(feature, country_code, update,
                                                verify)
 
@@ -484,7 +485,7 @@ def create_country_list(input):
         Example ["NG","ZA"]
     """
     full_codes_list = []
-    
+
     for value1 in input:
 
         codes_list = []
@@ -509,13 +510,13 @@ def create_country_list(input):
         # create a list with all countries
         full_codes_list.extend(codes_list)
 
-    full_codes_list = list(set(full_codes_list)) # Removing duplicates
+    full_codes_list = list(set(full_codes_list))  # Removing duplicates
 
     return full_codes_list
 
 
 if __name__ == "__main__":
-    if "snakemake" not in globals():    
+    if "snakemake" not in globals():
         from _helpers import mock_snakemake
         snakemake = mock_snakemake("download_osm_data")
     configure_logging(snakemake)
@@ -523,7 +524,8 @@ if __name__ == "__main__":
     # Required to set path to pypsa-africa
     _sets_path_to_root("pypsa-africa")
 
-    feature_list = ["substation", "generator", "line", "cable"]  # ["substation", "generator", "line", "cable", "tower"]
+    # ["substation", "generator", "line", "cable", "tower"]
+    feature_list = ["substation", "generator", "line", "cable"]
 
     input = snakemake.config["countries"]
 
@@ -531,5 +533,3 @@ if __name__ == "__main__":
 
     # Set update # Verify = True checks local md5s and pre-filters data again
     process_data(update=False, verify=False)
-
-
