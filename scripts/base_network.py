@@ -125,7 +125,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
 
 
 def _load_buses_from_osm():
-    buses = (_read_csv_nafix(snakemake.input.osm_buses, keep_default_na=False).set_index("bus_id").drop(
+    buses = (_read_csv_nafix(snakemake.input.osm_buses).set_index("bus_id").drop(
         ["station_id"], axis=1).rename(columns=dict(voltage="v_nom")))
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
