@@ -1,12 +1,13 @@
 """ OSM build network."""
-
 import logging
 import os
 import sys
 
 import geopandas as gpd
 import numpy as np
-from _helpers import _sets_path_to_root, _to_csv_nafix, configure_logging
+from _helpers import _sets_path_to_root
+from _helpers import _to_csv_nafix
+from _helpers import configure_logging
 
 logger = logging.getLogger(__name__)
 

@@ -19,15 +19,24 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
-from _helpers import _sets_path_to_root, _to_csv_nafix, configure_logging
-# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-from esy.osmfilter import Node, Relation, Way
+from _helpers import _sets_path_to_root
+from _helpers import _to_csv_nafix
+from _helpers import configure_logging
+from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
-from osm_data_config import (continent_regions, continents, feature_category,
-                             feature_columns, world)
-from shapely.geometry import LineString, Point, Polygon
+from esy.osmfilter import Way
+from osm_data_config import continent_regions
+from osm_data_config import continents
+from osm_data_config import feature_category
+from osm_data_config import feature_columns
+from osm_data_config import world
+from shapely.geometry import LineString
+from shapely.geometry import Point
+from shapely.geometry import Polygon
+# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
