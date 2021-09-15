@@ -7,7 +7,6 @@
 # Disables pylint problem in this scripts
 # pylint: disable=E1120
 """ OSM extraction script."""
-from _helpers import configure_logging
 import hashlib
 import json
 import logging
@@ -20,24 +19,15 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
-
+from _helpers import _sets_path_to_root, _to_csv_nafix, configure_logging
 # https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
-from esy.osmfilter import Node
+from esy.osmfilter import Node, Relation, Way
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
-from esy.osmfilter import Way
-from _helpers import _sets_path_to_root
-from _helpers import _to_csv_nafix
-from osm_data_config import world
-from osm_data_config import continents
-from osm_data_config import continent_regions
-from osm_data_config import feature_category
-from osm_data_config import feature_columns
-from shapely.geometry import LineString
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from osm_data_config import (continent_regions, continents, feature_category,
+                             feature_columns, world)
+from shapely.geometry import LineString, Point, Polygon
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

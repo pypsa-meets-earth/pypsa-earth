@@ -75,12 +75,10 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 import yaml
-from _helpers import configure_logging
-from _helpers import _read_csv_nafix
+from _helpers import _read_csv_nafix, configure_logging
 from osm_pbf_power_data_extractor import create_country_list
 from scipy.sparse import csgraph
-from shapely.geometry import LineString
-from shapely.geometry import Point
+from shapely.geometry import LineString, Point
 
 logger = logging.getLogger(__name__)
 
