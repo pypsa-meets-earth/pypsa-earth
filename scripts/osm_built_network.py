@@ -7,7 +7,9 @@ import logging
 import geopandas as gpd
 import numpy as np
 
-from _helpers import configure_logging, _sets_path_to_root
+from _helpers import configure_logging
+from _helpers import _sets_path_to_root
+from _helpers import _to_csv_nafix
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
@@ -136,7 +138,7 @@ def built_network():
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
 
-    lines.to_csv(outputfile_partial + ".csv")  # Generate CSV
+    _to_csv_nafix(lines, outputfile_partial + ".csv")  # Generate CSV
 
     # Buses
     # Output file directory
@@ -147,7 +149,7 @@ def built_network():
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
     # Generate CSV
-    buses.to_csv(outputfile_partial + ".csv")
+    _to_csv_nafix(buses, outputfile_partial + ".csv")
 
     return None
 

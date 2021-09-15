@@ -76,6 +76,7 @@ import shapely.prepared
 import shapely.wkt
 import yaml
 from _helpers import configure_logging
+from _helpers import _read_csv_nafix
 from osm_pbf_power_data_extractor import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
@@ -124,7 +125,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
 
 
 def _load_buses_from_osm():
-    buses = (pd.read_csv(snakemake.input.osm_buses).set_index("bus_id").drop(
+    buses = (_read_csv_nafix(snakemake.input.osm_buses, keep_default_na=False).set_index("bus_id").drop(
         ["station_id"], axis=1).rename(columns=dict(voltage="v_nom")))
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
@@ -157,7 +158,7 @@ def _load_buses_from_osm():
 
 
 def _load_transformers_from_eg(buses):
-    transformers = pd.read_csv(
+    transformers = _read_csv_nafix(
         snakemake.input.eg_transformers,
         quotechar="'",
         true_values="t",
@@ -171,7 +172,7 @@ def _load_transformers_from_eg(buses):
 
 
 def _load_converters_from_eg(buses):
-    converters = pd.read_csv(
+    converters = _read_csv_nafix(
         snakemake.input.eg_converters,
         quotechar="'",
         true_values="t",
@@ -187,7 +188,7 @@ def _load_converters_from_eg(buses):
 
 
 def _load_links_from_eg(buses):
-    links = pd.read_csv(
+    links = _read_csv_nafix(
         snakemake.input.eg_links,
         quotechar="'",
         true_values="t",
@@ -212,7 +213,7 @@ def _load_links_from_eg(buses):
 
 
 def _add_links_from_tyndp(buses, links):
-    links_tyndp = pd.read_csv(snakemake.input.links_tyndp)
+    links_tyndp = _read_csv_nafix(snakemake.input.links_tyndp)
 
     # remove all links from list which lie outside all of the desired countries
     europe_shape = gpd.read_file(snakemake.input.europe_shape).loc[0,
@@ -297,7 +298,7 @@ def _add_links_from_tyndp(buses, links):
 
 
 def _load_lines_from_osm(buses):
-    lines = (pd.read_csv(
+    lines = (_read_csv_nafix(
         snakemake.input.osm_lines,
         dtype=dict(
             line_id="str",
@@ -370,7 +371,7 @@ def _set_electrical_parameters_links(links):
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
-    links_p_nom = pd.read_csv(snakemake.input.links_p_nom)
+    links_p_nom = _read_csv_nafix(snakemake.input.links_p_nom)
 
     # filter links that are not in operation anymore
     removed_b = links_p_nom.Remarks.str.contains("Shut down|Replaced",

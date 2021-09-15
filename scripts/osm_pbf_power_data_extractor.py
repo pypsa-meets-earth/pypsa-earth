@@ -27,6 +27,7 @@ from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
 from esy.osmfilter import Way
 from _helpers import _sets_path_to_root
+from _helpers import _to_csv_nafix
 from osm_data_config import world
 from osm_data_config import continents
 from osm_data_config import continent_regions
@@ -381,44 +382,53 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     return gdf
 
 
+def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
+    "Function to save the feature as csv and geojson"
+
+    continent, country_name = getContinentCountry(country_code)
+    outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
+                                        continent + "_all"
+                                        "_raw")  # Output file directory
+
+    if not os.path.exists(outputfile_partial):
+        os.makedirs(os.path.dirname(outputfile_partial),
+                    exist_ok=True)  # create raw directory
+
+    df_all_feature = df_all_feature[df_all_feature.columns.intersection(
+        set(columns_feature))]
+    df_all_feature.reset_index(drop=True, inplace=True)
+
+    # Generate Files
+
+    if df_all_feature.empty:
+        _logger.warning(f"All feature data frame empty for {feature}")
+        return None
+
+    _to_csv_nafix(df_all_feature, outputfile_partial + f"_{feature}s" +
+                            ".csv")  # Generate CSV
+
+    if feature_category[feature] == "way":
+        gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
+    else:
+        gdf_feature = convert_pd_to_gdf_nodes(df_all_feature)
+
+    _logger.info("Writing GeoJSON file")
+    gdf_feature.to_file(outputfile_partial + f"_{feature}s" + ".geojson",
+                        driver="GeoJSON")  # Generate GeoJson
+
+
 def process_data(update, verify):
-    def output_csv_geojson(df_all_feature, columns_feature, feature):
-        continent, country_name = getContinentCountry(country_code)
-        outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-                                          continent + "_all"
-                                          "_raw")  # Output file directory
+    """
+    Download the features in feature_list for each country of the country_list
+    """
 
-        if not os.path.exists(outputfile_partial):
-            os.makedirs(os.path.dirname(outputfile_partial),
-                        exist_ok=True)  # create raw directory
+    # loop the request for each feature
 
-        df_all_feature = df_all_feature[df_all_feature.columns.intersection(
-            set(columns_feature))]
-        df_all_feature.reset_index(drop=True, inplace=True)
+    for feature in feature_list: # feature dataframe
 
-        # Generate Files
-
-        if df_all_feature.empty:
-            _logger.warning(f"All feature data frame empty for {feature}")
-            return None
-
-        df_all_feature.to_csv(outputfile_partial + f"_{feature}s" +
-                              ".csv")  # Generate CSV
-
-        if feature_category[feature] == "way":
-            gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
-        else:
-            gdf_feature = convert_pd_to_gdf_nodes(df_all_feature)
-
-        _logger.info("Writing GeoJSON file")
-        gdf_feature.to_file(outputfile_partial + f"_{feature}s" + ".geojson",
-                            driver="GeoJSON")  # Generate GeoJson
-
-
-    for feature in feature_list:
         df_all_feature = pd.DataFrame()
         for country_code in country_list:
-            continent, country_name = getContinentCountry(country_code)
+            
             feature_data = download_and_filter(feature, country_code, update,
                                                verify)
 
