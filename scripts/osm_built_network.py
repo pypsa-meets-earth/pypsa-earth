@@ -10,6 +10,7 @@ import numpy as np
 from _helpers import configure_logging
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
+
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
@@ -85,10 +86,14 @@ def create_station_at_equal_bus_locations(lines, buses):
     bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(
-        keep=False)].sort_values(by=["station_id", "voltage"])
-    lv_bus_at_station_duplicates = bus_all[bus_all.station_id.duplicated(keep=False)].sort_values(
-        by=["station_id", "voltage"]).drop_duplicates(subset=["station_id"])
+    bus_with_stations_duplicates = bus_all[
+        bus_all.station_id.duplicated(keep=False)
+    ].sort_values(by=["station_id", "voltage"])
+    lv_bus_at_station_duplicates = (
+        bus_all[bus_all.station_id.duplicated(keep=False)]
+        .sort_values(by=["station_id", "voltage"])
+        .drop_duplicates(subset=["station_id"])
+    )
     # Set all buses with station duplicates "False"
     bus_all.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
     # Set lv_buses with station duplicates "True"
@@ -159,6 +164,7 @@ def built_network():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 
