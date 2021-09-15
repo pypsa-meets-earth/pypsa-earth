@@ -1,13 +1,14 @@
 """ OSM build network."""
-
+import logging
 import os
 import sys
-import logging
 
 import geopandas as gpd
 import numpy as np
+from _helpers import _sets_path_to_root
+from _helpers import _to_csv_nafix
+from _helpers import configure_logging
 
-from _helpers import configure_logging, _sets_path_to_root
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
@@ -40,12 +41,12 @@ def create_bus_df_from_lines(substations, lines):
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
     # Read information from line.csv
-    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"]
-    ]  # line start points
-    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"]
-    ]  # line end points
+    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
+        "voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"
+    ]]  # line start points
+    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
+        "voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"
+    ]]  # line end points
     bus_all = bus_s.append(bus_e).reset_index(drop=True)
 
     # Assign index to bus_id
@@ -83,8 +84,11 @@ def create_station_at_equal_bus_locations(lines, buses):
     bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(keep=False)].sort_values(by=["station_id","voltage"])
-    lv_bus_at_station_duplicates = bus_all[bus_all.station_id.duplicated(keep=False)].sort_values(by=["station_id","voltage"]).drop_duplicates(subset=["station_id"])
+    bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"])
+    lv_bus_at_station_duplicates = (bus_all[bus_all.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
+            subset=["station_id"]))
     # Set all buses with station duplicates "False"
     bus_all.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
     # Set lv_buses with station duplicates "True"
@@ -93,7 +97,7 @@ def create_station_at_equal_bus_locations(lines, buses):
     # Add station_id to line dataframe
     n_row = int(bus_all.shape[0] / 2)  # row length
     lines = lines.reset_index(drop=True)
-    lines["bus0"] = bus_all.loc[: (n_row - 1), ["bus_id"]]
+    lines["bus0"] = bus_all.loc[:(n_row - 1), ["bus_id"]]
     lines["bus1"] = bus_all.loc[n_row:, ["bus_id"]].reset_index(drop=True)
 
     # TRY: Keep only buses that are not duplicated & lv_substation = True
@@ -129,36 +133,37 @@ def built_network():
     # Lines
     # Output file directory
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "base_network", "africa_all" + "_lines" + "_build_network"
-    )
+        os.getcwd(), "data", "base_network",
+        "africa_all" + "_lines" + "_build_network")
 
     # create clean directory if not already exist
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
 
-    lines.to_csv(outputfile_partial + ".csv")  # Generate CSV
+    _to_csv_nafix(lines, outputfile_partial + ".csv")  # Generate CSV
 
     # Buses
     # Output file directory
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "base_network", "africa_all" + "_buses" + "_build_network"
-    )
+        os.getcwd(), "data", "base_network",
+        "africa_all" + "_buses" + "_build_network")
     # create clean directory if not already exist
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
     # Generate CSV
-    buses.to_csv(outputfile_partial + ".csv")
+    _to_csv_nafix(buses, outputfile_partial + ".csv")
 
     return None
 
 
 if __name__ == "__main__":
-    if "snakemake" not in globals():    
+    if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 
     _sets_path_to_root("pypsa-africa")
-    #sys.path.append("./../../scripts")  ## alternative
+    # sys.path.append("./../../scripts")  ## alternative
 
     built_network()
