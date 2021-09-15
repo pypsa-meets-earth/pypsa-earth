@@ -75,8 +75,8 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 import yaml
-from _helpers import configure_logging
 from _helpers import _read_csv_nafix
+from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
@@ -125,8 +125,9 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
 
 
 def _load_buses_from_osm():
-    buses = (_read_csv_nafix(snakemake.input.osm_buses).set_index("bus_id").drop(
-        ["station_id"], axis=1).rename(columns=dict(voltage="v_nom")))
+    buses = (_read_csv_nafix(
+        snakemake.input.osm_buses).set_index("bus_id").drop(
+            ["station_id"], axis=1).rename(columns=dict(voltage="v_nom")))
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
@@ -136,7 +137,7 @@ def _load_buses_from_osm():
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
     # TODO: Drop NAN maybe somewhere else?
-    buses = buses.dropna(axis="index", subset=["x", "y","country"])
+    buses = buses.dropna(axis="index", subset=["x", "y", "country"])
     # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
 
@@ -460,13 +461,16 @@ def _set_countries_and_substations(n):
         )
 
     countries = create_country_list(snakemake.config["countries"])
-    country_shapes = gpd.read_file(
-        snakemake.input.country_shapes).set_index("name")["geometry"].set_crs(4326)
-    offshore_shapes = gpd.read_file(
-        snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(4326)
+    country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
+        "name")["geometry"].set_crs(4326))
+    offshore_shapes = (gpd.read_file(
+        snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(
+            4326))
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
-    substation_b = buses["symbol"]#.str.contains("substation|converter station",
+    # .str.contains("substation|converter station",
+    substation_b = buses["symbol"]
+
     #                                             case=False)
 
     def prefer_voltage(x, which):
@@ -509,7 +513,7 @@ def _set_countries_and_substations(n):
     #     offshore_b |= offshore_country_b
 
     #     buses.loc[offshore_country_b, "country"] = country
-    
+
     # TODO: Build in under-construction distinction
     # Only accept buses as low-voltage substations (where load is attached), if
     # they have at least one connection which is not under_construction
@@ -528,12 +532,18 @@ def _set_countries_and_substations(n):
     # buses["substation_lv"] = True # TODO:remove as done in osm_build_network?
     # TODO: New implementation below
     bus_locations = buses
-    bus_locations = gpd.GeoDataFrame(bus_locations,geometry=gpd.points_from_xy(buses.x,buses.y), crs = 4326)
-    offshore_b = (bus_locations.within(offshore_shapes))[:-offshore_shapes.size]  # Check if bus is in shape
+    bus_locations = gpd.GeoDataFrame(bus_locations,
+                                     geometry=gpd.points_from_xy(
+                                         buses.x, buses.y),
+                                     crs=4326)
+    offshore_b = (bus_locations.within(offshore_shapes)
+                  )[:-offshore_shapes.size]  # Check if bus is in shape
     offshore_b = offshore_b
-    offshore_hvb = buses["v_nom"] > 220  # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
-    buses["substation_off"] = (offshore_b | offshore_hvb)  # Compares two lists & makes list value true if at least one is true
-    
+    # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
+    offshore_hvb = buses["v_nom"] > 220
+    # Compares two lists & makes list value true if at least one is true
+    buses["substation_off"] = offshore_b | offshore_hvb
+
     # Busses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:
@@ -738,9 +748,10 @@ def base_network():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)
 
     n = base_network()
-    n.buses = pd.DataFrame(n.buses.drop(columns='geometry'))
+    n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
     n.export_to_netcdf(snakemake.output[0])

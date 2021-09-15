@@ -373,8 +373,7 @@ def _get_country(target, **keys):
 
     """
     import pycountry as pyc
-    
-    
+
     assert len(keys) == 1
     try:
         return getattr(pyc.countries.get(**keys), target)
@@ -396,7 +395,10 @@ def _two_2_three_digits_country(two_code_country):
     three_code_country: str
         3-digit country name
     """
-    if two_code_country == 'SN-GM': return f"{_two_2_three_digits_country('SN')}-{_two_2_three_digits_country('GM')}"
+    if two_code_country == "SN-GM":
+        return (
+            f"{_two_2_three_digits_country('SN')}-{_two_2_three_digits_country('GM')}"
+        )
 
     three_code_country = _get_country("alpha_3", alpha_2=two_code_country)
     return three_code_country
@@ -416,7 +418,10 @@ def _three_2_two_digits_country(three_code_country):
     two_code_country: str
         2-digit country name
     """
-    if three_code_country == 'SEN-GMB': return f"{_three_2_two_digits_country('SN')}-{_three_2_two_digits_country('GM')}"
+    if three_code_country == "SEN-GMB":
+        return (
+            f"{_three_2_two_digits_country('SN')}-{_three_2_two_digits_country('GM')}"
+        )
 
     two_code_country = _get_country("alpha_2", alpha_3=three_code_country)
     return two_code_country
@@ -436,7 +441,8 @@ def _two_digits_2_name_country(two_code_country):
     full_name: str
         full country name
     """
-    if two_code_country == 'SN-GM': return f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
+    if two_code_country == "SN-GM":
+        return f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
 
     full_name = _get_country("name", alpha_2=two_code_country)
     return full_name
@@ -456,23 +462,32 @@ def _country_name_2_two_digits(country_name):
     two_code_country: str
         2-digit country name
     """
-    if country_name == f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}": return 'SN-GM'
+    if (country_name ==
+            f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
+        ):
+        return "SN-GM"
 
     full_name = _get_country("alpha_2", name=country_name)
     return full_name
 
-NA_VALUE = 'NULL'
+
+NA_VALUE = "NULL"
+
 
 def _read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"
-    if 'keep_default_na' in kwargs:
-        del kwargs['keep_default_na']
-    if 'na_values' in kwargs:
-        del kwargs['na_values']
-    
-    return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=[NA_VALUE])
+    if "keep_default_na" in kwargs:
+        del kwargs["keep_default_na"]
+    if "na_values" in kwargs:
+        del kwargs["na_values"]
+
+    return pd.read_csv(file,
+                       **kwargs,
+                       keep_default_na=False,
+                       na_values=[NA_VALUE])
+
 
 def _to_csv_nafix(obj, path, **kwargs):
-    if 'na_rep' in kwargs:
-        del kwargs['na_rep']
+    if "na_rep" in kwargs:
+        del kwargs["na_rep"]
     return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
