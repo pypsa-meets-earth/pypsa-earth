@@ -419,10 +419,3 @@ continent_regions = {
     # Customized test set
     "TEST" : ["NG", "NE", "SL", "MA"],
 }
-
-# Dictionary to describe the match discrepancies between the iso reference coding and the geofabrik one
-iso_to_geofabrik = {
-    "EH": "MA",  # Western Sahara needs Morocco Geofabrik to be downloaded
-    "SN": "SNGM",  # Senegal needs the SNGM geofabrik special region 
-    "GM": "SNGM",
-}
