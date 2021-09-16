@@ -20,14 +20,20 @@ def line_endings_to_bus_conversion(lines):
 
     lines["bounds"] = lines["geometry"].boundary  # create start and end point
 
-    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p[0] if len(p) >= 2 else None)
-    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p[1] if len(p) >= 2 else None)
+    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p[0]
+                                               if len(p) >= 2 else None)
+    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p[1]
+                                               if len(p) >= 2 else None)
 
     # splits into coordinates
-    lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x if p != None else None)
-    lines["bus0_lat"] = lines["bus_0_coors"].map(lambda p: p.y if p != None else None)
-    lines["bus1_lon"] = lines["bus_1_coors"].map(lambda p: p.x if p != None else None)
-    lines["bus1_lat"] = lines["bus_1_coors"].map(lambda p: p.y if p != None else None)
+    lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x
+                                                 if p != None else None)
+    lines["bus0_lat"] = lines["bus_0_coors"].map(lambda p: p.y
+                                                 if p != None else None)
+    lines["bus1_lon"] = lines["bus_1_coors"].map(lambda p: p.x
+                                                 if p != None else None)
+    lines["bus1_lat"] = lines["bus_1_coors"].map(lambda p: p.y
+                                                 if p != None else None)
 
     return lines
 
@@ -38,12 +44,12 @@ def create_bus_df_from_lines(substations, lines):
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
     # Read information from line.csv
-    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"]
-    ]  # line start points
-    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"]
-    ]  # line end points
+    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
+        "voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"
+    ]]  # line start points
+    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
+        "voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"
+    ]]  # line end points
     bus_all = bus_s.append(bus_e).reset_index(drop=True)
 
     # Assign index to bus_id
@@ -81,14 +87,11 @@ def create_station_at_equal_bus_locations(lines, buses):
     bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    bus_with_stations_duplicates = bus_all[
-        bus_all.station_id.duplicated(keep=False)
-    ].sort_values(by=["station_id", "voltage"])
-    lv_bus_at_station_duplicates = (
-        bus_all[bus_all.station_id.duplicated(keep=False)]
-        .sort_values(by=["station_id", "voltage"])
-        .drop_duplicates(subset=["station_id"])
-    )
+    bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"])
+    lv_bus_at_station_duplicates = (bus_all[bus_all.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
+            subset=["station_id"]))
     # Set all buses with station duplicates "False"
     bus_all.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
     # Set lv_buses with station duplicates "True"
@@ -97,7 +100,7 @@ def create_station_at_equal_bus_locations(lines, buses):
     # Add station_id to line dataframe
     n_row = int(bus_all.shape[0] / 2)  # row length
     lines = lines.reset_index(drop=True)
-    lines["bus0"] = bus_all.loc[: (n_row - 1), ["bus_id"]]
+    lines["bus0"] = bus_all.loc[:(n_row - 1), ["bus_id"]]
     lines["bus1"] = bus_all.loc[n_row:, ["bus_id"]].reset_index(drop=True)
 
     # TRY: Keep only buses that are not duplicated & lv_substation = True
@@ -133,8 +136,8 @@ def built_network():
     # Lines
     # Output file directory
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "base_network", "africa_all" + "_lines" + "_build_network"
-    )
+        os.getcwd(), "data", "base_network",
+        "africa_all" + "_lines" + "_build_network")
 
     # create clean directory if not already exist
     if not os.path.exists(outputfile_partial):
@@ -145,8 +148,8 @@ def built_network():
     # Buses
     # Output file directory
     outputfile_partial = os.path.join(
-        os.getcwd(), "data", "base_network", "africa_all" + "_buses" + "_build_network"
-    )
+        os.getcwd(), "data", "base_network",
+        "africa_all" + "_buses" + "_build_network")
     # create clean directory if not already exist
     if not os.path.exists(outputfile_partial):
         os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
