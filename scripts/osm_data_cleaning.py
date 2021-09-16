@@ -127,7 +127,7 @@ def split_cells(df, lst_col="voltage"):
     return x
 
 
-def filter_voltage(df, threshold_voltage=110000):
+def filter_voltage(df, threshold_voltage=35000):
 
     # Drop any row with N/A voltage
     df = df.dropna(subset=["voltage"])
@@ -309,43 +309,12 @@ def prepare_generators_df(df_all_generators):
     return df_all_generators
 
 
-def clean_data(tag_substation="transmission", threshold_voltage=110000):
+def clean_data(tag_substation="transmission", threshold_voltage=35000):
     # Output file directory
     outputfile_partial = os.path.join(os.getcwd(), "data", "clean", "africa_all")
     # Output file directory
     raw_outputfile_partial = os.path.join(
         os.getcwd(), "data", "raw", "africa_all" + "_raw"
-    )
-
-    # ----------- SUBSTATIONS -----------
-
-    df_all_substations = gpd.read_file(
-        raw_outputfile_partial + "_substations" + ".geojson"
-    ).set_crs(epsg=4326, inplace=True)
-
-    # prepare dataset for substations
-    df_all_substations = prepare_substation_df(df_all_substations)
-
-    # filter substations by tag
-    df_all_substations = df_all_substations[
-        df_all_substations["tag_substation"] == tag_substation
-    ]
-
-    # filter substation by voltage
-    df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
-
-    # finalize dataframe types
-    df_all_substations = finalize_substation_types(df_all_substations)
-
-    # set unique bus ids
-    df_all_substations = set_unique_id(df_all_substations, "bus_id")
-
-    # save to csv file
-    df_all_substations = gpd.GeoDataFrame(
-        df_all_substations, geometry="geometry", crs="EPSG:4326"
-    )
-    df_all_substations.to_file(
-        outputfile_partial + "_substations" + ".geojson", driver="GeoJSON"
     )
 
     # ----------- LINES AND CABLES -----------
@@ -378,13 +347,50 @@ def clean_data(tag_substation="transmission", threshold_voltage=110000):
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
 
+    # # remove lines without endings
+    # df_all_lines = df_all_lines[df_all_lines["geometry"].map(lambda g: len(g.boundary) >= 2)]
+
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
 
     df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry", crs="EPSG:4326")
     df_all_lines.to_file(outputfile_partial + "_lines" + ".geojson", driver="GeoJSON")
 
-    # ----------- Generator -----------
+
+    # ----------- SUBSTATIONS -----------
+
+    df_all_substations = gpd.read_file(
+        raw_outputfile_partial + "_substations" + ".geojson"
+    ).set_crs(epsg=4326, inplace=True)
+
+    # prepare dataset for substations
+    df_all_substations = prepare_substation_df(df_all_substations)
+
+    # filter substations by tag
+    if tag_substation:  # if the string is not empty check it
+        df_all_substations = df_all_substations[
+            df_all_substations["tag_substation"] == tag_substation
+        ]
+
+    # filter substation by voltage
+    df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
+
+    # finalize dataframe types
+    df_all_substations = finalize_substation_types(df_all_substations)
+
+    # set unique bus ids
+    df_all_substations = set_unique_id(df_all_substations, "bus_id")
+
+    # save to geojson file
+    df_all_substations = gpd.GeoDataFrame(
+        df_all_substations, geometry="geometry", crs="EPSG:4326"
+    )
+    df_all_substations.to_file(
+        outputfile_partial + "_substations" + ".geojson", driver="GeoJSON"
+    )
+
+
+    # ----------- GENERATORS -----------
 
     df_all_generators = gpd.read_file(
         raw_outputfile_partial + "_generators" + ".geojson"
@@ -409,4 +415,7 @@ if __name__ == "__main__":
     # Required to set path to pypsa-africa
     _sets_path_to_root("pypsa-africa")
 
-    clean_data()
+    tag_substation = snakemake.config["osm_data_cleaning_options"]["tag_substation"]
+    threshold_voltage = snakemake.config["osm_data_cleaning_options"]["threshold_voltage"]
+
+    clean_data(tag_substation=tag_substation, threshold_voltage=threshold_voltage)
