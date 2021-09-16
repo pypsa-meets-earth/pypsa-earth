@@ -20,14 +20,20 @@ def line_endings_to_bus_conversion(lines):
 
     lines["bounds"] = lines["geometry"].boundary  # create start and end point
 
-    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p[0] if len(p) >= 2 else None)
-    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p[1] if len(p) >= 2 else None)
+    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p[0]
+                                               if len(p) >= 2 else None)
+    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p[1]
+                                               if len(p) >= 2 else None)
 
     # splits into coordinates
-    lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x if p != None else None)
-    lines["bus0_lat"] = lines["bus_0_coors"].map(lambda p: p.y if p != None else None)
-    lines["bus1_lon"] = lines["bus_1_coors"].map(lambda p: p.x if p != None else None)
-    lines["bus1_lat"] = lines["bus_1_coors"].map(lambda p: p.y if p != None else None)
+    lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x
+                                                 if p != None else None)
+    lines["bus0_lat"] = lines["bus_0_coors"].map(lambda p: p.y
+                                                 if p != None else None)
+    lines["bus1_lon"] = lines["bus_1_coors"].map(lambda p: p.x
+                                                 if p != None else None)
+    lines["bus1_lat"] = lines["bus_1_coors"].map(lambda p: p.y
+                                                 if p != None else None)
 
     return lines
 
