@@ -465,7 +465,8 @@ def process_data(update, verify):
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
-        output_csv_geojson(df_all_feature, feature_columns[feature], feature)
+        output_csv_geojson(country_code, df_all_feature,
+                           feature_columns[feature], feature)
 
 
 def create_country_list(input):
