@@ -121,7 +121,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
@@ -144,7 +144,7 @@ def _load_buses_from_osm():
     # TODO Deprecated. No influence because of new rebase. Remove?
     buses_with_v_nom_to_keep_b = (buses.v_nom.isin(
         snakemake.config["electricity"]["voltages"])
-                                  | buses.v_nom.isnull())
+        | buses.v_nom.isnull())
     logger.info("Removing buses with voltages {}".format(
         pd.Index(buses.v_nom.unique()).dropna().difference(
             snakemake.config["electricity"]["voltages"])))
@@ -154,7 +154,7 @@ def _load_buses_from_osm():
     # buses_in_europe_b = buses[["x", "y"]].apply(lambda p: europe_shape_prepped.contains(Point(p)), axis=1)
 
     # TODO Add remove buses outside of Area (currently commented out)
-    return buses # pd.DataFrame(buses.loc[buses_with_v_nom_to_keep_b])
+    return buses  # pd.DataFrame(buses.loc[buses_with_v_nom_to_keep_b])
     # return pd.DataFrame(buses.loc[buses_in_europe_b & buses_with_v_nom_to_keep_b])
 
 
