@@ -7,9 +7,11 @@ import numpy as np
 import pandas as pd
 
 from _helpers import _sets_path_to_root
+
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
 from _helpers import configure_logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -137,8 +139,7 @@ def filter_voltage(df, threshold_voltage=35000):
 
     # Convert voltage to float, if impossible, discard row
     df["voltage"] = (
-        df["voltage"].apply(lambda x: pd.to_numeric(
-            x, errors="coerce")).astype(float)
+        df["voltage"].apply(lambda x: pd.to_numeric(x, errors="coerce")).astype(float)
     )
     df = df.dropna(subset=["voltage"])  # Drop any row with Voltage = N/A
 
@@ -158,8 +159,7 @@ def finalize_substation_types(df_all_substations):
 
     # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
-    df_all_substations.loc[:,
-                           "voltage"] = df_all_substations["voltage"].astype(int)
+    df_all_substations.loc[:, "voltage"] = df_all_substations["voltage"].astype(int)
 
     return df_all_substations
 
@@ -256,8 +256,7 @@ def integrate_lines_df(df_all_lines):
     if df_all_lines["cables"].dtype != int:
         # HERE. "0" if cables "None", "nan" or "1"
         df_all_lines.loc[
-            (df_all_lines["cables"] <
-             "3") | df_all_lines["cables"].isna(), "cables"
+            (df_all_lines["cables"] < "3") | df_all_lines["cables"].isna(), "cables"
         ] = "0"
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
@@ -267,8 +266,7 @@ def integrate_lines_df(df_all_lines):
         # see https://hackaday.com/2019/06/11/a-field-guide-to-transmission-lines/
         # where circuits are "0" make "1"
         df_all_lines.loc[
-            (df_all_lines["cables"] == 4) | (
-                df_all_lines["cables"] == 5), "cables"
+            (df_all_lines["cables"] == 4) | (df_all_lines["cables"] == 5), "cables"
         ] = 3
 
     # one circuit contains 3 cable
@@ -279,8 +277,7 @@ def integrate_lines_df(df_all_lines):
 
     # where circuits are "0" make "1"
     df_all_lines.loc[
-        (df_all_lines["circuits"] == "0") | (
-            df_all_lines["circuits"] == 0), "circuits"
+        (df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0), "circuits"
     ] = 1
 
     # drop column if exist
@@ -308,8 +305,7 @@ def prepare_generators_df(df_all_generators):
         df_all_generators["power_output_MW"].astype(str).str.contains("MW")
     ]
     df_all_generators["power_output_MW"] = (
-        df_all_generators["power_output_MW"].str.extract(
-            "(\\d+)").astype(float)
+        df_all_generators["power_output_MW"].str.extract("(\\d+)").astype(float)
     )
 
     return df_all_generators
@@ -317,8 +313,7 @@ def prepare_generators_df(df_all_generators):
 
 def clean_data(tag_substation="transmission", threshold_voltage=35000):
     # Output file directory
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "clean", "africa_all")
+    outputfile_partial = os.path.join(os.getcwd(), "data", "clean", "africa_all")
     # Output file directory
     raw_outputfile_partial = os.path.join(
         os.getcwd(), "data", "raw", "africa_all" + "_raw"
@@ -355,16 +350,15 @@ def clean_data(tag_substation="transmission", threshold_voltage=35000):
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
 
     # remove lines without endings
-    df_all_lines = df_all_lines[df_all_lines["geometry"].map(
-        lambda g: len(g.boundary) >= 2)]
+    df_all_lines = df_all_lines[
+        df_all_lines["geometry"].map(lambda g: len(g.boundary) >= 2)
+    ]
 
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
 
-    df_all_lines = gpd.GeoDataFrame(
-        df_all_lines, geometry="geometry", crs="EPSG:4326")
-    df_all_lines.to_file(outputfile_partial + "_lines" +
-                         ".geojson", driver="GeoJSON")
+    df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry", crs="EPSG:4326")
+    df_all_lines.to_file(outputfile_partial + "_lines" + ".geojson", driver="GeoJSON")
 
     # ----------- SUBSTATIONS -----------
 
@@ -417,6 +411,7 @@ def clean_data(tag_substation="transmission", threshold_voltage=35000):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
 
@@ -424,7 +419,8 @@ if __name__ == "__main__":
     _sets_path_to_root("pypsa-africa")
 
     tag_substation = snakemake.config["osm_data_cleaning_options"]["tag_substation"]
-    threshold_voltage = snakemake.config["osm_data_cleaning_options"]["threshold_voltage"]
+    threshold_voltage = snakemake.config["osm_data_cleaning_options"][
+        "threshold_voltage"
+    ]
 
-    clean_data(tag_substation=tag_substation,
-               threshold_voltage=threshold_voltage)
+    clean_data(tag_substation=tag_substation, threshold_voltage=threshold_voltage)
