@@ -154,7 +154,7 @@ def _load_buses_from_osm():
     # buses_in_europe_b = buses[["x", "y"]].apply(lambda p: europe_shape_prepped.contains(Point(p)), axis=1)
 
     # TODO Add remove buses outside of Area (currently commented out)
-    return pd.DataFrame(buses.loc[buses_with_v_nom_to_keep_b])
+    return buses  # pd.DataFrame(buses.loc[buses_with_v_nom_to_keep_b])
     # return pd.DataFrame(buses.loc[buses_in_europe_b & buses_with_v_nom_to_keep_b])
 
 

@@ -19,18 +19,21 @@ def line_endings_to_bus_conversion(lines):
     # Assign to every line a start and end point
 
     lines["bounds"] = lines["geometry"].boundary  # create start and end point
-    # splits into coordinates
-    lines["bus0_lon"] = lines["bounds"].bounds.iloc[:, 0]
-    lines["bus0_lat"] = lines["bounds"].bounds.iloc[:, 1]
-    lines["bus1_lon"] = lines["bounds"].bounds.iloc[:, 2]
-    lines["bus1_lat"] = lines["bounds"].bounds.iloc[:, 3]
 
-    # TODO: FIX bug. Extract the coordinates is working for Nigeria bt not for
-    # the whole African continent
-    # lines_ng["bus_0_coors"]=lines_ng["bounds"].apply(lambda mp: mp[0])
-    # lines_ng["bus_1_coors"]=lines_ng["bounds"].apply(lambda mp: mp[1])
-    lines["bus_0_coors"] = np.nan
-    lines["bus_1_coors"] = np.nan
+    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p[0]
+                                               if len(p) >= 2 else None)
+    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p[1]
+                                               if len(p) >= 2 else None)
+
+    # splits into coordinates
+    lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x
+                                                 if p != None else None)
+    lines["bus0_lat"] = lines["bus_0_coors"].map(lambda p: p.y
+                                                 if p != None else None)
+    lines["bus1_lon"] = lines["bus_1_coors"].map(lambda p: p.x
+                                                 if p != None else None)
+    lines["bus1_lat"] = lines["bus_1_coors"].map(lambda p: p.y
+                                                 if p != None else None)
 
     return lines
 
