@@ -347,8 +347,8 @@ def clean_data(tag_substation="transmission", threshold_voltage=35000):
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
 
-    # # remove lines without endings
-    # df_all_lines = df_all_lines[df_all_lines["geometry"].map(lambda g: len(g.boundary) >= 2)]
+    # remove lines without endings
+    df_all_lines = df_all_lines[df_all_lines["geometry"].map(lambda g: len(g.boundary) >= 2)]
 
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
