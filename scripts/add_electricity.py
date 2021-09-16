@@ -87,13 +87,13 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import powerplantmatching as pm
+#import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from osm_pbf_power_data_extractor import create_country_list
-from powerplantmatching.export import map_country_bus
+#from powerplantmatching.export import map_country_bus
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
@@ -103,7 +103,7 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def normed(s):

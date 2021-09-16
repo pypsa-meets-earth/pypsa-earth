@@ -8,7 +8,7 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-countries: ["NG", "NE", "SL", "MA", "ZA"]  # Test set
+countries: ["MA"]  # Test set
 
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
   # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
