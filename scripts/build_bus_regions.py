@@ -42,16 +42,14 @@ Description
 """
 
 import logging
+import os
 
+import geopandas as gpd
 import numpy
+import pandas as pd
+import pypsa
 from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
-
-import pypsa
-import os
-import pandas as pd
-import geopandas as gpd
-
 from vresutils.graph import voronoi_partition_pts
 
 _logger = logging.getLogger("build_bus_regions")
@@ -173,9 +171,9 @@ if __name__ == "__main__":
     # First issues where observed for offshore shapes means that first country-onshore voronoi worked fine
     # TODO: Find out the root cause for this issues
     import shapely
-    from shapely.validation import make_valid
-    from shapely.geometry import shape, JOIN_STYLE
+    from shapely.geometry import JOIN_STYLE, shape
     from shapely.ops import unary_union
+    from shapely.validation import make_valid
 
     # country_shapes = make_valid(country_shapes)
     # offshore_shapes = make_valid(offshore_shapes)
