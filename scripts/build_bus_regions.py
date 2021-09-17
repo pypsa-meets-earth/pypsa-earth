@@ -60,7 +60,8 @@ _logger = logging.getLogger("build_bus_regions")
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
+# error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
+def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
     if not isinstance(df, gpd.GeoDataFrame):
@@ -142,7 +143,6 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     return polygons_arr
 
 
-
 if __name__ == "__main__":
     if 'snakemake' not in globals():
         from _helpers import mock_snakemake
@@ -153,8 +153,10 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
 
-    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index('name')['geometry']
-    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes).set_index('name')['geometry']
+    country_shapes = gpd.read_file(
+        snakemake.input.country_shapes).set_index('name')['geometry']
+    offshore_shapes = gpd.read_file(
+        snakemake.input.offshore_shapes).set_index('name')['geometry']
 
     # Issues in voronoi_creation due to overlapping/duplications will be removed with that function
     # First issues where observed for offshore shapes means that first country-onshore voronoi worked fine
@@ -176,25 +178,25 @@ if __name__ == "__main__":
         if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty:
             _logger.warning(f"No low voltage buses found for {country}!")
             continue
-            
+
         # print(country)
         onshore_shape = country_shapes[country]
         # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
         onshore_regions.append(gpd.GeoDataFrame({
-                'name': onshore_locs.index,
-                'x': onshore_locs['x'],
-                'y': onshore_locs['y'],
-                'geometry': custom_voronoi_partition_pts(onshore_locs.values, onshore_shape),
-                'country': country
-            }))
+            'name': onshore_locs.index,
+            'x': onshore_locs['x'],
+            'y': onshore_locs['y'],
+            'geometry': custom_voronoi_partition_pts(onshore_locs.values, onshore_shape),
+            'country': country
+        }))
 
         # These two logging could be commented out
-        if country not in offshore_shapes.index: 
+        if country not in offshore_shapes.index:
             _logger.warning(f"No off-shore shapes for {country}")
             continue
-        
+
         # Note: the off_shore shape should be present because cheched 10 lines above
         offshore_shape = offshore_shapes[country]
 
@@ -205,18 +207,20 @@ if __name__ == "__main__":
             # print(offshore_shape.is_valid)
             # print(offshore_shape.is_simple)
             # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
-            offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
+            offshore_locs = n.buses.loc[c_b &
+                                        n.buses.substation_off, ["x", "y"]]
             offshore_regions_c = gpd.GeoDataFrame({
-                    'name': offshore_locs.index,
-                    'x': offshore_locs['x'],
-                    'y': offshore_locs['y'],
-                    'geometry': custom_voronoi_partition_pts(offshore_locs.values, offshore_shape),
-                    'country': country
-                })
+                'name': offshore_locs.index,
+                'x': offshore_locs['x'],
+                'y': offshore_locs['y'],
+                'geometry': custom_voronoi_partition_pts(offshore_locs.values, offshore_shape),
+                'country': country
+            })
             offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
             offshore_regions.append(offshore_regions_c)
-    
-    save_to_geojson(pd.concat(onshore_regions, ignore_index=True), snakemake.output.regions_onshore)
-    if len(offshore_regions) != 0: 
-        offshore_regions= pd.concat(offshore_regions, ignore_index=True)
+
+    save_to_geojson(pd.concat(onshore_regions, ignore_index=True),
+                    snakemake.output.regions_onshore)
+    if len(offshore_regions) != 0:
+        offshore_regions = pd.concat(offshore_regions, ignore_index=True)
     save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
