@@ -19,11 +19,10 @@ def line_endings_to_bus_conversion(lines):
     # Assign to every line a start and end point
 
     lines["bounds"] = lines["geometry"].boundary  # create start and end point
-
-    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p[0]
-                                               if len(p) >= 2 else None)
-    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p[1]
-                                               if len(p) >= 2 else None)
+    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p.geoms[0]
+                                               if len(p.geoms) >= 2 else None)
+    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p.geoms[1]
+                                               if len(p.geoms) >= 2 else None)
 
     # splits into coordinates
     lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x
