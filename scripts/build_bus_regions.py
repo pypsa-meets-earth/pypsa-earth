@@ -42,6 +42,8 @@ Description
 """
 
 import logging
+
+import numpy
 from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
 
@@ -73,6 +75,72 @@ def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgu
         # create empty file to avoid issues with snakemake
         with os.open(fn, "w") as fp:
             pass
+
+
+def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
+    """
+    Compute the polygons of a voronoi partition of `points` within the
+    polygon `outline`
+
+    Attributes
+    ----------
+    points : Nx2 - ndarray[dtype=float]
+    outline : Polygon
+    no_multipolygons : bool (default: False)
+        If true, replace each MultiPolygon by its largest component
+
+    Returns
+    -------
+    polygons : N - ndarray[dtype=Polygon|MultiPolygon]
+    """
+
+    import numpy as np
+    from scipy.spatial import Voronoi
+    from shapely.geometry import Point, Polygon
+
+    points = np.asarray(points)
+
+    if len(points) == 1:
+        polygons = [outline]
+    else:
+
+        xmin, ymin = np.amin(points, axis=0)
+        xmax, ymax = np.amax(points, axis=0)
+
+        if add_bounds_shape:
+            # check bounds of the shape
+            minx_o, miny_o, maxx_o, maxy_o = outline.boundary.bounds
+            xmin = min(xmin, minx_o)
+            ymin = min(ymin, miny_o)
+            xmax = min(xmax, maxx_o)
+            ymax = min(ymax, maxy_o)
+
+        xspan = xmax - xmin
+        yspan = ymax - ymin
+
+        # to avoid any network positions outside all Voronoi cells, append
+        # the corners of a rectangle framing these points
+        vor = Voronoi(np.vstack((points,
+                                 [[xmin-multiplier*xspan, ymin-multiplier*yspan],
+                                  [xmin-multiplier*xspan, ymax+multiplier*yspan],
+                                  [xmax+multiplier*xspan, ymin-multiplier*yspan],
+                                  [xmax+multiplier*xspan, ymax+multiplier*yspan]])))
+
+        polygons = []
+        for i in range(len(points)):
+            poly = Polygon(vor.vertices[vor.regions[vor.point_region[i]]])
+
+            if not poly.is_valid:
+                poly = poly.buffer(0)
+
+            poly = poly.intersection(outline)
+
+            polygons.append(poly)
+
+    polygons_arr = np.empty((len(polygons),), 'object')
+    polygons_arr[:] = polygons
+    return polygons_arr
+
 
 
 if __name__ == "__main__":
@@ -110,7 +178,7 @@ if __name__ == "__main__":
             continue
             
         # print(country)
-        onshore_shape = make_valid(country_shapes[country])
+        onshore_shape = country_shapes[country]
         # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
@@ -118,7 +186,7 @@ if __name__ == "__main__":
                 'name': onshore_locs.index,
                 'x': onshore_locs['x'],
                 'y': onshore_locs['y'],
-                'geometry': voronoi_partition_pts(onshore_locs.values, onshore_shape),
+                'geometry': custom_voronoi_partition_pts(onshore_locs.values, onshore_shape),
                 'country': country
             }))
 
@@ -126,29 +194,27 @@ if __name__ == "__main__":
         if country not in offshore_shapes.index: 
             _logger.warning(f"No off-shore shapes for {country}")
             continue
+        
+        # Note: the off_shore shape should be present because cheched 10 lines above
+        offshore_shape = offshore_shapes[country]
+
         if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty:
             _logger.warning(f"No off-shore substations found for {country}")
             continue
-
-        offshore_shape = offshore_shapes[country]
-        # print(offshore_shape)
-        if offshore_shape.is_empty:
-            continue
-
-        offshore_shape = make_valid(offshore_shape) # Issue with CM reqired buffer
-        # print(offshore_shape.is_valid)
-        # print(offshore_shape.is_simple)
-        # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
-        offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
-        offshore_regions_c = gpd.GeoDataFrame({
-                'name': offshore_locs.index,
-                'x': offshore_locs['x'],
-                'y': offshore_locs['y'],
-                'geometry': voronoi_partition_pts(offshore_locs.values, offshore_shape),
-                'country': country
-            })
-        offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
-        offshore_regions.append(offshore_regions_c)
+        else:
+            # print(offshore_shape.is_valid)
+            # print(offshore_shape.is_simple)
+            # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
+            offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
+            offshore_regions_c = gpd.GeoDataFrame({
+                    'name': offshore_locs.index,
+                    'x': offshore_locs['x'],
+                    'y': offshore_locs['y'],
+                    'geometry': custom_voronoi_partition_pts(offshore_locs.values, offshore_shape),
+                    'country': country
+                })
+            offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
+            offshore_regions.append(offshore_regions_c)
     
     save_to_geojson(pd.concat(onshore_regions, ignore_index=True), snakemake.output.regions_onshore)
     if len(offshore_regions) != 0: 
