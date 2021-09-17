@@ -74,7 +74,10 @@ def save_to_geojson(df, fn):
             pass
 
 
-def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
+def custom_voronoi_partition_pts(points,
+                                 outline,
+                                 add_bounds_shape=True,
+                                 multiplier=5):
     """
     Compute the polygons of a voronoi partition of `points` within the
     polygon `outline`
@@ -118,18 +121,15 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
         # to avoid any network positions outside all Voronoi cells, append
         # the corners of a rectangle framing these points
         vor = Voronoi(
-            np.vstack(
-                (
-                    points,
-                    [
-                        [xmin - multiplier * xspan, ymin - multiplier * yspan],
-                        [xmin - multiplier * xspan, ymax + multiplier * yspan],
-                        [xmax + multiplier * xspan, ymin - multiplier * yspan],
-                        [xmax + multiplier * xspan, ymax + multiplier * yspan],
-                    ],
-                )
-            )
-        )
+            np.vstack((
+                points,
+                [
+                    [xmin - multiplier * xspan, ymin - multiplier * yspan],
+                    [xmin - multiplier * xspan, ymax + multiplier * yspan],
+                    [xmax + multiplier * xspan, ymin - multiplier * yspan],
+                    [xmax + multiplier * xspan, ymax + multiplier * yspan],
+                ],
+            )))
 
         polygons = []
         for i in range(len(points)):
@@ -142,7 +142,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
             polygons.append(poly)
 
-    polygons_arr = np.empty((len(polygons),), "object")
+    polygons_arr = np.empty((len(polygons), ), "object")
     polygons_arr[:] = polygons
     return polygons_arr
 
@@ -158,12 +158,10 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
 
-    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
-        "geometry"
-    ]
-    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes).set_index("name")[
-        "geometry"
-    ]
+    country_shapes = gpd.read_file(
+        snakemake.input.country_shapes).set_index("name")["geometry"]
+    offshore_shapes = gpd.read_file(
+        snakemake.input.offshore_shapes).set_index("name")["geometry"]
 
     # Issues in voronoi_creation due to overlapping/duplications will be removed with that function
     # First issues where observed for offshore shapes means that first country-onshore voronoi worked fine
@@ -193,18 +191,19 @@ if __name__ == "__main__":
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
         onshore_regions.append(
-            gpd.GeoDataFrame(
-                {
-                    "name": onshore_locs.index,
-                    "x": onshore_locs["x"],
-                    "y": onshore_locs["y"],
-                    "geometry": custom_voronoi_partition_pts(
-                        onshore_locs.values, onshore_shape
-                    ),
-                    "country": country,
-                }
-            )
-        )
+            gpd.GeoDataFrame({
+                "name":
+                onshore_locs.index,
+                "x":
+                onshore_locs["x"],
+                "y":
+                onshore_locs["y"],
+                "geometry":
+                custom_voronoi_partition_pts(onshore_locs.values,
+                                             onshore_shape),
+                "country":
+                country,
+            }))
 
         # These two logging could be commented out
         if country not in offshore_shapes.index:
@@ -221,24 +220,27 @@ if __name__ == "__main__":
             # print(offshore_shape.is_valid)
             # print(offshore_shape.is_simple)
             # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
-            offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
-            offshore_regions_c = gpd.GeoDataFrame(
-                {
-                    "name": offshore_locs.index,
-                    "x": offshore_locs["x"],
-                    "y": offshore_locs["y"],
-                    "geometry": custom_voronoi_partition_pts(
-                        offshore_locs.values, offshore_shape
-                    ),
-                    "country": country,
-                }
-            )
-            offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
+            offshore_locs = n.buses.loc[c_b & n.buses.substation_off,
+                                        ["x", "y"]]
+            offshore_regions_c = gpd.GeoDataFrame({
+                "name":
+                offshore_locs.index,
+                "x":
+                offshore_locs["x"],
+                "y":
+                offshore_locs["y"],
+                "geometry":
+                custom_voronoi_partition_pts(offshore_locs.values,
+                                             offshore_shape),
+                "country":
+                country,
+            })
+            offshore_regions_c = offshore_regions_c.loc[
+                offshore_regions_c.area > 1e-2]
             offshore_regions.append(offshore_regions_c)
 
-    save_to_geojson(
-        pd.concat(onshore_regions, ignore_index=True), snakemake.output.regions_onshore
-    )
+    save_to_geojson(pd.concat(onshore_regions, ignore_index=True),
+                    snakemake.output.regions_onshore)
     if len(offshore_regions) != 0:
         offshore_regions = pd.concat(offshore_regions, ignore_index=True)
     save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
