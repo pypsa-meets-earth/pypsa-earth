@@ -540,7 +540,7 @@ def _set_countries_and_substations(n):
                   )[:-offshore_shapes.size]  # Check if bus is in shape
     offshore_b = offshore_b
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
-    offshore_hvb = buses["v_nom"] > 220
+    offshore_hvb = buses["v_nom"] >= snakemake.config["base_network"]["min_voltage_substation_offshore"]/1000
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
 
@@ -680,7 +680,7 @@ def _rebase_voltage_to_config(component):
     ----------
     component : dataframe
     """
-    v_min = 110  # min. filtered value in dataset
+    v_min = snakemake.config["base_network"]["min_voltage_rebase_voltage"]/1000  # min. filtered value in dataset
     v_low = snakemake.config["electricity"]["voltages"][0]
     v_mid = snakemake.config["electricity"]["voltages"][1]
     v_up = snakemake.config["electricity"]["voltages"][2]
