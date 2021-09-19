@@ -73,7 +73,6 @@ rule build_shapes:
     output:
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
-        offshore_shapes_old="resources/offshore_shapes_old.geojson",
         africa_shape='resources/africa_shape.geojson',
         gadm_shapes='resources/gadm_shapes.geojson'
     log: "logs/build_shapes.log"
