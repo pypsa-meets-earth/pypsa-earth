@@ -138,7 +138,6 @@ feature_columns = {
     "tower": columns_basic + columns_tower,
 }
 
-
 # Python dictionary of ISO 3166-1-alpha-2 codes, as per publicly
 # available data on official ISO site in July 2015.
 #
@@ -249,7 +248,8 @@ world = {
         # 'LA': "lao people's democratic republic",
         "LB": "lebanon",
         "MO": "macao",
-        "MY-SG-BN": "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
+        "MY-SG-BN":
+        "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
         "MV": "maldives",
         "MN": "mongolia",
         "MM": "myanmar",
@@ -380,8 +380,7 @@ world = {
 
 world_countries = {
     country_2D: country_name
-    for d in world.values()
-    for (country_2D, country_name) in d.items()
+    for d in world.values() for (country_2D, country_name) in d.items()
 }
 
 continent_regions = {
