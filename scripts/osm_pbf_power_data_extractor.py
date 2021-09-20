@@ -18,7 +18,6 @@ import sys
 import geopandas as gpd
 import pandas as pd
 import requests
-from shapely import geometry
 import urllib3
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
@@ -33,8 +32,9 @@ from osm_data_config import continent_regions
 from osm_data_config import continents
 from osm_data_config import feature_category
 from osm_data_config import feature_columns
-from osm_data_config import world
 from osm_data_config import iso_to_geofk_dict
+from osm_data_config import world
+from shapely import geometry
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
@@ -390,11 +390,15 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     return gdf
 
 
-def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_dict):
+def convert_iso_to_geofk(iso_code,
+                         iso_coding=True,
+                         convert_dict=iso_to_geofk_dict):
     """Function to convert the iso code name of a country into the corresponding geofabrik"""
     if iso_code in convert_dict:
         if not iso_coding:
-            _logger.error(f"Unexpected iso code {iso_code}: expected only geofabrik codes")
+            _logger.error(
+                f"Unexpected iso code {iso_code}: expected only geofabrik codes"
+            )
         return convert_dict[iso_code]
     else:
         return iso_code
@@ -435,8 +439,7 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
                         driver="GeoJSON")  # Generate GeoJson
 
 
-def process_data(country_list,
-                iso_coding=True, update=False, verify=False):
+def process_data(country_list, iso_coding=True, update=False, verify=False):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -448,10 +451,11 @@ def process_data(country_list,
         df_all_feature = pd.DataFrame()
         for country_code_isogeofk in country_list:
 
-            country_code = convert_iso_to_geofk(country_code_isogeofk, iso_coding)
+            country_code = convert_iso_to_geofk(country_code_isogeofk,
+                                                iso_coding)
 
-            feature_data = download_and_filter(
-                feature, country_code, update, verify)
+            feature_data = download_and_filter(feature, country_code, update,
+                                               verify)
 
             df_node, df_way, Data = convert_filtered_data_to_dfs(
                 country_code, feature_data, feature)
@@ -505,7 +509,6 @@ def create_country_list(input, iso_coding=True):
     full_codes_list : list
         Example ["NG","ZA"]
     """
-
     def filter_codes(c_list, iso_coding=True):
         """
         Filter list according to the specified coding.
@@ -516,7 +519,7 @@ def create_country_list(input, iso_coding=True):
             return [c for c in c_list if len(c) == 2]
         else:
             return [c for c in c_list if c not in iso_to_geofk_dict]
-    
+
     full_codes_list = []
 
     for value1 in input:
@@ -544,8 +547,7 @@ def create_country_list(input, iso_coding=True):
         full_codes_list.extend(codes_list)
 
     # Removing duplicates and filter outputs by coding
-    full_codes_list = filter_codes(
-        set(full_codes_list), iso_coding=iso_coding)
+    full_codes_list = filter_codes(set(full_codes_list), iso_coding=iso_coding)
 
     return full_codes_list
 
