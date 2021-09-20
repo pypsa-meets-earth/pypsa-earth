@@ -200,9 +200,9 @@ world = {"africa": {"DZ": "algeria",
                     "RW": "rwanda",
                     # saint-helena-ascension-and-tristan-da-cunha
                     # "ST": "sao-tome-and-principe", #Island
-                    #"SNGM": "senegal-and-gambia",  # See Map # Self-created country code
-                    # "SN": "senegal",
-                    # "GM": "gambia",
+                    "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
+                    "SN": "senegal",
+                    "GM": "gambia",
                     # "SC": "seychelles", #Island
                     "SL": "sierra-leone",
                     "SO": "somalia", # No Data
@@ -418,4 +418,11 @@ continent_regions = {
 
     # Customized test set
     "TEST" : ["NG", "NE", "SL", "MA"],
+}
+
+# dictionary of correspondance between iso country codes and geofabrik codes containing those information
+iso_to_geofk_dict = {
+    "EH": "MA",   # western sahara -> Morocco
+    "SN": "SNGM",  # senegal -> senegal-gambia
+    "GM": "SNGM",  # gambia -> senegal-gambia
 }

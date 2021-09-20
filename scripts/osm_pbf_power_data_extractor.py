@@ -18,6 +18,7 @@ import sys
 import geopandas as gpd
 import pandas as pd
 import requests
+from shapely import geometry
 import urllib3
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
@@ -33,6 +34,7 @@ from osm_data_config import continents
 from osm_data_config import feature_category
 from osm_data_config import feature_columns
 from osm_data_config import world
+from osm_data_config import iso_to_geofk_dict
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
@@ -388,6 +390,16 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     return gdf
 
 
+def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_dict):
+    """Function to convert the iso code name of a country into the corresponding geofabrik"""
+    if iso_code in convert_dict:
+        if not iso_coding:
+            _logger.error(f"Unexpected iso code {iso_code}: expected only geofabrik codes")
+        return convert_dict[iso_code]
+    else:
+        return iso_code
+
+
 def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
     "Function to save the feature as csv and geojson"
 
@@ -423,7 +435,8 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
                         driver="GeoJSON")  # Generate GeoJson
 
 
-def process_data(update, verify):
+def process_data(country_list,
+                iso_coding=True, update=False, verify=False):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -433,10 +446,12 @@ def process_data(update, verify):
     for feature in feature_list:  # feature dataframe
 
         df_all_feature = pd.DataFrame()
-        for country_code in country_list:
+        for country_code_isogeofk in country_list:
 
-            feature_data = download_and_filter(feature, country_code, update,
-                                               verify)
+            country_code = convert_iso_to_geofk(country_code_isogeofk, iso_coding)
+
+            feature_data = download_and_filter(
+                feature, country_code, update, verify)
 
             df_node, df_way, Data = convert_filtered_data_to_dfs(
                 country_code, feature_data, feature)
@@ -460,7 +475,7 @@ def process_data(update, verify):
             # Concatinate Nodes and Ways
             df_feature = pd.concat([df_node, df_way], axis=0)
 
-            # Add Country Column
+            # Add Country Column with GeoFabrik coding
             df_feature["Country"] = country_code
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
@@ -539,4 +554,4 @@ if __name__ == "__main__":
     country_list = create_country_list(input)
 
     # Set update # Verify = True checks local md5s and pre-filters data again
-    process_data(update=False, verify=False)
+    process_data(country_list, iso_coding=True, update=False, verify=False)
