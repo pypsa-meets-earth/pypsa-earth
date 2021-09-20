@@ -633,17 +633,17 @@ def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
     # drop useless columns
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
-    # # add the population data to the dataset
-    # add_population_data(df_gadm, countries, year, update, out_logging)
+    # add the population data to the dataset
+    add_population_data(df_gadm, countries, year, update, out_logging)
 
-    # # add the gdp data to the dataset
-    # add_gdp_data(
-    #     df_gadm,
-    #     year,
-    #     update,
-    #     out_logging,
-    #     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    # )
+    # add the gdp data to the dataset
+    add_gdp_data(
+        df_gadm,
+        year,
+        update,
+        out_logging,
+        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
