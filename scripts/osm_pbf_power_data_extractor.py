@@ -394,7 +394,8 @@ def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_di
     """Function to convert the iso code name of a country into the corresponding geofabrik"""
     if iso_code in convert_dict:
         if not iso_coding:
-            _logger.error(f"Unexpected iso code {iso_code}: expected only geofabrik codes")
+            _logger.error(
+                f"Unexpected iso code {iso_code}: expected only geofabrik codes")
         return convert_dict[iso_code]
     else:
         return iso_code
@@ -436,7 +437,7 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
 
 
 def process_data(country_list,
-                iso_coding=True, update=False, verify=False):
+                 iso_coding=True, update=False, verify=False):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -448,7 +449,8 @@ def process_data(country_list,
         df_all_feature = pd.DataFrame()
         for country_code_isogeofk in country_list:
 
-            country_code = convert_iso_to_geofk(country_code_isogeofk, iso_coding)
+            country_code = convert_iso_to_geofk(
+                country_code_isogeofk, iso_coding)
 
             feature_data = download_and_filter(
                 feature, country_code, update, verify)
@@ -516,7 +518,7 @@ def create_country_list(input, iso_coding=True):
             return [c for c in c_list if len(c) == 2]
         else:
             return [c for c in c_list if c not in iso_to_geofk_dict]
-    
+
     full_codes_list = []
 
     for value1 in input:
