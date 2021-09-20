@@ -43,6 +43,8 @@ rule clean_osm_data:
         generators="data/raw/africa_all_raw_generators.geojson",
         lines="data/raw/africa_all_raw_lines.geojson",
         substations="data/raw/africa_all_raw_substations.geojson",
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
     output:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",

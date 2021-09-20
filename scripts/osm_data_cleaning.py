@@ -310,9 +310,9 @@ def find_first_overlap(geom, country_geoms, default_name):
     
 
 
-def set_countryname_by_shape(df, ext_country_shapes, iso_coding=True, exclude_external=True):
+def set_countryname_by_shape(df, ext_country_shapes, name_by_shape=True, exclude_external=True):
     "Set the country name by the name shape"
-    if iso_coding:
+    if name_by_shape:
         df["country"] = [
             find_first_overlap(row["geometry"], ext_country_shapes, None if exclude_external else row["country"])
             for id, row in df.iterrows()
@@ -335,8 +335,11 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
     return merged_shapes
 
 
-def clean_data(ext_country_shapes,
-    iso_coding=True, tag_substation="transmission", threshold_voltage=35000):
+def clean_data(
+    ext_country_shapes=None,
+    name_by_shape=True,
+    tag_substation="transmission",
+    threshold_voltage=35000):
 
     # Output file directory
     outputfile_partial = os.path.join(os.getcwd(), "data", "clean",
@@ -385,7 +388,8 @@ def clean_data(ext_country_shapes,
                                     crs="EPSG:4326")
                                     
     # set the country name by the shape
-    df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
+    df_all_lines = set_countryname_by_shape(
+        df_all_lines, name_by_shape, ext_country_shapes)
 
     df_all_lines.to_file(outputfile_partial + "_lines" + ".geojson",
                          driver="GeoJSON")
@@ -419,7 +423,8 @@ def clean_data(ext_country_shapes,
                                           crs="EPSG:4326")
                                     
     # set the country name by the shape
-    df_all_substations = set_countryname_by_shape(df_all_substations, ext_country_shapes)
+    df_all_substations = set_countryname_by_shape(
+        df_all_substations, name_by_shape, ext_country_shapes)
 
     df_all_substations.to_file(outputfile_partial + "_substations" +
                                ".geojson",
@@ -454,13 +459,23 @@ if __name__ == "__main__":
         "tag_substation"]
     threshold_voltage = snakemake.config["osm_data_cleaning_options"][
         "threshold_voltage"]
+    names_by_shapes = snakemake.config["osm_data_cleaning_options"][
+        "names_by_shapes"]
     
-    country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
-        "name")["geometry"].set_crs(4326))
-    offshore_shapes = (gpd.read_file(
-        snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(
-            4326))
-    ext_country_shapes = create_extended_country_shapes(country_shapes, offshore_shapes)
+    # only when country names are defined by shapes, load the info
+    if names_by_shapes:
+        country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
+            "name")["geometry"].set_crs(4326))
+        offshore_shapes = (gpd.read_file(
+            snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(
+                4326))
+        ext_country_shapes = create_extended_country_shapes(country_shapes, offshore_shapes)
+    else:
+        ext_country_shapes=None
 
-    clean_data(ext_country_shapes, 
-        tag_substation=tag_substation, threshold_voltage=threshold_voltage)
+    clean_data(
+        ext_country_shapes=ext_country_shapes,
+        names_by_shape=names_by_shapes,
+        tag_substation=tag_substation,
+        threshold_voltage=threshold_voltage
+    )

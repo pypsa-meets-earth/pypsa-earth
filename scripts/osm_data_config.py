@@ -216,8 +216,8 @@ world = {"africa": {"DZ": "algeria",
                     "TN": "tunisia",
                     "UG": "uganda",
                     "ZM": "zambia",
-                    "ZW": "zimbabwe"
-                    # "EH": "western-sahara"
+                    "ZW": "zimbabwe",
+                    "EH": "western-sahara"
                     },
 
         "asia" : {

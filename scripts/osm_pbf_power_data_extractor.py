@@ -484,7 +484,7 @@ def process_data(country_list,
                            feature_columns[feature], feature)
 
 
-def create_country_list(input):
+def create_country_list(input, iso_coding=True):
     """
     Create a country list for defined regions in osm_data_config.py
 
@@ -505,6 +505,18 @@ def create_country_list(input):
     full_codes_list : list
         Example ["NG","ZA"]
     """
+
+    def filter_codes(c_list, iso_coding=True):
+        """
+        Filter list according to the specified coding.
+        When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
+        When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
+        """
+        if iso_coding:
+            return [c for c in c_list if len(c) == 2]
+        else:
+            return [c for c in c_list if c not in iso_to_geofk_dict]
+    
     full_codes_list = []
 
     for value1 in input:
@@ -531,7 +543,9 @@ def create_country_list(input):
         # create a list with all countries
         full_codes_list.extend(codes_list)
 
-    full_codes_list = list(set(full_codes_list))  # Removing duplicates
+    # Removing duplicates and filter outputs by coding
+    full_codes_list = filter_codes(
+        set(full_codes_list), iso_coding=iso_coding)
 
     return full_codes_list
 
