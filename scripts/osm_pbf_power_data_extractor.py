@@ -86,8 +86,9 @@ def download_pbf(country_code, update, verify):
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
     geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
-    PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
-                                 geofabrik_filename)  # Input filepath
+    PBF_inputfile = os.path.join(
+        os.getcwd(), "data", "osm", continent, "pbf", geofabrik_filename
+    )  # Input filepath
 
     if not os.path.exists(PBF_inputfile):
         _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
@@ -180,22 +181,24 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     filter_file_exists = False
     # json file for the Data dictionary
-    JSON_outputfile = os.path.join(os.getcwd(), "data", "osm", continent,
-                                   country_code + "_power.json")
+    JSON_outputfile = os.path.join(
+        os.getcwd(), "data", "osm", continent, country_code + "_power.json"
+    )
     # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
     if os.path.exists(JSON_outputfile):
         filter_file_exists = True
 
     if not os.path.exists(
-            os.path.join(
-                os.getcwd(),
-                "data",
-                "osm",
-                continent,
-                "Elements",
-                country_code + f"_{feature}s.json",
-            )):
+        os.path.join(
+            os.getcwd(),
+            "data",
+            "osm",
+            continent,
+            "Elements",
+            country_code + f"_{feature}s.json",
+        )
+    ):
         _logger.warning("Element file not found so pre-filtering")
         filter_file_exists = False
 
@@ -218,7 +221,8 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         osm_pickle.picklesave(
             DataDict,
             os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))),
+                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))
+            ),
         )
 
         _logger.info(f"Loading {feature} Pickle for {country_name}")
@@ -236,15 +240,9 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         _logger.info(f"Creating new {feature} Elements for {country_name}")
 
     prefilter = {
-        Node: {
-            "power": feature_list
-        },
-        Way: {
-            "power": feature_list
-        },
-        Relation: {
-            "power": feature_list
-        },
+        Node: {"power": feature_list},
+        Way: {"power": feature_list},
+        Relation: {"power": feature_list},
     }  # see https://dlr-ve-esy.gitlab.io/esy-osmfilter/filter.html for filter structures
 
     blackfilter = [
@@ -271,8 +269,9 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         multiprocess=True,
     )
 
-    logging.disable(logging.NOTSET
-                    )  # Re-enable logging as run_filter disables logging.INFO
+    logging.disable(
+        logging.NOTSET
+    )  # Re-enable logging as run_filter disables logging.INFO
     _logger.info(
         f"Pre: {new_prefilter_data}, Elem: {create_elements}, for {feature} in {country_code}"
     )
@@ -304,8 +303,7 @@ def lonlat_lookup(df_way, Data):
         # df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(float)  # create empty "refs" if not in dataframe
 
     def look(ref):
-        lonlat_row = list(
-            map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
+        lonlat_row = list(map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
         return lonlat_row
 
     lonlat_list = df_way["refs"].apply(look)
@@ -320,19 +318,22 @@ def convert_ways_points(df_way, Data):
     lonlat_list = lonlat_lookup(df_way, Data)
     way_polygon = list(
         map(
-            lambda lonlat: Polygon(lonlat)
-            if len(lonlat) >= 3 else Point(lonlat[0]),
+            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
             lonlat_list,
-        ))
+        )
+    )
     area_column = list(
         map(
             int,
             round(
-                gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs(
-                    "EPSG:3857").area,
+                gpd.GeoSeries(way_polygon)
+                .set_crs("EPSG:4326")
+                .to_crs("EPSG:3857")
+                .area,
                 -1,
             ),
-        ))  # TODO: Rounding should be down in cleaning scripts
+        )
+    )  # TODO: Rounding should be down in cleaning scripts
 
     def find_center_point(p):
         if p.geom_type == "Polygon":
@@ -357,8 +358,9 @@ def convert_ways_lines(df_way, Data):
     df_way.insert(0, "lonlat", lonlat_column)
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
-    length_column = (gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs(
-        "EPSG:3857").length)
+    length_column = (
+        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+    )
 
     df_way.insert(0, "Length", length_column)
 
@@ -367,9 +369,9 @@ def convert_ways_lines(df_way, Data):
 
 
 def convert_pd_to_gdf_nodes(df_way):
-    gdf = gpd.GeoDataFrame(df_way,
-                           geometry=[Point(x, y) for x, y in df_way.lonlat],
-                           crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(
+        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
+    )
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
 
@@ -381,10 +383,11 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     # df_way["geometry"] = df_way["lonlat"].apply(lambda x: LineString(x))
     if simplified is True:
         df_way["geometry"] = df_way["geometry"].apply(
-            lambda x: x.simplify(0.005, preserve_topology=False))
-    gdf = gpd.GeoDataFrame(df_way,
-                           geometry=[LineString(x) for x in df_way.lonlat],
-                           crs="EPSG:4326")
+            lambda x: x.simplify(0.005, preserve_topology=False)
+        )
+    gdf = gpd.GeoDataFrame(
+        df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326"
+    )
     gdf.drop(columns=["lonlat"], inplace=True)
 
     return gdf
@@ -395,7 +398,8 @@ def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_di
     if iso_code in convert_dict:
         if not iso_coding:
             _logger.error(
-                f"Unexpected iso code {iso_code}: expected only geofabrik codes")
+                f"Unexpected iso code {iso_code}: expected only geofabrik codes"
+            )
         return convert_dict[iso_code]
     else:
         return iso_code
@@ -405,16 +409,18 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
     "Function to save the feature as csv and geojson"
 
     continent, country_name = getContinentCountry(country_code)
-    outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-                                      continent + "_all"
-                                      "_raw")  # Output file directory
+    outputfile_partial = os.path.join(
+        os.getcwd(), "data", "raw", continent + "_all" "_raw"
+    )  # Output file directory
 
     if not os.path.exists(outputfile_partial):
-        os.makedirs(os.path.dirname(outputfile_partial),
-                    exist_ok=True)  # create raw directory
+        os.makedirs(
+            os.path.dirname(outputfile_partial), exist_ok=True
+        )  # create raw directory
 
-    df_all_feature = df_all_feature[df_all_feature.columns.intersection(
-        set(columns_feature))]
+    df_all_feature = df_all_feature[
+        df_all_feature.columns.intersection(set(columns_feature))
+    ]
     df_all_feature.reset_index(drop=True, inplace=True)
 
     # Generate Files
@@ -423,8 +429,9 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
         _logger.warning(f"All feature data frame empty for {feature}")
         return None
 
-    _to_csv_nafix(df_all_feature,
-                  outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
+    _to_csv_nafix(
+        df_all_feature, outputfile_partial + f"_{feature}s" + ".csv"
+    )  # Generate CSV
 
     if feature_category[feature] == "way":
         gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
@@ -432,12 +439,12 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
         gdf_feature = convert_pd_to_gdf_nodes(df_all_feature)
 
     _logger.info("Writing GeoJSON file")
-    gdf_feature.to_file(outputfile_partial + f"_{feature}s" + ".geojson",
-                        driver="GeoJSON")  # Generate GeoJson
+    gdf_feature.to_file(
+        outputfile_partial + f"_{feature}s" + ".geojson", driver="GeoJSON"
+    )  # Generate GeoJson
 
 
-def process_data(country_list,
-                 iso_coding=True, update=False, verify=False):
+def process_data(country_list, iso_coding=True, update=False, verify=False):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -449,19 +456,20 @@ def process_data(country_list,
         df_all_feature = pd.DataFrame()
         for country_code_isogeofk in country_list:
 
-            country_code = convert_iso_to_geofk(
-                country_code_isogeofk, iso_coding)
+            country_code = convert_iso_to_geofk(country_code_isogeofk, iso_coding)
 
-            feature_data = download_and_filter(
-                feature, country_code, update, verify)
+            feature_data = download_and_filter(feature, country_code, update, verify)
 
             df_node, df_way, Data = convert_filtered_data_to_dfs(
-                country_code, feature_data, feature)
+                country_code, feature_data, feature
+            )
 
             if feature_category[feature] == "way":
                 convert_ways_lines(
-                    df_way, Data) if not df_way.empty else _logger.warning(
-                        f"Empty Way Dataframe for {feature} in {country_code}")
+                    df_way, Data
+                ) if not df_way.empty else _logger.warning(
+                    f"Empty Way Dataframe for {feature} in {country_code}"
+                )
                 if not df_node.empty:
                     _logger.warning(
                         f"Node dataframe not empty for {feature} in {country_code}"
@@ -482,8 +490,9 @@ def process_data(country_list,
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
-        output_csv_geojson(country_code, df_all_feature,
-                           feature_columns[feature], feature)
+        output_csv_geojson(
+            country_code, df_all_feature, feature_columns[feature], feature
+        )
 
 
 def create_country_list(input, iso_coding=True):
@@ -546,8 +555,7 @@ def create_country_list(input, iso_coding=True):
         full_codes_list.extend(codes_list)
 
     # Removing duplicates and filter outputs by coding
-    full_codes_list = filter_codes(
-        set(full_codes_list), iso_coding=iso_coding)
+    full_codes_list = filter_codes(set(full_codes_list), iso_coding=iso_coding)
 
     return full_codes_list
 

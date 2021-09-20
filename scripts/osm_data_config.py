@@ -1,5 +1,3 @@
-
-
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
@@ -148,244 +146,243 @@ feature_columns = {
 # Dimitris Karagkasidis, https://github.com/pageflt
 
 continents = {
-    'LA': 'latin_america',
-    'SA': 'south_america',
-    'CA': 'central_america',
-    'AS': 'asia',
-    'OC': 'australia',
-    'AF': 'africa',
-    'EU': 'europe',
+    "LA": "latin_america",
+    "SA": "south_america",
+    "CA": "central_america",
+    "AS": "asia",
+    "OC": "australia",
+    "AF": "africa",
+    "EU": "europe",
     # 'AN': 'antarctica'
 }
 
-world = {"africa": {"DZ": "algeria",
-                    "AO": "angola",
-                    "BJ": "benin",
-                    "BW": "botswana",
-                    "BF": "burkina-faso",
-                    "BI": "burundi",
-                    "CM": "cameroon",
-                    # canary-islands    # Island
-                    # "CV": "cape-verde", # Island
-                    "CF": "central-african-republic",
-                    "TD": "chad",
-                    # "KM": "comores", # Island
-                    "CG": "congo-brazzaville",
-                    "CD": "congo-democratic-republic",
-                    "DJ": "djibouti",
-                    "EG": "egypt",
-                    "GQ": "equatorial-guinea",
-                    "ER": "eritrea",
-                    "ET": "ethiopia",
-                    "GA": "gabon",
-                    "GH": "ghana",
-                    "GW": "guinea-bissau",  # No Data
-                    "GN": "guinea",
-                    "CI": "ivory-coast",
-                    "KE": "kenya",
-                    "LS": "lesotho",
-                    "LR": "liberia",
-                    "LY": "libya",
-                    "MG": "madagascar",
-                    "MW": "malawi",
-                    "ML": "mali",
-                    "MR": "mauritania",
-                    # "MU": "mauritius", Island
-                    "MA": "morocco",
-                    "MZ": "mozambique",
-                    "NA": "namibia",
-                    "NE": "niger",
-                    "NG": "nigeria",
-                    "RW": "rwanda",
-                    # saint-helena-ascension-and-tristan-da-cunha
-                    # "ST": "sao-tome-and-principe", #Island
-                    "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
-                    "SN": "senegal",
-                    "GM": "gambia",
-                    # "SC": "seychelles", #Island
-                    "SL": "sierra-leone",
-                    "SO": "somalia",  # No Data
-                    # south-africa-and-lesotho
-                    "ZA": "south-africa",
-                    "SS": "south-sudan",
-                    "SD": "sudan",
-                    "SZ": "swaziland",
-                    "TZ": "tanzania",
-                    "TG": "togo",
-                    "TN": "tunisia",
-                    "UG": "uganda",
-                    "ZM": "zambia",
-                    "ZW": "zimbabwe",
-                    "EH": "western-sahara"
-                    },
-
-         "asia": {
-    'AF': 'afghanistan',
-    'AM': 'armenia',
-    'AZ': 'azerbaijan',
-    # 'BH': 'bahrain',
-    'BD': 'bangladesh',
-    'BT': 'bhutan',
-    # 'IO': 'british indian ocean territory',
-    # 'BN': 'brunei darussalam', # merged with MY
-    'KH': 'cambodia',
-    'CN': 'china',
-    # 'CX': 'christmas island',
-    # 'CC': 'cocos (keeling) islands',
-    'CY': 'cyprus',
-    'GE': 'georgia',
-    'HK': 'hong kong',
-    'IN': 'india',
-    'ID': 'indonesia',
-    'IR': 'iran',
-    'IQ': 'iraq',
-    'IL-PL': 'israel-and-palestine',
-    'JP': 'japan',
-    'JO': 'jordan',
-    'KZ': 'kazakhstan',
-    'KP': "north-korea",
-    'KR': 'south-korea',
-    # 'KW': 'kuwait',
-    'KG': 'kyrgyzstan',
-    # 'LA': "lao people's democratic republic",
-    'LB': 'lebanon',
-    'MO': 'macao',
-    'MY-SG-BN': 'malaysia-singapore-brunei',  # Note 3 countries based on geofabrik
-    'MV': 'maldives',
-    'MN': 'mongolia',
-    'MM': 'myanmar',
-    'NP': 'nepal',
-    # 'OM': 'oman',
-    'PK': 'pakistan',
-    # 'PS': 'palestine',
-    'PH': 'philippines',
-    # 'QA': 'qatar',
-    # 'SA': 'saudi arabia',
-    # 'SG': 'singapore', # merged with MY
-    'LK': 'sri-lanka',
-    'SY': 'syria',
-    'TW': 'taiwan',
-    'TJ': 'tajikistan',
-    'TH': 'thailand',
-    'TR': 'turkey',
-    'TM': 'turkmenistan',
-    # 'AE': 'united arab emirates',
-    'UZ': 'uzbekistan',
-    'VN': 'vietnam',
-    'YE': 'yemen'
-},
-
+world = {
+    "africa": {
+        "DZ": "algeria",
+        "AO": "angola",
+        "BJ": "benin",
+        "BW": "botswana",
+        "BF": "burkina-faso",
+        "BI": "burundi",
+        "CM": "cameroon",
+        # canary-islands    # Island
+        # "CV": "cape-verde", # Island
+        "CF": "central-african-republic",
+        "TD": "chad",
+        # "KM": "comores", # Island
+        "CG": "congo-brazzaville",
+        "CD": "congo-democratic-republic",
+        "DJ": "djibouti",
+        "EG": "egypt",
+        "GQ": "equatorial-guinea",
+        "ER": "eritrea",
+        "ET": "ethiopia",
+        "GA": "gabon",
+        "GH": "ghana",
+        "GW": "guinea-bissau",  # No Data
+        "GN": "guinea",
+        "CI": "ivory-coast",
+        "KE": "kenya",
+        "LS": "lesotho",
+        "LR": "liberia",
+        "LY": "libya",
+        "MG": "madagascar",
+        "MW": "malawi",
+        "ML": "mali",
+        "MR": "mauritania",
+        # "MU": "mauritius", Island
+        "MA": "morocco",
+        "MZ": "mozambique",
+        "NA": "namibia",
+        "NE": "niger",
+        "NG": "nigeria",
+        "RW": "rwanda",
+        # saint-helena-ascension-and-tristan-da-cunha
+        # "ST": "sao-tome-and-principe", #Island
+        "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
+        "SN": "senegal",
+        "GM": "gambia",
+        # "SC": "seychelles", #Island
+        "SL": "sierra-leone",
+        "SO": "somalia",  # No Data
+        # south-africa-and-lesotho
+        "ZA": "south-africa",
+        "SS": "south-sudan",
+        "SD": "sudan",
+        "SZ": "swaziland",
+        "TZ": "tanzania",
+        "TG": "togo",
+        "TN": "tunisia",
+        "UG": "uganda",
+        "ZM": "zambia",
+        "ZW": "zimbabwe",
+        "EH": "western-sahara",
+    },
+    "asia": {
+        "AF": "afghanistan",
+        "AM": "armenia",
+        "AZ": "azerbaijan",
+        # 'BH': 'bahrain',
+        "BD": "bangladesh",
+        "BT": "bhutan",
+        # 'IO': 'british indian ocean territory',
+        # 'BN': 'brunei darussalam', # merged with MY
+        "KH": "cambodia",
+        "CN": "china",
+        # 'CX': 'christmas island',
+        # 'CC': 'cocos (keeling) islands',
+        "CY": "cyprus",
+        "GE": "georgia",
+        "HK": "hong kong",
+        "IN": "india",
+        "ID": "indonesia",
+        "IR": "iran",
+        "IQ": "iraq",
+        "IL-PL": "israel-and-palestine",
+        "JP": "japan",
+        "JO": "jordan",
+        "KZ": "kazakhstan",
+        "KP": "north-korea",
+        "KR": "south-korea",
+        # 'KW': 'kuwait',
+        "KG": "kyrgyzstan",
+        # 'LA': "lao people's democratic republic",
+        "LB": "lebanon",
+        "MO": "macao",
+        "MY-SG-BN": "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
+        "MV": "maldives",
+        "MN": "mongolia",
+        "MM": "myanmar",
+        "NP": "nepal",
+        # 'OM': 'oman',
+        "PK": "pakistan",
+        # 'PS': 'palestine',
+        "PH": "philippines",
+        # 'QA': 'qatar',
+        # 'SA': 'saudi arabia',
+        # 'SG': 'singapore', # merged with MY
+        "LK": "sri-lanka",
+        "SY": "syria",
+        "TW": "taiwan",
+        "TJ": "tajikistan",
+        "TH": "thailand",
+        "TR": "turkey",
+        "TM": "turkmenistan",
+        # 'AE': 'united arab emirates',
+        "UZ": "uzbekistan",
+        "VN": "vietnam",
+        "YE": "yemen",
+    },
     "australia": {
-    'AS': 'american-oceania',
-    'AU': 'australia',
-    # 'CK': 'cook islands',
-    'FJ': 'fiji',
-    'PF': 'french-polynesia',
-    'GU': 'guam',
-    'KI': 'kiribati',
-    # 'MH': 'marshall islands',
-    'FM': 'micronesia',
-    'NR': 'nauru',
-    'NC': 'new-caledonia',
-    'NZ': 'new-zealand',
-    'NU': 'niue',
-    'NF': 'norfolk island',
-    # 'MP': 'northern mariana islands',
-    'PW': 'palau',
-    'PG': 'papua-new-guinea',
-    'WS': 'samoa',
-    # 'SB': 'solomon islands',
-    'TK': 'tokelau',
-    'TO': 'tonga',
-    'TV': 'tuvalu',
-    'VU': 'vanuatu',
-    'WF': 'wallis-et-futuna'
-},
-
+        "AS": "american-oceania",
+        "AU": "australia",
+        # 'CK': 'cook islands',
+        "FJ": "fiji",
+        "PF": "french-polynesia",
+        "GU": "guam",
+        "KI": "kiribati",
+        # 'MH': 'marshall islands',
+        "FM": "micronesia",
+        "NR": "nauru",
+        "NC": "new-caledonia",
+        "NZ": "new-zealand",
+        "NU": "niue",
+        "NF": "norfolk island",
+        # 'MP': 'northern mariana islands',
+        "PW": "palau",
+        "PG": "papua-new-guinea",
+        "WS": "samoa",
+        # 'SB': 'solomon islands',
+        "TK": "tokelau",
+        "TO": "tonga",
+        "TV": "tuvalu",
+        "VU": "vanuatu",
+        "WF": "wallis-et-futuna",
+    },
     "europe": {
-    'AL': 'albania',
-    'AD': 'andorra',
-    'AT': 'austria',
-    'BY': 'belarus',
-    'BE': 'belgium',
-    'BA': 'bosnia-herzegovina',
-    'BG': 'bulgaria',
-    'HR': 'croatia',
-    'CZ': 'czech-republic',
-    'DK': 'denmark',
-    'EE': 'estonia',
-    'FO': 'faroe islands',
-    'FI': 'finland',
-    'FR': 'france',
-    'DE': 'germany',
-    # 'GI': 'gibraltar', Island ?
-    'GR': 'greece',
-    # 'GG': 'guernsey', Island
-    'HU': 'hungary',
-    'IS': 'iceland',
-    'IE': 'ireland-and-northern-ireland',
-    # 'IM': 'isle of man',
-    'IT': 'italy',
-    # 'JE': 'jersey',
-    'LV': 'latvia',
-    'LI': 'liechtenstein',
-    'LT': 'lithuania',
-    'LU': 'luxembourg',
-    'MK': 'macedonia',
-    'MT': 'malta',
-    'MD': 'moldova',
-    'MC': 'monaco',
-    'ME': 'montenegro',
-    'NL': 'netherlands',
-    'NO': 'norway',
-    'PL': 'poland',
-    'PT': 'portugal',
-    'RO': 'romania',
-    'RU': 'russia',
-    # 'SM': 'san-marino',
-    'RS': 'serbia',
-    'SK': 'slovakia',
-    'SI': 'slovenia',
-    'ES': 'spain',
-    # 'SJ': 'svalbard-and-jan-mayen',
-    'SE': 'sweden',
-    'CH': 'switzerland',
-    'UA': 'ukraine',
-    'GB': 'great-britain'
-},
-
+        "AL": "albania",
+        "AD": "andorra",
+        "AT": "austria",
+        "BY": "belarus",
+        "BE": "belgium",
+        "BA": "bosnia-herzegovina",
+        "BG": "bulgaria",
+        "HR": "croatia",
+        "CZ": "czech-republic",
+        "DK": "denmark",
+        "EE": "estonia",
+        "FO": "faroe islands",
+        "FI": "finland",
+        "FR": "france",
+        "DE": "germany",
+        # 'GI': 'gibraltar', Island ?
+        "GR": "greece",
+        # 'GG': 'guernsey', Island
+        "HU": "hungary",
+        "IS": "iceland",
+        "IE": "ireland-and-northern-ireland",
+        # 'IM': 'isle of man',
+        "IT": "italy",
+        # 'JE': 'jersey',
+        "LV": "latvia",
+        "LI": "liechtenstein",
+        "LT": "lithuania",
+        "LU": "luxembourg",
+        "MK": "macedonia",
+        "MT": "malta",
+        "MD": "moldova",
+        "MC": "monaco",
+        "ME": "montenegro",
+        "NL": "netherlands",
+        "NO": "norway",
+        "PL": "poland",
+        "PT": "portugal",
+        "RO": "romania",
+        "RU": "russia",
+        # 'SM': 'san-marino',
+        "RS": "serbia",
+        "SK": "slovakia",
+        "SI": "slovenia",
+        "ES": "spain",
+        # 'SJ': 'svalbard-and-jan-mayen',
+        "SE": "sweden",
+        "CH": "switzerland",
+        "UA": "ukraine",
+        "GB": "great-britain",
+    },
     "north_america": {
-    'CA': 'canada',
-    'GL': 'greenland',
-    'MX': 'mexico',
-    'US': 'united states'
-},
-
+        "CA": "canada",
+        "GL": "greenland",
+        "MX": "mexico",
+        "US": "united states",
+    },
     "latin_america": {
-    "AR": "argentina",
-    "BO": "bolivia",
-    "BR": "brazil",
-    "CL": "chile",
-    "CO": "colombia",
-    "EC": "ecuador",
-    "PE": "peru",
-    "SR": "suriname",
-    "UY": "uruguay",
-    "VE": "venezuela"
-},
-
+        "AR": "argentina",
+        "BO": "bolivia",
+        "BR": "brazil",
+        "CL": "chile",
+        "CO": "colombia",
+        "EC": "ecuador",
+        "PE": "peru",
+        "SR": "suriname",
+        "UY": "uruguay",
+        "VE": "venezuela",
+    },
     "central_america": {
-    "BZ": "belize",
-    "GT": "guatemala",
-    "SV": "el-salvador",
-    "HN": "honduras",
-    "NI": "nicaragua",
-    "CR": "costa-rica"
-}
+        "BZ": "belize",
+        "GT": "guatemala",
+        "SV": "el-salvador",
+        "HN": "honduras",
+        "NI": "nicaragua",
+        "CR": "costa-rica",
+    },
 }
 
-world_countries = {country_2D: country_name for d in world.values()
-                   for (country_2D, country_name) in d.items()}
+world_countries = {
+    country_2D: country_name
+    for d in world.values()
+    for (country_2D, country_name) in d.items()
+}
 
 continent_regions = {
     # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
@@ -396,21 +393,48 @@ continent_regions = {
     # CENTRAL EUROPIAN REGION
     "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK"],
     # BALKAN PENISULAN REGION
-    "BPR": ["AL", "AN", "BA", "BG", "GR", "HR", "MD", "MT", "RO", "SL", "RS", "ME", "MK"],
+    "BPR": [
+        "AL",
+        "AN",
+        "BA",
+        "BG",
+        "GR",
+        "HR",
+        "MD",
+        "MT",
+        "RO",
+        "SL",
+        "RS",
+        "ME",
+        "MK",
+    ],
     "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL"],  # WESTREN EUROPE
     "SER": ["ES", "IT", "PT"],  # SOUTHERN EUROPAIN REGION
-
     # African regions
     "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
     # WESTREN AFRICAN REGION
-    "WAR": ["MR", "ML", "NE", "NG", "BJ", "BF", "TG", "GH", "CI", "LR", "SL", "GN", "GM", "SL"],
+    "WAR": [
+        "MR",
+        "ML",
+        "NE",
+        "NG",
+        "BJ",
+        "BF",
+        "TG",
+        "GH",
+        "CI",
+        "LR",
+        "SL",
+        "GN",
+        "GM",
+        "SL",
+    ],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
     "EAR": ["ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
-
     # Asian regions
     # FAR EASTREN AISIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN"],
@@ -421,20 +445,18 @@ continent_regions = {
     "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
     "MEAR": ["TR", "SY", "IQ", "IR", "JO", "IL", "AE", "YE"],
-
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHREN AMERCIAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAL REGION
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "SR", "UY", "VE"],
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR"],  # CENTRAL AMERICAN REGION
-
     # Customized test set
     "TEST": ["NG", "NE", "SL", "MA"],
 }
 
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 iso_to_geofk_dict = {
-    "EH": "MA",   # western sahara -> Morocco
+    "EH": "MA",  # western sahara -> Morocco
     "SN": "SNGM",  # senegal -> senegal-gambia
     "GM": "SNGM",  # gambia -> senegal-gambia
 }
