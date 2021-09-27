@@ -8,7 +8,29 @@ The tool which is currently under development and will be heavily based on [PyPS
 
 Watch our latest discusson with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
-![PyPSA-Africa-PowerMap](doc/img/africa_osm_map.jpeg)
+
+<p align="center">
+  <img src="doc/img/africa_osm_map.jpeg" width="600">
+</p>
+
+
+## Get involved
+
+The PyPSA meets Africa team is currenlty running four types of meetings:
+- **Buddy talk (Open)**
+    - every Friday between 17-18:00 (UK time) 
+    - set a 20min meeting with Max to discuss anything you like
+    - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
+- **General code meeting (by invitation)**
+    - every second Wednesday 16-17:00 (Uk time)
+    - updates on overall project and code blocks
+- **Specific code meeting (by invitation)**
+    - current meetings: 1) AI asset recognition (WP6) and 2) Data workflow updates (covering WP1-WP5)
+    - every week Friday 1) 14-14:45 (Uk time), 2) 15-16:00 (Uk time)
+    - updates, demos, task distribution, weekly targets, Q&A
+- **Outreach meeting (by invitation)**
+    - every second week
+    - planning, discussing events, workshops, communication, community activities
 
 ## Development Notes
 
