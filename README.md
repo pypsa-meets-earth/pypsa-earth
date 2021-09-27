@@ -19,7 +19,7 @@ Watch our latest discusson with African leaders about [Open Energy System Modell
 The PyPSA meets Africa team is currenlty running four types of meetings:
 - **Buddy talk (Open)**
     - every Friday between 17-18:00 (UK time) 
-    - set a 20min meeting with Max to discuss anything you like
+    - book a 20min meeting with Max to discuss anything you like
     - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **General code meeting (by invitation)**
     - every second Wednesday 16-17:00 (Uk time)
