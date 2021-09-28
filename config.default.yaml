@@ -37,6 +37,10 @@ base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 35000
 
+load_option:
+  year: 2014
+  scale: 1
+
 summary_dir: results
 
 snapshots:

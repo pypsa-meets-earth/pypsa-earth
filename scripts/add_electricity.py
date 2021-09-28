@@ -220,34 +220,31 @@ def load_powerplants(ppl_fn=None):
         columns=["efficiency"]).replace({"carrier": carrier_dict}))
 
 
-def attach_load(n):
-    substation_lv_i = n.buses.index[n.buses["substation_lv"]]
-    regions = (gpd.read_file(
-        snakemake.input.regions).set_index("name").reindex(substation_lv_i))
-    opsd_load = pd.read_csv(
-        snakemake.input.load, index_col=0,
-        parse_dates=True).filter(items=create_country_list(snakemake.config["countries"]))
+def attach_load(n, regions, load, admin_shapes, countries, scale):
+    substation_lv_i = n.buses.index[n.buses['substation_lv']]
+    regions = (gpd.read_file(regions).set_index('name')
+               .reindex(substation_lv_i))
+    opsd_load = (pd.read_csv(load, index_col=0, parse_dates=True)
+                .filter(items=countries))
+    logger.info(f"Load data scaled with scalling factor {scale}.")
+    opsd_load *= scale
 
-    scaling = snakemake.config.get("load", {}).get("scaling_factor", 1.0)
-    logger.info(f"Load data scaled with scalling factor {scaling}.")
-    opsd_load *= scaling
-
-    nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index("index")
+    shapes = gpd.read_file(admin_shapes).set_index('index')
 
     def upsample(cntry, group):
         l = opsd_load[cntry]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
-            nuts3_cntry = nuts3.loc[nuts3.country == cntry]
+            shapes_cntry = shapes.loc[shapes.country == cntry]
             transfer = vtransfer.Shapes2Shapes(group,
-                                               nuts3_cntry.geometry,
+                                               shapes_cntry.geometry,
                                                normed=False).T.tocsr()
             gdp_n = pd.Series(transfer.dot(
-                nuts3_cntry["gdp"].fillna(1.0).values),
+                shapes_cntry["gdp"].fillna(1.0).values),
                               index=group.index)
             pop_n = pd.Series(transfer.dot(
-                nuts3_cntry["pop"].fillna(1.0).values),
+                shapes_cntry["pop"].fillna(1.0).values),
                               index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
@@ -664,10 +661,18 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.base_network)
     Nyears = n.snapshot_weightings.sum() / 8760.0
 
+    # Snakemake imports:
+    regions = snakemake.input.regions
+    load = snakemake.input.load
+    countries = snakemake.config["countries"]
+    scale =  snakemake.config["load_options"].scale
+    admin_shapes = snakemake.input.gadm_shapes
+
+
     costs = load_costs(Nyears)
     # ppl = load_powerplants()
 
-    # attach_load(n)
+    attach_load(n, regions, load, admin_shapes, countries, scale)
 
     # update_transmission_costs(n, costs)
 

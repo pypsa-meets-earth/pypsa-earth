@@ -185,7 +185,7 @@ rule add_electricity:
         # hydro_capacities='data/bundle/hydro_capacities.csv',
         # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         # load='resources/load.csv',
-        # nuts3_shapes='resources/nuts3_shapes.geojson',
+        gadm_shapes='resources/gadm_shapes.geojson',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}
     output: "networks/elec.nc"
