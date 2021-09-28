@@ -221,7 +221,6 @@ if __name__ == '__main__':
     if correction_factor != 1.:
         logger.info(f'correction_factor is set as {correction_factor}')
 
-
     cutout = atlite.Cutout(paths['cutout'])
     regions = gpd.read_file(paths.regions).set_index('name').rename_axis('bus')
     # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
@@ -249,13 +248,13 @@ if __name__ == '__main__':
     #     func = functools.partial(np.greater,-config['max_depth'])
     #     excluder.add_raster(paths.gebco, codes=func, crs=4236, nodata=-1000)
 
-    if 'min_shore_distance' in config:
-        buffer = config['min_shore_distance']
-        excluder.add_geometry(paths.country_shapes, buffer=buffer)
+    # if 'min_shore_distance' in config:
+    #     buffer = config['min_shore_distance']
+    #     excluder.add_geometry(paths.country_shapes, buffer=buffer)
 
-    if 'max_shore_distance' in config:
-        buffer = config['max_shore_distance']
-        excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
+    # if 'max_shore_distance' in config:
+    #     buffer = config['max_shore_distance']
+    #     excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 
     kwargs = dict(nprocesses=nprocesses, disable_progressbar=noprogress)
     if noprogress:
@@ -291,7 +290,6 @@ if __name__ == '__main__':
                         f'(default) or "conservative", not "{p_nom_max_meth}"')
 
 
-
     logger.info('Calculate average distances.')
     layoutmatrix = (layout * availability).stack(spatial=['y','x'])
 
@@ -320,17 +318,17 @@ if __name__ == '__main__':
                     average_distance.rename('average_distance')])
 
 
-    if snakemake.wildcards.technology.startswith("offwind"):
-        logger.info('Calculate underwater fraction of connections.')
-        offshore_shape = gpd.read_file(paths['offshore_shapes']).unary_union
-        underwater_fraction = []
-        for bus in buses:
-            p = centre_of_mass.sel(bus=bus).data
-            line = LineString([p, regions.loc[bus, ['x', 'y']]])
-            frac = line.intersection(offshore_shape).length/line.length
-            underwater_fraction.append(frac)
+    # if snakemake.wildcards.technology.startswith("offwind"):
+    #     logger.info('Calculate underwater fraction of connections.')
+    #     offshore_shape = gpd.read_file(paths['offshore_shapes']).unary_union
+    #     underwater_fraction = []
+    #     for bus in buses:
+    #         p = centre_of_mass.sel(bus=bus).data
+    #         line = LineString([p, regions.loc[bus, ['x', 'y']]])
+    #         frac = line.intersection(offshore_shape).length/line.length
+    #         underwater_fraction.append(frac)
 
-        ds['underwater_fraction'] = xr.DataArray(underwater_fraction, [buses])
+    #     ds['underwater_fraction'] = xr.DataArray(underwater_fraction, [buses])
 
     # select only buses with some capacity and minimal capacity factor
     ds = ds.sel(bus=((ds['profile'].mean('time') > config.get('min_p_max_pu', 0.)) &
