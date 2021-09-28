@@ -222,17 +222,25 @@ def load_powerplants(ppl_fn=None):
 
 def attach_load(n, regions, load, admin_shapes, countries, scale):
     substation_lv_i = n.buses.index[n.buses['substation_lv']]
-    regions = (gpd.read_file(regions).set_index('name')
-               .reindex(substation_lv_i))
-    opsd_load = (pd.read_csv(load, index_col=0, parse_dates=True)
-                .filter(items=countries))
+    regions = (
+        gpd.read_file(regions).set_index('name')
+        .reindex(substation_lv_i)
+        ).dropna(axis='rows')  # Added dropna 
+    # "NG" had 1 out of 620 NAN shape. Why?
+    load_path = load
+    gegis_load = xr.open_dataset(load_path)
+    # convert .nc file to dataframe and set "time" to index
+    gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+    # filter load for analysed countries
+    gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
     logger.info(f"Load data scaled with scalling factor {scale}.")
-    opsd_load *= scale
+    gegis_load *= scale
 
-    shapes = gpd.read_file(admin_shapes).set_index('index')
+
+    shapes = gpd.read_file(admin_shapes).set_index('GADM_ID')
 
     def upsample(cntry, group):
-        l = opsd_load[cntry]
+        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
@@ -664,8 +672,8 @@ if __name__ == "__main__":
     # Snakemake imports:
     regions = snakemake.input.regions
     load = snakemake.input.load
-    countries = snakemake.config["countries"]
-    scale =  snakemake.config["load_options"].scale
+    countries = snakemake.config['countries']
+    scale =  snakemake.config['load_options']['scale']
     admin_shapes = snakemake.input.gadm_shapes
 
 
