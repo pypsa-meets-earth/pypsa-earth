@@ -221,6 +221,29 @@ def load_powerplants(ppl_fn=None):
 
 
 def attach_load(n, regions, load, admin_shapes, countries, scale):
+    """
+    Add load to the network and distributes them according GDP and population.
+
+    Input
+    ----------
+    n : pypsa network
+    regions : .geojson
+        Contains bus_id of low voltage substations and 
+        bus region shapes (voronoi cells)
+    load : .nc
+        Contains timeseries of load data per country
+    admin_shapes : .geojson
+        contains subregional gdp, population and shape data
+    countries : list
+        List of countries that is config input
+    scale : float
+        The scale factor is multiplied with the load (1.3 = 30% more load)
+
+    Returns
+    -------
+    n : pypsa network
+        Now attached with load time series
+    """
     substation_lv_i = n.buses.index[n.buses['substation_lv']]
     regions = (
         gpd.read_file(regions).set_index('name')
