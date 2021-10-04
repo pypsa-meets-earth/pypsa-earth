@@ -249,7 +249,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         gpd.read_file(regions).set_index('name')
         .reindex(substation_lv_i)
         ).dropna(axis='rows')  # Added dropna 
-    # "NG" had 1 out of 620 NAN shape. Why?
+    # "NG" had 1 out of 620 NAN shape.
     load_path = load
     gegis_load = xr.open_dataset(load_path)
     # convert .nc file to dataframe and set "time" to index
@@ -295,7 +295,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         ],
         axis=1,
     )
-
+    print(load)
     n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
 
 

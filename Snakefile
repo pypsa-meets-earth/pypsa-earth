@@ -184,7 +184,7 @@ rule add_electricity:
         # powerplants='resources/powerplants.csv',
         # hydro_capacities='data/bundle/hydro_capacities.csv',
         # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
-        load='resources/ssp2-2.6/2030/era5_2018/Africa.nc',
+        load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
         gadm_shapes='resources/gadm_shapes.geojson',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}
