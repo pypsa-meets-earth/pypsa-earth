@@ -87,16 +87,16 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-#import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from osm_pbf_power_data_extractor import create_country_list
-#from powerplantmatching.export import map_country_bus
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
+# import powerplantmatching as pm
+# from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
@@ -228,7 +228,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     ----------
     n : pypsa network
     regions : .geojson
-        Contains bus_id of low voltage substations and 
+        Contains bus_id of low voltage substations and
         bus region shapes (voronoi cells)
     load : .nc
         Contains timeseries of load data per country
@@ -244,11 +244,9 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     n : pypsa network
         Now attached with load time series
     """
-    substation_lv_i = n.buses.index[n.buses['substation_lv']]
-    regions = (
-        gpd.read_file(regions).set_index('name')
-        .reindex(substation_lv_i)
-        ).dropna(axis='rows')  # Added dropna 
+    substation_lv_i = n.buses.index[n.buses["substation_lv"]]
+    regions = (gpd.read_file(regions).set_index("name").reindex(
+        substation_lv_i)).dropna(axis="rows")  # Added dropna
     # "NG" had 1 out of 620 NAN shape.
     load_path = load
     gegis_load = xr.open_dataset(load_path)
@@ -259,11 +257,11 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     logger.info(f"Load data scaled with scalling factor {scale}.")
     gegis_load *= scale
 
-
-    shapes = gpd.read_file(admin_shapes).set_index('GADM_ID')
+    shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
 
     def upsample(cntry, group):
-        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
+        l = gegis_load.loc[gegis_load.region_code ==
+                           cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
@@ -335,10 +333,10 @@ def attach_wind_and_solar(n, costs):
             continue
 
         n.add("Carrier", name=tech)
-        #TODO: Uncomment this out. MAX
+        # TODO: Uncomment this out. MAX
         # with xr.open_dataset(getattr(snakemake.input,
         #                              "profile_" + tech)) as ds:
-        #TODO: Remove the 2 lines below
+        # TODO: Remove the 2 lines below
         with xr.open_dataset(getattr(snakemake.input,
                                      "profile_" + "solar")) as ds:
             if ds.indexes["bus"].empty:
@@ -347,7 +345,7 @@ def attach_wind_and_solar(n, costs):
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
                 continue
-                #TODO: Uncomment this out. MAX
+                # TODO: Uncomment this out. MAX
                 # underwater_fraction = ds["underwater_fraction"].to_pandas()
                 # connection_cost = (
                 #     snakemake.config["lines"]["length_factor"] *
@@ -695,10 +693,9 @@ if __name__ == "__main__":
     # Snakemake imports:
     regions = snakemake.input.regions
     load = snakemake.input.load
-    countries = snakemake.config['countries']
-    scale =  snakemake.config['load_options']['scale']
+    countries = snakemake.config["countries"]
+    scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
-
 
     costs = load_costs(Nyears)
     # ppl = load_powerplants()

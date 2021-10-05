@@ -82,8 +82,9 @@ The rule :mod:`simplify_network` does up to four things:
 """
 import logging
 import os
-from functools import reduce
 import sys
+from functools import reduce
+
 import numpy as np
 import pandas as pd
 import pypsa
@@ -100,6 +101,7 @@ from pypsa.networkclustering import aggregateoneport
 from pypsa.networkclustering import busmap_by_stubs
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse.csgraph import dijkstra
+
 sys.settrace
 
 logger = logging.getLogger(__name__)
@@ -422,25 +424,32 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    
-    #Add dummy load data                                                        #TODO remove 
-    n.madd("Load", ['load ' + s for s in list(n.buses.index)],
-       bus=list(n.buses.index),
-       p_set=np.random.rand(len(n.snapshots),len(n.buses)))
-    
+
+    # Add dummy load data                                                        #TODO remove
+    n.madd(
+        "Load",
+        ["load " + s for s in list(n.buses.index)],
+        bus=list(n.buses.index),
+        p_set=np.random.rand(len(n.snapshots), len(n.buses)),
+    )
+
     n, trafo_map = simplify_network_to_380(n)
 
     n, simplify_links_map = simplify_links(n)
 
-    #n, stub_map = remove_stubs(n)
+    # n, stub_map = remove_stubs(n)
 
-    busmaps = [trafo_map, simplify_links_map]#, stub_map]
+    busmaps = [trafo_map, simplify_links_map]  # , stub_map]
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))
-        #busmaps.append(cluster_map)  #TODO: Uncomment and figure out purpose of busmap
+        # busmaps.append(cluster_map)  #TODO: Uncomment and figure out purpose of busmap
     else:
-        n.buses = n.buses.drop(['symbol', 'under_construction', 'substation_lv', 'substation_off'], axis=1) #TODO: Remove other unnecessary columns
+        # TODO: Remove other unnecessary columns
+        n.buses = n.buses.drop([
+            "symbol", "under_construction", "substation_lv", "substation_off"
+        ],
+                               axis=1)
 
     update_p_nom_max(n)
 
