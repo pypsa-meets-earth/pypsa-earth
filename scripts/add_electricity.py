@@ -95,15 +95,15 @@ from osm_pbf_power_data_extractor import create_country_list
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
-# import powerplantmatching as pm
-# from powerplantmatching.export import map_country_bus
+import powerplantmatching as pm
+from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def normed(s):

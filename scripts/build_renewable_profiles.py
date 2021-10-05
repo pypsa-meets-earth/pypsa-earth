@@ -194,7 +194,7 @@ from shapely.geometry import LineString
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

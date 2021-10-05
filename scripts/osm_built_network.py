@@ -9,7 +9,7 @@ from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("osm_build_network")
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))

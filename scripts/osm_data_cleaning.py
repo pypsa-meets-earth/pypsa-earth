@@ -11,7 +11,7 @@ from _helpers import configure_logging
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("osm_data_cleaning")
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))

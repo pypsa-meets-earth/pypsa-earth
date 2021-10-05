@@ -82,7 +82,7 @@ from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("base_network")
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))

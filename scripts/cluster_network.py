@@ -133,6 +133,7 @@ import seaborn as sns
 import shapely
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
+from _helpers import _sets_path_to_root
 from add_electricity import load_costs
 from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
@@ -144,7 +145,9 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+_sets_path_to_root("pypsa-africa")
 
 
 def normed(x):

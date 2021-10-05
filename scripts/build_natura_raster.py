@@ -58,7 +58,7 @@ from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-_logger = logging.getLogger(__name__)  # name of this file = "build_natura_raster"
+_logger = logging.getLogger("build_natura_raster")  # name of this file = "build_natura_raster"
 _logger.setLevel(logging.INFO)
 
 # Requirement to set path to filepath for execution
