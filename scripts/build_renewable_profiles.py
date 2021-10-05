@@ -203,14 +203,15 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 if __name__ == '__main__':
     if 'snakemake' not in globals():
         from _helpers import mock_snakemake
-        snakemake = mock_snakemake('build_renewable_profiles', technology='solar')
+        snakemake = mock_snakemake(
+            'build_renewable_profiles', technology='solar')
     configure_logging(snakemake)
     pgb.streams.wrap_stderr()
     paths = snakemake.input
     nprocesses = snakemake.config['atlite'].get('nprocesses')
     noprogress = not snakemake.config['atlite'].get('show_progress', True)
     config = snakemake.config['renewable'][snakemake.wildcards.technology]
-    resource = config['resource'] # pv panel config / wind turbine config
+    resource = config['resource']  # pv panel config / wind turbine config
     correction_factor = config.get('correction_factor', 1.)
     capacity_per_sqkm = config['capacity_per_sqkm']
     p_nom_max_meth = config.get('potential', 'conservative')
@@ -273,25 +274,27 @@ if __name__ == '__main__':
     potential = capacity_per_sqkm * availability.sum('bus') * area
     func = getattr(cutout, resource.pop('method'))
     resource['dask_kwargs'] = {'num_workers': nprocesses}
-    capacity_factor = correction_factor * func(capacity_factor=True, **resource)
+    capacity_factor = correction_factor * \
+        func(capacity_factor=True, **resource)
     layout = capacity_factor * area * capacity_per_sqkm
-    profile, capacities = func(matrix=availability.stack(spatial=['y','x']),
-                                layout=layout, index=buses,
-                                per_unit=True, return_capacity=True, **resource)
+    profile, capacities = func(matrix=availability.stack(spatial=['y', 'x']),
+                               layout=layout, index=buses,
+                               per_unit=True, return_capacity=True, **resource)
 
-    logger.info(f"Calculating maximal capacity per bus (method '{p_nom_max_meth}')")
+    logger.info(
+        f"Calculating maximal capacity per bus (method '{p_nom_max_meth}')")
     if p_nom_max_meth == 'simple':
         p_nom_max = capacity_per_sqkm * availability @ area
     elif p_nom_max_meth == 'conservative':
-        max_cap_factor = capacity_factor.where(availability!=0).max(['x', 'y'])
+        max_cap_factor = capacity_factor.where(
+            availability != 0).max(['x', 'y'])
         p_nom_max = capacities / max_cap_factor
     else:
         raise AssertionError('Config key `potential` should be one of "simple" '
-                        f'(default) or "conservative", not "{p_nom_max_meth}"')
-
+                             f'(default) or "conservative", not "{p_nom_max_meth}"')
 
     logger.info('Calculate average distances.')
-    layoutmatrix = (layout * availability).stack(spatial=['y','x'])
+    layoutmatrix = (layout * availability).stack(spatial=['y', 'x'])
 
     coords = cutout.grid[['x', 'y']]
     bus_coords = regions[['x', 'y']]
@@ -308,15 +311,14 @@ if __name__ == '__main__':
         centre_of_mass.append(co.values.T @ (row / row.sum()))
 
     average_distance = xr.DataArray(average_distance, [buses])
-    centre_of_mass = xr.DataArray(centre_of_mass, [buses, ('spatial', ['x', 'y'])])
-
+    centre_of_mass = xr.DataArray(
+        centre_of_mass, [buses, ('spatial', ['x', 'y'])])
 
     ds = xr.merge([(correction_factor * profile).rename('profile'),
-                    capacities.rename('weight'),
-                    p_nom_max.rename('p_nom_max'),
-                    potential.rename('potential'),
-                    average_distance.rename('average_distance')])
-
+                   capacities.rename('weight'),
+                   p_nom_max.rename('p_nom_max'),
+                   potential.rename('potential'),
+                   average_distance.rename('average_distance')])
 
     # if snakemake.wildcards.technology.startswith("offwind"):
     #     logger.info('Calculate underwater fraction of connections.')
@@ -332,7 +334,7 @@ if __name__ == '__main__':
 
     # select only buses with some capacity and minimal capacity factor
     ds = ds.sel(bus=((ds['profile'].mean('time') > config.get('min_p_max_pu', 0.)) &
-                      (ds['p_nom_max'] > config.get('min_p_nom_max', 0.))))
+                     (ds['p_nom_max'] > config.get('min_p_nom_max', 0.))))
 
     if 'clip_p_max_pu' in config:
         min_p_max_pu = config['clip_p_max_pu']

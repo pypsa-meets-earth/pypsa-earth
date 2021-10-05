@@ -172,7 +172,8 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
                                  costs.at["solar-utility", "capital_cost"])
 
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+        capital_cost = link1["capital_cost"] + \
+            max_hours * store["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
@@ -248,7 +249,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     regions = (
         gpd.read_file(regions).set_index('name')
         .reindex(substation_lv_i)
-        ).dropna(axis='rows')  # Added dropna 
+    ).dropna(axis='rows')  # Added dropna
     # "NG" had 1 out of 620 NAN shape.
     load_path = load
     gegis_load = xr.open_dataset(load_path)
@@ -259,11 +260,11 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     logger.info(f"Load data scaled with scalling factor {scale}.")
     gegis_load *= scale
 
-
     shapes = gpd.read_file(admin_shapes).set_index('GADM_ID')
 
     def upsample(cntry, group):
-        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
+        l = gegis_load.loc[gegis_load.region_code ==
+                           cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
@@ -273,10 +274,10 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
                                                normed=False).T.tocsr()
             gdp_n = pd.Series(transfer.dot(
                 shapes_cntry["gdp"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
             pop_n = pd.Series(transfer.dot(
                 shapes_cntry["pop"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to continent load data
@@ -335,10 +336,10 @@ def attach_wind_and_solar(n, costs):
             continue
 
         n.add("Carrier", name=tech)
-        #TODO: Uncomment this out. MAX
+        # TODO: Uncomment this out. MAX
         # with xr.open_dataset(getattr(snakemake.input,
         #                              "profile_" + tech)) as ds:
-        #TODO: Remove the 2 lines below
+        # TODO: Remove the 2 lines below
         with xr.open_dataset(getattr(snakemake.input,
                                      "profile_" + "solar")) as ds:
             if ds.indexes["bus"].empty:
@@ -347,7 +348,7 @@ def attach_wind_and_solar(n, costs):
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
                 continue
-                #TODO: Uncomment this out. MAX
+                # TODO: Uncomment this out. MAX
                 # underwater_fraction = ds["underwater_fraction"].to_pandas()
                 # connection_cost = (
                 #     snakemake.config["lines"]["length_factor"] *
@@ -696,9 +697,8 @@ if __name__ == "__main__":
     regions = snakemake.input.regions
     load = snakemake.input.load
     countries = snakemake.config['countries']
-    scale =  snakemake.config['load_options']['scale']
+    scale = snakemake.config['load_options']['scale']
     admin_shapes = snakemake.input.gadm_shapes
-
 
     costs = load_costs(Nyears)
     # ppl = load_powerplants()

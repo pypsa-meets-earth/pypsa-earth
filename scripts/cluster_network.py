@@ -174,8 +174,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     if solver_name is None:
         solver_name = snakemake.config["solving"]["solver"]["name"]
 
-    #TODO changed from L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby([n.buses.country, n.buses.sub_network]).sum().pipe(normed))
-    L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(              
+    # TODO changed from L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby([n.buses.country, n.buses.sub_network]).sum().pipe(normed))
+    L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
     N = n.buses.groupby(["country"]).size()
@@ -212,8 +212,9 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     def n_bounds(model, *n_id):
         return (1, N[n_id])
 
-    m.n = po.Var(list(L.index), bounds=(1, 50), domain=po.Integers)                  #TODO change bounds parameter to n_bounds
-    #m.n = po.Var(list(L.index), domain=po.Integers)                  #TODO change bounds parameter to n_bounds
+    # TODO change bounds parameter to n_bounds
+    m.n = po.Var(list(L.index), bounds=(1, 50), domain=po.Integers)
+    # m.n = po.Var(list(L.index), domain=po.Integers)                  #TODO change bounds parameter to n_bounds
     m.tot = po.Constraint(expr=(po.summation(m.n) == n_clusters))
     m.objective = po.Objective(
         expr=sum((m.n[i] - L.loc[i] * n_clusters)**2 for i in L.index),
@@ -241,9 +242,10 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 1000)                               #TODO change back to 1000
-        algorithm_kwds.setdefault("max_iter", 30000)                             #TODO change back to 30000
-        algorithm_kwds.setdefault("tol", 1e-6)                                  #TODO chage back to 1e-6
+        algorithm_kwds.setdefault("n_init", 1000)  # TODO change back to 1000
+        # TODO change back to 30000
+        algorithm_kwds.setdefault("max_iter", 30000)
+        algorithm_kwds.setdefault("tol", 1e-6)  # TODO chage back to 1e-6
 
     n.determine_network_topology()
 
@@ -373,10 +375,11 @@ def cluster_regions(busmaps, input=None, output=None):
     busmap = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
 
     for which in ("regions_onshore", "regions_offshore"):
-        regions = gpd.read_file(getattr(input, which)).set_index("name").dropna() #TODO fix the None geomerty in the regions files
-        
+        regions = gpd.read_file(getattr(input, which)).set_index(
+            "name").dropna()  # TODO fix the None geomerty in the regions files
+
         geom_c = regions.geometry.groupby(busmap).apply(list).apply(
-            shapely.ops.unary_union)                                            #TODO check unary_union in comparison to cascaded function removed
+            shapely.ops.unary_union)  # TODO check unary_union in comparison to cascaded function removed
         regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
         regions_c.index.name = "name"
         save_to_geojson(regions_c, getattr(output, which))
