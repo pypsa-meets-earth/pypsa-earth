@@ -252,37 +252,37 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
+# def eez_old(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 
-    if out_logging:
-        _logger.info("Stage 2bis of 4: Create offshore shapes - old method")
+#     if out_logging:
+#         _logger.info("Stage 2bis of 4: Create offshore shapes - old method")
 
-    # load data
-    df_eez = load_EEZ(countries)
+#     # load data
+#     df_eez = load_EEZ(countries)
 
-    ret_df_old = df_eez[["name", "geometry"]]
-    # create unique shape if country is described by multiple shapes
-    for c_code in countries:
-        selection = (ret_df_old.name == c_code)
-        n_offshore_shapes = selection.sum()
+#     ret_df_old = df_eez[["name", "geometry"]]
+#     # create unique shape if country is described by multiple shapes
+#     for c_code in countries:
+#         selection = (ret_df_old.name == c_code)
+#         n_offshore_shapes = selection.sum()
 
-        if n_offshore_shapes > 1:
-            # when multiple shapes per country, then merge polygons
+#         if n_offshore_shapes > 1:
+#             # when multiple shapes per country, then merge polygons
             
-            geom = ret_df_old[selection].geometry.unary_union
-            ret_df_old.drop(ret_df_old[selection].index, inplace=True)
-            ret_df_old = ret_df_old.append({"name": c_code, "geometry": geom}, ignore_index=True)
+#             geom = ret_df_old[selection].geometry.unary_union
+#             ret_df_old.drop(ret_df_old[selection].index, inplace=True)
+#             ret_df_old = ret_df_old.append({"name": c_code, "geometry": geom}, ignore_index=True)
 
-    ret_df_old = ret_df_old.set_index("name")["geometry"].map(
-        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+#     ret_df_old = ret_df_old.set_index("name")["geometry"].map(
+#         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
 
-    ret_df_old = gpd.GeoSeries({
-        k: v
-        for k, v in ret_df_old.iteritems() if v.distance(country_shapes[k]) < tol
-    })
-    ret_df_old.index.name = "name"
+#     ret_df_old = gpd.GeoSeries({
+#         k: v
+#         for k, v in ret_df_old.iteritems() if v.distance(country_shapes[k]) < tol
+#     })
+#     ret_df_old.index.name = "name"
 
-    return ret_df_old
+#     return ret_df_old
 
 
 # def eez2(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
@@ -307,7 +307,7 @@ def eez(countries, country_shapes, update=False, out_logging=False, tol=1e-3):
 #     return ret_df
 
 
-def eez_new(countries, country_shapes, out_logging=False, distance=0.01):
+def eez(countries, country_shapes, out_logging=False, distance=0.01):
     """
     Creates offshore shapes by 
     - buffer smooth countryshape (=offset country shape)
@@ -674,11 +674,11 @@ if __name__ == "__main__":
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez_new(countries_list, country_shapes, out_logging)
+    offshore_shapes = eez(countries_list, country_shapes, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
-    offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
-    save_to_geojson(offshore_shapes_old, out.offshore_shapes_old)
+    # offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
+    # save_to_geojson(offshore_shapes_old, out.offshore_shapes_old)
 
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)

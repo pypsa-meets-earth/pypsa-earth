@@ -43,6 +43,8 @@ rule clean_osm_data:
         generators="data/raw/africa_all_raw_generators.geojson",
         lines="data/raw/africa_all_raw_lines.geojson",
         substations="data/raw/africa_all_raw_substations.geojson",
+        country_shapes='resources/country_shapes.geojson',
+        offshore_shapes='resources/offshore_shapes.geojson',
     output:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",
@@ -58,7 +60,7 @@ rule build_osm_network:
         substations="data/clean/africa_all_substations.geojson",
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
-        substations="data/base_network/africa_all_buses_build_network.csv",   
+        substations="data/base_network/africa_all_buses_build_network.csv",
     log: "logs/build_osm_network.log"
     script: "scripts/osm_built_network.py"
 
@@ -73,7 +75,6 @@ rule build_shapes:
     output:
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
-        offshore_shapes_old="resources/offshore_shapes_old.geojson",
         africa_shape='resources/africa_shape.geojson',
         gadm_shapes='resources/gadm_shapes.geojson'
     log: "logs/build_shapes.log"
@@ -166,7 +167,7 @@ rule build_renewable_profiles:
         regions=lambda w: ("resources/regions_onshore.geojson"
                                    if w.technology in ('onwind', 'solar')
                                    else "resources/regions_offshore.geojson"),
-        cutout=lambda w: "cutouts/" + config["renewable"][w.technology]['cutout'] + ".nc"
+        cutout=lambda w: "cutouts/" + config["renewable"][w.technology]['cutout'] + ".nc",
     output: profile="resources/profile_{technology}.nc",
     log: "logs/build_renewable_profile_{technology}.log"
     benchmark: "benchmarks/build_renewable_profiles_{technology}"
@@ -183,8 +184,8 @@ rule add_electricity:
         # powerplants='resources/powerplants.csv',
         # hydro_capacities='data/bundle/hydro_capacities.csv',
         # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
-        # load='resources/load.csv',
-        # nuts3_shapes='resources/nuts3_shapes.geojson',
+        load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
+        gadm_shapes='resources/gadm_shapes.geojson',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}
     output: "networks/elec.nc"
@@ -233,5 +234,3 @@ rule cluster_network:
     threads: 1
     resources: mem=3000
     script: "scripts/cluster_network.py"
-
-
