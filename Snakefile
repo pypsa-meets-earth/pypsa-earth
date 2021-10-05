@@ -205,7 +205,7 @@ rule simplify_network:
         network='networks/elec_s{simpl}.nc',
         regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
-        # busmap='resources/busmap_elec_s{simpl}.csv'
+        busmap='resources/busmap_elec_s{simpl}.csv'
     log: "logs/simplify_network/elec_s{simpl}.log"
     benchmark: "benchmarks/simplify_network/elec_s{simpl}"
     threads: 1
@@ -226,8 +226,8 @@ rule cluster_network:
         network='networks/elec_s{simpl}_{clusters}.nc',
         regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-        # busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
-        # linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
+        busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
+        linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
     log: "logs/cluster_network/elec_s{simpl}_{clusters}.log"
     benchmark: "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
     threads: 1
