@@ -28,6 +28,20 @@ build_shape_options:
     out_logging: True  # When true, logging is printed to console
     year: 2020  # reference year used to derive shapes, info on population and info on GDP
 
+osm_data_cleaning_options:
+  names_by_shapes: True  # Set the country name based on the extended country shapes
+  threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
+
+base_network:
+  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 35000
+
+load_options:
+  weather_year: 2014
+  prediction_year: 2030
+  scale: 1
+
 summary_dir: results
 
 snapshots:
@@ -177,12 +191,12 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-  hydro:
-    cutout: africa-2013-era5
-    carriers: [ror, PHS, hydro]
-    PHS_max_hours: 6
-    hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
-    clip_min_inflow: 1.0
+  # hydro:
+  #   cutout: africa-2013-era5
+  #   carriers: [ror, PHS, hydro]
+  #   PHS_max_hours: 6
+  #   hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
+  #   clip_min_inflow: 1.0
 
 # TODO: Needs to be adjusted for Africa
 costs:
