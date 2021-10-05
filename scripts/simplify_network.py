@@ -100,6 +100,7 @@ from pypsa.networkclustering import aggregateoneport
 from pypsa.networkclustering import busmap_by_stubs
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse.csgraph import dijkstra
+
 sys.settrace
 
 logger = logging.getLogger(__name__)
@@ -114,26 +115,25 @@ def simplify_network_to_380(n):
 
     n.buses["v_nom"] = 380.0
 
-    (linetype_380, ) = n.lines.loc[n.lines.v_nom == 380.0, "type"].unique()
+    (linetype_380,) = n.lines.loc[n.lines.v_nom == 380.0, "type"].unique()
     lines_v_nom_b = n.lines.v_nom != 380.0
-    n.lines.loc[lines_v_nom_b,
-                "num_parallel"] *= (n.lines.loc[lines_v_nom_b, "v_nom"] /
-                                    380.0)**2
+    n.lines.loc[lines_v_nom_b, "num_parallel"] *= (
+        n.lines.loc[lines_v_nom_b, "v_nom"] / 380.0
+    ) ** 2
     n.lines.loc[lines_v_nom_b, "v_nom"] = 380.0
     n.lines.loc[lines_v_nom_b, "type"] = linetype_380
-    n.lines.loc[lines_v_nom_b,
-                "s_nom"] = (np.sqrt(3) *
-                            n.lines["type"].map(n.line_types.i_nom) *
-                            n.lines.bus0.map(n.buses.v_nom) *
-                            n.lines.num_parallel)
+    n.lines.loc[lines_v_nom_b, "s_nom"] = (
+        np.sqrt(3)
+        * n.lines["type"].map(n.line_types.i_nom)
+        * n.lines.bus0.map(n.buses.v_nom)
+        * n.lines.num_parallel
+    )
 
     # Replace transformers by lines
-    trafo_map = pd.Series(n.transformers.bus1.values,
-                          index=n.transformers.bus0.values)
+    trafo_map = pd.Series(n.transformers.bus1.values, index=n.transformers.bus0.values)
     trafo_map = trafo_map[~trafo_map.index.duplicated(keep="first")]
     several_trafo_b = trafo_map.isin(trafo_map.index)
-    trafo_map.loc[several_trafo_b] = trafo_map.loc[several_trafo_b].map(
-        trafo_map)
+    trafo_map.loc[several_trafo_b] = trafo_map.loc[several_trafo_b].map(trafo_map)
     missing_buses_i = n.buses.index.difference(trafo_map.index)
     trafo_map = trafo_map.append(pd.Series(missing_buses_i, missing_buses_i))
 
@@ -165,19 +165,22 @@ def _prepare_connection_costs_per_link(n):
     for tech in snakemake.config["renewable"]:
         if tech.startswith("offwind"):
             connection_costs_per_link[tech] = (
-                n.links.length * snakemake.config["lines"]["length_factor"] *
-                (n.links.underwater_fraction *
-                 costs.at[tech + "-connection-submarine", "capital_cost"] +
-                 (1.0 - n.links.underwater_fraction) *
-                 costs.at[tech + "-connection-underground", "capital_cost"]))
+                n.links.length
+                * snakemake.config["lines"]["length_factor"]
+                * (
+                    n.links.underwater_fraction
+                    * costs.at[tech + "-connection-submarine", "capital_cost"]
+                    + (1.0 - n.links.underwater_fraction)
+                    * costs.at[tech + "-connection-underground", "capital_cost"]
+                )
+            )
 
     return connection_costs_per_link
 
 
-def _compute_connection_costs_to_bus(n,
-                                     busmap,
-                                     connection_costs_per_link=None,
-                                     buses=None):
+def _compute_connection_costs_to_bus(
+    n, busmap, connection_costs_per_link=None, buses=None
+):
     if connection_costs_per_link is None:
         connection_costs_per_link = _prepare_connection_costs_per_link(n)
 
@@ -187,17 +190,21 @@ def _compute_connection_costs_to_bus(n,
     connection_costs_to_bus = pd.DataFrame(index=buses)
 
     for tech in connection_costs_per_link:
-        adj = n.adjacency_matrix(weights=pd.concat(
-            dict(
-                Link=connection_costs_per_link[tech].reindex(n.links.index),
-                Line=pd.Series(0.0, n.lines.index),
-            )))
+        adj = n.adjacency_matrix(
+            weights=pd.concat(
+                dict(
+                    Link=connection_costs_per_link[tech].reindex(n.links.index),
+                    Line=pd.Series(0.0, n.lines.index),
+                )
+            )
+        )
 
         costs_between_buses = dijkstra(
-            adj, directed=False, indices=n.buses.index.get_indexer(buses))
+            adj, directed=False, indices=n.buses.index.get_indexer(buses)
+        )
         connection_costs_to_bus[tech] = costs_between_buses[
-            np.arange(len(buses)),
-            n.buses.index.get_indexer(busmap.loc[buses])]
+            np.arange(len(buses)), n.buses.index.get_indexer(busmap.loc[buses])
+        ]
 
     return connection_costs_to_bus
 
@@ -205,24 +212,27 @@ def _compute_connection_costs_to_bus(n,
 def _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus):
     for tech in connection_costs_to_bus:
         tech_b = n.generators.carrier == tech
-        costs = (n.generators.loc[tech_b, "bus"].map(
-            connection_costs_to_bus[tech]).loc[lambda s: s > 0])
+        costs = (
+            n.generators.loc[tech_b, "bus"]
+            .map(connection_costs_to_bus[tech])
+            .loc[lambda s: s > 0]
+        )
         if not costs.empty:
             n.generators.loc[costs.index, "capital_cost"] += costs
             logger.info(
-                "Displacing {} generator(s) and adding connection costs to capital_costs: {} "
-                .format(
+                "Displacing {} generator(s) and adding connection costs to capital_costs: {} ".format(
                     tech,
-                    ", ".join("{:.0f} Eur/MW/a for `{}`".format(d, b)
-                              for b, d in costs.iteritems()),
-                ))
+                    ", ".join(
+                        "{:.0f} Eur/MW/a for `{}`".format(d, b)
+                        for b, d in costs.iteritems()
+                    ),
+                )
+            )
 
 
-def _aggregate_and_move_components(n,
-                                   busmap,
-                                   connection_costs_to_bus,
-                                   aggregate_one_ports={"Load",
-                                                        "StorageUnit"}):
+def _aggregate_and_move_components(
+    n, busmap, connection_costs_to_bus, aggregate_one_ports={"Load", "StorageUnit"}
+):
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
 
@@ -234,7 +244,8 @@ def _aggregate_and_move_components(n,
     _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus)
 
     generators, generators_pnl = aggregategenerators(
-        n, busmap, custom_strategies={"p_nom_min": np.sum})
+        n, busmap, custom_strategies={"p_nom_min": np.sum}
+    )
     replace_components(n, "Generator", generators, generators_pnl)
 
     for one_port in aggregate_one_ports:
@@ -245,9 +256,7 @@ def _aggregate_and_move_components(n,
     n.mremove("Bus", buses_to_del)
     for c in n.branch_components:
         df = n.df(c)
-        n.mremove(
-            c,
-            df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
+        n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
 
 def simplify_links(n):
@@ -272,10 +281,7 @@ def simplify_links(n):
         nodes = frozenset(nodes)
 
         seen = set()
-        supernodes = {
-            m
-            for m in nodes if len(G.adj[m]) > 2 or (set(G.adj[m]) - nodes)
-        }
+        supernodes = {m for m in nodes if len(G.adj[m]) > 2 or (set(G.adj[m]) - nodes)}
 
         for u in supernodes:
             for m, ls in G.adj[u].items():
@@ -305,7 +311,8 @@ def simplify_links(n):
 
     connection_costs_per_link = _prepare_connection_costs_per_link(n)
     connection_costs_to_bus = pd.DataFrame(
-        0.0, index=n.buses.index, columns=list(connection_costs_per_link))
+        0.0, index=n.buses.index, columns=list(connection_costs_per_link)
+    )
 
     for lbl in labels.value_counts().loc[lambda s: s > 2].index:
 
@@ -314,16 +321,15 @@ def simplify_links(n):
                 continue
 
             logger.debug("nodes = {}".format(labels.index[labels == lbl]))
-            logger.debug("b = {}\nbuses = {}\nlinks = {}".format(
-                b, buses, links))
+            logger.debug("b = {}\nbuses = {}\nlinks = {}".format(b, buses, links))
 
             m = sp.spatial.distance_matrix(
-                n.buses.loc[b, ["x", "y"]], n.buses.loc[buses[1:-1],
-                                                        ["x", "y"]])
+                n.buses.loc[b, ["x", "y"]], n.buses.loc[buses[1:-1], ["x", "y"]]
+            )
             busmap.loc[buses] = b[np.r_[0, m.argmin(axis=0), 1]]
-            connection_costs_to_bus.loc[
-                buses] += _compute_connection_costs_to_bus(
-                    n, busmap, connection_costs_per_link, buses)
+            connection_costs_to_bus.loc[buses] += _compute_connection_costs_to_bus(
+                n, busmap, connection_costs_per_link, buses
+            )
 
             all_links = [i for _, i in sum(links, [])]
 
@@ -334,13 +340,15 @@ def simplify_links(n):
                 carrier="DC",
                 bus0=b[0],
                 bus1=b[1],
-                length=sum(n.links.loc[[i for _, i in l], "length"].mean()
-                           for l in links),
-                p_nom=min(n.links.loc[[i for _, i in l], "p_nom"].sum()
-                          for l in links),
+                length=sum(
+                    n.links.loc[[i for _, i in l], "length"].mean() for l in links
+                ),
+                p_nom=min(n.links.loc[[i for _, i in l], "p_nom"].sum() for l in links),
                 underwater_fraction=sum(
-                    lengths / lengths.sum() *
-                    n.links.loc[all_links, "underwater_fraction"]),
+                    lengths
+                    / lengths.sum()
+                    * n.links.loc[all_links, "underwater_fraction"]
+                ),
                 p_max_pu=p_max_pu,
                 p_min_pu=-p_max_pu,
                 underground=False,
@@ -348,13 +356,14 @@ def simplify_links(n):
             )
 
             logger.info(
-                "Joining the links {} connecting the buses {} to simple link {}"
-                .format(", ".join(all_links), ", ".join(buses), name))
+                "Joining the links {} connecting the buses {} to simple link {}".format(
+                    ", ".join(all_links), ", ".join(buses), name
+                )
+            )
 
             n.mremove("Link", all_links)
 
-            static_attrs = n.components["Link"]["attrs"].loc[
-                lambda df: df.static]
+            static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.iteritems():
                 params.setdefault(attr, default)
             n.links.loc[name] = pd.Series(params)
@@ -384,22 +393,33 @@ def cluster(n, n_clusters):
 
     focus_weights = snakemake.config.get("focus_weights", None)
 
-    renewable_carriers = pd.Index([
-        tech for tech in n.generators.carrier.unique()
-        if tech.split("-", 2)[0] in snakemake.config["renewable"]
-    ])
+    renewable_carriers = pd.Index(
+        [
+            tech
+            for tech in n.generators.carrier.unique()
+            if tech.split("-", 2)[0] in snakemake.config["renewable"]
+        ]
+    )
 
     def consense(x):
         v = x.iat[0]
-        assert (x == v).all() or x.isnull().all(
-        ), "The `potential` configuration option must agree for all renewable carriers, for now!"
+        assert (
+            x == v
+        ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
         return v
 
-    potential_mode = (consense(
-        pd.Series([
-            snakemake.config["renewable"][tech]["potential"]
-            for tech in renewable_carriers
-        ])) if len(renewable_carriers) > 0 else "conservative")
+    potential_mode = (
+        consense(
+            pd.Series(
+                [
+                    snakemake.config["renewable"][tech]["potential"]
+                    for tech in renewable_carriers
+                ]
+            )
+        )
+        if len(renewable_carriers) > 0
+        else "conservative"
+    )
     clustering = clustering_for_n_clusters(
         n,
         n_clusters,
@@ -416,23 +436,24 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("simplify_network",
-                                   simpl="",
-                                   network="elec")
+        snakemake = mock_snakemake("simplify_network", simpl="", network="elec")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
 
     # Add dummy load data                                                        #TODO remove
-    n.madd("Load", ['load ' + s for s in list(n.buses.index)],
-           bus=list(n.buses.index),
-           p_set=np.random.rand(len(n.snapshots), len(n.buses)))
+    n.madd(
+        "Load",
+        ["load " + s for s in list(n.buses.index)],
+        bus=list(n.buses.index),
+        p_set=np.random.rand(len(n.snapshots), len(n.buses)),
+    )
 
     n, trafo_map = simplify_network_to_380(n)
 
     n, simplify_links_map = simplify_links(n)
 
-    #n, stub_map = remove_stubs(n)
+    # n, stub_map = remove_stubs(n)
 
     busmaps = [trafo_map, simplify_links_map]  # , stub_map]
 
@@ -442,7 +463,8 @@ if __name__ == "__main__":
     else:
         # TODO: Remove other unnecessary columns
         n.buses = n.buses.drop(
-            ['symbol', 'under_construction', 'substation_lv', 'substation_off'], axis=1)
+            ["symbol", "under_construction", "substation_lv", "substation_off"], axis=1
+        )
 
     update_p_nom_max(n)
 
