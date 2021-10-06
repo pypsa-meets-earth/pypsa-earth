@@ -201,7 +201,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_renewable_profiles",
-                                   technology="solar")
+                                   technology="hydro")
     configure_logging(snakemake)
     pgb.streams.wrap_stderr()
     paths = snakemake.input
@@ -212,6 +212,8 @@ if __name__ == "__main__":
     correction_factor = config.get("correction_factor", 1.0)
     capacity_per_sqkm = config["capacity_per_sqkm"]
     p_nom_max_meth = config.get("potential", "conservative")
+
+
 
     if isinstance(config.get("corine", {}), list):
         config["corine"] = {"grid_codes": config["corine"]}
@@ -224,6 +226,11 @@ if __name__ == "__main__":
     # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
     regions = regions.dropna(axis="index", subset=["geometry"])
     buses = regions.index
+    
+
+    # filter plants for hydro
+    if snakemake.wildcards.technology.startswith("hydro"):
+        resource["plants"] = regions.rename(columns={"x":"lon", "y":"lat"}).reset_index()
 
     excluder = atlite.ExclusionContainer(crs=3035, res=100)
 
