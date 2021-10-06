@@ -147,7 +147,7 @@ logger = logging.getLogger(__name__)
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-_sets_path_to_root("pypsa-africa")
+#_sets_path_to_root("pypsa-africa")
 
 
 def normed(x):
@@ -178,12 +178,11 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     if solver_name is None:
         solver_name = snakemake.config["solving"]["solver"]["name"]
 
-    # TODO changed from L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby([n.buses.country, n.buses.sub_network]).sum().pipe(normed))
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
     N = n.buses.groupby(["country"]).size()
-    # L = (N.copy().apply(lambda x: x*100*random.random())).pipe(normed)
+
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
     ), f"Number of clusters must be {len(N)} <= n_clusters <= {N.sum()} for this selection of countries."
@@ -250,7 +249,8 @@ def busmap_for_n_clusters(n,
         algorithm_kwds.setdefault("max_iter", 30000)
         algorithm_kwds.setdefault("tol", 1e-6)
 
-    n.determine_network_topology()
+    # PyPSA module that creates sub_networks and "error"
+    # n.determine_network_topology()
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(n,
@@ -278,7 +278,7 @@ def busmap_for_n_clusters(n,
         if algorithm == "kmeans":
             return prefix + busmap_by_kmeans(n,
                                              weight,
-                                             n_clusters[x.name],
+                                             n_clusters,  # n_clusters[x.name], not working for one country
                                              buses_i=x.index,
                                              **algorithm_kwds)
         elif algorithm == "spectral":
@@ -294,7 +294,7 @@ def busmap_for_n_clusters(n,
             )
 
     return (n.buses.groupby(
-        # ["country", "sub_network"],                                           #TODO
+        # ["country", "sub_network"], #TODO Why do we need sub_networks?
         ["country"],
         group_keys=False,
     ).apply(busmap_for_country).squeeze().rename("busmap"))
@@ -386,7 +386,7 @@ def cluster_regions(busmaps, input=None, output=None):
         geom_c = (
             regions.geometry.groupby(busmap).apply(list).apply(
                 shapely.ops.unary_union)
-        )  # TODO check unary_union in comparison to cascaded function removed
+        )
         regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
         regions_c.index.name = "name"
         save_to_geojson(regions_c, getattr(output, which))
@@ -409,7 +409,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="5")
+                                   clusters="50")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
