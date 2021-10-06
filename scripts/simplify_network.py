@@ -108,7 +108,7 @@ sys.settrace
 logger = logging.getLogger("simplify_network")
 
 # Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 #_sets_path_to_root("pypsa-africa")
 
@@ -425,16 +425,9 @@ if __name__ == "__main__":
                                    network="elec")
     configure_logging(snakemake)
 
+    # Inputs
     n = pypsa.Network(snakemake.input.network)
     linetype = snakemake.config["lines"]["types"][380.]
-
-    # Add dummy load data                                                        #TODO remove
-    n.madd(
-        "Load",
-        ["load " + s for s in list(n.buses.index)],
-        bus=list(n.buses.index),
-        p_set=np.random.rand(len(n.snapshots), len(n.buses)),
-    )
 
     n, trafo_map = simplify_network_to_380(n, linetype)
 
