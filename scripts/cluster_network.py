@@ -246,10 +246,9 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 1000)  # TODO change back to 1000
-        # TODO change back to 30000
+        algorithm_kwds.setdefault("n_init", 1000)
         algorithm_kwds.setdefault("max_iter", 30000)
-        algorithm_kwds.setdefault("tol", 1e-6)  # TODO chage back to 1e-6
+        algorithm_kwds.setdefault("tol", 1e-6)
 
     n.determine_network_topology()
 
@@ -410,7 +409,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="50")
+                                   clusters="5")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

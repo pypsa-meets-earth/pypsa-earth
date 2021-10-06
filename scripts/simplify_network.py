@@ -110,16 +110,15 @@ logger = logging.getLogger("simplify_network")
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-_sets_path_to_root("pypsa-africa")
+#_sets_path_to_root("pypsa-africa")
 
 
-def simplify_network_to_380(n):
+def simplify_network_to_380(n, linetype):
     # All goes to v_nom == 380
     logger.info("Mapping all network lines onto a single 380kV layer")
 
     n.buses["v_nom"] = 380.0
-
-    (linetype_380, ) = n.lines.loc[n.lines.v_nom == 380.0, "type"].unique()
+    linetype_380 = linetype
     lines_v_nom_b = n.lines.v_nom != 380.0
     n.lines.loc[lines_v_nom_b,
                 "num_parallel"] *= (n.lines.loc[lines_v_nom_b, "v_nom"] /
@@ -427,6 +426,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
+    linetype = snakemake.config["lines"]["types"][380.]
 
     # Add dummy load data                                                        #TODO remove
     n.madd(
@@ -436,7 +436,7 @@ if __name__ == "__main__":
         p_set=np.random.rand(len(n.snapshots), len(n.buses)),
     )
 
-    n, trafo_map = simplify_network_to_380(n)
+    n, trafo_map = simplify_network_to_380(n, linetype)
 
     n, simplify_links_map = simplify_links(n)
 
