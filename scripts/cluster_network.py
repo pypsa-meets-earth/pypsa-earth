@@ -278,7 +278,7 @@ def busmap_for_n_clusters(n,
         if algorithm == "kmeans":
             return prefix + busmap_by_kmeans(n,
                                              weight,
-                                             n_clusters,  # n_clusters[x.name], not working for one country
+                                             n_clusters[x.name],  # TODO: n_clusters[x.name], not working for one country, but `n_clusters` works
                                              buses_i=x.index,
                                              **algorithm_kwds)
         elif algorithm == "spectral":
