@@ -130,6 +130,9 @@ Outputs
 Description
 -----------
 
+This script leverages on atlite function to derivate hourly time series for an entire year
+for solar, wind (onshore and offshore), and hydro data.
+
 This script functions at two main spatial resolutions: the resolution of the
 network nodes and their `Voronoi cells
 <https://en.wikipedia.org/wiki/Voronoi_diagram>`_, and the resolution of the
