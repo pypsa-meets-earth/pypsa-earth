@@ -144,10 +144,7 @@ if config['enable'].get('build_cutout', False):
 if config['enable'].get('build_natura_raster', False):
     rule build_natura_raster:
         input:
-            natura = "data/raw/landcover/world_protected_area/WDPA_WDOECM_Aug2021_Public_AF_shp-polygons.shp",
-            za_conserved = "data/raw/landcover/za_conservation_area/SACAD_OR_2021_Q1.shp",
-            za_protected = "data/raw/landcover/za_protected_area/SAPAD_OR_2021_Q1.shp",
-            za_marine = "data/raw/landcover/za_marine_protected_area/SAMPAZ_OR_2021_Q1.shp",
+            natura = "data/raw/landcover/world_protected_areas/WDPA_WDOECM_Oct2021_Public_AF.zip",
             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"
@@ -158,14 +155,12 @@ rule build_renewable_profiles:
     input:
         base_network="networks/base.nc",
         natura="resources/natura.tiff",
-        # corine="data/bundle/corine/g250_clc06_V18_5.tif",
-        # gebco=lambda w: ("data/bundle/GEBCO_2014_2D.nc"
-        #                  if "max_depth" in config["renewable"][w.technology].keys()
-        #                  else []),
+        copernicus="data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+        gebco="data/raw/gebco/GEBCO_2021_TID.nc",
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
         regions=lambda w: ("resources/regions_onshore.geojson"
-                                   if w.technology in ('onwind', 'solar')
+                                   if w.technology in ('onwind', 'solar', "hydro")
                                    else "resources/regions_offshore.geojson"),
         cutout=lambda w: "cutouts/" + config["renewable"][w.technology]['cutout'] + ".nc",
     output: profile="resources/profile_{technology}.nc",
