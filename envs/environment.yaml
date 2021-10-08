@@ -37,6 +37,7 @@ dependencies:
   - scipy
   - shapely>=1.8a1
   - progressbar2
+  - pre-commit
   - pyomo
   - matplotlib
 
