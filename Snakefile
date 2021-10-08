@@ -127,17 +127,6 @@ rule build_bus_regions:
     script: "scripts/build_bus_regions.py"
 
 
-rule build_powerplants:
-    input:
-        base_network="networks/base.nc",
-        # custom_powerplants="data/custom_powerplants.csv"
-    output: "resources/powerplants.csv"
-    log: "logs/build_powerplants.log"
-    threads: 1
-    resources: mem=500
-    script: "scripts/build_powerplants.py"
-
-
 if config['enable'].get('build_cutout', False):
     rule build_cutout:
         input:
