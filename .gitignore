@@ -1,9 +1,9 @@
-.vscode
 
 # Byte-compiled / optimized / DLL files
 **/__pycache__
 *.py[cod]
 *$py.class
+.ipynb_checkpoints
 
 # General untracked file formats
 *.log
@@ -14,7 +14,7 @@
 config.yaml
 dag.svg
 
-# Untracked folders (in files within)
+# Untracked folders (and files within)
 .snakemake/
 benchmarks/
 cutouts/
@@ -38,3 +38,8 @@ notebooks/old_notebooks/*.tif
 
 # Untrack test doc builds
 doc/_build
+
+# VS code related
+.vscode
+doc/.vscode/settings.json
+.vscode/settings.json
