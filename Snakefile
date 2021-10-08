@@ -125,7 +125,17 @@ rule build_bus_regions:
     threads: 1
     resources: mem=1000
     script: "scripts/build_bus_regions.py"
-    # notebook: "scripts/build_bus_regions.py.ipynb"
+
+
+rule build_powerplants:
+    input:
+        base_network="networks/base.nc",
+        # custom_powerplants="data/custom_powerplants.csv"
+    output: "resources/powerplants.csv"
+    log: "logs/build_powerplants.log"
+    threads: 1
+    resources: mem=500
+    script: "scripts/build_powerplants.py"
 
 
 if config['enable'].get('build_cutout', False):
