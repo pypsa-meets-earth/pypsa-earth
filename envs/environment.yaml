@@ -57,6 +57,9 @@ dependencies:
   - pytz
   - country_converter
 
+  # Cloud download
+  - googledrivedownloader
+
   - pip:
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
     - vresutils==0.3.1

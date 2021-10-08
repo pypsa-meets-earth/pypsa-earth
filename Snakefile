@@ -27,6 +27,21 @@ wildcard_constraints:
     opts="[-+a-zA-Z0-9\.]*",
 
 
+datafiles = [
+        "cutouts/africa-2013-era5.nc",
+        "resources/ssp2-2.6/2030/era5_2013/Africa.nc"
+        "data/raw/africa_all_raw_cables.geojson",
+        "data/raw/africa_all_raw_generators.geojson",
+        "data/raw/africa_all_raw_lines.geojson",
+        "data/raw/africa_all_raw_substations.geojson",]
+
+if config['enable'].get('retrieve_databundle', True):
+    rule retrieve_databundle_light:
+        output: expand('{file}', file=datafiles)
+        log: "logs/retrieve_databundle.log"
+        script: 'scripts/retrieve_databundle_light.py'
+
+
 rule download_osm_data:
     output:
         cables="data/raw/africa_all_raw_cables.geojson",
