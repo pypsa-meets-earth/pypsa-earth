@@ -2,6 +2,7 @@
 import logging
 import os
 import sys
+import math
 
 import geopandas as gpd
 import numpy as np
@@ -66,6 +67,47 @@ def create_bus_df_from_lines(substations, lines):
     return buses
 
 
+def set_substations_ids(buses, tol=0.01):
+    """
+    Function to set substations ids to buses, accounting for location tolerance
+    """
+
+    buses["station_id"] = -1
+
+    station_id = 0
+    for i, row in buses.iterrows():
+        # get close buses within tolerance
+        close_nodes = np.where(buses.apply(
+            lambda x: math.dist([row["lat"], row["lon"]], [x["lat"], x["lon"]]) <= tol,
+            axis=1
+        ))[0]
+
+        if len(close_nodes) == 1:
+            # no close nodes
+            if buses.loc[i, "station_id"] < 0:
+                # if bus node id is -1, then set the station id
+                buses.loc[buses.index[i], "station_id"] = station_id
+                # update station id
+                station_id += 1
+        else:
+            # there are close nodes
+            # check if all -1
+            subset_ids = buses.loc[buses.index[close_nodes],"station_id"]
+            all_neg = subset_ids.max() < 0
+            some_neg = subset_ids.min() < 0
+
+            if all_neg:
+                buses.loc[buses.index[close_nodes], "station_id"] = station_id
+                station_id += 1
+            elif some_neg:
+                stat_id = -1
+                for bus_id in subset_ids:
+                    if bus_id >= 0:
+                        stat_id = bus_id
+                        break
+                buses.loc[buses.index[close_nodes], "station_id"] = bus_id
+
+
 def create_station_at_equal_bus_locations(lines, buses):
     # V1. Create station_id at same bus location
     # - We saw that buses are not connected exactly at one point, they are
@@ -83,7 +125,9 @@ def create_station_at_equal_bus_locations(lines, buses):
 
     # If same location/geometry make station
     bus_all = buses
-    bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
+
+    set_substations_ids(bus_all)
+    # bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
     bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(
@@ -161,6 +205,8 @@ def built_network():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
