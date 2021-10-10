@@ -70,6 +70,15 @@ def create_bus_df_from_lines(substations, lines):
 def set_substations_ids(buses, tol=0.01):
     """
     Function to set substations ids to buses, accounting for location tolerance
+    
+    The algorithm is as follows:
+    1.  initialize all substation ids to -1
+    2.  if the current substation has been already visited [substation_id < 0], then skip the calculation
+    3.  otherwise:
+    3.1.    identify the substations within the specified tolerance (tol)
+    3.2.    when all the substations in tolerance have substation_id < 0, then specify a new substation_id
+    3.3.    otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
+            in case of multiple substations with substation_ids >= 0, the first value is picked for all
     """
 
     buses["station_id"] = -1
@@ -79,39 +88,47 @@ def set_substations_ids(buses, tol=0.01):
         if buses.loc[i, "station_id"] >= 0:
             continue
 
-        # get close buses within tolerance
+        # get substations within tolerance
         close_nodes = np.where(buses.apply(
             lambda x: math.dist([row["lat"], row["lon"]], [x["lat"], x["lon"]]) <= tol,
             axis=1
         ))[0]
 
         if len(close_nodes) == 1:
-            # no close nodes
-            if buses.loc[i, "station_id"] < 0:
-                # if bus node id is -1, then set the station id
-                buses.loc[buses.index[i], "station_id"] = station_id
-                # update station id
-                station_id += 1
+            # if only one substation is in tolerance, then the substation is the current one iì
+            # Note that the node cannot be with substation_id >= 0, given the preliminary check
+            # at the beginning of the for loop
+            buses.loc[buses.index[i], "station_id"] = station_id
+            # update station id
+            station_id += 1
         else:
-            # there are close nodes
-            # check if all -1
-            subset_ids = buses.loc[buses.index[close_nodes],"station_id"]
-            all_neg = subset_ids.max() < 0
-            some_neg = subset_ids.min() < 0
+            # several substations in tolerance
+
+            # get their ids
+            subset_substation_ids = buses.loc[buses.index[close_nodes],"station_id"]
+            all_neg = subset_substation_ids.max() < 0  # check if all substation_ids are negative (<0)
+            some_neg = subset_substation_ids.min() < 0  # check if at least a substation_id is negative (<0)
 
             if all_neg:
+                # when all substation_ids are negative, then this is a new substation id
+                # set the current station_id and increment the counter
                 buses.loc[buses.index[close_nodes], "station_id"] = station_id
                 station_id += 1
             elif some_neg:
-                stat_id = -1
-                for bus_id in subset_ids:
-                    if bus_id >= 0:
-                        stat_id = bus_id
+                # otherwise, when at least a substation_id is non-negative, then pick the first value
+                # and set it to all the other substations within tolerance
+                sub_id = -1
+                for substation_id in subset_substation_ids:
+                    if substation_id >= 0:
+                        sub_id = substation_id
                         break
-                buses.loc[buses.index[close_nodes], "station_id"] = bus_id
+                buses.loc[buses.index[close_nodes], "station_id"] = sub_id
 
 
 def connect_stations_same_station_id(lines, buses):
+    """
+    Function to create fake links between substations with the same substation_id
+    """
     station_id_list = buses.station_id.unique()
 
     add_lines = []
