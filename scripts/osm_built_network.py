@@ -76,6 +76,9 @@ def set_substations_ids(buses, tol=0.01):
 
     station_id = 0
     for i, row in buses.iterrows():
+        if buses.loc[i, "station_id"] >= 0:
+            continue
+
         # get close buses within tolerance
         close_nodes = np.where(buses.apply(
             lambda x: math.dist([row["lat"], row["lon"]], [x["lat"], x["lon"]]) <= tol,
@@ -106,6 +109,26 @@ def set_substations_ids(buses, tol=0.01):
                         stat_id = bus_id
                         break
                 buses.loc[buses.index[close_nodes], "station_id"] = bus_id
+
+
+def connect_stations_same_station_id(lines, buses):
+    station_id_list = buses.station_id.unique()
+
+    add_lines = []
+    from shapely.geometry import LineString
+    for s_id in station_id_list:
+        buses_station_id = buses[buses.station_id == s_id]
+
+        if len(buses_station_id) > 1:
+            for b_it in range(1, len(buses_station_id)):
+                add_lines.append([
+                    f"link{buses_station_id}_{b_it}", buses_station_id.index[0], buses_station_id.index[b_it], 400000, 1, 0.0,
+                    False, False, "transmission", 50, buses_station_id.country.iloc[0],
+                    LineString([buses_station_id.geometry.iloc[0], buses_station_id.geometry.iloc[b_it]]), LineString([buses_station_id.geometry.iloc[0], buses_station_id.geometry.iloc[b_it]]).bounds,
+                    buses_station_id.geometry.iloc[0], buses_station_id.geometry.iloc[b_it], buses_station_id.lon.iloc[0], buses_station_id.lat.iloc[0], buses_station_id.lon.iloc[b_it], buses_station_id.lat.iloc[b_it]
+                ])
+    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()), ignore_index=True)
+    
 
 
 def create_station_at_equal_bus_locations(lines, buses):
@@ -140,7 +163,8 @@ def create_station_at_equal_bus_locations(lines, buses):
     # Set lv_buses with station duplicates "True"
     bus_all.loc[lv_bus_at_station_duplicates.index, "substation_lv"] = True
 
-    # Add station_id to line dataframe
+    # Add station_id to line dataframe.
+    # Note: by construction, the first half of bus_all is "bus0" and the rest is "bus1"
     n_row = int(bus_all.shape[0] / 2)  # row length
     lines = lines.reset_index(drop=True)
     lines["bus0"] = bus_all.loc[:(n_row - 1), ["bus_id"]]
@@ -149,6 +173,8 @@ def create_station_at_equal_bus_locations(lines, buses):
     # TRY: Keep only buses that are not duplicated & lv_substation = True
     # TODO: Check if this is necessary. What effetc do duplicates have?
     bus_all = bus_all[bus_all["substation_lv"] == True]
+
+    lines = connect_stations_same_station_id(lines, buses)
 
     return lines, buses
 
