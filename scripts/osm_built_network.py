@@ -67,7 +67,7 @@ def create_bus_df_from_lines(substations, lines):
     return buses
 
 
-def set_substations_ids(buses, tol=0.01):
+def set_substations_ids(buses, tol=0.01):  # tol=0.01, around 700m at latitude 44.
     """
     Function to set substations ids to buses, accounting for location tolerance
     """
