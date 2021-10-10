@@ -99,7 +99,7 @@ from pypsa.io import import_components_from_dataframe
 from pypsa.io import import_series_from_dataframe
 from pypsa.networkclustering import aggregategenerators
 from pypsa.networkclustering import aggregateoneport
-from pypsa.networkclustering import busmap_by_stubs
+# from pypsa.networkclustering import busmap_by_stubs
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse.csgraph import dijkstra
 
@@ -108,7 +108,7 @@ sys.settrace
 logger = logging.getLogger("simplify_network")
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 #_sets_path_to_root("pypsa-africa")
 
@@ -371,6 +371,51 @@ def simplify_links(n):
     return n, busmap
 
 
+
+def busmap_by_stubs(network, matching_attrs=None):
+    """Create a busmap by reducing stubs and stubby trees
+    (i.e. sequentially reducing dead-ends).
+
+    Parameters
+    ----------
+    network : pypsa.Network
+
+    matching_attrs : None|[str]
+        bus attributes clusters have to agree on
+
+    Returns
+    -------
+    busmap : pandas.Series
+        Mapping of network.buses to k-means clusters (indexed by
+        non-negative integers).
+
+    """
+
+    busmap = pd.Series(network.buses.index, network.buses.index)
+
+    G = network.graph()
+
+    def attrs_match(u, v):
+        return (matching_attrs is None or
+                (network.buses.loc[u, matching_attrs] ==
+                 network.buses.loc[v, matching_attrs]).all())
+
+    while True:
+        stubs = []
+        for u in G.nodes:
+            neighbours = list(G.adj[u].keys())
+            if len(neighbours) == 1:
+                v, = neighbours
+                if attrs_match(u, v):
+                    busmap[busmap == u] = v
+                    stubs.append(u)
+        G.remove_nodes_from(stubs)
+        if len(stubs) == 0:
+            break
+    return busmap
+    
+
+
 def remove_stubs(n):
     logger.info("Removing stubs")
 
@@ -419,6 +464,8 @@ def cluster(n, n_clusters):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+        
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("simplify_network",
                                    simpl="",
@@ -433,7 +480,7 @@ if __name__ == "__main__":
 
     n, simplify_links_map = simplify_links(n)
 
-    # n, stub_map = remove_stubs(n)
+    n, stub_map = remove_stubs(n)
 
     busmaps = [trafo_map, simplify_links_map]  # , stub_map]
 
