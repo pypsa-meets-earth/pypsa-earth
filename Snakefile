@@ -243,3 +243,57 @@ rule cluster_network:
     threads: 1
     resources: mem=3000
     script: "scripts/cluster_network.py"
+
+
+rule add_extra_components:
+    input:
+        network='networks/elec_s{simpl}_{clusters}.nc',
+        tech_costs=COSTS,
+    output: 'networks/elec_s{simpl}_{clusters}_ec.nc'
+    log: "logs/add_extra_components/elec_s{simpl}_{clusters}.log"
+    benchmark: "benchmarks/add_extra_components/elec_s{simpl}_{clusters}_ec"
+    threads: 1
+    resources: mem=3000
+    script: "scripts/add_extra_components.py"
+
+
+rule prepare_network:
+    input: 'networks/elec_s{simpl}_{clusters}_ec.nc', tech_costs=COSTS
+    output: 'networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc'
+    log: "logs/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log"
+    benchmark: "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+    threads: 1
+    resources: mem=4000
+    script: "scripts/prepare_network.py"
+
+
+def memory(w):
+    factor = 3.
+    for o in w.opts.split('-'):
+        m = re.match(r'^(\d+)h$', o, re.IGNORECASE)
+        if m is not None:
+            factor /= int(m.group(1))
+            break
+    for o in w.opts.split('-'):
+        m = re.match(r'^(\d+)seg$', o, re.IGNORECASE)
+        if m is not None:
+            factor *= int(m.group(1)) / 8760
+            break
+    if w.clusters.endswith('m'):
+        return int(factor * (18000 + 180 * int(w.clusters[:-1])))
+    else:
+        return int(factor * (10000 + 195 * int(w.clusters)))
+
+
+rule solve_network:
+    input: "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+    output: "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+    log:
+        solver=normpath("logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"),
+        python="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+        memory="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log"
+    benchmark: "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+    threads: 4
+    resources: mem=memory
+    shadow: "shallow"
+    script: "scripts/solve_network.py"
