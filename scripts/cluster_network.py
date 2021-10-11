@@ -147,7 +147,7 @@ logger = logging.getLogger(__name__)
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-#_sets_path_to_root("pypsa-africa")
+# _sets_path_to_root("pypsa-africa")
 
 
 def normed(x):
@@ -269,6 +269,11 @@ def busmap_for_n_clusters(n,
         return nr
 
     def busmap_for_country(x):
+        if type(n_clusters) == int or float:
+            n_cluster_c = n_clusters
+        else:
+            n_cluster_c = n_clusters[x.name]
+
         prefix = x.name[0] + x.name[1] + " "
         logger.debug(f"Determining busmap for country {prefix[:-1]}")
         if len(x) == 1:
@@ -278,12 +283,12 @@ def busmap_for_n_clusters(n,
         if algorithm == "kmeans":
             return prefix + busmap_by_kmeans(n,
                                              weight,
-                                             n_clusters[x.name],  # TODO: n_clusters[x.name], not working for one country, but `n_clusters` works
+                                             n_cluster_c,
                                              buses_i=x.index,
                                              **algorithm_kwds)
         elif algorithm == "spectral":
             return prefix + busmap_by_spectral_clustering(
-                reduce_network(n, x), n_clusters[x.name], **algorithm_kwds)
+                reduce_network(n, x), n_cluster_c, **algorithm_kwds)
         # TODO: Check where it is imported from
         # elif algorithm == "louvain":
         #     return prefix + busmap_by_louvain(reduce_network(
@@ -405,6 +410,8 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+        
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
