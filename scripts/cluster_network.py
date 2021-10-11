@@ -269,10 +269,10 @@ def busmap_for_n_clusters(n,
         return nr
 
     def busmap_for_country(x):
-        if type(n_clusters) == int or float:
-            n_cluster_c = n_clusters
-        else:
+        if isinstance(n_clusters, pd.Series):
             n_cluster_c = n_clusters[x.name]
+        else:
+            n_cluster_c = n_clusters
 
         prefix = x.name[0] + x.name[1] + " "
         logger.debug(f"Determining busmap for country {prefix[:-1]}")
