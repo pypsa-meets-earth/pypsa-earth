@@ -45,6 +45,7 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         custom_powerplants: YearCommissioned <= 2015
 """
 
+import yaml
 import logging
 from _helpers import configure_logging
 
@@ -75,12 +76,15 @@ if __name__ == "__main__":
         snakemake = mock_snakemake('build_powerplants')
     configure_logging(snakemake)
 
+    with open(snakemake.input.pm_config, "r") as f:
+        config = yaml.safe_load(f)
+
     n = pypsa.Network(snakemake.input.base_network)
     countries = n.buses.country.unique()
+    config['target_countries'] = countries
 
-    ppl = (pm.powerplants(from_url=True)
+    ppl = (pm.powerplants(from_url=False, config=config)
            .powerplant.fill_missing_decommyears()
-           .powerplant.convert_country_to_alpha2()
            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries')
            .replace({'Technology': {'Steam Turbine': 'OCGT'}})
             .assign(Fueltype=lambda df: (

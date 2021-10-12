@@ -185,12 +185,24 @@ rule build_renewable_profiles:
     script: "scripts/build_renewable_profiles.py"
 
 
+rule build_powerplants:
+    input:
+        base_network="networks/base.nc",
+        pm_config="powerplantmatching_config.yaml",
+        custom_powerplants="data/custom_powerplants.csv"
+    output: "resources/powerplants.csv"
+    log: "logs/build_powerplants.log"
+    threads: 1
+    resources: mem=500
+    script: "scripts/build_powerplants.py"
+
+
 rule add_electricity:
     input:
         base_network='networks/base.nc',
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
-        # powerplants='resources/powerplants.csv',
+        powerplants='resources/powerplants.csv',
         # hydro_capacities='data/bundle/hydro_capacities.csv',
         # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
