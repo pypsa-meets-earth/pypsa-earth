@@ -698,16 +698,16 @@ if __name__ == "__main__":
     admin_shapes = snakemake.input.gadm_shapes
 
     costs = load_costs(Nyears)
-    # ppl = load_powerplants()
+    ppl = load_powerplants()
 
     attach_load(n, regions, load, admin_shapes, countries, scale)
 
     update_transmission_costs(n, costs)
 
-    # attach_conventional_generators(n, costs, ppl)
+    attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
     # attach_hydro(n, costs, ppl)
-    # attach_extendable_generators(n, costs, ppl)
+    attach_extendable_generators(n, costs, ppl)
 
     # estimate_renewable_capacities(n)
     # attach_OPSD_renewables(n)

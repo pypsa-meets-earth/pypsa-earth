@@ -27,7 +27,6 @@ dependencies:
   - yaml
   - pytables
   - lxml
-  - powerplantmatching>=0.4.8
   - numpy
   - pandas
   - geopandas
@@ -40,6 +39,7 @@ dependencies:
   - pre-commit
   - pyomo
   - matplotlib
+  - openjdk
 
   # Keep in conda environment when calling ipython
   - ipython
@@ -63,6 +63,7 @@ dependencies:
 
   - pip:
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
+    - git+https://github.com/koen-vg/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
     - vresutils==0.3.1
     - tsam>=1.1.0
     - esy-osm-pbf

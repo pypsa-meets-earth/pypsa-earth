@@ -78,9 +78,13 @@ electricity:
     Store: [battery, H2]
     Link: []
 
+  conventional_carriers: ["OCGT", "CCGT", "oil"]
+
   max_hours:
     battery: 6
     H2: 168
+
+  powerplants_filter:
 
 lines:
   types:
