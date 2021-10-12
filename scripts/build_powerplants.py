@@ -45,15 +45,14 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         custom_powerplants: YearCommissioned <= 2015
 """
 
-import yaml
 import logging
-from _helpers import configure_logging
 
-import pypsa
-import powerplantmatching as pm
-import pandas as pd
 import numpy as np
-
+import pandas as pd
+import powerplantmatching as pm
+import pypsa
+import yaml
+from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 
 logger = logging.getLogger(__name__)
