@@ -250,7 +250,7 @@ def busmap_for_n_clusters(n,
         algorithm_kwds.setdefault("tol", 1e-6)
 
     # PyPSA module that creates sub_networks and "error"
-    # n.determine_network_topology()
+    n.determine_network_topology()
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(n,
