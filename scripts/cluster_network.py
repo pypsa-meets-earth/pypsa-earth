@@ -181,7 +181,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
-    N = n.buses.groupby(["country"]).size()
+    N = n.buses.groupby(["country"]).size()  # originally ["country", "sub_networks"]
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -212,12 +212,21 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     m = po.ConcreteModel()
 
-    def n_bounds(model, *n_id):
+    def n_bounds(model, n_id):
+        """
+        Create a function that makes a bound pair for pyomo
+
+        Use n_bounds(model, n_id) if N is Single-Index
+        Use n_bounds(model, *n_id) if N is Multi-Index
+        Example: https://pyomo.readthedocs.io/en/stable/pyomo_modeling_components/Variables.html
+
+        Returns
+        -------
+        bounds = A function (or Python object) that gives a (lower,upper) bound pair i.e.(1,10) for the variable
+        """
         return (1, N[n_id])
 
-    # TODO change bounds parameter to n_bounds
-    m.n = po.Var(list(L.index), bounds=(1, 50), domain=po.Integers)
-    # m.n = po.Var(list(L.index), domain=po.Integers)                  #TODO change bounds parameter to n_bounds
+    m.n = po.Var(list(L.index), bounds=n_bounds, domain=po.Integers)
     m.tot = po.Constraint(expr=(po.summation(m.n) == n_clusters))
     m.objective = po.Objective(
         expr=sum((m.n[i] - L.loc[i] * n_clusters)**2 for i in L.index),
