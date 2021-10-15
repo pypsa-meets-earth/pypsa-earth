@@ -50,13 +50,12 @@ from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
 from vresutils.graph import voronoi_partition_pts
 
-_logger = logging.getLogger("build_bus_regions")
+_logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-# error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
 def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists

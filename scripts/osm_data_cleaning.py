@@ -11,7 +11,7 @@ from _helpers import configure_logging
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
 
-logger = logging.getLogger("osm_data_cleaning")
+logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -109,7 +109,7 @@ def split_cells(df, lst_col="voltage"):
     """
     Split semicolon separated cells i.e. [66000;220000] and create new identical rows
 
-        Parameters
+    Parameters
     ----------
     df : dataframe
         Dataframe under analysis

@@ -28,7 +28,7 @@ from shapely.ops import cascaded_union
 #from osm_data_config import AFRICA_CC
 
 
-_logger = logging.getLogger("build_shapes")
+_logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust

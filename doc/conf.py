@@ -15,7 +15,11 @@ import sys
 
 # import shlex
 
-sys.path.insert(0, os.path.abspath(".."))
+print(os.getcwd())
+
+sys.path.insert(0, os.path.abspath('..\scripts'))
+for p in sys.path:
+    print(p)
 
 
 # -- Project information -----------------------------------------------------
@@ -40,24 +44,26 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
+    #'sphinx.ext.graphviz',
     # "sphinx.ext.pngmath",
     # "sphinxcontrib.tikz",
     # "rinoh.frontend.sphinx",
-    "sphinx.ext.imgconverter",  # for SVG conversion
+    # "sphinx.ext.imgconverter",  # for SVG conversion
 ]
 
 # autodoc_mock_imports leave the package out and does not require for building
 # the documentation. If not mocked out errors can appear i.e. not automated
 # documentation
 autodoc_mock_imports = [
-    "esy-osmfilter",
-    "esy",
-    "numpy",
-    "pandas",
-    "geopandas",
-    "shapely",
-    "geoplot",
-    "matplotlib",
+    # "esy-osmfilter",
+    # "esy",
+    # "pypsa",
+    # "numpy",
+    # "pandas",
+    # "geopandas",
+    # "shapely",
+    # "geoplot",
+    # "matplotlib",
 ]
 autodoc_default_flags = ["members"]
 autosummary_generate = True

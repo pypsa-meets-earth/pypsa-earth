@@ -82,7 +82,7 @@ from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
 
-logger = logging.getLogger("base_network")
+logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -148,12 +148,7 @@ def _load_buses_from_osm():
     logger.info("Removing buses with voltages {}".format(
         pd.Index(buses.v_nom.unique()).dropna().difference(
             snakemake.config["electricity"]["voltages"])))
-    # TODO remove all buses outside of all countries including exclusive economic zones (offshore)
-    # europe_shape = gpd.read_file(snakemake.input.europe_shape).loc[0, "geometry"]
-    # europe_shape_prepped = shapely.prepared.prep(europe_shape)
-    # buses_in_europe_b = buses[["x", "y"]].apply(lambda p: europe_shape_prepped.contains(Point(p)), axis=1)
 
-    # TODO Add remove buses outside of Area (currently commented out)
     return buses  # pd.DataFrame(buses.loc[buses_with_v_nom_to_keep_b])
     # return pd.DataFrame(buses.loc[buses_in_europe_b & buses_with_v_nom_to_keep_b])
 
@@ -201,9 +196,6 @@ def _load_links_from_eg(buses):
     ).set_index("link_id")
 
     links["length"] /= 1e3
-
-    # hotfix
-    links.loc[links.bus1 == "6271", "bus1"] = "6273"
 
     links = _remove_dangling_branches(links, buses)
 
@@ -731,7 +723,6 @@ def base_network():
     # TODO: Run when pypsa-africa is connected. Removes small network structures.
     # n = _remove_unconnected_components(n)
 
-    # TODO: Add when shapes are available. Adds homeless buses i.e. offshore to country & assigns LV-bus as demand..
     _set_countries_and_substations(n)
 
     # _set_links_underwater_fraction(n)

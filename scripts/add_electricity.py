@@ -81,6 +81,7 @@ It further adds extendable ``generators`` with **zero** capacity for
 - photovoltaic, onshore and AC- as well as DC-connected offshore wind installations with today's locational, hourly wind and solar capacity factors (but **no** current capacities),
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
+
 import logging
 import os
 
@@ -224,7 +225,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     """
     Add load to the network and distributes them according GDP and population.
 
-    Input
+    Parameters
     ----------
     n : pypsa network
     regions : .geojson
