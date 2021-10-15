@@ -18,8 +18,6 @@ import sys
 print(os.getcwd())
 
 sys.path.insert(0, os.path.abspath('..\scripts'))
-for p in sys.path:
-    print(p)
 
 
 # -- Project information -----------------------------------------------------
