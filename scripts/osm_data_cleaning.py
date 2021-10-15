@@ -263,14 +263,14 @@ def integrate_lines_df(df_all_lines):
         df_all_lines.loc[(df_all_lines["cables"] == 4) |
                          (df_all_lines["cables"] == 5), "cables"] = 3
 
+    # where circuits are "0" make "1"
+    df_all_lines.loc[(df_all_lines["circuits"] == "0") |
+                     (df_all_lines["circuits"] == 0), "circuits"] = 1
+
     # one circuit contains 3 cable
     df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = (
         df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3)
     df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
-
-    # where circuits are "0" make "1"
-    df_all_lines.loc[(df_all_lines["circuits"] == "0") |
-                     (df_all_lines["circuits"] == 0), "circuits"] = 1
 
     # drop column if exist
     if "cables" in df_all_lines:
@@ -343,32 +343,25 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
 
 
 def clean_data(
+    input_files,
+    output_files,
     ext_country_shapes=None,
     names_by_shapes=True,
     tag_substation="transmission",
     threshold_voltage=35000,
 ):
 
-    # Output file directory
-    outputfile_partial = os.path.join(os.getcwd(), "data", "clean",
-                                      "africa_all")
-    # Output file directory
-    raw_outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-                                          "africa_all" + "_raw")
-
     # ----------- LINES AND CABLES -----------
 
     # Load raw data lines
-    df_lines = gpd.read_file(raw_outputfile_partial + "_lines" +
-                             ".geojson").set_crs(epsg=4326, inplace=True)
+    df_lines = gpd.read_file(input_files["lines"]).set_crs(epsg=4326, inplace=True)
 
     # prepare lines dataframe and data types
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
 
     # Load raw data lines
-    df_cables = gpd.read_file(raw_outputfile_partial + "_cables" +
-                              ".geojson").set_crs(epsg=4326, inplace=True)
+    df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326, inplace=True)
 
     # prepare cables dataframe and data types
     df_cables = prepare_lines_df(df_cables)
@@ -400,13 +393,12 @@ def clean_data(
                                             ext_country_shapes,
                                             names_by_shapes=names_by_shapes)
 
-    df_all_lines.to_file(outputfile_partial + "_lines" + ".geojson",
+    df_all_lines.to_file(output_files["lines"],
                          driver="GeoJSON")
 
     # ----------- SUBSTATIONS -----------
 
-    df_all_substations = gpd.read_file(raw_outputfile_partial +
-                                       "_substations" + ".geojson").set_crs(
+    df_all_substations = gpd.read_file(input_files["substations"]).set_crs(
                                            epsg=4326, inplace=True)
 
     # prepare dataset for substations
@@ -437,20 +429,18 @@ def clean_data(
         ext_country_shapes,
         names_by_shapes=names_by_shapes)
 
-    df_all_substations.to_file(outputfile_partial + "_substations" +
-                               ".geojson",
+    df_all_substations.to_file(output_files["substations"],
                                driver="GeoJSON")
 
     # ----------- GENERATORS -----------
 
-    df_all_generators = gpd.read_file(raw_outputfile_partial + "_generators" +
-                                      ".geojson").set_crs(epsg=4326,
+    df_all_generators = gpd.read_file(input_files["generators"]).set_crs(epsg=4326,
                                                           inplace=True)
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
 
-    df_all_generators.to_file(outputfile_partial + "_generators" + ".geojson",
+    df_all_generators.to_file(output_files["generators"],
                               driver="GeoJSON")
 
     return None
@@ -459,12 +449,15 @@ def clean_data(
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+        
+        # needed to run mock_snakemake
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
 
     # Required to set path to pypsa-africa
-    _sets_path_to_root("pypsa-africa")
+    # _sets_path_to_root("pypsa-africa")
 
     tag_substation = snakemake.config["osm_data_cleaning_options"][
         "tag_substation"]
@@ -472,6 +465,9 @@ if __name__ == "__main__":
         "threshold_voltage"]
     names_by_shapes = snakemake.config["osm_data_cleaning_options"][
         "names_by_shapes"]
+    
+    input_files = snakemake.input
+    output_files = snakemake.output
 
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
@@ -487,6 +483,8 @@ if __name__ == "__main__":
         ext_country_shapes = None
 
     clean_data(
+        input_files,
+        output_files,
         ext_country_shapes=ext_country_shapes,
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,

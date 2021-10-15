@@ -72,6 +72,7 @@ rule build_osm_network:
     input:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",
+        cables="data/clean/africa_all_cables.geojson",
         substations="data/clean/africa_all_substations.geojson",
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
