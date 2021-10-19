@@ -251,7 +251,6 @@ def busmap_for_gadm_clusters(n,
                              gadm_level):
     
     folders = os.listdir('temp/shapefiles')
-    gadm_level = 2
 
     for i, folder in enumerate(folders):
         print(i)
@@ -383,7 +382,7 @@ def clustering_for_n_clusters(
     else:
         # busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
         #                                focus_weights, algorithm)
-        n, busmap = busmap_for_gadm_clusters(n, 1)                              #TODO make func only return busmap
+        n, busmap = busmap_for_gadm_clusters(n, 1)                              #TODO make func only return busmap, and get 1 from config
         
     clustering = get_clustering_from_busmap(
         n,
