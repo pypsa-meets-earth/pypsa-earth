@@ -24,6 +24,8 @@ data/raw/
 data/base_network/
 networks/
 resources/
+scripts/temp
+scripts/test.py
 
 # Untrack some Jupyter changes
 .ipynb_checkpoints
