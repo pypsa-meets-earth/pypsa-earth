@@ -1,7 +1,7 @@
 import logging
+import math
 import os
 import sys
-import math
 
 import geopandas as gpd
 import numpy as np
@@ -66,18 +66,21 @@ def create_bus_df_from_lines(substations, lines):
     return buses
 
 
-def set_substations_ids(buses, tol=0.01):  # tol=0.01, around 700m at latitude 44.
+# tol=0.01, around 700m at latitude 44.
+def set_substations_ids(buses, tol=0.01):
     """
     Function to set substations ids to buses, accounting for location tolerance
-    
+
     The algorithm is as follows:
-    1.  initialize all substation ids to -1
-    2.  if the current substation has been already visited [substation_id < 0], then skip the calculation
-    3.  otherwise:
-    3.1.    identify the substations within the specified tolerance (tol)
-    3.2.    when all the substations in tolerance have substation_id < 0, then specify a new substation_id
-    3.3.    otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
-            in case of multiple substations with substation_ids >= 0, the first value is picked for all
+
+    1. initialize all substation ids to -1
+    2. if the current substation has been already visited [substation_id < 0], then skip the calculation
+    3. otherwise:
+        1. identify the substations within the specified tolerance (tol)
+        2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
+        3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
+           in case of multiple substations with substation_ids >= 0, the first value is picked for all
+
     """
 
     buses["station_id"] = -1
@@ -88,10 +91,12 @@ def set_substations_ids(buses, tol=0.01):  # tol=0.01, around 700m at latitude 4
             continue
 
         # get substations within tolerance
-        close_nodes = np.where(buses.apply(
-            lambda x: math.dist([row["lat"], row["lon"]], [x["lat"], x["lon"]]) <= tol,
-            axis=1
-        ))[0]
+        close_nodes = np.where(
+            buses.apply(
+                lambda x: math.dist([row["lat"], row["lon"]],
+                                    [x["lat"], x["lon"]]) <= tol,
+                axis=1,
+            ))[0]
 
         if len(close_nodes) == 1:
             # if only one substation is in tolerance, then the substation is the current one iì
@@ -104,9 +109,12 @@ def set_substations_ids(buses, tol=0.01):  # tol=0.01, around 700m at latitude 4
             # several substations in tolerance
 
             # get their ids
-            subset_substation_ids = buses.loc[buses.index[close_nodes],"station_id"]
-            all_neg = subset_substation_ids.max() < 0  # check if all substation_ids are negative (<0)
-            some_neg = subset_substation_ids.min() < 0  # check if at least a substation_id is negative (<0)
+            subset_substation_ids = buses.loc[buses.index[close_nodes],
+                                              "station_id"]
+            # check if all substation_ids are negative (<0)
+            all_neg = subset_substation_ids.max() < 0
+            # check if at least a substation_id is negative (<0)
+            some_neg = subset_substation_ids.min() < 0
 
             if all_neg:
                 # when all substation_ids are negative, then this is a new substation id
@@ -132,19 +140,41 @@ def connect_stations_same_station_id(lines, buses):
 
     add_lines = []
     from shapely.geometry import LineString
+
     for s_id in station_id_list:
         buses_station_id = buses[buses.station_id == s_id]
 
         if len(buses_station_id) > 1:
             for b_it in range(1, len(buses_station_id)):
                 add_lines.append([
-                    f"link{buses_station_id}_{b_it}", buses_station_id.index[0], buses_station_id.index[b_it], 400000, 1, 0.0,
-                    False, False, "transmission", 50, buses_station_id.country.iloc[0],
-                    LineString([buses_station_id.geometry.iloc[0], buses_station_id.geometry.iloc[b_it]]), LineString([buses_station_id.geometry.iloc[0], buses_station_id.geometry.iloc[b_it]]).bounds,
-                    buses_station_id.geometry.iloc[0], buses_station_id.geometry.iloc[b_it], buses_station_id.lon.iloc[0], buses_station_id.lat.iloc[0], buses_station_id.lon.iloc[b_it], buses_station_id.lat.iloc[b_it]
+                    f"link{buses_station_id}_{b_it}",
+                    buses_station_id.index[0],
+                    buses_station_id.index[b_it],
+                    400000,
+                    1,
+                    0.0,
+                    False,
+                    False,
+                    "transmission",
+                    50,
+                    buses_station_id.country.iloc[0],
+                    LineString([
+                        buses_station_id.geometry.iloc[0],
+                        buses_station_id.geometry.iloc[b_it],
+                    ]),
+                    LineString([
+                        buses_station_id.geometry.iloc[0],
+                        buses_station_id.geometry.iloc[b_it],
+                    ]).bounds,
+                    buses_station_id.geometry.iloc[0],
+                    buses_station_id.geometry.iloc[b_it],
+                    buses_station_id.lon.iloc[0],
+                    buses_station_id.lat.iloc[0],
+                    buses_station_id.lon.iloc[b_it],
+                    buses_station_id.lat.iloc[b_it],
                 ])
-    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()), ignore_index=True)
-    
+    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()),
+                        ignore_index=True)
 
 
 def create_station_at_equal_bus_locations(lines, buses):
