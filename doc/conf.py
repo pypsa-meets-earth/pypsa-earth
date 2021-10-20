@@ -15,8 +15,8 @@ import sys
 
 # sys.path.insert(0, os.path.abspath('scripts'))
 # sys.path.insert(0, os.path.abspath('../scripts'))
-#sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../scripts'))
+# sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath("../scripts"))
 for p in sys.path:
     print(p)
 
@@ -119,8 +119,7 @@ texinfo_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "pypsa_meets_africa",
-     u"pypsa_meets_africa Documentation", [author], 1)
+    (master_doc, "pypsa_meets_africa", u"pypsa_meets_africa Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
