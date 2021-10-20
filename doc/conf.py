@@ -18,7 +18,6 @@ sys.path.insert(0, os.path.abspath("../scripts"))
 for p in sys.path:
     print(p)
 
-
 # -- Project information -----------------------------------------------------
 
 project = "PyPSA meets Africa"
@@ -27,7 +26,6 @@ author = "Max Parzen"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -116,13 +114,11 @@ texinfo_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "pypsa_meets_africa", u"pypsa_meets_africa Documentation", [author], 1)
-]
+man_pages = [(master_doc, "pypsa_meets_africa",
+              u"pypsa_meets_africa Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
-
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"https://docs.python.org/": None}
