@@ -3,9 +3,7 @@
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-
 # -- Path setup --------------------------------------------------------------
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -15,11 +13,10 @@ import sys
 
 # sys.path.insert(0, os.path.abspath('scripts'))
 # sys.path.insert(0, os.path.abspath('../scripts'))
-#sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../scripts'))
+# sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath("../scripts"))
 for p in sys.path:
     print(p)
-
 
 # -- Project information -----------------------------------------------------
 
@@ -29,7 +26,6 @@ author = "Max Parzen"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -43,7 +39,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    #'sphinx.ext.graphviz',
+    # 'sphinx.ext.graphviz',
     # "sphinx.ext.pngmath",
     # "sphinxcontrib.tikz",
     # "rinoh.frontend.sphinx",
@@ -66,7 +62,7 @@ autodoc_mock_imports = [
     # "geoplot",
     # "matplotlib",
 ]
-autodoc_default_options  = {}  # {"members": None}
+autodoc_default_options = {}  # {"members": None}
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -118,13 +114,11 @@ texinfo_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "pypsa_meets_africa", u"pypsa_meets_africa Documentation", [author], 1)
-]
+man_pages = [(master_doc, "pypsa_meets_africa",
+              u"pypsa_meets_africa Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
-
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"https://docs.python.org/": None}
