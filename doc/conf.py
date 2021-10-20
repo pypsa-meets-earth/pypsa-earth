@@ -43,7 +43,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    #'sphinx.ext.graphviz',
+    # 'sphinx.ext.graphviz',
     # "sphinx.ext.pngmath",
     # "sphinxcontrib.tikz",
     # "rinoh.frontend.sphinx",
@@ -66,7 +66,7 @@ autodoc_mock_imports = [
     # "geoplot",
     # "matplotlib",
 ]
-autodoc_default_options  = {}  # {"members": None}
+autodoc_default_options = {}  # {"members": None}
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -119,7 +119,8 @@ texinfo_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "pypsa_meets_africa", u"pypsa_meets_africa Documentation", [author], 1)
+    (master_doc, "pypsa_meets_africa",
+     u"pypsa_meets_africa Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
