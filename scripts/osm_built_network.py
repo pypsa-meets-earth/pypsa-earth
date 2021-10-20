@@ -71,13 +71,15 @@ def set_substations_ids(buses, tol=0.01):  # tol=0.01, around 700m at latitude 4
     Function to set substations ids to buses, accounting for location tolerance
     
     The algorithm is as follows:
-    1.  initialize all substation ids to -1
-    2.  if the current substation has been already visited [substation_id < 0], then skip the calculation
-    3.  otherwise:
-    3.1.    identify the substations within the specified tolerance (tol)
-    3.2.    when all the substations in tolerance have substation_id < 0, then specify a new substation_id
-    3.3.    otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
-            in case of multiple substations with substation_ids >= 0, the first value is picked for all
+    
+    1. initialize all substation ids to -1
+    2. if the current substation has been already visited [substation_id < 0], then skip the calculation
+    3. otherwise:
+        1. identify the substations within the specified tolerance (tol)
+        2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
+        3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
+           in case of multiple substations with substation_ids >= 0, the first value is picked for all
+    
     """
 
     buses["station_id"] = -1

@@ -13,10 +13,12 @@
 import os
 import sys
 
-# import shlex
-
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('..\Scripts'))
+# sys.path.insert(0, os.path.abspath('scripts'))
+# sys.path.insert(0, os.path.abspath('../scripts'))
+#sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../scripts'))
+for p in sys.path:
+    print(p)
 
 
 # -- Project information -----------------------------------------------------
@@ -48,6 +50,8 @@ extensions = [
     "sphinx.ext.imgconverter",  # for SVG conversion
 ]
 
+numpydoc_show_class_members = False
+
 # autodoc_mock_imports leave the package out and does not require for building
 # the documentation. If not mocked out errors can appear i.e. not automated
 # documentation
@@ -62,7 +66,7 @@ autodoc_mock_imports = [
     # "geoplot",
     # "matplotlib",
 ]
-autodoc_default_flags = ["members"]
+autodoc_default_options  = {}  # {"members": None}
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
