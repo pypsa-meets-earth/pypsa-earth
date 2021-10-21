@@ -49,11 +49,13 @@ import pypsa
 from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
 from vresutils.graph import voronoi_partition_pts
+from shapely.geometry import Point
+from shapely.geometry import Polygon
 
 _logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def save_to_geojson(df, fn):
@@ -145,7 +147,24 @@ def custom_voronoi_partition_pts(points,
     polygons_arr[:] = polygons
     return polygons_arr
 
-
+def get_gadm_shape(onshore_locs):
+    def locate_bus(coords):
+        try:
+            return gadm_shapes[gadm_shapes.contains(Point(coords['x'],
+                                                          coords['y']))].item()
+                
+        except ValueError:
+            # return 'not_found'
+            gadm_shapes[gadm_shapes.contains(Point(-9,
+                                                   32))].item()
+    sas=[]
+    sas.append(onshore_locs[['x', 'y']].apply(locate_bus, axis=1).values)
+    ss=numpy.empty((len(sas), ), "object")
+    ss[:] = sas
+    regions= onshore_locs[['x', 'y']].apply(locate_bus, axis=1)
+    return regions.values
+    
+    
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -161,6 +180,8 @@ if __name__ == "__main__":
         snakemake.input.country_shapes).set_index("name")["geometry"]
     offshore_shapes = gpd.read_file(
         snakemake.input.offshore_shapes).set_index("name")["geometry"]
+    gadm_shapes = gpd.read_file(
+        snakemake.input.gadm_shapes).set_index("GADM_ID")["geometry"]
 
     # Issues in voronoi_creation due to overlapping/duplications will be removed with that function
     # First issues where observed for offshore shapes means that first country-onshore voronoi worked fine
@@ -198,8 +219,9 @@ if __name__ == "__main__":
                 "y":
                 onshore_locs["y"],
                 "geometry":
-                custom_voronoi_partition_pts(onshore_locs.values,
-                                             onshore_shape),
+                # custom_voronoi_partition_pts(onshore_locs.values,
+                #                              onshore_shape),
+                get_gadm_shape(onshore_locs),             
                 "country":
                 country,
             }))
