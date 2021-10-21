@@ -14,7 +14,7 @@ scenario:
   clusters: [6]
   opts: [Co2L-3H]
 
-countries: ["NG", "NI"]
+countries: ["NG", "NE"]
 
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
   # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
@@ -58,6 +58,7 @@ snapshots:
 enable:
   # prepare_links_p_nom: false
   retrieve_databundle: true
+  download_osm_data: false
   # retrieve_cutout: true
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
