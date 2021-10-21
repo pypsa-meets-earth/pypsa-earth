@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 import sys
 
@@ -74,6 +75,117 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["dc"] = False
 
     return df_all_substations
+
+
+
+def add_line_endings_tosubstations(substations, lines):
+    # extract columns from substation df
+    bus_s = gpd.GeoDataFrame(columns=substations.columns)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns)
+
+    # Read information from line.csv
+    bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
+    bus_s["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[0]
+                                               if len(p.geoms) >= 2 else None)
+    bus_s["lon"] = bus_s["geometry"].map(lambda p: p.x
+                                                 if p != None else None)
+    bus_s["lat"] = bus_s["geometry"].map(lambda p: p.y
+                                                 if p != None else None)
+    bus_s["bus_id"] = substations["bus_id"].max() + 1 + bus_s.index
+
+
+    bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
+    bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1]
+                                               if len(p.geoms) >= 2 else None)
+    bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x
+                                                 if p != None else None)
+    bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y
+                                                 if p != None else None)
+    bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
+
+    bus_all = bus_s.append(bus_e).reset_index(drop=True)
+
+    # Add NaN as default
+    bus_all["station_id"] = np.nan
+    bus_all["dc"] = np.nan
+    bus_all["under_construction"] = False  # Assuming substations completed for installed lines
+    bus_all["tag_area"] = np.nan
+    bus_all["symbol"] = "substation"
+    bus_all["tag_substation"] = "transmission"  # TODO: this tag may be improved, maybe depending on voltage levels
+
+    buses = substations.append(bus_all).reset_index(drop=True)
+
+    # Assign index to bus_id
+    buses.loc[:, "bus_id"] = buses.index
+
+    return buses
+
+
+# tol=0.01, around 700m at latitude 44.
+def set_substations_ids(buses, tol=0.01):
+    """
+    Function to set substations ids to buses, accounting for location tolerance
+
+    The algorithm is as follows:
+
+    1. initialize all substation ids to -1
+    2. if the current substation has been already visited [substation_id < 0], then skip the calculation
+    3. otherwise:
+        1. identify the substations within the specified tolerance (tol)
+        2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
+        3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
+           in case of multiple substations with substation_ids >= 0, the first value is picked for all
+
+    """
+
+    buses["station_id"] = -1
+
+    station_id = 0
+    for i, row in buses.iterrows():
+        if buses.loc[i, "station_id"] >= 0:
+            continue
+
+        # get substations within tolerance
+        close_nodes = np.where(
+            buses.apply(
+                lambda x: math.dist([row["lat"], row["lon"]],
+                                    [x["lat"], x["lon"]]) <= tol,
+                axis=1,
+            ))[0]
+
+        if len(close_nodes) == 1:
+            # if only one substation is in tolerance, then the substation is the current one iì
+            # Note that the node cannot be with substation_id >= 0, given the preliminary check
+            # at the beginning of the for loop
+            buses.loc[buses.index[i], "station_id"] = station_id
+            # update station id
+            station_id += 1
+        else:
+            # several substations in tolerance
+
+            # get their ids
+            subset_substation_ids = buses.loc[buses.index[close_nodes],
+                                              "station_id"]
+            # check if all substation_ids are negative (<0)
+            all_neg = subset_substation_ids.max() < 0
+            # check if at least a substation_id is negative (<0)
+            some_neg = subset_substation_ids.min() < 0
+
+            if all_neg:
+                # when all substation_ids are negative, then this is a new substation id
+                # set the current station_id and increment the counter
+                buses.loc[buses.index[close_nodes], "station_id"] = station_id
+                station_id += 1
+            elif some_neg:
+                # otherwise, when at least a substation_id is non-negative, then pick the first value
+                # and set it to all the other substations within tolerance
+                sub_id = -1
+                for substation_id in subset_substation_ids:
+                    if substation_id >= 0:
+                        sub_id = substation_id
+                        break
+                buses.loc[buses.index[close_nodes], "station_id"] = sub_id
+
 
 
 def set_unique_id(df, col):
@@ -350,6 +462,8 @@ def clean_data(
     names_by_shapes=True,
     tag_substation="transmission",
     threshold_voltage=35000,
+    add_line_endings=True,
+    group_close_buses=True,
 ):
 
     # ----------- LINES AND CABLES -----------
@@ -405,6 +519,11 @@ def clean_data(
     # prepare dataset for substations
     df_all_substations = prepare_substation_df(df_all_substations)
 
+    # add line endings if option is enabled
+    if add_line_endings:
+        df_all_substations = add_line_endings_tosubstations(
+            df_all_substations, df_all_lines)
+
     # filter substations by tag
     if tag_substation:  # if the string is not empty check it
         df_all_substations = df_all_substations[
@@ -412,6 +531,9 @@ def clean_data(
 
     # filter substation by voltage
     df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
+    
+    # set substation_id
+    set_substations_ids(df_all_substations)
 
     # finalize dataframe types
     df_all_substations = finalize_substation_types(df_all_substations)
@@ -467,6 +589,10 @@ if __name__ == "__main__":
         "threshold_voltage"]
     names_by_shapes = snakemake.config["osm_data_cleaning_options"][
         "names_by_shapes"]
+    add_line_endings = snakemake.config["osm_data_cleaning_options"][
+        "add_line_endings"]
+    group_close_buses = snakemake.config["osm_data_cleaning_options"][
+        "group_close_buses"]
     
     input_files = snakemake.input
     output_files = snakemake.output
@@ -491,4 +617,6 @@ if __name__ == "__main__":
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,
         threshold_voltage=threshold_voltage,
+        add_line_endings=add_line_endings,
+        group_close_buses=group_close_buses
     )

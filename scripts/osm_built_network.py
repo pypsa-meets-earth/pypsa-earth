@@ -2,6 +2,10 @@ import logging
 import math
 import os
 import sys
+from shapely.geometry import Point
+from shapely.geometry import LineString
+from shapely.ops import unary_union
+from shapely.ops import linemerge
 
 import geopandas as gpd
 import numpy as np
@@ -62,6 +66,49 @@ def create_bus_df_from_lines(substations, lines):
     buses["tag_substation"] = "False"
     buses["tag_area"] = "False"
     buses["substation_lv"] = True
+
+    return buses
+
+
+def add_line_endings_tosubstations(substations, lines):
+    # extract columns from substation df
+    bus_s = gpd.GeoDataFrame(columns=substations.columns)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns)
+
+    # Read information from line.csv
+    bus_s[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
+    bus_s["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[0]
+                                               if len(p.geoms) >= 2 else None)
+    bus_s["lon"] = bus_s["geometry"].map(lambda p: p.x
+                                                 if p != None else None)
+    bus_s["lat"] = bus_s["geometry"].map(lambda p: p.y
+                                                 if p != None else None)
+    bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
+
+
+    bus_e[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
+    bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1]
+                                               if len(p.geoms) >= 2 else None)
+    bus_e["lon"] = bus_s["geometry"].map(lambda p: p.x
+                                                 if p != None else None)
+    bus_e["lat"] = bus_s["geometry"].map(lambda p: p.y
+                                                 if p != None else None)
+    bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
+
+    bus_all = bus_s.append(bus_e).reset_index(drop=True)
+    # Assign index to bus_id
+    bus_all.loc[:, "bus_id"] = bus_all.index
+    buses = bus_all
+
+    # Add NaN as default
+    bus_all["station_id"] = np.nan
+    bus_all["dc"] = np.nan
+    bus_all["under_construction"] = False  # Assuming substations completed for installed lines
+    bus_all["tag_area"] = np.nan
+    bus_all["symbol"] = "substation"
+    bus_all["tag_substation"] = "transmission"  # TODO: this tag may be improved, maybe depending on voltage levels
+
+    buses = substations.append(bus_all).reset_index(drop=True)
 
     return buses
 
@@ -132,10 +179,178 @@ def set_substations_ids(buses, tol=0.01):
                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
 
 
+
+def set_lines_ids(lines, buses):
+    """
+    Function to set line buses ids to the closest bus in the list
+
+    """
+
+    # initialization
+    lines["bus0"] = -1
+    lines["bus1"] = -1
+
+    for i, row in lines.iterrows():
+
+        # select buses having the voltage level of the current line
+        buses_sel = buses[buses["voltage"] == row["voltage"]]
+
+        # find the closest node of the bus0 of the line
+        bus0_id = buses_sel.geometry.distance(row["bus_0_coors"]).idxmin()
+        lines.loc[i, "bus0"] = buses.loc[bus0_id, "bus_id"]
+
+        # check if the line starts exactly in the node, otherwise modify the linestring
+        distance_bus0 = buses_sel.geometry[bus0_id].distance(row["bus_0_coors"])
+        if distance_bus0 > 0.0:
+            # the line does not start in the node, thus modify the linestring
+            lines.loc[i, "geometry"] = linemerge([
+                LineString([
+                        buses_sel.geometry[bus0_id],
+                        row["bus_0_coors"],
+                    ]),
+                lines.loc[i, "geometry"]
+            ])
+
+        # find the closest node of the bus1 of the line
+        bus1_id = buses_sel.geometry.distance(row["bus_1_coors"]).idxmin()
+        lines.loc[i, "bus1"] = buses.loc[bus1_id, "bus_id"]
+
+        # check if the line ends exactly in the node, otherwise modify the linestring
+        distance_bus1 = buses_sel.geometry[bus1_id].distance(row["bus_1_coors"])
+        if distance_bus1 > 0.0:
+            # the line does not end in the node, thus modify the linestring
+            lines.loc[i, "geometry"] = linemerge([
+                LineString([
+                    row["bus_1_coors"],
+                    buses_sel.geometry[bus1_id]
+                ]),
+                lines.loc[i, "geometry"]
+            ])
+    
+    return lines, buses
+
+
+def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
+    """
+    Function to merge buses with same voltage and station_id
+    This function iterattes over all substation ids and creates a bus_id for every substation and voltage level.
+    Therefore, a substation with multiple voltage levels is represented with different buses, one per voltage level    
+    """
+    # initialize empty dataset of cleaned buses
+    buses_clean = gpd.GeoDataFrame(columns=buses.columns)
+
+    # initalize the number of buses
+    n_buses = 0
+
+    for g_name, g_value in buses.groupby(by=["station_id"]):
+
+        # average location of the buses having the same station_id
+        station_loc = g_value[["lon", "lat"]].mean()
+
+        # loop for every voltage level in the bus
+        # The location of the buses is averaged; in the case of multiple voltage levels for the same station_id,
+        # each bus corresponding to a voltage level is located at a distanceregulated by delta_lon/delta_lat
+        v_it = 0
+        for v_name, bus_row in g_value.groupby(by=["voltage"]):
+            
+            # add the bus
+            buses_clean.loc[n_buses] = {
+                "bus_id": n_buses,
+                "station_id": g_name,
+                "voltage": v_name,
+                "dc": bus_row["dc"].all(),
+                "symbol": "|".join(bus_row["symbol"].unique()),
+                "under_construction": bus_row["under_construction"].any(),
+                "tag_substation": "|".join(bus_row["tag_substation"].unique()),
+                "tag_area": bus_row["tag_area"].sum(),
+                "lon": station_loc.lon + v_it * delta_lon,
+                "lat": station_loc.lat + v_it * delta_lat,
+                "country": bus_row["country"].iloc[0],
+                "geometry": Point(
+                    station_loc.lon + v_it * delta_lon,
+                    station_loc.lat + v_it * delta_lat
+                )
+            }
+
+            # increase counters
+            v_it += 1
+            n_buses += 1
+    
+    return buses_clean
+
+
+
+def set_line_buses_by_station_id_and_voltage(lines, buses, tol=0.001):
+    """
+    Function to set the bus ids to lines by substation id and voltage
+    """
+
+    set_substations_ids(buses)
+    # bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
+
+    station_id_list = buses.station_id.unique()
+
+    # get the index of the bus corresponding to the bus 0 and 1 of the line
+    index_bus_0_line = lines["bus_0_coors"].map(lambda x: (buses.geometry.distance(x) < tol).idxmax())
+    index_bus_1_line = lines["bus_1_coors"].map(lambda x: (buses.geometry.distance(x) < tol).idxmax())
+
+    # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
+    bus_with_stations_duplicates = buses[buses.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"])
+    lv_bus_at_station_duplicates = (buses[buses.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
+            subset=["station_id"]))
+    # Set all buses with station duplicates "False"
+    buses.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
+    # Set lv_buses with station duplicates "True"
+    buses.loc[lv_bus_at_station_duplicates.index, "substation_lv"] = True
+
+    add_lines = []
+
+    for s_id in station_id_list:
+        buses_station_id = buses[buses.station_id == s_id]
+
+        if len(buses_station_id) > 1:
+            for b_it in range(1, len(buses_station_id)):
+                add_lines.append([
+                    f"link{buses_station_id}_{b_it}",
+                    buses_station_id.index[0],
+                    buses_station_id.index[b_it],
+                    400000,
+                    1,
+                    0.0,
+                    False,
+                    False,
+                    "transmission",
+                    50,
+                    buses_station_id.country.iloc[0],
+                    LineString([
+                        buses_station_id.geometry.iloc[0],
+                        buses_station_id.geometry.iloc[b_it],
+                    ]),
+                    LineString([
+                        buses_station_id.geometry.iloc[0],
+                        buses_station_id.geometry.iloc[b_it],
+                    ]).bounds,
+                    buses_station_id.geometry.iloc[0],
+                    buses_station_id.geometry.iloc[b_it],
+                    buses_station_id.lon.iloc[0],
+                    buses_station_id.lat.iloc[0],
+                    buses_station_id.lon.iloc[b_it],
+                    buses_station_id.lat.iloc[b_it],
+                ])
+    lines =  lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()),
+                        ignore_index=True)
+    return lines, buses
+
+
+
+
 def connect_stations_same_station_id(lines, buses):
     """
     Function to create fake links between substations with the same substation_id
     """
+    
     station_id_list = buses.station_id.unique()
 
     add_lines = []
@@ -175,6 +390,26 @@ def connect_stations_same_station_id(lines, buses):
                 ])
     return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()),
                         ignore_index=True)
+
+
+
+
+def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01):
+    """
+    Function to merge close stations and adapt the line datasets to adhere to the merged dataset
+    
+    """
+
+    # set substation ids
+    set_substations_ids(buses, tol=tol)
+
+    # merge buses with same station id and voltage
+    buses = merge_stations_same_station_id(buses)
+
+    # set the bus ids to the line dataset
+    lines, buses = set_lines_ids(lines, buses)
+
+    return lines, buses
 
 
 def create_station_at_equal_bus_locations(lines, buses):
@@ -238,14 +473,23 @@ def built_network():
 
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
-    buses = create_bus_df_from_lines(substations, lines)
+    buses = add_line_endings_tosubstations(substations, lines)
+    # buses = create_bus_df_from_lines(substations, lines)
 
     # Methods to build network
     # METHOD 1 - Form station at exact same location
     # TODO: Select at clean_data(method = ...) the applied method
-    lines, buses = create_station_at_equal_bus_locations(lines, buses)
+    # lines, buses = create_station_at_equal_bus_locations(lines, buses)
+    
     # METHOD 2 - Use interference method
     # TODO: Add and test other method (ready in jupyter)
+
+    # METHOD to merge buses with same voltage and within tolerance
+    lines, buses = merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01)
+
+    # get transformers: modelled as lines connecting buses with different voltage
+    # transformers = get_transformers(lines, buses)
+
 
     # Export data
     # Lines
