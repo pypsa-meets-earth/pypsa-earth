@@ -461,7 +461,7 @@ def _set_countries_and_substations(n):
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
     # .str.contains("substation|converter station",
-    substation_b = buses["symbol"]
+    substation_b = buses["symbol"].str.contains("substation|converter station", case=False)
 
     #                                             case=False)
 
@@ -743,6 +743,8 @@ def base_network():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)

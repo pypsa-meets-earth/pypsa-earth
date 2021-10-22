@@ -279,71 +279,51 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
     return buses_clean
 
 
-
-def set_line_buses_by_station_id_and_voltage(lines, buses, tol=0.001):
+def get_transformers(buses, lines):
     """
-    Function to set the bus ids to lines by substation id and voltage
+    Function to create fake transformer lines that connect buses of the same station_id at different voltage
     """
 
-    set_substations_ids(buses)
-    # bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
+    df_transformers = gpd.GeoDataFrame(columns=lines.columns)
 
-    station_id_list = buses.station_id.unique()
+    for g_name, g_value in buses.sort_values('voltage', ascending=True).groupby(by=['station_id']):
 
-    # get the index of the bus corresponding to the bus 0 and 1 of the line
-    index_bus_0_line = lines["bus_0_coors"].map(lambda x: (buses.geometry.distance(x) < tol).idxmax())
-    index_bus_1_line = lines["bus_1_coors"].map(lambda x: (buses.geometry.distance(x) < tol).idxmax())
+        # note: by construction there cannot be more that two nodes with the same station_id and same voltage
+        n_voltages = len(g_value)
 
-    # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    bus_with_stations_duplicates = buses[buses.station_id.duplicated(
-        keep=False)].sort_values(by=["station_id", "voltage"])
-    lv_bus_at_station_duplicates = (buses[buses.station_id.duplicated(
-        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
-            subset=["station_id"]))
-    # Set all buses with station duplicates "False"
-    buses.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
-    # Set lv_buses with station duplicates "True"
-    buses.loc[lv_bus_at_station_duplicates.index, "substation_lv"] = True
+        if n_voltages > 1:
 
-    add_lines = []
+            for id in range(0, n_voltages-1):
+                # when g_value has more than one node, it means that there are multiple voltages for the same bus
+                geom_trans = LineString([
+                        g_value.geometry.iloc[id],
+                        g_value.geometry.iloc[id+1]
+                    ])
+                transf_id = lines.shape[0] + df_transformers.shape[0] + 1
 
-    for s_id in station_id_list:
-        buses_station_id = buses[buses.station_id == s_id]
-
-        if len(buses_station_id) > 1:
-            for b_it in range(1, len(buses_station_id)):
-                add_lines.append([
-                    f"link{buses_station_id}_{b_it}",
-                    buses_station_id.index[0],
-                    buses_station_id.index[b_it],
-                    400000,
-                    1,
-                    0.0,
-                    False,
-                    False,
-                    "transmission",
-                    50,
-                    buses_station_id.country.iloc[0],
-                    LineString([
-                        buses_station_id.geometry.iloc[0],
-                        buses_station_id.geometry.iloc[b_it],
-                    ]),
-                    LineString([
-                        buses_station_id.geometry.iloc[0],
-                        buses_station_id.geometry.iloc[b_it],
-                    ]).bounds,
-                    buses_station_id.geometry.iloc[0],
-                    buses_station_id.geometry.iloc[b_it],
-                    buses_station_id.lon.iloc[0],
-                    buses_station_id.lat.iloc[0],
-                    buses_station_id.lon.iloc[b_it],
-                    buses_station_id.lat.iloc[b_it],
-                ])
-    lines =  lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()),
-                        ignore_index=True)
-    return lines, buses
-
-
+                df_transformers.loc[transf_id] = {
+                    'line_id': f"transf_{g_name}_{id}",
+                    'bus0': g_value['bus_id'].iloc[id],
+                    'bus1':g_value['bus_id'].iloc[id+1],
+                    'voltage': g_value.voltage.iloc[[id, id+1]].max(),
+                    'circuits': 1,
+                    'length': 0.0,
+                    'underground': False,
+                    'under_construction': False,
+                    'tag_type': 'transmission',
+                    'tag_frequency': 50,
+                    'country': g_value.country.iloc[id],
+                    'geometry': geom_trans,
+                    'bounds': geom_trans.bounds,
+                    'bus_0_coors': g_value.geometry.iloc[id],
+                    'bus_1_coors': g_value.geometry.iloc[id+1],
+                    'bus0_lon': g_value.geometry.iloc[id].x,
+                    'bus0_lat': g_value.geometry.iloc[id].y,
+                    'bus1_lon': g_value.geometry.iloc[id+1].x,
+                    'bus1_lat': g_value.geometry.iloc[id+1].y,
+                }
+    
+    return df_transformers
 
 
 def connect_stations_same_station_id(lines, buses):
@@ -488,8 +468,9 @@ def built_network():
     lines, buses = merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01)
 
     # get transformers: modelled as lines connecting buses with different voltage
-    # transformers = get_transformers(lines, buses)
+    transformers = get_transformers(buses, lines)
 
+    lines = lines.append(transformers)
 
     # Export data
     # Lines
