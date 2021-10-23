@@ -61,8 +61,8 @@ if __name__ == "__main__":
     # BUNDLE 1
     destination = './resources'
     zip_path = destination +'.zip'
-    url = "https://drive.google.com/file/d/1L5ewMn2i0iscYCeKAHpPFWyux8J6ld4B/view?usp=sharing"
-    gdd.download_file_from_google_drive(file_id='1L5ewMn2i0iscYCeKAHpPFWyux8J6ld4B',
+    url = "https://drive.google.com/file/d/1nATTTS4t-EBBaAScNbZksVqsfUiL9TTV/view?usp=sharing"
+    gdd.download_file_from_google_drive(file_id='1nATTTS4t-EBBaAScNbZksVqsfUiL9TTV',
                                         dest_path=zip_path,
                                         unzip=True)
     os.remove(zip_path)
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     # BUNDLE 2
     destination = './data'
     zip_path = destination +'.zip'
-    url = "https://drive.google.com/file/d/1F0UQz0nenMgIAeIYWQZJ18UJCG-tcfGl/view?usp=sharing"
-    gdd.download_file_from_google_drive(file_id='1F0UQz0nenMgIAeIYWQZJ18UJCG-tcfGl',
+    url = "https://drive.google.com/file/d/1lxfxCrUBdnQdFd6Isx3XlGwP6d9KRW2E/view?usp=sharing"
+    gdd.download_file_from_google_drive(file_id='1lxfxCrUBdnQdFd6Isx3XlGwP6d9KRW2E',
                                         dest_path=zip_path,
                                         unzip=True)
     os.remove(zip_path)
@@ -83,8 +83,8 @@ if __name__ == "__main__":
     # BUNDLE 3
     destination = './cutouts'
     zip_path = destination +'.zip'
-    url = "https://drive.google.com/file/d/1rCIylwHJ-JLQF5ZDquSyYlaLkWdPORUb/view?usp=sharing"
-    gdd.download_file_from_google_drive(file_id='1rCIylwHJ-JLQF5ZDquSyYlaLkWdPORUb',
+    url = "https://drive.google.com/file/d/1FvjV6CmqoQMMUF0otVnG3fBQm2_GGISW/view?usp=sharing"
+    gdd.download_file_from_google_drive(file_id='1FvjV6CmqoQMMUF0otVnG3fBQm2_GGISW',
                                         dest_path=zip_path,
                                         unzip=True)
     os.remove(zip_path)
