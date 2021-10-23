@@ -59,14 +59,14 @@ snapshots:
 
 enable:
   # prepare_links_p_nom: false
-  retrieve_databundle: true
+  retrieve_databundle: false
   download_osm_data: true
   # retrieve_cutout: true
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
+  build_natura_raster: false  # If True, then build_natura_raster can be run
   # custom_busmap: false
 
 electricity:
