@@ -71,7 +71,7 @@ def prepare_substation_df(df_all_substations):
     df_all_substations = df_all_substations[clist]
 
     # add the under_construction and dc
-    df_all_substations["under_construction"] = True
+    df_all_substations["under_construction"] = False
     df_all_substations["dc"] = False
 
     return df_all_substations
@@ -107,9 +107,9 @@ def add_line_endings_tosubstations(substations, lines):
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
-    bus_all["dc"] = np.nan
+    bus_all["dc"] = False  # np.nan
     bus_all["under_construction"] = False  # Assuming substations completed for installed lines
-    bus_all["tag_area"] = np.nan
+    bus_all["tag_area"] = 0.0  # np.nan
     bus_all["symbol"] = "substation"
     bus_all["tag_substation"] = "transmission"  # TODO: this tag may be improved, maybe depending on voltage levels
 
@@ -462,8 +462,7 @@ def clean_data(
     names_by_shapes=True,
     tag_substation="transmission",
     threshold_voltage=35000,
-    add_line_endings=True,
-    group_close_buses=True,
+    add_line_endings=True
 ):
 
     # ----------- LINES AND CABLES -----------
@@ -591,8 +590,6 @@ if __name__ == "__main__":
         "names_by_shapes"]
     add_line_endings = snakemake.config["osm_data_cleaning_options"][
         "add_line_endings"]
-    group_close_buses = snakemake.config["osm_data_cleaning_options"][
-        "group_close_buses"]
     
     input_files = snakemake.input
     output_files = snakemake.output
@@ -617,6 +614,5 @@ if __name__ == "__main__":
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,
         threshold_voltage=threshold_voltage,
-        add_line_endings=add_line_endings,
-        group_close_buses=group_close_buses
+        add_line_endings=add_line_endings
     )

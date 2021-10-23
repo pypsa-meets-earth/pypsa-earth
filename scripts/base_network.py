@@ -81,6 +81,7 @@ from osm_pbf_power_data_extractor import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
+from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
@@ -455,8 +456,8 @@ def _set_countries_and_substations(n):
     countries = create_country_list(snakemake.config["countries"])
     country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
         "name")["geometry"].set_crs(4326))
-    offshore_shapes = (gpd.read_file(
-        snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(
+    offshore_shapes = unary_union(gpd.read_file(
+        snakemake.input.offshore_shapes)["geometry"].set_crs(
             4326))
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
@@ -526,11 +527,10 @@ def _set_countries_and_substations(n):
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(bus_locations,
                                      geometry=gpd.points_from_xy(
-                                         buses.x, buses.y),
+                                         bus_locations.x, bus_locations.y),
                                      crs=4326)
-    offshore_b = (bus_locations.within(offshore_shapes)
-                  )[:-offshore_shapes.size]  # Check if bus is in shape
-    offshore_b = offshore_b
+    offshore_b = bus_locations.within(offshore_shapes)  # Check if bus is in shape
+
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
         buses["v_nom"] >=

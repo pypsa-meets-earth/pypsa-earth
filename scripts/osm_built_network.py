@@ -102,9 +102,9 @@ def add_line_endings_tosubstations(substations, lines):
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
-    bus_all["dc"] = np.nan
+    bus_all["dc"] = False  # np.nan
     bus_all["under_construction"] = False  # Assuming substations completed for installed lines
-    bus_all["tag_area"] = np.nan
+    bus_all["tag_area"] = 0.0  # np.nan
     bus_all["symbol"] = "substation"
     bus_all["tag_substation"] = "transmission"  # TODO: this tag may be improved, maybe depending on voltage levels
 
@@ -373,6 +373,29 @@ def connect_stations_same_station_id(lines, buses):
 
 
 
+def set_lv_substations(buses):
+    """
+    Function to set what nodes are lv, thereby setting substation_lv
+    The current methodology is to set lv nodes to buses where multiple voltage level are found,
+    hence when the station_id is duplicated
+    """
+    
+    # initialize column substation_lv to true
+    buses["substation_lv"] = True
+
+    # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
+    bus_with_stations_duplicates = buses[buses.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"])
+    lv_bus_at_station_duplicates = (buses[buses.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
+            subset=["station_id"]))
+    # Set all buses with station duplicates "False"
+    buses.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
+    # Set lv_buses with station duplicates "True"
+    buses.loc[lv_bus_at_station_duplicates.index, "substation_lv"] = True
+
+    return buses
+
 
 def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01):
     """
@@ -388,6 +411,9 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01):
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses)
+
+    # set substation_lv
+    set_lv_substations(buses)
 
     return lines, buses
 
@@ -414,15 +440,7 @@ def create_station_at_equal_bus_locations(lines, buses):
     # bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    bus_with_stations_duplicates = bus_all[bus_all.station_id.duplicated(
-        keep=False)].sort_values(by=["station_id", "voltage"])
-    lv_bus_at_station_duplicates = (bus_all[bus_all.station_id.duplicated(
-        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
-            subset=["station_id"]))
-    # Set all buses with station duplicates "False"
-    bus_all.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
-    # Set lv_buses with station duplicates "True"
-    bus_all.loc[lv_bus_at_station_duplicates.index, "substation_lv"] = True
+    set_lv_substations(bus_all)
 
     # Add station_id to line dataframe.
     # Note: by construction, the first half of bus_all is "bus0" and the rest is "bus1"
