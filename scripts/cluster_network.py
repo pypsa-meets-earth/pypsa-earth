@@ -425,7 +425,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="50")
+                                   clusters="10")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

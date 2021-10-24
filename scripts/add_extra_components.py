@@ -54,6 +54,7 @@ from _helpers import configure_logging
 
 import pypsa
 import pandas as pd
+import os
 import numpy as np
 
 from add_electricity import (load_costs, add_nice_carrier_names,
@@ -192,8 +193,9 @@ def attach_hydrogen_pipelines(n, costs):
 if __name__ == "__main__":
     if 'snakemake' not in globals():
         from _helpers import mock_snakemake
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake('add_extra_components', network='elec',
-                                  simpl='', clusters=5)
+                                  simpl='', clusters=10)
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

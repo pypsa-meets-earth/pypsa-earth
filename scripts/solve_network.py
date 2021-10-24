@@ -82,6 +82,7 @@ from _helpers import configure_logging
 import numpy as np
 import pandas as pd
 import re
+import os
 
 import pypsa
 from pypsa.linopf import (get_var, define_constraints, linexpr, join_exprs,
@@ -269,8 +270,11 @@ def solve_network(n, config, opts='', **kwargs):
 if __name__ == "__main__":
     if 'snakemake' not in globals():
         from _helpers import mock_snakemake
+        
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         snakemake = mock_snakemake('solve_network', network='elec', simpl='',
-                                  clusters='5', ll='copt', opts='Co2L-BAU-CCL-24H')
+                                  clusters='10', ll='v0.3', opts='Co2L-24H')
     configure_logging(snakemake)
 
     tmpdir = snakemake.config['solving'].get('tmpdir')
