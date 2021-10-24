@@ -376,14 +376,14 @@ def integrate_lines_df(df_all_lines):
         df_all_lines.loc[(df_all_lines["cables"] == 4) |
                          (df_all_lines["cables"] == 5), "cables"] = 3
 
-    # where circuits are "0" make "1"
-    df_all_lines.loc[(df_all_lines["circuits"] == "0") |
-                     (df_all_lines["circuits"] == 0), "circuits"] = 1
-
     # one circuit contains 3 cable
     df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = (
         df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3)
     df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
+
+    # where circuits are "0" make "1"
+    df_all_lines.loc[(df_all_lines["circuits"] == "0") |
+                     (df_all_lines["circuits"] == 0), "circuits"] = 1
 
     # drop column if exist
     if "cables" in df_all_lines:
