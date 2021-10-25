@@ -38,14 +38,14 @@ Inputs
 ------
 
 - ``data/entsoegridkit``:  Extract from the geographical vector data of the online
-  `ENTSO-E Interactive Map <https://www.entsoe.eu/data/map/>`_ by the
-  `GridKit <https://github.com/pypsa/gridkit>`_ toolkit dating back to January 2020.
+`ENTSO-E Interactive Map <https://www.entsoe.eu/data/map/>`_ by the
+`GridKit <https://github.com/pypsa/gridkit>`_ toolkit dating back to January 2020.
 - ``data/parameter_corrections.yaml``: Corrections for ``data/entsoegridkit``
 - ``data/links_p_nom.csv``: confer :ref:`links`
 - ``data/links_tyndp.csv``: List of projects in the
-  `TYNDP 2018 <https://tyndp.entsoe.eu/tyndp2018/>`_ that are at least *in permitting*
-  with fields for start- and endpoint (names and coordinates), length, capacity,
-  construction status, and project reference ID.
+`TYNDP 2018 <https://tyndp.entsoe.eu/tyndp2018/>`_ that are at least *in permitting*
+with fields for start- and endpoint (names and coordinates), length, capacity,
+construction status, and project reference ID.
 - ``resources/country_shapes.geojson``: confer :ref:`shapes`
 - ``resources/offshore_shapes.geojson``: confer :ref:`shapes`
 - ``resources/europe_shape.geojson``: confer :ref:`shapes`
@@ -532,10 +532,7 @@ def _set_countries_and_substations(n):
                   )[:-offshore_shapes.size]  # Check if bus is in shape
     offshore_b = offshore_b
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
-    offshore_hvb = (
-        buses["v_nom"] >=
-        snakemake.config["base_network"]["min_voltage_substation_offshore"] /
-        1000)
+    offshore_hvb = buses["v_nom"] >= snakemake.config["base_network"]["min_voltage_substation_offshore"]/1000
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
 
@@ -675,8 +672,7 @@ def _rebase_voltage_to_config(component):
     ----------
     component : dataframe
     """
-    v_min = (snakemake.config["base_network"]["min_voltage_rebase_voltage"] /
-             1000)  # min. filtered value in dataset
+    v_min = snakemake.config["base_network"]["min_voltage_rebase_voltage"]/1000  # min. filtered value in dataset
     v_low = snakemake.config["electricity"]["voltages"][0]
     v_mid = snakemake.config["electricity"]["voltages"][1]
     v_up = snakemake.config["electricity"]["voltages"][2]

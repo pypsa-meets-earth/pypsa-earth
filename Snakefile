@@ -33,13 +33,7 @@ datafiles = [
         "data/raw/africa_all_raw_cables.geojson",
         "data/raw/africa_all_raw_generators.geojson",
         "data/raw/africa_all_raw_lines.geojson",
-        "data/raw/africa_all_raw_substations.geojson",
-        "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        "data/raw/gebco/GEBCO_2021_TID.nc",
-        "data/raw/eez/eez_v11.gpkg",
-        "data/raw/landcover/WDPA_WDOECM_Oct2021_Public_AF.zip",
-        "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
-        ]
+        "data/raw/africa_all_raw_substations.geojson",]
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
@@ -47,15 +41,15 @@ if config['enable'].get('retrieve_databundle', True):
         log: "logs/retrieve_databundle.log"
         script: 'scripts/retrieve_databundle_light.py'
 
-if config['enable'].get('download_osm_data', True):
-    rule download_osm_data:
-        output:
-            cables="data/raw/africa_all_raw_cables.geojson",
-            generators="data/raw/africa_all_raw_generators.geojson",
-            lines="data/raw/africa_all_raw_lines.geojson",
-            substations="data/raw/africa_all_raw_substations.geojson",
-        log: "logs/download_osm_data.log"
-        script: "scripts/osm_pbf_power_data_extractor.py"
+
+rule download_osm_data:
+    output:
+        cables="data/raw/africa_all_raw_cables.geojson",
+        generators="data/raw/africa_all_raw_generators.geojson",
+        lines="data/raw/africa_all_raw_lines.geojson",
+        substations="data/raw/africa_all_raw_substations.geojson",
+    log: "logs/download_osm_data.log"
+    script: "scripts/osm_pbf_power_data_extractor.py"
 
 
 rule clean_osm_data:
@@ -68,7 +62,6 @@ rule clean_osm_data:
         offshore_shapes='resources/offshore_shapes.geojson',
     output:
         generators="data/clean/africa_all_generators.geojson",
-        generators_csv="data/clean/africa_all_generators.csv",
         lines="data/clean/africa_all_lines.geojson",
         substations="data/clean/africa_all_substations.geojson",
     log: "logs/clean_osm_data.log"
@@ -79,6 +72,7 @@ rule build_osm_network:
     input:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",
+        cables="data/clean/africa_all_cables.geojson",
         substations="data/clean/africa_all_substations.geojson",
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
@@ -165,7 +159,7 @@ if config['enable'].get('build_cutout', False):
 if config['enable'].get('build_natura_raster', False):
     rule build_natura_raster:
         input:
-            shapefiles_land="data/raw/landcover",
+            natura = "data/raw/landcover/world_protected_areas/WDPA_WDOECM_Oct2021_Public_AF.zip",
             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"
@@ -195,8 +189,8 @@ rule build_renewable_profiles:
 rule build_powerplants:
     input:
         base_network="networks/base.nc",
-        pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/clean/africa_all_generators.csv"
+        pm_config="powerplantmatching_config.yaml",
+        custom_powerplants="data/custom_powerplants.csv"
     output: "resources/powerplants.csv"
     log: "logs/build_powerplants.log"
     threads: 1

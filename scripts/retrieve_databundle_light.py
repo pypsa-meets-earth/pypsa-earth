@@ -42,20 +42,17 @@ from _helpers import _sets_path_to_root
 
 logger = logging.getLogger(__name__)
 
+_sets_path_to_root("pypsa-africa")
+
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         from _helpers import mock_snakemake
         snakemake = mock_snakemake('retrieve_databundle_light')
         rootpath = '..'
     else:
         rootpath = '.'
     configure_logging(snakemake) # TODO Make logging compatible with progressbar (see PR #102)
-
-    _sets_path_to_root("pypsa-africa")
 
 
     # BUNDLE 1

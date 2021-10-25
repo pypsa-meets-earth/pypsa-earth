@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from _helpers import _sets_path_to_root
 from _helpers import configure_logging
-from _helpers import _to_csv_nafix
 
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
@@ -443,7 +442,6 @@ def clean_data(
 
     df_all_generators.to_file(output_files["generators"],
                               driver="GeoJSON")
-    _to_csv_nafix(df_all_generators, output_files["generators_csv"])
 
     return None
 
