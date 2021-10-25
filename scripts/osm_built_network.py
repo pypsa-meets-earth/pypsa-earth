@@ -114,7 +114,7 @@ def add_line_endings_tosubstations(substations, lines):
 
 
 # tol=0.01, around 700m at latitude 44.
-def set_substations_ids(buses, tol=0.01):
+def set_substations_ids(buses, tol=0.02):
     """
     Function to set substations ids to buses, accounting for location tolerance
 
@@ -220,12 +220,15 @@ def set_lines_ids(lines, buses):
         if distance_bus1 > 0.0:
             # the line does not end in the node, thus modify the linestring
             lines.loc[i, "geometry"] = linemerge([
+                lines.loc[i, "geometry"],
                 LineString([
                     row["bus_1_coors"],
                     buses_sel.geometry[bus1_id]
-                ]),
-                lines.loc[i, "geometry"]
+                ])
             ])
+
+    # update line endings
+    lines = line_endings_to_bus_conversion(lines)
     
     return lines, buses
 
@@ -323,6 +326,10 @@ def get_transformers(buses, lines):
                     'bus1_lat': g_value.geometry.iloc[id+1].y,
                 }
     
+
+    # update line endings
+    df_transformers = line_endings_to_bus_conversion(df_transformers)
+    
     return df_transformers
 
 
@@ -396,8 +403,13 @@ def set_lv_substations(buses):
 
     return buses
 
-
-def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01):
+# Note tolerance = 0.01 means around 700m
+# TODO: the current tolerance is high to avoid an issue in the Nigeria case where line 565939360-1
+#       seems to be interconnected to both ends, but at the eastern one, the node is actually not connected
+#       another line seems to be exactly touching the node, but from the data point of view it only fly over it.
+#       There may be the need to split a line in several segments in the case the line is within tolerance with
+#       respect to a node
+def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
     
@@ -412,13 +424,21 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01):
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses)
 
+    # drop lines starting and ending in the same node
+    lines = lines[lines["bus0"] != lines["bus1"]]
+
     # set substation_lv
     set_lv_substations(buses)
+
+    # get transformers: modelled as lines connecting buses with different voltage
+    transformers = get_transformers(buses, lines)
+
+    lines = lines.append(transformers)
 
     return lines, buses
 
 
-def create_station_at_equal_bus_locations(lines, buses):
+def create_station_at_equal_bus_locations(lines, buses, tol=0.01):
     # V1. Create station_id at same bus location
     # - We saw that buses are not connected exactly at one point, they are
     #   usually connected to a substation "area" (analysed on maps)
@@ -436,18 +456,21 @@ def create_station_at_equal_bus_locations(lines, buses):
     # If same location/geometry make station
     bus_all = buses
 
-    set_substations_ids(bus_all)
-    # bus_all["station_id"] = bus_all.groupby(["lon", "lat"]).ngroup()
+    # set substation ids
+    set_substations_ids(buses, tol=tol)
+
+    # set the bus ids to the line dataset
+    lines, buses = set_lines_ids(lines, buses)
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
     set_lv_substations(bus_all)
 
-    # Add station_id to line dataframe.
-    # Note: by construction, the first half of bus_all is "bus0" and the rest is "bus1"
-    n_row = int(bus_all.shape[0] / 2)  # row length
-    lines = lines.reset_index(drop=True)
-    lines["bus0"] = bus_all.loc[:(n_row - 1), ["bus_id"]]
-    lines["bus1"] = bus_all.loc[n_row:, ["bus_id"]].reset_index(drop=True)
+    # # Add station_id to line dataframe.
+    # # Note: by construction, the first half of bus_all is "bus0" and the rest is "bus1"
+    # n_row = int(bus_all.shape[0] / 2)  # row length
+    # lines = lines.reset_index(drop=True)
+    # lines["bus0"] = bus_all.loc[:(n_row - 1), ["bus_id"]]
+    # lines["bus1"] = bus_all.loc[n_row:, ["bus_id"]].reset_index(drop=True)
 
     # TRY: Keep only buses that are not duplicated & lv_substation = True
     # TODO: Check if this is necessary. What effetc do duplicates have?
@@ -458,12 +481,10 @@ def create_station_at_equal_bus_locations(lines, buses):
     return lines, buses
 
 
-def built_network():
+def built_network(inputs, outputs):
     # ----------- LOAD DATA -----------
-    paths = os.path.realpath("data/clean") + "/africa_all_substations.geojson"
-    pathl = os.path.realpath("data/clean") + "/africa_all_lines.geojson"
-    substations = gpd.read_file(paths).set_crs(epsg=4326, inplace=True)
-    lines = gpd.read_file(pathl).set_crs(epsg=4326, inplace=True)
+    substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
+    lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
 
     # Filter only Nigeria
     # lines = lines[lines.loc[:,"country"] == "nigeria"].copy()
@@ -483,36 +504,32 @@ def built_network():
     # TODO: Add and test other method (ready in jupyter)
 
     # METHOD to merge buses with same voltage and within tolerance
-    lines, buses = merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.01)
-
-    # get transformers: modelled as lines connecting buses with different voltage
-    transformers = get_transformers(buses, lines)
-
-    lines = lines.append(transformers)
+    lines, buses = merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.05)
 
     # Export data
     # Lines
     # Output file directory
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "base_network",
-        "africa_all" + "_lines" + "_build_network")
+    # outputfile_partial = os.path.join(
+    #     os.getcwd(), "data", "base_network",
+    #     "africa_all" + "_lines" + "_build_network")
 
     # create clean directory if not already exist
-    if not os.path.exists(outputfile_partial):
-        os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
+    if not os.path.exists(outputs["lines"]):
+        os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
-    _to_csv_nafix(lines, outputfile_partial + ".csv")  # Generate CSV
+    _to_csv_nafix(lines, outputs["lines"])  # Generate CSV
 
     # Buses
     # Output file directory
-    outputfile_partial = os.path.join(
-        os.getcwd(), "data", "base_network",
-        "africa_all" + "_buses" + "_build_network")
+    # outputfile_partial = os.path.join(
+    #     os.getcwd(), "data", "base_network",
+    #     "africa_all" + "_buses" + "_build_network")
+
     # create clean directory if not already exist
-    if not os.path.exists(outputfile_partial):
-        os.makedirs(os.path.dirname(outputfile_partial), exist_ok=True)
+    if not os.path.exists(outputs["substations"]):
+        os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
     # Generate CSV
-    _to_csv_nafix(buses, outputfile_partial + ".csv")
+    _to_csv_nafix(buses, outputs["substations"])
 
     return None
 
@@ -529,4 +546,4 @@ if __name__ == "__main__":
     _sets_path_to_root("pypsa-africa")
     # sys.path.append("./../../scripts")  ## alternative
 
-    built_network()
+    built_network(snakemake.input, snakemake.output)

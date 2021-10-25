@@ -91,7 +91,7 @@ def add_line_endings_tosubstations(substations, lines):
                                                  if p != None else None)
     bus_s["lat"] = bus_s["geometry"].map(lambda p: p.y
                                                  if p != None else None)
-    bus_s["bus_id"] = substations["bus_id"].max() + 1 + bus_s.index
+    bus_s["bus_id"] = (substations["bus_id"].max() if "bus_id" in substations else 0) + 1 + bus_s.index
 
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
@@ -121,70 +121,70 @@ def add_line_endings_tosubstations(substations, lines):
     return buses
 
 
-# tol=0.01, around 700m at latitude 44.
-def set_substations_ids(buses, tol=0.01):
-    """
-    Function to set substations ids to buses, accounting for location tolerance
+# # tol=0.01, around 700m at latitude 44.
+# def set_substations_ids(buses, tol=0.02):
+#     """
+#     Function to set substations ids to buses, accounting for location tolerance
 
-    The algorithm is as follows:
+#     The algorithm is as follows:
 
-    1. initialize all substation ids to -1
-    2. if the current substation has been already visited [substation_id < 0], then skip the calculation
-    3. otherwise:
-        1. identify the substations within the specified tolerance (tol)
-        2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
-        3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
-           in case of multiple substations with substation_ids >= 0, the first value is picked for all
+#     1. initialize all substation ids to -1
+#     2. if the current substation has been already visited [substation_id < 0], then skip the calculation
+#     3. otherwise:
+#         1. identify the substations within the specified tolerance (tol)
+#         2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
+#         3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
+#            in case of multiple substations with substation_ids >= 0, the first value is picked for all
 
-    """
+#     """
 
-    buses["station_id"] = -1
+#     buses["station_id"] = -1
 
-    station_id = 0
-    for i, row in buses.iterrows():
-        if buses.loc[i, "station_id"] >= 0:
-            continue
+#     station_id = 0
+#     for i, row in buses.iterrows():
+#         if buses.loc[i, "station_id"] >= 0:
+#             continue
 
-        # get substations within tolerance
-        close_nodes = np.where(
-            buses.apply(
-                lambda x: math.dist([row["lat"], row["lon"]],
-                                    [x["lat"], x["lon"]]) <= tol,
-                axis=1,
-            ))[0]
+#         # get substations within tolerance
+#         close_nodes = np.where(
+#             buses.apply(
+#                 lambda x: math.dist([row["lat"], row["lon"]],
+#                                     [x["lat"], x["lon"]]) <= tol,
+#                 axis=1,
+#             ))[0]
 
-        if len(close_nodes) == 1:
-            # if only one substation is in tolerance, then the substation is the current one iì
-            # Note that the node cannot be with substation_id >= 0, given the preliminary check
-            # at the beginning of the for loop
-            buses.loc[buses.index[i], "station_id"] = station_id
-            # update station id
-            station_id += 1
-        else:
-            # several substations in tolerance
+#         if len(close_nodes) == 1:
+#             # if only one substation is in tolerance, then the substation is the current one iì
+#             # Note that the node cannot be with substation_id >= 0, given the preliminary check
+#             # at the beginning of the for loop
+#             buses.loc[buses.index[i], "station_id"] = station_id
+#             # update station id
+#             station_id += 1
+#         else:
+#             # several substations in tolerance
 
-            # get their ids
-            subset_substation_ids = buses.loc[buses.index[close_nodes],
-                                              "station_id"]
-            # check if all substation_ids are negative (<0)
-            all_neg = subset_substation_ids.max() < 0
-            # check if at least a substation_id is negative (<0)
-            some_neg = subset_substation_ids.min() < 0
+#             # get their ids
+#             subset_substation_ids = buses.loc[buses.index[close_nodes],
+#                                               "station_id"]
+#             # check if all substation_ids are negative (<0)
+#             all_neg = subset_substation_ids.max() < 0
+#             # check if at least a substation_id is negative (<0)
+#             some_neg = subset_substation_ids.min() < 0
 
-            if all_neg:
-                # when all substation_ids are negative, then this is a new substation id
-                # set the current station_id and increment the counter
-                buses.loc[buses.index[close_nodes], "station_id"] = station_id
-                station_id += 1
-            elif some_neg:
-                # otherwise, when at least a substation_id is non-negative, then pick the first value
-                # and set it to all the other substations within tolerance
-                sub_id = -1
-                for substation_id in subset_substation_ids:
-                    if substation_id >= 0:
-                        sub_id = substation_id
-                        break
-                buses.loc[buses.index[close_nodes], "station_id"] = sub_id
+#             if all_neg:
+#                 # when all substation_ids are negative, then this is a new substation id
+#                 # set the current station_id and increment the counter
+#                 buses.loc[buses.index[close_nodes], "station_id"] = station_id
+#                 station_id += 1
+#             elif some_neg:
+#                 # otherwise, when at least a substation_id is non-negative, then pick the first value
+#                 # and set it to all the other substations within tolerance
+#                 sub_id = -1
+#                 for substation_id in subset_substation_ids:
+#                     if substation_id >= 0:
+#                         sub_id = substation_id
+#                         break
+#                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
 
 
 
@@ -521,7 +521,7 @@ def clean_data(
     # add line endings if option is enabled
     if add_line_endings:
         df_all_substations = add_line_endings_tosubstations(
-            df_all_substations, df_all_lines)
+            gpd.GeoDataFrame(), df_all_lines)
 
     # filter substations by tag
     if tag_substation:  # if the string is not empty check it
@@ -531,8 +531,8 @@ def clean_data(
     # filter substation by voltage
     df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
     
-    # set substation_id
-    set_substations_ids(df_all_substations)
+    # # set substation_id
+    # set_substations_ids(df_all_substations, tol=0.02)
 
     # finalize dataframe types
     df_all_substations = finalize_substation_types(df_all_substations)
