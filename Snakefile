@@ -37,6 +37,7 @@ datafiles = [
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
+        "data/costs.csv",
         "data/raw/landcover/WDPA_WDOECM_Oct2021_Public_AF.zip",
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
         ]
@@ -94,6 +95,7 @@ rule build_shapes:
         # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
         # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
         # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
+        eez='data/raw/eez/eez_v11.gpkg'
     output:
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
@@ -196,7 +198,7 @@ rule build_powerplants:
     input:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/clean/africa_all_generators.csv"
+        custom_powerplants="data/base_network/africa_all_generators.csv"
     output: "resources/powerplants.csv"
     log: "logs/build_powerplants.log"
     threads: 1

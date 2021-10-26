@@ -219,18 +219,18 @@ def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgu
             pass
 
 
-def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
+def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
     The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
     """
 
-    EEZ_gpkg = os.path.join(os.getcwd(), "data", "raw", "eez",
-                            name_file)  # Input filepath gpkg
+    # EEZ_gpkg = os.path.join(os.getcwd(), "data", "raw", "eez",
+    #                         name_file)  # Input filepath gpkg
 
     if not os.path.exists(EEZ_gpkg):
         raise Exception(
-            f"File EEZ {name_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}"
+            f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}"
         )
 
     geodf_EEZ = gpd.read_file(EEZ_gpkg)
@@ -307,7 +307,7 @@ def load_EEZ(countries_codes, name_file="eez_v11.gpkg"):
 #     return ret_df
 
 
-def eez(countries, country_shapes, out_logging=False, distance=0.01):
+def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     """
     Creates offshore shapes by 
     - buffer smooth countryshape (=offset country shape)
@@ -322,7 +322,7 @@ def eez(countries, country_shapes, out_logging=False, distance=0.01):
         _logger.info("Stage 2 of 4: Create offshore shapes")
 
     # load data
-    df_eez = load_EEZ(countries)
+    df_eez = load_EEZ(countries, EEZ_gpkg)
 
     # simplified offshore_shape
     # ret_df = df_eez.set_index("name")["geometry"].map(
@@ -668,13 +668,14 @@ if __name__ == "__main__":
     update = snakemake.config['build_shape_options']['update_file']
     out_logging = snakemake.config['build_shape_options']['out_logging']
     year = snakemake.config['build_shape_options']['year']
+    EEZ_gpkg = snakemake.input["eez"]
 
     # print(snakemake.config)
 
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(countries_list, country_shapes, out_logging)
+    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     # offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
