@@ -207,7 +207,7 @@ from _helpers import _sets_path_to_root
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("build_renewable_profiles",
-                                   technology="hydro")
+                                   technology="onwind")
         _sets_path_to_root("pypsa-africa")
 
 
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(paths["cutout"])
     regions = gpd.read_file(paths.regions).set_index("name").rename_axis("bus")
     # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
-    regions = regions.dropna(axis="index", subset=["geometry"])
+    regions = regions.dropna(axis="index", subset=["geometry"]).drop_duplicates()
     buses = regions.index
     
     

@@ -108,7 +108,7 @@ sys.settrace
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 #_sets_path_to_root("pypsa-africa")
 
@@ -482,7 +482,7 @@ if __name__ == "__main__":
 
     n, stub_map = remove_stubs(n)
 
-    busmaps = [trafo_map, simplify_links_map]  # , stub_map]
+    busmaps = [trafo_map, simplify_links_map , stub_map]
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))

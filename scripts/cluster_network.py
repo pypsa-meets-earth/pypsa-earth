@@ -466,7 +466,9 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    n.buses.at[['1371', '2516', '3962', '5107', '1297', '1348', '1367', '2479', '2498', '2512'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
+    #n.buses.at[['1371', '2516', '3962', '5107', '1297', '1348', '1367', '2479', '2498', '2512'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
+    n.buses.at[['166','440', '564', '1167', '1583', '1774', '1896', '2356', '3758', '4947', '2516', '5107', '1367', '2479', '2498'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
+    n.buses.at[['1367'], 'country'] = 'DZ'       #TODO isnpect the wrong country mapping of buses
     focus_weights = snakemake.config.get("focus_weights", None)
 
     renewable_carriers = pd.Index([
