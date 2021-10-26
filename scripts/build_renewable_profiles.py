@@ -216,7 +216,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("build_renewable_profiles",
-                                   technology="onwind")
+                                   technology="solar")
         _sets_path_to_root("pypsa-africa")
 
 
