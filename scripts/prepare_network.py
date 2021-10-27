@@ -86,12 +86,14 @@ def add_co2limit(n, Nyears=1., factor=None):
 def add_emission_prices(n, emission_prices=None, exclude_co2=False):
     if emission_prices is None:
         emission_prices = snakemake.config['costs']['emission_prices']
-    if exclude_co2: emission_prices.pop('co2')
+    if exclude_co2:
+        emission_prices.pop('co2')
     ep = (pd.Series(emission_prices).rename(lambda x: x+'_emissions') *
           n.carriers.filter(like='_emissions')).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
     n.generators['marginal_cost'] += gen_ep
-    su_ep = n.storage_units.carrier.map(ep) / n.storage_units.efficiency_dispatch
+    su_ep = n.storage_units.carrier.map(
+        ep) / n.storage_units.efficiency_dispatch
     n.storage_units['marginal_cost'] += su_ep
 
 
@@ -105,9 +107,8 @@ def set_transmission_limit(n, ll_type, factor, Nyears=1):
     links_dc_b = n.links.carrier == 'DC' if not n.links.empty else pd.Series()
 
     _lines_s_nom = (np.sqrt(3) * n.lines.type.map(n.line_types.i_nom) *
-                   n.lines.num_parallel *  n.lines.bus0.map(n.buses.v_nom))
+                    n.lines.num_parallel * n.lines.bus0.map(n.buses.v_nom))
     lines_s_nom = n.lines.s_nom.where(n.lines.type == '', _lines_s_nom)
-
 
     col = 'capital_cost' if ll_type == 'c' else 'length'
     ref = (lines_s_nom @ n.lines[col] +
@@ -165,7 +166,7 @@ def apply_time_segmentation(n, segments):
 
     load_norm = n.loads_t.p_set.max()
     load = n.loads_t.p_set / load_norm
-    
+
     inflow_norm = n.storage_units_t.inflow.max()
     inflow = n.storage_units_t.inflow / inflow_norm
 
@@ -181,11 +182,13 @@ def apply_time_segmentation(n, segments):
 
     weightings = segmented.index.get_level_values("Segment Duration")
     offsets = np.insert(np.cumsum(weightings[:-1]), 0, 0)
-    snapshots = [n.snapshots[0] + pd.Timedelta(f"{offset}h") for offset in offsets]
+    snapshots = [n.snapshots[0] +
+                 pd.Timedelta(f"{offset}h") for offset in offsets]
 
     n.set_snapshots(pd.DatetimeIndex(snapshots, name='name'))
-    n.snapshot_weightings = pd.Series(weightings, index=snapshots, name="weightings", dtype="float64")
-    
+    n.snapshot_weightings = pd.Series(
+        weightings, index=snapshots, name="weightings", dtype="float64")
+
     segmented.index = snapshots
     n.generators_t.p_max_pu = segmented[n.generators_t.p_max_pu.columns] * p_max_pu_norm
     n.loads_t.p_set = segmented[n.loads_t.p_set.columns] * load_norm
@@ -193,21 +196,23 @@ def apply_time_segmentation(n, segments):
 
     return n
 
+
 def enforce_autarky(n, only_crossborder=False):
     if only_crossborder:
         lines_rm = n.lines.loc[
-                        n.lines.bus0.map(n.buses.country) !=
-                        n.lines.bus1.map(n.buses.country)
-                    ].index
+            n.lines.bus0.map(n.buses.country) !=
+            n.lines.bus1.map(n.buses.country)
+        ].index
         links_rm = n.links.loc[
-                        n.links.bus0.map(n.buses.country) !=
-                        n.links.bus1.map(n.buses.country)
-                    ].index
+            n.links.bus0.map(n.buses.country) !=
+            n.links.bus1.map(n.buses.country)
+        ].index
     else:
         lines_rm = n.lines.index
-        links_rm = n.links.loc[n.links.carrier=="DC"].index
+        links_rm = n.links.loc[n.links.carrier == "DC"].index
     n.mremove("Line", lines_rm)
     n.mremove("Link", links_rm)
+
 
 def set_line_nom_max(n):
     s_nom_max_set = snakemake.config["lines"].get("s_nom_max,", np.inf)
@@ -215,12 +220,13 @@ def set_line_nom_max(n):
     n.lines.s_nom_max.clip(upper=s_nom_max_set, inplace=True)
     n.links.p_nom_max.clip(upper=p_nom_max_set, inplace=True)
 
+
 if __name__ == "__main__":
     if 'snakemake' not in globals():
         from _helpers import mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake('prepare_network', network='elec', simpl='',
-                                  clusters='10', ll='v0.3', opts='Co2L-24H')
+                                   clusters='10', ll='v0.3', opts='Co2L-24H')
     configure_logging(snakemake)
 
     opts = snakemake.wildcards.opts.split('-')
@@ -266,7 +272,7 @@ if __name__ == "__main__":
                 comps = {"Generator", "Link", "StorageUnit", "Store"}
                 for c in n.iterate_components(comps):
                     sel = c.df.carrier.str.contains(carrier)
-                    c.df.loc[sel,attr] *= factor
+                    c.df.loc[sel, attr] *= factor
 
     if 'Ep' in opts:
         add_emission_prices(n)

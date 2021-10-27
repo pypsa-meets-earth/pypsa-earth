@@ -77,7 +77,6 @@ def prepare_substation_df(df_all_substations):
     return df_all_substations
 
 
-
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
@@ -86,21 +85,21 @@ def add_line_endings_tosubstations(substations, lines):
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_s["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[0]
-                                               if len(p.geoms) >= 2 else None)
+                                                    if len(p.geoms) >= 2 else None)
     bus_s["lon"] = bus_s["geometry"].map(lambda p: p.x
-                                                 if p != None else None)
+                                         if p != None else None)
     bus_s["lat"] = bus_s["geometry"].map(lambda p: p.y
-                                                 if p != None else None)
-    bus_s["bus_id"] = (substations["bus_id"].max() if "bus_id" in substations else 0) + 1 + bus_s.index
-
+                                         if p != None else None)
+    bus_s["bus_id"] = (substations["bus_id"].max()
+                       if "bus_id" in substations else 0) + 1 + bus_s.index
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1]
-                                               if len(p.geoms) >= 2 else None)
+                                                    if len(p.geoms) >= 2 else None)
     bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x
-                                                 if p != None else None)
+                                         if p != None else None)
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y
-                                                 if p != None else None)
+                                         if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
 
     bus_all = bus_s.append(bus_e).reset_index(drop=True)
@@ -108,10 +107,12 @@ def add_line_endings_tosubstations(substations, lines):
     # Add NaN as default
     bus_all["station_id"] = np.nan
     bus_all["dc"] = False  # np.nan
-    bus_all["under_construction"] = False  # Assuming substations completed for installed lines
+    # Assuming substations completed for installed lines
+    bus_all["under_construction"] = False
     bus_all["tag_area"] = 0.0  # np.nan
     bus_all["symbol"] = "substation"
-    bus_all["tag_substation"] = "transmission"  # TODO: this tag may be improved, maybe depending on voltage levels
+    # TODO: this tag may be improved, maybe depending on voltage levels
+    bus_all["tag_substation"] = "transmission"
 
     buses = substations.append(bus_all).reset_index(drop=True)
 
@@ -185,7 +186,6 @@ def add_line_endings_tosubstations(substations, lines):
 #                         sub_id = substation_id
 #                         break
 #                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
-
 
 
 def set_unique_id(df, col):
@@ -468,14 +468,16 @@ def clean_data(
     # ----------- LINES AND CABLES -----------
 
     # Load raw data lines
-    df_lines = gpd.read_file(input_files["lines"]).set_crs(epsg=4326, inplace=True)
+    df_lines = gpd.read_file(input_files["lines"]).set_crs(
+        epsg=4326, inplace=True)
 
     # prepare lines dataframe and data types
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
 
     # Load raw data lines
-    df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326, inplace=True)
+    df_cables = gpd.read_file(input_files["cables"]).set_crs(
+        epsg=4326, inplace=True)
 
     # prepare cables dataframe and data types
     df_cables = prepare_lines_df(df_cables)
@@ -513,7 +515,7 @@ def clean_data(
     # ----------- SUBSTATIONS -----------
 
     df_all_substations = gpd.read_file(input_files["substations"]).set_crs(
-                                           epsg=4326, inplace=True)
+        epsg=4326, inplace=True)
 
     # prepare dataset for substations
     df_all_substations = prepare_substation_df(df_all_substations)
@@ -530,7 +532,7 @@ def clean_data(
 
     # filter substation by voltage
     df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
-    
+
     # # set substation_id
     # set_substations_ids(df_all_substations, tol=0.02)
 
@@ -557,7 +559,7 @@ def clean_data(
     # ----------- GENERATORS -----------
 
     df_all_generators = gpd.read_file(input_files["generators"]).set_crs(epsg=4326,
-                                                          inplace=True)
+                                                                         inplace=True)
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
@@ -572,7 +574,7 @@ def clean_data(
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         # needed to run mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -590,7 +592,7 @@ if __name__ == "__main__":
         "names_by_shapes"]
     add_line_endings = snakemake.config["osm_data_cleaning_options"][
         "add_line_endings"]
-    
+
     input_files = snakemake.input
     output_files = snakemake.output
 
@@ -598,10 +600,10 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = (gpd.read_file(
             snakemake.input.country_shapes).set_index("name")
-                          ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         offshore_shapes = (gpd.read_file(
             snakemake.input.offshore_shapes).set_index("name")
-                           ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes)
     else:

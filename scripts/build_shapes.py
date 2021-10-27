@@ -32,7 +32,7 @@ _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
 # IMPORTANT: RUN SCRIPT FROM THIS SCRIPTS DIRECTORY i.e data_exploration/ TODO: make more robust
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # import sys
 
@@ -155,7 +155,8 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
-        polys = sorted(polys, key=attrgetter("area"), reverse=True) # here deprecation warning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
+        # here deprecation warning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
+        polys = sorted(polys, key=attrgetter("area"), reverse=True)
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
@@ -190,7 +191,8 @@ def countries(countries, update=False, out_logging=False):
 def country_cover(country_shapes, eez_shapes=None, out_logging=False):
 
     if out_logging:
-        _logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
+        _logger.info(
+            "Stage 3 of 4: Merge country shapes to create continent shape")
 
     shapes = list(country_shapes)
     if eez_shapes is not None:
@@ -202,7 +204,8 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False):
     return Polygon(shell=africa_shape.exterior)
 
 
-def save_to_geojson(df, fn): # error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
+# error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
+def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
     if not isinstance(df, gpd.GeoDataFrame):
@@ -268,7 +271,7 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
 
 #         if n_offshore_shapes > 1:
 #             # when multiple shapes per country, then merge polygons
-            
+
 #             geom = ret_df_old[selection].geometry.unary_union
 #             ret_df_old.drop(ret_df_old[selection].index, inplace=True)
 #             ret_df_old = ret_df_old.append({"name": c_code, "geometry": geom}, ignore_index=True)
@@ -317,7 +320,6 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     """
     from shapely.validation import make_valid
 
-    
     if out_logging:
         _logger.info("Stage 2 of 4: Create offshore shapes")
 
@@ -327,7 +329,7 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     # simplified offshore_shape
     # ret_df = df_eez.set_index("name")["geometry"].map(
     #     lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
-    
+
     ret_df = df_eez[["name", "geometry"]]
     # create unique shape if country is described by multiple shapes
     for c_code in countries:
@@ -336,16 +338,17 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
 
         if n_offshore_shapes > 1:
             # when multiple shapes per country, then merge polygons
-            
+
             geom = ret_df[selection].geometry.unary_union
             ret_df.drop(ret_df[selection].index, inplace=True)
-            ret_df = ret_df.append({"name": c_code, "geometry": geom}, ignore_index=True)
+            ret_df = ret_df.append(
+                {"name": c_code, "geometry": geom}, ignore_index=True)
 
     ret_df = ret_df.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
 
-
-    ret_df = ret_df.apply(lambda x: make_valid(x))  # hole lies outside occurs here
+    # hole lies outside occurs here
+    ret_df = ret_df.apply(lambda x: make_valid(x))
     country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
@@ -425,7 +428,8 @@ def download_WorldPop(country_code,
                         loaded = True
                         break
         if not loaded:
-            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+            _logger.error(
+                f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -541,10 +545,10 @@ def add_gdp_data(
             #   but it is conservative and avoids considering multiple times the same
             #   pixels
             out_image, out_transform = generalized_mask(src,
-                                            row["geometry"],
-                                            all_touched=True,
-                                            invert=False,
-                                            nodata=0.0)
+                                                        row["geometry"],
+                                                        all_touched=True,
+                                                        invert=False,
+                                                        nodata=0.0)
             # out_image_int, out_transform = mask(src,
             #                                row["geometry"],
             #                                all_touched=False,
@@ -556,12 +560,12 @@ def add_gdp_data(
             # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
             if out_logging == True:
-                _logger.info("Stage 4/4 GDP: shape: " + str(index) + " out of " + str(df_gadm.shape[0]))
+                _logger.info("Stage 4/4 GDP: shape: " +
+                             str(index) + " out of " + str(df_gadm.shape[0]))
 
             # update the gdp data in the dataset
             df_gadm.loc[index, "gdp"] = gdp_by_geom
     return df_gadm
-
 
 
 def add_population_data(df_gadm,
@@ -594,10 +598,10 @@ def add_population_data(df_gadm,
                 #   the population, but the error is limited and it enables halving the
                 #   computational time
                 out_image, out_transform = generalized_mask(src,
-                                            row["geometry"],
-                                            all_touched=True,
-                                            invert=False,
-                                            nodata=0.0)
+                                                            row["geometry"],
+                                                            all_touched=True,
+                                                            invert=False,
+                                                            nodata=0.0)
                 # out_image_int, out_transform = mask(src,
                 #                                row["geometry"],
                 #                                all_touched=False,
@@ -614,7 +618,8 @@ def add_population_data(df_gadm,
                 count += 1
 
                 if out_logging == True:
-                    _logger.info("Stage 4/4 POP: " + str(count) + " out of " + str(df_gadm.shape[0]) + " [" + c_code + "]")
+                    _logger.info("Stage 4/4 POP: " + str(count) + " out of " +
+                                 str(df_gadm.shape[0]) + " [" + c_code + "]")
                     # print(c_code, ": ", index, " out of ",
                     #      country_rows.shape[0])
 
@@ -675,7 +680,8 @@ if __name__ == "__main__":
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg, out_logging)
+    offshore_shapes = eez(countries_list, country_shapes,
+                          EEZ_gpkg, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     # offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)

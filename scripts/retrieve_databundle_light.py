@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         from _helpers import mock_snakemake
@@ -53,14 +53,14 @@ if __name__ == "__main__":
         rootpath = '..'
     else:
         rootpath = '.'
-    configure_logging(snakemake) # TODO Make logging compatible with progressbar (see PR #102)
+    # TODO Make logging compatible with progressbar (see PR #102)
+    configure_logging(snakemake)
 
     _sets_path_to_root("pypsa-africa")
 
-
     # BUNDLE 1
     destination = './resources'
-    zip_path = destination +'.zip'
+    zip_path = destination + '.zip'
     url = "https://drive.google.com/file/d/1nrWntieUVUcyya0xaadt4T3JFTDrqhLf/view?usp=sharing"
     gdd.download_file_from_google_drive(file_id='1nrWntieUVUcyya0xaadt4T3JFTDrqhLf',
                                         dest_path=zip_path,
@@ -68,10 +68,9 @@ if __name__ == "__main__":
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
-
     # BUNDLE 2
     destination = './data'
-    zip_path = destination +'.zip'
+    zip_path = destination + '.zip'
     url = "https://drive.google.com/file/d/1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ/view?usp=sharing"
     gdd.download_file_from_google_drive(file_id='1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ',
                                         dest_path=zip_path,
@@ -79,10 +78,9 @@ if __name__ == "__main__":
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
-
     # BUNDLE 3
     destination = './cutouts'
-    zip_path = destination +'.zip'
+    zip_path = destination + '.zip'
     url = "https://drive.google.com/file/d/1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O/view?usp=sharing"
     gdd.download_file_from_google_drive(file_id='1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O',
                                         dest_path=zip_path,

@@ -85,7 +85,8 @@ def attach_storageunits(n, costs):
                capital_cost=costs.at[carrier, 'capital_cost'],
                marginal_cost=costs.at[carrier, 'marginal_cost'],
                efficiency_store=costs.at[lookup_store[carrier], 'efficiency'],
-               efficiency_dispatch=costs.at[lookup_dispatch[carrier], 'efficiency'],
+               efficiency_dispatch=costs.at[lookup_dispatch[carrier],
+                                            'efficiency'],
                max_hours=max_hours[carrier],
                cyclic_state_of_charge=True)
 
@@ -100,7 +101,8 @@ def attach_stores(n, costs):
     bus_sub_dict = {k: n.buses[k].values for k in ['x', 'y', 'country']}
 
     if 'H2' in carriers:
-        h2_buses_i = n.madd("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
+        h2_buses_i = n.madd("Bus", buses_i + " H2",
+                            carrier="H2", **bus_sub_dict)
 
         n.madd("Store", h2_buses_i,
                bus=h2_buses_i,
@@ -124,12 +126,14 @@ def attach_stores(n, costs):
                carrier='H2 fuel cell',
                p_nom_extendable=True,
                efficiency=costs.at["fuel cell", "efficiency"],
-               #NB: fixed cost is per MWel
-               capital_cost=costs.at["fuel cell", "capital_cost"] * costs.at["fuel cell", "efficiency"],
+               # NB: fixed cost is per MWel
+               capital_cost=costs.at["fuel cell", "capital_cost"] * \
+               costs.at["fuel cell", "efficiency"],
                marginal_cost=costs.at["fuel cell", "marginal_cost"])
 
     if 'battery' in carriers:
-        b_buses_i = n.madd("Bus", buses_i + " battery", carrier="battery", **bus_sub_dict)
+        b_buses_i = n.madd("Bus", buses_i + " battery",
+                           carrier="battery", **bus_sub_dict)
 
         n.madd("Store", b_buses_i,
                bus=b_buses_i,
@@ -152,7 +156,7 @@ def attach_stores(n, costs):
                bus0=b_buses_i,
                bus1=buses_i,
                carrier='battery discharger',
-               efficiency=costs.at['battery inverter','efficiency'],
+               efficiency=costs.at['battery inverter', 'efficiency'],
                p_nom_extendable=True,
                marginal_cost=costs.at["battery inverter", "marginal_cost"])
 
@@ -162,20 +166,23 @@ def attach_hydrogen_pipelines(n, costs):
     ext_carriers = elec_opts['extendable_carriers']
     as_stores = ext_carriers.get('Store', [])
 
-    if 'H2 pipeline' not in ext_carriers.get('Link',[]): return
+    if 'H2 pipeline' not in ext_carriers.get('Link', []):
+        return
 
     assert 'H2' in as_stores, ("Attaching hydrogen pipelines requires hydrogen "
-            "storage to be modelled as Store-Link-Bus combination. See "
-            "`config.yaml` at `electricity: extendable_carriers: Store:`.")
+                               "storage to be modelled as Store-Link-Bus combination. See "
+                               "`config.yaml` at `electricity: extendable_carriers: Store:`.")
 
     # determine bus pairs
-    attrs = ["bus0","bus1","length"]
+    attrs = ["bus0", "bus1", "length"]
     candidates = pd.concat([n.lines[attrs], n.links.query('carrier=="DC"')[attrs]])\
-                    .reset_index(drop=True)
+        .reset_index(drop=True)
 
     # remove bus pair duplicates regardless of order of bus0 and bus1
-    h2_links = candidates[~pd.DataFrame(np.sort(candidates[['bus0', 'bus1']])).duplicated()]
-    h2_links.index = h2_links.apply(lambda c: f"H2 pipeline {c.bus0}-{c.bus1}", axis=1)
+    h2_links = candidates[~pd.DataFrame(
+        np.sort(candidates[['bus0', 'bus1']])).duplicated()]
+    h2_links.index = h2_links.apply(
+        lambda c: f"H2 pipeline {c.bus0}-{c.bus1}", axis=1)
 
     # add pipelines
     n.madd("Link",
@@ -185,8 +192,9 @@ def attach_hydrogen_pipelines(n, costs):
            p_min_pu=-1,
            p_nom_extendable=True,
            length=h2_links.length.values,
-           capital_cost=costs.at['H2 pipeline','capital_cost']*h2_links.length,
-           efficiency=costs.at['H2 pipeline','efficiency'],
+           capital_cost=costs.at['H2 pipeline',
+                                 'capital_cost']*h2_links.length,
+           efficiency=costs.at['H2 pipeline', 'efficiency'],
            carrier="H2 pipeline")
 
 
@@ -195,7 +203,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake('add_extra_components', network='elec',
-                                  simpl='', clusters=10)
+                                   simpl='', clusters=10)
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

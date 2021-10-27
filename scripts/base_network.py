@@ -122,7 +122,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
@@ -145,7 +145,7 @@ def _load_buses_from_osm():
     # TODO Deprecated. No influence because of new rebase. Remove?
     buses_with_v_nom_to_keep_b = (buses.v_nom.isin(
         snakemake.config["electricity"]["voltages"])
-                                  | buses.v_nom.isnull())
+        | buses.v_nom.isnull())
     logger.info("Removing buses with voltages {}".format(
         pd.Index(buses.v_nom.unique()).dropna().difference(
             snakemake.config["electricity"]["voltages"])))
@@ -462,7 +462,8 @@ def _set_countries_and_substations(n):
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
     # .str.contains("substation|converter station",
-    substation_b = buses["symbol"].str.contains("substation|converter station", case=False)
+    substation_b = buses["symbol"].str.contains(
+        "substation|converter station", case=False)
 
     #                                             case=False)
 
@@ -529,7 +530,8 @@ def _set_countries_and_substations(n):
                                      geometry=gpd.points_from_xy(
                                          bus_locations.x, bus_locations.y),
                                      crs=4326)
-    offshore_b = bus_locations.within(offshore_shapes)  # Check if bus is in shape
+    offshore_b = bus_locations.within(
+        offshore_shapes)  # Check if bus is in shape
 
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (

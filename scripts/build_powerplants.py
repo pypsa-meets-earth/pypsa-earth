@@ -91,11 +91,11 @@ if __name__ == "__main__":
            .powerplant.fill_missing_decommyears()
            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries')
            .replace({'Technology': {'Steam Turbine': 'OCGT'}})
-            .assign(Fueltype=lambda df: (
-                    df.Fueltype
-                      .where(df.Fueltype != 'Natural Gas',
-                             df.Technology.replace('Steam Turbine',
-                                                   'OCGT').fillna('OCGT')))))
+           .assign(Fueltype=lambda df: (
+               df.Fueltype
+               .where(df.Fueltype != 'Natural Gas',
+                      df.Technology.replace('Steam Turbine',
+                                            'OCGT').fillna('OCGT')))))
 
     ppl_query = snakemake.config['electricity']['powerplants_filter']
     if isinstance(ppl_query, str):
@@ -103,21 +103,24 @@ if __name__ == "__main__":
 
     # ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
 
-    cntries_without_ppl = [c for c in countries if c not in ppl.Country.unique()]
+    cntries_without_ppl = [
+        c for c in countries if c not in ppl.Country.unique()]
 
     for c in countries:
         substation_i = n.buses.query('substation_lv and country == @c').index
-        kdtree = KDTree(n.buses.loc[substation_i, ['x','y']].values)
+        kdtree = KDTree(n.buses.loc[substation_i, ['x', 'y']].values)
         ppl_i = ppl.query('Country == @c').index
 
-        tree_i = kdtree.query(ppl.loc[ppl_i, ['lon','lat']].values)[1]
+        tree_i = kdtree.query(ppl.loc[ppl_i, ['lon', 'lat']].values)[1]
         ppl.loc[ppl_i, 'bus'] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
     if cntries_without_ppl:
-        logging.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+        logging.warning(
+            f"No powerplants known in: {', '.join(cntries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
-        logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
+        logging.warning(
+            f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
     ppl.to_csv(snakemake.output[0])

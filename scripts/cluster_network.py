@@ -181,7 +181,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
-    N = n.buses.groupby(["country"]).size()  # originally ["country", "sub_networks"]
+    # originally ["country", "sub_networks"]
+    N = n.buses.groupby(["country"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -419,7 +420,7 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("cluster_network",
