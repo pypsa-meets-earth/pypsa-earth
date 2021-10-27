@@ -81,6 +81,7 @@ from osm_pbf_power_data_extractor import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
+from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
@@ -455,13 +456,14 @@ def _set_countries_and_substations(n):
     countries = create_country_list(snakemake.config["countries"])
     country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
         "name")["geometry"].set_crs(4326))
-    offshore_shapes = (gpd.read_file(
-        snakemake.input.offshore_shapes).set_index("name")["geometry"].set_crs(
-            4326))
+    offshore_shapes = unary_union(
+        gpd.read_file(
+            snakemake.input.offshore_shapes)["geometry"].set_crs(4326))
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
     # .str.contains("substation|converter station",
-    substation_b = buses["symbol"]
+    substation_b = buses["symbol"].str.contains("substation|converter station",
+                                                case=False)
 
     #                                             case=False)
 
@@ -524,13 +526,14 @@ def _set_countries_and_substations(n):
     # buses["substation_lv"] = True # TODO:remove as done in osm_build_network?
     # TODO: New implementation below
     bus_locations = buses
-    bus_locations = gpd.GeoDataFrame(bus_locations,
-                                     geometry=gpd.points_from_xy(
-                                         buses.x, buses.y),
-                                     crs=4326)
-    offshore_b = (bus_locations.within(offshore_shapes)
-                  )[:-offshore_shapes.size]  # Check if bus is in shape
-    offshore_b = offshore_b
+    bus_locations = gpd.GeoDataFrame(
+        bus_locations,
+        geometry=gpd.points_from_xy(bus_locations.x, bus_locations.y),
+        crs=4326,
+    )
+    offshore_b = bus_locations.within(
+        offshore_shapes)  # Check if bus is in shape
+
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
         buses["v_nom"] >=
@@ -743,6 +746,8 @@ def base_network():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)

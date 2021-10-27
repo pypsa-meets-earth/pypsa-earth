@@ -38,6 +38,8 @@ osm_data_cleaning_options:
   names_by_shapes: True  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
+  add_line_endings: True  # When true, the line endings are added to the dataset of the substations
+  group_close_buses: True  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
@@ -57,14 +59,14 @@ snapshots:
 
 enable:
   # prepare_links_p_nom: false
-  retrieve_databundle: true
-  download_osm_data: false
+  retrieve_databundle: false
+  download_osm_data: true
   # retrieve_cutout: true
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
+  build_natura_raster: false  # If True, then build_natura_raster can be run
   # custom_busmap: false
 
 electricity:

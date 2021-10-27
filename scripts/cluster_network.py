@@ -131,9 +131,9 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
+from _helpers import _sets_path_to_root
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
-from _helpers import _sets_path_to_root
 from add_electricity import load_costs
 from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
@@ -181,7 +181,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
-    N = n.buses.groupby(["country"]).size()  # originally ["country", "sub_networks"]
+    # originally ["country", "sub_networks"]
+    N = n.buses.groupby(["country"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -290,11 +291,8 @@ def busmap_for_n_clusters(n,
         weight = weighting_for_country(n, x)
 
         if algorithm == "kmeans":
-            return prefix + busmap_by_kmeans(n,
-                                             weight,
-                                             n_cluster_c,
-                                             buses_i=x.index,
-                                             **algorithm_kwds)
+            return prefix + busmap_by_kmeans(
+                n, weight, n_cluster_c, buses_i=x.index, **algorithm_kwds)
         elif algorithm == "spectral":
             return prefix + busmap_by_spectral_clustering(
                 reduce_network(n, x), n_cluster_c, **algorithm_kwds)
@@ -397,10 +395,8 @@ def cluster_regions(busmaps, input=None, output=None):
                                          which)).set_index("name").dropna()
                    )  # TODO fix the None geomerty in the regions files
 
-        geom_c = (
-            regions.geometry.groupby(busmap).apply(list).apply(
-                shapely.ops.unary_union)
-        )
+        geom_c = (regions.geometry.groupby(busmap).apply(list).apply(
+            shapely.ops.unary_union))
         regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
         regions_c.index.name = "name"
         save_to_geojson(regions_c, getattr(output, which))
@@ -419,13 +415,13 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="50")
+                                   clusters="10")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

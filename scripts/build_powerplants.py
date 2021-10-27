@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: MIT
-
 # coding: utf-8
 """
 Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend the powerplant database with custom entries provided in ``data/custom_powerplants.csv``.
@@ -44,38 +43,42 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 """
-
-import yaml
 import logging
 import os
-from _helpers import configure_logging
 
-import pypsa
-import powerplantmatching as pm
-import pandas as pd
 import numpy as np
-
+import pandas as pd
+import powerplantmatching as pm
+import pypsa
+import yaml
+from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 
 logger = logging.getLogger(__name__)
 
 
 def add_custom_powerplants(ppl):
-    custom_ppl_query = snakemake.config['electricity']['custom_powerplants']
+    custom_ppl_query = snakemake.config["electricity"]["custom_powerplants"]
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(snakemake.input.custom_powerplants, index_col=0,
-                           dtype={'bus': 'str'})
+    add_ppls = pd.read_csv(snakemake.input.custom_powerplants,
+                           index_col=0,
+                           dtype={"bus": "str"})
     if isinstance(custom_ppl_query, str):
         add_ppls.query(custom_ppl_query, inplace=True)
-    return ppl.append(add_ppls, sort=False, ignore_index=True, verify_integrity=True)
+    return ppl.append(add_ppls,
+                      sort=False,
+                      ignore_index=True,
+                      verify_integrity=True)
 
 
 if __name__ == "__main__":
-    if 'snakemake' not in globals():
+    if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake('build_powerplants')
+        snakemake = mock_snakemake("build_powerplants")
+
     configure_logging(snakemake)
 
     with open(snakemake.input.pm_config, "r") as f:
@@ -83,39 +86,46 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
     countries = n.buses.country.unique()
-    config['target_countries'] = countries
+    config["target_countries"] = countries
 
-    ppl = (pm.powerplants(from_url=False, config=config)
-           .powerplant.fill_missing_decommyears()
-           .query('Fueltype not in ["Solar", "Wind"] and Country in @countries')
-           .replace({'Technology': {'Steam Turbine': 'OCGT'}})
-            .assign(Fueltype=lambda df: (
-                    df.Fueltype
-                      .where(df.Fueltype != 'Natural Gas',
-                             df.Technology.replace('Steam Turbine',
-                                                   'OCGT').fillna('OCGT')))))
+    ppl = (pm.powerplants(
+        from_url=False,
+        config=config).powerplant.fill_missing_decommyears().query(
+            'Fueltype not in ["Solar", "Wind"] and Country in @countries').
+           replace({
+               "Technology": {
+                   "Steam Turbine": "OCGT"
+               }
+           }).assign(Fueltype=lambda df: (df.Fueltype.where(
+               df.Fueltype != "Natural Gas",
+               df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
+           ))))
 
-    ppl_query = snakemake.config['electricity']['powerplants_filter']
+    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
     if isinstance(ppl_query, str):
         ppl.query(ppl_query, inplace=True)
 
     # ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
 
-    cntries_without_ppl = [c for c in countries if c not in ppl.Country.unique()]
+    cntries_without_ppl = [
+        c for c in countries if c not in ppl.Country.unique()
+    ]
 
     for c in countries:
-        substation_i = n.buses.query('substation_lv and country == @c').index
-        kdtree = KDTree(n.buses.loc[substation_i, ['x','y']].values)
-        ppl_i = ppl.query('Country == @c').index
+        substation_i = n.buses.query("substation_lv and country == @c").index
+        kdtree = KDTree(n.buses.loc[substation_i, ["x", "y"]].values)
+        ppl_i = ppl.query("Country == @c").index
 
-        tree_i = kdtree.query(ppl.loc[ppl_i, ['lon','lat']].values)[1]
-        ppl.loc[ppl_i, 'bus'] = substation_i.append(pd.Index([np.nan]))[tree_i]
+        tree_i = kdtree.query(ppl.loc[ppl_i, ["lon", "lat"]].values)[1]
+        ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
     if cntries_without_ppl:
-        logging.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+        logging.warning(
+            f"No powerplants known in: {', '.join(cntries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
-        logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
+        logging.warning(
+            f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
     ppl.to_csv(snakemake.output[0])
