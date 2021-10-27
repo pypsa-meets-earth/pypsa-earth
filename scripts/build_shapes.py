@@ -11,7 +11,8 @@ import geopandas as gpd
 import numpy as np
 import rasterio
 import requests
-#import rioxarray
+
+# import rioxarray
 import rioxarray as rx
 from shapely.geometry.base import BaseGeometry
 import xarray as xr
@@ -25,7 +26,8 @@ from rasterio.mask import mask
 from shapely.geometry import MultiPolygon
 from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import cascaded_union
-#from osm_data_config import AFRICA_CC
+
+# from osm_data_config import AFRICA_CC
 
 
 _logger = logging.getLogger(__name__)
@@ -136,8 +138,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
-            _three_2_two_digits_country(twoD_c)
-            for twoD_c in geodf_temp["GID_0"]
+            _three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
         ]
 
         # create a subindex column that is useful
@@ -160,10 +161,13 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
-            polys = MultiPolygon([
-                p for p in takewhile(lambda p: p.area > minarea, polys)
-                if not filterremote or (mainpoly.distance(p) < mainlength)
-            ])
+            polys = MultiPolygon(
+                [
+                    p
+                    for p in takewhile(lambda p: p.area > minarea, polys)
+                    if not filterremote or (mainpoly.distance(p) < mainlength)
+                ]
+            )
         else:
             polys = mainpoly
     return polys.simplify(tolerance=tolerance)
@@ -191,8 +195,7 @@ def countries(countries, update=False, out_logging=False):
 def country_cover(country_shapes, eez_shapes=None, out_logging=False):
 
     if out_logging:
-        _logger.info(
-            "Stage 3 of 4: Merge country shapes to create continent shape")
+        _logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
     shapes = list(country_shapes)
     if eez_shapes is not None:
@@ -243,11 +246,12 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
     selected_countries_codes_3D = [
         _two_2_three_digits_country(x) for x in countries_codes
     ]
-    geodf_EEZ = geodf_EEZ[[
-        any([x in selected_countries_codes_3D]) for x in geodf_EEZ["ISO_TER1"]
-    ]]
+    geodf_EEZ = geodf_EEZ[
+        [any([x in selected_countries_codes_3D]) for x in geodf_EEZ["ISO_TER1"]]
+    ]
     geodf_EEZ["ISO_TER1"] = geodf_EEZ["ISO_TER1"].map(
-        lambda x: _three_2_two_digits_country(x))
+        lambda x: _three_2_two_digits_country(x)
+    )
     geodf_EEZ.reset_index(drop=True, inplace=True)
 
     geodf_EEZ.rename(columns={"ISO_TER1": "name"}, inplace=True)
@@ -312,7 +316,7 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
 
 def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     """
-    Creates offshore shapes by 
+    Creates offshore shapes by
     - buffer smooth countryshape (=offset country shape)
     - and differ that with the offshore shape
     Leads to for instance a 100m non-build coastline
@@ -333,7 +337,7 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     ret_df = df_eez[["name", "geometry"]]
     # create unique shape if country is described by multiple shapes
     for c_code in countries:
-        selection = (ret_df.name == c_code)
+        selection = ret_df.name == c_code
         n_offshore_shapes = selection.sum()
 
         if n_offshore_shapes > 1:
@@ -342,10 +346,12 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
             geom = ret_df[selection].geometry.unary_union
             ret_df.drop(ret_df[selection].index, inplace=True)
             ret_df = ret_df.append(
-                {"name": c_code, "geometry": geom}, ignore_index=True)
+                {"name": c_code, "geometry": geom}, ignore_index=True
+            )
 
     ret_df = ret_df.set_index("name")["geometry"].map(
-        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+    )
 
     # hole lies outside occurs here
     ret_df = ret_df.apply(lambda x: make_valid(x))
@@ -356,7 +362,10 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
 
     # repeat to simplify after the buffer correction
     ret_df_new = ret_df_new.map(
-        lambda x: x if x is None else _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+        lambda x: x
+        if x is None
+        else _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+    )
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
     # Drops empty geometry
@@ -365,11 +374,9 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     return ret_df
 
 
-def download_WorldPop(country_code,
-                      year=2020,
-                      update=False,
-                      out_logging=False,
-                      size_min=300):
+def download_WorldPop(
+    country_code, year=2020, update=False, out_logging=False, size_min=300
+):
     """
     Download tiff file for each country code
 
@@ -407,9 +414,9 @@ def download_WorldPop(country_code,
         f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
     ]
 
-    WorldPop_inputfile = os.path.join(os.getcwd(), "data",
-                                      "raw", "WorldPop",
-                                      WorldPop_filename)  # Input filepath tif
+    WorldPop_inputfile = os.path.join(
+        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
@@ -428,8 +435,7 @@ def download_WorldPop(country_code,
                         loaded = True
                         break
         if not loaded:
-            _logger.error(
-                f"Stage 4/4: Impossible to download {WorldPop_filename}")
+            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -447,12 +453,14 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "raw", "GDP",
-                          name_file_nc)  # Input filepath nc
+    GDP_nc = os.path.join(
+        os.getcwd(), "data", "raw", "GDP", name_file_nc
+    )  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(os.getcwd(), "data", "raw", "GDP",
-                           name_file_tif)  # Input filepath nc
+    GDP_tif = os.path.join(
+        os.getcwd(), "data", "raw", "GDP", name_file_tif
+    )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
@@ -496,8 +504,9 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(os.getcwd(), "data", "raw", "GDP",
-                           name_file_tif)  # Input filepath tif
+    GDP_tif = os.path.join(
+        os.getcwd(), "data", "raw", "GDP", name_file_tif
+    )  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
@@ -511,7 +520,7 @@ def load_GDP(
 
 def generalized_mask(src, geom, **kwargs):
     "Generalize mask function to account for Polygon and MultiPolygon"
-    if geom.geom_type == 'Polygon':
+    if geom.geom_type == "Polygon":
         return mask(src, [geom], **kwargs)
     else:
         return mask(src, geom, **kwargs)
@@ -544,11 +553,9 @@ def add_gdp_data(
             #   where the border of the shape lays. This may affect the computation
             #   but it is conservative and avoids considering multiple times the same
             #   pixels
-            out_image, out_transform = generalized_mask(src,
-                                                        row["geometry"],
-                                                        all_touched=True,
-                                                        invert=False,
-                                                        nodata=0.0)
+            out_image, out_transform = generalized_mask(
+                src, row["geometry"], all_touched=True, invert=False, nodata=0.0
+            )
             # out_image_int, out_transform = mask(src,
             #                                row["geometry"],
             #                                all_touched=False,
@@ -560,19 +567,21 @@ def add_gdp_data(
             # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
             if out_logging == True:
-                _logger.info("Stage 4/4 GDP: shape: " +
-                             str(index) + " out of " + str(df_gadm.shape[0]))
+                _logger.info(
+                    "Stage 4/4 GDP: shape: "
+                    + str(index)
+                    + " out of "
+                    + str(df_gadm.shape[0])
+                )
 
             # update the gdp data in the dataset
             df_gadm.loc[index, "gdp"] = gdp_by_geom
     return df_gadm
 
 
-def add_population_data(df_gadm,
-                        country_codes,
-                        year=2020,
-                        update=False,
-                        out_logging=False):
+def add_population_data(
+    df_gadm, country_codes, year=2020, update=False, out_logging=False
+):
     """Function to add the population info for each country shape in the gadm dataset"""
 
     if out_logging:
@@ -586,7 +595,8 @@ def add_population_data(df_gadm,
 
     for c_code in country_codes:
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, year, update, out_logging)
+            c_code, year, update, out_logging
+        )
 
         with rasterio.open(WorldPop_inputfile) as src:
             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
@@ -597,11 +607,9 @@ def add_population_data(df_gadm,
                 #   where the border of the shape lays. This leads to slightly overestimate
                 #   the population, but the error is limited and it enables halving the
                 #   computational time
-                out_image, out_transform = generalized_mask(src,
-                                                            row["geometry"],
-                                                            all_touched=True,
-                                                            invert=False,
-                                                            nodata=0.0)
+                out_image, out_transform = generalized_mask(
+                    src, row["geometry"], all_touched=True, invert=False, nodata=0.0
+                )
                 # out_image_int, out_transform = mask(src,
                 #                                row["geometry"],
                 #                                all_touched=False,
@@ -618,8 +626,15 @@ def add_population_data(df_gadm,
                 count += 1
 
                 if out_logging == True:
-                    _logger.info("Stage 4/4 POP: " + str(count) + " out of " +
-                                 str(df_gadm.shape[0]) + " [" + c_code + "]")
+                    _logger.info(
+                        "Stage 4/4 POP: "
+                        + str(count)
+                        + " out of "
+                        + str(df_gadm.shape[0])
+                        + " ["
+                        + c_code
+                        + "]"
+                    )
                     # print(c_code, ": ", index, " out of ",
                     #      country_rows.shape[0])
 
@@ -661,6 +676,7 @@ if __name__ == "__main__":
     # print(os.path.dirname(os.path.abspath(__file__)))
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         snakemake = mock_snakemake("build_shapes")
     configure_logging(snakemake)
 
@@ -669,10 +685,10 @@ if __name__ == "__main__":
     # Parameters to be later initialized through snakemake
     # countries_list = list(AFRICA_CC) # TODO: implement some coding to automatically process all africa by config.yaml
     countries_list = create_country_list(snakemake.config["countries"])
-    layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
-    update = snakemake.config['build_shape_options']['update_file']
-    out_logging = snakemake.config['build_shape_options']['out_logging']
-    year = snakemake.config['build_shape_options']['year']
+    layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+    update = snakemake.config["build_shape_options"]["update_file"]
+    out_logging = snakemake.config["build_shape_options"]["out_logging"]
+    year = snakemake.config["build_shape_options"]["year"]
     EEZ_gpkg = snakemake.input["eez"]
 
     # print(snakemake.config)
@@ -680,8 +696,7 @@ if __name__ == "__main__":
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(countries_list, country_shapes,
-                          EEZ_gpkg, out_logging)
+    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     # offshore_shapes_old = eez(countries_list, country_shapes, update, out_logging)
