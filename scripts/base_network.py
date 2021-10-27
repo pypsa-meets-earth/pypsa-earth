@@ -456,13 +456,14 @@ def _set_countries_and_substations(n):
     countries = create_country_list(snakemake.config["countries"])
     country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
         "name")["geometry"].set_crs(4326))
-    offshore_shapes = unary_union(gpd.read_file(
-        snakemake.input.offshore_shapes)["geometry"].set_crs(
-            4326))
+    offshore_shapes = unary_union(
+        gpd.read_file(
+            snakemake.input.offshore_shapes)["geometry"].set_crs(4326))
     # TODO: At the moment buses["symbol"] = False. This was set as default values
     # and need to be adjusted. What values should we put in?
     # .str.contains("substation|converter station",
-    substation_b = buses["symbol"].str.contains("substation|converter station", case=False)
+    substation_b = buses["symbol"].str.contains("substation|converter station",
+                                                case=False)
 
     #                                             case=False)
 
@@ -525,11 +526,13 @@ def _set_countries_and_substations(n):
     # buses["substation_lv"] = True # TODO:remove as done in osm_build_network?
     # TODO: New implementation below
     bus_locations = buses
-    bus_locations = gpd.GeoDataFrame(bus_locations,
-                                     geometry=gpd.points_from_xy(
-                                         bus_locations.x, bus_locations.y),
-                                     crs=4326)
-    offshore_b = bus_locations.within(offshore_shapes)  # Check if bus is in shape
+    bus_locations = gpd.GeoDataFrame(
+        bus_locations,
+        geometry=gpd.points_from_xy(bus_locations.x, bus_locations.y),
+        crs=4326,
+    )
+    offshore_b = bus_locations.within(
+        offshore_shapes)  # Check if bus is in shape
 
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
