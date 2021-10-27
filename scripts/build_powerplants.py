@@ -76,7 +76,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake('build_powerplants')
-    
+
     configure_logging(snakemake)
 
     with open(snakemake.input.pm_config, "r") as f:
@@ -90,14 +90,14 @@ if __name__ == "__main__":
         from_url=False,
         config=config).powerplant.fill_missing_decommyears().query(
             'Fueltype not in ["Solar", "Wind"] and Country in @countries').
-           replace({
-               "Technology": {
-                   "Steam Turbine": "OCGT"
-               }
-           }).assign(Fueltype=lambda df: (df.Fueltype.where(
-               df.Fueltype != "Natural Gas",
-               df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
-           ))))
+        replace({
+            "Technology": {
+                "Steam Turbine": "OCGT"
+            }
+        }).assign(Fueltype=lambda df: (df.Fueltype.where(
+            df.Fueltype != "Natural Gas",
+            df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
+        ))))
 
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]
     if isinstance(ppl_query, str):
