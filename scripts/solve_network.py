@@ -77,24 +77,16 @@ Details (and errors made through this heuristic) are discussed in the paper
 """
 
 import logging
-from _helpers import configure_logging
+import os
+import re
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import re
-import os
-
 import pypsa
-from pypsa.linopf import (
-    get_var,
-    define_constraints,
-    linexpr,
-    join_exprs,
-    network_lopf,
-    ilopf,
-)
-
-from pathlib import Path
+from _helpers import configure_logging
+from pypsa.linopf import (define_constraints, get_var, ilopf, join_exprs,
+                          linexpr, network_lopf)
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)

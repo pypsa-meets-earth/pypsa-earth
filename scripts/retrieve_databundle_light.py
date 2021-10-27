@@ -34,11 +34,11 @@ The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/35179
 
 import logging
 import os
-from _helpers import progress_retrieve, configure_logging
-from google_drive_downloader import GoogleDriveDownloader as gdd
 import tarfile
 from pathlib import Path
-from _helpers import _sets_path_to_root
+
+from _helpers import _sets_path_to_root, configure_logging, progress_retrieve
+from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)
 
