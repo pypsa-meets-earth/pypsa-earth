@@ -81,7 +81,6 @@ It further adds extendable ``generators`` with **zero** capacity for
 - photovoltaic, onshore and AC- as well as DC-connected offshore wind installations with today's locational, hourly wind and solar capacity factors (but **no** current capacities),
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
-
 import logging
 import os
 
@@ -91,7 +90,8 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, update_p_nom_max
+from _helpers import configure_logging
+from _helpers import update_p_nom_max
 from osm_pbf_power_data_extractor import create_country_list
 from powerplantmatching.export import map_country_bus
 from vresutils import transfer as vtransfer

@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: MIT
-
 """
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3517935.svg
    :target: https://doi.org/10.5281/zenodo.3517935
@@ -31,13 +30,14 @@ The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/35179
 - ``cutouts/bundle``: input data collected from various sources
 
 """
-
 import logging
 import os
 import tarfile
 from pathlib import Path
 
-from _helpers import _sets_path_to_root, configure_logging, progress_retrieve
+from _helpers import _sets_path_to_root
+from _helpers import configure_logging
+from _helpers import progress_retrieve
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)

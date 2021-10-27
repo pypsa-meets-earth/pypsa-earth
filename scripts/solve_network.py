@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: MIT
-
 """
 Solves linear optimal power flow for a network iteratively while updating reactances.
 
@@ -75,7 +74,6 @@ Details (and errors made through this heuristic) are discussed in the paper
     the rule :mod:`solve_network`.
 
 """
-
 import logging
 import os
 import re
@@ -85,8 +83,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from pypsa.linopf import (define_constraints, get_var, ilopf, join_exprs,
-                          linexpr, network_lopf)
+from pypsa.linopf import define_constraints
+from pypsa.linopf import get_var
+from pypsa.linopf import ilopf
+from pypsa.linopf import join_exprs
+from pypsa.linopf import linexpr
+from pypsa.linopf import network_lopf
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)

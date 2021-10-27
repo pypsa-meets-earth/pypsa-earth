@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: MIT
-
 # coding: utf-8
 """
 Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such as
@@ -54,7 +53,6 @@ Description
     the rule :mod:`prepare_network`.
 
 """
-
 import logging
 import os
 import re
@@ -63,7 +61,8 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import load_costs
+from add_electricity import update_transmission_costs
 
 idx = pd.IndexSlice
 
