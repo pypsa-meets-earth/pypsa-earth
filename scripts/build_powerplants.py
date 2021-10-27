@@ -61,15 +61,12 @@ def add_custom_powerplants(ppl):
     custom_ppl_query = snakemake.config["electricity"]["custom_powerplants"]
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(snakemake.input.custom_powerplants,
-                           index_col=0,
-                           dtype={"bus": "str"})
+    add_ppls = pd.read_csv(
+        snakemake.input.custom_powerplants, index_col=0, dtype={"bus": "str"}
+    )
     if isinstance(custom_ppl_query, str):
         add_ppls.query(custom_ppl_query, inplace=True)
-    return ppl.append(add_ppls,
-                      sort=False,
-                      ignore_index=True,
-                      verify_integrity=True)
+    return ppl.append(add_ppls, sort=False, ignore_index=True, verify_integrity=True)
 
 
 if __name__ == "__main__":
@@ -88,18 +85,20 @@ if __name__ == "__main__":
     countries = n.buses.country.unique()
     config["target_countries"] = countries
 
-    ppl = (pm.powerplants(
-        from_url=False,
-        config=config).powerplant.fill_missing_decommyears().query(
-            'Fueltype not in ["Solar", "Wind"] and Country in @countries').
-        replace({
-            "Technology": {
-                "Steam Turbine": "OCGT"
-            }
-        }).assign(Fueltype=lambda df: (df.Fueltype.where(
-            df.Fueltype != "Natural Gas",
-            df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
-        ))))
+    ppl = (
+        pm.powerplants(from_url=False, config=config)
+        .powerplant.fill_missing_decommyears()
+        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries')
+        .replace({"Technology": {"Steam Turbine": "OCGT"}})
+        .assign(
+            Fueltype=lambda df: (
+                df.Fueltype.where(
+                    df.Fueltype != "Natural Gas",
+                    df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
+                )
+            )
+        )
+    )
 
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]
     if isinstance(ppl_query, str):
@@ -107,9 +106,7 @@ if __name__ == "__main__":
 
     # ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
 
-    cntries_without_ppl = [
-        c for c in countries if c not in ppl.Country.unique()
-    ]
+    cntries_without_ppl = [c for c in countries if c not in ppl.Country.unique()]
 
     for c in countries:
         substation_i = n.buses.query("substation_lv and country == @c").index
@@ -120,12 +117,10 @@ if __name__ == "__main__":
         ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
     if cntries_without_ppl:
-        logging.warning(
-            f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+        logging.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
-        logging.warning(
-            f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
+        logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
     ppl.to_csv(snakemake.output[0])
