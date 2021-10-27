@@ -34,6 +34,7 @@ datafiles = [
         "data/raw/africa_all_raw_generators.geojson",
         "data/raw/africa_all_raw_lines.geojson",
         "data/raw/africa_all_raw_substations.geojson",
+        "data/raw/africa_all_raw_generators.csv",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
@@ -53,6 +54,7 @@ if config['enable'].get('download_osm_data', True):
         output:
             cables="data/raw/africa_all_raw_cables.geojson",
             generators="data/raw/africa_all_raw_generators.geojson",
+            generators_csv="data/raw/africa_all_raw_generators.csv",
             lines="data/raw/africa_all_raw_lines.geojson",
             substations="data/raw/africa_all_raw_substations.geojson",
         log: "logs/download_osm_data.log"
@@ -84,6 +86,7 @@ rule build_osm_network:
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
         substations="data/base_network/africa_all_buses_build_network.csv",
+        generators="data/base_network/africa_all_generators_build_network.csv",
     log: "logs/build_osm_network.log"
     script: "scripts/osm_built_network.py"
 
@@ -198,7 +201,7 @@ rule build_powerplants:
     input:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/base_network/africa_all_generators.csv"
+        custom_powerplants="data/raw/africa_all_raw_generators.csv"
     output: "resources/powerplants.csv"
     log: "logs/build_powerplants.log"
     threads: 1

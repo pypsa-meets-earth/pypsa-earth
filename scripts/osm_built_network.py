@@ -485,6 +485,7 @@ def built_network(inputs, outputs):
     # ----------- LOAD DATA -----------
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
+    generators = gpd.read_file(inputs["generators"]).set_crs(epsg=4326, inplace=True)
 
     # Filter only Nigeria
     # lines = lines[lines.loc[:,"country"] == "nigeria"].copy()
@@ -530,6 +531,12 @@ def built_network(inputs, outputs):
         os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
     # Generate CSV
     _to_csv_nafix(buses, outputs["substations"])
+
+    # save generators
+    if not os.path.exists(outputs["generators"]):
+        os.makedirs(os.path.dirname(outputs["generators"]), exist_ok=True)
+    # Generate CSV
+    _to_csv_nafix(buses, outputs["generators"])
 
     return None
 
