@@ -83,8 +83,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from pypsa.linopf import (define_constraints, get_var, ilopf, join_exprs,
-                          linexpr, network_lopf)
+from pypsa.linopf import define_constraints
+from pypsa.linopf import get_var
+from pypsa.linopf import ilopf
+from pypsa.linopf import join_exprs
+from pypsa.linopf import linexpr
+from pypsa.linopf import network_lopf
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
