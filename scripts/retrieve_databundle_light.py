@@ -42,7 +42,6 @@ from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)
 
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
 
@@ -64,8 +63,9 @@ if __name__ == "__main__":
     zip_path = destination + ".zip"
     url = "https://drive.google.com/file/d/1nrWntieUVUcyya0xaadt4T3JFTDrqhLf/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="1nrWntieUVUcyya0xaadt4T3JFTDrqhLf", dest_path=zip_path, unzip=True
-    )
+        file_id="1nrWntieUVUcyya0xaadt4T3JFTDrqhLf",
+        dest_path=zip_path,
+        unzip=True)
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
@@ -74,8 +74,9 @@ if __name__ == "__main__":
     zip_path = destination + ".zip"
     url = "https://drive.google.com/file/d/1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ", dest_path=zip_path, unzip=True
-    )
+        file_id="1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ",
+        dest_path=zip_path,
+        unzip=True)
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
@@ -84,7 +85,8 @@ if __name__ == "__main__":
     zip_path = destination + ".zip"
     url = "https://drive.google.com/file/d/1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O", dest_path=zip_path, unzip=True
-    )
+        file_id="1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O",
+        dest_path=zip_path,
+        unzip=True)
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
