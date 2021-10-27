@@ -151,18 +151,29 @@ def get_gadm_shape(onshore_locs):
     def locate_bus(coords):
         try:
             return gadm_shapes[gadm_shapes.contains(Point(coords['x'],
-                                                          coords['y']))].item()
-                
+                                                          coords['y']))].item()         
         except ValueError:
             # return 'not_found'
             gadm_shapes[gadm_shapes.contains(Point(-9,
-                                                   32))].item()
+                                                   32))].item() #TODO !!Fatal!! assigning not found to a random shape
+    
+    def get_id(coords):
+        try:
+            return gadm_shapes[gadm_shapes.contains(Point(coords['x'],
+                                                          coords['y']))].index.item()         
+        except ValueError:
+            # return 'not_found'
+            gadm_shapes[gadm_shapes.contains(Point(-9,
+                                                   32))].index.item() #TODO !!Fatal!! assigning not found to a random shape
+    
     sas=[]
     sas.append(onshore_locs[['x', 'y']].apply(locate_bus, axis=1).values)
     ss=numpy.empty((len(sas), ), "object")
     ss[:] = sas
-    regions= onshore_locs[['x', 'y']].apply(locate_bus, axis=1)
-    return regions.values
+    regions = onshore_locs[['x', 'y']].apply(locate_bus, axis=1)
+    ids = onshore_locs[['x', 'y']].apply(get_id, axis=1)
+    return regions.values, ids.values
+
     
     
 if __name__ == "__main__":
@@ -220,9 +231,11 @@ if __name__ == "__main__":
                 "geometry":
                 # custom_voronoi_partition_pts(onshore_locs.values,
                 #                              onshore_shape),
-                get_gadm_shape(onshore_locs),     
+                get_gadm_shape(onshore_locs)[0],     
                 "country":
                 country,
+                "shape_id":
+                get_gadm_shape(onshore_locs)[1],     
             }))
 
         # These two logging could be commented out

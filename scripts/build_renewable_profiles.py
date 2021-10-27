@@ -216,7 +216,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("build_renewable_profiles",
-                                   technology="solar")
+                                   technology="onwind")
         _sets_path_to_root("pypsa-africa")
 
 
@@ -238,8 +238,14 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
     regions = gpd.read_file(paths.regions).set_index("name").rename_axis("bus")
+    regions_crs=regions.crs
     # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
-    regions = regions.dropna(axis="index", subset=["geometry"]).drop_duplicates()
+    regions = regions.dropna(axis="index", subset=["geometry"])
+    if len(regions['geometry'].drop_duplicates()) < len(regions['geometry']):    #TODO check nicely :D
+        regions=gpd.GeoDataFrame(regions.groupby('shape_id').agg(
+            {'x': 'mean', 'y':'mean', 'country':'first', 'geometry':'first'})\
+                .rename_axis('bus'))
+    regions.crs = regions_crs                    #TODO only for alternative clustering
     buses = regions.index
     
     
