@@ -45,6 +45,7 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
 """
 import logging
 import os
+
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
@@ -74,9 +75,10 @@ def add_custom_powerplants(ppl):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake('build_powerplants')
-    
+        snakemake = mock_snakemake("build_powerplants")
+
     configure_logging(snakemake)
 
     with open(snakemake.input.pm_config, "r") as f:
