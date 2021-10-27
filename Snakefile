@@ -29,7 +29,7 @@ wildcard_constraints:
 
 datafiles = [
         "cutouts/africa-2013-era5.nc",
-        "resources/ssp2-2.6/2030/era5_2013/Africa.nc"
+        "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
         "data/raw/africa_all_raw_cables.geojson",
         "data/raw/africa_all_raw_generators.geojson",
         "data/raw/africa_all_raw_lines.geojson",
@@ -41,7 +41,7 @@ datafiles = [
         "data/raw/landcover",
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
         "data/costs.csv",
-        ]
+]
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
