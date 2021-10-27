@@ -384,11 +384,15 @@ def clustering_for_n_clusters(
         #                                focus_weights, algorithm)
         n, busmap = busmap_for_gadm_clusters(n, 1)                              #TODO make func only return busmap, and get level from config
         
+        if snakemake.config['alternative_clustering']:                          #TODO conv. generators must be aggregated manually 
+            weighted_agg_gens = False
+        else:
+            weighted_agg_gens = True
     clustering = get_clustering_from_busmap(
         n,
         busmap,
         bus_strategies=dict(country=_make_consense("Bus", "country")),
-        aggregate_generators_weighted=True,
+        aggregate_generators_weighted=weighted_agg_gens,
         aggregate_generators_carriers=aggregate_carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
@@ -467,14 +471,20 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
     #n.buses.at[['1371', '2516', '3962', '5107', '1297', '1348', '1367', '2479', '2498', '2512'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
-    n.buses.at[['124', '147', '229', '1583', '1297', '1548', '1573', '1635', '2460', '3888', '5051', '1774', '1896', '2356', '4947', '2516', '5107', '1367', '2479', '2498'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
-    n.buses.at[['1367'], 'country'] = 'DZ'       #TODO isnpect the wrong country mapping of buses
+#    n.buses.at[['124', '147', '229', '1583', '1297', '1548', '1573', '1635', '2460', '3888', '5051', '1774', '1896', '2356', '4947', '2516', '5107', '1367', '2479', '2498'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
+#    n.buses.at[['1367'], 'country'] = 'DZ'       #TODO isnpect the wrong country mapping of buses
+    n.buses.at[['66', '228', '329', '737', '1188', '1416', '1543', '2071', '2920', '4134'], 'country'] = 'MA' #TODO isnpect the wrong country mapping of buses   
     focus_weights = snakemake.config.get("focus_weights", None)
-
-    renewable_carriers = pd.Index([
-        tech for tech in n.generators.carrier.unique()
-        if tech in snakemake.config["renewable"]
-    ])
+    
+    if snakemake.config['alternative_clustering']:
+        renewable_carriers =  pd.Index([
+        'solar', 'onwind' #TODO find a way to fetch automatically from the model run
+        ])
+    else:
+        renewable_carriers = pd.Index([
+            tech for tech in n.generators.carrier.unique()
+            if tech in snakemake.config["renewable"]
+        ])
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])

@@ -333,7 +333,10 @@ def attach_wind_and_solar(n, costs):
         if tech == "hydro":
             continue
 
-        n.add("Carrier", name=tech)
+        if snakemake.config["alternative_clustering"]:
+            pass
+        else:    
+            n.add("Carrier", name=tech)
         # TODO: Uncomment this out. MAX
         # with xr.open_dataset(getattr(snakemake.input,
         #                              "profile_" + tech)) as ds:
@@ -685,10 +688,11 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("add_electricity")
+        snakemake = mock_snakemake("add_electricity", simpl="", clusters="50")
     configure_logging(snakemake)
-
-    n = pypsa.Network(snakemake.input.base_network)
+    
+    n = pypsa.Network(snakemake.input.network)
+    
     Nyears = n.snapshot_weightings.sum() / 8760.0
 
     # Snakemake imports:
@@ -701,7 +705,7 @@ if __name__ == "__main__":
     costs = load_costs(Nyears)
 #    ppl = load_powerplants()
 
-    attach_load(n, regions, load, admin_shapes, countries, scale)
+#    attach_load(n, regions, load, admin_shapes, countries, scale)
 
     update_transmission_costs(n, costs)
 

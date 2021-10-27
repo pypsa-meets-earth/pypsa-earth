@@ -205,10 +205,19 @@ rule build_powerplants:
     resources: mem=500
     script: "scripts/build_powerplants.py"
 
+add_electricity_input_network = list()
+simplify_network_input_network = list()
+
+if config['alternative_clustering']:
+    add_electricity_input_network.append('networks/elec_s{simpl}_{clusters}.nc')
+    simplify_network_input_network.append('networks/base.nc')
+else:
+    add_electricity_input_network.append('networks/base.nc')
+    simplify_network_input_network.append('networks/elec.nc')
 
 rule add_electricity:
     input:
-        base_network='networks/base.nc',
+        network=add_electricity_input_network[0],
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
         powerplants='resources/powerplants.csv',
@@ -224,11 +233,10 @@ rule add_electricity:
     threads: 1
     resources: mem=3000
     script: "scripts/add_electricity.py"
-
-
+    
 rule simplify_network:
     input:
-        network='networks/elec.nc',
+    	network=simplify_network_input_network[0],
         tech_costs=COSTS,
         regions_onshore="resources/regions_onshore.geojson",
         regions_offshore="resources/regions_offshore.geojson"
@@ -264,6 +272,7 @@ rule cluster_network:
     threads: 1
     resources: mem=3000
     script: "scripts/cluster_network.py"
+
 
 
 rule add_extra_components:

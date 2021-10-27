@@ -46,3 +46,5 @@ doc/_build
 doc/.vscode/settings.json
 .vscode/settings.json
 resources/regions_onshore.geojson
+resources/regions_offshore.geojson
+resources/regions_onshore.geojson

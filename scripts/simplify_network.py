@@ -474,15 +474,16 @@ if __name__ == "__main__":
 
     # Inputs
     n = pypsa.Network(snakemake.input.network)
+    
     linetype = snakemake.config["lines"]["types"][380.]
 
     n, trafo_map = simplify_network_to_380(n, linetype)
 
     n, simplify_links_map = simplify_links(n)
 
-    n, stub_map = remove_stubs(n)
+#    n, stub_map = remove_stubs(n)
 
-    busmaps = [trafo_map, simplify_links_map , stub_map]
+    busmaps = [trafo_map, simplify_links_map]# , stub_map]
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))
