@@ -45,6 +45,7 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
 """
 import logging
 import os
+
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
