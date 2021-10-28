@@ -705,7 +705,7 @@ if __name__ == "__main__":
     costs = load_costs(Nyears)
 #    ppl = load_powerplants()
 
-#    attach_load(n, regions, load, admin_shapes, countries, scale)
+    attach_load(n, regions, load, admin_shapes, countries, scale)
 
     update_transmission_costs(n, costs)
 
