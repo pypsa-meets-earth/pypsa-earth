@@ -24,7 +24,6 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 - **General code meeting (Open meeting on [zoom platform](https://ed-ac-uk.zoom.us/j/89486720170))**
   - every second Thursday 16-17:00 (UK time)
   - updates on overall project and code blocks
-  - link: 
 - **Specific code meeting (by invitation)**
   - current meetings: 1) AI asset recognition (WP6) and 2) Data workflow updates (covering WP1-WP5)
   - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
