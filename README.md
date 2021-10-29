@@ -21,7 +21,7 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
-- **General code meeting (Open meeting on [zoom platform](https://ed-ac-uk.zoom.us/j/89486720170))**
+- **General code meeting (Open meeting on [zoom platform](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101)**
   - every second Thursday 16-17:00 (UK time)
   - updates on overall project and code blocks
 - **Specific code meeting (by invitation)**
