@@ -26,6 +26,8 @@ from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import cascaded_union
+import multiprocessing as mp
+from tqdm import tqdm
 
 # import rioxarray
 
@@ -524,12 +526,43 @@ def generalized_mask(src, geom, **kwargs):
         return mask(src, geom, **kwargs)
 
 
+
+def _sum_raster_over_mask(shape, img):
+    """
+    Function to sum the raster value within a shape
+    """
+
+    # select the desired area of the raster corresponding to each polygon
+    # Approximation: the population is measured including the pixels
+    #   where the border of the shape lays. This leads to slightly overestimate
+    #   the output, but the error is limited and it enables halving the
+    #   computational time
+    out_image, out_transform = generalized_mask(img,
+                                                shape,
+                                                all_touched=True,
+                                                invert=False,
+                                                nodata=0.0)
+    # out_image_int, out_transform = mask(src,
+    #                                row["geometry"],
+    #                                all_touched=False,
+    #                                invert=False,
+    #                                nodata=0.0)
+
+    # calculate total output in the selected geometry
+    out_sum = out_image.sum()
+    # out_sum = out_image.sum()/2 + out_image_int.sum()/2
+
+    return out_sum
+
+
 def add_gdp_data(
     df_gadm,
     year=2020,
     update=False,
     out_logging=False,
     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+    nprocesses=2,
+    disable_progressbar=False
 ):
     """Function to add the population info for each country shape in the gadm dataset"""
 
@@ -541,45 +574,91 @@ def add_gdp_data(
 
     GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
 
+    gdp_col = []
+
     with rasterio.open(GDP_tif) as src:
         # data_GDP = src.read(1)
         # resample data to target shape
+        
+        tqdm_kwargs = dict(
+            ascii=False,
+            unit=" geometries",
+            total=df_gadm.shape[0],
+            desc="Compute GDP ",
+        )
+        for i in tqdm(df_gadm.index, **tqdm_kwargs):
+            df_gadm.loc[i, "gdp"] = _sum_raster_over_mask(df_gadm.geometry.loc[i], src)
+            # gdp_col.append(_)
 
-        for index, row in df_gadm.iterrows():
-            # select the desired area of the raster corresponding to each polygon
-            # Approximation: the gdp is measured excluding the pixels
-            #   where the border of the shape lays. This may affect the computation
-            #   but it is conservative and avoids considering multiple times the same
-            #   pixels
-            out_image, out_transform = generalized_mask(src,
-                                                        row["geometry"],
-                                                        all_touched=True,
-                                                        invert=False,
-                                                        nodata=0.0)
-            # out_image_int, out_transform = mask(src,
-            #                                row["geometry"],
-            #                                all_touched=False,
-            #                                invert=False,
-            #                                nodata=0.0)
 
-            # calculate total gdp in the selected geometry
-            gdp_by_geom = np.nansum(out_image)
-            # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
-
-            if out_logging == True:
-                _logger.info("Stage 4/4 GDP: shape: " + str(index) +
-                             " out of " + str(df_gadm.shape[0]))
-
-            # update the gdp data in the dataset
-            df_gadm.loc[index, "gdp"] = gdp_by_geom
     return df_gadm
+
+
+
+        # for index, row in tqdm(df_gadm.iterrows(), index=df_gadm.shape[0]):
+        #     # select the desired area of the raster corresponding to each polygon
+        #     # Approximation: the gdp is measured excluding the pixels
+        #     #   where the border of the shape lays. This may affect the computation
+        #     #   but it is conservative and avoids considering multiple times the same
+        #     #   pixels
+        #     out_image, out_transform = generalized_mask(src,
+        #                                                 row["geometry"],
+        #                                                 all_touched=True,
+        #                                                 invert=False,
+        #                                                 nodata=0.0)
+        #     # out_image_int, out_transform = mask(src,
+        #     #                                row["geometry"],
+        #     #                                all_touched=False,
+        #     #                                invert=False,
+        #     #                                nodata=0.0)
+
+        #     # calculate total gdp in the selected geometry
+        #     gdp_by_geom = np.nansum(out_image)
+        #     # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
+
+        #     if out_logging == True:
+        #         _logger.info("Stage 4/4 GDP: shape: " + str(index) +
+        #                      " out of " + str(df_gadm.shape[0]))
+
+        #     # update the gdp data in the dataset
+        #     df_gadm.loc[index, "gdp"] = gdp_by_geom
+
+
+
+
+
+
+
+def _init_process_pop(df_gadm_, year_):
+    global df_gadm, year
+    df_gadm, year = df_gadm_, year_
+
+
+def _process_func_pop(c_code):
+
+    # get subset by country code
+    country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+
+    # get worldpop image
+    WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+            c_code, year, False, False)
+
+    with rasterio.open(WorldPop_inputfile) as src:
+
+        for i, row in country_rows.iterrows():
+            country_rows.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
+                    
+    return country_rows
 
 
 def add_population_data(df_gadm,
                         country_codes,
                         year=2020,
                         update=False,
-                        out_logging=False):
+                        out_logging=False,
+                        nprocesses=2,
+                        disable_progressbar=False
+    ):
     """Function to add the population info for each country shape in the gadm dataset"""
 
     if out_logging:
@@ -588,50 +667,86 @@ def add_population_data(df_gadm,
     # initialize new population column
     df_gadm["pop"] = 0.0
 
-    # count elements
-    count = 0
+    tqdm_kwargs = dict(
+        ascii=False,
+        unit=" countries",
+        # total=len(country_codes),
+        desc="Compute population ",
+    )
+    if (nprocesses is None) or (nprocesses == 1):
 
-    for c_code in country_codes:
-        WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, year, update, out_logging)
+        with tqdm(total=df_gadm.shape[0], **tqdm_kwargs) as pbar:
 
-        with rasterio.open(WorldPop_inputfile) as src:
-            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+            for c_code in country_codes:
+                # get subset by country code
+                country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
-            for index, row in country_rows.iterrows():
-                # select the desired area of the raster corresponding to each polygon
-                # Approximation: the population is measured including the pixels
-                #   where the border of the shape lays. This leads to slightly overestimate
-                #   the population, but the error is limited and it enables halving the
-                #   computational time
-                out_image, out_transform = generalized_mask(src,
-                                                            row["geometry"],
-                                                            all_touched=True,
-                                                            invert=False,
-                                                            nodata=0.0)
-                # out_image_int, out_transform = mask(src,
-                #                                row["geometry"],
-                #                                all_touched=False,
-                #                                invert=False,
-                #                                nodata=0.0)
+                # get worldpop image
+                WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+                        c_code, year, update, out_logging)
 
-                # calculate total population in the selected geometry
-                pop_by_geom = out_image.sum()
-                # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
+                with rasterio.open(WorldPop_inputfile) as src:
 
-                # update the population data in the dataset
-                df_gadm.loc[index, "pop"] = pop_by_geom
+                    for i, row in country_rows.iterrows():
+                        df_gadm.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
+                        pbar.update(1)
+        
+    else:
 
-                count += 1
+        kwargs = {
+            "initializer": _init_process_pop,
+            "initargs": (df_gadm, year),
+            "maxtasksperchild": 20,
+            "processes": nprocesses,
+        }
+        with mp.get_context("spawn").Pool(**kwargs) as pool:
+            if disable_progressbar:
+                _ = list(pool.map(_process_func_pop, country_codes))
+                for elem in _:
+                    df_gadm.loc[elem.index, 'pop'] = elem['pop']
+            else:
+                _ = list(
+                    tqdm(pool.imap(_process_func_pop, country_codes), total=len(country_codes), **tqdm_kwargs)
+                )
+                for elem in _:
+                    df_gadm.loc[elem.index, 'pop'] = elem['pop']
 
-                if out_logging == True:
-                    _logger.info("Stage 4/4 POP: " + str(count) + " out of " +
-                                 str(df_gadm.shape[0]) + " [" + c_code + "]")
-                    # print(c_code, ": ", index, " out of ",
-                    #      country_rows.shape[0])
+                    
+
+            # for index, row in country_rows.iterrows():
+            #     # select the desired area of the raster corresponding to each polygon
+            #     # Approximation: the population is measured including the pixels
+            #     #   where the border of the shape lays. This leads to slightly overestimate
+            #     #   the population, but the error is limited and it enables halving the
+            #     #   computational time
+            #     out_image, out_transform = generalized_mask(src,
+            #                                                 row["geometry"],
+            #                                                 all_touched=True,
+            #                                                 invert=False,
+            #                                                 nodata=0.0)
+            #     # out_image_int, out_transform = mask(src,
+            #     #                                row["geometry"],
+            #     #                                all_touched=False,
+            #     #                                invert=False,
+            #     #                                nodata=0.0)
+
+            #     # calculate total population in the selected geometry
+            #     pop_by_geom = out_image.sum()
+            #     # pop_by_geom = out_image.sum()/2 + out_image_int.sum()/2
+
+            #     # update the population data in the dataset
+            #     df_gadm.loc[index, "pop"] = pop_by_geom
+
+            #     count += 1
+
+            #     if out_logging == True:
+            #         _logger.info("Stage 4/4 POP: " + str(count) + " out of " +
+            #                      str(df_gadm.shape[0]) + " [" + c_code + "]")
+            #         # print(c_code, ": ", index, " out of ",
+            #         #      country_rows.shape[0])
 
 
-def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
+def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020, nprocesses=None):
 
     if out_logging:
         _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
@@ -646,7 +761,7 @@ def gadm(countries, layer_id=2, update=False, out_logging=False, year=2020):
     df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
 
     # add the population data to the dataset
-    add_population_data(df_gadm, countries, year, update, out_logging)
+    add_population_data(df_gadm, countries, year, update, out_logging, nprocesses=nprocesses)
 
     # add the gdp data to the dataset
     add_gdp_data(
@@ -668,8 +783,10 @@ if __name__ == "__main__":
     # print(os.path.dirname(os.path.abspath(__file__)))
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_shapes")
+        _sets_path_to_root("pypsa-africa")
+    
     configure_logging(snakemake)
 
     out = snakemake.output
@@ -681,6 +798,7 @@ if __name__ == "__main__":
     update = snakemake.config["build_shape_options"]["update_file"]
     out_logging = snakemake.config["build_shape_options"]["out_logging"]
     year = snakemake.config["build_shape_options"]["year"]
+    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
     EEZ_gpkg = snakemake.input["eez"]
 
     # print(snakemake.config)
@@ -698,5 +816,5 @@ if __name__ == "__main__":
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm(countries_list, layer_id, update, out_logging, year)
+    gadm_shapes = gadm(countries_list, layer_id, update, out_logging, year, nprocesses=nprocesses)
     save_to_geojson(gadm_shapes, out.gadm_shapes)
