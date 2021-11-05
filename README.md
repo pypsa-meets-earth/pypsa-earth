@@ -22,7 +22,7 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **General code meeting (Open)**
-  - every second Thursday 16-17:00 (UK time) <a href="doc/PyPSA_meets_Africa_-_Code_and_Data_meeting.ics" download>download .ics</a>
+  - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
   - updates on overall project and code blocks
   - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
 - **Specific code meeting (by invitation)**
