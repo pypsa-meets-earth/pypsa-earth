@@ -207,7 +207,7 @@ from _helpers import _sets_path_to_root
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -241,11 +241,12 @@ if __name__ == "__main__":
     regions_crs=regions.crs
     # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
     regions = regions.dropna(axis="index", subset=["geometry"])
-    if len(regions['geometry'].drop_duplicates()) < len(regions['geometry']):    #TODO check nicely :D
-        regions=gpd.GeoDataFrame(regions.groupby('shape_id').agg(
-            {'x': 'mean', 'y':'mean', 'country':'first', 'geometry':'first'})\
-                .rename_axis('bus'))
-    regions.crs = regions_crs                    #TODO only for alternative clustering
+    if snakemake.config['alternative_clustering']:
+        regions=gpd.GeoDataFrame(regions.reset_index().groupby('shape_id').agg(
+            {'x': 'mean', 'y':'mean', 'country':'first', 'geometry':'first', 'bus':'first'})\
+                .set_index('bus'))
+        regions.crs = regions_crs                    
+    
     buses = regions.index
     
     

@@ -104,7 +104,7 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def normed(s):
@@ -334,7 +334,9 @@ def attach_wind_and_solar(n, costs):
             continue
 
         if snakemake.config["alternative_clustering"]:
-            pass
+            # pass
+            n.add("Carrier", name=tech)
+
         else:    
             n.add("Carrier", name=tech)
         # TODO: Uncomment this out. MAX
@@ -691,7 +693,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("add_electricity", simpl="", clusters="50")
     configure_logging(snakemake)
     
-    n = pypsa.Network(snakemake.input.network)
+    n = pypsa.Network(snakemake.input.base_network)
     
     Nyears = n.snapshot_weightings.sum() / 8760.0
 

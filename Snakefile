@@ -217,7 +217,8 @@ else:
 
 rule add_electricity:
     input:
-        network=add_electricity_input_network[0],
+        #network=add_electricity_input_network[0],
+        base_network='networks/base.nc',
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
         powerplants='resources/powerplants.csv',
@@ -236,7 +237,8 @@ rule add_electricity:
     
 rule simplify_network:
     input:
-    	network=simplify_network_input_network[0],
+    	#network=simplify_network_input_network[0],
+        network='networks/elec.nc',
         tech_costs=COSTS,
         regions_onshore="resources/regions_onshore.geojson",
         regions_offshore="resources/regions_offshore.geojson"

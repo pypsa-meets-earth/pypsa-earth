@@ -146,7 +146,7 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # _sets_path_to_root("pypsa-africa")
 
@@ -272,8 +272,8 @@ def busmap_for_gadm_clusters(n,
 
     buses=n.buses
     buses['gadm_{}'.format(gadm_level)]=buses[['x', 'y']].apply(locate_bus2, axis=1)
-    busmap = buses['gadm_{}'.format(gadm_level)].apply(lambda x: x[:-2])
-    not_founds = busmap[busmap=='not_fou'].index.tolist()
+    busmap = buses['gadm_{}'.format(gadm_level)]#.apply(lambda x: x[:-2])
+    not_founds = busmap[busmap=='not_found'].index.tolist()
     for not_found in not_founds:
         for tech in ['solar', 'onwind']:
             try:
@@ -281,7 +281,7 @@ def busmap_for_gadm_clusters(n,
             except:
                 pass
            
-    return n, busmap[busmap != 'not_fou']
+    return n, busmap[busmap != 'not_found']
 
 def busmap_for_n_clusters(n,
                           n_clusters,
@@ -296,6 +296,7 @@ def busmap_for_n_clusters(n,
 
     # PyPSA module that creates sub_networks and "error"
     n.determine_network_topology()
+    n.lines.at[:, 'sub_network'] = '0'
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(n,
@@ -380,12 +381,16 @@ def clustering_for_n_clusters(
         logger.info(
             f"Imported custom busmap from {snakemake.input.custom_busmap}")
     else:
-        # busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
-        #                                focus_weights, algorithm)
-        n, busmap = busmap_for_gadm_clusters(n, 1)                              #TODO make func only return busmap, and get level from config
         
+        if snakemake.config['alternative_clustering']:
+            n, busmap = busmap_for_gadm_clusters(n, 
+                    snakemake.config['build_shape_options']['gadm_layer_id'])                              #TODO make func only return busmap, and get level from config
+        else:
+            busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
+                                               focus_weights, algorithm)
+
         if snakemake.config['alternative_clustering']:                          #TODO conv. generators must be aggregated manually 
-            weighted_agg_gens = False
+            weighted_agg_gens = True
         else:
             weighted_agg_gens = True
     clustering = get_clustering_from_busmap(
@@ -466,16 +471,16 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="50")
+                                   clusters="75")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
     #n.buses.at[['1371', '2516', '3962', '5107', '1297', '1348', '1367', '2479', '2498', '2512'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
 #    n.buses.at[['124', '147', '229', '1583', '1297', '1548', '1573', '1635', '2460', '3888', '5051', '1774', '1896', '2356', '4947', '2516', '5107', '1367', '2479', '2498'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
 #    n.buses.at[['1367'], 'country'] = 'DZ'       #TODO isnpect the wrong country mapping of buses
-    n.buses.at[['66', '228', '329', '737', '1188', '1416', '1543', '2071', '2920', '4134'], 'country'] = 'MA' #TODO isnpect the wrong country mapping of buses   
+#    n.buses.at[['66', '228', '329', '737', '1188', '1416', '1543', '2071', '2920', '4134'], 'country'] = 'MA' #TODO isnpect the wrong country mapping of buses   
+#    n.buses.at[['1635', '1903', '2133', '2163', '4441', '4507'], 'country']='MA'
     focus_weights = snakemake.config.get("focus_weights", None)
-    
     if snakemake.config['alternative_clustering']:
         renewable_carriers =  pd.Index([
         'solar', 'onwind' #TODO find a way to fetch automatically from the model run

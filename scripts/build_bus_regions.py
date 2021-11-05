@@ -55,7 +55,7 @@ from shapely.geometry import Polygon
 _logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def save_to_geojson(df, fn):
@@ -220,6 +220,13 @@ if __name__ == "__main__":
         # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
+        if snakemake.config['alternative_clustering']:
+            onshore_geometry = get_gadm_shape(onshore_locs)[0]
+            shape_id = get_gadm_shape(onshore_locs)[1]
+        else:
+            onshore_geometry = custom_voronoi_partition_pts(onshore_locs.values,
+                                              onshore_shape) 
+            shape_id = 0 #Not used
         onshore_regions.append(
             gpd.GeoDataFrame({
                 "name":
@@ -229,13 +236,11 @@ if __name__ == "__main__":
                 "y":
                 onshore_locs["y"],
                 "geometry":
-                # custom_voronoi_partition_pts(onshore_locs.values,
-                #                              onshore_shape),
-                get_gadm_shape(onshore_locs)[0],     
+                onshore_geometry,  
                 "country":
                 country,
                 "shape_id":
-                get_gadm_shape(onshore_locs)[1],     
+                shape_id,     
             }))
 
         # These two logging could be commented out
