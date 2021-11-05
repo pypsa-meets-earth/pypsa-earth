@@ -81,30 +81,29 @@ It further adds extendable ``generators`` with **zero** capacity for
 - photovoltaic, onshore and AC- as well as DC-connected offshore wind installations with today's locational, hourly wind and solar capacity factors (but **no** current capacities),
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
-
 import logging
 import os
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from osm_pbf_power_data_extractor import create_country_list
+from powerplantmatching.export import map_country_bus
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
-import powerplantmatching as pm
-from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def normed(s):
@@ -333,12 +332,7 @@ def attach_wind_and_solar(n, costs):
         if tech == "hydro":
             continue
 
-        if snakemake.config["alternative_clustering"]:
-            # pass
-            n.add("Carrier", name=tech)
-
-        else:    
-            n.add("Carrier", name=tech)
+        n.add("Carrier", name=tech)
         # TODO: Uncomment this out. MAX
         # with xr.open_dataset(getattr(snakemake.input,
         #                              "profile_" + tech)) as ds:
@@ -690,11 +684,12 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("add_electricity", simpl="", clusters="50")
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+        snakemake = mock_snakemake("add_electricity")
     configure_logging(snakemake)
-    
+
     n = pypsa.Network(snakemake.input.base_network)
-    
     Nyears = n.snapshot_weightings.sum() / 8760.0
 
     # Snakemake imports:
@@ -705,16 +700,16 @@ if __name__ == "__main__":
     admin_shapes = snakemake.input.gadm_shapes
 
     costs = load_costs(Nyears)
-#    ppl = load_powerplants()
+    ppl = load_powerplants()
 
     attach_load(n, regions, load, admin_shapes, countries, scale)
 
     update_transmission_costs(n, costs)
 
-#    attach_conventional_generators(n, costs, ppl)
+    attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
     # attach_hydro(n, costs, ppl)
-#    attach_extendable_generators(n, costs, ppl)
+    attach_extendable_generators(n, costs, ppl)
 
     # estimate_renewable_capacities(n)
     # attach_OPSD_renewables(n)
