@@ -35,10 +35,10 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 
 ## Development Notes
 
-The python package requirements are curated in the `envs/environment.yml` file.
+The python package requirements are curated in the `envs/environment.yaml` file.
 The environment can be installed and activated using:
 
-    .../pypsa_meets_africa % conda env create -f envs/environment.yml
+    .../pypsa_meets_africa % conda env create -f envs/environment.yaml
 
     .../pypsa_meets_africa % conda activate pypsa-africa
 
