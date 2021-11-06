@@ -480,6 +480,7 @@ if __name__ == "__main__":
 #    n.buses.at[['1367'], 'country'] = 'DZ'       #TODO isnpect the wrong country mapping of buses
 #    n.buses.at[['66', '228', '329', '737', '1188', '1416', '1543', '2071', '2920', '4134'], 'country'] = 'MA' #TODO isnpect the wrong country mapping of buses   
 #    n.buses.at[['1635', '1903', '2133', '2163', '4441', '4507'], 'country']='MA'
+    n.buses.at[['73'], 'country']='DZ'
     focus_weights = snakemake.config.get("focus_weights", None)
     if snakemake.config['alternative_clustering']:
         renewable_carriers =  pd.Index([
