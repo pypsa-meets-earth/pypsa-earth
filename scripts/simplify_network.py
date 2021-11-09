@@ -89,20 +89,14 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import configure_logging
-from _helpers import update_p_nom_max
-from _helpers import _sets_path_to_root
+from _helpers import _sets_path_to_root, configure_logging, update_p_nom_max
 from add_electricity import load_costs
-from cluster_network import cluster_regions
-from cluster_network import clustering_for_n_clusters
-from pypsa.io import import_components_from_dataframe
-from pypsa.io import import_series_from_dataframe
-from pypsa.networkclustering import aggregategenerators
-from pypsa.networkclustering import aggregateoneport
-
+from cluster_network import cluster_regions, clustering_for_n_clusters
+from pypsa.io import (import_components_from_dataframe,
+                      import_series_from_dataframe)
+from pypsa.networkclustering import aggregategenerators, aggregateoneport
 # from pypsa.networkclustering import busmap_by_stubs
-from scipy.sparse.csgraph import connected_components
-from scipy.sparse.csgraph import dijkstra
+from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
 
