@@ -45,9 +45,9 @@ The environment can be installed and activated using:
     .../pypsa-africa % conda env create -f envs/environment.yaml
 
     .../pypsa-africa % conda activate pypsa-africa
-    
+
 To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
-    
+
     .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
     
     .../pypsa-africa % jupyter lab 
