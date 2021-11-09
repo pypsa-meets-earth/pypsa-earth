@@ -23,8 +23,7 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
     /some/other/path % cd /some/path/without/spaces
 
-    /some/path/without/spaces % git clone https://github.com/pz-max/pypsa_meets_africa
-
+    /some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
 
 .. _deps:
 
@@ -41,8 +40,15 @@ The environment can be installed and activated using
 
 .. code:: bash
 
-    .../pypsa_meets_africa % conda env create -f envs/environment.yaml
+    .../pypsa_africa % conda env create -f envs/environment.yaml
 
-    .../pypsa_meets_africa % conda activate pypsa_meets_africa
+    .../pypsa_africa % conda activate pypsa_meets_africa
+    
+To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ and test if your jupyter lab works:
+    
+.. code:: bash
 
+    .../pypsa_africa % ipython kernel install --user --name=pypsa-africa
+
+    .../pypsa_africa % jupyter lab 
 
