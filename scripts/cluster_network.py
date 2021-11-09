@@ -146,7 +146,7 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # _sets_path_to_root("pypsa-africa")
 
@@ -182,7 +182,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
-    N = n.buses.groupby(["country"]).size()  # originally ["country", "sub_networks"]
+    # originally ["country", "sub_networks"]
+    N = n.buses.groupby(["country"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -247,9 +248,10 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     return pd.Series(m.n.get_values(), index=L.index).astype(int)
 
+
 def busmap_for_gadm_clusters(n,
                              gadm_level):
-    
+
     folders = os.listdir('temp/shapefiles')
 
     for i, folder in enumerate(folders):
@@ -259,29 +261,28 @@ def busmap_for_gadm_clusters(n,
                                 layer='{0}_{1}'.format(folder, gadm_level))
         else:
             gdf = gdf.append(gpd.read_file('temp/shapefiles/{0}/{0}.gpkg'.format(folder),
-                                layer='{0}_{1}'.format(folder, gadm_level)))
-
+                                           layer='{0}_{1}'.format(folder, gadm_level)))
 
     def locate_bus2(coords):
         try:
-            return gdf[gdf.contains(Point(coords['x'], coords['y']))]\
-                ['GID_{}'.format(gadm_level)].item()
+            return gdf[gdf.contains(Point(coords['x'], coords['y']))]['GID_{}'.format(gadm_level)].item()
         except ValueError:
             return 'not_found'
-        
 
-    buses=n.buses
-    buses['gadm_{}'.format(gadm_level)]=buses[['x', 'y']].apply(locate_bus2, axis=1)
-    busmap = buses['gadm_{}'.format(gadm_level)]#.apply(lambda x: x[:-2])
-    not_founds = busmap[busmap=='not_found'].index.tolist()
+    buses = n.buses
+    buses['gadm_{}'.format(gadm_level)] = buses[['x', 'y']
+                                                ].apply(locate_bus2, axis=1)
+    busmap = buses['gadm_{}'.format(gadm_level)]  # .apply(lambda x: x[:-2])
+    not_founds = busmap[busmap == 'not_found'].index.tolist()
     for not_found in not_founds:
         for tech in ['solar', 'onwind']:
             try:
                 n.remove('Generator', '{0} {1}'.format(not_found, tech))
             except:
                 pass
-           
+
     return n, busmap[busmap != 'not_found']
+
 
 def busmap_for_n_clusters(n,
                           n_clusters,
@@ -381,14 +382,13 @@ def clustering_for_n_clusters(
         logger.info(
             f"Imported custom busmap from {snakemake.input.custom_busmap}")
     else:
-        
+
         if snakemake.config['alternative_clustering']:
-            n, busmap = busmap_for_gadm_clusters(n, 
-                    snakemake.config['build_shape_options']['gadm_layer_id'])                              #TODO make func only return busmap, and get level from config
+            n, busmap = busmap_for_gadm_clusters(n,
+                                                 snakemake.config['build_shape_options']['gadm_layer_id'])  # TODO make func only return busmap, and get level from config
         else:
             busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
-                                               focus_weights, algorithm)
-
+                                           focus_weights, algorithm)
 
     weighted_agg_gens = True
     clustering = get_clustering_from_busmap(
@@ -463,7 +463,7 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("cluster_network",
@@ -476,8 +476,8 @@ if __name__ == "__main__":
 #    n.buses.at[['73'], 'country']='DZ'
     focus_weights = snakemake.config.get("focus_weights", None)
     if snakemake.config['alternative_clustering']:
-        renewable_carriers =  pd.Index([
-        'solar', 'onwind' #TODO find a way to fetch automatically from the model run
+        renewable_carriers = pd.Index([
+            'solar', 'onwind'  # TODO find a way to fetch automatically from the model run
         ])
     else:
         renewable_carriers = pd.Index([

@@ -122,7 +122,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
@@ -145,7 +145,7 @@ def _load_buses_from_osm():
     # TODO Deprecated. No influence because of new rebase. Remove?
     buses_with_v_nom_to_keep_b = (buses.v_nom.isin(
         snakemake.config["electricity"]["voltages"])
-                                  | buses.v_nom.isnull())
+        | buses.v_nom.isnull())
     logger.info("Removing buses with voltages {}".format(
         pd.Index(buses.v_nom.unique()).dropna().difference(
             snakemake.config["electricity"]["voltages"])))
@@ -675,7 +675,8 @@ def _rebase_voltage_to_config(component):
     ----------
     component : dataframe
     """
-    v_min = snakemake.config["base_network"]["min_voltage_rebase_voltage"]/1000  # min. filtered value in dataset
+    v_min = snakemake.config["base_network"]["min_voltage_rebase_voltage"] / \
+        1000  # min. filtered value in dataset
     v_low = snakemake.config["electricity"]["voltages"][0]
     v_mid = snakemake.config["electricity"]["voltages"][1]
     v_up = snakemake.config["electricity"]["voltages"][2]

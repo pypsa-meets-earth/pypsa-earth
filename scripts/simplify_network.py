@@ -108,9 +108,9 @@ sys.settrace
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-#_sets_path_to_root("pypsa-africa")
+# _sets_path_to_root("pypsa-africa")
 
 
 def simplify_network_to_380(n, linetype):
@@ -371,7 +371,6 @@ def simplify_links(n):
     return n, busmap
 
 
-
 def busmap_by_stubs(network, matching_attrs=None):
     """Create a busmap by reducing stubs and stubby trees
     (i.e. sequentially reducing dead-ends).
@@ -413,7 +412,6 @@ def busmap_by_stubs(network, matching_attrs=None):
         if len(stubs) == 0:
             break
     return busmap
-    
 
 
 def remove_stubs(n):
@@ -464,7 +462,7 @@ def cluster(n, n_clusters):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("simplify_network",
@@ -474,7 +472,7 @@ if __name__ == "__main__":
 
     # Inputs
     n = pypsa.Network(snakemake.input.network)
-    
+
     linetype = snakemake.config["lines"]["types"][380.]
 
     n, trafo_map = simplify_network_to_380(n, linetype)
@@ -483,7 +481,7 @@ if __name__ == "__main__":
 
 #    n, stub_map = remove_stubs(n)
 
-    busmaps = [trafo_map, simplify_links_map]# , stub_map]
+    busmaps = [trafo_map, simplify_links_map]  # , stub_map]
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))
@@ -493,7 +491,7 @@ if __name__ == "__main__":
         n.buses = n.buses.drop([
             "symbol", "under_construction", "substation_lv", "substation_off"
         ],
-                               axis=1)
+            axis=1)
 
     update_p_nom_max(n)
 
