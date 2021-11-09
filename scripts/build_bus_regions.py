@@ -48,6 +48,8 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging
 from osm_pbf_power_data_extractor import create_country_list
+from shapely.geometry import Point
+from shapely.geometry import Polygon
 from vresutils.graph import voronoi_partition_pts
 
 _logger = logging.getLogger(__name__)
@@ -146,6 +148,34 @@ def custom_voronoi_partition_pts(points,
     return polygons_arr
 
 
+def get_gadm_shape(onshore_locs, gadm_shapes):
+    def locate_bus(coords):
+        try:
+            return gadm_shapes[gadm_shapes.contains(
+                Point(coords["x"], coords["y"]))].item()
+        except ValueError:
+            # return 'not_found'
+            gadm_shapes[gadm_shapes.contains(Point(-9, 32))].item(
+            )  # TODO !!Fatal!! assigning not found to a random shape
+
+    def get_id(coords):
+        try:
+            return gadm_shapes[gadm_shapes.contains(
+                Point(coords["x"], coords["y"]))].index.item()
+        except ValueError:
+            # return 'not_found'
+            gadm_shapes[gadm_shapes.contains(Point(-9, 32))].index.item(
+            )  # TODO !!Fatal!! assigning not found to a random shape
+
+    sas = []
+    sas.append(onshore_locs[["x", "y"]].apply(locate_bus, axis=1).values)
+    ss = numpy.empty((len(sas), ), "object")
+    ss[:] = sas
+    regions = onshore_locs[["x", "y"]].apply(locate_bus, axis=1)
+    ids = onshore_locs[["x", "y"]].apply(get_id, axis=1)
+    return regions.values, ids.values
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -161,7 +191,8 @@ if __name__ == "__main__":
         snakemake.input.country_shapes).set_index("name")["geometry"]
     offshore_shapes = gpd.read_file(
         snakemake.input.offshore_shapes).set_index("name")["geometry"]
-
+    gadm_shapes = gpd.read_file(
+        snakemake.input.gadm_shapes).set_index("GADM_ID")["geometry"]
     # Issues in voronoi_creation due to overlapping/duplications will be removed with that function
     # First issues where observed for offshore shapes means that first country-onshore voronoi worked fine
     # TODO: Find out the root cause for this issues
@@ -189,19 +220,21 @@ if __name__ == "__main__":
         # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
+        if snakemake.config["alternative_clustering"]:
+            onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
+            shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
+        else:
+            onshore_geometry = custom_voronoi_partition_pts(
+                onshore_locs.values, onshore_shape)
+            shape_id = 0  # Not used
         onshore_regions.append(
             gpd.GeoDataFrame({
-                "name":
-                onshore_locs.index,
-                "x":
-                onshore_locs["x"],
-                "y":
-                onshore_locs["y"],
-                "geometry":
-                custom_voronoi_partition_pts(onshore_locs.values,
-                                             onshore_shape),
-                "country":
-                country,
+                "name": onshore_locs.index,
+                "x": onshore_locs["x"],
+                "y": onshore_locs["y"],
+                "geometry": onshore_geometry,
+                "country": country,
+                "shape_id": shape_id,
             }))
 
         # These two logging could be commented out

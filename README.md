@@ -1,5 +1,7 @@
 # PyPSA meets Africa
+
 ## Development Status: **Prototype**
+
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa.
@@ -8,15 +10,14 @@ The tool which is currently under development and will be heavily based on [PyPS
 
 Watch our latest discusson with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
-
 <p align="center">
   <img src="doc/img/africa_osm_map.jpeg" width="600">
 </p>
 
-
 ## Get involved
 
 The PyPSA meets Africa team is currenlty running four types of meetings:
+
 - **Buddy talk (Open)**
   - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
@@ -45,12 +46,12 @@ The environment can be installed and activated using:
     .../pypsa-africa % conda env create -f envs/environment.yaml
 
     .../pypsa-africa % conda activate pypsa-africa
-    
+
 To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
-    
+
     .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
-    
-    .../pypsa-africa % jupyter lab 
+
+    .../pypsa-africa % jupyter lab
 
 ## Documentation
 

@@ -24,6 +24,8 @@ data/raw/
 data/base_network/
 networks/
 resources/
+scripts/temp
+scripts/test.py
 
 # Untrack some Jupyter changes
 .ipynb_checkpoints
@@ -43,3 +45,10 @@ doc/_build
 .vscode
 doc/.vscode/settings.json
 .vscode/settings.json
+resources/regions_onshore.geojson
+resources/regions_offshore.geojson
+resources/regions_onshore.geojson
+resources/regions_onshore.geojson
+resources/regions_offshore.geojson
+resources/regions_onshore.geojson
+resources/regions_offshore.geojson

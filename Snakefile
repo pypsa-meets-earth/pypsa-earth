@@ -144,7 +144,8 @@ rule build_bus_regions:
     input:
         country_shapes='resources/country_shapes.geojson',
         offshore_shapes='resources/offshore_shapes.geojson',
-        base_network="networks/base.nc"
+        base_network="networks/base.nc",
+        gadm_shapes="resources/gadm_shapes.geojson"
     output:
         regions_onshore="resources/regions_onshore.geojson",
         regions_offshore="resources/regions_offshore.geojson"

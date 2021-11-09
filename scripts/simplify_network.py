@@ -89,9 +89,9 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
+from _helpers import _sets_path_to_root
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
-from _helpers import _sets_path_to_root
 from add_electricity import load_costs
 from cluster_network import cluster_regions
 from cluster_network import clustering_for_n_clusters
@@ -99,9 +99,10 @@ from pypsa.io import import_components_from_dataframe
 from pypsa.io import import_series_from_dataframe
 from pypsa.networkclustering import aggregategenerators
 from pypsa.networkclustering import aggregateoneport
-# from pypsa.networkclustering import busmap_by_stubs
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse.csgraph import dijkstra
+
+# from pypsa.networkclustering import busmap_by_stubs
 
 sys.settrace
 
@@ -110,7 +111,7 @@ logger = logging.getLogger(__name__)
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-#_sets_path_to_root("pypsa-africa")
+# _sets_path_to_root("pypsa-africa")
 
 
 def simplify_network_to_380(n, linetype):
@@ -371,7 +372,6 @@ def simplify_links(n):
     return n, busmap
 
 
-
 def busmap_by_stubs(network, matching_attrs=None):
     """Create a busmap by reducing stubs and stubby trees
     (i.e. sequentially reducing dead-ends).
@@ -396,16 +396,16 @@ def busmap_by_stubs(network, matching_attrs=None):
     G = network.graph()
 
     def attrs_match(u, v):
-        return (matching_attrs is None or
-                (network.buses.loc[u, matching_attrs] ==
-                 network.buses.loc[v, matching_attrs]).all())
+        return (matching_attrs is None
+                or (network.buses.loc[u, matching_attrs]
+                    == network.buses.loc[v, matching_attrs]).all())
 
     while True:
         stubs = []
         for u in G.nodes:
             neighbours = list(G.adj[u].keys())
             if len(neighbours) == 1:
-                v, = neighbours
+                (v, ) = neighbours
                 if attrs_match(u, v):
                     busmap[busmap == u] = v
                     stubs.append(u)
@@ -413,7 +413,6 @@ def busmap_by_stubs(network, matching_attrs=None):
         if len(stubs) == 0:
             break
     return busmap
-    
 
 
 def remove_stubs(n):
@@ -464,7 +463,7 @@ def cluster(n, n_clusters):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("simplify_network",
@@ -474,13 +473,14 @@ if __name__ == "__main__":
 
     # Inputs
     n = pypsa.Network(snakemake.input.network)
-    linetype = snakemake.config["lines"]["types"][380.]
+
+    linetype = snakemake.config["lines"]["types"][380.0]
 
     n, trafo_map = simplify_network_to_380(n, linetype)
 
     n, simplify_links_map = simplify_links(n)
 
-    n, stub_map = remove_stubs(n)
+    #    n, stub_map = remove_stubs(n)
 
     busmaps = [trafo_map, simplify_links_map]  # , stub_map]
 

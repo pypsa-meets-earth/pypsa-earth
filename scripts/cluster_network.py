@@ -139,6 +139,7 @@ from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
 from pypsa.networkclustering import busmap_by_spectral_clustering
 from pypsa.networkclustering import get_clustering_from_busmap
+from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
@@ -248,6 +249,47 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     return pd.Series(m.n.get_values(), index=L.index).astype(int)
 
 
+def busmap_for_gadm_clusters(n, gadm_level):
+
+    folders = os.listdir("temp/shapefiles")
+
+    for i, folder in enumerate(folders):
+        print(i)
+        if i == 0:
+            gdf = gpd.read_file(
+                "temp/shapefiles/{0}/{0}.gpkg".format(folder),
+                layer="{0}_{1}".format(folder, gadm_level),
+            )
+        else:
+            gdf = gdf.append(
+                gpd.read_file(
+                    "temp/shapefiles/{0}/{0}.gpkg".format(folder),
+                    layer="{0}_{1}".format(folder, gadm_level),
+                ))
+
+    def locate_bus2(coords):
+        try:
+            return gdf[gdf.contains(
+                Point(coords["x"],
+                      coords["y"]))]["GID_{}".format(gadm_level)].item()
+        except ValueError:
+            return "not_found"
+
+    buses = n.buses
+    buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus2,
+                                                                  axis=1)
+    busmap = buses["gadm_{}".format(gadm_level)]  # .apply(lambda x: x[:-2])
+    not_founds = busmap[busmap == "not_found"].index.tolist()
+    for not_found in not_founds:
+        for tech in ["solar", "onwind"]:
+            try:
+                n.remove("Generator", "{0} {1}".format(not_found, tech))
+            except:
+                pass
+
+    return n, busmap[busmap != "not_found"]
+
+
 def busmap_for_n_clusters(n,
                           n_clusters,
                           solver_name,
@@ -255,12 +297,13 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 1000)
-        algorithm_kwds.setdefault("max_iter", 30000)
-        algorithm_kwds.setdefault("tol", 1e-6)
+        algorithm_kwds.setdefault("n_init", 100)
+        algorithm_kwds.setdefault("max_iter", 300)
+        algorithm_kwds.setdefault("tol", 1e-3)
 
     # PyPSA module that creates sub_networks and "error"
     n.determine_network_topology()
+    n.lines.at[:, "sub_network"] = "0"
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(n,
@@ -342,14 +385,21 @@ def clustering_for_n_clusters(
         logger.info(
             f"Imported custom busmap from {snakemake.input.custom_busmap}")
     else:
-        busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
-                                       focus_weights, algorithm)
 
+        if snakemake.config["alternative_clustering"]:
+            n, busmap = busmap_for_gadm_clusters(
+                n, snakemake.config["build_shape_options"]["gadm_layer_id"]
+            )  # TODO make func only return busmap, and get level from config
+        else:
+            busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
+                                           focus_weights, algorithm)
+
+    weighted_agg_gens = True
     clustering = get_clustering_from_busmap(
         n,
         busmap,
         bus_strategies=dict(country=_make_consense("Bus", "country")),
-        aggregate_generators_weighted=True,
+        aggregate_generators_weighted=weighted_agg_gens,
         aggregate_generators_carriers=aggregate_carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
@@ -421,17 +471,22 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="10")
+                                   clusters="75")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-
+    #    n.buses.at[['73'], 'country']='DZ'
     focus_weights = snakemake.config.get("focus_weights", None)
-
-    renewable_carriers = pd.Index([
-        tech for tech in n.generators.carrier.unique()
-        if tech in snakemake.config["renewable"]
-    ])
+    if snakemake.config["alternative_clustering"]:
+        renewable_carriers = pd.Index([
+            "solar",
+            "onwind",  # TODO find a way to fetch automatically from the model run
+        ])
+    else:
+        renewable_carriers = pd.Index([
+            tech for tech in n.generators.carrier.unique()
+            if tech in snakemake.config["renewable"]
+        ])
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])

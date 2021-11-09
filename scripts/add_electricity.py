@@ -708,7 +708,7 @@ if __name__ == "__main__":
 
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
-    # attach_hydro(n, costs, ppl)
+    attach_hydro(n, costs, ppl)
     attach_extendable_generators(n, costs, ppl)
 
     # estimate_renewable_capacities(n)
