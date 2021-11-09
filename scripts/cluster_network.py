@@ -389,10 +389,8 @@ def clustering_for_n_clusters(
             busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
                                                focus_weights, algorithm)
 
-        if snakemake.config['alternative_clustering']:                          #TODO conv. generators must be aggregated manually 
-            weighted_agg_gens = True
-        else:
-            weighted_agg_gens = True
+
+    weighted_agg_gens = True
     clustering = get_clustering_from_busmap(
         n,
         busmap,
@@ -475,12 +473,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    #n.buses.at[['1371', '2516', '3962', '5107', '1297', '1348', '1367', '2479', '2498', '2512'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
-#    n.buses.at[['124', '147', '229', '1583', '1297', '1548', '1573', '1635', '2460', '3888', '5051', '1774', '1896', '2356', '4947', '2516', '5107', '1367', '2479', '2498'], 'country'] = 'MA'       #TODO isnpect the wrong country mapping of buses
-#    n.buses.at[['1367'], 'country'] = 'DZ'       #TODO isnpect the wrong country mapping of buses
-#    n.buses.at[['66', '228', '329', '737', '1188', '1416', '1543', '2071', '2920', '4134'], 'country'] = 'MA' #TODO isnpect the wrong country mapping of buses   
-#    n.buses.at[['1635', '1903', '2133', '2163', '4441', '4507'], 'country']='MA'
-    n.buses.at[['73'], 'country']='DZ'
+#    n.buses.at[['73'], 'country']='DZ'
     focus_weights = snakemake.config.get("focus_weights", None)
     if snakemake.config['alternative_clustering']:
         renewable_carriers =  pd.Index([

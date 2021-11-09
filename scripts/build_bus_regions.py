@@ -55,7 +55,7 @@ from shapely.geometry import Polygon
 _logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def save_to_geojson(df, fn):
@@ -147,7 +147,7 @@ def custom_voronoi_partition_pts(points,
     polygons_arr[:] = polygons
     return polygons_arr
 
-def get_gadm_shape(onshore_locs):
+def get_gadm_shape(onshore_locs, gadm_shapes):
     def locate_bus(coords):
         try:
             return gadm_shapes[gadm_shapes.contains(Point(coords['x'],
@@ -221,8 +221,8 @@ if __name__ == "__main__":
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
         if snakemake.config['alternative_clustering']:
-            onshore_geometry = get_gadm_shape(onshore_locs)[0]
-            shape_id = get_gadm_shape(onshore_locs)[1]
+            onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
+            shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
         else:
             onshore_geometry = custom_voronoi_partition_pts(onshore_locs.values,
                                               onshore_shape) 

@@ -64,6 +64,28 @@ _logger.setLevel(logging.INFO)
 # Requirement to set path to filepath for execution
 # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+def get_fileshapes(list_paths, accepted_formats=(".shp",)):
+    "Function to parse the list of paths to include shapes included in folders, if any"
+
+    list_fileshapes = []
+    for lf in list_paths:
+        if os.path.isdir(lf):
+            # if it is a folder, then list all shapes files contained
+
+            # loop over all dirs and subdirs
+            for path, subdirs, files in os.walk(lf):
+                # loop over all files
+                for subfile in files:
+                    # add the subfile if it is a shape file
+                    if subfile.endswith(accepted_formats):
+                        list_fileshapes.append(os.path.join(path, subfile))
+
+        elif lf.endswith(accepted_formats):
+            list_fileshapes.append(lf)
+    
+    return list_fileshapes
+
+
 def determine_cutout_xXyY(cutout_name, out_logging):
     if out_logging:
         _logger.info("Stage 1/5: Determine cutout boundaries")
@@ -104,21 +126,23 @@ def unify_protected_shape_areas(inputs, out_logging):
 
     # Read only .shp snakemake inputs
     shp_files = [string for string in inputs if ".shp" in string]
+
     # Create one geodataframe with all geometries, of all .shp files
     if out_logging:
         _logger.info("Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")
     for i in shp_files:
         shape = gpd.GeoDataFrame(
             pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(3035)
+
     # Removes shapely geometry with null values. Returns geoseries.
-    shape = [
-        geom if geom.is_valid else geom.buffer(0) for geom in shape["geometry"]
-    ]
+    shape = shape["geometry"][shape["geometry"].is_valid]
+
     # Create Geodataframe with crs(3035)
     shape = gpd.GeoDataFrame(shape)
     shape = shape.rename(columns={
         0: "geometry"
     }).set_geometry("geometry")  # .set_crs(3035)
+    
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
     if out_logging:
         _logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
@@ -135,18 +159,21 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
 
     out_logging = True
     inputs = snakemake.input
     cutouts = inputs.cutouts
+    shapefiles = get_fileshapes(inputs)
     xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout, out_logging=out_logging)
                            for cutout in cutouts))
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
     transform, out_shape = get_transform_and_shape(bounds, res=100, out_logging=out_logging)
     # adjusted boundaries
-    shapes = unify_protected_shape_areas(inputs, out_logging=out_logging)
+    shapes = unify_protected_shape_areas(shapefiles, out_logging=out_logging)
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
