@@ -131,9 +131,9 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
+from _helpers import _sets_path_to_root
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
-from _helpers import _sets_path_to_root
 from add_electricity import load_costs
 from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
@@ -146,7 +146,7 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 # Requirement to set path to filepath for execution
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # _sets_path_to_root("pypsa-africa")
 
@@ -182,7 +182,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
 
-    N = n.buses.groupby(["country"]).size()  # originally ["country", "sub_networks"]
+    # originally ["country", "sub_networks"]
+    N = n.buses.groupby(["country"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -247,41 +248,47 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     return pd.Series(m.n.get_values(), index=L.index).astype(int)
 
-def busmap_for_gadm_clusters(n,
-                             gadm_level):
-    
-    folders = os.listdir('temp/shapefiles')
+
+def busmap_for_gadm_clusters(n, gadm_level):
+
+    folders = os.listdir("temp/shapefiles")
 
     for i, folder in enumerate(folders):
         print(i)
         if i == 0:
-            gdf = gpd.read_file('temp/shapefiles/{0}/{0}.gpkg'.format(folder),
-                                layer='{0}_{1}'.format(folder, gadm_level))
+            gdf = gpd.read_file(
+                "temp/shapefiles/{0}/{0}.gpkg".format(folder),
+                layer="{0}_{1}".format(folder, gadm_level),
+            )
         else:
-            gdf = gdf.append(gpd.read_file('temp/shapefiles/{0}/{0}.gpkg'.format(folder),
-                                layer='{0}_{1}'.format(folder, gadm_level)))
-
+            gdf = gdf.append(
+                gpd.read_file(
+                    "temp/shapefiles/{0}/{0}.gpkg".format(folder),
+                    layer="{0}_{1}".format(folder, gadm_level),
+                ))
 
     def locate_bus2(coords):
         try:
-            return gdf[gdf.contains(Point(coords['x'], coords['y']))]\
-                ['GID_{}'.format(gadm_level)].item()
+            return gdf[gdf.contains(
+                Point(coords["x"],
+                      coords["y"]))]["GID_{}".format(gadm_level)].item()
         except ValueError:
-            return 'not_found'
-        
+            return "not_found"
 
-    buses=n.buses
-    buses['gadm_{}'.format(gadm_level)]=buses[['x', 'y']].apply(locate_bus2, axis=1)
-    busmap = buses['gadm_{}'.format(gadm_level)]#.apply(lambda x: x[:-2])
-    not_founds = busmap[busmap=='not_found'].index.tolist()
+    buses = n.buses
+    buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus2,
+                                                                  axis=1)
+    busmap = buses["gadm_{}".format(gadm_level)]  # .apply(lambda x: x[:-2])
+    not_founds = busmap[busmap == "not_found"].index.tolist()
     for not_found in not_founds:
-        for tech in ['solar', 'onwind']:
+        for tech in ["solar", "onwind"]:
             try:
-                n.remove('Generator', '{0} {1}'.format(not_found, tech))
+                n.remove("Generator", "{0} {1}".format(not_found, tech))
             except:
                 pass
-           
-    return n, busmap[busmap != 'not_found']
+
+    return n, busmap[busmap != "not_found"]
+
 
 def busmap_for_n_clusters(n,
                           n_clusters,
@@ -296,7 +303,7 @@ def busmap_for_n_clusters(n,
 
     # PyPSA module that creates sub_networks and "error"
     n.determine_network_topology()
-    n.lines.at[:, 'sub_network'] = '0'
+    n.lines.at[:, "sub_network"] = "0"
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(n,
@@ -327,11 +334,8 @@ def busmap_for_n_clusters(n,
         weight = weighting_for_country(n, x)
 
         if algorithm == "kmeans":
-            return prefix + busmap_by_kmeans(n,
-                                             weight,
-                                             n_cluster_c,
-                                             buses_i=x.index,
-                                             **algorithm_kwds)
+            return prefix + busmap_by_kmeans(
+                n, weight, n_cluster_c, buses_i=x.index, **algorithm_kwds)
         elif algorithm == "spectral":
             return prefix + busmap_by_spectral_clustering(
                 reduce_network(n, x), n_cluster_c, **algorithm_kwds)
@@ -381,14 +385,14 @@ def clustering_for_n_clusters(
         logger.info(
             f"Imported custom busmap from {snakemake.input.custom_busmap}")
     else:
-        
-        if snakemake.config['alternative_clustering']:
-            n, busmap = busmap_for_gadm_clusters(n, 
-                    snakemake.config['build_shape_options']['gadm_layer_id'])                              #TODO make func only return busmap, and get level from config
+
+        if snakemake.config["alternative_clustering"]:
+            n, busmap = busmap_for_gadm_clusters(
+                n, snakemake.config["build_shape_options"]["gadm_layer_id"]
+            )  # TODO make func only return busmap, and get level from config
         else:
             busmap = busmap_for_n_clusters(n, n_clusters, solver_name,
-                                               focus_weights, algorithm)
-
+                                           focus_weights, algorithm)
 
     weighted_agg_gens = True
     clustering = get_clustering_from_busmap(
@@ -441,10 +445,8 @@ def cluster_regions(busmaps, input=None, output=None):
                                          which)).set_index("name").dropna()
                    )  # TODO fix the None geomerty in the regions files
 
-        geom_c = (
-            regions.geometry.groupby(busmap).apply(list).apply(
-                shapely.ops.unary_union)
-        )
+        geom_c = (regions.geometry.groupby(busmap).apply(list).apply(
+            shapely.ops.unary_union))
         regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
         regions_c.index.name = "name"
         save_to_geojson(regions_c, getattr(output, which))
@@ -463,7 +465,7 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-        
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("cluster_network",
@@ -473,11 +475,12 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-#    n.buses.at[['73'], 'country']='DZ'
+    #    n.buses.at[['73'], 'country']='DZ'
     focus_weights = snakemake.config.get("focus_weights", None)
-    if snakemake.config['alternative_clustering']:
-        renewable_carriers =  pd.Index([
-        'solar', 'onwind' #TODO find a way to fetch automatically from the model run
+    if snakemake.config["alternative_clustering"]:
+        renewable_carriers = pd.Index([
+            "solar",
+            "onwind",  # TODO find a way to fetch automatically from the model run
         ])
     else:
         renewable_carriers = pd.Index([
