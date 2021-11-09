@@ -33,14 +33,24 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - every second week
   - planning, discussing events, workshops, communication, community activities
 
-## Development Notes
+## Installation
 
-The python package requirements are curated in the `envs/environment.yml` file.
+Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
+
+    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+
+The python package requirements are curated in the `envs/environment.yaml` file.
 The environment can be installed and activated using:
 
-    .../pypsa_meets_africa % conda env create -f envs/environment.yml
+    .../pypsa-africa % conda env create -f envs/environment.yaml
 
-    .../pypsa_meets_africa % conda activate pypsa-africa
+    .../pypsa-africa % conda activate pypsa-africa
+    
+To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+    
+    .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+    
+    .../pypsa-africa % jupyter lab 
 
 ## Documentation
 

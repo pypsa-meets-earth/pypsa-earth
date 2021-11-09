@@ -43,6 +43,9 @@ dependencies:
 
   # Keep in conda environment when calling ipython
   - ipython
+  # Jupyter notebook requirement
+  - ipykernel
+  - jupyterlab
 
   # GIS dependencies:
   - cartopy
