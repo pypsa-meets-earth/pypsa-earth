@@ -7,7 +7,7 @@
 series (based on weather data), and (iii) the average distance from the node for
 onshore wind, AC-connected offshore wind, DC-connected offshore wind and solar
 PV generators. For hydro generators, it calculates the expected inflows.
-In addition for offshore wind it calculates the fraction of the grid connection 
+In addition for offshore wind it calculates the fraction of the grid connection
 which is under water.
 
 Relevant settings
