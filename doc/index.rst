@@ -50,7 +50,6 @@ Documentation
 
 * :doc:`project_structure_and_credits`
 * :doc:`contributing`
-* :doc:`learning_material`
 * :doc:`talks_and_papers`
 
 .. toctree::
@@ -60,7 +59,6 @@ Documentation
 
    project_structure_and_credits
    contributing
-   learning_material
    talks_and_papers
    
 
