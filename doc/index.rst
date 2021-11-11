@@ -20,14 +20,18 @@ Documentation
 
 **Getting Started**
 
+* :doc:`introduction`
 * :doc:`installation`
+* :doc:`tutorial`
 
 .. toctree::
    :hidden:
    :maxdepth: 2
    :caption: Getting Started
 
+   introduction
    installation
+   tutorial
 
 **Code Documenation (automated)**
 
