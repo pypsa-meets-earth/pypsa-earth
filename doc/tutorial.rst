@@ -94,3 +94,43 @@ the rules, in the ``notebooks`` folder, the following notebooks are available:
 
 Examples
 ========
+
+Solve the optimal power flow
+-----------------------------------
+
+The following snakemake routine enables executing the optimal power flow problem
+for the current configuration using a 6-bus equivalent of the region.
+
+.. code:: bash
+
+    .../pypsa-africa % snakemake -j 1 results/networks/elec_s_6_ec_l.nc
+
+Change the country for the analysis
+-----------------------------------
+
+In order to run the code for a set of countries different than the default ones,
+the option ``countries`` in the configuration yaml files shall be modified.
+To do so, follow the following procedure:
+1. Make a copy of the ``config.default.yaml`` file and rename it as ``config.yaml``
+2. In ``config.yaml`` modify the option ``countries = ["AA", ..., "ZZ"]`` with the list
+   of countries that you desire; 2-digit country codes are requested or region names.
+
+   For example, to investigate Nigeria, the following specification shall be applied in
+   the configuration file.
+.. code:: bash
+
+    countries = ["NG"]
+
+    The code also supports pre-set group of countries, such as africa. For example,
+    the African region can be simulated using:
+.. code:: bash
+
+    countries = ["africa"]
+
+3. Then, the software is ready to be used on the selected countries
+
+Manual test of specific scripts
+-------------------------------
+
+The scripts in the ``scripts`` folder are build so that they can be easily run and tested
+even without the snakemake procedure. Therefore, to test the specific functionality of
