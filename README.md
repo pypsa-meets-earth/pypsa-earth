@@ -154,7 +154,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/energyLS">
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
-            <sub><b>energyLS</b></sub>
+            <sub><b>EnergyLS</b></sub>
         </a>
     </td>
     <td align="center">
