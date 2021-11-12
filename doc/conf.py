@@ -10,6 +10,7 @@
 #
 import os
 import sys
+import datetime
 
 # sys.path.insert(0, os.path.abspath('scripts'))
 # sys.path.insert(0, os.path.abspath('../scripts'))
@@ -21,8 +22,8 @@ for p in sys.path:
 # -- Project information -----------------------------------------------------
 
 project = "PyPSA meets Africa"
-copyright = "2021, Max Parzen"
 author = "Max Parzen"
+copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
