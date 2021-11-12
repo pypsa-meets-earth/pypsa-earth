@@ -9,8 +9,8 @@
 Project structure and credits
 ##########################################
 
-PyPSA meets Africa is an open source initiative. 
-We implemented a project structure to enhance collaboration and give people responsibilities. 
+PyPSA meets Africa is an open source initiative.
+We implemented a project structure to enhance collaboration and give people responsibilities.
 Therefore, the structure is not here to dictate, it is rather a structure that let people organise and think in different angles about the project.
 
 We all have the same goal. We want to create a long-term maintained, supported and steadily improving energy system model that is useful for industry and research. Every person helping towards achieving this goal is listed in the credits.
@@ -34,7 +34,7 @@ The structure might be adjusted in future:
 
 .. _credits:
 
-Credits 
+Credits
 ===============================
 
 (sorted by continent, country, institution)
@@ -83,11 +83,3 @@ Advisor Team
 - Aristides Kiprakis (Professor at University of Edinburgh, United Kingdom)
 - Yusuf Kuvvetli (Associate Professor and Deputy Head of Industrial Engineering Department at Cukurova University, Turkey)
 - İclal Çetin Taş (Assistant Professor of Software Engineering Department at OSTİM Technical University, Turkey)
-
-
-
-
-
-
-
-
