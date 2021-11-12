@@ -15,7 +15,7 @@ directory in which the commands following the ``%`` should be entered.
 Software requirements
 =====================
 
-PyPSA meets Africa builds on top of several open-source packages, which are here recalled together with recommended sources to better understand the main dependencies.
+PyPSA-Africa builds on top of several open-source packages, which are here recalled together with recommended sources to better understand the main dependencies.
 In the case the user needs to revise your knowledge of some of the requirements, please, check out our learning material in the tutorial section.
 
 Programs and programming language
@@ -57,7 +57,7 @@ Python packages
 Clone the Repository
 ====================
 
-First of all, clone the `PyPSA meets Africa repository <https://github.com/pz-max/pypsa_meets_africa>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-Africa repository <https://github.com/pypsa-meets-africa/pypsa-africa.git>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
@@ -88,7 +88,7 @@ The environment can be installed and activated using
 
     .../pypsa-africa % conda env create -f envs/environment.yaml
 
-    .../pypsa-africa % conda activate pypsa_meets_africa
+    .../pypsa-africa % conda activate pypsa-africa
     
 To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ and test if your jupyter lab works:
     
@@ -116,7 +116,7 @@ The rule ``retrieve_databundle_light`` has been specifically developed to set up
 
    .. code:: bash
 
-     .../pypsa-africa % conda activate pypsa_meets_africa
+     .../pypsa-africa % conda activate pypsa-africa
 
      .../pypsa-africa % snakemake -j1 retrieve_databundle_light --force
 
