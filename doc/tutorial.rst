@@ -114,18 +114,20 @@ To do so, follow the following procedure:
 1. Make a copy of the ``config.default.yaml`` file and rename it as ``config.yaml``
 2. In ``config.yaml`` modify the option ``countries = ["AA", ..., "ZZ"]`` with the list
    of countries that you desire; 2-digit country codes are requested or region names.
-
+   
    For example, to investigate Nigeria, the following specification shall be applied in
    the configuration file.
-.. code:: bash
 
-    countries = ["NG"]
+   .. code:: bash
 
-    The code also supports pre-set group of countries, such as africa. For example,
-    the African region can be simulated using:
-.. code:: bash
+      countries = ["NG"]
 
-    countries = ["africa"]
+   The code also supports pre-set group of countries, such as africa. For example,
+   the African region can be simulated using:
+
+   .. code:: bash
+
+      countries = ["africa"]
 
 3. Then, the software is ready to be used on the selected countries
 

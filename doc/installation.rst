@@ -15,7 +15,7 @@ directory in which the commands following the ``%`` should be entered.
 Software requirements
 =====================
 
-PyPSA meets Africa builds on top of several open-source packages, which are here recalled together with recommended sources to better understand the main dependencies.
+PyPSA-Africa builds on top of several open-source packages, which are here recalled together with recommended sources to better understand the main dependencies.
 In the case the user needs to revise your knowledge of some of the requirements, please, check out our learning material in the tutorial section.
 
 Programs and programming language
@@ -26,8 +26,8 @@ Programs and programming language
   Useful content to watch refer to numpy, pandas
 - `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ **(mandatory)**: in order to use packages in python,
   it is highly recommended to use a conda package manager, such as `Anaconda <https://docs.anaconda.com/>`_ or
-  `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ (**recommended**)
-- `Git <https://git-scm.com/>`_ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
+  `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ (**recommended**)
+- `Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
   and enable to coordinate the parallel software development between many developers.
   It is mandatory to `learn the git basics <https://git-scm.com/doc>`_.
 - `IDE Python` **(recommendation)**: in order to write python code, you need an Integrated Development Environment (IDE)
@@ -36,7 +36,7 @@ Programs and programming language
   Other alternatives are also viable if you are familiar with them, such as `PyCharm <https://www.jetbrains.com/pycharm/>`_,
   however we recommend Visual Studio Code also given its easy to use interface with Git.
   *Note*: if you decide to use Visual Studio Code, check out the tutorial about how to use 
-  `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`_ and `Github <https://code.visualstudio.com/docs/editor/github>`_ 
+  `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`__ and `Github <https://code.visualstudio.com/docs/editor/github>`__ 
   in Visual Studio Code
 - `Snakemake <https://snakemake.readthedocs.io/en/stable/>`_ **(mandatory)**: snakemake is a tool to create reproducible and scalable workflow procedures.
   Snakemake provides a set of functions and a reference language where a set of execution blocks can be easily defined
@@ -57,7 +57,7 @@ Python packages
 Clone the Repository
 ====================
 
-First of all, clone the `PyPSA meets Africa repository <https://github.com/pz-max/pypsa_meets_africa>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-Africa repository <https://github.com/pypsa-meets-africa/pypsa-africa.git>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
@@ -76,8 +76,8 @@ PyPSA meets Africa relies on a set of other Python packages to function.
 We recommend using the package manager and environment management system ``conda`` to install them.
 Make sure that ``conda`` is already installed on your system or install one of the following two distributions:
 
-- `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ (recommended), which is a mini version of `Anaconda <https://www.anaconda.com/>`_  
-- `Anaconda <https://www.anaconda.com/>`_
+- `miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ (recommended), which is a mini version of `Anaconda <https://www.anaconda.com/>`__  
+- `Anaconda <https://www.anaconda.com/>`__
 
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
@@ -88,7 +88,7 @@ The environment can be installed and activated using
 
     .../pypsa-africa % conda env create -f envs/environment.yaml
 
-    .../pypsa-africa % conda activate pypsa_meets_africa
+    .../pypsa-africa % conda activate pypsa-africa
     
 To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ and test if your jupyter lab works:
     
@@ -114,11 +114,11 @@ The rule ``retrieve_databundle_light`` has been specifically developed to set up
 4. Execute the following code on the shell to download initial files. Please, note that around **20Gb zipped files will be downloaded**, 
    so make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed.
 
-.. code:: bash
+   .. code:: bash
 
-    .../pypsa-africa % conda activate pypsa_meets_africa
+     .../pypsa-africa % conda activate pypsa-africa
 
-    .../pypsa-africa % snakemake -j1 retrieve_databundle_light --force
+     .../pypsa-africa % snakemake -j1 retrieve_databundle_light --force
 
 5. In the file ``config.yaml`` set the option ``retrieve_databundle`` back to ``false`` and save the file:
    ``retrieve_databundle: false``
