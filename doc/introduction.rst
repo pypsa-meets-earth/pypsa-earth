@@ -16,7 +16,7 @@ PyPSA meets Africa aims at providing an open-source energy system model that des
 The Mission
 ===========
 
-The PyPSA Africa team foreseas the use of Open Energy Modelling for Africa as disruptive approach to support policy makers, utilities,
+The PyPSA Africa team foresees the use of Open Energy Modelling for Africa as disruptive approach to support policy makers, utilities,
 developers and researchers in performing the most affordable, reliable, transparent, reproducible and informed decisions that Africa deserves.
 
 
@@ -33,7 +33,7 @@ planning and dispatch to maximize the efficient use of energy that can sustain s
 Project structure
 =================
 
-In PyPSA meets Africa, six main work packages are in place to tackle the continent-wide challenges:
+In PyPSA-Africa, six main work packages are in place to tackle the continent-wide challenges:
 
 - **WP1. Demand modelling**: to characterize the demand profiles for each location both in space and time resolution
 - **WP2. Conventional generator modelling**: define the type of generators that are installed in each substation
