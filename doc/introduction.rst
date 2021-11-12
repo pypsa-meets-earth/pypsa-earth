@@ -23,16 +23,18 @@ developers and researchers in performing the most affordable, reliable, transpar
 We are committed to give tools that can efficiently provide instruments to all stakeholders to perform the best informed decisions and promode coordinated
 planning and dispatch to maximize the efficient use of energy that can sustain stable sustainable growth.
 
-Despite being home to almost twice the population of Europe, Africa energy demand is a quarter of Europe [OWD]_.
-Access to energy is also very diverse and, according to IEA, still around 600mln people have no access to electricity in Sub-Saharan Africa [WEO2021]_.
-
-.. [OWD] https://ourworldindata.org/grapher/primary-energy-consumption-by-region
-.. [WEO2021] https://www.iea.org/data-and-statistics/charts/people-without-access-to-electricity-in-sub-saharan-africa-2000-2021
+..  
+    Despite being home to almost twice the population of Europe, Africa energy demand is a quarter of Europe [OWD]_.
+    Access to energy is also very diverse and, according to IEA, still around 600mln people have no access to electricity in Sub-Saharan Africa [WEO2021]_.
+    
+    .. [OWD] https://ourworldindata.org/grapher/primary-energy-consumption-by-region
+    .. [WEO2021] https://www.iea.org/data-and-statistics/charts/people-without-access-to-electricity-in-sub-saharan-africa-2000-2021
 
 Project structure
 =================
 
 In PyPSA meets Africa, six main work packages are in place to tackle the continent-wide challenges:
+
 - **WP1. Demand modelling**: to characterize the demand profiles for each location both in space and time resolution
 - **WP2. Conventional generator modelling**: define the type of generators that are installed in each substation
 - **WP3. RES modelling**: to characterize the available renewable production in space and time resolution, given technical, social, and land constraints
