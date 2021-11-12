@@ -8,6 +8,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import datetime
 import os
 import sys
 
@@ -21,8 +22,8 @@ for p in sys.path:
 # -- Project information -----------------------------------------------------
 
 project = "PyPSA meets Africa"
-copyright = "2021, Max Parzen"
 author = "Max Parzen"
+copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
@@ -102,7 +103,7 @@ texinfo_documents = [
     (
         master_doc,
         "pypsa_meets_africa",
-        u"pypsa-meets-africa Documentation",
+        "pypsa-meets-africa Documentation",
         author,
         "pypsa-meets-africa",
         "One line description of project.",
@@ -115,7 +116,7 @@ texinfo_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [(master_doc, "pypsa_meets_africa",
-              u"pypsa_meets_africa Documentation", [author], 1)]
+              "pypsa_meets_africa Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
