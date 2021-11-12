@@ -29,6 +29,7 @@ The structure might be adjusted in future:
 - `AI leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
 - `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
 - `Finance leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EbBuUGDNwrRBqmeT8xbQT3MBL1MOMkemCDXi7EMbzXEmHw?e=E3Cbc7>`_ (Not assigned)
+- Western Asia Coordinator (`Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
 
 
 .. _credits:
@@ -80,6 +81,8 @@ Advisor Team
 - Fabian Neumann (PyPSA-Eur maintainer at TU Berlin, Germany)
 - Tom Brown (PyPSA creator, Professor and Head of Energy System Analysis Department at the TU Berlin, Germany)
 - Aristides Kiprakis (Professor at University of Edinburgh, United Kingdom)
+- Yusuf Kuvvetli (Associate Professor and Deputy Head of Industrial Engineering Department at Cukurova University, Turkey)
+- İclal Çetin Taş (Assistant Professor of Software Engineering Department at OSTİM Technical University, Turkey)
 
 
 
