@@ -12,16 +12,19 @@ Installation
 The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the
 directory in which the commands following the ``%`` should be entered.
 
+System Requirements
+===================
+
+Building the model with the scripts in this repository runs on a normal computer.
+The entire energy model is heavy and it requires > 40Gb of available memory in the disk (HHD/SSD).
+
+
 Software requirements
 =====================
 
-PyPSA-Africa builds on top of several open-source packages, which are here recalled together with recommended sources to better understand the main dependencies.
-In the case the user needs to revise your knowledge of some of the requirements, please, check out our learning material in the tutorial section.
+The complete list of software needed to be installed before installing PyPSA Africa is listed below.
 
-Programs and programming language
----------------------------------
-
-- `Python <https://www.python.org/>`_ **(mandatory)**: Python is used as our main programming language, thus its knowledge is mandatory.
+- `Python 3 <https://www.python.org/>`_ **(mandatory)**: Python is used as our main programming language, thus its knowledge is mandatory.
   To refresh the knowledge, there are plenty of online courses free-of-charge, e.g. `CSDojo playlist <https://www.youtube.com/c/CSDojo/playlists>`_.
   Useful content to watch refer to numpy, pandas
 - `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ **(mandatory)**: in order to use packages in python,
@@ -38,26 +41,22 @@ Programs and programming language
   *Note*: if you decide to use Visual Studio Code, check out the tutorial about how to use 
   `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`__ and `Github <https://code.visualstudio.com/docs/editor/github>`__ 
   in Visual Studio Code
-- `Snakemake <https://snakemake.readthedocs.io/en/stable/>`_ **(mandatory)**: snakemake is a tool to create reproducible and scalable workflow procedures.
-  Snakemake provides a set of functions and a reference language where a set of execution blocks can be easily defined
-  with specific properties which are executed subsequently in an automated procedure.
+- `Solver` **(mandatory)**: an optimization solver is needed to solve the mathematical problem that is build with the automated workflow.
+  With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC https://projects.coin-or.org/Cbc>`_,
+  `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
+  to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
+  (both commercial licenses with free academic options) can also be used
 
-Python packages
----------------------
-- `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ **(mandatory)**: Python for Power Systems Analysis is a 
-  modelling suite with the goal of providing a set of functions to ease the power systems analysis.
-  In particular, it is used as a backbone for formulating the mathematical problem to be solved. 
-- `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_ **(mandatory)**: PyPSA-Eur is an open source model of the European Transmission systems.
-  This package has been used a the base for PyPSA meets Africa package, hence, its good knowledge is recommended 
-  for successfully working with PyPSA meets Africa.
-- `Atlite <https://atlite.readthedocs.io/en/latest/>`_ **(optional)**: atlite is used to generate time series for renewable energy sources,
-  such as wind, solar and hydro. The package converts weather datasets into time series to be useful for energy studies
-
+.. note:
+  Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Africa model.
+  The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Africa experience is listed in the 
+  `Tutorial section <https://pypsa-meets-africa.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`.
+  Most of the dependencies needed will be automatically installed using the conda environments listed below
 
 Clone the Repository
 ====================
 
-First of all, clone the `PyPSA-Africa repository <https://github.com/pypsa-meets-africa/pypsa-africa.git>`_ using the version control system ``git``.
+First of all, clone the `PyPSA meets Africa repository <https://github.com/pypsa-meets-africa/pypsa-africa>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
@@ -96,7 +95,7 @@ To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel
 
     .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
 
-    .../pypsa_africa % jupyter lab 
+    .../pypsa-africa % jupyter lab 
 
 
 Download data

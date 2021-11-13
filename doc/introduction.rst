@@ -9,18 +9,18 @@
 Introduction
 ##########################################
 
-PyPSA meets Africa aims at providing an open-source energy system model that describes the African energy system **by the end of 2021**.
+PyPSA meets Africa aims at providing an open-source energy system model, named PyPSA-Africa, that describes the African energy system **by the end of 2021**.
 
 .. TODO: video Introduction
 
 The Mission
 ===========
 
-The PyPSA Africa team foresees the use of Open Energy Modelling for Africa as disruptive approach to support policy makers, utilities,
+The PyPSA Africa team foreseas the use of Open Energy Modelling for Africa as a disruptive approach to support policy makers, utilities,
 developers and researchers in performing the most affordable, reliable, transparent, reproducible and informed decisions that Africa deserves.
 
 
-We are committed to give tools that can efficiently provide instruments to all stakeholders to perform the best informed decisions and promode coordinated
+We are committed to give tools that can efficiently provide instruments to all stakeholders to perform the best informed decisions and promote coordinated
 planning and dispatch to maximize the efficient use of energy that can sustain stable sustainable growth.
 
 ..  
@@ -33,14 +33,16 @@ planning and dispatch to maximize the efficient use of energy that can sustain s
 Project structure
 =================
 
-In PyPSA-Africa, six main work packages are in place to tackle the continent-wide challenges:
+In PyPSA Africa, six main work packages are in place to tackle the continent-wide challenges:
 
 - **WP1. Demand modelling**: to characterize the demand profiles for each location both in space and time resolution
 - **WP2. Conventional generator modelling**: define the type of generators that are installed in each substation
 - **WP3. RES modelling**: to characterize the available renewable production in space and time resolution, given technical, social, and land constraints
 - **WP4. Land coverage constraint modelling**: to identify limits and constraints where assets can or cannot be installed
 - **WP5. Network and substation modelling**: drawing the model of the network to feed the PyPSA modeling suite
-- **WP6. Data creation and validation**: when data are scarce, by using high resolution maps we aim at filling the gaps and update the datasets
+- **WP6. Data creation and validation**: when data are scarce,
+  by using high resolution maps we aim at filling the gaps and update the datasets. The AI detection is tackled in the package
+  `detect_energy <https://github.com/pypsa-meets-africa/detect_energy>`_
 
 
 For more details, read our preliminary conference paper (more to come):
@@ -102,14 +104,3 @@ The content in this package is organized in folders as described below; for more
 - ``benchmarks``: Stores ``snakemake`` benchmarks.
 - ``logs``: Stores log files about solving, including the solver output, console output and the output of a memory logger.
 - ``envs``: Stores the conda environment files to successfully run the workflow.
-
-
-System Requirements
-===================
-
-Building the model with the scripts in this repository runs on a normal computer.
-The entire energy model is heavy and it requires > 40Gb of available memory in the disk (HHD/SSD).
-With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers; strong interior-point solvers are recommended.
-To further improve performances commercial solvers
-like `Gurobi <http://www.gurobi.com/>`_ (commercial, free academics), `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_ (commercial, free academics) with more memory,
-can further improve performances.
