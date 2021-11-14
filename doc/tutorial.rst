@@ -24,6 +24,7 @@ Data science basics (essential)
 
 - Refresh your Python knowledge by watching `CSDojo's playlist <https://www.youtube.com/c/CSDojo/playlists>`_. His content is excellent as introduction. You will learn in effective short videos the python basics such as variables If/else statements, functions, lists, for loops, while loops, dictionaries, classes and objects, boolean, list comprehensions, sets - put your hands on and write some test scripts as the video suggests. (~3h)
 - Familiarize yourself with numpy and panda dataframes.  In the Python-based PyPSA tool, we do not work with Excel. Powerful panda dataframes are our friends. `Here <https://www.coursera.org/learn/python-data-analysis>`__ is an extensive 30h course that provides a great introduction if this is completely unfamiliar to you.
+- `Introduction to Unix-shell <https://swcarpentry.github.io/shell-novice/>`_ (optional 4h, to become a pro)
 
 
 PyPSA Introduction (essential)
