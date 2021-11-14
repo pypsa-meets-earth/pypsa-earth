@@ -49,7 +49,7 @@ Documentation
 **Project Info**
 
 * :doc:`project_structure_and_credits`
-* :doc:`contributing`
+* :doc:`how_to_contribute`
 * :doc:`talks_and_papers`
 
 .. toctree::
@@ -58,7 +58,7 @@ Documentation
    :caption: Project Info
 
    project_structure_and_credits
-   contributing
+   how_to_contribute
    talks_and_papers
    
 

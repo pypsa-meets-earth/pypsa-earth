@@ -49,6 +49,7 @@ Code Team
 - Hazem Abdel-Khalek (Frauenhofer Institution for Energy IEG, Germany)
 - Johannes Hampp (Justus Liebig University Giessen, Germany)
 - Fabian Neumann (TU Berlin, Germany)
+- Davide Fioriti (University of Pisa, Italy)
 - Koen van Greevenbroek (University of Tromso, Norway)
 - Caputo Cesare (Imperial College London, United Kingdom)
 - Desen Kirli (University of Edinburgh, United Kingdom)
