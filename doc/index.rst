@@ -33,6 +33,21 @@ Documentation
    installation
    tutorial
 
+**Configuration**
+
+* :doc:`wildcards`
+* :doc:`configuration`
+* :doc:`costs`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Configuration
+
+   wildcards
+   configuration
+   costs
+
 **Code Documenation (automated)**
 
 * :doc:`api_reference`
