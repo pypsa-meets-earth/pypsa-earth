@@ -111,6 +111,7 @@ Change the country for the analysis
 In order to run the code for a set of countries different than the default ones,
 the option ``countries`` in the configuration yaml files shall be modified.
 To do so, follow the following procedure:
+
 1. Make a copy of the ``config.default.yaml`` file and rename it as ``config.yaml``
 2. In ``config.yaml`` modify the option ``countries = ["AA", ..., "ZZ"]`` with the list
    of countries that you desire; 2-digit country codes are requested or region names.
@@ -128,7 +129,6 @@ To do so, follow the following procedure:
    .. code:: bash
 
       countries = ["africa"]
-
 3. Then, the software is ready to be used on the selected countries
 
 Manual test of specific scripts

@@ -42,15 +42,15 @@ The complete list of software needed to be installed before installing PyPSA Afr
   `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`__ and `Github <https://code.visualstudio.com/docs/editor/github>`__ 
   in Visual Studio Code
 - `Solver` **(mandatory)**: an optimization solver is needed to solve the mathematical problem that is build with the automated workflow.
-  With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC https://projects.coin-or.org/Cbc>`_,
+  With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC <https://projects.coin-or.org/Cbc>`_,
   `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
   to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
   (both commercial licenses with free academic options) can also be used
 
-.. note:
+.. note::
   Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Africa model.
   The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Africa experience is listed in the 
-  `Tutorial section <https://pypsa-meets-africa.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`.
+  `Tutorial section <https://pypsa-meets-africa.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
   Most of the dependencies needed will be automatically installed using the conda environments listed below
 
 Clone the Repository
@@ -89,13 +89,25 @@ The environment can be installed and activated using
 
     .../pypsa-africa % conda activate pypsa-africa
     
-To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ and test if your jupyter lab works:
+To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ 
+and test if your jupyter lab works:
     
 .. code:: bash
 
     .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
 
-    .../pypsa-africa % jupyter lab 
+    .../pypsa-africa % jupyter lab
+
+.. note::
+  ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-africa,
+  thereby there is no need to install it manually.
+  The snakemake included in the conda environment pypsa-africa installed with the above-mentioned procedure can be executed with the following procedure:
+
+  .. code: bash
+
+    .../pypsa-africa % .../pypsa-africa % conda activate pypsa-africa
+
+    .../pypsa-africa % snakemake < any command here >
 
 
 Download data
