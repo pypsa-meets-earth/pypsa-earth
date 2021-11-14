@@ -23,7 +23,20 @@ Video
 Some publications:
 --------------------
 
-Coming soon
+- D. Kirli et al., "PyPSA meets Africa: Developing an open source electricity network model of the African continent," 2021 IEEE AFRICON, 2021, pp. 1-6, doi: `10.1109/AFRICON51333.2021.9570911 <https://doi.org/10.1109/AFRICON51333.2021.9570911>`_.
+  Please use the following BibTeX: ::
+
+    @INPROCEEDINGS{9570911,
+        author={Kirli, Desen and Hampp, Johannes and van Greevenbroek, Koen and Grant, Rebecca and Mahmood, Matin and Parzen, Maximilian and Kiprakis, Aristides},
+        booktitle={2021 IEEE AFRICON}, 
+        title={PyPSA meets Africa: Developing an open source electricity network model of the African continent}, 
+        year={2021},
+        volume={},
+        number={},
+        pages={1-6},
+        doi={10.1109/AFRICON51333.2021.9570911}
+    }
+- [Coming soon]
 
 .. _PyPSA_Eur:
 
