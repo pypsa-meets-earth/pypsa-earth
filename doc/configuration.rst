@@ -91,7 +91,7 @@ Specifies the temporal range to build an energy system model for as arguments to
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: electricity:
-   :end-before: atlite:
+   :end-before: lines:
 
 .. csv-table::
    :header-rows: 1
