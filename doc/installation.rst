@@ -16,13 +16,14 @@ System Requirements
 ===================
 
 Building the model with the scripts in this repository runs on a normal computer.
-The entire energy model is heavy and it requires > 40Gb of available memory in the disk (HHD/SSD).
+The entire energy model is relatively heavy and it easily requires > 40Gb of available memory in the disk (HHD/SSD);
+the exact space requirements depend on the specific models under interest.
 
 
 Software requirements
 =====================
 
-The complete list of software needed to be installed before installing PyPSA Africa is listed below.
+The complete list of software needed before installing PyPSA Africa is listed below.
 
 - `Python 3 <https://www.python.org/>`_ **(mandatory)**: Python is used as our main programming language, thus its knowledge is mandatory.
   To refresh the knowledge, there are plenty of online courses free-of-charge, e.g. `CSDojo playlist <https://www.youtube.com/c/CSDojo/playlists>`_.
@@ -42,7 +43,7 @@ The complete list of software needed to be installed before installing PyPSA Afr
   `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`__ and `Github <https://code.visualstudio.com/docs/editor/github>`__ 
   in Visual Studio Code
 - `Solver` **(mandatory)**: an optimization solver is needed to solve the mathematical problem that is build with the automated workflow.
-  With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC <https://projects.coin-or.org/Cbc>`_,
+  With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC <https://projects.coin-or.org/Cbc>`_ ,
   `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
   to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
   (both commercial licenses with free academic options) can also be used
