@@ -266,7 +266,6 @@ world = {
         "TW": "taiwan",
         "TJ": "tajikistan",
         "TH": "thailand",
-        "TR": "turkey",
         "TM": "turkmenistan",
         # 'AE': 'united arab emirates',
         "UZ": "uzbekistan",
@@ -349,6 +348,7 @@ world = {
         "CH": "switzerland",
         "UA": "ukraine",
         "GB": "great-britain",
+        "TR": "turkey",
     },
     "north_america": {
         "CA": "canada",

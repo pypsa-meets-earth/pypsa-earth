@@ -402,16 +402,24 @@ def convert_iso_to_geofk(iso_code,
         return iso_code
 
 
-def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
+def output_csv_geojson(output_files, country_code, df_all_feature, columns_feature, feature):
     "Function to save the feature as csv and geojson"
 
     continent, country_name = getContinentCountry(country_code)
-    outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-                                      continent + "_all"
-                                      "_raw")  # Output file directory
 
-    if not os.path.exists(outputfile_partial):
-        os.makedirs(os.path.dirname(outputfile_partial),
+    path_file_geojson = output_files[feature + "s"]  # get path from snakemake; expected geojson
+    if not path_file_geojson.endswith(".geojson"):
+        _logger.error(
+            f"Output file feature {feature} is not a geojson file"
+        )
+    path_file_csv = path_file_geojson.replace(".geojson", ".csv")  # get csv file
+    
+    # outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
+    #                                   continent + "_all"
+    #                                   "_raw")  # Output file directory
+
+    if not os.path.exists(path_file_geojson):
+        os.makedirs(os.path.dirname(path_file_geojson),
                     exist_ok=True)  # create raw directory
 
     df_all_feature = df_all_feature[df_all_feature.columns.intersection(
@@ -424,8 +432,9 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
         _logger.warning(f"All feature data frame empty for {feature}")
         return None
 
-    _to_csv_nafix(df_all_feature,
-                  outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
+    # _to_csv_nafix(df_all_feature,
+    #               outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
+    _to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
 
     if feature_category[feature] == "way":
         gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
@@ -433,11 +442,12 @@ def output_csv_geojson(country_code, df_all_feature, columns_feature, feature):
         gdf_feature = convert_pd_to_gdf_nodes(df_all_feature)
 
     _logger.info("Writing GeoJSON file")
-    gdf_feature.to_file(outputfile_partial + f"_{feature}s" + ".geojson",
+    gdf_feature.to_file(path_file_geojson,
                         driver="GeoJSON")  # Generate GeoJson
 
 
-def process_data(country_list, iso_coding=True, update=False, verify=False):
+def process_data(feature_list, country_list, output_files,
+                iso_coding=True, update=False, verify=False):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -482,7 +492,7 @@ def process_data(country_list, iso_coding=True, update=False, verify=False):
 
             df_all_feature = pd.concat([df_all_feature, df_feature])
 
-        output_csv_geojson(country_code, df_all_feature,
+        output_csv_geojson(output_files, country_code, df_all_feature,
                            feature_columns[feature], feature)
 
 
@@ -566,8 +576,10 @@ if __name__ == "__main__":
     feature_list = ["substation", "generator", "line", "cable"]
 
     input = snakemake.config["countries"]
+    output_files = snakemake.output
 
     country_list = create_country_list(input)
 
     # Set update # Verify = True checks local md5s and pre-filters data again
-    process_data(country_list, iso_coding=True, update=False, verify=False)
+    process_data(feature_list, country_list, output_files,
+                iso_coding=True, update=False, verify=False)
