@@ -27,6 +27,9 @@ countries: ["NG", "NE"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
+# if True clusters to GADM shapes, if False Voronoi cells will be clustered
+alternative_clustering: False
+
 # options for build_shapes
 build_shape_options:
     gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
