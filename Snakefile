@@ -26,6 +26,10 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
 
+    
+rule solve_all_networks:
+    input: expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", **config['scenario'])
+
 
 datafiles = [
         "cutouts/africa-2013-era5.nc",
