@@ -254,18 +254,16 @@ if __name__ == "__main__":
             # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
             offshore_locs = n.buses.loc[c_b & n.buses.substation_off,
                                         ["x", "y"]]
+            shape_id = 0  # Not used
+            offshore_geometry = custom_voronoi_partition_pts(
+                offshore_locs.values, offshore_shape)
             offshore_regions_c = gpd.GeoDataFrame({
-                "name":
-                offshore_locs.index,
-                "x":
-                offshore_locs["x"],
-                "y":
-                offshore_locs["y"],
-                "geometry":
-                custom_voronoi_partition_pts(offshore_locs.values,
-                                             offshore_shape),
-                "country":
-                country,
+                "name": offshore_locs.index,
+                "x": offshore_locs["x"],
+                "y": offshore_locs["y"],
+                "geometry": offshore_geometry,
+                "country": country,
+                "shape_id": shape_id,
             })
             offshore_regions_c = offshore_regions_c.loc[
                 offshore_regions_c.area > 1e-2]
