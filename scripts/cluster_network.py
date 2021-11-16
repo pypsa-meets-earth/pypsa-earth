@@ -140,6 +140,7 @@ from pypsa.networkclustering import busmap_by_kmeans
 from pypsa.networkclustering import busmap_by_spectral_clustering
 from pypsa.networkclustering import get_clustering_from_busmap
 from shapely.geometry import Point
+from build_shapes import get_GADM_layer
 
 idx = pd.IndexSlice
 
@@ -251,23 +252,9 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
 def busmap_for_gadm_clusters(n, gadm_level):
 
-    folders = os.listdir("temp/shapefiles")
+    gdf = get_GADM_layer(country_list, gadm_level)
 
-    for i, folder in enumerate(folders):
-        print(i)
-        if i == 0:
-            gdf = gpd.read_file(
-                "temp/shapefiles/{0}/{0}.gpkg".format(folder),
-                layer="{0}_{1}".format(folder, gadm_level),
-            )
-        else:
-            gdf = gdf.append(
-                gpd.read_file(
-                    "temp/shapefiles/{0}/{0}.gpkg".format(folder),
-                    layer="{0}_{1}".format(folder, gadm_level),
-                ))
-
-    def locate_bus2(coords):
+    def locate_bus(coords):
         try:
             return gdf[gdf.contains(
                 Point(coords["x"],
@@ -276,7 +263,7 @@ def busmap_for_gadm_clusters(n, gadm_level):
             return "not_found"
 
     buses = n.buses
-    buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus2,
+    buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus,
                                                                   axis=1)
     busmap = buses["gadm_{}".format(gadm_level)]  # .apply(lambda x: x[:-2])
     not_founds = busmap[busmap == "not_found"].index.tolist()
@@ -475,8 +462,14 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    #    n.buses.at[['73'], 'country']='DZ'
+#    n.buses.at[['73'], 'country']='DZ'					
     focus_weights = snakemake.config.get("focus_weights", None)
+    
+    country_list = snakemake.config['countries']
+    
+    gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
+
+    
     if snakemake.config["alternative_clustering"]:
         renewable_carriers = pd.Index([
             "solar",
