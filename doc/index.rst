@@ -20,6 +20,7 @@ Documentation
 
 **Getting Started**
 
+* :doc:`how_to_docs`
 * :doc:`introduction`
 * :doc:`installation`
 * :doc:`tutorial`
@@ -32,6 +33,7 @@ Documentation
    introduction
    installation
    tutorial
+   how_to_docs
 
 **Configuration**
 
@@ -41,25 +43,27 @@ Documentation
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Configuration
 
    wildcards
    configuration
    costs
 
-**Code Documenation (automated)**
+**Work flow and code**
 
+* :doc:`structure`
+* :doc:`rules_overview`
 * :doc:`api_reference`
-* :doc:`how_to_docs`
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Code Documenation (automated)
+   :caption: Work flow and code
 
+   structure
+   rules_overview
    api_reference
-   how_to_docs
 
 **Project Info**
 
