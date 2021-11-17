@@ -50,7 +50,7 @@ Documentation
    configuration
    costs
 
-**Work flow and code**
+**Work flow and API**
 
 * :doc:`structure`
 * :doc:`rules_overview`
@@ -59,7 +59,7 @@ Documentation
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Work flow and code
+   :caption: Work flow and API
 
    structure
    rules_overview
