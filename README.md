@@ -34,6 +34,16 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 - **Outreach meeting (by invitation)**
   - every second week
   - planning, discussing events, workshops, communication, community activities
+- [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
+  - Access to presentations, lists, documents
+- [**Slack (Open)**](https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ)
+<p align="left">
+<a href="https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ">
+  <img src="https://user-images.githubusercontent.com/61968949/142443671-562e5493-63a5-4c5b-a062-439ac2acaf00.png" width="150">
+<a/>
+</p>
+
+
 
 ## Installation
 
