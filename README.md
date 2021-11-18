@@ -26,6 +26,7 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
   - updates on overall project and code blocks
   - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
+  - [open meeting agena](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). Invited member have edit rights. 
 - **Specific code meeting (by invitation)**
   - current meetings: 1) AI asset recognition (WP6) and 2) Data workflow updates (covering WP1-WP5)
   - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
