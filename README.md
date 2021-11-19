@@ -27,11 +27,11 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
       </p>
 - **General code meeting (Open)**
   - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
-  - updates on overall project and code blocks
+  - join for project news and high-level code updates
   - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
-  - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). Invited members have edit rights.
+  - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Specific code meeting (by invitation)**
-  - current meetings: 1) AI asset recognition (WP6) and 2) Data workflow updates (covering WP1-WP5)
+  - current meetings: 1) AI asset detection (WP6) and 2) Data workflow updates (covering WP1-WP5)
   - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
   - updates, demos, task distribution, weekly targets, Q&A
 - **Outreach meeting (by invitation)**
@@ -42,7 +42,7 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
-  - Access to presentations, lists, documents
+  - access to presentations, lists, documents
 
 
 ## Installation
