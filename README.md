@@ -6,7 +6,7 @@
 
 PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa.
 
-The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter.
+The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). A short presentation about our project and its aims is given on our [site](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter.
 
 Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
@@ -26,6 +26,7 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
   - updates on overall project and code blocks
   - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
+  - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). Invited members have edit rights.
 - **Specific code meeting (by invitation)**
   - current meetings: 1) AI asset recognition (WP6) and 2) Data workflow updates (covering WP1-WP5)
   - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
@@ -33,6 +34,16 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 - **Outreach meeting (by invitation)**
   - every second week
   - planning, discussing events, workshops, communication, community activities
+- [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
+  - Access to presentations, lists, documents
+- [**Slack (Open)**](https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ)
+<p align="left">
+<a href="https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ">
+  <img src="https://user-images.githubusercontent.com/61968949/142443671-562e5493-63a5-4c5b-a062-439ac2acaf00.png" width="150">
+<a/>
+</p>
+
+
 
 ## Installation
 
