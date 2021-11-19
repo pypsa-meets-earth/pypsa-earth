@@ -18,10 +18,13 @@ Watch our latest discussion with African leaders about [Open Energy System Model
 
 The PyPSA meets Africa team is currenlty running four types of meetings:
 
-- **Buddy talk (Open)**
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
+- [**Slack NEW! (Open)**](https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ)
+  - Chat with the community
+      <p align="left">
+        <a href="https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Slack_Technologies_Logo.svg/1024px-Slack_Technologies_Logo.svg.png" width="150">
+        <a/>
+      </p>
 - **General code meeting (Open)**
   - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
   - updates on overall project and code blocks
@@ -34,15 +37,12 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 - **Outreach meeting (by invitation)**
   - every second week
   - planning, discussing events, workshops, communication, community activities
+- **Buddy talk (Open)**
+  - every Friday between 17-18:00 (UK time)
+  - book a 20min meeting with Max to discuss anything you like
+  - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
   - Access to presentations, lists, documents
-- [**Slack (Open)**](https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ)
-<p align="left">
-<a href="https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ">
-  <img src="https://user-images.githubusercontent.com/61968949/142443671-562e5493-63a5-4c5b-a062-439ac2acaf00.png" width="150">
-<a/>
-</p>
-
 
 
 ## Installation
