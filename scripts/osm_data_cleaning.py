@@ -4,7 +4,6 @@ import sys
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-
 from _helpers import _sets_path_to_root
 
 # from shapely.geometry import LineString, Point, Polygon
