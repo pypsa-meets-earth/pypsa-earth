@@ -13,7 +13,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 _sets_path_to_root("pypsa-africa")
 
 
-
 def prepare_substation_df(df_all_substations):
     """
     Prepare raw substations dataframe to the structure compatible with PyPSA-Eur
@@ -134,7 +133,8 @@ def filter_voltage(df, threshold_voltage=110000):
 
     # Convert voltage to float, if impossible, discard row
     df["voltage"] = (
-        df["voltage"].apply(lambda x: pd.to_numeric(x, errors="coerce")).astype(float)
+        df["voltage"].apply(lambda x: pd.to_numeric(
+            x, errors="coerce")).astype(float)
     )
     df = df.dropna(subset=["voltage"])  # Drop any row with Voltage = N/A
 
@@ -154,7 +154,8 @@ def finalize_substation_types(df_all_substations):
 
     # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
-    df_all_substations.loc[:, "voltage"] = df_all_substations["voltage"].astype(int)
+    df_all_substations.loc[:,
+                           "voltage"] = df_all_substations["voltage"].astype(int)
 
     return df_all_substations
 
@@ -225,19 +226,21 @@ def finalize_lines_type(df_lines):
 
     return df_lines
 
-def split_cells_multiple(df,list_col=['cables','voltage']):
+
+def split_cells_multiple(df, list_col=['cables', 'voltage']):
     for i in range(df.shape[0]):
-        sub = df.loc[i,list_col]
-        if sub.notnull().all() == True: 
-            if [ ";" in s for s in sub].count(True) == len(list_col):
-                d = [ s.split(';')  for s in sub]
-                r = df.loc[i,:].copy()
-                df.loc[i,list_col[0]] = d[0][0]
-                df.loc[i,list_col[1]] = d[1][0]
+        sub = df.loc[i, list_col]
+        if sub.notnull().all() == True:
+            if [";" in s for s in sub].count(True) == len(list_col):
+                d = [s.split(';') for s in sub]
+                r = df.loc[i, :].copy()
+                df.loc[i, list_col[0]] = d[0][0]
+                df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]
                 r[list_col[1]] = d[1][1]
                 df = df.append(r)
     return df
+
 
 def integrate_lines_df(df_all_lines):
     """
@@ -258,14 +261,15 @@ def integrate_lines_df(df_all_lines):
 
     # Add frequency column
     df_all_lines["tag_frequency"] = 50
-    
+
     df_all_lines = split_cells_multiple(df_all_lines)
     # Add circuits information
     # if not int make int
     if df_all_lines["cables"].dtype != int:
         # HERE. "0" if cables "None", "nan" or "1"
         df_all_lines.loc[
-            (df_all_lines["cables"] < "3") | df_all_lines["cables"].isna(), "cables"
+            (df_all_lines["cables"] <
+             "3") | df_all_lines["cables"].isna(), "cables"
         ] = "0"
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
@@ -275,7 +279,8 @@ def integrate_lines_df(df_all_lines):
         # see https://hackaday.com/2019/06/11/a-field-guide-to-transmission-lines/
         # where circuits are "0" make "1"
         df_all_lines.loc[
-            (df_all_lines["cables"] == 4) | (df_all_lines["cables"] == 5), "cables"
+            (df_all_lines["cables"] == 4) | (
+                df_all_lines["cables"] == 5), "cables"
         ] = 3
 
     # one circuit contains 3 cable
@@ -286,7 +291,8 @@ def integrate_lines_df(df_all_lines):
 
     # where circuits are "0" make "1"
     df_all_lines.loc[
-        (df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0), "circuits"
+        (df_all_lines["circuits"] == "0") | (
+            df_all_lines["circuits"] == 0), "circuits"
     ] = 1
 
     # drop column if exist
@@ -314,7 +320,8 @@ def prepare_generators_df(df_all_generators):
         df_all_generators["power_output_MW"].astype(str).str.contains("MW")
     ]
     df_all_generators["power_output_MW"] = (
-        df_all_generators["power_output_MW"].str.extract("(\\d+)").astype(float)
+        df_all_generators["power_output_MW"].str.extract(
+            "(\\d+)").astype(float)
     )
 
     return df_all_generators
@@ -322,7 +329,8 @@ def prepare_generators_df(df_all_generators):
 
 def clean_data(tag_substation="transmission", threshold_voltage=110000):
     # Output file directory
-    outputfile_partial = os.path.join(os.getcwd(), "data", "clean", "africa_all")
+    outputfile_partial = os.path.join(
+        os.getcwd(), "data", "clean", "africa_all")
     # Output file directory
     raw_outputfile_partial = os.path.join(
         os.getcwd(), "data", "raw", "africa_all" + "_raw"
@@ -392,8 +400,10 @@ def clean_data(tag_substation="transmission", threshold_voltage=110000):
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
 
-    df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry", crs="EPSG:4326")
-    df_all_lines.to_file(outputfile_partial + "_lines" + ".geojson", driver="GeoJSON")
+    df_all_lines = gpd.GeoDataFrame(
+        df_all_lines, geometry="geometry", crs="EPSG:4326")
+    df_all_lines.to_file(outputfile_partial + "_lines" +
+                         ".geojson", driver="GeoJSON")
 
     # ----------- Generator -----------
 
