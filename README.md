@@ -4,11 +4,9 @@
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
-PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa.
+PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/).
 
-The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter.
-
-Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
+A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
 <p align="center">
   <img src="doc/img/africa_osm_map.jpeg" width="600">
@@ -16,13 +14,13 @@ Watch our latest discussion with African leaders about [Open Energy System Model
 
 ## Get involved
 
-The PyPSA meets Africa team is currenlty running four types of meetings:
+There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
 
-- [**Slack NEW! (Open)**](https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ)
-  - Chat with the community
+- [**Discord NEW! (Open)**](https://discord.gg/AnuJBk23FU)
+  - Chat with the community, team up on features, exchange with developers, code in voice channels
       <p align="left">
-        <a href="https://join.slack.com/t/pypsa-earth/shared_invite/zt-z5x7mxhd-4zM~ChrcBwPULkiGUT9jRQ">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Slack_Technologies_Logo.svg/1024px-Slack_Technologies_Logo.svg.png" width="150">
+        <a href="https://discord.gg/AnuJBk23FU">
+          <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
         <a/>
       </p>
 - **General code meeting (Open)**
@@ -30,6 +28,10 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
   - join for project news and high-level code updates
   - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
+- **Buddy talk (Open)**
+  - every Friday between 17-18:00 (UK time)
+  - book a 20min meeting with Max to discuss anything you like
+  - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **Specific code meeting (by invitation)**
   - current meetings: 1) AI asset detection (WP6) and 2) Data workflow updates (covering WP1-WP5)
   - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
@@ -37,10 +39,6 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 - **Outreach meeting (by invitation)**
   - every second week
   - planning, discussing events, workshops, communication, community activities
-- **Buddy talk (Open)**
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
   - access to presentations, lists, documents
 
