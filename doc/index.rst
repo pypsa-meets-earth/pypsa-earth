@@ -6,7 +6,7 @@
 Welcome to the PyPSA meets Africa documentation!
 ================================================
 
-PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa. The tool which is currenlty under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
+PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currenlty under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
 
 Watch our latest discusson with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
 
@@ -20,17 +20,16 @@ Get Involved
 
 The PyPSA meets Africa team is currenlty running four types of meetings:
 
-- **Buddy talk (Open)**
 
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: `app.autobook.me/max-parzen/pypsa-meets-africa <https://app.autobook.me/max-parzen/pypsa-meets-africa>`_ (developed by @mnm-matin)
+- `**Discord NEW! (Open)** <https://discord.gg/AnuJBk23FU>`_
+  - Chat with the community, team up on features, exchange with developers, code in voice channels
 
 - **General code meeting (Open)**
 
   - every second Thursday 16-17:00 (UK time) `download .ics file <https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download>`_
   - updates on overall project and code blocks
   - meeting on `Zoom <https://ed-ac-uk.zoom.us/j/89486720170>`_, password: energy101
+  - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
 
 - **Specific code meeting (by invitation)**
 
@@ -42,6 +41,12 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 
   - every second week
   - planning, discussing events, workshops, communication, community activities
+  
+- **Buddy talk (Open)**
+
+  - every Friday between 17-18:00 (UK time)
+  - book a 20min meeting with Max to discuss anything you like
+  - booking link: `app.autobook.me/max-parzen/pypsa-meets-africa <https://app.autobook.me/max-parzen/pypsa-meets-africa>`_ (developed by @mnm-matin)
 
 =============
 Documentation
