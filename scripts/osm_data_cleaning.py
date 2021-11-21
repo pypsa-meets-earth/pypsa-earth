@@ -336,6 +336,19 @@ def finalize_lines_type(df_lines):
 
     return df_lines
 
+def split_cells_multiple(df,list_col=['cables','voltage']): # split function for cables and voltage
+    for i in range(df.shape[0]): 
+        sub = df.loc[i,list_col] # for each cables and voltage
+        if sub.notnull().all() == True:  # check not both empty
+            if [ ";" in s for s in sub].count(True) == len(list_col): # check both contain ";"
+                d = [ s.split(';')  for s in sub] #split them
+                r = df.loc[i,:].copy()
+                df.loc[i,list_col[0]] = d[0][0] # first split  [0]
+                df.loc[i,list_col[1]] = d[1][0]
+                r[list_col[0]] = d[0][1] # second split [1]
+                r[list_col[1]] = d[1][1]
+                df = df.append(r) 
+    return df # return new frame
 
 def integrate_lines_df(df_all_lines):
     """
@@ -357,6 +370,7 @@ def integrate_lines_df(df_all_lines):
     # Add frequency column
     df_all_lines["tag_frequency"] = 50
 
+    df_all_lines = split_cells_multiple(df_all_lines)
     # Add circuits information
     # if not int make int
     if df_all_lines["cables"].dtype != int:
