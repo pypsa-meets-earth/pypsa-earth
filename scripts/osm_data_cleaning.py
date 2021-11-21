@@ -336,19 +336,23 @@ def finalize_lines_type(df_lines):
 
     return df_lines
 
-def split_cells_multiple(df,list_col=['cables','voltage']): # split function for cables and voltage
-    for i in range(df.shape[0]): 
-        sub = df.loc[i,list_col] # for each cables and voltage
+
+# split function for cables and voltage
+def split_cells_multiple(df, list_col=['cables', 'voltage']):
+    for i in range(df.shape[0]):
+        sub = df.loc[i, list_col]  # for each cables and voltage
         if sub.notnull().all() == True:  # check not both empty
-            if [ ";" in s for s in sub].count(True) == len(list_col): # check both contain ";"
-                d = [ s.split(';')  for s in sub] #split them
-                r = df.loc[i,:].copy()
-                df.loc[i,list_col[0]] = d[0][0] # first split  [0]
-                df.loc[i,list_col[1]] = d[1][0]
-                r[list_col[0]] = d[0][1] # second split [1]
+            # check both contain ";"
+            if [";" in s for s in sub].count(True) == len(list_col):
+                d = [s.split(';') for s in sub]  # split them
+                r = df.loc[i, :].copy()
+                df.loc[i, list_col[0]] = d[0][0]  # first split  [0]
+                df.loc[i, list_col[1]] = d[1][0]
+                r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df = df.append(r) 
-    return df # return new frame
+                df = df.append(r)
+    return df  # return new frame
+
 
 def integrate_lines_df(df_all_lines):
     """
@@ -608,10 +612,10 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = (gpd.read_file(
             snakemake.input.country_shapes).set_index("name")
-                          ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         offshore_shapes = (gpd.read_file(
             snakemake.input.offshore_shapes).set_index("name")
-                           ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes)
     else:
