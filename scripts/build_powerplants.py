@@ -58,14 +58,14 @@ logger = logging.getLogger(__name__)
 
 
 def add_custom_powerplants(ppl):
-    custom_ppl_query = snakemake.config["electricity"]["custom_powerplants"]
+    custom_ppl_query = snakemake.input.custom_powerplants
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(snakemake.input.custom_powerplants,
+    add_ppls = pd.read_csv(custom_ppl_query,
                            index_col=0,
                            dtype={"bus": "str"})
-    if isinstance(custom_ppl_query, str):
-        add_ppls.query(custom_ppl_query, inplace=True)
+    # if isinstance(custom_ppl_query, str):
+    #     add_ppls.query(custom_ppl_query, inplace=True)
     return ppl.append(add_ppls,
                       sort=False,
                       ignore_index=True,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     if isinstance(ppl_query, str):
         ppl.query(ppl_query, inplace=True)
 
-    # ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
+    ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
 
     cntries_without_ppl = [
         c for c in countries if c not in ppl.Country.unique()
