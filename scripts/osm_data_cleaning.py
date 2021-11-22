@@ -339,8 +339,9 @@ def finalize_lines_type(df_lines):
 
 # split function for cables and voltage
 def split_cells_multiple(df, list_col=["cables", "voltage"]):
-    for i in range(df.shape[0]):
-        sub = df.loc[i, list_col]  # for each cables and voltage
+    n_rows = df.shape[0]
+    for i in range(n_rows):
+        sub = df[list_col].iloc[i]  # for each cables and voltage
         if sub.notnull().all() == True:  # check not both empty
             # check both contain ";"
             if [";" in s for s in sub].count(True) == len(list_col):
@@ -351,6 +352,11 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
                 df = df.append(r)
+    
+    # if some columns still contain ";" then sum the values
+    for cl_name in list_col:
+        sel_ids = (df[cl_name].str.contains(";") == True)
+        df.loc[sel_ids, cl_name] = df.loc[sel_ids, cl_name].apply(lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
     return df  # return new frame
 
 
