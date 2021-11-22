@@ -30,7 +30,7 @@ dependencies:
   - numpy
   - pandas
   - geopandas
-  - xarray
+  # - xarray # till the main is not in conda
   - netcdf4
   - networkx
   - scipy
@@ -65,6 +65,7 @@ dependencies:
   - googledrivedownloader
 
   - pip:
+    - git+https://github.com/pydata/xarray@main # till the main is not in conda
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
     - git+https://github.com/koen-vg/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
     - vresutils==0.3.1

@@ -31,7 +31,7 @@ dependencies:
   - numpy
   - pandas
   - geopandas
-  - xarray
+  # - xarray  # till the main is not in conda- xarray
   - netcdf4
   - networkx
   - scipy
@@ -57,6 +57,7 @@ dependencies:
   - country_converter
 
   - pip:
+    - git+https://github.com/pydata/xarray@main # till the main is not in conda
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
     - vresutils==0.3.1
     - tsam>=1.1.0
