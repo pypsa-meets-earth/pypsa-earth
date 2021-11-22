@@ -206,7 +206,7 @@ rule build_powerplants:
     input:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/raw/africa_all_raw_generators.csv"
+        custom_powerplants="data/clean/africa_all_generators.csv"
     output: "resources/powerplants.csv"
     log: "logs/build_powerplants.log"
     threads: 1
