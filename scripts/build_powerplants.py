@@ -48,11 +48,13 @@ import os
 
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 import powerplantmatching as pm
 import pypsa
 import yaml
 from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
+from shapely import wkt
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +63,24 @@ def add_custom_powerplants(ppl):
     custom_ppl_query = snakemake.input.custom_powerplants
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(custom_ppl_query,
+    raw_custom_ppls = pd.read_csv(custom_ppl_query,
                            index_col=0,
                            dtype={"bus": "str"})
     # if isinstance(custom_ppl_query, str):
-    #     add_ppls.query(custom_ppl_query, inplace=True)
+    # add_ppls.query(custom_ppl_query, inplace=True)
+
+    custom_ppls_coords = gpd.GeoSeries.from_wkt(raw_custom_ppls['geometry'])
+    custom_ppls_data = {'Name':raw_custom_ppls['id'], 
+    # TODO Improve correspondance with powerplantmatching fields
+    'Fueltype':raw_custom_ppls['tags.generator:source'], 
+    'Technology':(raw_custom_ppls['tags.generator:type'] + ', ' + raw_custom_ppls['tags.generator:method']), 
+    'Set':raw_custom_ppls['tags.power'], 'Country':raw_custom_ppls['Country'], 
+    'Capacity':raw_custom_ppls['power_output_MW'], 'Efficiency':'', 'Duration':'',
+    'Volume_Mm3':'', 'DamHeight_m':'', 'StorageCapacity_MWh':'', 
+    'DateIn':'', 'DateRetrofit':'', 'DateMothball':'','DateOut':'',
+    'lat':custom_ppls_coords.y, 'lon':custom_ppls_coords.x,
+    'EIC':'', 'projectID':''}
+    add_ppls = pd.DataFrame(data=custom_ppls_data)
     return ppl.append(add_ppls,
                       sort=False,
                       ignore_index=True,
