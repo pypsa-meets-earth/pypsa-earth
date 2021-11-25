@@ -164,7 +164,7 @@ def _simplify_polys(polys,
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         # here deprecation warning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
-        polys = sorted(polys, key=attrgetter("area"), reverse=True)
+        polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
@@ -208,7 +208,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False):
 
     africa_shape = unary_union(shapes)
     if isinstance(africa_shape, MultiPolygon):
-        africa_shape = max(africa_shape, key=attrgetter("area"))
+        africa_shape = max(africa_shape.geoms, key=attrgetter("area"))
     return Polygon(shell=africa_shape.exterior)
 
 
