@@ -101,9 +101,9 @@ if tutorial == True:
     # BUNDLE 1
     destination = "./resources"
     zip_path = destination + ".zip"
-    url = "https://drive.google.com/file/d/1w-OEe-eJg7Par7-CfhbhkFOgNrlsO8aj/view?usp=sharing"
+    url = "https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="1w-OEe-eJg7Par7-CfhbhkFOgNrlsO8aj",
+        file_id="1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8",
         dest_path=zip_path,
         unzip=True)
     os.remove(zip_path)
@@ -112,9 +112,9 @@ if tutorial == True:
     # BUNDLE 2
     destination = "./data"
     zip_path = destination + ".zip"
-    url = "https://drive.google.com/file/d/15MgxaBAAQyOpIzJdsLuydc6iBsYSoUOJ/view?usp=sharing"
+    url = "https://drive.google.com/file/d/13v55AXGBSZ41v6u_kcvVFzGiKrRz7wsf/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="15MgxaBAAQyOpIzJdsLuydc6iBsYSoUOJ",
+        file_id="13v55AXGBSZ41v6u_kcvVFzGiKrRz7wsf",
         dest_path=zip_path,
         unzip=True)
     os.remove(zip_path)
@@ -124,9 +124,9 @@ if CI == False:
     # BUNDLE 3
     destination = "./cutouts"
     zip_path = destination + ".zip"
-    url = "https://drive.google.com/file/d/1Z4EamyS6gj6w2ONg4aqwjl5Ykj3Qx1wG/view?usp=sharing"
+    url = "https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="1Z4EamyS6gj6w2ONg4aqwjl5Ykj3Qx1wG",
+        file_id="1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh",
         dest_path=zip_path,
         unzip=True)
     os.remove(zip_path)
