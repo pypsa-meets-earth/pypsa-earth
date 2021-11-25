@@ -143,7 +143,9 @@ def custom_voronoi_partition_pts(points,
 
             polygons.append(poly)
 
-    return np.array(polygons)
+    polygons_arr = np.empty((len(polygons), ), "object")
+    polygons_arr[:] = polygons
+    return polygons_arr
 
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
