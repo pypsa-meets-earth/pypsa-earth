@@ -435,9 +435,9 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
     if df_all_feature.empty:
         _logger.warning(f"Store empty Dataframe for {feature}.")
         gdf_feature = []
-        
+
         # create empty file to avoid issues with snakemake
-        with os.open(path_file_geojson, "w") as fp:
+        with open(path_file_geojson, "w") as fp:
             pass
 
         return None
