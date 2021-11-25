@@ -415,31 +415,33 @@ def attach_hydro(n, costs, ppl):
 
     ppl = (ppl.query('carrier == "hydro"').reset_index(drop=True).rename(
         index=lambda s: str(s) + " hydro"))
+
+    # TODO: remove this line to address nan when powerplantmatching is stable
+    ppl.loc[ppl.technology.isna(), 'technology'] = "Run-Of-River" # NaN technologies set to ROR
+
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
 
-    country = ppl["bus"].map(n.buses.country).rename("country")
+    bus_id = ppl["bus"]
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
-        dist_key = ppl.loc[inflow_idx,
-                           "p_nom"].groupby(country).transform(normed)
 
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            inflow_countries = pd.Index(country[inflow_idx])
-            missing_c = inflow_countries.unique().difference(
-                inflow.indexes["countries"])
+            inflow_stations = pd.Index(bus_id[inflow_idx])
+            missing_c = inflow_stations.unique().difference(
+                inflow.indexes["plant"])
             assert missing_c.empty, (
                 f"'{snakemake.input.profile_hydro}' is missing "
-                f"inflow time-series for at least one country: {', '.join(missing_c)}"
+                f"inflow time-series for at least one bus: {', '.join(missing_c)}"
             )
 
-            inflow_t = (inflow.sel(countries=inflow_countries).rename({
-                "countries":
+            inflow_t = inflow.sel(plant=inflow_stations).rename({
+                "plant":
                 "name"
             }).assign_coords(name=inflow_idx).transpose(
-                "time", "name").to_pandas().multiply(dist_key, axis=1))
+                "time", "name").to_pandas()
 
     if "ror" in carriers and not ror.empty:
         n.madd(
@@ -698,15 +700,15 @@ if __name__ == "__main__":
     admin_shapes = snakemake.input.gadm_shapes
 
     costs = load_costs(Nyears)
-    # ppl = load_powerplants()  # uncomment out when powerplantmatching is stable
+    ppl = load_powerplants()  # uncomment out when powerplantmatching is stable
 
     attach_load(n, regions, load, admin_shapes, countries, scale)
 
     update_transmission_costs(n, costs)
 
-    # attach_conventional_generators(n, costs, ppl)  # uncomment out when powerplantmatching is stable
+    attach_conventional_generators(n, costs, ppl)  # uncomment out when powerplantmatching is stable
     attach_wind_and_solar(n, costs)
-    # attach_hydro(n, costs, ppl)  # uncomment out when powerplantmatching is stable
+    attach_hydro(n, costs, ppl)  # uncomment out when powerplantmatching is stable
     # attach_extendable_generators(n, costs, ppl) # uncomment out when powerplantmatching is stable
 
     # estimate_renewable_capacities(n)

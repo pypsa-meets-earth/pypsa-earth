@@ -105,7 +105,7 @@ if __name__ == "__main__":
     if isinstance(ppl_query, str):
         ppl.query(ppl_query, inplace=True)
 
-    ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
+    # ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
 
     cntries_without_ppl = [
         c for c in countries if c not in ppl.Country.unique()
