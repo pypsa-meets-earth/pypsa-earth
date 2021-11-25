@@ -428,14 +428,19 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
 
     # Generate Files
 
-    if df_all_feature.empty:
-        _logger.warning(f"Store empty Dataframe for {feature}.")
-        gdf_feature = []
-        return None
-
     # _to_csv_nafix(df_all_feature,
     #               outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
     _to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
+
+    if df_all_feature.empty:
+        _logger.warning(f"Store empty Dataframe for {feature}.")
+        gdf_feature = []
+        
+        # create empty file to avoid issues with snakemake
+        with os.open(path_file_geojson, "w") as fp:
+            pass
+
+        return None
 
     if feature_category[feature] == "way":
         gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
