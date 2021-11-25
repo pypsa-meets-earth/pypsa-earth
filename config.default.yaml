@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 version: 0.3.0
+tutorial: False
 
 logging:
   level: INFO

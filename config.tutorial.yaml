@@ -12,7 +12,7 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [5]
+  clusters: [6]
   opts: [Co2L-24H]
 
 countries: ["NG", "BJ"]
@@ -59,7 +59,7 @@ summary_dir: results
 
 snapshots:
   start: "2013-03-1"
-  end: "2013-03-8"
+  end: "2013-03-14"
   closed: "left" # end is not inclusive
 
 enable:
@@ -70,7 +70,7 @@ enable:
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  build_cutout: true
+  build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
   # custom_busmap: false
 
@@ -125,7 +125,7 @@ atlite:
       module: era5
       dx: 0.3
       dy: 0.3
-      time: ["2013-03-01", "2013-03-08"]
+      time: ["2013-03", "2013-03"]
     # europe-2013-era5:
     #   module: era5 # in priority order
     #   x: [-12., 35.]
