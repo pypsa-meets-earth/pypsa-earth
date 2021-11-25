@@ -32,7 +32,6 @@ rule solve_all_networks:
 
 
 datafiles = [
-        "cutouts/africa-2013-era5.nc",
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
@@ -41,6 +40,11 @@ datafiles = [
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
         "data/costs.csv",
 ]
+
+if config.get('tutorial', True)==True:
+    datafiles.extend(["cutouts/africa-2013-era5.nc"])
+elif config.get('tutorial')==False:
+    datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
