@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from os.path import normpath, exists
+from os.path import normpath, exists, isdir
 from shutil import copyfile
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
@@ -36,19 +36,21 @@ datafiles = [
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
-        directory("data/raw/landcover"),
+        # "data/raw/landcover",  # set as an explicit directory in the rule
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
         "data/costs.csv",
 ]
 
-if config.get('tutorial', True)==True:
-    datafiles.extend(["cutouts/africa-2013-era5.nc"])
-elif config.get('tutorial')==False:
+if config.get('tutorial', True)==True and config.get('CI_test', False) == False:
     datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
+elif config.get('tutorial')==False:
+    datafiles.extend(["cutouts/africa-2013-era5.nc"])
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
-        output: expand('{file}', file=datafiles)
+        output: #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
+            expand('{file}', file=datafiles),
+            directory("data/raw/landcover")
         log: "logs/retrieve_databundle.log"
         script: 'scripts/retrieve_databundle_light.py'
 
