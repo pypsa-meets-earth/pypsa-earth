@@ -17,7 +17,7 @@ configfile: "config.yaml"
 
 
 COSTS = "data/costs.csv"
-ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
+ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 20)
 
 
 wildcard_constraints:
@@ -34,11 +34,6 @@ rule solve_all_networks:
 datafiles = [
         "cutouts/africa-2013-era5.nc",
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
-        "data/raw/africa_all_raw_cables.geojson",
-        "data/raw/africa_all_raw_generators.geojson",
-        "data/raw/africa_all_raw_lines.geojson",
-        "data/raw/africa_all_raw_substations.geojson",
-        "data/raw/africa_all_raw_generators.csv",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
@@ -322,7 +317,7 @@ rule solve_network:
         python="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
         memory="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log"
     benchmark: "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
-    threads: 4
+    threads: 20
     resources: mem=memory
     shadow: "shallow"
     script: "scripts/solve_network.py"
