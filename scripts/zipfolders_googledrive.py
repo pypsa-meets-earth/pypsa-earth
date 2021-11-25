@@ -27,6 +27,6 @@ if __name__ == "__main__":
     _sets_path_to_root("pypsa-africa")
 
 # Execute zip function
-zipFilesInDir("./resources_tutorial", "resources.zip", lambda x: True)
-zipFilesInDir("./data_tutorial", "data.zip", lambda x: True)
-zipFilesInDir("./cutouts_tutorial", "cutouts.zip", lambda x: True)
+zipFilesInDir("./resources", "resources.zip", lambda x: True)
+zipFilesInDir("./data", "data.zip", lambda x: True)
+zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True)
