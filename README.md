@@ -3,6 +3,8 @@
 ## Development Status: **Prototype**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+[![Build Status](https://github.com/pypsa/pypsa-eur/actions/workflows/ci.yaml/badge.svg)](https://github.com/PyPSA/pypsa-eur/actions)
+![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 
 PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission!
 
@@ -77,7 +79,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>hazemakhalek</b></sub>
         </a>
     </td>
     <td align="center">
@@ -98,7 +100,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/euronion">
             <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
             <br />
-            <sub><b>Euronion</b></sub>
+            <sub><b>euronion</b></sub>
         </a>
     </td>
     <td align="center">
@@ -163,7 +165,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/energyLS">
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
-            <sub><b>EnergyLS</b></sub>
+            <sub><b>energyLS</b></sub>
         </a>
     </td>
     <td align="center">
