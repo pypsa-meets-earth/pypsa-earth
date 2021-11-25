@@ -170,7 +170,7 @@ if config['enable'].get('build_cutout', False):
 if config['enable'].get('build_natura_raster', False):
     rule build_natura_raster:
         input:
-            shapefiles_land="data/raw/landcover",
+            shapefiles_land=directory("data/raw/landcover"),
             cutouts=expand("cutouts/{cutouts}.nc", **config['atlite'])
         output: "resources/natura.tiff"
         log: "logs/build_natura_raster.log"
