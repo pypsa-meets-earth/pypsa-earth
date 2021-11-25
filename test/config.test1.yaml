@@ -4,6 +4,7 @@
 
 version: 0.3.0
 tutorial: True
+CI_test: True
 
 logging:
   level: INFO
