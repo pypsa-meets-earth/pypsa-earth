@@ -37,7 +37,7 @@ datafiles = [
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
-        "data/raw/landcover/world_protected_area/WDPA_WDOECM_Oct2021_Public_AF_shp_2/WDPA_WDOECM_Oct2021_Public_AF_shp-polygons.shp",
+        directory("data/raw/landcover"),
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
         "data/costs.csv",
 ]
