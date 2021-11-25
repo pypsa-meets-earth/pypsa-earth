@@ -429,7 +429,8 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
     # Generate Files
 
     if df_all_feature.empty:
-        _logger.warning(f"All feature data frame empty for {feature}")
+        _logger.warning(f"Store empty Dataframe for {feature}.")
+        gdf_feature = []
         return None
 
     # _to_csv_nafix(df_all_feature,

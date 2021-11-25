@@ -247,7 +247,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     assert (results["Solver"][0]["Status"] == "ok"
             ), f"Solver returned non-optimally: {results}"
 
-    return pd.Series(m.n.get_values(), index=L.index).astype(int)
+    return pd.Series(m.n.get_values(), index=L.index).round().astype(int)
 
 
 def busmap_for_gadm_clusters(n, gadm_level):
@@ -284,9 +284,9 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 100)
-        algorithm_kwds.setdefault("max_iter", 300)
-        algorithm_kwds.setdefault("tol", 1e-3)
+        algorithm_kwds.setdefault("n_init", 1000)
+        algorithm_kwds.setdefault("max_iter", 30000)
+        algorithm_kwds.setdefault("tol", 1e-6)
 
     # PyPSA module that creates sub_networks and "error"
     n.determine_network_topology()
@@ -458,7 +458,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="75")
+                                   clusters="10")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

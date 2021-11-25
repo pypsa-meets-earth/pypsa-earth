@@ -56,8 +56,13 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102)
     configure_logging(snakemake)
 
-    _sets_path_to_root("pypsa-africa")
 
+_sets_path_to_root("pypsa-africa")
+tutorial = snakemake.config["tutorial"]
+CI = snakemake.config["CI"]
+logger.info("Retrieving data from GoogleDrive.")
+
+if tutorial == False:
     # BUNDLE 1
     destination = "./resources"
     zip_path = destination + ".zip"
@@ -86,6 +91,42 @@ if __name__ == "__main__":
     url = "https://drive.google.com/file/d/1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O/view?usp=sharing"
     gdd.download_file_from_google_drive(
         file_id="1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O",
+        dest_path=zip_path,
+        unzip=True)
+    os.remove(zip_path)
+    logger.info(f"Download data to '{destination}' from cloud '{url}'.")
+
+
+if tutorial == True:
+    # BUNDLE 1
+    destination = "./resources"
+    zip_path = destination + ".zip"
+    url = "https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8/view?usp=sharing"
+    gdd.download_file_from_google_drive(
+        file_id="1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8",
+        dest_path=zip_path,
+        unzip=True)
+    os.remove(zip_path)
+    logger.info(f"Download data to '{destination}' from cloud '{url}'.")
+
+    # BUNDLE 2
+    destination = "./data"
+    zip_path = destination + ".zip"
+    url = "https://drive.google.com/file/d/13v55AXGBSZ41v6u_kcvVFzGiKrRz7wsf/view?usp=sharing"
+    gdd.download_file_from_google_drive(
+        file_id="13v55AXGBSZ41v6u_kcvVFzGiKrRz7wsf",
+        dest_path=zip_path,
+        unzip=True)
+    os.remove(zip_path)
+    logger.info(f"Download data to '{destination}' from cloud '{url}'.")
+
+if CI == False:
+    # BUNDLE 3
+    destination = "./cutouts"
+    zip_path = destination + ".zip"
+    url = "https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view?usp=sharing"
+    gdd.download_file_from_google_drive(
+        file_id="1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh",
         dest_path=zip_path,
         unzip=True)
     os.remove(zip_path)
