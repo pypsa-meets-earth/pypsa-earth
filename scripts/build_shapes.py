@@ -163,7 +163,6 @@ def _simplify_polys(polys,
                     filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
-        # here deprecation warning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
         polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
