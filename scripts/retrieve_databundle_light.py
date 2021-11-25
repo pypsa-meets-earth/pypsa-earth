@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
 _sets_path_to_root("pypsa-africa")
 tutorial = snakemake.config["tutorial"]
-CI = snakemake.config["CI"]
+CI = snakemake.config["CI_test"]
 logger.info("Retrieving data from GoogleDrive.")
 
 if tutorial == False:
