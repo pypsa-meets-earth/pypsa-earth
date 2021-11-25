@@ -25,7 +25,7 @@ from shapely.geometry import MultiPolygon
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
 import multiprocessing as mp
 from tqdm import tqdm
 
@@ -206,7 +206,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False):
     if eez_shapes is not None:
         shapes += list(eez_shapes)
 
-    africa_shape = cascaded_union(shapes)
+    africa_shape = unary_union(shapes)
     if isinstance(africa_shape, MultiPolygon):
         africa_shape = max(africa_shape, key=attrgetter("area"))
     return Polygon(shell=africa_shape.exterior)
