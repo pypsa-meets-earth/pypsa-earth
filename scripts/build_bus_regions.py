@@ -143,9 +143,7 @@ def custom_voronoi_partition_pts(points,
 
             polygons.append(poly)
 
-    polygons_arr = np.empty((len(polygons), ), "object")
-    polygons_arr[:] = polygons
-    return polygons_arr
+    return np.array(polygons)
 
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
@@ -179,6 +177,9 @@ def get_gadm_shape(onshore_locs, gadm_shapes):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
+        # needed to run mock_snakemake
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("build_bus_regions")
     configure_logging(snakemake)
