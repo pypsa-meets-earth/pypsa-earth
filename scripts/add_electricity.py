@@ -333,12 +333,10 @@ def attach_wind_and_solar(n, costs):
             continue
 
         n.add("Carrier", name=tech)
-        # TODO: Uncomment this out. MAX
-        # with xr.open_dataset(getattr(snakemake.input,
-        #                              "profile_" + tech)) as ds:
-        # TODO: Remove the 2 lines below
+        
         with xr.open_dataset(getattr(snakemake.input,
-                                     "profile_" + "solar")) as ds:
+                                     "profile_" + tech)) as ds:
+                                     
             if ds.indexes["bus"].empty:
                 continue
 
