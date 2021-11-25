@@ -65,7 +65,7 @@ snapshots:
 
 enable:
   # prepare_links_p_nom: false
-  retrieve_databundle: false
+  retrieve_databundle: true
   download_osm_data: true
   # retrieve_cutout: true
   # retrieve_natura_raster: true
