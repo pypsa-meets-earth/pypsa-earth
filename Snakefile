@@ -91,7 +91,6 @@ rule build_osm_network:
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
         substations="data/base_network/africa_all_buses_build_network.csv",
-        generators="data/base_network/africa_all_generators_build_network.csv",
     log: "logs/build_osm_network.log"
     script: "scripts/osm_built_network.py"
 

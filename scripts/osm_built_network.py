@@ -7,6 +7,7 @@ import geopandas as gpd
 import numpy as np
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
+from _helpers import _read_geojson
 from _helpers import configure_logging
 from shapely.geometry import LineString
 from shapely.geometry import Point
@@ -495,7 +496,7 @@ def built_network(inputs, outputs):
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
                                                                inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
-    generators = gpd.read_file(inputs["generators"]).set_crs(epsg=4326,
+    generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
                                                              inplace=True)
 
     # Filter only Nigeria
@@ -545,11 +546,11 @@ def built_network(inputs, outputs):
     # Generate CSV
     _to_csv_nafix(buses, outputs["substations"])
 
-    # save generators
-    if not os.path.exists(outputs["generators"]):
-        os.makedirs(os.path.dirname(outputs["generators"]), exist_ok=True)
-    # Generate CSV
-    _to_csv_nafix(buses, outputs["generators"])
+    # # save generators
+    # if not os.path.exists(outputs["generators"]):
+    #     os.makedirs(os.path.dirname(outputs["generators"]), exist_ok=True)
+    # # Generate CSV
+    # _to_csv_nafix(generators, outputs["generators"])
 
     return None
 

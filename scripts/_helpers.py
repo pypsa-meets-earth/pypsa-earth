@@ -507,3 +507,12 @@ def _save_to_geojson(df, fn):
     else:
         # save file
         df.to_file(fn, driver="GeoJSON")
+
+
+def _read_geojson(fn):
+    # if the file is non-zero, read the geodataframe and return it
+    if os.path.getsize(fn) > 0:
+        return gpd.read_file(fn)
+    else:
+        # else return an empty GeoDataFrame
+        return gpd.GeoDataFrame(geometry=[])
