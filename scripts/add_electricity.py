@@ -293,7 +293,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         ],
         axis=1,
     )
-    print(load)
+    
     n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
 
 
