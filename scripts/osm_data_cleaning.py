@@ -496,16 +496,18 @@ def clean_data(
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
 
-    # Load raw data lines
-    df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326,
-                                                             inplace=True)
+    # load cables only if data are stored
+    if os.path.getsize(input_files["cables"]) > 0:
+        # Load raw data lines
+        df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326,
+                                                                inplace=True)
 
-    # prepare cables dataframe and data types
-    df_cables = prepare_lines_df(df_cables)
-    df_cables = finalize_lines_type(df_cables)
+        # prepare cables dataframe and data types
+        df_cables = prepare_lines_df(df_cables)
+        df_cables = finalize_lines_type(df_cables)
 
-    # concatenate lines and cables in a single dataframe
-    df_all_lines = pd.concat([df_lines, df_cables])
+        # concatenate lines and cables in a single dataframe
+        df_all_lines = pd.concat([df_lines, df_cables])
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
