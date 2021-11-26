@@ -44,11 +44,8 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("retrieve_databundle_light")
         rootpath = ".."
     else:
@@ -120,7 +117,7 @@ if tutorial == True:
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
-if CI == True:
+if CI == False:
     # BUNDLE 3
     destination = "./cutouts"
     zip_path = destination + ".zip"

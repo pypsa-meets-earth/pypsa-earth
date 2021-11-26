@@ -41,10 +41,11 @@ datafiles = [
         "data/costs.csv",
 ]
 
-if config.get('CI_test', False) == True:
-    datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
-elif config.get('tutorial')==False and not config.get('CI_test', False) == True:
+if config.get('tutorial')==False:
     datafiles.extend(["cutouts/africa-2013-era5.nc"])
+if config.get('tutorial')==True and config.get('CI_test', False) == False:
+    datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
+#  Info: No .nc data required for CI test
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
