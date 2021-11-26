@@ -56,7 +56,6 @@ if __name__ == "__main__":
 
 _sets_path_to_root("pypsa-africa")
 tutorial = snakemake.config["tutorial"]
-CI = snakemake.config["CI_test"]
 logger.info("Retrieving data from GoogleDrive.")
 
 if tutorial == False:
@@ -117,7 +116,6 @@ if tutorial == True:
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
-if CI == False:
     # BUNDLE 3
     destination = "./cutouts"
     zip_path = destination + ".zip"

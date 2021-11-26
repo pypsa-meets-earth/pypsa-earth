@@ -4,7 +4,6 @@
 
 version: 0.3.0
 tutorial: False
-CI_test: False
 
 logging:
   level: INFO
