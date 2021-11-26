@@ -41,9 +41,9 @@ datafiles = [
         "data/costs.csv",
 ]
 
-if config.get('tutorial', True)==True and config.get('CI_test', False) == False:
+if config.get('CI_test', False) == True:
     datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
-elif config.get('tutorial')==False:
+elif config.get('tutorial')==False and not config.get('CI_test', False) == True:
     datafiles.extend(["cutouts/africa-2013-era5.nc"])
 
 if config['enable'].get('retrieve_databundle', True):

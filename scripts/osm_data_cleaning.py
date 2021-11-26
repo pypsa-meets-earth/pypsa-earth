@@ -496,6 +496,9 @@ def clean_data(
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
 
+    # initialize name of the final dataframe
+    df_all_lines = df_lines
+
     # load cables only if data are stored
     if os.path.getsize(input_files["cables"]) > 0:
         # Load raw data lines

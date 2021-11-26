@@ -120,7 +120,7 @@ if tutorial == True:
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
 
-if CI == False:
+if CI == True:
     # BUNDLE 3
     destination = "./cutouts"
     zip_path = destination + ".zip"
