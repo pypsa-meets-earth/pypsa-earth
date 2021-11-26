@@ -9,6 +9,7 @@ import pandas as pd
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from _helpers import _save_to_geojson
 
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
@@ -535,7 +536,7 @@ def clean_data(
                                             ext_country_shapes,
                                             names_by_shapes=names_by_shapes)
 
-    df_all_lines.to_file(output_files["lines"], driver="GeoJSON")
+    _save_to_geojson(df_all_lines, output_files["lines"])
 
     # ----------- SUBSTATIONS -----------
 
@@ -578,7 +579,7 @@ def clean_data(
         ext_country_shapes,
         names_by_shapes=names_by_shapes)
 
-    df_all_substations.to_file(output_files["substations"], driver="GeoJSON")
+    _save_to_geojson(df_all_substations, output_files["substations"])
 
     # ----------- GENERATORS -----------
 
@@ -588,8 +589,11 @@ def clean_data(
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
 
-    df_all_generators.to_file(output_files["generators"], driver="GeoJSON")
+    # save to csv
     _to_csv_nafix(df_all_generators, output_files["generators_csv"])
+
+    # save to geojson
+    _save_to_geojson(df_all_generators, output_files["generators"])
 
     return None
 

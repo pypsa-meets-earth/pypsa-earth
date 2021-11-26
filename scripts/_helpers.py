@@ -5,6 +5,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import os
+import geopandas as gpd
 
 
 def _sets_path_to_root(root_directory_name):
@@ -491,3 +493,17 @@ def _to_csv_nafix(obj, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
+
+
+def _save_to_geojson(df, fn):
+    if os.path.exists(fn):
+        os.unlink(fn)  # remove file if it exists
+
+    # save file if the (Geo)DataFrame is non-empty
+    if df.empty:
+        # create empty file to avoid issues with snakemake
+        with open(fn, "w") as fp:
+            pass
+    else:
+        # save file
+        df.to_file(fn, driver="GeoJSON")
