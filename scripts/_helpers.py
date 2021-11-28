@@ -317,7 +317,7 @@ def mock_snakemake(rulename, **wildcards):
     except Exception as exception:
         print(exception, 
         f"The {rulename} might be a conditional rule in the Snakefile.\n"
-        f"Did you enable {rulename} it in the config?")
+        f"Did you enable {rulename} in the config?")
         raise
     dag = sm.dag.DAG(workflow, rules=[rule])
     wc = Dict(wildcards)
