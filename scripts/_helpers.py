@@ -312,7 +312,10 @@ def mock_snakemake(rulename, **wildcards):
     workflow = sm.Workflow(snakefile)
     workflow.include(snakefile)
     workflow.global_resources = {}
-    rule = workflow.get_rule(rulename)
+    try:
+        rule = workflow.get_rule(rulename)
+    except:
+        print("Missing rule error. Did you enable the rule in the config?")
     dag = sm.dag.DAG(workflow, rules=[rule])
     wc = Dict(wildcards)
     job = sm.jobs.Job(rule, dag, wc)
