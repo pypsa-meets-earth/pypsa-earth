@@ -69,18 +69,36 @@ def add_custom_powerplants(ppl):
     # if isinstance(custom_ppl_query, str):
     # add_ppls.query(custom_ppl_query, inplace=True)
 
-    custom_ppls_coords = gpd.GeoSeries.from_wkt(raw_custom_ppls['geometry'])
-    custom_ppls_data = {'Name':raw_custom_ppls['id'], 
-    # TODO Improve correspondance with powerplantmatching fields
-    'Fueltype':raw_custom_ppls['tags.generator:source'], 
-    'Technology':(raw_custom_ppls['tags.generator:type'] + ', ' + raw_custom_ppls['tags.generator:method']), 
-    'Set':raw_custom_ppls['tags.power'], 'Country':raw_custom_ppls['Country'], 
-    'Capacity':raw_custom_ppls['power_output_MW'], 'Efficiency':'', 'Duration':'',
-    'Volume_Mm3':'', 'DamHeight_m':'', 'StorageCapacity_MWh':'', 
-    'DateIn':'', 'DateRetrofit':'', 'DateMothball':'','DateOut':'',
-    'lat':custom_ppls_coords.y, 'lon':custom_ppls_coords.x,
-    'EIC':'', 'projectID':''}
-    add_ppls = pd.DataFrame(data=custom_ppls_data)
+    custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls['geometry'])
+    add_ppls = (
+        add_ppls.rename(
+            columns={
+                'Name':'id', 
+                # TODO Improve correspondance with powerplantmatching fields
+                'Fueltype':'tags.generator:source', 
+                'Technology':'tags.generator:type', #there is also 'tags.generator:method', 
+                'Set':'tags.power',                  
+                'Capacity':'power_output_MW', 
+                'Efficiency':'',
+                'Duration':'',
+                'Volume_Mm3':'', 
+                'DamHeight_m':'', 
+                'StorageCapacity_MWh':'', 
+                'Country':'Country',
+                'DateIn':'', 
+                'DateRetrofit':'', 
+                'DateMothball':'',
+                'DateOut':'',
+                # 'lat':custom_ppls_coords.y, 'lon':custom_ppls_coords.x,
+                'EIC':'', 
+                'projectID':''
+            }
+        )
+        .drop(columns=['tags.power', 'tags.generator:type', 'tags.generator:method', 
+            'tags.generator:source', 'power_output_MW', 'geometry'])
+        .assign(lat = custom_ppls_coords.y, lon = custom_ppls_coords.x)
+
+    )
     return ppl.append(add_ppls,
                       sort=False,
                       ignore_index=True,
