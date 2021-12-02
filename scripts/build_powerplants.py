@@ -63,7 +63,7 @@ def add_custom_powerplants(ppl):
     custom_ppl_query = snakemake.input.custom_powerplants
     if not custom_ppl_query:
         return ppl
-    raw_custom_ppls = pd.read_csv(custom_ppl_query,
+    add_ppls = pd.read_csv(custom_ppl_query,
                            index_col=0,
                            dtype={"bus": "str"})
     # if isinstance(custom_ppl_query, str):
