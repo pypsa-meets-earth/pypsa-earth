@@ -81,6 +81,28 @@ def add_custom_powerplants(ppl):
         )
         .replace(
             dict(
+                Fueltype={
+                    "nuclear" : "Nuclear",
+                    "wind" : "Wind",
+                    "hydro" : "Hydro",
+                    "tidal" : "Other",
+                    "wave" : "Other",
+                    "geothermal" : "Geothermal",
+                    "solar" : "Solar",
+                    # NB It may be "Hard Coal" with just the same success
+                    "coal" : "Lignite",
+                    "gas" : "Natural Gas",
+                    "biomass" : "Bioenergy",
+                    "biofuel" : "Bioenergy",
+                    "biogas" : "Bioenergy",
+                    "oil" : "Oil",
+                    "diesel" : "Oil",
+                    "gasoline" : "Oil",
+                    "waste" : "Waste",
+                    "battery" : "Other",
+                    "osmotic" : "Other",
+                    "wave" : "Other"
+                },
             )
         )
         .drop(columns=["tags.generator:method", 
