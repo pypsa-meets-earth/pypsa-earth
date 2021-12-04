@@ -73,25 +73,10 @@ def add_custom_powerplants(ppl):
     add_ppls = (
         add_ppls.rename(
             columns={
-                "Name":"id", 
-                # TODO Improve correspondance with powerplantmatching fields
-                "Fueltype":"tags.generator:source", 
-                "Technology":"tags.generator:type", #there is also "tags.generator:method", 
-                "Set":"tags.power",                  
-                "Capacity":"power_output_MW", 
-                "Efficiency":"",
-                "Duration":"",
-                "Volume_Mm3":"", 
-                "DamHeight_m":"", 
-                "StorageCapacity_MWh":"", 
-                "Country":"Country",
-                "DateIn":"", 
-                "DateRetrofit":"", 
-                "DateMothball":"",
-                "DateOut":"",
-                # "lat":custom_ppls_coords.y, "lon":custom_ppls_coords.x,
-                "EIC":"", 
-                "projectID":""
+                "tags.generator:source": "Fueltype", 
+                "tags.generator:type": "Technology",
+                "tags.power": "Set",                  
+                "power_output_MW": "Capacity"
             }
         )
         .drop(columns=["tags.power", "tags.generator:type", "tags.generator:method", 
