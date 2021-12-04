@@ -79,6 +79,10 @@ def add_custom_powerplants(ppl):
                 "power_output_MW": "Capacity"
             }
         )
+        .replace(
+            dict(
+            )
+        )
         .drop(columns=["tags.generator:method", 
             "geometry"])
         .assign(Name = "",
