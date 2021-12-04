@@ -103,6 +103,29 @@ def add_custom_powerplants(ppl):
                     "osmotic" : "Other",
                     "wave" : "Other"
                 },
+
+                # 'Reservoir' 'Pumped Storage' 'Run-Of-River' 'Steam Turbine' 'CCGT' 'OCGT'
+                # nan 'Pv' 'CCGT, Thermal' 'Offshore' 'Storage Technologies'
+                Technology={
+                    "combined_cycle" : "CCGT",
+                    "gas_turbine" : "OCGT",
+                    "steam_turbine" : "Steam Turbine",
+                    "reciprocating_engine" : "Combustion Engine",
+                    # a very strong assumption
+                    "horizontal_axis" : "Onshore",
+                    "vertical_axis" : "Onshore"
+
+                    # 'solar'
+                    # 'thermal'
+                    #     'steam_turbine', 'solar_thermal_collector'
+                    # 'photovoltaic'
+                    #     'solar_photovoltaic_panel'
+                    # Pv  
+
+                    # Run-Of-River, Pumped Storage, Reservoir => see "tags.generator:method"
+
+                    # The nuclear PP can be mapped into "Steam Turbine"
+            },
             )
         )
         .drop(columns=["tags.generator:method", 
