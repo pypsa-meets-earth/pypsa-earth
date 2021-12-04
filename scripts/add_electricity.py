@@ -94,6 +94,7 @@ from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from osm_pbf_power_data_extractor import create_country_list
 from powerplantmatching.export import map_country_bus
+from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
@@ -258,7 +259,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     gegis_load *= scale
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
-
+    shapes.loc[:,"geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
     def upsample(cntry, group):
         l = gegis_load.loc[gegis_load.region_code ==
                            cntry]["Electricity demand"]
