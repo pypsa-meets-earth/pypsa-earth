@@ -340,6 +340,10 @@ def finalize_lines_type(df_lines):
 
 # split function for cables and voltage
 def split_cells_multiple(df, list_col=["cables", "voltage"]):
+    # TODO: split multiple cell need fix!
+    # One line with 'cable':{3,6} and 'voltage':{220000,110000} or
+    # only 'voltage':{110000,220000, 3330000} needs to split in several lines
+    # with new line_ID
     n_rows = df.shape[0]
     for i in range(n_rows):
         sub = df[list_col].iloc[i]  # for each cables and voltage
@@ -357,7 +361,13 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
         sel_ids = (df[cl_name].str.contains(";") == True)
-        df.loc[sel_ids, cl_name] = df.loc[sel_ids, cl_name].apply(lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
+        # TODO: split multiple cell need fix!
+        df = df.drop(df.loc[sel_ids, cl_name].index, )
+        ## Original fix breaks with one input like [30;t], a string in the element
+        # df.loc[sel_ids, cl_name] = (    
+        #   df.loc[sel_ids, cl_name].apply(
+        #         lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
+        # )
     return df  # return new frame
 
 
