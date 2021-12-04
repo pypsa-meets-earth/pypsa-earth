@@ -79,9 +79,23 @@ def add_custom_powerplants(ppl):
                 "power_output_MW": "Capacity"
             }
         )
-        .drop(columns=["tags.power", "tags.generator:type", "tags.generator:method", 
-            "tags.generator:source", "power_output_MW", "geometry"])
-        .assign(lat = custom_ppls_coords.y, lon = custom_ppls_coords.x)
+        .drop(columns=["tags.generator:method", 
+            "geometry"])
+        .assign(Name = "",
+            Efficiency = "",
+            Duration = "",
+            Volume_Mm3 = "", 
+            DamHeight_m = "", 
+            StorageCapacity_MWh = "", 
+            DateIn = "", 
+            DateRetrofit = "", 
+            DateMothball = "",
+            DateOut = "",
+            lat = custom_ppls_coords.y, 
+            lon = custom_ppls_coords.x,
+            EIC = "", 
+            projectID = ""
+        )    
 
     )
     return ppl.append(add_ppls,
