@@ -126,6 +126,17 @@ def add_custom_powerplants(ppl):
 
                     # The nuclear PP can be mapped into "Steam Turbine"
             },
+
+                    # map into
+                    # Power Plant (PP), Combined Heat and Power (CHP), Storages (Stores) 
+                    # 'Store' 'PP' 'CHP'
+                    Set={
+                        "generator" : "PP",
+                        "plant" : "PP"
+                        # Storages (Stores)=> see "tags.generator:source" == "battery"
+                        # CHP?
+                    }
+
             )
         )
         .drop(columns=["tags.generator:method", 
