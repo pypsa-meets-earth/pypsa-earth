@@ -182,6 +182,10 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
+    assert (len(L.index) == len(n.buses.country.unique())), (
+        "The following countries have no load: "
+    f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+    )
 
     # originally ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
@@ -458,7 +462,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="10")
+                                   clusters="60")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
