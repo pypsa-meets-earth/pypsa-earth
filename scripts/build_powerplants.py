@@ -116,14 +116,8 @@ def add_custom_powerplants(ppl):
                     "horizontal_axis" : "Onshore",
                     "vertical_axis" : "Onshore"
 
-                    # 'solar'
-                    # 'thermal'
-                    #     'steam_turbine', 'solar_thermal_collector'
-                    # 'photovoltaic'
-                    #     'solar_photovoltaic_panel'
-                    # Pv  
-
                     # Run-Of-River, Pumped Storage, Reservoir => see "tags.generator:method"
+                    "solar_photovoltaic_panel" : "Pv"
 
                     # The nuclear PP can be mapped into "Steam Turbine"
             },
