@@ -134,8 +134,6 @@ def add_custom_powerplants(ppl):
 
             )
         )
-        .drop(columns=["tags.generator:method", 
-            "geometry"])
         .assign(Name = "",
             Efficiency = "",
             Duration = "",
@@ -153,6 +151,10 @@ def add_custom_powerplants(ppl):
         )    
 
     )
+
+    add_ppls.drop(columns=["tags.generator:method", 
+        "geometry"])   
+
     return ppl.append(add_ppls,
                       sort=False,
                       ignore_index=True,
