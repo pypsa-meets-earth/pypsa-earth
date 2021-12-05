@@ -115,8 +115,6 @@ def add_custom_powerplants(ppl):
                     # a very strong assumption
                     "horizontal_axis" : "Onshore",
                     "vertical_axis" : "Onshore"
-
-                    # Run-Of-River, Pumped Storage, Reservoir => see "tags.generator:method"
                     "solar_photovoltaic_panel" : "Pv"
 
                     # The nuclear PP can be mapped into "Steam Turbine"
@@ -151,6 +149,15 @@ def add_custom_powerplants(ppl):
         )    
 
     )
+
+    # Run-Of-River, Pumped Storage, Reservoir => see "tags.generator:method"
+    # TODO Vectorize
+    add_ppls.loc[add_ppls["tags.generator:method"] == "run-of-the-river", 
+        "Technology"] = "Run-Of-River"
+    add_ppls.loc[add_ppls["tags.generator:method"] == "water-pumped-storage", 
+        "Technology"] = "Pumped Storage"
+    add_ppls.loc[add_ppls["tags.generator:method"] == "water-storage", 
+        "Technology"] = "Reservoir"
 
     add_ppls.drop(columns=["tags.generator:method", 
         "geometry"])   
