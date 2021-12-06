@@ -219,7 +219,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))),
         )
 
-        _logger.info(f"Loading {feature} Pickle for {country_name}")
+        _logger.info(f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}")
         # feature_data = Data, Elements
         # return feature_data
 
@@ -231,7 +231,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             pre_filtered.append(country_code)
         else:
             new_prefilter_data = False
-        _logger.info(f"Creating new {feature} Elements for {country_name}")
+        _logger.info(f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}")
 
     prefilter = {
         Node: {
