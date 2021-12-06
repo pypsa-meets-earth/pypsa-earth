@@ -6,6 +6,7 @@ import sys
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from shapely.ops import unary_union
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
@@ -486,7 +487,6 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
 
     return merged_shapes
 
-
 def clean_data(
     input_files,
     output_files,
@@ -533,6 +533,12 @@ def clean_data(
     # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
     df_all_lines = df_all_lines[df_all_lines["geometry"].map(
         lambda g: len(g.boundary.geoms) >= 2)]
+
+    # drop lines crossing regions with and without the region under interest
+    overall_region = unary_union(ext_country_shapes.geometry)  # overall union of the shapes
+    df_all_lines = df_all_lines[
+        df_all_lines.apply(lambda x: overall_region.contains(x.geometry.boundary), axis=1)
+    ]
 
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
