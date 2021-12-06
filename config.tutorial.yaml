@@ -162,7 +162,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: false
+    extendable: true
   offwind-ac:
     cutout: africa-2013-era5-tutorial
     resource:
@@ -176,7 +176,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: false
+    extendable: true
   offwind-dc:
     cutout: africa-2013-era5-tutorial
     resource:
@@ -191,7 +191,7 @@ renewable:
     min_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: false
+    extendable: true
   solar:
     cutout: africa-2013-era5-tutorial
     resource:
@@ -212,7 +212,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
-    extendable: false
+    extendable: true
   hydro:
     cutout: africa-2013-era5-tutorial
     resource:
