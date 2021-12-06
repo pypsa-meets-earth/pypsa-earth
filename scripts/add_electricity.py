@@ -333,6 +333,13 @@ def attach_wind_and_solar(n, costs):
         if tech == "hydro":
             continue
 
+        ren_config = snakemake.config["renewable"][tech]
+
+        # get if technology is extendable
+        extendable = False
+        if "extendable" in ren_config:
+            extendable = ren_config["extendable"]
+
         n.add("Carrier", name=tech)
         
         with xr.open_dataset(getattr(snakemake.input,
@@ -369,7 +376,7 @@ def attach_wind_and_solar(n, costs):
                 " " + tech,
                 bus=ds.indexes["bus"],
                 carrier=tech,
-                p_nom_extendable=True,
+                p_nom_extendable=extendable,
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 weight=ds["weight"].to_pandas(),
                 marginal_cost=costs.at[suptech, "marginal_cost"],
