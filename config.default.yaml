@@ -162,6 +162,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   offwind-ac:
     cutout: africa-2013-era5
     resource:
@@ -175,6 +176,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   offwind-dc:
     cutout: africa-2013-era5
     resource:
@@ -189,6 +191,7 @@ renewable:
     min_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   solar:
     cutout: africa-2013-era5
     resource:
@@ -209,6 +212,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   hydro:
     cutout: africa-2013-era5
     resource:
@@ -222,6 +226,7 @@ renewable:
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     clip_min_inflow: 1.0
+    extendable: true
 
 # TODO: Needs to be adjusted for Africa
 costs:
