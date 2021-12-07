@@ -161,6 +161,11 @@ def add_custom_powerplants(ppl):
     for i in osm_ppm_df.index:
         add_ppls.loc[add_ppls["tags.generator:method"] == osm_ppm_df.loc[i, "osm_method"], 
             "Technology"] = osm_ppm_df.loc[i, "ppm_technology"]
+
+    # originates from osm::"tags.generator:source"
+    add_ppls.loc[add_ppls["Fueltype"] == "Nuclear", 
+            "Technology"] = "Steam Turbine"
+    
     add_ppls.drop(columns=["tags.generator:method", 
         "geometry"])   
 
