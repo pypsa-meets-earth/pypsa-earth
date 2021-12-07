@@ -424,6 +424,16 @@ def integrate_lines_df(df_all_lines):
 
     return df_all_lines
 
+def filter_lines_by_geometry(df_all_lines):
+    
+    # drop None geometries
+    df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
+
+    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
+    df_all_lines = df_all_lines[df_all_lines["geometry"].map(
+        lambda g: len(g.boundary.geoms) >= 2)]
+
+    return df_all_lines
 
 def prepare_generators_df(df_all_generators):
     """
@@ -490,6 +500,7 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
 def clean_data(
     input_files,
     output_files,
+    africa_shape,
     ext_country_shapes=None,
     names_by_shapes=True,
     tag_substation="transmission",
@@ -529,15 +540,14 @@ def clean_data(
 
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
+    
+    # filter lines to make sure the geometry is appropriate
+    df_all_lines = filter_lines_by_geometry(df_all_lines)
 
-    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
-    df_all_lines = df_all_lines[df_all_lines["geometry"].map(
-        lambda g: len(g.boundary.geoms) >= 2)]
 
     # drop lines crossing regions with and without the region under interest
-    overall_region = unary_union(ext_country_shapes.geometry)  # overall union of the shapes
     df_all_lines = df_all_lines[
-        df_all_lines.apply(lambda x: overall_region.contains(x.geometry.boundary), axis=1)
+        df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
     ]
 
     # set unique line ids
@@ -639,6 +649,9 @@ if __name__ == "__main__":
     input_files = snakemake.input
     output_files = snakemake.output
 
+    africa_shape = (gpd.read_file(
+            snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0])
+
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
         country_shapes = (gpd.read_file(
@@ -655,6 +668,7 @@ if __name__ == "__main__":
     clean_data(
         input_files,
         output_files,
+        africa_shape,
         ext_country_shapes=ext_country_shapes,
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,
