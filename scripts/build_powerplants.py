@@ -106,7 +106,7 @@ def add_custom_powerplants(ppl):
                     "wave" : "Other",
                     "geothermal" : "Geothermal",
                     "solar" : "Solar",
-                    # "Hard Coal" follows conventions of PPM, but may be "Lignite" with just the same success
+                    # "Hard Coal" follows defauls of PPM
                     "coal" : "Hard Coal",
                     "gas" : "Natural Gas",
                     "biomass" : "Bioenergy",
@@ -120,8 +120,6 @@ def add_custom_powerplants(ppl):
                     "wave" : "Other"
                 },
 
-                # 'Reservoir' 'Pumped Storage' 'Run-Of-River' 'Steam Turbine' 'CCGT' 'OCGT'
-                # nan 'Pv' 'CCGT, Thermal' 'Offshore' 'Storage Technologies'
                 Technology={
                     "combined_cycle" : "CCGT",
                     "gas_turbine" : "OCGT",
@@ -133,7 +131,6 @@ def add_custom_powerplants(ppl):
                     "vertical_axis" : "Offhore",
                     "solar_photovoltaic_panel" : "Pv"
 
-                    # The nuclear PP can be mapped into "Steam Turbine"
             },
 
                     Set={
