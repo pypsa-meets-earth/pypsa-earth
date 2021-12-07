@@ -63,9 +63,9 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 import logging
 import os
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import powerplantmatching as pm
 import pypsa
 import yaml
