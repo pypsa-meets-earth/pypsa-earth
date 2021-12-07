@@ -75,7 +75,7 @@ The environment can be installed using:
   ``` bash
   snakemake -j 1 solve_all_networks -n
   ```
-  Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis. 
+  Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
   
 ## Documentation
 
