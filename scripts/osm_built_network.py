@@ -24,20 +24,15 @@ def line_endings_to_bus_conversion(lines):
     # Assign to every line a start and end point
 
     lines["bounds"] = lines["geometry"].boundary  # create start and end point
-    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p.geoms[0]
-                                               if len(p.geoms) >= 2 else None)
-    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p.geoms[1]
-                                               if len(p.geoms) >= 2 else None)
+
+    lines["bus_0_coors"] = lines["bounds"].map(lambda p: p.geoms[0])
+    lines["bus_1_coors"] = lines["bounds"].map(lambda p: p.geoms[1])
 
     # splits into coordinates
-    lines["bus0_lon"] = lines["bus_0_coors"].map(lambda p: p.x
-                                                 if p != None else None)
-    lines["bus0_lat"] = lines["bus_0_coors"].map(lambda p: p.y
-                                                 if p != None else None)
-    lines["bus1_lon"] = lines["bus_1_coors"].map(lambda p: p.x
-                                                 if p != None else None)
-    lines["bus1_lat"] = lines["bus_1_coors"].map(lambda p: p.y
-                                                 if p != None else None)
+    lines["bus0_lon"] = lines["bus_0_coors"].x
+    lines["bus0_lat"] = lines["bus_0_coors"].y
+    lines["bus1_lon"] = lines["bus_1_coors"].x
+    lines["bus1_lat"] = lines["bus_1_coors"].y
 
     return lines
 
@@ -79,18 +74,16 @@ def add_line_endings_tosubstations(substations, lines):
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage",
                                            "country"]]  # line start points
-    bus_s["geometry"] = lines.geometry.boundary.map(
-        lambda p: p.geoms[0] if len(p.geoms) >= 2 else None)
-    bus_s["lon"] = bus_s["geometry"].map(lambda p: p.x if p != None else None)
-    bus_s["lat"] = bus_s["geometry"].map(lambda p: p.y if p != None else None)
+    bus_s["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[0])
+    bus_s["lon"] = bus_s["geometry"].x
+    bus_s["lat"] = bus_s["geometry"].y
     bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
 
     bus_e[["voltage", "country"]] = lines[["voltage",
                                            "country"]]  # line start points
-    bus_e["geometry"] = lines.geometry.boundary.map(
-        lambda p: p.geoms[1] if len(p.geoms) >= 2 else None)
-    bus_e["lon"] = bus_s["geometry"].map(lambda p: p.x if p != None else None)
-    bus_e["lat"] = bus_s["geometry"].map(lambda p: p.y if p != None else None)
+    bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1])
+    bus_e["lon"] = bus_s["geometry"].x
+    bus_e["lat"] = bus_s["geometry"].y
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
 
     bus_all = bus_s.append(bus_e).reset_index(drop=True)
@@ -138,12 +131,9 @@ def set_substations_ids(buses, tol=0.02):
             continue
 
         # get substations within tolerance
-        close_nodes = np.where(
-            buses.apply(
-                lambda x: math.dist([row["lat"], row["lon"]],
-                                    [x["lat"], x["lon"]]) <= tol,
-                axis=1,
-            ))[0]
+        close_nodes = np.flatnonzero(buses.geometry.distance(row["geometry"]) <= tol)
+
+        # print("set_substations_ids: ", i, "/", buses.shape[0])
 
         if len(close_nodes) == 1:
             # if only one substation is in tolerance, then the substation is the current one iì
@@ -191,6 +181,8 @@ def set_lines_ids(lines, buses):
 
     for i, row in lines.iterrows():
 
+        # print("set_lines_ids: ", i, "/", lines.shape[0])
+
         # select buses having the voltage level of the current line
         buses_sel = buses[buses["voltage"] == row["voltage"]]
 
@@ -199,13 +191,13 @@ def set_lines_ids(lines, buses):
         lines.loc[i, "bus0"] = buses.loc[bus0_id, "bus_id"]
 
         # check if the line starts exactly in the node, otherwise modify the linestring
-        distance_bus0 = buses_sel.geometry[bus0_id].distance(
+        distance_bus0 = buses.loc[bus0_id, "geometry"].distance(
             row["bus_0_coors"])
         if distance_bus0 > 0.0:
             # the line does not start in the node, thus modify the linestring
             lines.loc[i, "geometry"] = linemerge([
                 LineString([
-                    buses_sel.geometry[bus0_id],
+                    buses.loc[bus0_id, "geometry"],
                     row["bus_0_coors"],
                 ]),
                 lines.loc[i, "geometry"],
@@ -216,17 +208,14 @@ def set_lines_ids(lines, buses):
         lines.loc[i, "bus1"] = buses.loc[bus1_id, "bus_id"]
 
         # check if the line ends exactly in the node, otherwise modify the linestring
-        distance_bus1 = buses_sel.geometry[bus1_id].distance(
+        distance_bus1 = buses.loc[bus1_id, "geometry"].distance(
             row["bus_1_coors"])
         if distance_bus1 > 0.0:
             # the line does not end in the node, thus modify the linestring
             lines.loc[i, "geometry"] = linemerge([
                 lines.loc[i, "geometry"],
-                LineString([row["bus_1_coors"], buses_sel.geometry[bus1_id]]),
+                LineString([row["bus_1_coors"], buses.loc[bus1_id, "geometry"]]),
             ])
-
-    # update line endings
-    lines = line_endings_to_bus_conversion(lines)
 
     return lines, buses
 
@@ -301,6 +290,8 @@ def get_transformers(buses, lines):
 
     for g_name, g_value in buses.sort_values(
             "voltage", ascending=True).groupby(by=["station_id"]):
+        
+        # print("get_transformers: ", g_name)
 
         # note: by construction there cannot be more that two nodes with the same station_id and same voltage
         n_voltages = len(g_value)
@@ -437,13 +428,20 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
     # drop lines starting and ending in the same node
     lines = lines[lines["bus0"] != lines["bus1"]]
 
+    # update line endings
+    lines = line_endings_to_bus_conversion(lines)
+
     # set substation_lv
     set_lv_substations(buses)
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
 
+    # append transformer lines
     lines = lines.append(transformers)
+
+    # reset index
+    lines.reset_index(drop=True, inplace=True)
 
     return lines, buses
 
@@ -471,6 +469,9 @@ def create_station_at_equal_bus_locations(lines, buses, tol=0.01):
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses)
+
+    # update line endings
+    lines = line_endings_to_bus_conversion(lines)
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
     set_lv_substations(bus_all)
