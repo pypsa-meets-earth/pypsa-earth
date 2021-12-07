@@ -48,18 +48,18 @@ There are multiple ways to get involved and learn more about our work. That's ho
 ## Installation
 
 1) Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
-```
+``` bash
     .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
 ```
 2) The python package requirements are curated in the `envs/environment.yaml` file.
 The environment can be installed using:
-```
+``` bash
     .../pypsa-africa % conda env create -f envs/environment.yaml
 ```  
 3) For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
 
 4) To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
-```
+``` bash
     .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
 
     .../pypsa-africa % jupyter lab
@@ -68,11 +68,11 @@ The environment can be installed using:
 - In the folder open a terminal/command window to be located at this path `~/pypsa-africa/`
 - Activate the environment `conda activate pypsa-africa`
 - Rename config.tutorial.yaml to config.yaml. For instance in Linux:
-  ```
+  ``` bash
   mv config.tutorial.yaml config.yaml 
   ```
 - Run a dryrun of the Snakemake workflow by typing simply in the terminal:
-  ```
+  ``` bash
   snakemake -j 1 solve_all_networks -n
   ```
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis. 
