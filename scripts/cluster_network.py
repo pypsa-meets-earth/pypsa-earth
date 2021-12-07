@@ -290,7 +290,7 @@ def busmap_for_n_clusters(n,
                           **algorithm_kwds):
     if algorithm == "kmeans":
         algorithm_kwds.setdefault("n_init", 1000)  # 1000 for more accurate results; 100 for fast results
-        algorithm_kwds.setdefault("max_iter", 3000)  # 3000 for more accurate results; 3000 for fast results
+        algorithm_kwds.setdefault("max_iter", 30000)  # 30000 for more accurate results; 3000 for fast results
         algorithm_kwds.setdefault("tol", 1e-6)  # 1e-6 for more accurate results; 1e-3 for fast results
 
     # PyPSA module that creates sub_networks and "error"
