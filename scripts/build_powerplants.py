@@ -43,13 +43,13 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 
-The following assumptions were done to map custom OSM-extracted powerplants with powerplants matching format.
+The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:
-        'Fueltype': ['Hydro' 'Hard Coal' 'Natural Gas' 'Lignite' 'Nuclear' 'Oil' 'Bioenergy'
-            'Wind' 'Geothermal' 'Solar' 'Waste' 'Other'] 
-        'Technology': ['Reservoir' 'Pumped Storage' 'Run-Of-River' 'Steam Turbine' 'CCGT' 'OCGT'
-            nan 'Pv' 'CCGT, Thermal' 'Offshore' 'Storage Technologies']
-        'Set': ['Store' 'PP' 'CHP']
+        'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
+            'Wind', 'Geothermal', 'Solar', 'Waste', 'Other'] 
+        'Technology': ['Reservoir', 'Pumped Storage', 'Run-Of-River', 'Steam Turbine', 'CCGT', 'OCGT'
+            'Pv', 'CCGT, Thermal', 'Offshore', 'Storage Technologies']
+        'Set': ['Store', 'PP', 'CHP']
 2. OSM-extracted features were mapped into PPM ones using a (quite arbitrary) set of rules:
         'coal': 'Hard Coal'
         'wind_turbine': 'Onshore',
@@ -57,7 +57,7 @@ The following assumptions were done to map custom OSM-extracted powerplants with
         'vertical_axis' : 'Offhore',
         'nuclear': 'Steam Turbine'
 3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
-4. OSM extraction was supposed to be not dealing with CHP and Natural Gas storages (in contrast to PPM).
+4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
 
 """
 import logging
