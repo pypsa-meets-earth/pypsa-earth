@@ -113,8 +113,9 @@ def add_custom_powerplants(ppl):
                     "steam_turbine" : "Steam Turbine",
                     "reciprocating_engine" : "Combustion Engine",
                     # a very strong assumption
+                    "wind_turbine": "Onshore",
                     "horizontal_axis" : "Onshore",
-                    "vertical_axis" : "Onshore",
+                    "vertical_axis" : "Offhore",
                     "solar_photovoltaic_panel" : "Pv"
 
                     # The nuclear PP can be mapped into "Steam Turbine"
