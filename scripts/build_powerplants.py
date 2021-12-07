@@ -89,8 +89,7 @@ def add_custom_powerplants(ppl):
                     "wave" : "Other",
                     "geothermal" : "Geothermal",
                     "solar" : "Solar",
-                    # NB may be "Lignite" with just the same success
-                    # follows conventions of PPM
+                    # "Hard Coal" follows conventions of PPM, but may be "Lignite" with just the same success
                     "coal" : "Hard Coal",
                     "gas" : "Natural Gas",
                     "biomass" : "Bioenergy",
