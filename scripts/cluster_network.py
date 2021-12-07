@@ -141,6 +141,7 @@ from pypsa.networkclustering import busmap_by_spectral_clustering
 from pypsa.networkclustering import get_clustering_from_busmap
 from shapely.geometry import Point
 from build_shapes import get_GADM_layer
+from osm_pbf_power_data_extractor import create_country_list
 
 idx = pd.IndexSlice
 
@@ -469,7 +470,7 @@ if __name__ == "__main__":
 #    n.buses.at[['73'], 'country']='DZ'					
     focus_weights = snakemake.config.get("focus_weights", None)
     
-    country_list = snakemake.config['countries']
+    country_list = create_country_list(snakemake.config['countries'])
     
     gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
 
