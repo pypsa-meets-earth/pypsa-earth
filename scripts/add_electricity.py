@@ -98,6 +98,7 @@ from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
+from osm_pbf_power_data_extractor import create_country_list
 
 idx = pd.IndexSlice
 
@@ -703,7 +704,7 @@ if __name__ == "__main__":
     # Snakemake imports:
     regions = snakemake.input.regions
     load = snakemake.input.load
-    countries = snakemake.config["countries"]
+    countries = create_country_list(snakemake.config["countries"])
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
 
