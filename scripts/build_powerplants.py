@@ -151,15 +151,16 @@ def add_custom_powerplants(ppl):
 
     )
 
-    # Run-Of-River, Pumped Storage, Reservoir => see "tags.generator:method"
-    # TODO Vectorize
-    add_ppls.loc[add_ppls["tags.generator:method"] == "run-of-the-river", 
-        "Technology"] = "Run-Of-River"
-    add_ppls.loc[add_ppls["tags.generator:method"] == "water-pumped-storage", 
-        "Technology"] = "Pumped Storage"
-    add_ppls.loc[add_ppls["tags.generator:method"] == "water-storage", 
-        "Technology"] = "Reservoir"
-
+    # All Hydro objects can be interpreted by PPM as Storages, too
+    # However, everithing extracted from OSM seems to belong 
+    # to power plants with "tags.power" == "generator" only
+    osm_ppm_df = pd.DataFrame(data={
+        "osm_method": ["run-of-the-river", "water-pumped-storage", "water-storage"], 
+        "ppm_technology":["Run-Of-River", "Pumped Storage", "Reservoir"]
+    })
+    for i in osm_ppm_df.index:
+        add_ppls.loc[add_ppls["tags.generator:method"] == osm_ppm_df.loc[i, "osm_method"], 
+            "Technology"] = osm_ppm_df.loc[i, "ppm_technology"]
     add_ppls.drop(columns=["tags.generator:method", 
         "geometry"])   
 
