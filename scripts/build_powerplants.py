@@ -46,7 +46,7 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:
         'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
-            'Wind', 'Geothermal', 'Solar', 'Waste', 'Other'] 
+            'Wind', 'Geothermal', 'Solar', 'Waste', 'Other']
         'Technology': ['Reservoir', 'Pumped Storage', 'Run-Of-River', 'Steam Turbine', 'CCGT', 'OCGT'
             'Pv', 'CCGT, Thermal', 'Offshore', 'Storage Technologies']
         'Set': ['Store', 'PP', 'CHP']
