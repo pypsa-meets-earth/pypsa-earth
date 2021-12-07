@@ -26,6 +26,7 @@ from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
+from shapely.validation import make_valid
 import multiprocessing as mp
 from tqdm import tqdm
 
@@ -324,7 +325,6 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     Leads to for instance a 100m non-build coastline
 
     """
-    from shapely.validation import make_valid
 
     if out_logging:
         _logger.info("Stage 2 of 4: Create offshore shapes")
@@ -636,7 +636,7 @@ def _init_process_pop(df_gadm_, year_):
 def _process_func_pop(c_code):
 
     # get subset by country code
-    country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+    country_rows = df_gadm.loc[df_gadm["country"] == c_code].copy()
 
     # get worldpop image
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
