@@ -16,7 +16,7 @@ Relevant Settings
 Inputs
 ------
 - ``networks/base.nc``: confer :ref:`base`.
-- ``data/custom_powerplants.csv``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides
+- ``data/custom_powerplants.csv``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as OSM extractor generates
 Outputs
 -------
 - ``resource/powerplants.csv``: A list of conventional power plants (i.e. neither wind nor solar) with fields for name, fuel type, technology, country, capacity in MW, duration, commissioning year, retrofit year, latitude, longitude, and dam information as documented in the `powerplantmatching README <https://github.com/FRESNA/powerplantmatching/blob/master/README.md>`_; additionally it includes information on the closest substation/bus in ``networks/base.nc``.
@@ -42,10 +42,28 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
     .. code:: yaml
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
+
+The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
+1. The benchmark PPM keys values were taken as follows:
+        'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
+            'Wind', 'Geothermal', 'Solar', 'Waste', 'Other']
+        'Technology': ['Reservoir', 'Pumped Storage', 'Run-Of-River', 'Steam Turbine', 'CCGT', 'OCGT'
+            'Pv', 'CCGT, Thermal', 'Offshore', 'Storage Technologies']
+        'Set': ['Store', 'PP', 'CHP']
+2. OSM-extracted features were mapped into PPM ones using a (quite arbitrary) set of rules:
+        'coal': 'Hard Coal'
+        'wind_turbine': 'Onshore',
+        'horizontal_axis' : 'Onshore',
+        'vertical_axis' : 'Offhore',
+        'nuclear': 'Steam Turbine'
+3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
+4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
+
 """
 import logging
 import os
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
@@ -53,6 +71,7 @@ import pypsa
 import yaml
 from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
+from shapely import wkt
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +80,101 @@ def add_custom_powerplants(ppl):
     custom_ppl_query = snakemake.input.custom_powerplants
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(custom_ppl_query,
-                           index_col=0,
-                           dtype={"bus": "str"})
+    add_ppls = pd.read_csv(custom_ppl_query, index_col=0, dtype={"bus": "str"})
     # if isinstance(custom_ppl_query, str):
-    #     add_ppls.query(custom_ppl_query, inplace=True)
+    # add_ppls.query(custom_ppl_query, inplace=True)
+
+    custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
+    add_ppls = (
+        add_ppls.rename(
+            columns={
+                "tags.generator:source": "Fueltype",
+                "tags.generator:type": "Technology",
+                "tags.power": "Set",
+                "power_output_MW": "Capacity",
+            }).replace(
+                dict(
+                    Fueltype={
+                        "nuclear": "Nuclear",
+                        "wind": "Wind",
+                        "hydro": "Hydro",
+                        "tidal": "Other",
+                        "wave": "Other",
+                        "geothermal": "Geothermal",
+                        "solar": "Solar",
+                        # "Hard Coal" follows defauls of PPM
+                        "coal": "Hard Coal",
+                        "gas": "Natural Gas",
+                        "biomass": "Bioenergy",
+                        "biofuel": "Bioenergy",
+                        "biogas": "Bioenergy",
+                        "oil": "Oil",
+                        "diesel": "Oil",
+                        "gasoline": "Oil",
+                        "waste": "Waste",
+                        "osmotic": "Other",
+                        "wave": "Other",
+                    },
+                    Technology={
+                        "combined_cycle": "CCGT",
+                        "gas_turbine": "OCGT",
+                        "steam_turbine": "Steam Turbine",
+                        "reciprocating_engine": "Combustion Engine",
+                        # a very strong assumption
+                        "wind_turbine": "Onshore",
+                        "horizontal_axis": "Onshore",
+                        "vertical_axis": "Offhore",
+                        "solar_photovoltaic_panel": "Pv",
+                    },
+                    Set={
+                        "generator": "PP",
+                        "plant": "PP"
+                    },
+                )).assign(
+                    Name="",
+                    Efficiency="",
+                    Duration="",
+                    Volume_Mm3="",
+                    DamHeight_m="",
+                    StorageCapacity_MWh="",
+                    DateIn="",
+                    DateRetrofit="",
+                    DateMothball="",
+                    DateOut="",
+                    lat=custom_ppls_coords.y,
+                    lon=custom_ppls_coords.x,
+                    EIC="",
+                    projectID="",
+                ))
+
+    # All Hydro objects can be interpreted by PPM as Storages, too
+    # However, everithing extracted from OSM seems to belong
+    # to power plants with "tags.power" == "generator" only
+    osm_ppm_df = pd.DataFrame(
+        data={
+            "osm_method":
+            ["run-of-the-river", "water-pumped-storage", "water-storage"],
+            "ppm_technology": ["Run-Of-River", "Pumped Storage", "Reservoir"],
+        })
+    for i in osm_ppm_df.index:
+        add_ppls.loc[add_ppls["tags.generator:method"] == osm_ppm_df.loc[
+            i, "osm_method"],
+                     "Technology", ] = osm_ppm_df.loc[i, "ppm_technology"]
+
+    # originates from osm::"tags.generator:source"
+    add_ppls.loc[add_ppls["Fueltype"] == "Nuclear",
+                 "Technology"] = "Steam Turbine"
+
+    # PMM contains data on NG, batteries and hydro storages
+    # trying to catch some of them...
+    # originates from osm::"tags.generator:source"
+    add_ppls.loc[add_ppls["Fueltype"] == "battery", "Set"] = "Store"
+    # originates from osm::tags.generator:type
+    add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
+    add_ppls.replace(dict(Fueltype={"battery": "Other"}))
+
+    add_ppls.drop(columns=["tags.generator:method", "geometry"])
+
     return ppl.append(add_ppls,
                       sort=False,
                       ignore_index=True,
@@ -105,7 +214,7 @@ if __name__ == "__main__":
     if isinstance(ppl_query, str):
         ppl.query(ppl_query, inplace=True)
 
-    # ppl = add_custom_powerplants(ppl) # add carriers from own powerplant files
+    ppl = add_custom_powerplants(ppl)  # add carriers from own powerplant files
 
     cntries_without_ppl = [
         c for c in countries if c not in ppl.Country.unique()
