@@ -219,7 +219,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
                 os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))),
         )
 
-        _logger.info(f"Loading {feature} Pickle for {country_name}")
+        _logger.info(f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}")
         # feature_data = Data, Elements
         # return feature_data
 
@@ -231,7 +231,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             pre_filtered.append(country_code)
         else:
             new_prefilter_data = False
-        _logger.info(f"Creating new {feature} Elements for {country_name}")
+        _logger.info(f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}")
 
     prefilter = {
         Node: {
@@ -428,13 +428,19 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
 
     # Generate Files
 
-    if df_all_feature.empty:
-        _logger.warning(f"All feature data frame empty for {feature}")
-        return None
-
     # _to_csv_nafix(df_all_feature,
     #               outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
     _to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
+
+    if df_all_feature.empty:
+        _logger.warning(f"Store empty Dataframe for {feature}.")
+        gdf_feature = []
+
+        # create empty file to avoid issues with snakemake
+        with open(path_file_geojson, "w") as fp:
+            pass
+
+        return None
 
     if feature_category[feature] == "way":
         gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
@@ -456,7 +462,8 @@ def process_data(feature_list, country_list, output_files,
 
     for feature in feature_list:  # feature dataframe
 
-        df_all_feature = pd.DataFrame()
+        # list of dataframes
+        df_list = []
         for country_code_isogeofk in country_list:
 
             country_code = convert_iso_to_geofk(country_code_isogeofk,
@@ -490,7 +497,9 @@ def process_data(feature_list, country_list, output_files,
             # Add Country Column with GeoFabrik coding
             df_feature["Country"] = country_code
 
-            df_all_feature = pd.concat([df_all_feature, df_feature])
+            df_list.append(df_feature)
+
+        df_all_feature = pd.concat(df_list)
 
         output_csv_geojson(output_files, country_code, df_all_feature,
                            feature_columns[feature], feature)

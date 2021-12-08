@@ -126,7 +126,7 @@ def unify_protected_shape_areas(inputs, out_logging):
 
     # Read only .shp snakemake inputs
     shp_files = [string for string in inputs if ".shp" in string]
-
+    assert len(shp_files)!=0, "no input shapefiles given"
     # Create one geodataframe with all geometries, of all .shp files
     if out_logging:
         _logger.info("Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")

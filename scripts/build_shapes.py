@@ -25,7 +25,8 @@ from shapely.geometry import MultiPolygon
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
+from shapely.validation import make_valid
 import multiprocessing as mp
 from tqdm import tqdm
 
@@ -163,8 +164,7 @@ def _simplify_polys(polys,
                     filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
-        # here deprecation warning: Iteration over multi-part geometries is deprecated and will be removed in Shapely 2.0. Use the `geoms` property to access the constituent parts of a multi-part geometry.
-        polys = sorted(polys, key=attrgetter("area"), reverse=True)
+        polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
@@ -206,9 +206,9 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False):
     if eez_shapes is not None:
         shapes += list(eez_shapes)
 
-    africa_shape = cascaded_union(shapes)
+    africa_shape = unary_union(shapes)
     if isinstance(africa_shape, MultiPolygon):
-        africa_shape = max(africa_shape, key=attrgetter("area"))
+        africa_shape = max(africa_shape.geoms, key=attrgetter("area"))
     return Polygon(shell=africa_shape.exterior)
 
 
@@ -226,7 +226,7 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON", schema=schema)
     else:
         # create empty file to avoid issues with snakemake
-        with os.open(fn, "w") as fp:
+        with open(fn, "w") as fp:
             pass
 
 
@@ -325,7 +325,6 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     Leads to for instance a 100m non-build coastline
 
     """
-    from shapely.validation import make_valid
 
     if out_logging:
         _logger.info("Stage 2 of 4: Create offshore shapes")
@@ -637,7 +636,7 @@ def _init_process_pop(df_gadm_, year_):
 def _process_func_pop(c_code):
 
     # get subset by country code
-    country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+    country_rows = df_gadm.loc[df_gadm["country"] == c_code].copy()
 
     # get worldpop image
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
