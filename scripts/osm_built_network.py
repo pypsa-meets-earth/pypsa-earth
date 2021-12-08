@@ -13,6 +13,7 @@ from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
 from shapely.ops import unary_union
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -106,8 +107,8 @@ def add_line_endings_tosubstations(substations, lines):
     return buses
 
 
-# tol=0.01, around 700m at latitude 44.
-def set_substations_ids(buses, tol=0.02):
+# tol in m
+def set_substations_ids(buses, tol=1000):
     """
     Function to set substations ids to buses, accounting for location tolerance
 
@@ -125,13 +126,24 @@ def set_substations_ids(buses, tol=0.02):
 
     buses["station_id"] = -1
 
+    # create temporary series to execute distance calculations using m as reference distances
+    temp_bus_geom = buses.geometry.to_crs(3736)
+    
+    # set tqdm options for substation ids
+    tqdm_kwargs_substation_ids = dict(
+        ascii=False,
+        unit=" buses",
+        total=buses.shape[0],
+        desc="Set substation ids ",
+    )
+
     station_id = 0
-    for i, row in buses.iterrows():
+    for i, row in tqdm(buses.iterrows(), **tqdm_kwargs_substation_ids):
         if buses.loc[i, "station_id"] >= 0:
             continue
 
         # get substations within tolerance
-        close_nodes = np.flatnonzero(buses.geometry.distance(row["geometry"]) <= tol)
+        close_nodes = np.flatnonzero(temp_bus_geom.distance(row["geometry"]) <= tol)
 
         # print("set_substations_ids: ", i, "/", buses.shape[0])
 
@@ -174,12 +186,20 @@ def set_lines_ids(lines, buses):
     Function to set line buses ids to the closest bus in the list
 
     """
+    
+    # set tqdm options for set lines ids
+    tqdm_kwargs_line_ids = dict(
+        ascii=False,
+        unit=" lines",
+        total=lines.shape[0],
+        desc="Set line bus ids ",
+    )
 
     # initialization
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    for i, row in lines.iterrows():
+    for i, row in tqdm(lines.iterrows(), **tqdm_kwargs_line_ids):
 
         # print("set_lines_ids: ", i, "/", lines.shape[0])
 
@@ -410,17 +430,23 @@ def set_lv_substations(buses):
 #       respect to a node
 
 
-def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
+def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=3000):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
+    
+    logger.info("Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol/1000))
 
     # set substation ids
     set_substations_ids(buses, tol=tol)
+    
+    logger.info("Stage 3b/4: Merge substations with the same id")
 
     # merge buses with same station id and voltage
     buses = merge_stations_same_station_id(buses)
+    
+    logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses)
@@ -433,6 +459,8 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
 
     # set substation_lv
     set_lv_substations(buses)
+    
+    logger.info("Stage 3d/4: Add transformers")
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
@@ -494,6 +522,8 @@ def create_station_at_equal_bus_locations(lines, buses, tol=0.01):
 
 def built_network(inputs, outputs):
     # ----------- LOAD DATA -----------
+    logger.info("Stage 1/4: Read input data")
+
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
                                                                inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
@@ -503,6 +533,8 @@ def built_network(inputs, outputs):
     # Filter only Nigeria
     # lines = lines[lines.loc[:,"country"] == "nigeria"].copy()
     # substations = substations[substations.loc[:,"country"] == "nigeria"].copy()
+    
+    logger.info("Stage 2/4: Add line endings to the substation datasets")
 
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
@@ -516,11 +548,13 @@ def built_network(inputs, outputs):
 
     # METHOD 2 - Use interference method
     # TODO: Add and test other method (ready in jupyter)
+    
+    logger.info("Stage 3/4: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
     lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                   buses,
-                                                                  tol=0.05)
+                                                                  tol=4000)
 
     # Export data
     # Lines
@@ -528,6 +562,8 @@ def built_network(inputs, outputs):
     # outputfile_partial = os.path.join(
     #     os.getcwd(), "data", "base_network",
     #     "africa_all" + "_lines" + "_build_network")
+    
+    logger.info("Stage 4/4: Save outputs")
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["lines"]):
