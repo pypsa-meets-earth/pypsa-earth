@@ -147,11 +147,6 @@ idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-# _sets_path_to_root("pypsa-africa")
-
 
 def normed(x):
     return (x / x.sum()).fillna(0.0)
@@ -293,9 +288,8 @@ def busmap_for_n_clusters(n,
         algorithm_kwds.setdefault("max_iter", 30000)  # 30000 for more accurate results; 3000 for fast results
         algorithm_kwds.setdefault("tol", 1e-6)  # 1e-6 for more accurate results; 1e-3 for fast results
 
-    # PyPSA module that creates sub_networks and "error"
     n.determine_network_topology()
-    n.lines.at[:, "sub_network"] = "0"
+    n.lines.at[:, "sub_network"] = "0"  # current fix
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(n,
@@ -331,17 +325,14 @@ def busmap_for_n_clusters(n,
         elif algorithm == "spectral":
             return prefix + busmap_by_spectral_clustering(
                 reduce_network(n, x), n_cluster_c, **algorithm_kwds)
-        # TODO: Check where it is imported from
-        # elif algorithm == "louvain":
-        #     return prefix + busmap_by_louvain(reduce_network(
-        #         n, x), n_clusters[x.name], **algorithm_kwds)
+
         else:
             raise ValueError(
                 f"`algorithm` must be one of 'kmeans', 'spectral' or 'louvain'. Is {algorithm}."
             )
 
     return (n.buses.groupby(
-        # ["country", "sub_network"], #TODO Why do we need sub_networks?
+        # ["country", "sub_network"], #TODO Add sub_networks and debug
         ["country"],
         group_keys=False,
     ).apply(busmap_for_country).squeeze().rename("busmap"))
@@ -435,7 +426,7 @@ def cluster_regions(busmaps, input=None, output=None):
     for which in ("regions_onshore", "regions_offshore"):
         regions = (gpd.read_file(getattr(input,
                                          which)).set_index("name").dropna()
-                   )  # TODO fix the None geomerty in the regions files
+                   )
 
         geom_c = (regions.geometry.groupby(busmap).apply(list).apply(
             shapely.ops.unary_union))
@@ -443,16 +434,6 @@ def cluster_regions(busmaps, input=None, output=None):
         regions_c.index.name = "name"
         save_to_geojson(regions_c, getattr(output, which))
 
-
-# TODO: E1120 error in linter. Commented out for now
-# def plot_busmap_for_n_clusters(n, n_clusters, fn=None):
-#     busmap = busmap_for_n_clusters(n, n_clusters)
-#     cs = busmap.unique()
-#     cr = sns.color_palette("hls", len(cs))
-#     n.plot(bus_colors=busmap.map(dict(zip(cs, cr))))
-#     if fn is not None:
-#         plt.savefig(fn, bbox_inches="tight")
-#     del cs, cr
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -467,7 +448,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-#    n.buses.at[['73'], 'country']='DZ'					
+				
     focus_weights = snakemake.config.get("focus_weights", None)
     
     country_list = create_country_list(snakemake.config['countries'])
