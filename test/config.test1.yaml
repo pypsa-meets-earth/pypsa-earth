@@ -12,10 +12,10 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [5]
+  clusters: [10]
   opts: [Co2L-24H]
 
-countries: ["NG"]  # ["NG", "BJ"]
+countries: ["NG", "BJ"]
 
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
   # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
