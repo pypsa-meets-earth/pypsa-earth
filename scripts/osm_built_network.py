@@ -108,7 +108,7 @@ def add_line_endings_tosubstations(substations, lines):
 
 
 # tol in m
-def set_substations_ids(buses, tol=1000):
+def set_substations_ids(buses, tol=2000):
     """
     Function to set substations ids to buses, accounting for location tolerance
 
@@ -143,7 +143,8 @@ def set_substations_ids(buses, tol=1000):
             continue
 
         # get substations within tolerance
-        close_nodes = np.flatnonzero(temp_bus_geom.distance(row["geometry"]) <= tol)
+        close_nodes = np.flatnonzero(
+            temp_bus_geom.distance(temp_bus_geom.loc[i]) <= tol)
 
         # print("set_substations_ids: ", i, "/", buses.shape[0])
 
@@ -430,7 +431,7 @@ def set_lv_substations(buses):
 #       respect to a node
 
 
-def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=3000):
+def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
@@ -474,7 +475,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=3000):
     return lines, buses
 
 
-def create_station_at_equal_bus_locations(lines, buses, tol=0.01):
+def create_station_at_equal_bus_locations(lines, buses, tol=2000):
     # V1. Create station_id at same bus location
     # - We saw that buses are not connected exactly at one point, they are
     #   usually connected to a substation "area" (analysed on maps)
@@ -554,7 +555,7 @@ def built_network(inputs, outputs):
     # METHOD to merge buses with same voltage and within tolerance
     lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                   buses,
-                                                                  tol=4000)
+                                                                  tol=2000)
 
     # Export data
     # Lines
