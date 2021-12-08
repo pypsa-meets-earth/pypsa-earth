@@ -284,9 +284,9 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 1000)  # 1000 for more accurate results; 100 for fast results
-        algorithm_kwds.setdefault("max_iter", 30000)  # 30000 for more accurate results; 3000 for fast results
-        algorithm_kwds.setdefault("tol", 1e-6)  # 1e-6 for more accurate results; 1e-3 for fast results
+        algorithm_kwds.setdefault("n_init", 100)  # 1000 for more accurate results; 100 for fast results
+        algorithm_kwds.setdefault("max_iter", 3000)  # 30000 for more accurate results; 3000 for fast results
+        algorithm_kwds.setdefault("tol", 1e-3)  # 1e-6 for more accurate results; 1e-3 for fast results
 
     n.determine_network_topology()
     n.lines.at[:, "sub_network"] = "0"  # current fix

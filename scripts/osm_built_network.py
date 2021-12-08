@@ -555,7 +555,7 @@ def built_network(inputs, outputs):
     # METHOD to merge buses with same voltage and within tolerance
     lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                   buses,
-                                                                  tol=2000)
+                                                                  tol=4000)
 
     # Export data
     # Lines
