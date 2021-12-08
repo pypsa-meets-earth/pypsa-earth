@@ -141,6 +141,7 @@ from pypsa.networkclustering import busmap_by_spectral_clustering
 from pypsa.networkclustering import get_clustering_from_busmap
 from shapely.geometry import Point
 from build_shapes import get_GADM_layer
+from osm_pbf_power_data_extractor import create_country_list
 
 idx = pd.IndexSlice
 
@@ -182,6 +183,10 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
         [n.buses.country]).sum().pipe(normed))
+    assert (len(L.index) == len(n.buses.country.unique())), (
+        "The following countries have no load: "
+    f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+    )
 
     # originally ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
@@ -247,7 +252,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     assert (results["Solver"][0]["Status"] == "ok"
             ), f"Solver returned non-optimally: {results}"
 
-    return pd.Series(m.n.get_values(), index=L.index).astype(int)
+    return pd.Series(m.n.get_values(), index=L.index).round().astype(int)
 
 
 def busmap_for_gadm_clusters(n, gadm_level):
@@ -284,9 +289,9 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 100)
-        algorithm_kwds.setdefault("max_iter", 300)
-        algorithm_kwds.setdefault("tol", 1e-3)
+        algorithm_kwds.setdefault("n_init", 1000)  # 1000 for more accurate results; 100 for fast results
+        algorithm_kwds.setdefault("max_iter", 30000)  # 30000 for more accurate results; 3000 for fast results
+        algorithm_kwds.setdefault("tol", 1e-6)  # 1e-6 for more accurate results; 1e-3 for fast results
 
     # PyPSA module that creates sub_networks and "error"
     n.determine_network_topology()
@@ -458,14 +463,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
-                                   clusters="75")
+                                   clusters="60")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
 #    n.buses.at[['73'], 'country']='DZ'					
     focus_weights = snakemake.config.get("focus_weights", None)
     
-    country_list = snakemake.config['countries']
+    country_list = create_country_list(snakemake.config['countries'])
     
     gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
 

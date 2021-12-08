@@ -6,9 +6,11 @@ import sys
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from shapely.ops import unary_union
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from _helpers import _save_to_geojson
 
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
@@ -339,6 +341,10 @@ def finalize_lines_type(df_lines):
 
 # split function for cables and voltage
 def split_cells_multiple(df, list_col=["cables", "voltage"]):
+    # TODO: split multiple cell need fix!
+    # One line with 'cable':{3,6} and 'voltage':{220000,110000} or
+    # only 'voltage':{110000,220000, 3330000} needs to split in several lines
+    # with new line_ID
     n_rows = df.shape[0]
     for i in range(n_rows):
         sub = df[list_col].iloc[i]  # for each cables and voltage
@@ -356,7 +362,13 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
         sel_ids = (df[cl_name].str.contains(";") == True)
-        df.loc[sel_ids, cl_name] = df.loc[sel_ids, cl_name].apply(lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
+        # TODO: split multiple cell need fix!
+        df = df.drop(df.loc[sel_ids, cl_name].index, )
+        ## Original fix breaks with one input like [30;t], a string in the element
+        # df.loc[sel_ids, cl_name] = (    
+        #   df.loc[sel_ids, cl_name].apply(
+        #         lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
+        # )
     return df  # return new frame
 
 
@@ -412,6 +424,16 @@ def integrate_lines_df(df_all_lines):
 
     return df_all_lines
 
+def filter_lines_by_geometry(df_all_lines):
+    
+    # drop None geometries
+    df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
+
+    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
+    df_all_lines = df_all_lines[df_all_lines["geometry"].map(
+        lambda g: len(g.boundary.geoms) >= 2)]
+
+    return df_all_lines
 
 def prepare_generators_df(df_all_generators):
     """
@@ -475,10 +497,10 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
 
     return merged_shapes
 
-
 def clean_data(
     input_files,
     output_files,
+    africa_shape,
     ext_country_shapes=None,
     names_by_shapes=True,
     tag_substation="transmission",
@@ -496,16 +518,21 @@ def clean_data(
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
 
-    # Load raw data lines
-    df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326,
-                                                             inplace=True)
+    # initialize name of the final dataframe
+    df_all_lines = df_lines
 
-    # prepare cables dataframe and data types
-    df_cables = prepare_lines_df(df_cables)
-    df_cables = finalize_lines_type(df_cables)
+    # load cables only if data are stored
+    if os.path.getsize(input_files["cables"]) > 0:
+        # Load raw data lines
+        df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326,
+                                                                inplace=True)
 
-    # concatenate lines and cables in a single dataframe
-    df_all_lines = pd.concat([df_lines, df_cables])
+        # prepare cables dataframe and data types
+        df_cables = prepare_lines_df(df_cables)
+        df_cables = finalize_lines_type(df_cables)
+
+        # concatenate lines and cables in a single dataframe
+        df_all_lines = pd.concat([df_lines, df_cables])
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
@@ -513,10 +540,15 @@ def clean_data(
 
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
+    
+    # filter lines to make sure the geometry is appropriate
+    df_all_lines = filter_lines_by_geometry(df_all_lines)
 
-    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
-    df_all_lines = df_all_lines[df_all_lines["geometry"].map(
-        lambda g: len(g.boundary.geoms) >= 2)]
+
+    # drop lines crossing regions with and without the region under interest
+    df_all_lines = df_all_lines[
+        df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
+    ]
 
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
@@ -530,7 +562,7 @@ def clean_data(
                                             ext_country_shapes,
                                             names_by_shapes=names_by_shapes)
 
-    df_all_lines.to_file(output_files["lines"], driver="GeoJSON")
+    _save_to_geojson(df_all_lines, output_files["lines"])
 
     # ----------- SUBSTATIONS -----------
 
@@ -573,7 +605,7 @@ def clean_data(
         ext_country_shapes,
         names_by_shapes=names_by_shapes)
 
-    df_all_substations.to_file(output_files["substations"], driver="GeoJSON")
+    _save_to_geojson(df_all_substations, output_files["substations"])
 
     # ----------- GENERATORS -----------
 
@@ -583,8 +615,11 @@ def clean_data(
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
 
-    df_all_generators.to_file(output_files["generators"], driver="GeoJSON")
+    # save to csv
     _to_csv_nafix(df_all_generators, output_files["generators_csv"])
+
+    # save to geojson
+    _save_to_geojson(df_all_generators, output_files["generators"])
 
     return None
 
@@ -614,6 +649,9 @@ if __name__ == "__main__":
     input_files = snakemake.input
     output_files = snakemake.output
 
+    africa_shape = (gpd.read_file(
+            snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0])
+
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
         country_shapes = (gpd.read_file(
@@ -630,6 +668,7 @@ if __name__ == "__main__":
     clean_data(
         input_files,
         output_files,
+        africa_shape,
         ext_country_shapes=ext_country_shapes,
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,

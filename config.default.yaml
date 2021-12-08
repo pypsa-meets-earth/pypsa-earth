@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 version: 0.3.0
+tutorial: False
 
 logging:
   level: INFO
@@ -18,7 +19,7 @@ countries: ["NG", "NE"]
 
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
   # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
-  # 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
+  # 'MG', 'MW', 'ML', 'MR', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
   # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
 
   #["NG"]  # Nigeria
@@ -63,7 +64,7 @@ snapshots:
 
 enable:
   # prepare_links_p_nom: false
-  retrieve_databundle: false
+  retrieve_databundle: true
   download_osm_data: true
   # retrieve_cutout: true
   # retrieve_natura_raster: true
@@ -161,6 +162,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   offwind-ac:
     cutout: africa-2013-era5
     resource:
@@ -174,6 +176,7 @@ renewable:
     max_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   offwind-dc:
     cutout: africa-2013-era5
     resource:
@@ -188,6 +191,7 @@ renewable:
     min_shore_distance: 30000
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   solar:
     cutout: africa-2013-era5
     resource:
@@ -208,6 +212,7 @@ renewable:
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
+    extendable: true
   hydro:
     cutout: africa-2013-era5
     resource:
@@ -221,6 +226,7 @@ renewable:
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     clip_min_inflow: 1.0
+    extendable: true
 
 # TODO: Needs to be adjusted for Africa
 costs:

@@ -46,7 +46,8 @@ The complete list of software needed before installing PyPSA Africa is listed be
   With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC <https://projects.coin-or.org/Cbc>`_ ,
   `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
   to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
-  (both commercial licenses with free academic options) can also be used
+  (both commercial licenses with free academic options) can also be used. A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
+ 
 
 .. note::
   Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Africa model.
