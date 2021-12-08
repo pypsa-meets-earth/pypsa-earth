@@ -180,7 +180,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         [n.buses.country]).sum().pipe(normed))
     assert (len(L.index) == len(n.buses.country.unique())), (
         "The following countries have no load: "
-    f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+        f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
     )
 
     # originally ["country", "sub_networks"]
@@ -284,9 +284,12 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 1000)  # 1000 for more accurate results; 100 for fast results
-        algorithm_kwds.setdefault("max_iter", 30000)  # 30000 for more accurate results; 3000 for fast results
-        algorithm_kwds.setdefault("tol", 1e-6)  # 1e-6 for more accurate results; 1e-3 for fast results
+        # 1000 for more accurate results; 100 for fast results
+        algorithm_kwds.setdefault("n_init", 1000)
+        # 30000 for more accurate results; 3000 for fast results
+        algorithm_kwds.setdefault("max_iter", 30000)
+        # 1e-6 for more accurate results; 1e-3 for fast results
+        algorithm_kwds.setdefault("tol", 1e-6)
 
     n.determine_network_topology()
     n.lines.at[:, "sub_network"] = "0"  # current fix
@@ -448,14 +451,13 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-				
+
     focus_weights = snakemake.config.get("focus_weights", None)
-    
+
     country_list = create_country_list(snakemake.config['countries'])
-    
+
     gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
 
-    
     if snakemake.config["alternative_clustering"]:
         renewable_carriers = pd.Index([
             "solar",
