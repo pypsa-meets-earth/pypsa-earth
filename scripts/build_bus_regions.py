@@ -101,8 +101,10 @@ def custom_voronoi_partition_pts(points,
 
     points = np.asarray(points)
 
+    polygons_arr = []
+
     if len(points) == 1:
-        polygons = [outline]
+        polygons_arr = [outline]
     else:
 
         xmin, ymin = np.amin(points, axis=0)
@@ -132,7 +134,7 @@ def custom_voronoi_partition_pts(points,
                 ],
             )))
 
-        polygons = []
+        polygons_arr = np.empty((len(points), ), "object")
         for i in range(len(points)):
             poly = Polygon(vor.vertices[vor.regions[vor.point_region[i]]])
 
@@ -141,10 +143,8 @@ def custom_voronoi_partition_pts(points,
 
             poly = poly.intersection(outline)
 
-            polygons.append(poly)
+            polygons_arr[i] = poly
 
-    polygons_arr = np.empty((len(polygons), ), "object")
-    polygons_arr[:] = polygons
     return polygons_arr
 
 
