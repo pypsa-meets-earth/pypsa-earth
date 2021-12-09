@@ -30,7 +30,7 @@ The complete list of software needed before installing PyPSA Africa is listed be
   Useful content to watch refer to numpy, pandas
 - `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ **(mandatory)**: in order to use packages in python,
   it is highly recommended to use a conda package manager, such as `Anaconda <https://docs.anaconda.com/>`_ or
-  `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ (**recommended**)
+  `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ (**recommended**). There is many things you can do wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a cristal clear explanation of conda (**excellent read**).  
 - `Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
   and enable to coordinate the parallel software development between many developers.
   It is mandatory to `learn the git basics <https://git-scm.com/doc>`_.
