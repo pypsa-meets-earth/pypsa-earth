@@ -7,71 +7,70 @@ channels:
   - conda-forge/label/shapely_dev  # Until shapely 1.8+ is out of alpha
   - conda-forge
   - bioconda
-  - http://conda.anaconda.org/gurobi
 dependencies:
-  - python<=3.9.7
-  - pip<=21.3.1
-  - mamba<=0.18.2 # esp for windows build
+  - python>=3.8
+  - pip
+  - mamba # esp for windows build
 
-  # - pypsa>=0.17.1
-  - atlite=0.2.5
+  - pypsa>=0.17.1
+  - atlite>=0.2.4
   - dask<=2021.3.1 # until https://github.com/dask/dask/issues/7583 is solved
 
   # Dependencies of the workflow itself
-  - xlrd=2.0.1
-  - openpyxl<=3.0.9
-  - pycountry<=20.7.3
-  - seaborn<=0.11.2
-  - snakemake-minimal<=6.11.0
-  - memory_profiler<=0.58.0
-  - pyyaml<=6.0
-  - pytables<=3.6.1
-  - lxml<=4.6.4
-  - numpy=1.21.4
-  - pandas=1.3.4
-  - geopandas<=0.10.2
+  - xlrd
+  - openpyxl
+  - pycountry
+  - seaborn
+  - snakemake-minimal
+  - memory_profiler
+  - yaml
+  - pytables
+  - lxml
+  - numpy
+  - pandas
+  - geopandas
   # - xarray # till the main is not in conda
-  - netcdf4<=1.5.6
-  - networkx<=2.6.2
-  - scipy<=1.7.1
+  - netcdf4
+  - networkx
+  - scipy
   - shapely>=1.8a1
-  - progressbar2<=3.53.1
-  # - pre-commit<=2.15.0
-  - pyomo<=6.2
-  - matplotlib<=3.5.0
+  - progressbar2
+  - pre-commit
+  - pyomo
+  - matplotlib
+  - openjdk
 
   # Keep in conda environment when calling ipython
-  - ipython<=7.29.0
+  - ipython
   # Jupyter notebook requirement
-  - ipykernel<=6.5.0
-  - jupyterlab<=3.2.4
+  - ipykernel
+  - jupyterlab
 
   # GIS dependencies:
-  - cartopy<=0.20.1
-  - descartes<=1.1.0
-  - rasterio<=#1.2.10
-  - rioxarray<=0.9.0
-  - geoviews<=1.9.2
-  - hvplot<=0.7.3
+  - cartopy
+  - descartes
+  - rasterio
+  - rioxarray
+  - geoviews
+  - hvplot
 
   # PyPSA-Eur-Sec Dependencies
-  - geopy=2.2.0
-  - tqdm<=4.62.3
-  - pytz<=2021.3
-  - country_converter<=0.7.4
-  - powerplantmatching
+  - geopy
+  - tqdm
+  - pytz
+  - country_converter
 
   # Cloud download
-  - googledrivedownloader<=0.4
-
-  # base solvers
+  - googledrivedownloader
+  
+  # Default solver for tests
   - glpk
-  - ipopt
+  - ipopt<3.13.3
 
   - pip:
     - git+https://github.com/pydata/xarray@main # till the main is not in conda
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
     - vresutils==0.3.1
-    - tsam==1.1.2
+    - tsam>=1.1.0
     - esy-osm-pbf
     - esy-osmfilter

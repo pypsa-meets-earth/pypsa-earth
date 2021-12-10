@@ -309,7 +309,7 @@ def mock_snakemake(rulename, **wildcards):
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = sm.Workflow(snakefile)
+    workflow = sm.Workflow(snakefile, overwrite_configfiles=[])
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
