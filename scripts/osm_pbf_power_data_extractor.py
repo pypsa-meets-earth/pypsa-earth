@@ -463,7 +463,7 @@ def process_data(feature_list, country_list, output_files,
     for feature in feature_list:  # feature dataframe
 
         # list of dataframes
-        df_list = []
+        df_all_feature = pd.DataFrame()
         for country_code_isogeofk in country_list:
 
             country_code = convert_iso_to_geofk(country_code_isogeofk,
@@ -497,9 +497,7 @@ def process_data(feature_list, country_list, output_files,
             # Add Country Column with GeoFabrik coding
             df_feature["Country"] = country_code
 
-            df_list.append(df_feature)
-
-        df_all_feature = pd.concat(df_list, ignore_index=True)
+            df_all_feature = pd.concat([df_all_feature, df_feature])
 
         output_csv_geojson(output_files, country_code, df_all_feature,
                            feature_columns[feature], feature)
