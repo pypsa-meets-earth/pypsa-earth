@@ -8,12 +8,12 @@ opsd_vres_base_year: 2016
 matching_sources:
   - CARMA
   - GPD
-  - GEO
+  # - GEO
 
 fully_included_sources:
   - CARMA
   - GPD
-  - GEO
+  # - GEO
 
 CARMA:
   net_capacity: false
