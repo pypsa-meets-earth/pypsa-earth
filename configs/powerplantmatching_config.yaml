@@ -15,6 +15,25 @@ fully_included_sources:
   - GPD
   - GEO
 
+CARMA:
+  net_capacity: false
+  reliability_score: 1
+  url: https://vfs.fias.science/f/e1d9d9d587/?raw=1
+  fn: Full_CARMA_2009_Dataset_1.csv
+
+GEO:
+  net_capacity: false
+  reliability_score: 3
+  url: https://vfs.fias.science/f/b4607c76b4/?raw=1
+  fn: global_energy_observatory_power_plants.csv
+
+GPD:
+  reliability_score: 3
+  fn: global_power_plant_database.csv
+  #if outdated, look at http://datasets.wri.org/dataset/globalpowerplantdatabase
+  url: https://wri-dataportal-prod.s3.amazonaws.com/manual/global_power_plant_database_v_1_3.zip
+
+
 parallel_duke_processes: false
 process_limit: 2
 remove_missing_coords: true
