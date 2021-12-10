@@ -38,7 +38,6 @@ dependencies:
   - pre-commit
   - pyomo
   - matplotlib
-  - openjdk
 
   # Keep in conda environment when calling ipython
   - ipython
