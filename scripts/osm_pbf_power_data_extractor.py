@@ -262,7 +262,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         prefilter,
         whitefilter,
         blackfilter,
-        NewPreFilterData=new_prefilter_data,
+        NewPreFilterData=True, #new_prefilter_data, TODO: temporary fix for reliability issues
         CreateElements=create_elements,
         LoadElements=True,
         verbose=False,
@@ -461,9 +461,12 @@ def process_data(feature_list, country_list, output_files,
     # loop the request for each feature
 
     for feature in feature_list:  # feature dataframe
-
-        # list of dataframes
+        
         df_list = []
+
+        # initialize dataframe
+        # df_all_feature = pd.DataFrame()
+
         for country_code_isogeofk in country_list:
 
             country_code = convert_iso_to_geofk(country_code_isogeofk,
@@ -499,6 +502,8 @@ def process_data(feature_list, country_list, output_files,
 
             df_list.append(df_feature)
 
+            # df_all_feature = pd.concat([df_all_feature, df_feature], ignore_index=True)
+        
         df_all_feature = pd.concat(df_list, ignore_index=True)
 
         output_csv_geojson(output_files, country_code, df_all_feature,
