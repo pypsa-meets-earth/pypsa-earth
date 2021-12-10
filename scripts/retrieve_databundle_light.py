@@ -66,7 +66,7 @@ if tutorial == False:
     gdd.download_file_from_google_drive(
         file_id="1nrWntieUVUcyya0xaadt4T3JFTDrqhLf",
         dest_path=zip_path,
-        showsize=True,
+        showsize=False,
         unzip=True)
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
@@ -78,7 +78,7 @@ if tutorial == False:
     gdd.download_file_from_google_drive(
         file_id="1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ",
         dest_path=zip_path,
-        showsize=True,
+        showsize=False,
         unzip=True)
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
@@ -90,7 +90,7 @@ if tutorial == False:
     gdd.download_file_from_google_drive(
         file_id="1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O",
         dest_path=zip_path,
-        showsize=True,
+        showsize=False,
         unzip=True)
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
