@@ -223,7 +223,7 @@ if __name__ == "__main__":
         # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
-        if snakemake.config["alternative_clustering"]:
+        if snakemake.config["cluster_options"]["alternative_clustering"]:
             onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
             shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
         else:

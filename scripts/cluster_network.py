@@ -141,6 +141,8 @@ from pypsa.networkclustering import busmap_by_spectral_clustering
 from pypsa.networkclustering import get_clustering_from_busmap
 from shapely.geometry import Point
 from build_shapes import get_GADM_layer
+from build_shapes import add_population_data
+from build_shapes import add_gdp_data
 from osm_pbf_power_data_extractor import create_country_list
 
 idx = pd.IndexSlice
@@ -174,6 +176,11 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     """Determine the number of clusters per country"""
 
     distribution_cluster = snakemake.config["cluster_options"]["distribute_cluster"]
+    countries_list = create_country_list(snakemake.config["countries"])
+    year = snakemake.config["build_shape_options"]["year"]
+    update = snakemake.config["build_shape_options"]["update_file"]
+    out_logging = snakemake.config["build_shape_options"]["out_logging"]
+    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
 
     if solver_name is None:
         solver_name = snakemake.config["solving"]["solver"]["name"]
@@ -186,6 +193,24 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
         )
         distribution_factor = L
+    
+    if distribution_cluster == ["pop"]:
+        df_pop = gpd.read_file(snakemake.input.fundamental_onshore_region)
+        df_pop_c = df_pop.loc[:,("country","geometry")]
+        add_population_data(df_pop_c, countries_list, year, update, out_logging, nprocesses=nprocesses)
+        P = df_pop_c.loc[:,("country","pop")]
+        P = P.groupby(P["country"]).sum().pipe(normed).squeeze()
+        distribution_factor = P
+
+    if distribution_cluster == ["gdp"]:
+        df_gdp = gpd.read_file(snakemake.input.fundamental_onshore_region)
+        df_gdp_c = df_gdp.loc[:,("country","geometry")]
+        add_gdp_data(df_gdp_c, year, update, out_logging,
+            name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+        )
+        G = df_gdp_c.loc[:,("country","gdp")]
+        G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
+        distribution_factor = G 
 
     # originally ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
@@ -431,7 +456,6 @@ def cluster_regions(busmaps, input=None, output=None):
         regions = (gpd.read_file(getattr(input,
                                          which)).set_index("name").dropna()
                    )
-
         geom_c = (regions.geometry.groupby(busmap).apply(list).apply(
             shapely.ops.unary_union))
         regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
@@ -442,13 +466,12 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
                                    clusters="60")
+        _sets_path_to_root("pypsa-africa")  # for distribute_cluster > "gdp"
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

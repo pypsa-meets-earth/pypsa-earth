@@ -465,7 +465,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
         raise Exception(
-            f"File EEZ {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
+            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
         )
 
     # open nc dataset
