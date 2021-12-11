@@ -563,12 +563,12 @@ def add_gdp_data(
     nprocesses=2,
     disable_progressbar=False
 ):
-    """Function to add the population info for each country shape in the gadm dataset"""
+    """Function to add the gdp data for each country shape in the gadm dataset"""
 
     if out_logging:
-        _logger.info("Stage 4/4: Add population data to GADM GeoDataFrame")
+        _logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
 
-    # initialize new population column
+    # initialize new gdp column
     df_gadm["gdp"] = 0.0
 
     GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
