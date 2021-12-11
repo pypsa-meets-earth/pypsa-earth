@@ -1,5 +1,6 @@
 # import
 import logging
+import multiprocessing as mp
 import os
 import shutil
 import zipfile
@@ -13,21 +14,15 @@ import rasterio
 import requests
 import rioxarray as rx
 import xarray as xr
-from _helpers import _sets_path_to_root
-from _helpers import _three_2_two_digits_country
-from _helpers import _two_2_three_digits_country
-from _helpers import _two_digits_2_name_country
-from _helpers import configure_logging
+from _helpers import (_sets_path_to_root, _three_2_two_digits_country,
+                      _two_2_three_digits_country, _two_digits_2_name_country,
+                      configure_logging)
 from osm_pbf_power_data_extractor import create_country_list
 from rasterio.mask import mask
-from shapely.geometry import LineString
-from shapely.geometry import MultiPolygon
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 from shapely.validation import make_valid
-import multiprocessing as mp
 from tqdm import tqdm
 
 # import rioxarray
