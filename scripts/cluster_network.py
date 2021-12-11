@@ -190,27 +190,28 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
             [n.buses.country]).sum().pipe(normed))
         assert (len(L.index) == len(n.buses.country.unique())), (
             "The following countries have no load: "
-        f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+            f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
         )
         distribution_factor = L
-    
+
     if distribution_cluster == ["pop"]:
         df_pop = gpd.read_file(snakemake.input.fundamental_onshore_region)
-        df_pop_c = df_pop.loc[:,("country","geometry")]
-        add_population_data(df_pop_c, countries_list, year, update, out_logging, nprocesses=nprocesses)
-        P = df_pop_c.loc[:,("country","pop")]
+        df_pop_c = df_pop.loc[:, ("country", "geometry")]
+        add_population_data(df_pop_c, countries_list, year,
+                            update, out_logging, nprocesses=nprocesses)
+        P = df_pop_c.loc[:, ("country", "pop")]
         P = P.groupby(P["country"]).sum().pipe(normed).squeeze()
         distribution_factor = P
 
     if distribution_cluster == ["gdp"]:
         df_gdp = gpd.read_file(snakemake.input.fundamental_onshore_region)
-        df_gdp_c = df_gdp.loc[:,("country","geometry")]
+        df_gdp_c = df_gdp.loc[:, ("country", "geometry")]
         add_gdp_data(df_gdp_c, year, update, out_logging,
-            name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-        )
-        G = df_gdp_c.loc[:,("country","gdp")]
+                     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+                     )
+        G = df_gdp_c.loc[:, ("country", "gdp")]
         G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
-        distribution_factor = G 
+        distribution_factor = G
 
     # originally ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
@@ -227,13 +228,15 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
                 ), "The sum of focus weights must be less than or equal to 1."
 
         for country, weight in focus_weights.items():
-            distribution_factor[country] = weight / len(distribution_factor[country])
+            distribution_factor[country] = weight / \
+                len(distribution_factor[country])
 
         remainder = [
             c not in focus_weights.keys()
             for c in distribution_factor.index.get_level_values("country")
         ]
-        distribution_factor[remainder] = distribution_factor.loc[remainder].pipe(normed) * (1 - total_focus)
+        distribution_factor[remainder] = distribution_factor.loc[remainder].pipe(
+            normed) * (1 - total_focus)
 
         logger.warning(
             "Using custom focus weights for determining number of clusters.")
@@ -258,10 +261,12 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         """
         return (1, N[n_id])
 
-    m.n = po.Var(list(distribution_factor.index), bounds=n_bounds, domain=po.Integers)
+    m.n = po.Var(list(distribution_factor.index),
+                 bounds=n_bounds, domain=po.Integers)
     m.tot = po.Constraint(expr=(po.summation(m.n) == n_clusters))
     m.objective = po.Objective(
-        expr=sum((m.n[i] - distribution_factor.loc[i] * n_clusters)**2 for i in distribution_factor.index),
+        expr=sum((m.n[i] - distribution_factor.loc[i] * n_clusters)
+                 ** 2 for i in distribution_factor.index),
         sense=po.minimize,
     )
 
@@ -313,9 +318,12 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 100)  # 1000 for more accurate results; 100 for fast results
-        algorithm_kwds.setdefault("max_iter", 3000)  # 30000 for more accurate results; 3000 for fast results
-        algorithm_kwds.setdefault("tol", 1e-3)  # 1e-6 for more accurate results; 1e-3 for fast results
+        # 1000 for more accurate results; 100 for fast results
+        algorithm_kwds.setdefault("n_init", 100)
+        # 30000 for more accurate results; 3000 for fast results
+        algorithm_kwds.setdefault("max_iter", 3000)
+        # 1e-6 for more accurate results; 1e-3 for fast results
+        algorithm_kwds.setdefault("tol", 1e-3)
 
     n.determine_network_topology()
     n.lines.at[:, "sub_network"] = "0"  # current fix
@@ -476,7 +484,7 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    alternative_clustering = snakemake.config["cluster_options"]["alternative_clustering"]		
+    alternative_clustering = snakemake.config["cluster_options"]["alternative_clustering"]
     gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
     focus_weights = snakemake.config.get("focus_weights", None)
     country_list = create_country_list(snakemake.config['countries'])
