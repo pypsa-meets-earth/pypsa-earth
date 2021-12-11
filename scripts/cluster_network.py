@@ -173,15 +173,19 @@ def weighting_for_country(n, x):
 def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     """Determine the number of clusters per country"""
 
+    distribution_cluster = snakemake.config["cluster_options"]["distribute_cluster"]
+
     if solver_name is None:
         solver_name = snakemake.config["solving"]["solver"]["name"]
 
-    L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
-        [n.buses.country]).sum().pipe(normed))
-    assert (len(L.index) == len(n.buses.country.unique())), (
-        "The following countries have no load: "
-    f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
-    )
+    if distribution_cluster == ["load"]:
+        L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
+            [n.buses.country]).sum().pipe(normed))
+        assert (len(L.index) == len(n.buses.country.unique())), (
+            "The following countries have no load: "
+        f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+        )
+        distribution_factor = L
 
     # originally ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
@@ -198,20 +202,20 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
                 ), "The sum of focus weights must be less than or equal to 1."
 
         for country, weight in focus_weights.items():
-            L[country] = weight / len(L[country])
+            distribution_factor[country] = weight / len(distribution_factor[country])
 
         remainder = [
             c not in focus_weights.keys()
-            for c in L.index.get_level_values("country")
+            for c in distribution_factor.index.get_level_values("country")
         ]
-        L[remainder] = L.loc[remainder].pipe(normed) * (1 - total_focus)
+        distribution_factor[remainder] = distribution_factor.loc[remainder].pipe(normed) * (1 - total_focus)
 
         logger.warning(
             "Using custom focus weights for determining number of clusters.")
 
     assert np.isclose(
-        L.sum(), 1.0, rtol=1e-3
-    ), f"Country weights L must sum up to 1.0 when distributing clusters. Is {L.sum()}."
+        distribution_factor.sum(), 1.0, rtol=1e-3
+    ), f"Country weights L must sum up to 1.0 when distributing clusters. Is {distribution_factor.sum()}."
 
     m = po.ConcreteModel()
 
@@ -229,10 +233,10 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         """
         return (1, N[n_id])
 
-    m.n = po.Var(list(L.index), bounds=n_bounds, domain=po.Integers)
+    m.n = po.Var(list(distribution_factor.index), bounds=n_bounds, domain=po.Integers)
     m.tot = po.Constraint(expr=(po.summation(m.n) == n_clusters))
     m.objective = po.Objective(
-        expr=sum((m.n[i] - L.loc[i] * n_clusters)**2 for i in L.index),
+        expr=sum((m.n[i] - distribution_factor.loc[i] * n_clusters)**2 for i in distribution_factor.index),
         sense=po.minimize,
     )
 
@@ -247,7 +251,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     assert (results["Solver"][0]["Status"] == "ok"
             ), f"Solver returned non-optimally: {results}"
 
-    return pd.Series(m.n.get_values(), index=L.index).round().astype(int)
+    return pd.Series(m.n.get_values(), index=distribution_factor.index).round().astype(int)
 
 
 def busmap_for_gadm_clusters(n, gadm_level):
@@ -450,13 +454,10 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     alternative_clustering = snakemake.config["cluster_options"]["alternative_clustering"]		
-    focus_weights = snakemake.config.get("focus_weights", None)
-    
-    country_list = create_country_list(snakemake.config['countries'])
-    
     gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
+    focus_weights = snakemake.config.get("focus_weights", None)
+    country_list = create_country_list(snakemake.config['countries'])
 
-    
     if alternative_clustering:
         renewable_carriers = pd.Index([
             "solar",
