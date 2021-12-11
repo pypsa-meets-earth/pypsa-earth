@@ -563,7 +563,21 @@ def add_gdp_data(
     nprocesses=2,
     disable_progressbar=False
 ):
-    """Function to add the gdp data for each country shape in the gadm dataset"""
+    """
+    Function to add gdp data to arbitrary number of shapes in a country
+    
+    Inputs:
+    -------
+    df_gadm: Geodataframe with one Multipolygon per row
+        - Essential column ["country", "geometry"]
+        - Non-essential column ["GADM_ID"]
+    
+    Outputs:
+    --------
+    df_gadm: Geodataframe with one Multipolygon per row
+        - Same columns as input
+        - Includes a new column ["gdp"]
+    """
 
     if out_logging:
         _logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
@@ -658,7 +672,21 @@ def add_population_data(df_gadm,
                         nprocesses=2,
                         disable_progressbar=False
     ):
-    """Function to add the population info for each country shape in the gadm dataset"""
+    """
+    Function to add population data to arbitrary number of shapes in a country
+    
+    Inputs:
+    -------
+    df_gadm: Geodataframe with one Multipolygon per row
+        - Essential column ["country", "geometry"]
+        - Non-essential column ["GADM_ID"]
+    
+    Outputs:
+    --------
+    df_gadm: Geodataframe with one Multipolygon per row
+        - Same columns as input
+        - Includes a new column ["pop"]
+    """
 
     if out_logging:
         _logger.info("Stage 4/4 POP: Add population data to GADM GeoDataFrame")
