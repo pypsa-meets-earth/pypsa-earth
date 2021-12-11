@@ -369,7 +369,7 @@ def clustering_for_n_clusters(
             f"Imported custom busmap from {snakemake.input.custom_busmap}")
     else:
 
-        if snakemake.config["alternative_clustering"]:
+        if snakemake.config["cluster_options"]["alternative_clustering"]:
             n, busmap = busmap_for_gadm_clusters(
                 n, snakemake.config["build_shape_options"]["gadm_layer_id"]
             )  # TODO make func only return busmap, and get level from config
@@ -448,7 +448,8 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-				
+
+    alternative_clustering = snakemake.config["cluster_options"]["alternative_clustering"]		
     focus_weights = snakemake.config.get("focus_weights", None)
     
     country_list = create_country_list(snakemake.config['countries'])
@@ -456,7 +457,7 @@ if __name__ == "__main__":
     gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
 
     
-    if snakemake.config["alternative_clustering"]:
+    if alternative_clustering:
         renewable_carriers = pd.Index([
             "solar",
             "onwind",  # TODO find a way to fetch automatically from the model run
