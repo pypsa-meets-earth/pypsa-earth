@@ -26,7 +26,7 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
 
-    
+
 rule solve_all_networks:
     input: expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", **config['scenario'])
 
@@ -256,6 +256,7 @@ rule simplify_network:
 rule cluster_network:
     input:
         network='networks/elec_s{simpl}.nc',
+        raw_onshore_busregion="resources/regions_onshore.geojson",
         regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
         # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),

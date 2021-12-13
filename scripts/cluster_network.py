@@ -135,13 +135,15 @@ from _helpers import _sets_path_to_root
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from add_electricity import load_costs
+from build_shapes import add_gdp_data
+from build_shapes import add_population_data
+from build_shapes import get_GADM_layer
+from osm_pbf_power_data_extractor import create_country_list
 from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
 from pypsa.networkclustering import busmap_by_spectral_clustering
 from pypsa.networkclustering import get_clustering_from_busmap
 from shapely.geometry import Point
-from build_shapes import get_GADM_layer
-from osm_pbf_power_data_extractor import create_country_list
 
 idx = pd.IndexSlice
 
@@ -173,15 +175,52 @@ def weighting_for_country(n, x):
 def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     """Determine the number of clusters per country"""
 
+    distribution_cluster = snakemake.config["cluster_options"][
+        "distribute_cluster"]
+    countries_list = create_country_list(snakemake.config["countries"])
+    year = snakemake.config["build_shape_options"]["year"]
+    update = snakemake.config["build_shape_options"]["update_file"]
+    out_logging = snakemake.config["build_shape_options"]["out_logging"]
+    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
+
     if solver_name is None:
         solver_name = snakemake.config["solving"]["solver"]["name"]
 
-    L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
-        [n.buses.country]).sum().pipe(normed))
-    assert (len(L.index) == len(n.buses.country.unique())), (
-        "The following countries have no load: "
-    f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
-    )
+    if distribution_cluster == ["load"]:
+        L = (n.loads_t.p_set.mean().groupby(n.loads.bus).sum().groupby(
+            [n.buses.country]).sum().pipe(normed))
+        assert len(L.index) == len(n.buses.country.unique()), (
+            "The following countries have no load: "
+            f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+        )
+        distribution_factor = L
+
+    if distribution_cluster == ["pop"]:
+        df_pop = gpd.read_file(snakemake.input.raw_onshore_busregion)
+        df_pop_c = df_pop.loc[:, ("country", "geometry")]
+        add_population_data(df_pop_c,
+                            countries_list,
+                            year,
+                            update,
+                            out_logging,
+                            nprocesses=nprocesses)
+        P = df_pop_c.loc[:, ("country", "pop")]
+        P = P.groupby(P["country"]).sum().pipe(normed).squeeze()
+        distribution_factor = P
+
+    if distribution_cluster == ["gdp"]:
+        df_gdp = gpd.read_file(snakemake.input.raw_onshore_busregion)
+        df_gdp_c = df_gdp.loc[:, ("country", "geometry")]
+        add_gdp_data(
+            df_gdp_c,
+            year,
+            update,
+            out_logging,
+            name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+        )
+        G = df_gdp_c.loc[:, ("country", "gdp")]
+        G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
+        distribution_factor = G
 
     # originally ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
@@ -198,20 +237,22 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
                 ), "The sum of focus weights must be less than or equal to 1."
 
         for country, weight in focus_weights.items():
-            L[country] = weight / len(L[country])
+            distribution_factor[country] = weight / len(
+                distribution_factor[country])
 
         remainder = [
             c not in focus_weights.keys()
-            for c in L.index.get_level_values("country")
+            for c in distribution_factor.index.get_level_values("country")
         ]
-        L[remainder] = L.loc[remainder].pipe(normed) * (1 - total_focus)
+        distribution_factor[remainder] = distribution_factor.loc[
+            remainder].pipe(normed) * (1 - total_focus)
 
         logger.warning(
             "Using custom focus weights for determining number of clusters.")
 
     assert np.isclose(
-        L.sum(), 1.0, rtol=1e-3
-    ), f"Country weights L must sum up to 1.0 when distributing clusters. Is {L.sum()}."
+        distribution_factor.sum(), 1.0, rtol=1e-3
+    ), f"Country weights L must sum up to 1.0 when distributing clusters. Is {distribution_factor.sum()}."
 
     m = po.ConcreteModel()
 
@@ -229,10 +270,13 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         """
         return (1, N[n_id])
 
-    m.n = po.Var(list(L.index), bounds=n_bounds, domain=po.Integers)
+    m.n = po.Var(list(distribution_factor.index),
+                 bounds=n_bounds,
+                 domain=po.Integers)
     m.tot = po.Constraint(expr=(po.summation(m.n) == n_clusters))
     m.objective = po.Objective(
-        expr=sum((m.n[i] - L.loc[i] * n_clusters)**2 for i in L.index),
+        expr=sum((m.n[i] - distribution_factor.loc[i] * n_clusters)**2
+                 for i in distribution_factor.index),
         sense=po.minimize,
     )
 
@@ -247,7 +291,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     assert (results["Solver"][0]["Status"] == "ok"
             ), f"Solver returned non-optimally: {results}"
 
-    return pd.Series(m.n.get_values(), index=L.index).round().astype(int)
+    return (pd.Series(m.n.get_values(),
+                      index=distribution_factor.index).round().astype(int))
 
 
 def busmap_for_gadm_clusters(n, gadm_level):
@@ -284,9 +329,12 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        algorithm_kwds.setdefault("n_init", 100)  # 1000 for more accurate results; 100 for fast results
-        algorithm_kwds.setdefault("max_iter", 3000)  # 30000 for more accurate results; 3000 for fast results
-        algorithm_kwds.setdefault("tol", 1e-3)  # 1e-6 for more accurate results; 1e-3 for fast results
+        # 1000 for more accurate results; 100 for fast results
+        algorithm_kwds.setdefault("n_init", 100)
+        # 30000 for more accurate results; 3000 for fast results
+        algorithm_kwds.setdefault("max_iter", 3000)
+        # 1e-6 for more accurate results; 1e-3 for fast results
+        algorithm_kwds.setdefault("tol", 1e-3)
 
     n.determine_network_topology()
     n.lines.at[:, "sub_network"] = "0"  # current fix
@@ -369,7 +417,7 @@ def clustering_for_n_clusters(
             f"Imported custom busmap from {snakemake.input.custom_busmap}")
     else:
 
-        if snakemake.config["alternative_clustering"]:
+        if snakemake.config["cluster_options"]["alternative_clustering"]:
             n, busmap = busmap_for_gadm_clusters(
                 n, snakemake.config["build_shape_options"]["gadm_layer_id"]
             )  # TODO make func only return busmap, and get level from config
@@ -424,10 +472,8 @@ def cluster_regions(busmaps, input=None, output=None):
     busmap = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
 
     for which in ("regions_onshore", "regions_offshore"):
-        regions = (gpd.read_file(getattr(input,
-                                         which)).set_index("name").dropna()
-                   )
-
+        regions = gpd.read_file(getattr(input,
+                                        which)).set_index("name").dropna()
         geom_c = (regions.geometry.groupby(busmap).apply(list).apply(
             shapely.ops.unary_union))
         regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
@@ -440,23 +486,22 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("cluster_network",
                                    network="elec",
                                    simpl="",
                                    clusters="60")
+        _sets_path_to_root("pypsa-africa")  # for distribute_cluster > "gdp"
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-				
-    focus_weights = snakemake.config.get("focus_weights", None)
-    
-    country_list = create_country_list(snakemake.config['countries'])
-    
-    gadm_layer_id = snakemake.config['build_shape_options']['gadm_layer_id']
 
-    
-    if snakemake.config["alternative_clustering"]:
+    alternative_clustering = snakemake.config["cluster_options"][
+        "alternative_clustering"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+    focus_weights = snakemake.config.get("focus_weights", None)
+    country_list = create_country_list(snakemake.config["countries"])
+
+    if alternative_clustering:
         renewable_carriers = pd.Index([
             "solar",
             "onwind",  # TODO find a way to fetch automatically from the model run
