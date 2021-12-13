@@ -240,7 +240,7 @@ if __name__ == "__main__":
     regions_crs = regions.crs
     # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
     regions = regions.dropna(axis="index", subset=["geometry"])
-    if snakemake.config["alternative_clustering"]:
+    if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(
             regions.reset_index().groupby("shape_id").agg({
                 "x": "mean",

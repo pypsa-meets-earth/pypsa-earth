@@ -29,7 +29,10 @@ countries: ["NG", "BJ"]
   #["ZA"]  # South Africa
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
-alternative_clustering: False
+cluster_options:
+  alternative_clustering: False
+  distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
+  out_logging: True  # When true, logging is printed to console
 
 # options for build_shapes
 build_shape_options:
