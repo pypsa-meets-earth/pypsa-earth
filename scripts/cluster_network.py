@@ -196,7 +196,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         distribution_factor = L
 
     if distribution_cluster == ["pop"]:
-        df_pop = gpd.read_file(snakemake.input.fundamental_onshore_region)
+        df_pop = gpd.read_file(snakemake.input.raw_onshore_busregion)
         df_pop_c = df_pop.loc[:, ("country", "geometry")]
         add_population_data(df_pop_c,
                             countries_list,
@@ -209,7 +209,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         distribution_factor = P
 
     if distribution_cluster == ["gdp"]:
-        df_gdp = gpd.read_file(snakemake.input.fundamental_onshore_region)
+        df_gdp = gpd.read_file(snakemake.input.raw_onshore_busregion)
         df_gdp_c = df_gdp.loc[:, ("country", "geometry")]
         add_gdp_data(
             df_gdp_c,

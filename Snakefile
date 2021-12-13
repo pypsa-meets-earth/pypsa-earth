@@ -256,7 +256,7 @@ rule simplify_network:
 rule cluster_network:
     input:
         network='networks/elec_s{simpl}.nc',
-        fundamental_onshore_region="resources/regions_onshore.geojson",
+        raw_onshore_busregion="resources/regions_onshore.geojson",
         regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
         # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
