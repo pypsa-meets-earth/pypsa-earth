@@ -49,7 +49,7 @@ from pypsa.geo import haversine_pts
 logger = logging.getLogger(__name__)
 
 
-### Functions
+# Functions
 def haversine(p):
     coord0 = n.buses.loc[p.bus0, ['x', 'y']].values
     coord1 = n.buses.loc[p.bus1, ['x', 'y']].values
@@ -86,54 +86,59 @@ if __name__ == "__main__":
     # k_edge algorithm implementation
     G = nx.Graph()
 
-    network_buses = n.buses.loc[n.buses.carrier=="AC"].index
+    network_buses = n.buses.loc[n.buses.carrier == "AC"].index
     G.add_nodes_from(np.unique(network_buses.values))
-        
+
     # TODO: Currently only AC lines are read in and meshed. One need to combine
     # AC & DC lines and then move on.
-    network_lines =  n.lines
+    network_lines = n.lines
     sel = network_lines.s_nom > 100  # TODO: Check, should be all selected or filtered?
     attrs = ["bus0", "bus1", "length"]
     G.add_weighted_edges_from(network_lines.loc[:, attrs].values)
 
     # find all complement edges
-    complement_edges = pd.DataFrame(complement(G).edges, columns=["bus0", "bus1"])
+    complement_edges = pd.DataFrame(
+        complement(G).edges, columns=["bus0", "bus1"])
     complement_edges["length"] = complement_edges.apply(haversine, axis=1)
 
     # apply k_edge_augmentation weighted by length of complement edges
     k_edge = k_edge_option
-    augmentation = k_edge_augmentation(G, k_edge, avail=complement_edges.values)
+    augmentation = k_edge_augmentation(
+        G, k_edge, avail=complement_edges.values)
     new_network_lines = pd.DataFrame(augmentation, columns=["bus0", "bus1"])
     new_network_lines["length"] = new_network_lines.apply(haversine, axis=1)
     new_network_lines.index = new_network_lines.apply(
-            lambda x: f"lines new {x.bus0} <-> {x.bus1}", axis=1)
+        lambda x: f"lines new {x.bus0} <-> {x.bus1}", axis=1)
 
     #  add new lines to the network
-    if line_type_option=="HVDC":
+    if line_type_option == "HVDC":
         n.madd("Link",
-            new_network_lines.index,
-            bus0=new_network_lines.bus0,
-            bus1=new_network_lines.bus1,
-            p_min_pu=-1, # network is bidirectional
-            p_nom_extendable=True,
-            p_nom_min=min_expansion_option,
-            length=new_network_lines.length,
-            capital_cost=new_network_lines.length * costs.at['HVDC overhead', 'capital_cost'],
-            carrier="DC",
-            lifetime=costs.at['HVDC overhead', 'lifetime']
-        )
+               new_network_lines.index,
+               bus0=new_network_lines.bus0,
+               bus1=new_network_lines.bus1,
+               p_min_pu=-1,  # network is bidirectional
+               p_nom_extendable=True,
+               p_nom_min=min_expansion_option,
+               length=new_network_lines.length,
+               capital_cost=new_network_lines.length * \
+               costs.at['HVDC overhead', 'capital_cost'],
+               carrier="DC",
+               lifetime=costs.at['HVDC overhead', 'lifetime']
+               )
 
-    if line_type_option=="HVAC":
+    if line_type_option == "HVAC":
         n.madd("Line",
-                new_network_lines.index,
-                bus0=new_network_lines.bus0,
-                bus1=new_network_lines.bus1,
-                s_nom_extendable=True,
-                s_nom_min=min_expansion_option,  #  TODO: Check if minimum value needs to be set.
-                length=new_network_lines.length,
-                capital_cost=new_network_lines.length * costs.at['HVAC overhead', 'capital_cost'],
-                carrier="AC",
-                lifetime=costs.at['HVAC overhead', 'lifetime']
-        )
+               new_network_lines.index,
+               bus0=new_network_lines.bus0,
+               bus1=new_network_lines.bus1,
+               s_nom_extendable=True,
+               # TODO: Check if minimum value needs to be set.
+               s_nom_min=min_expansion_option,
+               length=new_network_lines.length,
+               capital_cost=new_network_lines.length * \
+               costs.at['HVAC overhead', 'capital_cost'],
+               carrier="AC",
+               lifetime=costs.at['HVAC overhead', 'lifetime']
+               )
 
 n.export_to_netcdf(snakemake.output.network)
