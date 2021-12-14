@@ -468,17 +468,18 @@ def find_first_overlap(geom, country_geoms, default_name):
 def set_countryname_by_shape(df,
                              ext_country_shapes,
                              names_by_shapes=True,
-                             exclude_external=True):
+                             exclude_external=True,
+                             col_country="country"):
     "Set the country name by the name shape"
     if names_by_shapes:
-        df["country"] = [
+        df[col_country] = [
             find_first_overlap(
                 row["geometry"],
                 ext_country_shapes,
-                None if exclude_external else row["country"],
+                None if exclude_external else row[col_country],
             ) for id, row in df.iterrows()
         ]
-        df.dropna(subset=["country"], inplace=True)
+        df.dropna(subset=[col_country], inplace=True)
     return df
 
 
@@ -603,7 +604,8 @@ def clean_data(
     df_all_substations = set_countryname_by_shape(
         df_all_substations,
         ext_country_shapes,
-        names_by_shapes=names_by_shapes)
+        names_by_shapes=names_by_shapes,
+        col_country="Country")
 
     _save_to_geojson(df_all_substations, output_files["substations"])
 
@@ -614,6 +616,12 @@ def clean_data(
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
+
+    # set the country name by the shape
+    df_all_generators = set_countryname_by_shape(
+        df_all_generators,
+        ext_country_shapes,
+        names_by_shapes=names_by_shapes)
 
     # save to csv
     _to_csv_nafix(df_all_generators, output_files["generators_csv"])
