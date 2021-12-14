@@ -196,20 +196,22 @@ def countries(countries, update=False, out_logging=False):
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
 
     if out_logging:
         _logger.info(
             "Stage 3 of 4: Merge country shapes to create continent shape")
 
-    shapes = list(country_shapes)
+    shapes = country_shapes.apply(lambda x: x.buffer(distance))
+    shapes_list = list(shapes)
     if eez_shapes is not None:
-        shapes += list(eez_shapes)
+        shapes_list += list(eez_shapes)
 
-    africa_shape = unary_union(shapes)
-    if isinstance(africa_shape, MultiPolygon):
-        africa_shape = max(africa_shape.geoms, key=attrgetter("area"))
-    return Polygon(shell=africa_shape.exterior)
+    africa_shape = unary_union(shapes_list)
+    # Below code does not work properly when countries are not next to each others
+    # if isinstance(africa_shape, MultiPolygon):
+    #     africa_shape = max(africa_shape.geoms, key=attrgetter("area"))
+    return africa_shape
 
 
 # error occurs here: ERROR:shapely.geos:IllegalArgumentException: Geometry must be a Point or LineString
