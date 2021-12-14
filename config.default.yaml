@@ -15,18 +15,18 @@ scenario:
   clusters: [6]
   opts: [Co2L-3H]
 
-countries: ["NG", "NE"]
+countries: ["africa"]
 
+  ### REGIONS CURRENTLY WORKED ON ###
+  ### AFRICA - more at /scripts/osm_data_config.py
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
   # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
   # 'MG', 'MW', 'ML', 'MR', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
-  # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
+  # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']
 
-  #["NG"]  # Nigeria
-  #["NE"]  # Niger
-  #["SL"]  # Sierra Leone
-  #["MA"]  # Morroco
-  #["ZA"]  # South Africa
+  ### WEST-ASIA, /MIDDLE EAST - more at /scripts/osm_data_config.py
+  # ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL-PL", "JO", 
+  # "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"]
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
