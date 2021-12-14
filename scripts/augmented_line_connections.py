@@ -75,6 +75,9 @@ if __name__ == "__main__":
         snakemake.config["electricity"],
     )
     options = snakemake.config["augmented_line_connection"]
+    min_expansion_option = options.get("min_expansion")
+    k_edge_option = options.get("connectivity_upgrade", 3)
+    line_type_option = options.get("new_line_type", "HVDC")
 
     # Make a copy of the original network
     n0 = pypsa.Network(snakemake.input.network)
@@ -98,7 +101,7 @@ if __name__ == "__main__":
     complement_edges["length"] = complement_edges.apply(haversine, axis=1)
 
     # apply k_edge_augmentation weighted by length of complement edges
-    k_edge = options.get("connectivity_upgrade", 3)
+    k_edge = k_edge_option
     augmentation = k_edge_augmentation(G, k_edge, avail=complement_edges.values)
     new_network_lines = pd.DataFrame(augmentation, columns=["bus0", "bus1"])
     new_network_lines["length"] = new_network_lines.apply(haversine, axis=1)
@@ -106,26 +109,27 @@ if __name__ == "__main__":
             lambda x: f"lines new {x.bus0} <-> {x.bus1}", axis=1)
 
     #  add new lines to the network
-    if options.get("new_line_type", "HVDC")=="HVDC":
+    if line_type_option=="HVDC":
         n.madd("Link",
             new_network_lines.index,
             bus0=new_network_lines.bus0,
             bus1=new_network_lines.bus1,
             p_min_pu=-1, # network is bidirectional
             p_nom_extendable=True,
+            p_nom_min=min_expansion_option,
             length=new_network_lines.length,
             capital_cost=new_network_lines.length * costs.at['HVDC overhead', 'capital_cost'],
             carrier="DC",
             lifetime=costs.at['HVDC overhead', 'lifetime']
         )
 
-    if options.get("new_line_type", "HVAC")=="HVAC":
+    if line_type_option=="HVAC":
         n.madd("Line",
                 new_network_lines.index,
                 bus0=new_network_lines.bus0,
                 bus1=new_network_lines.bus1,
                 s_nom_extendable=True,
-                s_nom_min=1,  #  TODO: Check if minimum value needs to be set.
+                s_nom_min=min_expansion_option,  #  TODO: Check if minimum value needs to be set.
                 length=new_network_lines.length,
                 capital_cost=new_network_lines.length * costs.at['HVAC overhead', 'capital_cost'],
                 carrier="AC",
