@@ -33,17 +33,17 @@ import os
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
-import numpy as np
 import networkx as nx
+import numpy as np
 import pandas as pd
 import pyomo.environ as po
 import pypsa
 import shapely
-
-from add_electricity import load_costs
 from _helpers import configure_logging
-from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
+from add_electricity import load_costs
 from networkx.algorithms import complement
+from networkx.algorithms.connectivity.edge_augmentation import \
+    k_edge_augmentation
 from pypsa.geo import haversine_pts
 
 logger = logging.getLogger(__name__)
