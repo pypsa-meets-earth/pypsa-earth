@@ -80,10 +80,6 @@ if __name__ == "__main__":
     k_edge_option = options.get("connectivity_upgrade", 3)
     line_type_option = options.get("new_line_type", "HVDC")
 
-    # Make a copy of the original network
-    n0 = pypsa.Network(snakemake.input.network)
-    n0.export_to_netcdf(snakemake.output.network_unmeshed)
-
     # k_edge algorithm implementation
     G = nx.Graph()
 

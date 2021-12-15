@@ -254,7 +254,32 @@ rule simplify_network:
     script: "scripts/simplify_network.py"
 
 
-rule cluster_network:
+if config['augmented_line_connection'].get('add_to_snakefile', False):
+    rule cluster_network:
+    input:
+        network='networks/elec_s{simpl}.nc',
+        raw_onshore_busregion="resources/regions_onshore.geojson",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
+        # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
+        # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+        #                if config["enable"].get("custom_busmap", False) else []),
+        tech_costs=COSTS
+    output:
+        network='networks/elec_s{simpl}_{clusters}_pre_augmentation.nc',
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
+        linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
+    log: "logs/cluster_network/elec_s{simpl}_{clusters}.log"
+    benchmark: "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
+    threads: 1
+    resources: mem=3000
+    script: "scripts/cluster_network.py"
+
+
+if (config['augmented_line_connection'].get('add_to_snakefile', False)==False):
+    rule cluster_network:
     input:
         network='networks/elec_s{simpl}.nc',
         raw_onshore_busregion="resources/regions_onshore.geojson",
@@ -277,22 +302,19 @@ rule cluster_network:
     script: "scripts/cluster_network.py"
 
 
-rule augmented_line_connections:
-    input:
-        tech_costs=COSTS,
-        network='networks/elec_s{simpl}_{clusters}.nc',
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-    output:
-        network='networks/elec_s{simpl}_{clusters}.nc',
-        network_unmeshed='networks/elec_s{simpl}_{clusters}_no_augmented_connections.nc',
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-    log: "logs/augmented_line_connections/elec_s{simpl}_{clusters}.log"
-    benchmark: "benchmarks/augmented_line_connections/elec_s{simpl}_{clusters}"
-    threads: 1
-    resources: mem=3000
-    script: "scripts/augmented_line_connections.py"
+    rule augmented_line_connections:
+        input:
+            tech_costs=COSTS,
+            network='networks/elec_s{simpl}_{clusters}_pre_augmentation.nc',
+            regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            network='networks/elec_s{simpl}_{clusters}.nc',
+        log: "logs/augmented_line_connections/elec_s{simpl}_{clusters}.log"
+        benchmark: "benchmarks/augmented_line_connections/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources: mem=3000
+        script: "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:
