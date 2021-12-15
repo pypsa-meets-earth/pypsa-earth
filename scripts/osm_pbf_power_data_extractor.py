@@ -102,7 +102,7 @@ def download_pbf(country_code, update, verify):
                 os.remove(PBF_inputfile)
 
             # Only try downloading once
-            download_pbf(country_code, update=False)
+            download_pbf(country_code, update=False, verify=False)
 
     return PBF_inputfile
 

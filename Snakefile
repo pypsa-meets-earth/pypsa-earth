@@ -89,6 +89,7 @@ rule build_osm_network:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",
         substations="data/clean/africa_all_substations.geojson",
+        country_shapes='resources/country_shapes.geojson',
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
         substations="data/base_network/africa_all_buses_build_network.csv",
@@ -223,7 +224,7 @@ rule add_electricity:
         powerplants='resources/powerplants.csv',
         # hydro_capacities='data/bundle/hydro_capacities.csv',
         # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
-        load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
+        load='resources/ssp2-2.6/2050/era5_2013/Africa.nc',
         gadm_shapes='resources/gadm_shapes.geojson',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}

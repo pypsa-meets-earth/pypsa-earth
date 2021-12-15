@@ -5,6 +5,7 @@ import sys
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import _read_geojson
@@ -14,6 +15,7 @@ from shapely.geometry import Point
 from shapely.ops import linemerge
 from shapely.ops import unary_union
 from tqdm import tqdm
+from osm_pbf_power_data_extractor import create_country_list
 
 logger = logging.getLogger(__name__)
 
@@ -531,9 +533,6 @@ def built_network(inputs, outputs):
     generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
                                                              inplace=True)
 
-    # Filter only Nigeria
-    # lines = lines[lines.loc[:,"country"] == "nigeria"].copy()
-    # substations = substations[substations.loc[:,"country"] == "nigeria"].copy()
     
     logger.info("Stage 2/4: Add line endings to the substation datasets")
 
@@ -553,18 +552,46 @@ def built_network(inputs, outputs):
     logger.info("Stage 3/4: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
-    lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
+    if snakemake.config["osm_data_cleaning_options"]["group_close_buses"]:
+        lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                   buses,
                                                                   tol=4000)
 
-    # Export data
-    # Lines
-    # Output file directory
-    # outputfile_partial = os.path.join(
-    #     os.getcwd(), "data", "base_network",
-    #     "africa_all" + "_lines" + "_build_network")
+    logger.info("Stage 4/4: Add augmented substation to country with no data")
     
-    logger.info("Stage 4/4: Save outputs")
+    country_shapes_fn = snakemake.input.country_shapes
+    country_shapes = (
+        gpd.read_file(country_shapes_fn)
+        .set_index("name")["geometry"]
+        .set_crs(4326)
+    )
+    input = snakemake.config["countries"]
+    country_list = create_country_list(input)
+    bus_country_list = buses["country"].unique().tolist() 
+
+    if len(bus_country_list) != len(country_list):
+        no_data_countries = set(country_list).difference(set(bus_country_list))
+        no_data_countries_shape = country_shapes[
+            country_shapes.index.isin(no_data_countries)==True
+            ].reset_index()
+        length = len(no_data_countries)
+        df = gpd.GeoDataFrame({
+            'voltage': [220000]*length,
+            'country': no_data_countries_shape["name"],
+            'lon': no_data_countries_shape["geometry"].centroid.x,
+            'lat': no_data_countries_shape["geometry"].centroid.y,
+            'bus_id': np.arange(len(buses)+1, len(buses)+(length+1), 1),
+            'station_id': [np.nan]*4,
+            'dc': [False]*length,
+            'under_construction': [False]*length,
+            'tag_area': [0.0]*length,
+            'symbol': ["substation"]*length,
+            'tag_substation': ["transmission"]*length,
+            'geometry': no_data_countries_shape["geometry"].centroid
+        })
+        buses = gpd.GeoDataFrame(pd.concat([buses, df], ignore_index=True), crs=buses.geometry.crs)
+
+    logger.info("Save outputs")
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["lines"]):
