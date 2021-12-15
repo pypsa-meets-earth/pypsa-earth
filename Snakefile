@@ -276,6 +276,24 @@ rule cluster_network:
     script: "scripts/cluster_network.py"
 
 
+rule augmented_line_connections:
+    input:
+        tech_costs=COSTS,
+        network='networks/elec_s{simpl}_{clusters}.nc',
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+    output:
+        network='networks/elec_s{simpl}_{clusters}.nc',
+        network_unmeshed='networks/elec_s{simpl}_{clusters}_no_augmented_connections.nc',
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+    log: "logs/augmented_line_connections/elec_s{simpl}_{clusters}.log"
+    benchmark: "benchmarks/augmented_line_connections/elec_s{simpl}_{clusters}"
+    threads: 1
+    resources: mem=3000
+    script: "scripts/augmented_line_connections.py"
+
+
 rule add_extra_components:
     input:
         network='networks/elec_s{simpl}_{clusters}.nc',

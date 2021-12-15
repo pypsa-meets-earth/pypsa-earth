@@ -28,6 +28,11 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
+augmented_line_connection:
+  connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: "HVDC"  # or "HVAC"
+  min_expansion: 1  # [MW]
+
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
   alternative_clustering: False
