@@ -65,7 +65,7 @@ dependencies:
   
   # Default solver for tests
   - glpk
-  - ipopt<3.13.3
+  - ipopt<=3.13.3
 
   - pip:
     - git+https://github.com/pydata/xarray@main # till the main is not in conda
