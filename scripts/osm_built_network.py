@@ -573,13 +573,13 @@ def built_network(inputs, outputs):
         no_data_countries = set(country_list).difference(set(bus_country_list))
         no_data_countries_shape = country_shapes[
             country_shapes.index.isin(no_data_countries)==True
-            ].reset_index()
+            ].reset_index().set_crs(4326)
         length = len(no_data_countries)
         df = gpd.GeoDataFrame({
             'voltage': [220000]*length,
             'country': no_data_countries_shape["name"],
-            'lon': no_data_countries_shape["geometry"].centroid.x,
-            'lat': no_data_countries_shape["geometry"].centroid.y,
+            'lon': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
+            'lat': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
             'bus_id': np.arange(len(buses)+1, len(buses)+(length+1), 1),
             'station_id': [np.nan]*4,
             'dc': [False]*length,
@@ -587,7 +587,8 @@ def built_network(inputs, outputs):
             'tag_area': [0.0]*length,
             'symbol': ["substation"]*length,
             'tag_substation': ["transmission"]*length,
-            'geometry': no_data_countries_shape["geometry"].centroid
+            'geometry': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
+            "substation_lv": [True]*length,
         })
         buses = gpd.GeoDataFrame(pd.concat([buses, df], ignore_index=True), crs=buses.geometry.crs)
 
