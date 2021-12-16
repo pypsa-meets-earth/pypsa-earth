@@ -41,6 +41,7 @@ import pypsa
 import shapely
 from _helpers import configure_logging
 from add_electricity import load_costs
+from base_network import _set_links_underwater_fraction
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import \
     k_edge_augmentation
@@ -64,7 +65,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("augmented_line_connections",
                                    network="elec",
                                    simpl="",
-                                   clusters="60")
+                                   clusters="10")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
@@ -123,6 +124,7 @@ if __name__ == "__main__":
             costs.at["HVDC overhead", "capital_cost"],
             carrier="DC",
             lifetime=costs.at["HVDC overhead", "lifetime"],
+            underwater_fraction=0.0,
         )
 
     if line_type_option == "HVAC":
@@ -140,5 +142,7 @@ if __name__ == "__main__":
             carrier="AC",
             lifetime=costs.at["HVAC overhead", "lifetime"],
         )
+
+        _set_links_underwater_fraction(n)
 
 n.export_to_netcdf(snakemake.output.network)
