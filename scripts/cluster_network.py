@@ -197,6 +197,11 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     if distribution_cluster == ["pop"]:
         df_pop = gpd.read_file(snakemake.input.raw_onshore_busregion)
+        if (df_pop["geometry"] == None).sum() > 0:
+            df_none_c = df_pop.loc[(df_pop["geometry"] == None),"country"]
+            country = list(df_none_c.unique())
+            logger.info(f"remove None shapes in {country}")
+            df_pop = df_pop.loc[(df_pop["geometry"] != None),:]
         df_pop_c = df_pop.loc[:, ("country", "geometry")]
         add_population_data(df_pop_c,
                             countries_list,
@@ -330,11 +335,11 @@ def busmap_for_n_clusters(n,
                           **algorithm_kwds):
     if algorithm == "kmeans":
         # 1000 for more accurate results; 100 for fast results
-        algorithm_kwds.setdefault("n_init", 100)
+        algorithm_kwds.setdefault("n_init", 1000)
         # 30000 for more accurate results; 3000 for fast results
-        algorithm_kwds.setdefault("max_iter", 3000)
+        algorithm_kwds.setdefault("max_iter", 30000)
         # 1e-6 for more accurate results; 1e-3 for fast results
-        algorithm_kwds.setdefault("tol", 1e-3)
+        algorithm_kwds.setdefault("tol", 1e-6)
 
     n.determine_network_topology()
     n.lines.at[:, "sub_network"] = "0"  # current fix
