@@ -248,8 +248,7 @@ world = {
         # 'LA': "lao people's democratic republic",
         "LB": "lebanon",
         "MO": "macao",
-        "MY-SG-BN":
-        "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
+        "MY-SG-BN": "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
         "MV": "maldives",
         "MN": "mongolia",
         "MM": "myanmar",
@@ -380,7 +379,8 @@ world = {
 
 world_countries = {
     country_2D: country_name
-    for d in world.values() for (country_2D, country_name) in d.items()
+    for d in world.values()
+    for (country_2D, country_name) in d.items()
 }
 
 continent_regions = {
@@ -435,24 +435,26 @@ continent_regions = {
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
     # Asian regions
-    "WAS": ["TR",  # TURKEY
-            "AM",  # ARMENIA
-            "AZ",  # AZERBAIJAN
-            "BH",  # BAHREIN
-            "CY",  # CYPRUS (NORTH AND SOUTH)
-            "GE",  # GEORGIA
-            "IQ",  # IRAQ
-            "IL-PL",  # ISRAEL AND PALESTINE
-            "JO",  # JORDAN
-            "KW",  # KUWAIT
-            "LB",  # LEBANON
-            "OM",  # OMAN
-            "PS",  # PALESTINE
-            "QA",  # QATAR
-            "SA",  # SAUDI ARABIA
-            "SY",  # SYRIA
-            "AE",  # UNITED ARAB EMIRATES
-            "YE"],  # YEMEN
+    "WAS": [
+        "TR",  # TURKEY
+        "AM",  # ARMENIA
+        "AZ",  # AZERBAIJAN
+        "BH",  # BAHREIN
+        "CY",  # CYPRUS (NORTH AND SOUTH)
+        "GE",  # GEORGIA
+        "IQ",  # IRAQ
+        "IL-PL",  # ISRAEL AND PALESTINE
+        "JO",  # JORDAN
+        "KW",  # KUWAIT
+        "LB",  # LEBANON
+        "OM",  # OMAN
+        "PS",  # PALESTINE
+        "QA",  # QATAR
+        "SA",  # SAUDI ARABIA
+        "SY",  # SYRIA
+        "AE",  # UNITED ARAB EMIRATES
+        "YE",
+    ],  # YEMEN
     # FAR EASTREN AISIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN"],
     # SOUTHEASTREN AISIAN REGION
