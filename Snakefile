@@ -222,10 +222,10 @@ rule add_electricity:
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
         powerplants='resources/powerplants.csv',
-        # hydro_capacities='data/bundle/hydro_capacities.csv',
-        # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
         gadm_shapes='resources/gadm_shapes.geojson',
+        # hydro_capacities='data/bundle/hydro_capacities.csv',
+        # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}
     output: "networks/elec.nc"
@@ -258,7 +258,7 @@ if (config['augmented_line_connection'].get('add_to_snakefile', False)==True):
     rule cluster_network:
         input:
             network='networks/elec_s{simpl}.nc',
-            raw_onshore_busregion="resources/regions_onshore.geojson",
+            country_shapes="resources/country_shapes.geojson",
             regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
@@ -296,7 +296,7 @@ if (config['augmented_line_connection'].get('add_to_snakefile', False)==False):
     rule cluster_network:
         input:
             network='networks/elec_s{simpl}.nc',
-            raw_onshore_busregion="resources/regions_onshore.geojson",
+            country_shapes="resources/country_shapes.geojson",
             regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
