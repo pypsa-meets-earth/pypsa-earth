@@ -196,13 +196,9 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         distribution_factor = L
 
     if distribution_cluster == ["pop"]:
-        df_pop = gpd.read_file(snakemake.input.raw_onshore_busregion)
-        if (df_pop["geometry"] == None).sum() > 0:
-            df_none_c = df_pop.loc[(df_pop["geometry"] == None),"country"]
-            country = list(df_none_c.unique())
-            logger.info(f"remove None shapes in {country}")
-            df_pop = df_pop.loc[(df_pop["geometry"] != None),:]
-        df_pop_c = df_pop.loc[:, ("country", "geometry")]
+        df_pop_c = gpd.read_file(
+            snakemake.input.country_shapes
+            ).rename(columns={"name": "country"})
         add_population_data(df_pop_c,
                             countries_list,
                             year,
@@ -214,8 +210,9 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         distribution_factor = P
 
     if distribution_cluster == ["gdp"]:
-        df_gdp = gpd.read_file(snakemake.input.raw_onshore_busregion)
-        df_gdp_c = df_gdp.loc[:, ("country", "geometry")]
+        df_gdp_c = gpd.read_file(
+            snakemake.input.country_shapes
+            ).rename(columns={"name": "country"})
         add_gdp_data(
             df_gdp_c,
             year,

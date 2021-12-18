@@ -32,7 +32,7 @@ rule solve_all_networks:
 
 
 datafiles = [
-        "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
+        "resources/ssp2-2.6/2050/era5_2013/Africa.nc",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
@@ -258,7 +258,7 @@ if (config['augmented_line_connection'].get('add_to_snakefile', False)==True):
     rule cluster_network:
         input:
             network='networks/elec_s{simpl}.nc',
-            raw_onshore_busregion="resources/regions_onshore.geojson",
+            country_shapes="resources/country_shapes.geojson",
             regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
@@ -296,7 +296,7 @@ if (config['augmented_line_connection'].get('add_to_snakefile', False)==False):
     rule cluster_network:
         input:
             network='networks/elec_s{simpl}.nc',
-            raw_onshore_busregion="resources/regions_onshore.geojson",
+            country_shapes="resources/country_shapes.geojson",
             regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
