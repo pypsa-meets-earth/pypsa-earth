@@ -198,7 +198,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     if distribution_cluster == ["pop"]:
         df_pop_c = gpd.read_file(
             snakemake.input.country_shapes
-            ).rename(columns={"name": "country"})
+        ).rename(columns={"name": "country"})
         add_population_data(df_pop_c,
                             countries_list,
                             year,
@@ -212,7 +212,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     if distribution_cluster == ["gdp"]:
         df_gdp_c = gpd.read_file(
             snakemake.input.country_shapes
-            ).rename(columns={"name": "country"})
+        ).rename(columns={"name": "country"})
         add_gdp_data(
             df_gdp_c,
             year,
