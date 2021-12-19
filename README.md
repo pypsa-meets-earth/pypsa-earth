@@ -216,5 +216,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <sub><b>Lukas Franken</b></sub>
         </a>
     </td></tr>
+<tr>
+    <td align="center">
+        <a href="https://github.com/EmreYorat">
+            <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
+            <br />
+            <sub><b>EmreYorat</b></sub>
+        </a>
+    </td></tr>
 </table>
 <!-- readme: collaborators,contributors -end -->
