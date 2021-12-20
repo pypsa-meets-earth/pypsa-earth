@@ -7,7 +7,6 @@ channels:
   - conda-forge/label/shapely_dev  # Until shapely 1.8+ is out of alpha
   - conda-forge
   - bioconda
-  - http://conda.anaconda.org/gurobi
 dependencies:
   - python>=3.8
   - pip
@@ -16,6 +15,7 @@ dependencies:
   - pypsa>=0.17.1
   - atlite>=0.2.4
   - dask<=2021.3.1 # until https://github.com/dask/dask/issues/7583 is solved
+  # - powerplantmatching>=0.4.8
 
   # Dependencies of the workflow itself
   - xlrd
@@ -39,7 +39,6 @@ dependencies:
   - pre-commit
   - pyomo
   - matplotlib
-  - openjdk
 
   # Keep in conda environment when calling ipython
   - ipython
@@ -63,6 +62,10 @@ dependencies:
 
   # Cloud download
   - googledrivedownloader
+  
+  # Default solver for tests
+  - glpk
+  - ipopt<=3.13.3
 
   - pip:
     - git+https://github.com/pydata/xarray@main # till the main is not in conda

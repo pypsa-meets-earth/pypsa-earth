@@ -26,7 +26,7 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
 
-    
+
 rule solve_all_networks:
     input: expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", **config['scenario'])
 
@@ -89,6 +89,7 @@ rule build_osm_network:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",
         substations="data/clean/africa_all_substations.geojson",
+        country_shapes='resources/country_shapes.geojson',
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
         substations="data/base_network/africa_all_buses_build_network.csv",
@@ -221,10 +222,10 @@ rule add_electricity:
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
         powerplants='resources/powerplants.csv',
-        # hydro_capacities='data/bundle/hydro_capacities.csv',
-        # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
         gadm_shapes='resources/gadm_shapes.geojson',
+        # hydro_capacities='data/bundle/hydro_capacities.csv',
+        # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}
     output: "networks/elec.nc"
@@ -253,26 +254,66 @@ rule simplify_network:
     script: "scripts/simplify_network.py"
 
 
-rule cluster_network:
-    input:
-        network='networks/elec_s{simpl}.nc',
-        regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
-        regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
-        # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
-        # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-        #                if config["enable"].get("custom_busmap", False) else []),
-        tech_costs=COSTS
-    output:
-        network='networks/elec_s{simpl}_{clusters}.nc',
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-        busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
-        linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
-    log: "logs/cluster_network/elec_s{simpl}_{clusters}.log"
-    benchmark: "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
-    threads: 1
-    resources: mem=3000
-    script: "scripts/cluster_network.py"
+if (config['augmented_line_connection'].get('add_to_snakefile', False)==True):
+    rule cluster_network:
+        input:
+            network='networks/elec_s{simpl}.nc',
+            country_shapes="resources/country_shapes.geojson",
+            regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
+            regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
+            # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
+            # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+            #                if config["enable"].get("custom_busmap", False) else []),
+            tech_costs=COSTS
+        output:
+            network='networks/elec_s{simpl}_{clusters}_pre_augmentation.nc',
+            regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+            busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
+            linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
+        log: "logs/cluster_network/elec_s{simpl}_{clusters}.log"
+        benchmark: "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources: mem=3000
+        script: "scripts/cluster_network.py"
+
+    rule augmented_line_connections:
+        input:
+            tech_costs=COSTS,
+            network='networks/elec_s{simpl}_{clusters}_pre_augmentation.nc',
+            regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            network='networks/elec_s{simpl}_{clusters}.nc',
+        log: "logs/augmented_line_connections/elec_s{simpl}_{clusters}.log"
+        benchmark: "benchmarks/augmented_line_connections/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources: mem=3000
+        script: "scripts/augmented_line_connections.py"
+
+
+if (config['augmented_line_connection'].get('add_to_snakefile', False)==False):
+    rule cluster_network:
+        input:
+            network='networks/elec_s{simpl}.nc',
+            country_shapes="resources/country_shapes.geojson",
+            regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
+            regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
+            # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
+            # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+            #                if config["enable"].get("custom_busmap", False) else []),
+            tech_costs=COSTS
+        output:
+            network='networks/elec_s{simpl}_{clusters}.nc',
+            regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+            busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
+            linemap="resources/linemap_elec_s{simpl}_{clusters}.csv"
+        log: "logs/cluster_network/elec_s{simpl}_{clusters}.log"
+        benchmark: "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources: mem=3000
+        script: "scripts/cluster_network.py"
 
 
 rule add_extra_components:

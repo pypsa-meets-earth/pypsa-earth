@@ -102,7 +102,7 @@ def download_pbf(country_code, update, verify):
                 os.remove(PBF_inputfile)
 
             # Only try downloading once
-            download_pbf(country_code, update=False)
+            download_pbf(country_code, update=False, verify=False)
 
     return PBF_inputfile
 
@@ -199,25 +199,25 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     elementname = f"{country_code}_{feature}s"
 
+    new_prefilter_data = True
+
     # Load Previously Pre-Filtered Files
     if update is False and verify is False and filter_file_exists is True:
         create_elements = True  # Do not create elements again
-        # TODO: There is a bug somewhere, the line above create_elements should be set to False and the elements loaded from the pickle
+        new_prefilter_data = False
+        
+        # folder path
+        folder_path = os.path.realpath(
+                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile)))
+        
+        # path of the Data.pickle used by run_filter
+        file_pickle = os.path.join(folder_path, "Data.pickle")
 
-        # ElementsDict = {elementname:{}}
-        # Elements = osm_pickle.pickleload(ElementsDict,os.path.join(os.getcwd(),os.path.dirname(JSON_outputfile), 'Elements'))
+        # path of the backup file
+        file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
 
-        new_prefilter_data = False  # Do not pre-filter data again
-        # HACKY: esy.osmfilter code to re-create Data.pickle
-        # with open(JSON_outputfile,encoding="utf-8") as f:
-        #     Data = json.load(f)
-        Data = osm_info.ReadJason(JSON_outputfile, verbose="no")
-        DataDict = {"Data": Data}
-        osm_pickle.picklesave(
-            DataDict,
-            os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile))),
-        )
+        # copy backup pickle into Data.pickle
+        shutil.copyfile(file_stored_pickle, file_pickle)
 
         _logger.info(f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}")
         # feature_data = Data, Elements
@@ -229,8 +229,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             new_prefilter_data = True
             _logger.info(f"Pre-filtering {country_name} ")
             pre_filtered.append(country_code)
-        else:
-            new_prefilter_data = False
+        
         _logger.info(f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}")
 
     prefilter = {
@@ -268,6 +267,19 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         verbose=False,
         multiprocess=True,
     )
+
+    # if new_prefilter_data, the prefiltering is performed and the Data.pickle for the country is created;
+    # save a backup file
+    if new_prefilter_data:
+        folder_path = os.path.realpath(
+                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile)))
+        file_pickle = os.path.join(folder_path, "Data.pickle")
+        file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
+        # store pickle country
+        shutil.copyfile(file_pickle, file_stored_pickle)
+    
+    # delete pickle to avoid issues
+    os.remove(file_pickle)
 
     logging.disable(logging.NOTSET
                     )  # Re-enable logging as run_filter disables logging.INFO
@@ -461,9 +473,12 @@ def process_data(feature_list, country_list, output_files,
     # loop the request for each feature
 
     for feature in feature_list:  # feature dataframe
-
-        # list of dataframes
+        
         df_list = []
+
+        # initialize dataframe
+        # df_all_feature = pd.DataFrame()
+
         for country_code_isogeofk in country_list:
 
             country_code = convert_iso_to_geofk(country_code_isogeofk,
@@ -499,7 +514,9 @@ def process_data(feature_list, country_list, output_files,
 
             df_list.append(df_feature)
 
-        df_all_feature = pd.concat(df_list)
+            # df_all_feature = pd.concat([df_all_feature, df_feature], ignore_index=True)
+        
+        df_all_feature = pd.concat(df_list, ignore_index=True)
 
         output_csv_geojson(output_files, country_code, df_all_feature,
                            feature_columns[feature], feature)

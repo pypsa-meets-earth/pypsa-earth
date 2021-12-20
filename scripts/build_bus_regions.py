@@ -101,8 +101,10 @@ def custom_voronoi_partition_pts(points,
 
     points = np.asarray(points)
 
+    polygons_arr = []
+
     if len(points) == 1:
-        polygons = [outline]
+        polygons_arr = [outline]
     else:
 
         xmin, ymin = np.amin(points, axis=0)
@@ -132,7 +134,7 @@ def custom_voronoi_partition_pts(points,
                 ],
             )))
 
-        polygons = []
+        polygons_arr = np.empty((len(points), ), "object")
         for i in range(len(points)):
             poly = Polygon(vor.vertices[vor.regions[vor.point_region[i]]])
 
@@ -141,10 +143,8 @@ def custom_voronoi_partition_pts(points,
 
             poly = poly.intersection(outline)
 
-            polygons.append(poly)
+            polygons_arr[i] = poly
 
-    polygons_arr = np.empty((len(polygons), ), "object")
-    polygons_arr[:] = polygons
     return polygons_arr
 
 
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
         # print(onshore_locs.values)
-        if snakemake.config["alternative_clustering"]:
+        if snakemake.config["cluster_options"]["alternative_clustering"]:
             onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
             shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
         else:

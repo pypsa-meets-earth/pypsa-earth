@@ -5,6 +5,7 @@ import sys
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import _read_geojson
@@ -13,6 +14,8 @@ from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
 from shapely.ops import unary_union
+from tqdm import tqdm
+from osm_pbf_power_data_extractor import create_country_list
 
 logger = logging.getLogger(__name__)
 
@@ -106,8 +109,8 @@ def add_line_endings_tosubstations(substations, lines):
     return buses
 
 
-# tol=0.01, around 700m at latitude 44.
-def set_substations_ids(buses, tol=0.02):
+# tol in m
+def set_substations_ids(buses, tol=2000):
     """
     Function to set substations ids to buses, accounting for location tolerance
 
@@ -125,13 +128,25 @@ def set_substations_ids(buses, tol=0.02):
 
     buses["station_id"] = -1
 
+    # create temporary series to execute distance calculations using m as reference distances
+    temp_bus_geom = buses.geometry.to_crs(3736)
+    
+    # set tqdm options for substation ids
+    tqdm_kwargs_substation_ids = dict(
+        ascii=False,
+        unit=" buses",
+        total=buses.shape[0],
+        desc="Set substation ids ",
+    )
+
     station_id = 0
-    for i, row in buses.iterrows():
+    for i, row in tqdm(buses.iterrows(), **tqdm_kwargs_substation_ids):
         if buses.loc[i, "station_id"] >= 0:
             continue
 
         # get substations within tolerance
-        close_nodes = np.flatnonzero(buses.geometry.distance(row["geometry"]) <= tol)
+        close_nodes = np.flatnonzero(
+            temp_bus_geom.distance(temp_bus_geom.loc[i]) <= tol)
 
         # print("set_substations_ids: ", i, "/", buses.shape[0])
 
@@ -174,12 +189,20 @@ def set_lines_ids(lines, buses):
     Function to set line buses ids to the closest bus in the list
 
     """
+    
+    # set tqdm options for set lines ids
+    tqdm_kwargs_line_ids = dict(
+        ascii=False,
+        unit=" lines",
+        total=lines.shape[0],
+        desc="Set line bus ids ",
+    )
 
     # initialization
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    for i, row in lines.iterrows():
+    for i, row in tqdm(lines.iterrows(), **tqdm_kwargs_line_ids):
 
         # print("set_lines_ids: ", i, "/", lines.shape[0])
 
@@ -410,17 +433,23 @@ def set_lv_substations(buses):
 #       respect to a node
 
 
-def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
+def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
+    
+    logger.info("Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol/1000))
 
     # set substation ids
     set_substations_ids(buses, tol=tol)
+    
+    logger.info("Stage 3b/4: Merge substations with the same id")
 
     # merge buses with same station id and voltage
     buses = merge_stations_same_station_id(buses)
+    
+    logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses)
@@ -433,6 +462,8 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
 
     # set substation_lv
     set_lv_substations(buses)
+    
+    logger.info("Stage 3d/4: Add transformers")
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
@@ -446,7 +477,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=0.06):
     return lines, buses
 
 
-def create_station_at_equal_bus_locations(lines, buses, tol=0.01):
+def create_station_at_equal_bus_locations(lines, buses, tol=2000):
     # V1. Create station_id at same bus location
     # - We saw that buses are not connected exactly at one point, they are
     #   usually connected to a substation "area" (analysed on maps)
@@ -494,15 +525,16 @@ def create_station_at_equal_bus_locations(lines, buses, tol=0.01):
 
 def built_network(inputs, outputs):
     # ----------- LOAD DATA -----------
+    logger.info("Stage 1/4: Read input data")
+
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
                                                                inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
     generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
                                                              inplace=True)
 
-    # Filter only Nigeria
-    # lines = lines[lines.loc[:,"country"] == "nigeria"].copy()
-    # substations = substations[substations.loc[:,"country"] == "nigeria"].copy()
+    
+    logger.info("Stage 2/4: Add line endings to the substation datasets")
 
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
@@ -516,18 +548,51 @@ def built_network(inputs, outputs):
 
     # METHOD 2 - Use interference method
     # TODO: Add and test other method (ready in jupyter)
+    
+    logger.info("Stage 3/4: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
-    lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
+    if snakemake.config["osm_data_cleaning_options"]["group_close_buses"]:
+        lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                   buses,
-                                                                  tol=0.05)
+                                                                  tol=4000)
 
-    # Export data
-    # Lines
-    # Output file directory
-    # outputfile_partial = os.path.join(
-    #     os.getcwd(), "data", "base_network",
-    #     "africa_all" + "_lines" + "_build_network")
+    logger.info("Stage 4/4: Add augmented substation to country with no data")
+    
+    country_shapes_fn = snakemake.input.country_shapes
+    country_shapes = (
+        gpd.read_file(country_shapes_fn)
+        .set_index("name")["geometry"]
+        .set_crs(4326)
+    )
+    input = snakemake.config["countries"]
+    country_list = create_country_list(input)
+    bus_country_list = buses["country"].unique().tolist() 
+
+    if len(bus_country_list) != len(country_list):
+        no_data_countries = set(country_list).difference(set(bus_country_list))
+        no_data_countries_shape = country_shapes[
+            country_shapes.index.isin(no_data_countries)==True
+            ].reset_index().set_crs(4326)
+        length = len(no_data_countries)
+        df = gpd.GeoDataFrame({
+            'voltage': [220000]*length,
+            'country': no_data_countries_shape["name"],
+            'lon': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
+            'lat': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
+            'bus_id': np.arange(len(buses)+1, len(buses)+(length+1), 1),
+            'station_id': [np.nan]*4,
+            'dc': [False]*length,
+            'under_construction': [False]*length,
+            'tag_area': [0.0]*length,
+            'symbol': ["substation"]*length,
+            'tag_substation': ["transmission"]*length,
+            'geometry': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
+            "substation_lv": [True]*length,
+        })
+        buses = gpd.GeoDataFrame(pd.concat([buses, df], ignore_index=True), crs=buses.geometry.crs)
+
+    logger.info("Save outputs")
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["lines"]):

@@ -463,7 +463,7 @@ def _set_countries_and_substations(n):
     # and need to be adjusted. What values should we put in?
     # .str.contains("substation|converter station",
     substation_b = buses["symbol"].str.contains("substation|converter station",
-                                                case=False)
+                                                 case=False)
 
     #                                             case=False)
 
@@ -531,8 +531,8 @@ def _set_countries_and_substations(n):
         geometry=gpd.points_from_xy(bus_locations.x, bus_locations.y),
         crs=4326,
     )
-    offshore_b = bus_locations.within(
-        offshore_shapes)  # Check if bus is in shape
+    # Check if bus is in shape
+    offshore_b = bus_locations.within(offshore_shapes)
 
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
@@ -695,7 +695,7 @@ def _rebase_voltage_to_config(component):
 
 
 def base_network():
-    buses = _load_buses_from_osm()
+    buses = _load_buses_from_osm().reset_index()
 
     # links = _load_links_from_eg(buses)
     # if snakemake.config["links"].get("include_tyndp"):

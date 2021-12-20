@@ -24,6 +24,7 @@ jobs:
         os:
         - ubuntu-latest
         - macos-latest
+        - windows-latest
 
     defaults:
       run:
@@ -43,7 +44,6 @@ jobs:
     - name: Install dependencies  
       run: |
         echo -ne "url: ${CDSAPI_URL}\nkey: ${CDSAPI_TOKEN}\n" > ~/.cdsapirc
-        echo -e "  - glpk\n  - ipopt<3.13.3" >> envs/environment.yaml
         mamba env update -f envs/environment.yaml --name test
         
     - name: Test snakemake workflow
