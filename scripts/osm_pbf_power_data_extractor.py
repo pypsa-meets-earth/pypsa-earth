@@ -176,24 +176,25 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     continent, country_name = getContinentCountry(country_code)
 
-    filter_file_exists = False
+    # folder path
+    folder_path = os.path.join(os.getcwd(), "data", "osm", continent)
+    
+    # path of the Data.pickle used by run_filter
+    file_pickle = os.path.join(folder_path, "Data.pickle")
+
+    # path of the backup file
+    file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
+
+
     # json file for the Data dictionary
-    JSON_outputfile = os.path.join(os.getcwd(), "data", "osm", continent,
-                                   country_code + "_power.json")
+    JSON_outputfile = os.path.join(folder_path, country_code + "_power.json")
     # json file for the Elements dictionary is automatically written to "data/osm/Elements"+filename)
 
-    if os.path.exists(JSON_outputfile):
+    # check if data have already been processed or not
+    filter_file_exists = False
+    if os.path.exists(file_stored_pickle):
         filter_file_exists = True
-
-    if not os.path.exists(
-            os.path.join(
-                os.getcwd(),
-                "data",
-                "osm",
-                continent,
-                "Elements",
-                country_code + f"_{feature}s.json",
-            )):
+    else:
         _logger.warning("Element file not found so pre-filtering")
         filter_file_exists = False
 
@@ -205,16 +206,6 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     if update is False and verify is False and filter_file_exists is True:
         create_elements = True  # Do not create elements again
         new_prefilter_data = False
-        
-        # folder path
-        folder_path = os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile)))
-        
-        # path of the Data.pickle used by run_filter
-        file_pickle = os.path.join(folder_path, "Data.pickle")
-
-        # path of the backup file
-        file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
 
         # copy backup pickle into Data.pickle
         shutil.copyfile(file_stored_pickle, file_pickle)
@@ -271,15 +262,11 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     # if new_prefilter_data, the prefiltering is performed and the Data.pickle for the country is created;
     # save a backup file
     if new_prefilter_data:
-        folder_path = os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(JSON_outputfile)))
-        file_pickle = os.path.join(folder_path, "Data.pickle")
-        file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
-        # store pickle country
-        shutil.copyfile(file_pickle, file_stored_pickle)
-    
-    # delete pickle to avoid issues
-    os.remove(file_pickle)
+        if os.path.exists(file_stored_pickle):
+            os.remove(file_pickle)
+        else:
+            # rename and store pickle country
+            os.rename(file_pickle, file_stored_pickle)
 
     logging.disable(logging.NOTSET
                     )  # Re-enable logging as run_filter disables logging.INFO
