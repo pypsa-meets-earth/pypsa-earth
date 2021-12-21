@@ -208,8 +208,11 @@ rule build_powerplants:
     input:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/clean/africa_all_generators.csv"
-    output: "resources/powerplants.csv"
+        custom_powerplants="data/clean/africa_all_generators.csv",
+        osm_powerplants="data/clean/africa_all_generators.csv",
+    output:
+        powerplants="resources/powerplants.csv",
+        powerplants_osm2pm="resources/powerplants_osm2pm.csv",
     log: "logs/build_powerplants.log"
     threads: 1
     resources: mem=500
