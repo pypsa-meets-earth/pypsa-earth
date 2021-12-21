@@ -3,17 +3,27 @@ entsoe_token:
 google_api_key:
 opsd_vres_base_year: 2016
 
+hash: pypsa-africa
+
 
 #matching config
 matching_sources:
   - CARMA
   - GEO
   - GPD
+  - EXTERNAL_DATABASE
 
 fully_included_sources:
   - CARMA
   - GEO
   - GPD
+  - EXTERNAL_DATABASE
+
+
+EXTERNAL_DATABASE:
+  reliability_score: 5
+  store_locally: false
+  fn: /data/davidef/git/pypsa-africa/resources/powerplants_osm2pm.csv  # MODIFIED_BY_WORKFLOW
 
 
 parallel_duke_processes: false
