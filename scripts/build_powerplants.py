@@ -72,8 +72,114 @@ import yaml
 from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
+from _helpers import _read_csv_nafix, _to_csv_nafix
 
 logger = logging.getLogger(__name__)
+
+
+def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
+
+    add_ppls = _read_csv_nafix(
+        filepath_ppl_osm,
+        index_col=0,
+        dtype={"bus": "str"})
+
+    custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
+    add_ppls = (
+        add_ppls.rename(
+            columns={
+                "id": "Name",
+                "tags.generator:source": "Fueltype",
+                "tags.generator:type": "Technology",
+                "tags.power": "Set",
+                "power_output_MW": "Capacity",
+            }).replace(
+                dict(
+                    Fueltype={
+                        "nuclear": "Nuclear",
+                        "wind": "Wind",
+                        "hydro": "Hydro",
+                        "tidal": "Other",
+                        "wave": "Other",
+                        "geothermal": "Geothermal",
+                        "solar": "Solar",
+                        # "Hard Coal" follows defauls of PPM
+                        "coal": "Hard Coal",
+                        "gas": "Natural Gas",
+                        "biomass": "Bioenergy",
+                        "biofuel": "Bioenergy",
+                        "biogas": "Bioenergy",
+                        "oil": "Oil",
+                        "diesel": "Oil",
+                        "gasoline": "Oil",
+                        "waste": "Waste",
+                        "osmotic": "Other",
+                        "wave": "Other",
+                    },
+                    Technology={
+                        "combined_cycle": "CCGT",
+                        "gas_turbine": "OCGT",
+                        "steam_turbine": "Steam Turbine",
+                        "reciprocating_engine": "Combustion Engine",
+                        # a very strong assumption
+                        "wind_turbine": "Onshore",
+                        "horizontal_axis": "Onshore",
+                        "vertical_axis": "Offhore",
+                        "solar_photovoltaic_panel": "Pv",
+                    },
+                    Set={
+                        "generator": "PP",
+                        "plant": "PP"
+                    },
+                )).assign(
+                    Efficiency="",
+                    Duration="",
+                    Volume_Mm3="",
+                    DamHeight_m="",
+                    StorageCapacity_MWh="",
+                    DateIn="",
+                    DateRetrofit="",
+                    DateMothball="",
+                    DateOut="",
+                    lat=custom_ppls_coords.y,
+                    lon=custom_ppls_coords.x,
+                    EIC="",
+                    projectID=lambda df: "OSM" + df.id.astype(str),
+                ))
+
+    # All Hydro objects can be interpreted by PPM as Storages, too
+    # However, everithing extracted from OSM seems to belong
+    # to power plants with "tags.power" == "generator" only
+    osm_ppm_df = pd.DataFrame(
+        data={
+            "osm_method":
+            ["run-of-the-river", "water-pumped-storage", "water-storage"],
+            "ppm_technology": ["Run-Of-River", "Pumped Storage", "Reservoir"],
+        })
+    for i in osm_ppm_df.index:
+        add_ppls.loc[add_ppls["tags.generator:method"] == osm_ppm_df.loc[
+            i, "osm_method"],
+                     "Technology", ] = osm_ppm_df.loc[i, "ppm_technology"]
+
+    # originates from osm::"tags.generator:source"
+    add_ppls.loc[add_ppls["Fueltype"] == "Nuclear",
+                 "Technology"] = "Steam Turbine"
+
+    # PMM contains data on NG, batteries and hydro storages
+    # trying to catch some of them...
+    # originates from osm::"tags.generator:source"
+    add_ppls.loc[add_ppls["Fueltype"] == "battery", "Set"] = "Store"
+    # originates from osm::tags.generator:type
+    add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
+
+    add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
+        columns=["tags.generator:method", "geometry", "Area", "country"])
+
+
+    _to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
+
+    return add_ppls
+
 
 
 def add_custom_powerplants(ppl):
@@ -193,12 +299,21 @@ if __name__ == "__main__":
     with open(snakemake.input.pm_config, "r") as f:
         config = yaml.safe_load(f)
 
+    filepath_osm_ppl = snakemake.input.osm_powerplants
+    filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
+
+    csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
+
     n = pypsa.Network(snakemake.input.base_network)
     countries = n.buses.country.unique()
     config["target_countries"] = countries
 
+    # if "EXTERNAL_DATABASE" in config:
+    #     config["EXTERNAL_DATABASE"]["fn"] = os.path.join(os.getcwd(), filepath_osm2pm_ppl)
+
     ppl = (pm.powerplants(
         from_url=False,
+        update_all=True,
         config=config).powerplant.fill_missing_decommyears().query(
             'Fueltype not in ["Solar", "Wind"] and Country in @countries').
            replace({
@@ -237,4 +352,4 @@ if __name__ == "__main__":
         logging.warning(
             f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
-    ppl.to_csv(snakemake.output[0])
+    ppl.to_csv(snakemake.output.powerplants)
