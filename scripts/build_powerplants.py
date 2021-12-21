@@ -171,9 +171,9 @@ def add_custom_powerplants(ppl):
     add_ppls.loc[add_ppls["Fueltype"] == "battery", "Set"] = "Store"
     # originates from osm::tags.generator:type
     add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
-    add_ppls.replace(dict(Fueltype={"battery": "Other"}))
 
-    add_ppls.drop(columns=["tags.generator:method", "geometry"])
+    add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
+        columns=["tags.generator:method", "geometry", "Area"])
 
     return ppl.append(add_ppls,
                       sort=False,
