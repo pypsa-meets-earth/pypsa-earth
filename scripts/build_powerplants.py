@@ -132,6 +132,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                         "plant": "PP"
                     },
                 )).assign(
+                    Name="",
                     Efficiency="",
                     Duration="",
                     Volume_Mm3="",
@@ -144,7 +145,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     lat=custom_ppls_coords.y,
                     lon=custom_ppls_coords.x,
                     EIC="",
-                    projectID=lambda df: "OSM" + df.id.astype(str),
+                    projectID=lambda df: "OSM" + df.index.astype(str),
                 ))
 
     # All Hydro objects can be interpreted by PPM as Storages, too
