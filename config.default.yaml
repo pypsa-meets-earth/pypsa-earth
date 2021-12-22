@@ -25,7 +25,7 @@ countries: ["africa"]
   # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']
 
   ### WEST-ASIA, /MIDDLE EAST - more at /scripts/osm_data_config.py
-  # ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL-PL", "JO", 
+  # ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL-PL", "JO",
   # "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"]
 
 augmented_line_connection:
