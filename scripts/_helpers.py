@@ -315,9 +315,9 @@ def mock_snakemake(rulename, **wildcards):
     try:
         rule = workflow.get_rule(rulename)
     except Exception as exception:
-        print(exception, 
-        f"The {rulename} might be a conditional rule in the Snakefile.\n"
-        f"Did you enable {rulename} in the config?")
+        print(exception,
+              f"The {rulename} might be a conditional rule in the Snakefile.\n"
+              f"Did you enable {rulename} in the config?")
         raise
     dag = sm.dag.DAG(workflow, rules=[rule])
     wc = Dict(wildcards)
@@ -471,8 +471,8 @@ def _country_name_2_two_digits(country_name):
         2-digit country name
     """
     if (country_name ==
-            f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
-        ):
+                f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
+            ):
         return "SN-GM"
 
     full_name = _get_country("alpha_2", name=country_name)

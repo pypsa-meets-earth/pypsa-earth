@@ -174,7 +174,8 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
                                  costs.at["solar-utility", "capital_cost"])
 
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+        capital_cost = link1["capital_cost"] + \
+            max_hours * store["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
@@ -260,7 +261,9 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     gegis_load *= scale
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
-    shapes.loc[:,"geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
+    shapes.loc[:, "geometry"] = shapes["geometry"].apply(
+        lambda x: make_valid(x))
+
     def upsample(cntry, group):
         l = gegis_load.loc[gegis_load.region_code ==
                            cntry]["Electricity demand"]
@@ -273,10 +276,10 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
                                                normed=False).T.tocsr()
             gdp_n = pd.Series(transfer.dot(
                 shapes_cntry["gdp"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
             pop_n = pd.Series(transfer.dot(
                 shapes_cntry["pop"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to continent load data
@@ -295,7 +298,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         ],
         axis=1,
     )
-    
+
     n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
 
 
@@ -342,10 +345,10 @@ def attach_wind_and_solar(n, costs):
             extendable = ren_config["extendable"]
 
         n.add("Carrier", name=tech)
-        
+
         with xr.open_dataset(getattr(snakemake.input,
                                      "profile_" + tech)) as ds:
-                                     
+
             if ds.indexes["bus"].empty:
                 continue
 
@@ -426,7 +429,8 @@ def attach_hydro(n, costs, ppl):
         index=lambda s: str(s) + " hydro"))
 
     # TODO: remove this line to address nan when powerplantmatching is stable
-    ppl.loc[ppl.technology.isna(), 'technology'] = "Run-Of-River" # NaN technologies set to ROR
+    # NaN technologies set to ROR
+    ppl.loc[ppl.technology.isna(), 'technology'] = "Run-Of-River"
 
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
@@ -715,7 +719,8 @@ if __name__ == "__main__":
 
     update_transmission_costs(n, costs)
 
-    attach_conventional_generators(n, costs, ppl)  # uncomment out when powerplantmatching is stable
+    # uncomment out when powerplantmatching is stable
+    attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
     # attach_hydro(n, costs, ppl)  # uncomment out when powerplantmatching is stable
     # attach_extendable_generators(n, costs, ppl) # uncomment out when powerplantmatching is stable
