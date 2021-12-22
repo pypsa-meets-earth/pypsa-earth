@@ -25,7 +25,7 @@ countries: ["africa"]
   # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']
 
   ### WEST-ASIA, /MIDDLE EAST - more at /scripts/osm_data_config.py
-  # ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL-PL", "JO", 
+  # ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL-PL", "JO",
   # "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"]
 
 augmented_line_connection:
@@ -159,7 +159,7 @@ renewable:
     resource:
       method: wind
       turbine: Vestas_V112_3MW
-    capacity_per_sqkm: 3 # ScholzPhd Tab 4.3.1: 10MW/km^2
+    capacity_per_sqkm: 2 # ScholzPhd Tab 4.3.1: 10MW/km^2
     # correction_factor: 0.93
     corine:
       # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
@@ -177,7 +177,7 @@ renewable:
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
-    capacity_per_sqkm: 3
+    capacity_per_sqkm: 2
     # correction_factor: 0.93
     corine: [44, 255]
     natura: true
