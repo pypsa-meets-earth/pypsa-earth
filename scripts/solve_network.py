@@ -133,7 +133,7 @@ def prepare_network(n, solve_opts):
     if solve_opts.get("nhours"):
         nhours = solve_opts["nhours"]
         n.set_snapshots(n.snapshots[:nhours])
-        n.snapshot_weightings[:] = 8760.0 / nhours
+        n.snapshot_weightings[:] = 8760. / nhours
 
     return n
 
