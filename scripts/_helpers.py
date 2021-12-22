@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+import os
 from pathlib import Path
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import os
-import geopandas as gpd
 
 
 def _sets_path_to_root(root_directory_name):
