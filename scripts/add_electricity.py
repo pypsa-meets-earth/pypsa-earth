@@ -98,7 +98,6 @@ from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
 from vresutils.load import timeseries_opsd
-from osm_pbf_power_data_extractor import create_country_list
 
 idx = pd.IndexSlice
 
@@ -260,7 +259,9 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     gegis_load *= scale
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
-    shapes.loc[:,"geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
+    shapes.loc[:,
+               "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
+
     def upsample(cntry, group):
         l = gegis_load.loc[gegis_load.region_code ==
                            cntry]["Electricity demand"]
@@ -295,7 +296,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         ],
         axis=1,
     )
-    
+
     n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
 
 
@@ -342,10 +343,10 @@ def attach_wind_and_solar(n, costs):
             extendable = ren_config["extendable"]
 
         n.add("Carrier", name=tech)
-        
+
         with xr.open_dataset(getattr(snakemake.input,
                                      "profile_" + tech)) as ds:
-                                     
+
             if ds.indexes["bus"].empty:
                 continue
 
@@ -426,7 +427,8 @@ def attach_hydro(n, costs, ppl):
         index=lambda s: str(s) + " hydro"))
 
     # TODO: remove this line to address nan when powerplantmatching is stable
-    ppl.loc[ppl.technology.isna(), 'technology'] = "Run-Of-River" # NaN technologies set to ROR
+    # NaN technologies set to ROR
+    ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
 
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
@@ -446,11 +448,11 @@ def attach_hydro(n, costs, ppl):
                 f"inflow time-series for at least one bus: {', '.join(missing_c)}"
             )
 
-            inflow_t = inflow.sel(plant=inflow_stations).rename({
+            inflow_t = (inflow.sel(plant=inflow_stations).rename({
                 "plant":
                 "name"
-            }).assign_coords(name=inflow_idx).transpose(
-                "time", "name").to_pandas()
+            }).assign_coords(name=inflow_idx).transpose("time",
+                                                        "name").to_pandas())
 
     if "ror" in carriers and not ror.empty:
         n.madd(
@@ -699,7 +701,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
-    Nyears = n.snapshot_weightings.sum().values[0] / 8760.0
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
 
     # Snakemake imports:
     regions = snakemake.input.regions
@@ -715,7 +717,8 @@ if __name__ == "__main__":
 
     update_transmission_costs(n, costs)
 
-    attach_conventional_generators(n, costs, ppl)  # uncomment out when powerplantmatching is stable
+    # uncomment out when powerplantmatching is stable
+    attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
     # attach_hydro(n, costs, ppl)  # uncomment out when powerplantmatching is stable
     # attach_extendable_generators(n, costs, ppl) # uncomment out when powerplantmatching is stable

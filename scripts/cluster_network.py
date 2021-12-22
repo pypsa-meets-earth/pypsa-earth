@@ -528,8 +528,9 @@ if __name__ == "__main__":
             n, busmap, linemap, linemap, pd.Series(dtype="O"))
     else:
         line_length_factor = snakemake.config["lines"]["length_factor"]
+        Nyears = n.snapshot_weightings.objective.sum() / 8760
         hvac_overhead_cost = load_costs(
-            n.snapshot_weightings.sum() / 8760,
+            Nyears,
             tech_costs=snakemake.input.tech_costs,
             config=snakemake.config["costs"],
             elec_config=snakemake.config["electricity"],
