@@ -158,8 +158,9 @@ def _prepare_connection_costs_per_link(n):
     if n.links.empty:
         return {}
 
+    Nyears = n.snapshot_weightings.objective.sum() / 8760
     costs = load_costs(
-        n.snapshot_weightings.sum() / 8760,
+        Nyears,
         snakemake.input.tech_costs,
         snakemake.config["costs"],
         snakemake.config["electricity"],
