@@ -701,7 +701,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
-    Nyears = n.snapshot_weightings.objective.sum().values[0] / 8760.0
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
 
     # Snakemake imports:
     regions = snakemake.input.regions
