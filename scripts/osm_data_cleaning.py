@@ -669,10 +669,10 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = (gpd.read_file(
             snakemake.input.country_shapes).set_index("name")
-                          ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         offshore_shapes = (gpd.read_file(
             snakemake.input.offshore_shapes).set_index("name")
-                           ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes)
     else:
