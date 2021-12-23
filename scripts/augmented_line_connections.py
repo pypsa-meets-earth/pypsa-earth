@@ -31,14 +31,10 @@ Description
 import logging
 import os
 
-import geopandas as gpd
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import pyomo.environ as po
 import pypsa
-import shapely
 from _helpers import configure_logging
 from add_electricity import load_costs
 from base_network import _set_links_underwater_fraction
