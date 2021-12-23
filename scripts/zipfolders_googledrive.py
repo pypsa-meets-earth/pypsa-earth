@@ -5,9 +5,10 @@
 Module to zip the desired folders to be stored in google drive, or equivalent
 """
 
-import zipfile
 import os
+import zipfile
 from os.path import basename
+
 from _helpers import _sets_path_to_root
 
 # Zip the files from given directory that matches the filter
