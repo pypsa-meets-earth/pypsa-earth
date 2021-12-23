@@ -62,7 +62,6 @@ if config['enable'].get('download_osm_data', True):
             generators_csv="data/raw/africa_all_raw_generators.csv",
             lines="data/raw/africa_all_raw_lines.geojson",
             substations="data/raw/africa_all_raw_substations.geojson",
-            plants="data/raw/africa_all_raw_plants.geojson",
         log: "logs/download_osm_data.log"
         script: "scripts/osm_pbf_power_data_extractor.py"
 
