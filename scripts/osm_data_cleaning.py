@@ -11,6 +11,10 @@ from _helpers import _save_to_geojson
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from shapely.ops import unary_union
+
+# from shapely.geometry import LineString, Point, Polygon
+# from osm_data_config import AFRICA_CC
 
 logger = logging.getLogger(__name__)
 
