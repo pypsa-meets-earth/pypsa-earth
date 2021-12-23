@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
 Module to zip the desired folders to be stored in google drive, or equivalent
 """
