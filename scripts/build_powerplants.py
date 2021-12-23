@@ -184,6 +184,9 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
 
 def add_custom_powerplants(ppl):
+    if "custom_powerplants" not in snakemake.config['electricity']:
+        return ppl
+    
     custom_ppl_query = snakemake.config['electricity']['custom_powerplants']
     if not custom_ppl_query:
         return ppl
