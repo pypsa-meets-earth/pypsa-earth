@@ -7,6 +7,8 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from _helpers import _save_to_geojson
+from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
 from _helpers import _save_to_geojson
@@ -287,9 +289,14 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
     
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
-        sel_ids = (df[cl_name].str.contains(";") == True)
-        # TODO: split multiple cell need probably fix
+        sel_ids = df[cl_name].str.contains(";") == True
+        # TODO: split multiple cell need fix!
         df = df.drop(df.loc[sel_ids, cl_name].index, )
+        # Original fix breaks with one input like [30;t], a string in the element
+        # df.loc[sel_ids, cl_name] = (
+        #   df.loc[sel_ids, cl_name].apply(
+        #         lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
+        # )
     return df  # return new frame
 
 
