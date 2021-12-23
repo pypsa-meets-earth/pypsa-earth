@@ -70,7 +70,7 @@ dependencies:
   - pip:
     - git+https://github.com/pydata/xarray@main # till the main is not in conda
     - git+https://github.com/pypsa/pypsa.git#egg=pypsa
-    - git+https://github.com/koen-vg/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
+    - git+https://github.com/davide-f/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
     - vresutils==0.3.1
     - tsam>=1.1.0
     - esy-osm-pbf
