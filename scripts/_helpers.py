@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+import os
 from pathlib import Path
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import os
-import geopandas as gpd
 
 
 def _sets_path_to_root(root_directory_name):
@@ -168,7 +168,7 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
-    Nyears = n.snapshot_weightings.sum() / 8760.0
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = load_costs(Nyears, tech_costs, config["costs"],
                        config["electricity"])
     update_transmission_costs(n, costs)
@@ -315,9 +315,11 @@ def mock_snakemake(rulename, **wildcards):
     try:
         rule = workflow.get_rule(rulename)
     except Exception as exception:
-        print(exception, 
-        f"The {rulename} might be a conditional rule in the Snakefile.\n"
-        f"Did you enable {rulename} in the config?")
+        print(
+            exception,
+            f"The {rulename} might be a conditional rule in the Snakefile.\n"
+            f"Did you enable {rulename} in the config?",
+        )
         raise
     dag = sm.dag.DAG(workflow, rules=[rule])
     wc = Dict(wildcards)
