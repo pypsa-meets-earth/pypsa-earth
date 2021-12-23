@@ -63,7 +63,7 @@ if config['enable'].get('download_osm_data', True):
             lines="data/raw/africa_all_raw_lines.geojson",
             substations="data/raw/africa_all_raw_substations.geojson",
         log: "logs/download_osm_data.log"
-        script: "scripts/osm_pbf_power_data_extractor.py"
+        script: "scripts/download_osm_data.py"
 
 
 rule clean_osm_data:

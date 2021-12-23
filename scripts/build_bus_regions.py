@@ -47,7 +47,7 @@ import numpy
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 from vresutils.graph import voronoi_partition_pts

@@ -15,7 +15,7 @@ from shapely.geometry import Point
 from shapely.ops import linemerge
 from shapely.ops import unary_union
 from tqdm import tqdm
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 
 logger = logging.getLogger(__name__)
 

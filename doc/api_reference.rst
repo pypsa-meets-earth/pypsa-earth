@@ -76,10 +76,10 @@ osm_data_config
 .. automodule:: osm_data_config
     :members:
 
-osm_pbf_power_data_extractor
+download_osm_data
 -------------------------------
 
-.. automodule:: osm_pbf_power_data_extractor
+.. automodule:: download_osm_data
     :members:
 
 simplify_network
