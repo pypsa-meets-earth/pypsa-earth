@@ -8,13 +8,8 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import _save_to_geojson
-from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
-from shapely.ops import unary_union
-
-# from shapely.geometry import LineString, Point, Polygon
-# from osm_data_config import AFRICA_CC
 
 logger = logging.getLogger(__name__)
 
@@ -293,13 +288,8 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
         sel_ids = df[cl_name].str.contains(";") == True
-        # TODO: split multiple cell need fix!
+        # TODO: split multiple cell need fix
         df = df.drop(df.loc[sel_ids, cl_name].index, )
-        # Original fix breaks with one input like [30;t], a string in the element
-        # df.loc[sel_ids, cl_name] = (
-        #   df.loc[sel_ids, cl_name].apply(
-        #         lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
-        # )
     return df  # return new frame
 
 
@@ -563,7 +553,6 @@ def clean_data(
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
