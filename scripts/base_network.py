@@ -110,7 +110,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
@@ -127,7 +127,7 @@ def _load_buses_from_osm():
     buses["y"] = buses["lat"]
     # TODO: Drop NAN maybe somewhere else?
     buses = buses.dropna(axis="index", subset=["x", "y", "country"])
-    
+
     # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
 
@@ -194,7 +194,6 @@ def _set_countries_and_substations(n):
     offshore_shapes = unary_union(
         gpd.read_file(
             snakemake.input.offshore_shapes)["geometry"].set_crs(4326))
-
 
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
@@ -293,7 +292,6 @@ def base_network():
 
     n.import_components_from_dataframe(buses, "Bus")
     n.import_components_from_dataframe(lines, "Line")
-
 
     _set_lines_s_nom_from_linetypes(n)
 

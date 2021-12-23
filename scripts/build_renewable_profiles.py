@@ -213,7 +213,7 @@ if __name__ == "__main__":
                                    technology="solar")
         _sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
-    
+
     pgb.streams.wrap_stderr()
     paths = snakemake.input
     nprocesses = snakemake.config["atlite"].get("nprocesses")

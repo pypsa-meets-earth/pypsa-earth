@@ -52,6 +52,7 @@ _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
+
 def getContinentCountry(code):
     for continent in world:
         country = world[continent].get(code, 0)
@@ -175,13 +176,13 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     # folder path
     folder_path = os.path.join(os.getcwd(), "data", "osm", continent)
-    
+
     # path of the Data.pickle used by run_filter
     file_pickle = os.path.join(folder_path, "Data.pickle")
 
     # path of the backup file
-    file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
-
+    file_stored_pickle = os.path.join(
+        folder_path, f"Data_{country_code}.pickle")
 
     # json file for the Data dictionary
     JSON_outputfile = os.path.join(folder_path, country_code + "_power.json")
@@ -207,7 +208,8 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         # copy backup pickle into Data.pickle
         shutil.copyfile(file_stored_pickle, file_pickle)
 
-        _logger.info(f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}")
+        _logger.info(
+            f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}")
 
     else:
         create_elements = True
@@ -215,8 +217,9 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             new_prefilter_data = True
             _logger.info(f"Pre-filtering {country_name} ")
             pre_filtered.append(country_code)
-        
-        _logger.info(f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}")
+
+        _logger.info(
+            f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}")
 
     prefilter = {
         Node: {
@@ -288,6 +291,7 @@ def lonlat_lookup(df_way, Data):
     if "refs" not in df_way.columns:
         _logger.warning("refs column not found")
         print(df_way.columns)
+
     def look(ref):
         lonlat_row = list(
             map(lambda r: tuple(Data["Node"][str(r)]["lonlat"]), ref))
@@ -328,7 +332,6 @@ def convert_ways_points(df_way, Data):
 
     df_way.insert(0, "Area", area_column)
     df_way.insert(0, "lonlat", lonlat_column)
-
 
 
 def convert_ways_lines(df_way, Data):
@@ -384,13 +387,15 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
     """Function to save the feature as csv and geojson"""
     continent, country_name = getContinentCountry(country_code)
 
-    path_file_geojson = output_files[feature + "s"]  # get path from snakemake; expected geojson
+    # get path from snakemake; expected geojson
+    path_file_geojson = output_files[feature + "s"]
     if not path_file_geojson.endswith(".geojson"):
         _logger.error(
             f"Output file feature {feature} is not a geojson file"
         )
-    path_file_csv = path_file_geojson.replace(".geojson", ".csv")  # get csv file
-    
+    path_file_csv = path_file_geojson.replace(
+        ".geojson", ".csv")  # get csv file
+
     if not os.path.exists(path_file_geojson):
         os.makedirs(os.path.dirname(path_file_geojson),
                     exist_ok=True)  # create raw directory
@@ -423,7 +428,7 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
 
 
 def process_data(feature_list, country_list, output_files,
-                iso_coding=True, update=False, verify=False):
+                 iso_coding=True, update=False, verify=False):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -431,7 +436,7 @@ def process_data(feature_list, country_list, output_files,
     # loop the request for each feature
 
     for feature in feature_list:  # feature dataframe
-        
+
         df_list = []
 
         for country_code_isogeofk in country_list:
@@ -559,4 +564,4 @@ if __name__ == "__main__":
 
     # Set update # Verify = True checks local md5s and pre-filters data again
     process_data(feature_list, country_list, output_files,
-                iso_coding=True, update=False, verify=False)
+                 iso_coding=True, update=False, verify=False)

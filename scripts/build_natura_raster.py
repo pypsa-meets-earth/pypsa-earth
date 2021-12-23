@@ -67,7 +67,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
     list_fileshapes = []
     for lf in list_paths:
-        if os.path.isdir(lf): # if it is a folder, then list all shapes files contained
+        if os.path.isdir(lf):  # if it is a folder, then list all shapes files contained
 
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
@@ -79,7 +79,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
         elif lf.endswith(accepted_formats):
             list_fileshapes.append(lf)
-    
+
     return list_fileshapes
 
 
@@ -123,10 +123,11 @@ def unify_protected_shape_areas(inputs, out_logging):
 
     # Read only .shp snakemake inputs
     shp_files = [string for string in inputs if ".shp" in string]
-    assert len(shp_files)!=0, "no input shapefiles given"
+    assert len(shp_files) != 0, "no input shapefiles given"
     # Create one geodataframe with all geometries, of all .shp files
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")
+        _logger.info(
+            "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")
     for i in shp_files:
         shape = gpd.GeoDataFrame(
             pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(3035)
@@ -139,13 +140,15 @@ def unify_protected_shape_areas(inputs, out_logging):
     shape = shape.rename(columns={
         0: "geometry"
     }).set_geometry("geometry")  # .set_crs(3035)
-    
+
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
+        _logger.info(
+            "Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
     unified_shape_file = unary_union(shape["geometry"])
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape")
+        _logger.info(
+            "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape")
     unified_shape = gpd.GeoDataFrame(
         geometry=[unified_shape_file]).set_crs(3035)
 
@@ -166,7 +169,8 @@ if __name__ == "__main__":
     xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout, out_logging=out_logging)
                            for cutout in cutouts))
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
-    transform, out_shape = get_transform_and_shape(bounds, res=100, out_logging=out_logging)
+    transform, out_shape = get_transform_and_shape(
+        bounds, res=100, out_logging=out_logging)
     # adjusted boundaries
     shapes = unify_protected_shape_areas(shapefiles, out_logging=out_logging)
 

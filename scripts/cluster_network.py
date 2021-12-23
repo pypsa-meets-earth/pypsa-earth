@@ -222,7 +222,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
         distribution_factor = G
 
-    #TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_networks"]
+    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
 
     assert (

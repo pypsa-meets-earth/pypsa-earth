@@ -126,7 +126,7 @@ def set_substations_ids(buses, tol=2000):
 
     # create temporary series to execute distance calculations using m as reference distances
     temp_bus_geom = buses.geometry.to_crs(3736)
-    
+
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
         ascii=False,
@@ -226,7 +226,8 @@ def set_lines_ids(lines, buses):
             # the line does not end in the node, thus modify the linestring
             lines.loc[i, "geometry"] = linemerge([
                 lines.loc[i, "geometry"],
-                LineString([row["bus_1_coors"], buses.loc[bus1_id, "geometry"]]),
+                LineString(
+                    [row["bus_1_coors"], buses.loc[bus1_id, "geometry"]]),
             ])
 
     return lines, buses
@@ -424,16 +425,17 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
-    logger.info("Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol/1000))
+    logger.info(
+        "Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol/1000))
 
     # set substation ids
     set_substations_ids(buses, tol=tol)
-    
+
     logger.info("Stage 3b/4: Merge substations with the same id")
 
     # merge buses with same station id and voltage
     buses = merge_stations_same_station_id(buses)
-    
+
     logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
@@ -447,7 +449,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
 
     # set substation_lv
     set_lv_substations(buses)
-    
+
     logger.info("Stage 3d/4: Add transformers")
 
     # get transformers: modelled as lines connecting buses with different voltage
@@ -514,17 +516,17 @@ def built_network(inputs, outputs):
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
     buses = add_line_endings_tosubstations(substations, lines)
-    
+
     logger.info("Stage 3/4: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
     if snakemake.config["osm_data_cleaning_options"]["group_close_buses"]:
         lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
-                                                                  buses,
-                                                                  tol=4000)
+                                                                      buses,
+                                                                      tol=4000)
 
     logger.info("Stage 4/4: Add augmented substation to country with no data")
-    
+
     country_shapes_fn = snakemake.input.country_shapes
     country_shapes = (
         gpd.read_file(country_shapes_fn)
@@ -533,13 +535,13 @@ def built_network(inputs, outputs):
     )
     input = snakemake.config["countries"]
     country_list = create_country_list(input)
-    bus_country_list = buses["country"].unique().tolist() 
+    bus_country_list = buses["country"].unique().tolist()
 
     if len(bus_country_list) != len(country_list):
         no_data_countries = set(country_list).difference(set(bus_country_list))
         no_data_countries_shape = country_shapes[
-            country_shapes.index.isin(no_data_countries)==True
-            ].reset_index().set_crs(4326)
+            country_shapes.index.isin(no_data_countries) == True
+        ].reset_index().set_crs(4326)
         length = len(no_data_countries)
         df = gpd.GeoDataFrame({
             'voltage': [220000]*length,
@@ -556,7 +558,8 @@ def built_network(inputs, outputs):
             'geometry': no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
             "substation_lv": [True]*length,
         })
-        buses = gpd.GeoDataFrame(pd.concat([buses, df], ignore_index=True), crs=buses.geometry.crs)
+        buses = gpd.GeoDataFrame(
+            pd.concat([buses, df], ignore_index=True), crs=buses.geometry.crs)
 
     logger.info("Save outputs")
 
