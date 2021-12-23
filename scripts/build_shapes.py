@@ -32,7 +32,7 @@ from tqdm import tqdm
 
 # import rioxarray
 
-# from osm_data_config import AFRICA_CC
+# from config_osm_data import AFRICA_CC
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)

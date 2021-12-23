@@ -13,7 +13,7 @@ from _helpers import configure_logging
 from shapely.ops import unary_union
 
 # from shapely.geometry import LineString, Point, Polygon
-# from osm_data_config import AFRICA_CC
+# from config_osm_data import AFRICA_CC
 
 logger = logging.getLogger(__name__)
 

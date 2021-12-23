@@ -70,10 +70,10 @@ clean_osm_data
 .. automodule:: clean_osm_data
     :members:
 
-osm_data_config
+config_osm_data
 -------------------------------
 
-.. automodule:: osm_data_config
+.. automodule:: config_osm_data
     :members:
 
 download_osm_data
