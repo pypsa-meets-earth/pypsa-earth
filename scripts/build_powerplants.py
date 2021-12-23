@@ -132,7 +132,9 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                         "plant": "PP"
                     },
                 )).assign(
-                    Name=lambda df: "OSM_" + df.Country.astype(str) + "_" + df.id.astype(str) + "-" + df.Name.astype(str),
+                    Name=lambda df: "OSM_" + \
+            df.Country.astype(str) + "_" + df.id.astype(str) + \
+            "-" + df.Name.astype(str),
                     Efficiency="",
                     Duration="",
                     Volume_Mm3="",
@@ -146,7 +148,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     lon=custom_ppls_coords.x,
                     EIC=lambda df: df.id,
                     projectID=lambda df: "OSM" + df.id.astype(str),
-                ))
+        ))
 
     # All Hydro objects can be interpreted by PPM as Storages, too
     # However, everithing extracted from OSM seems to belong
@@ -160,7 +162,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     for i in osm_ppm_df.index:
         add_ppls.loc[add_ppls["tags.generator:method"] == osm_ppm_df.loc[
             i, "osm_method"],
-                     "Technology", ] = osm_ppm_df.loc[i, "ppm_technology"]
+            "Technology", ] = osm_ppm_df.loc[i, "ppm_technology"]
 
     # originates from osm::"tags.generator:source"
     add_ppls.loc[add_ppls["Fueltype"] == "Nuclear",
@@ -176,17 +178,15 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
         columns=["tags.generator:method", "geometry", "Area", "country", "id"])
 
-
     _to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
 
     return add_ppls
 
 
-
 def add_custom_powerplants(ppl):
     if "custom_powerplants" not in snakemake.config['electricity']:
         return ppl
-    
+
     custom_ppl_query = snakemake.config['electricity']['custom_powerplants']
     if not custom_ppl_query:
         return ppl
@@ -230,14 +230,14 @@ if __name__ == "__main__":
         update_all=True,
         config=config).powerplant.fill_missing_decommyears().query(
             'Fueltype not in ["Solar", "Wind"] and Country in @countries').
-           replace({
-               "Technology": {
-                   "Steam Turbine": "OCGT"
-               }
-           }).assign(Fueltype=lambda df: (df.Fueltype.where(
-               df.Fueltype != "Natural Gas",
-               df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
-           ))))
+        replace({
+            "Technology": {
+                "Steam Turbine": "OCGT"
+            }
+        }).assign(Fueltype=lambda df: (df.Fueltype.where(
+            df.Fueltype != "Natural Gas",
+            df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
+        ))))
 
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]
     if isinstance(ppl_query, str):

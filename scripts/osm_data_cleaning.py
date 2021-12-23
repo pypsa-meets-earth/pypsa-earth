@@ -358,14 +358,14 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
                 df = df.append(r)
-    
+
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
         sel_ids = (df[cl_name].str.contains(";") == True)
         # TODO: split multiple cell need fix!
         df = df.drop(df.loc[sel_ids, cl_name].index, )
-        ## Original fix breaks with one input like [30;t], a string in the element
-        # df.loc[sel_ids, cl_name] = (    
+        # Original fix breaks with one input like [30;t], a string in the element
+        # df.loc[sel_ids, cl_name] = (
         #   df.loc[sel_ids, cl_name].apply(
         #         lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
         # )
@@ -424,8 +424,9 @@ def integrate_lines_df(df_all_lines):
 
     return df_all_lines
 
+
 def filter_lines_by_geometry(df_all_lines):
-    
+
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
@@ -434,6 +435,7 @@ def filter_lines_by_geometry(df_all_lines):
         lambda g: len(g.boundary.geoms) >= 2)]
 
     return df_all_lines
+
 
 def prepare_generators_df(df_all_generators):
     """
@@ -500,6 +502,7 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
 
     return merged_shapes
 
+
 def clean_data(
     input_files,
     output_files,
@@ -528,7 +531,7 @@ def clean_data(
     if os.path.getsize(input_files["cables"]) > 0:
         # Load raw data lines
         df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326,
-                                                                inplace=True)
+                                                                 inplace=True)
 
         # prepare cables dataframe and data types
         df_cables = prepare_lines_df(df_cables)
@@ -543,14 +546,14 @@ def clean_data(
 
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
-    
+
     # filter lines to make sure the geometry is appropriate
     df_all_lines = filter_lines_by_geometry(df_all_lines)
 
-
     # drop lines crossing regions with and without the region under interest
     df_all_lines = df_all_lines[
-        df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
+        df_all_lines.apply(lambda x: africa_shape.contains(
+            x.geometry.boundary), axis=1)
     ]
 
     # set unique line ids
@@ -660,16 +663,16 @@ if __name__ == "__main__":
     output_files = snakemake.output
 
     africa_shape = (gpd.read_file(
-            snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0])
+        snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0])
 
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
         country_shapes = (gpd.read_file(
             snakemake.input.country_shapes).set_index("name")
-                          ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         offshore_shapes = (gpd.read_file(
             snakemake.input.offshore_shapes).set_index("name")
-                           ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes)
     else:
