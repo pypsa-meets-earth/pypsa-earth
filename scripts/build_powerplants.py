@@ -69,20 +69,20 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
+from _helpers import _read_csv_nafix
+from _helpers import _to_csv_nafix
 from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
-from _helpers import _read_csv_nafix, _to_csv_nafix
 
 logger = logging.getLogger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
-    add_ppls = _read_csv_nafix(
-        filepath_ppl_osm,
-        index_col=0,
-        dtype={"bus": "str"})
+    add_ppls = _read_csv_nafix(filepath_ppl_osm,
+                               index_col=0,
+                               dtype={"bus": "str"})
 
     custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
     add_ppls = (
@@ -132,7 +132,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                         "plant": "PP"
                     },
                 )).assign(
-                    Name=lambda df: "OSM_" + df.Country.astype(str) + "_" + df.id.astype(str) + "-" + df.Name.astype(str),
+                    Name=lambda df: "OSM_" + df.Country.astype(str) + "_" + df.
+                    id.astype(str) + "-" + df.Name.astype(str),
                     Efficiency="",
                     Duration="",
                     Volume_Mm3="",
@@ -176,22 +177,21 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
         columns=["tags.generator:method", "geometry", "Area", "country", "id"])
 
-
     _to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
 
     return add_ppls
 
 
-
 def add_custom_powerplants(ppl):
-    if "custom_powerplants" not in snakemake.config['electricity']:
+    if "custom_powerplants" not in snakemake.config["electricity"]:
         return ppl
-    
-    custom_ppl_query = snakemake.config['electricity']['custom_powerplants']
+
+    custom_ppl_query = snakemake.config["electricity"]["custom_powerplants"]
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(snakemake.input.custom_powerplants, index_col=0,
-                           dtype={'bus': 'str'})
+    add_ppls = pd.read_csv(snakemake.input.custom_powerplants,
+                           index_col=0,
+                           dtype={"bus": "str"})
     # if isinstance(custom_ppl_query, str):
     #     add_ppls.query(custom_ppl_query, inplace=True)
 
@@ -226,8 +226,7 @@ if __name__ == "__main__":
     #     config["EXTERNAL_DATABASE"]["fn"] = os.path.join(os.getcwd(), filepath_osm2pm_ppl)
 
     ppl = (pm.powerplants(
-        from_url=False,
-        update_all=True,
+        from_url=False, update_all=True,
         config=config).powerplant.fill_missing_decommyears().query(
             'Fueltype not in ["Solar", "Wind"] and Country in @countries').
            replace({

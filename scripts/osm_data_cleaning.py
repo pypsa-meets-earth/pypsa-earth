@@ -6,11 +6,11 @@ import sys
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from shapely.ops import unary_union
+from _helpers import _save_to_geojson
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
-from _helpers import _save_to_geojson
+from shapely.ops import unary_union
 
 # from shapely.geometry import LineString, Point, Polygon
 # from osm_data_config import AFRICA_CC
@@ -358,14 +358,14 @@ def split_cells_multiple(df, list_col=["cables", "voltage"]):
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
                 df = df.append(r)
-    
+
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
-        sel_ids = (df[cl_name].str.contains(";") == True)
+        sel_ids = df[cl_name].str.contains(";") == True
         # TODO: split multiple cell need fix!
         df = df.drop(df.loc[sel_ids, cl_name].index, )
-        ## Original fix breaks with one input like [30;t], a string in the element
-        # df.loc[sel_ids, cl_name] = (    
+        # Original fix breaks with one input like [30;t], a string in the element
+        # df.loc[sel_ids, cl_name] = (
         #   df.loc[sel_ids, cl_name].apply(
         #         lambda x: str(sum(map(int, x.split(";")))) if ";" in str(x) else x)
         # )
@@ -424,8 +424,9 @@ def integrate_lines_df(df_all_lines):
 
     return df_all_lines
 
+
 def filter_lines_by_geometry(df_all_lines):
-    
+
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
@@ -434,6 +435,7 @@ def filter_lines_by_geometry(df_all_lines):
         lambda g: len(g.boundary.geoms) >= 2)]
 
     return df_all_lines
+
 
 def prepare_generators_df(df_all_generators):
     """
@@ -447,7 +449,8 @@ def prepare_generators_df(df_all_generators):
     df_all_generators = df_all_generators.rename(
         columns={
             "tags.generator:output:electricity": "power_output_MW",
-            "tags.name": "name"})
+            "tags.name": "name",
+        })
 
     # convert electricity column from string to float value
     df_all_generators = df_all_generators[
@@ -467,11 +470,13 @@ def find_first_overlap(geom, country_geoms, default_name):
     return default_name
 
 
-def set_countryname_by_shape(df,
-                             ext_country_shapes,
-                             names_by_shapes=True,
-                             exclude_external=True,
-                             col_country="country"):
+def set_countryname_by_shape(
+    df,
+    ext_country_shapes,
+    names_by_shapes=True,
+    exclude_external=True,
+    col_country="country",
+):
     "Set the country name by the name shape"
     if names_by_shapes:
         df[col_country] = [
@@ -499,6 +504,7 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
     }).set_index("name")["geometry"].set_crs(4326))
 
     return merged_shapes
+
 
 def clean_data(
     input_files,
@@ -528,7 +534,7 @@ def clean_data(
     if os.path.getsize(input_files["cables"]) > 0:
         # Load raw data lines
         df_cables = gpd.read_file(input_files["cables"]).set_crs(epsg=4326,
-                                                                inplace=True)
+                                                                 inplace=True)
 
         # prepare cables dataframe and data types
         df_cables = prepare_lines_df(df_cables)
@@ -543,15 +549,13 @@ def clean_data(
 
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
-    
+
     # filter lines to make sure the geometry is appropriate
     df_all_lines = filter_lines_by_geometry(df_all_lines)
 
-
     # drop lines crossing regions with and without the region under interest
-    df_all_lines = df_all_lines[
-        df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
-    ]
+    df_all_lines = df_all_lines[df_all_lines.apply(
+        lambda x: africa_shape.contains(x.geometry.boundary), axis=1)]
 
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
@@ -607,7 +611,8 @@ def clean_data(
         df_all_substations,
         ext_country_shapes,
         names_by_shapes=names_by_shapes,
-        col_country="Country")
+        col_country="Country",
+    )
 
     _save_to_geojson(df_all_substations, output_files["substations"])
 
@@ -621,9 +626,7 @@ def clean_data(
 
     # set the country name by the shape
     df_all_generators = set_countryname_by_shape(
-        df_all_generators,
-        ext_country_shapes,
-        names_by_shapes=names_by_shapes)
+        df_all_generators, ext_country_shapes, names_by_shapes=names_by_shapes)
 
     # save to csv
     _to_csv_nafix(df_all_generators, output_files["generators_csv"])
@@ -660,7 +663,7 @@ if __name__ == "__main__":
     output_files = snakemake.output
 
     africa_shape = (gpd.read_file(
-            snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0])
+        snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0])
 
     # only when country names are defined by shapes, load the info
     if names_by_shapes:

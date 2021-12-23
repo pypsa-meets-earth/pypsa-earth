@@ -62,7 +62,7 @@ dependencies:
 
   # Cloud download
   - googledrivedownloader
-  
+
   # Default solver for tests
   - glpk
   - ipopt<=3.13.3

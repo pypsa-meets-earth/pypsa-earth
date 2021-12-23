@@ -68,12 +68,12 @@ target_fueltypes:
   - Solar
   - Waste
   - Wind
-  
+
 target_sets:
   - CHP
   - PP
   - Store
-  
+
 target_technologies:
   - CCGT
   - OCGT
