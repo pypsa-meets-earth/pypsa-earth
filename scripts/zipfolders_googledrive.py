@@ -15,7 +15,8 @@ from _helpers import _sets_path_to_root
 
 def zipFilesInDir(dirName, zipFileName, filter):
     # create a ZipFile object
-    with zipfile.ZipFile(zipFileName, "w", compression=zipfile.ZIP_DEFLATED) as zipObj:
+    with zipfile.ZipFile(zipFileName, "w",
+                         compression=zipfile.ZIP_DEFLATED) as zipObj:
         # Iterate over all the files in directory
         for folderName, subfolders, filenames in os.walk(dirName):
             for filename in filenames:

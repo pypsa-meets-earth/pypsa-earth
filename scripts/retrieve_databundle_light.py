@@ -54,7 +54,6 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102)
     configure_logging(snakemake)
 
-
 _sets_path_to_root("pypsa-africa")
 tutorial = snakemake.config["tutorial"]
 logger.info("Retrieving data from GoogleDrive.")
@@ -98,7 +97,6 @@ if tutorial == False:
     )
     os.remove(zip_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
-
 
 if tutorial == True:
     # BUNDLE 1
