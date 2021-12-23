@@ -127,30 +127,31 @@ def unify_protected_shape_areas(inputs, out_logging):
     # Create one geodataframe with all geometries, of all .shp files
     if out_logging:
         _logger.info(
-            "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")
+            "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
+        )
     for i in shp_files:
         shape = gpd.GeoDataFrame(
-            pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(3035)
+            pd.concat([gpd.read_file(i) for i in shp_files])
+        ).to_crs(3035)
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
 
     # Create Geodataframe with crs(3035)
     shape = gpd.GeoDataFrame(shape)
-    shape = shape.rename(columns={
-        0: "geometry"
-    }).set_geometry("geometry")  # .set_crs(3035)
+    shape = shape.rename(columns={0: "geometry"}).set_geometry(
+        "geometry"
+    )  # .set_crs(3035)
 
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
     if out_logging:
-        _logger.info(
-            "Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
+        _logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
     unified_shape_file = unary_union(shape["geometry"])
     if out_logging:
         _logger.info(
-            "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape")
-    unified_shape = gpd.GeoDataFrame(
-        geometry=[unified_shape_file]).set_crs(3035)
+            "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
+        )
+    unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file]).set_crs(3035)
 
     return unified_shape
 
@@ -158,6 +159,7 @@ def unify_protected_shape_areas(inputs, out_logging):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
@@ -166,11 +168,13 @@ if __name__ == "__main__":
     inputs = snakemake.input
     cutouts = inputs.cutouts
     shapefiles = get_fileshapes(inputs)
-    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout, out_logging=out_logging)
-                           for cutout in cutouts))
+    xs, Xs, ys, Ys = zip(
+        *(determine_cutout_xXyY(cutout, out_logging=out_logging) for cutout in cutouts)
+    )
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
     transform, out_shape = get_transform_and_shape(
-        bounds, res=100, out_logging=out_logging)
+        bounds, res=100, out_logging=out_logging
+    )
     # adjusted boundaries
     shapes = unify_protected_shape_areas(shapefiles, out_logging=out_logging)
 
@@ -182,15 +186,15 @@ if __name__ == "__main__":
     if out_logging:
         _logger.info("Stage 5/5: Export as .tiff")
     with rio.open(
-            snakemake.output[0],
-            "w",
-            driver="GTiff",
-            dtype=rio.uint8,
-            count=1,
-            transform=transform,
-            crs=3035,
-            compress="lzw",
-            width=raster.shape[1],
-            height=raster.shape[0],
+        snakemake.output[0],
+        "w",
+        driver="GTiff",
+        dtype=rio.uint8,
+        count=1,
+        transform=transform,
+        crs=3035,
+        compress="lzw",
+        width=raster.shape[1],
+        height=raster.shape[0],
     ) as dst:
         dst.write(raster, indexes=1)
