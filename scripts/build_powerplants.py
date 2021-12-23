@@ -69,7 +69,9 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
-from _helpers import _read_csv_nafix, _to_csv_nafix, configure_logging
+from _helpers import _read_csv_nafix
+from _helpers import _to_csv_nafix
+from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
 
