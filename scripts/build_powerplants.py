@@ -222,8 +222,9 @@ if __name__ == "__main__":
     countries = n.buses.country.unique()
     config["target_countries"] = countries
 
-    # if "EXTERNAL_DATABASE" in config:
-    #     config["EXTERNAL_DATABASE"]["fn"] = os.path.join(os.getcwd(), filepath_osm2pm_ppl)
+    if "EXTERNAL_DATABASE" in config:
+        config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
+            os.getcwd(), filepath_osm2pm_ppl)
 
     ppl = (pm.powerplants(
         from_url=False, update_all=True,
