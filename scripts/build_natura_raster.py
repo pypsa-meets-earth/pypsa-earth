@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -58,19 +58,16 @@ from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-_logger = logging.getLogger(__name__)  # name of this file = "build_natura_raster"
+_logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     "Function to parse the list of paths to include shapes included in folders, if any"
 
     list_fileshapes = []
     for lf in list_paths:
-        if os.path.isdir(lf):
-            # if it is a folder, then list all shapes files contained
+        if os.path.isdir(lf): # if it is a folder, then list all shapes files contained
 
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
@@ -158,9 +155,7 @@ def unify_protected_shape_areas(inputs, out_logging):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
 
