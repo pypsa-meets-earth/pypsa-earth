@@ -55,8 +55,9 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import (_add_missing_carriers_from_costs,
-                             add_nice_carrier_names, load_costs)
+from add_electricity import _add_missing_carriers_from_costs
+from add_electricity import add_nice_carrier_names
+from add_electricity import load_costs
 
 idx = pd.IndexSlice
 
