@@ -62,6 +62,7 @@ if config['enable'].get('download_osm_data', True):
             generators_csv="data/raw/africa_all_raw_generators.csv",
             lines="data/raw/africa_all_raw_lines.geojson",
             substations="data/raw/africa_all_raw_substations.geojson",
+            plants="data/raw/africa_all_raw_plants.geojson",
         log: "logs/download_osm_data.log"
         script: "scripts/osm_pbf_power_data_extractor.py"
 
@@ -208,7 +209,7 @@ rule build_powerplants:
     input:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/clean/africa_all_generators.csv",
+        custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants="data/clean/africa_all_generators.csv",
     output:
         powerplants="resources/powerplants.csv",
