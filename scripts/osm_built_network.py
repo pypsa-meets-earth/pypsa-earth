@@ -1,7 +1,8 @@
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 import logging
-import math
 import os
-import sys
 
 import geopandas as gpd
 import numpy as np
@@ -13,14 +14,10 @@ from _helpers import configure_logging
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
-from shapely.ops import unary_union
 from tqdm import tqdm
 from osm_pbf_power_data_extractor import create_country_list
 
 logger = logging.getLogger(__name__)
-
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def line_endings_to_bus_conversion(lines):
@@ -123,7 +120,6 @@ def set_substations_ids(buses, tol=2000):
         2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
         3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
            in case of multiple substations with substation_ids >= 0, the first value is picked for all
-
     """
 
     buses["station_id"] = -1
@@ -148,8 +144,6 @@ def set_substations_ids(buses, tol=2000):
         close_nodes = np.flatnonzero(
             temp_bus_geom.distance(temp_bus_geom.loc[i]) <= tol)
 
-        # print("set_substations_ids: ", i, "/", buses.shape[0])
-
         if len(close_nodes) == 1:
             # if only one substation is in tolerance, then the substation is the current one iì
             # Note that the node cannot be with substation_id >= 0, given the preliminary check
@@ -159,7 +153,6 @@ def set_substations_ids(buses, tol=2000):
             station_id += 1
         else:
             # several substations in tolerance
-
             # get their ids
             subset_substation_ids = buses.loc[buses.index[close_nodes],
                                               "station_id"]
@@ -187,9 +180,7 @@ def set_substations_ids(buses, tol=2000):
 def set_lines_ids(lines, buses):
     """
     Function to set line buses ids to the closest bus in the list
-
     """
-    
     # set tqdm options for set lines ids
     tqdm_kwargs_line_ids = dict(
         ascii=False,
@@ -203,8 +194,6 @@ def set_lines_ids(lines, buses):
     lines["bus1"] = -1
 
     for i, row in tqdm(lines.iterrows(), **tqdm_kwargs_line_ids):
-
-        # print("set_lines_ids: ", i, "/", lines.shape[0])
 
         # select buses having the voltage level of the current line
         buses_sel = buses[buses["voltage"] == row["voltage"]]
@@ -246,7 +235,7 @@ def set_lines_ids(lines, buses):
 def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
     """
     Function to merge buses with same voltage and station_id
-    This function iterattes over all substation ids and creates a bus_id for every substation and voltage level.
+    This function iterates over all substation ids and creates a bus_id for every substation and voltage level.
     Therefore, a substation with multiple voltage levels is represented with different buses, one per voltage level
     """
     # initialize empty dataset of cleaned buses
@@ -313,10 +302,8 @@ def get_transformers(buses, lines):
 
     for g_name, g_value in buses.sort_values(
             "voltage", ascending=True).groupby(by=["station_id"]):
-        
-        # print("get_transformers: ", g_name)
 
-        # note: by construction there cannot be more that two nodes with the same station_id and same voltage
+        # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
 
         if n_voltages > 1:
@@ -407,7 +394,6 @@ def set_lv_substations(buses):
     The current methodology is to set lv nodes to buses where multiple voltage level are found,
     hence when the station_id is duplicated
     """
-
     # initialize column substation_lv to true
     buses["substation_lv"] = True
 
@@ -438,7 +424,6 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
-    
     logger.info("Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol/1000))
 
     # set substation ids
@@ -489,7 +474,7 @@ def create_station_at_equal_bus_locations(lines, buses, tol=2000):
     #   at the same point)
     # TODO: Filter out the generator lines - defined as going from generator to
     #       the next station which is connected to a load. Excluding generator
-    #       lines make proably sense because they are not transmission expansion
+    #       lines make probably sense because they are not transmission expansion
     #       relevant. For now we simplify and include generator lines.
 
     # If same location/geometry make station
@@ -507,15 +492,8 @@ def create_station_at_equal_bus_locations(lines, buses, tol=2000):
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
     set_lv_substations(bus_all)
 
-    # # Add station_id to line dataframe.
-    # # Note: by construction, the first half of bus_all is "bus0" and the rest is "bus1"
-    # n_row = int(bus_all.shape[0] / 2)  # row length
-    # lines = lines.reset_index(drop=True)
-    # lines["bus0"] = bus_all.loc[:(n_row - 1), ["bus_id"]]
-    # lines["bus1"] = bus_all.loc[n_row:, ["bus_id"]].reset_index(drop=True)
-
     # TRY: Keep only buses that are not duplicated & lv_substation = True
-    # TODO: Check if this is necessary. What effetc do duplicates have?
+    # TODO: Check if this is necessary. What effect do duplicates have?
     bus_all = bus_all[bus_all["substation_lv"] == True]
 
     lines = connect_stations_same_station_id(lines, buses)
@@ -524,7 +502,6 @@ def create_station_at_equal_bus_locations(lines, buses, tol=2000):
 
 
 def built_network(inputs, outputs):
-    # ----------- LOAD DATA -----------
     logger.info("Stage 1/4: Read input data")
 
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
@@ -533,21 +510,10 @@ def built_network(inputs, outputs):
     generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
                                                              inplace=True)
 
-    
     logger.info("Stage 2/4: Add line endings to the substation datasets")
-
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
     buses = add_line_endings_tosubstations(substations, lines)
-    # buses = create_bus_df_from_lines(substations, lines)
-
-    # Methods to build network
-    # METHOD 1 - Form station at exact same location
-    # TODO: Select at clean_data(method = ...) the applied method
-    # lines, buses = create_station_at_equal_bus_locations(lines, buses)
-
-    # METHOD 2 - Use interference method
-    # TODO: Add and test other method (ready in jupyter)
     
     logger.info("Stage 3/4: Aggregate close substations")
 
@@ -600,23 +566,11 @@ def built_network(inputs, outputs):
 
     _to_csv_nafix(lines, outputs["lines"])  # Generate CSV
 
-    # Buses
-    # Output file directory
-    # outputfile_partial = os.path.join(
-    #     os.getcwd(), "data", "base_network",
-    #     "africa_all" + "_buses" + "_build_network")
-
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):
         os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
     # Generate CSV
     _to_csv_nafix(buses, outputs["substations"])
-
-    # # save generators
-    # if not os.path.exists(outputs["generators"]):
-    #     os.makedirs(os.path.dirname(outputs["generators"]), exist_ok=True)
-    # # Generate CSV
-    # _to_csv_nafix(generators, outputs["generators"])
 
     return None
 
@@ -624,13 +578,10 @@ def built_network(inputs, outputs):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 
     _sets_path_to_root("pypsa-africa")
-    # sys.path.append("./../../scripts")  ## alternative
 
     built_network(snakemake.input, snakemake.output)

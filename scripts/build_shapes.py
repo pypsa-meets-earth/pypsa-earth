@@ -1,4 +1,7 @@
-# import
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 import logging
 import multiprocessing as mp
 import os
