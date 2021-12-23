@@ -311,6 +311,7 @@ def update_transmission_costs(n,
     if n.links.empty:
         return
 
+    dc_b = n.links.carrier == "DC"
     # If there are no "DC" links, then the 'underwater_fraction' column
     # may be missing. Therefore we have to return here.
     # TODO: Require fix
