@@ -88,7 +88,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls = (
         add_ppls.rename(
             columns={
-                "id": "Name",
+                "name": "Name",
                 "tags.generator:source": "Fueltype",
                 "tags.generator:type": "Technology",
                 "tags.power": "Set",
@@ -132,7 +132,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                         "plant": "PP"
                     },
                 )).assign(
-                    Name="",
+                    Name=lambda df: "OSM_" + df.Country.astype(str) + "_" + df.id.astype(str) + "-" + df.Name.astype(str),
                     Efficiency="",
                     Duration="",
                     Volume_Mm3="",
@@ -144,8 +144,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     DateOut="",
                     lat=custom_ppls_coords.y,
                     lon=custom_ppls_coords.x,
-                    EIC="",
-                    projectID=lambda df: "OSM" + df.index.astype(str),
+                    EIC=lambda df: df.id,
+                    projectID=lambda df: "OSM" + df.id.astype(str),
                 ))
 
     # All Hydro objects can be interpreted by PPM as Storages, too
@@ -174,7 +174,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
 
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
-        columns=["tags.generator:method", "geometry", "Area", "country"])
+        columns=["tags.generator:method", "geometry", "Area", "country", "id"])
 
 
     _to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)

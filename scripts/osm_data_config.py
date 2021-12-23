@@ -60,6 +60,7 @@ columns_substation = [
 
 columns_generator = [
     "Area",
+    "tags.name",
     "tags.generator:type",
     "tags.generator:method",
     "tags.generator:source",

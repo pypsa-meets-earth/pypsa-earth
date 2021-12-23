@@ -445,7 +445,9 @@ def prepare_generators_df(df_all_generators):
 
     # rename columns
     df_all_generators = df_all_generators.rename(
-        columns={"tags.generator:output:electricity": "power_output_MW"})
+        columns={
+            "tags.generator:output:electricity": "power_output_MW",
+            "tags.name": "name"})
 
     # convert electricity column from string to float value
     df_all_generators = df_all_generators[
