@@ -423,22 +423,18 @@ def attach_hydro(n, costs, ppl):
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    ppl = (ppl.query('carrier == "hydro"').reset_index(drop=True).rename(
+    # Add all hydro plants static data
+    ppl_h = (ppl.query('carrier == "hydro"').reset_index(drop=True).rename(
         index=lambda s: str(s) + " hydro"))
+    ror = ppl_h.query('technology == "Run-Of-River"')
+    phs = ppl_h.query('technology == "Pumped Storage"')
+    hydro = ppl_h.query('technology == "Reservoir"')
 
-    # TODO: remove this line to address nan when powerplantmatching is stable
-    # NaN technologies set to ROR
-    ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
+    bus_id = ppl_h["bus"]
 
-    ror = ppl.query('technology == "Run-Of-River"')
-    phs = ppl.query('technology == "Pumped Storage"')
-    hydro = ppl.query('technology == "Reservoir"')
-
-    bus_id = ppl["bus"]
-
+    # Add inflow timeseries raster
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
-
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             inflow_stations = pd.Index(bus_id[inflow_idx])
             missing_c = inflow_stations.unique().difference(
@@ -454,6 +450,7 @@ def attach_hydro(n, costs, ppl):
             }).assign_coords(name=inflow_idx).transpose("time",
                                                         "name").to_pandas())
 
+    # Add generators/storage with timeseries to the network
     if "ror" in carriers and not ror.empty:
         n.madd(
             "Generator",
