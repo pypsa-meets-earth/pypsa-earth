@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -54,13 +54,11 @@ from vresutils.graph import voronoi_partition_pts
 
 _logger = logging.getLogger(__name__)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 
 def save_to_geojson(df, fn):
+    # remove file if it exists
     if os.path.exists(fn):
-        os.unlink(fn)  # remove file if it exists
+        os.unlink(fn)
     if not isinstance(df, gpd.GeoDataFrame):
         df = gpd.GeoDataFrame(dict(geometry=df))
 
@@ -180,9 +178,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        # needed to run mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("build_bus_regions")
     configure_logging(snakemake)
 
@@ -196,16 +192,6 @@ if __name__ == "__main__":
         snakemake.input.offshore_shapes).set_index("name")["geometry"]
     gadm_shapes = gpd.read_file(
         snakemake.input.gadm_shapes).set_index("GADM_ID")["geometry"]
-    # Issues in voronoi_creation due to overlapping/duplications will be removed with that function
-    # First issues where observed for offshore shapes means that first country-onshore voronoi worked fine
-    # TODO: Find out the root cause for this issues
-    import shapely
-    from shapely.geometry import JOIN_STYLE, shape
-    from shapely.ops import unary_union
-    from shapely.validation import make_valid
-
-    # country_shapes = make_valid(country_shapes)
-    # offshore_shapes = make_valid(offshore_shapes)
 
     onshore_regions = []
     offshore_regions = []
@@ -213,16 +199,12 @@ if __name__ == "__main__":
     for country in countries:
 
         c_b = n.buses.country == country
-        # Check if lv_buses exist in onshape. TD has no buses!
         if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty:
             _logger.warning(f"No low voltage buses found for {country}!")
             continue
 
-        # print(country)
         onshore_shape = country_shapes[country]
-        # print(shapely.validation.explain_validity(onshore_shape), onshore_shape.area)
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
-        # print(onshore_locs.values)
         if snakemake.config["cluster_options"]["alternative_clustering"]:
             onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
             shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
@@ -245,16 +227,12 @@ if __name__ == "__main__":
             _logger.warning(f"No off-shore shapes for {country}")
             continue
 
-        # Note: the off_shore shape should be present because cheched 10 lines above
         offshore_shape = offshore_shapes[country]
 
         if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty:
             _logger.warning(f"No off-shore substations found for {country}")
             continue
         else:
-            # print(offshore_shape.is_valid)
-            # print(offshore_shape.is_simple)
-            # print(shapely.validation.explain_validity(offshore_shape), offshore_shape.area)
             offshore_locs = n.buses.loc[c_b & n.buses.substation_off,
                                         ["x", "y"]]
             shape_id = 0  # Not used

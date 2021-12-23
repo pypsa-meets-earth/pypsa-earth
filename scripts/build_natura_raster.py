@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -58,19 +58,17 @@ from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-_logger = logging.getLogger(__name__)  # name of this file = "build_natura_raster"
+_logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-def get_fileshapes(list_paths, accepted_formats=(".shp",)):
+def get_fileshapes(list_paths, accepted_formats=(".shp", )):
     "Function to parse the list of paths to include shapes included in folders, if any"
 
     list_fileshapes = []
     for lf in list_paths:
-        if os.path.isdir(lf):
-            # if it is a folder, then list all shapes files contained
+        if os.path.isdir(
+                lf):  # if it is a folder, then list all shapes files contained
 
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
@@ -82,7 +80,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
         elif lf.endswith(accepted_formats):
             list_fileshapes.append(lf)
-    
+
     return list_fileshapes
 
 
@@ -126,10 +124,12 @@ def unify_protected_shape_areas(inputs, out_logging):
 
     # Read only .shp snakemake inputs
     shp_files = [string for string in inputs if ".shp" in string]
-    assert len(shp_files)!=0, "no input shapefiles given"
+    assert len(shp_files) != 0, "no input shapefiles given"
     # Create one geodataframe with all geometries, of all .shp files
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes")
+        _logger.info(
+            "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
+        )
     for i in shp_files:
         shape = gpd.GeoDataFrame(
             pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(3035)
@@ -142,13 +142,16 @@ def unify_protected_shape_areas(inputs, out_logging):
     shape = shape.rename(columns={
         0: "geometry"
     }).set_geometry("geometry")  # .set_crs(3035)
-    
+
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
+        _logger.info(
+            "Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
     unified_shape_file = unary_union(shape["geometry"])
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape")
+        _logger.info(
+            "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
+        )
     unified_shape = gpd.GeoDataFrame(
         geometry=[unified_shape_file]).set_crs(3035)
 
@@ -160,7 +163,6 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
 
@@ -168,10 +170,13 @@ if __name__ == "__main__":
     inputs = snakemake.input
     cutouts = inputs.cutouts
     shapefiles = get_fileshapes(inputs)
-    xs, Xs, ys, Ys = zip(*(determine_cutout_xXyY(cutout, out_logging=out_logging)
-                           for cutout in cutouts))
+    xs, Xs, ys, Ys = zip(
+        *(determine_cutout_xXyY(cutout, out_logging=out_logging)
+          for cutout in cutouts))
     bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
-    transform, out_shape = get_transform_and_shape(bounds, res=100, out_logging=out_logging)
+    transform, out_shape = get_transform_and_shape(bounds,
+                                                   res=100,
+                                                   out_logging=out_logging)
     # adjusted boundaries
     shapes = unify_protected_shape_areas(shapefiles, out_logging=out_logging)
 

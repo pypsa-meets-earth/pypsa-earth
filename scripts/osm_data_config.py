@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
@@ -474,6 +477,7 @@ continent_regions = {
     "TEST": ["NG", "NE", "SL", "MA"],
 }
 
+# Problematic countries, where geofabrik and iso norm deviates
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 iso_to_geofk_dict = {
     "EH": "MA",  # western sahara -> Morocco

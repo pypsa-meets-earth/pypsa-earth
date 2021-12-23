@@ -1,7 +1,8 @@
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 import logging
-import math
 import os
-import sys
 
 import geopandas as gpd
 import numpy as np
@@ -17,9 +18,6 @@ from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 
 def prepare_substation_df(df_all_substations):
     """
@@ -31,7 +29,6 @@ def prepare_substation_df(df_all_substations):
         Raw substations dataframe as downloaded from OpenStreetMap
 
     """
-
     # Modify the naming of the DataFrame columns to adapt to the PyPSA-Eur-like format
     df_all_substations = df_all_substations.rename(
         columns={
@@ -41,7 +38,7 @@ def prepare_substation_df(df_all_substations):
             "tags.power": "symbol",
             # "under_construction", will be added below
             "tags.substation": "tag_substation",
-            "Country": "country",  # new/different to PyPSA-Eur
+            "Country": "country",
             "Area": "tag_area",
             "lonlat": "geometry",
         })
@@ -121,72 +118,6 @@ def add_line_endings_tosubstations(substations, lines):
     return buses
 
 
-# # tol=0.01, around 700m at latitude 44.
-# def set_substations_ids(buses, tol=0.02):
-#     """
-#     Function to set substations ids to buses, accounting for location tolerance
-
-#     The algorithm is as follows:
-
-#     1. initialize all substation ids to -1
-#     2. if the current substation has been already visited [substation_id < 0], then skip the calculation
-#     3. otherwise:
-#         1. identify the substations within the specified tolerance (tol)
-#         2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
-#         3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
-#            in case of multiple substations with substation_ids >= 0, the first value is picked for all
-
-#     """
-
-#     buses["station_id"] = -1
-
-#     station_id = 0
-#     for i, row in buses.iterrows():
-#         if buses.loc[i, "station_id"] >= 0:
-#             continue
-
-#         # get substations within tolerance
-#         close_nodes = np.where(
-#             buses.apply(
-#                 lambda x: math.dist([row["lat"], row["lon"]],
-#                                     [x["lat"], x["lon"]]) <= tol,
-#                 axis=1,
-#             ))[0]
-
-#         if len(close_nodes) == 1:
-#             # if only one substation is in tolerance, then the substation is the current one iì
-#             # Note that the node cannot be with substation_id >= 0, given the preliminary check
-#             # at the beginning of the for loop
-#             buses.loc[buses.index[i], "station_id"] = station_id
-#             # update station id
-#             station_id += 1
-#         else:
-#             # several substations in tolerance
-
-#             # get their ids
-#             subset_substation_ids = buses.loc[buses.index[close_nodes],
-#                                               "station_id"]
-#             # check if all substation_ids are negative (<0)
-#             all_neg = subset_substation_ids.max() < 0
-#             # check if at least a substation_id is negative (<0)
-#             some_neg = subset_substation_ids.min() < 0
-
-#             if all_neg:
-#                 # when all substation_ids are negative, then this is a new substation id
-#                 # set the current station_id and increment the counter
-#                 buses.loc[buses.index[close_nodes], "station_id"] = station_id
-#                 station_id += 1
-#             elif some_neg:
-#                 # otherwise, when at least a substation_id is non-negative, then pick the first value
-#                 # and set it to all the other substations within tolerance
-#                 sub_id = -1
-#                 for substation_id in subset_substation_ids:
-#                     if substation_id >= 0:
-#                         sub_id = substation_id
-#                         break
-#                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
-
-
 def set_unique_id(df, col):
     """
     Create unique id's, where id is specified by the column "col"
@@ -263,8 +194,6 @@ def finalize_substation_types(df_all_substations):
     """
     Specify bus_id and voltage columns as integer
     """
-
-    # make float to integer
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
     df_all_substations.loc[:,
                            "voltage"] = df_all_substations["voltage"].astype(
@@ -282,7 +211,6 @@ def prepare_lines_df(df_lines):
     df_lines : dataframe
         Raw lines or cables dataframe as downloaded from OpenStreetMap
     """
-
     # Modification - create final dataframe layout
     df_lines = df_lines.rename(
         columns={
@@ -293,7 +221,7 @@ def prepare_lines_df(df_lines):
             "tags.frequency": "tag_frequency",
             "tags.power": "tag_type",
             "lonlat": "geometry",
-            "Country": "country",  # new/different to PyPSA-Eur
+            "Country": "country",
             "Length": "length",
         })
 
@@ -339,12 +267,15 @@ def finalize_lines_type(df_lines):
     return df_lines
 
 
-# split function for cables and voltage
 def split_cells_multiple(df, list_col=["cables", "voltage"]):
-    # TODO: split multiple cell need fix!
-    # One line with 'cable':{3,6} and 'voltage':{220000,110000} or
-    # only 'voltage':{110000,220000, 3330000} needs to split in several lines
-    # with new line_ID
+    """
+    Split function for cables and voltage
+
+    One line with 'cable':{3,6} and 'voltage':{220000,110000} or
+    only 'voltage':{110000, 220000, 3330000} needs to split in several lines
+    with new line_ID
+    """
+    # TODO: split multiple cell probably needs fix
     n_rows = df.shape[0]
     for i in range(n_rows):
         sub = df[list_col].iloc[i]  # for each cables and voltage
@@ -376,7 +307,6 @@ def integrate_lines_df(df_all_lines):
     """
     Function to add underground, under_construction, frequency and circuits
     """
-
     # Add under construction info
     # Default = False. No more information available atm
     df_all_lines["under_construction"] = False
@@ -441,7 +371,6 @@ def prepare_generators_df(df_all_generators):
     """
     Prepare the dataframe for generators
     """
-
     # reset index
     df_all_generators = df_all_generators.reset_index(drop=True)
 
@@ -516,9 +445,6 @@ def clean_data(
     threshold_voltage=35000,
     add_line_endings=True,
 ):
-
-    # ----------- LINES AND CABLES -----------
-
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"]).set_crs(epsg=4326,
                                                            inplace=True)
@@ -592,9 +518,6 @@ def clean_data(
     # filter substation by voltage
     df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
 
-    # # set substation_id
-    # set_substations_ids(df_all_substations, tol=0.02)
-
     # finalize dataframe types
     df_all_substations = finalize_substation_types(df_all_substations)
 
@@ -641,14 +564,9 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        # needed to run mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
-
-    # Required to set path to pypsa-africa
-    # _sets_path_to_root("pypsa-africa")
 
     tag_substation = snakemake.config["osm_data_cleaning_options"][
         "tag_substation"]

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
 """
@@ -72,7 +72,6 @@ Details (and errors made through this heuristic) are discussed in the paper
     The rule :mod:`solve_all_networks` runs
     for all ``scenario`` s in the configuration file
     the rule :mod:`solve_network`.
-
 """
 import logging
 import os
@@ -119,6 +118,7 @@ def prepare_network(n, solve_opts):
 
     if solve_opts.get("noisy_costs"):
         for t in n.iterate_components(n.one_port_components):
+            # TODO: uncomment out to and test noisy_cost (makes solution unique)
             # if 'capital_cost' in t.df:
             #    t.df['capital_cost'] += 1e1 + 2.*(np.random.random(len(t.df)) - 0.5)
             if "marginal_cost" in t.df:

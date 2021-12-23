@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # coding: utf-8
@@ -102,20 +102,13 @@ from pypsa.networkclustering import aggregateoneport
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse.csgraph import dijkstra
 
-# from pypsa.networkclustering import busmap_by_stubs
-
 sys.settrace
 
 logger = logging.getLogger(__name__)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-# _sets_path_to_root("pypsa-africa")
-
 
 def simplify_network_to_380(n, linetype):
-    # All goes to v_nom == 380
+    """Simplify network to v_nom == 380"""
     logger.info("Mapping all network lines onto a single 380kV layer")
 
     n.buses["v_nom"] = 380.0
@@ -289,7 +282,7 @@ def simplify_links(n):
                     continue
 
                 buses = [u, m]
-                links = [list(ls)]  # [name for name in ls]]
+                links = [list(ls)]
 
                 while m not in (supernodes | seen):
                     seen.add(m)
@@ -297,7 +290,7 @@ def simplify_links(n):
                         if m2 in seen or m2 == u:
                             continue
                         buses.append(m2)
-                        links.append(list(ls))  # [name for name in ls])
+                        links.append(list(ls))
                         break
                     else:
                         # stub
@@ -365,8 +358,6 @@ def simplify_links(n):
                 params.setdefault(attr, default)
             n.links.loc[name] = pd.Series(params)
 
-            # n.add("Link", **params)
-
     logger.debug("Collecting all components using the busmap")
 
     _aggregate_and_move_components(n, busmap, connection_costs_to_bus)
@@ -389,9 +380,7 @@ def busmap_by_stubs(network, matching_attrs=None):
     busmap : pandas.Series
         Mapping of network.buses to k-means clusters (indexed by
         non-negative integers).
-
     """
-
     busmap = pd.Series(network.buses.index, network.buses.index)
 
     G = network.graph()
@@ -466,13 +455,11 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("simplify_network",
                                    simpl="",
                                    network="elec")
     configure_logging(snakemake)
 
-    # Inputs
     n = pypsa.Network(snakemake.input.network)
 
     linetype = snakemake.config["lines"]["types"][380.0]

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
 # coding: utf-8
@@ -142,7 +142,6 @@ def set_transmission_limit(n, ll_type, factor, Nyears=1):
             constant=rhs,
             carrier_attribute="AC, DC",
         )
-
     return n
 
 

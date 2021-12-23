@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # This script does the following
 # 1. Downloads OSM files for specified countries from Geofabrik
 # 2. Filters files for substations, lines and generators
@@ -39,19 +42,13 @@ from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 
-# https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
+# esy.osm filter: https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# logging.basicConfig()
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
-
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-# Downloads PBF File for given Country Code
 
 
 def getContinentCountry(code):
@@ -139,7 +136,6 @@ def verify_pbf(PBF_inputfile, geofabrik_url, update):
         verified_pbf.append(PBF_inputfile)
         return True
     else:
-        # print(local_md5, remote_md5)
         return False
 
 
@@ -178,13 +174,13 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     # folder path
     folder_path = os.path.join(os.getcwd(), "data", "osm", continent)
-    
+
     # path of the Data.pickle used by run_filter
     file_pickle = os.path.join(folder_path, "Data.pickle")
 
     # path of the backup file
-    file_stored_pickle = os.path.join(folder_path, f"Data_{country_code}.pickle")
-
+    file_stored_pickle = os.path.join(folder_path,
+                                      f"Data_{country_code}.pickle")
 
     # json file for the Data dictionary
     JSON_outputfile = os.path.join(folder_path, country_code + "_power.json")
@@ -210,9 +206,9 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         # copy backup pickle into Data.pickle
         shutil.copyfile(file_stored_pickle, file_pickle)
 
-        _logger.info(f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}")
-        # feature_data = Data, Elements
-        # return feature_data
+        _logger.info(
+            f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}"
+        )
 
     else:
         create_elements = True
@@ -220,8 +216,10 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             new_prefilter_data = True
             _logger.info(f"Pre-filtering {country_name} ")
             pre_filtered.append(country_code)
-        
-        _logger.info(f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}")
+
+        _logger.info(
+            f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}"
+        )
 
     prefilter = {
         Node: {
@@ -279,10 +277,8 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     return feature_data
 
 
-# Convert Filtered Data, Elements to Pandas Dataframes
-
-
 def convert_filtered_data_to_dfs(country_code, feature_data, feature):
+    """Convert Filtered Data, Elements to Pandas Dataframes"""
     Data, Elements = feature_data
     elementname = f"{country_code}_{feature}s"
     df_way = pd.json_normalize(Elements[elementname]["Way"].values())
@@ -290,15 +286,11 @@ def convert_filtered_data_to_dfs(country_code, feature_data, feature):
     return (df_node, df_way, Data)
 
 
-# Lookup refs and convert to list of longlats
-
-
 def lonlat_lookup(df_way, Data):
-
+    """Lookup refs and convert to list of longlats"""
     if "refs" not in df_way.columns:
         _logger.warning("refs column not found")
         print(df_way.columns)
-        # df_way[col] = pd.Series([], dtype=pd.StringDtype()).astype(float)  # create empty "refs" if not in dataframe
 
     def look(ref):
         lonlat_row = list(
@@ -310,10 +302,8 @@ def lonlat_lookup(df_way, Data):
     return lonlat_list
 
 
-# Convert Ways to Point Coordinates
-
-
 def convert_ways_points(df_way, Data):
+    """Convert Ways to Point Coordinates"""
     lonlat_list = lonlat_lookup(df_way, Data)
     way_polygon = list(
         map(
@@ -329,7 +319,7 @@ def convert_ways_points(df_way, Data):
                     "EPSG:3857").area,
                 -1,
             ),
-        ))  # TODO: Rounding should be down in cleaning scripts
+        ))
 
     def find_center_point(p):
         if p.geom_type == "Polygon":
@@ -340,15 +330,12 @@ def convert_ways_points(df_way, Data):
 
     lonlat_column = list(map(find_center_point, way_polygon))
 
-    # df_way.drop("refs", axis=1, inplace=True, errors="ignore")
     df_way.insert(0, "Area", area_column)
     df_way.insert(0, "lonlat", lonlat_column)
 
 
-# Convert Ways to Line Coordinates
-
-
 def convert_ways_lines(df_way, Data):
+    """Convert Ways to Line Coordinates"""
     lonlat_list = lonlat_lookup(df_way, Data)
     lonlat_column = lonlat_list
     df_way.insert(0, "lonlat", lonlat_column)
@@ -360,10 +347,8 @@ def convert_ways_lines(df_way, Data):
     df_way.insert(0, "Length", length_column)
 
 
-# Convert Points Pandas Dataframe to GeoPandas Dataframe
-
-
 def convert_pd_to_gdf_nodes(df_way):
+    """Convert Points Pandas Dataframe to GeoPandas Dataframe"""
     gdf = gpd.GeoDataFrame(df_way,
                            geometry=[Point(x, y) for x, y in df_way.lonlat],
                            crs="EPSG:4326")
@@ -371,11 +356,8 @@ def convert_pd_to_gdf_nodes(df_way):
     return gdf
 
 
-# Convert Lines Pandas Dataframe to GeoPandas Dataframe
-
-
 def convert_pd_to_gdf_lines(df_way, simplified=False):
-    # df_way["geometry"] = df_way["lonlat"].apply(lambda x: LineString(x))
+    """Convert Lines Pandas Dataframe to GeoPandas Dataframe"""
     if simplified is True:
         df_way["geometry"] = df_way["geometry"].apply(
             lambda x: x.simplify(0.005, preserve_topology=False))
@@ -401,21 +383,17 @@ def convert_iso_to_geofk(iso_code,
         return iso_code
 
 
-def output_csv_geojson(output_files, country_code, df_all_feature, columns_feature, feature):
-    "Function to save the feature as csv and geojson"
-
+def output_csv_geojson(output_files, country_code, df_all_feature,
+                       columns_feature, feature):
+    """Function to save the feature as csv and geojson"""
     continent, country_name = getContinentCountry(country_code)
 
-    path_file_geojson = output_files[feature + "s"]  # get path from snakemake; expected geojson
+    # get path from snakemake; expected geojson
+    path_file_geojson = output_files[feature + "s"]
     if not path_file_geojson.endswith(".geojson"):
-        _logger.error(
-            f"Output file feature {feature} is not a geojson file"
-        )
-    path_file_csv = path_file_geojson.replace(".geojson", ".csv")  # get csv file
-    
-    # outputfile_partial = os.path.join(os.getcwd(), "data", "raw",
-    #                                   continent + "_all"
-    #                                   "_raw")  # Output file directory
+        _logger.error(f"Output file feature {feature} is not a geojson file")
+    path_file_csv = path_file_geojson.replace(".geojson",
+                                              ".csv")  # get csv file
 
     if not os.path.exists(path_file_geojson):
         os.makedirs(os.path.dirname(path_file_geojson),
@@ -426,9 +404,6 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
     df_all_feature.reset_index(drop=True, inplace=True)
 
     # Generate Files
-
-    # _to_csv_nafix(df_all_feature,
-    #               outputfile_partial + f"_{feature}s" + ".csv")  # Generate CSV
     _to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
 
     if df_all_feature.empty:
@@ -451,8 +426,14 @@ def output_csv_geojson(output_files, country_code, df_all_feature, columns_featu
                         driver="GeoJSON")  # Generate GeoJson
 
 
-def process_data(feature_list, country_list, output_files,
-                iso_coding=True, update=False, verify=False):
+def process_data(
+    feature_list,
+    country_list,
+    output_files,
+    iso_coding=True,
+    update=False,
+    verify=False,
+):
     """
     Download the features in feature_list for each country of the country_list
     """
@@ -460,11 +441,8 @@ def process_data(feature_list, country_list, output_files,
     # loop the request for each feature
 
     for feature in feature_list:  # feature dataframe
-        
-        df_list = []
 
-        # initialize dataframe
-        # df_all_feature = pd.DataFrame()
+        df_list = []
 
         for country_code_isogeofk in country_list:
 
@@ -493,7 +471,7 @@ def process_data(feature_list, country_list, output_files,
             df_node["Type"] = "Node"
             df_way["Type"] = "Way"
 
-            # Concatinate Nodes and Ways
+            # Concat. Nodes and Ways
             df_feature = pd.concat([df_node, df_way], axis=0)
 
             # Add Country Column with GeoFabrik coding
@@ -501,12 +479,15 @@ def process_data(feature_list, country_list, output_files,
 
             df_list.append(df_feature)
 
-            # df_all_feature = pd.concat([df_all_feature, df_feature], ignore_index=True)
-        
         df_all_feature = pd.concat(df_list, ignore_index=True)
 
-        output_csv_geojson(output_files, country_code, df_all_feature,
-                           feature_columns[feature], feature)
+        output_csv_geojson(
+            output_files,
+            country_code,
+            df_all_feature,
+            feature_columns[feature],
+            feature,
+        )
 
 
 def create_country_list(input, iso_coding=True):
@@ -578,7 +559,6 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("download_osm_data")
     configure_logging(snakemake)
 
@@ -594,5 +574,11 @@ if __name__ == "__main__":
     country_list = create_country_list(input)
 
     # Set update # Verify = True checks local md5s and pre-filters data again
-    process_data(feature_list, country_list, output_files,
-                iso_coding=True, update=False, verify=False)
+    process_data(
+        feature_list,
+        country_list,
+        output_files,
+        iso_coding=True,
+        update=False,
+        verify=False,
+    )

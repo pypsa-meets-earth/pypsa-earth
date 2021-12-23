@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Calculates for each network node the
@@ -142,9 +142,7 @@ generators across the grid cells within each Voronoi cell. This is done by
 taking account of a combination of the available land at each grid cell and the
 capacity factor there.
 
-First the script computes how much of the technology can be installed at each
-cutout grid cell and each node using the `GLAES
-<https://github.com/FZJ-IEK3-VSA/glaes>`_ library. This uses the Copernicus land use data,
+This uses the Copernicus land use data,
 Natura2000 nature reserves and GEBCO bathymetry data.
 
 .. image:: ../img/eligibility.png
@@ -206,26 +204,22 @@ from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("build_renewable_profiles",
                                    technology="solar")
         _sets_path_to_root("pypsa-africa")
-
     configure_logging(snakemake)
+
     pgb.streams.wrap_stderr()
     paths = snakemake.input
     nprocesses = snakemake.config["atlite"].get("nprocesses")
     noprogress = not snakemake.config["atlite"].get("show_progress", True)
     config = snakemake.config["renewable"][snakemake.wildcards.technology]
-    resource = config["resource"]  # pv panel config / wind turbine config
+    resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
 
@@ -238,7 +232,7 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(paths["cutout"])
     regions = gpd.read_file(paths.regions).set_index("name").rename_axis("bus")
     regions_crs = regions.crs
-    # TODO: Drop NAN maybe somewhere else? NaN lead to error otherwise
+    # TODO: Check if NaN still needs to be dropped here
     regions = regions.dropna(axis="index", subset=["geometry"])
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(

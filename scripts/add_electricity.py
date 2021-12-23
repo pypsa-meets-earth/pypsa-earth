@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # coding: utf-8
 """
-Adds electrical generators and existing hydro storage units to a base network.
+Adds electrical generators, load and existing hydro storage units to a base network.
 
 Relevant Settings
 -----------------
@@ -46,15 +46,15 @@ Inputs
 ------
 
 - ``data/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
-- ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.
+- ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
 
     .. image:: ../img/hydrocapacities.png
         :scale: 34 %
 
 - ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
-- ``resources/opsd_load.csv`` Hourly per-country load profiles.
+- ``resources/ssp2-2.6/2030/era5_2013/Africa.nc`` Hourly country load profiles produced by GEGIS
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
-- ``resources/nuts3_shapes.geojson``: confer :ref:`shapes`
+- ``resources/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
 - ``resources/profile_{}.nc``: all technologies in ``config["renewables"].keys()``, confer :ref:`renewableprofiles`.
 - ``networks/base.nc``: confer :ref:`base`
@@ -72,7 +72,7 @@ Description
 
 The rule :mod:`add_electricity` ties all the different data inputs from the preceding rules together into a detailed PyPSA network that is stored in ``networks/elec.nc``. It includes:
 
-- today's transmission topology and transfer capacities (optionally including lines which are under construction according to the config settings ``lines: under_construction`` and ``links: under_construction``),
+- today's transmission topology and transfer capacities (in future, optionally including lines which are under construction according to the config settings ``lines: under_construction`` and ``links: under_construction``),
 - today's thermal and hydro power generation capacities (for the technologies listed in the config setting ``electricity: conventional_carriers``), and
 - today's load time-series (upsampled in a top-down approach according to population and gross domestic product)
 
@@ -102,9 +102,6 @@ from vresutils.load import timeseries_opsd
 idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
-
-# Requirement to set path to filepath for execution
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def normed(s):
@@ -246,12 +243,12 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         Now attached with load time series
     """
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
-    regions = (gpd.read_file(regions).set_index("name").reindex(
-        substation_lv_i)).dropna(axis="rows")  # Added dropna
-    # "NG" had 1 out of 620 NAN shape.
+    regions = (
+        gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
+    ).dropna(
+        axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
     load_path = load
     gegis_load = xr.open_dataset(load_path)
-    # convert .nc file to dataframe and set "time" to index
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
@@ -263,6 +260,9 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
                "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
     def upsample(cntry, group):
+        """
+        Distributes load in country according to population and gdp
+        """
         l = gegis_load.loc[gegis_load.region_code ==
                            cntry]["Electricity demand"]
         if len(group) == 1:
@@ -280,8 +280,9 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
                               index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
-            # regression on the country to continent load data
+            # regression on the country to EU continent load data
             # (refer to vresutils.load._upsampling_weights)
+            # TODO: require adjustment for Africa
             factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
             return pd.DataFrame(
                 factors.values * l.values[:, np.newaxis],
@@ -311,10 +312,10 @@ def update_transmission_costs(n,
         return
 
     dc_b = n.links.carrier == "DC"
-
-    # If there are no dc links, then the 'underwater_fraction' column
+    # If there are no "DC" links, then the 'underwater_fraction' column
     # may be missing. Therefore we have to return here.
-    if n.links.loc[dc_b].empty:
+    # TODO: Require fix
+    if n.links.loc[n.links.carrier == "DC"].empty:
         return
 
     if simple_hvdc_costs:
@@ -337,8 +338,7 @@ def attach_wind_and_solar(n, costs):
 
         ren_config = snakemake.config["renewable"][tech]
 
-        # get if technology is extendable
-        extendable = False
+        extendable = False  # set by default false and update below
         if "extendable" in ren_config:
             extendable = ren_config["extendable"]
 
@@ -353,7 +353,7 @@ def attach_wind_and_solar(n, costs):
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
                 continue
-                # TODO: Uncomment this out. MAX
+                # TODO: Uncomment out and debug.
                 # underwater_fraction = ds["underwater_fraction"].to_pandas()
                 # connection_cost = (
                 #     snakemake.config["lines"]["length_factor"] *
@@ -427,7 +427,7 @@ def attach_hydro(n, costs, ppl):
         index=lambda s: str(s) + " hydro"))
 
     # TODO: remove this line to address nan when powerplantmatching is stable
-    # NaN technologies set to ROR
+    # Current fix, NaN technologies set to ROR
     ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
 
     ror = ppl.query('technology == "Run-Of-River"')
@@ -498,7 +498,6 @@ def attach_hydro(n, costs, ppl):
         missing_mh_i = hydro.query("max_hours == 0").index
 
         if hydro_max_hours == "energy_capacity_totals_by_country":
-            # watch out some p_nom values like IE's are totally underrepresented
             max_hours_country = (
                 e_missing /
                 hydro.loc[missing_mh_i].groupby("country").p_nom.sum())
@@ -660,7 +659,6 @@ def estimate_renewable_capacities(n, tech_map=None):
         tech_capacities = capacities.loc[ppm_fueltype,
                                          "Capacity"].reindex(countries,
                                                              fill_value=0.0)
-        # tech_i = n.generators.query('carrier in @techs').index
         tech_i = n.generators.query("carrier in @techs")[n.generators.query(
             "carrier in @techs").bus.map(
                 n.buses.country).isin(countries)].index
@@ -711,22 +709,20 @@ if __name__ == "__main__":
     admin_shapes = snakemake.input.gadm_shapes
 
     costs = load_costs(Nyears)
-    ppl = load_powerplants()  # uncomment out when powerplantmatching is stable
+    ppl = load_powerplants()
 
     attach_load(n, regions, load, admin_shapes, countries, scale)
-
     update_transmission_costs(n, costs)
-
-    # uncomment out when powerplantmatching is stable
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
-    # attach_hydro(n, costs, ppl)  # uncomment out when powerplantmatching is stable
-    # attach_extendable_generators(n, costs, ppl) # uncomment out when powerplantmatching is stable
+    attach_hydro(n, costs, ppl)
+    attach_extendable_generators(n, costs, ppl)
 
+    # TODO: Feature to uncomment and debug
     # estimate_renewable_capacities(n)
     # attach_OPSD_renewables(n)
-    update_p_nom_max(n)
 
+    update_p_nom_max(n)
     add_nice_carrier_names(n)
 
     n.export_to_netcdf(snakemake.output[0])

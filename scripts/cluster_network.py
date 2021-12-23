@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # coding: utf-8
@@ -222,7 +222,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
         distribution_factor = G
 
-    # originally ["country", "sub_networks"]
+    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_networks"]
     N = n.buses.groupby(["country"]).size()
 
     assert (
@@ -310,7 +310,7 @@ def busmap_for_gadm_clusters(n, gadm_level):
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus,
                                                                   axis=1)
-    busmap = buses["gadm_{}".format(gadm_level)]  # .apply(lambda x: x[:-2])
+    busmap = buses["gadm_{}".format(gadm_level)]
     not_founds = busmap[busmap == "not_found"].index.tolist()
     for not_found in not_founds:
         for tech in ["solar", "onwind"]:
@@ -329,11 +329,8 @@ def busmap_for_n_clusters(n,
                           algorithm="kmeans",
                           **algorithm_kwds):
     if algorithm == "kmeans":
-        # 1000 for more accurate results; 100 for fast results
         algorithm_kwds.setdefault("n_init", 1000)
-        # 30000 for more accurate results; 3000 for fast results
         algorithm_kwds.setdefault("max_iter", 30000)
-        # 1e-6 for more accurate results; 1e-3 for fast results
         algorithm_kwds.setdefault("tol", 1e-6)
 
     n.determine_network_topology()
@@ -380,7 +377,7 @@ def busmap_for_n_clusters(n,
             )
 
     return (n.buses.groupby(
-        # ["country", "sub_network"], #TODO Add sub_networks and debug
+        # ["country", "sub_network"], #TODO: 2. Add sub_networks (see previous TODO)
         ["country"],
         group_keys=False,
     ).apply(busmap_for_country).squeeze().rename("busmap"))
@@ -490,7 +487,7 @@ if __name__ == "__main__":
                                    network="elec",
                                    simpl="",
                                    clusters="60")
-        _sets_path_to_root("pypsa-africa")  # for distribute_cluster > "gdp"
+        _sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
@@ -504,7 +501,7 @@ if __name__ == "__main__":
     if alternative_clustering:
         renewable_carriers = pd.Index([
             "solar",
-            "onwind",  # TODO find a way to fetch automatically from the model run
+            "onwind",  # TODO load "solar" and "wind" from config
         ])
     else:
         renewable_carriers = pd.Index([
@@ -518,7 +515,7 @@ if __name__ == "__main__":
             n.generators.carrier.unique()).difference(renewable_carriers)
     else:
         n_clusters = int(snakemake.wildcards.clusters)
-        aggregate_carriers = None  # All
+        aggregate_carriers = None
 
     if n_clusters == len(n.buses):
         # Fast-path if no clustering is necessary
