@@ -53,7 +53,7 @@ numpydoc_show_class_members = False
 # the documentation. If not mocked out errors can appear i.e. not automated
 # documentation
 autodoc_mock_imports = [
-    "setuptools",
+    # "esy-osmfilter",
     # "esy",
     # "pypsa",
     # "numpy",

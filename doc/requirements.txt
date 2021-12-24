@@ -23,4 +23,4 @@ descartes
 esy-osm-pbf
 esy-osmfilter
 rioxarray
-setuptools<58.3.0
+pip "setuptools==50.3.1" cmake --upgrade
