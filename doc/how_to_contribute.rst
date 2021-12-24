@@ -70,8 +70,7 @@ In the code team we are working on 6 different work packages:
 - WP5. Network and substation modelling
 - WP6. Data creation and validation
 
-A conference paper describing each of the work packages in more detail is coming end of June 2021. 
-You can write max.parzen(@ed.ac.uk) to receive a non-published preprint version.
+A conference paper describing each of the work packages in more detail introduced [here](https://arxiv.org/abs/2110.10628) 
 
 
 .. _required_prototype_dev:
