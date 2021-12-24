@@ -12,7 +12,7 @@ PyPSA meets Africa is a free and open source software initiative aiming to devel
 A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
 <p align="center">
-  <img src="doc/img/africa_osm_map.jpeg" width="600">
+  <img src="doc/img/africa_osm_map.png" width="600">
 </p>
 
 ## Get involved

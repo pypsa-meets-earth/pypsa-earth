@@ -84,7 +84,7 @@ To achieve this we differentiate in the project between essential and optional p
 You can join the work package development. Some examples of open tasks are:
 
 
-.. image:: img/africa_osm_map.jpeg
+.. image:: img/africa_osm_map.png
     :width: 60%
     :align: center
 
