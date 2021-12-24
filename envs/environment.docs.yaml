@@ -35,7 +35,7 @@ dependencies:
   - netcdf4
   - networkx
   - scipy
-  - shapely=>1.8.1a
+  - shapely>=1.8a1
   - progressbar2
   - pyomo
   - matplotlib

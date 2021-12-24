@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-setuptools
-
+setuptools<58.3.0
 sphinx
 sphinx_rtd_theme
 
@@ -24,3 +23,4 @@ descartes
 
 esy-osm-pbf
 esy-osmfilter
+rioxarray
