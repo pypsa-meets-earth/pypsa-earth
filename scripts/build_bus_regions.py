@@ -48,8 +48,7 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging
 from download_osm_data import create_country_list
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from shapely.geometry import Point, Polygon
 from vresutils.graph import voronoi_partition_pts
 
 _logger = logging.getLogger(__name__)
