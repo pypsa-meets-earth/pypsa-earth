@@ -281,7 +281,7 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
                 "name": c_code,
                 "geometry": geom
             },
-                                   ignore_index=True)
+                ignore_index=True)
 
     ret_df = ret_df.set_index("name")["geometry"].map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))

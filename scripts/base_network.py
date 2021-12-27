@@ -110,7 +110,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
