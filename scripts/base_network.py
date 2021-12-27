@@ -68,7 +68,7 @@ import shapely.wkt
 import yaml
 from _helpers import _read_csv_nafix
 from _helpers import configure_logging
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point

@@ -138,7 +138,7 @@ from add_electricity import load_costs
 from build_shapes import add_gdp_data
 from build_shapes import add_population_data
 from build_shapes import get_GADM_layer
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
 from pypsa.networkclustering import busmap_by_spectral_clustering

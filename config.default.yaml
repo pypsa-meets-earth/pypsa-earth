@@ -53,7 +53,7 @@ build_shape_options:
     year: 2020  # reference year used to derive shapes, info on population and info on GDP
     nprocesses: 5  # number of processes to be used in build_shapes
 
-osm_data_cleaning_options:  # osm = OpenStreetMap
+clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: True  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
   tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)

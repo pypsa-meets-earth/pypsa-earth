@@ -11,7 +11,7 @@ from _helpers import _read_geojson
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
@@ -520,7 +520,7 @@ def built_network(inputs, outputs):
     logger.info("Stage 3/4: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
-    if snakemake.config["osm_data_cleaning_options"]["group_close_buses"]:
+    if snakemake.config["clean_osm_data_options"]["group_close_buses"]:
         lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                       buses,
                                                                       tol=4000)

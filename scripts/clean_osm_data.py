@@ -557,13 +557,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
 
-    tag_substation = snakemake.config["osm_data_cleaning_options"][
+    tag_substation = snakemake.config["clean_osm_data_options"][
         "tag_substation"]
-    threshold_voltage = snakemake.config["osm_data_cleaning_options"][
+    threshold_voltage = snakemake.config["clean_osm_data_options"][
         "threshold_voltage"]
-    names_by_shapes = snakemake.config["osm_data_cleaning_options"][
+    names_by_shapes = snakemake.config["clean_osm_data_options"][
         "names_by_shapes"]
-    add_line_endings = snakemake.config["osm_data_cleaning_options"][
+    add_line_endings = snakemake.config["clean_osm_data_options"][
         "add_line_endings"]
 
     input_files = snakemake.input
