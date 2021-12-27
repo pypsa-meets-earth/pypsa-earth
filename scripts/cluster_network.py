@@ -131,18 +131,13 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
-from _helpers import _sets_path_to_root
-from _helpers import configure_logging
-from _helpers import update_p_nom_max
+from _helpers import _sets_path_to_root, configure_logging, update_p_nom_max
 from add_electricity import load_costs
-from build_shapes import add_gdp_data
-from build_shapes import add_population_data
-from build_shapes import get_GADM_layer
+from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
 from download_osm_data import create_country_list
-from pypsa.networkclustering import _make_consense
-from pypsa.networkclustering import busmap_by_kmeans
-from pypsa.networkclustering import busmap_by_spectral_clustering
-from pypsa.networkclustering import get_clustering_from_busmap
+from pypsa.networkclustering import (_make_consense, busmap_by_kmeans,
+                                     busmap_by_spectral_clustering,
+                                     get_clustering_from_busmap)
 from shapely.geometry import Point
 
 idx = pd.IndexSlice

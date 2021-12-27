@@ -6,16 +6,12 @@ import sys
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import _sets_path_to_root
-from _helpers import _to_csv_nafix
-from _helpers import _read_geojson
-from _helpers import configure_logging
-from shapely.geometry import LineString
-from shapely.geometry import Point
-from shapely.ops import linemerge
-from shapely.ops import unary_union
-from tqdm import tqdm
+from _helpers import (_read_geojson, _sets_path_to_root, _to_csv_nafix,
+                      configure_logging)
 from download_osm_data import create_country_list
+from shapely.geometry import LineString, Point
+from shapely.ops import linemerge, unary_union
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
