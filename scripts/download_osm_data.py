@@ -25,18 +25,18 @@ import urllib3
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
-from esy.osmfilter import Node
-from esy.osmfilter import osm_info as osm_info
-from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import Relation
-from esy.osmfilter import run_filter
-from esy.osmfilter import Way
 from config_osm_data import continent_regions
 from config_osm_data import continents
 from config_osm_data import feature_category
 from config_osm_data import feature_columns
 from config_osm_data import iso_to_geofk_dict
 from config_osm_data import world
+from esy.osmfilter import Node
+from esy.osmfilter import osm_info as osm_info
+from esy.osmfilter import osm_pickle as osm_pickle
+from esy.osmfilter import Relation
+from esy.osmfilter import run_filter
+from esy.osmfilter import Way
 from shapely import geometry
 from shapely.geometry import LineString
 from shapely.geometry import Point
