@@ -92,7 +92,7 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer

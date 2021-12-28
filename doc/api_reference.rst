@@ -58,28 +58,28 @@ cluster_network
 .. automodule:: cluster_network
     :members:
 
-osm_built_network
+build_osm_network
 -------------------------------
 
-.. automodule:: osm_built_network
+.. automodule:: build_osm_network
     :members:
 
-osm_data_cleaning
+clean_osm_data
 -------------------------------
 
-.. automodule:: osm_data_cleaning
+.. automodule:: clean_osm_data
     :members:
 
-osm_data_config
+config_osm_data
 -------------------------------
 
-.. automodule:: osm_data_config
+.. automodule:: config_osm_data
     :members:
 
-osm_pbf_power_data_extractor
+download_osm_data
 -------------------------------
 
-.. automodule:: osm_pbf_power_data_extractor
+.. automodule:: download_osm_data
     :members:
 
 simplify_network

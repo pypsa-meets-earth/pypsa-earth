@@ -25,18 +25,18 @@ import urllib3
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from config_osm_data import continent_regions
+from config_osm_data import continents
+from config_osm_data import feature_category
+from config_osm_data import feature_columns
+from config_osm_data import iso_to_geofk_dict
+from config_osm_data import world
 from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
 from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
 from esy.osmfilter import Way
-from osm_data_config import continent_regions
-from osm_data_config import continents
-from osm_data_config import feature_category
-from osm_data_config import feature_columns
-from osm_data_config import iso_to_geofk_dict
-from osm_data_config import world
 from shapely import geometry
 from shapely.geometry import LineString
 from shapely.geometry import Point
@@ -492,12 +492,12 @@ def process_data(
 
 def create_country_list(input, iso_coding=True):
     """
-    Create a country list for defined regions in osm_data_config.py
+    Create a country list for defined regions in config_osm_data.py
 
     Parameters
     ----------
     input : str
-        Any two-letter country name, regional name, or continent given in osm_data_config.py
+        Any two-letter country name, regional name, or continent given in config_osm_data.py
         Country name duplications won't distort the result.
         Examples are:
         ["NG","ZA"], downloading osm data for Nigeria and South Africa

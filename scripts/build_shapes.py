@@ -21,7 +21,7 @@ from _helpers import _three_2_two_digits_country
 from _helpers import _two_2_three_digits_country
 from _helpers import _two_digits_2_name_country
 from _helpers import configure_logging
-from osm_pbf_power_data_extractor import create_country_list
+from download_osm_data import create_country_list
 from rasterio.mask import mask
 from shapely.geometry import LineString
 from shapely.geometry import MultiPolygon

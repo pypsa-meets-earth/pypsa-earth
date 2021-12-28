@@ -63,7 +63,7 @@ if config['enable'].get('download_osm_data', True):
             lines="data/raw/africa_all_raw_lines.geojson",
             substations="data/raw/africa_all_raw_substations.geojson",
         log: "logs/download_osm_data.log"
-        script: "scripts/osm_pbf_power_data_extractor.py"
+        script: "scripts/download_osm_data.py"
 
 
 rule clean_osm_data:
@@ -81,7 +81,7 @@ rule clean_osm_data:
         lines="data/clean/africa_all_lines.geojson",
         substations="data/clean/africa_all_substations.geojson",
     log: "logs/clean_osm_data.log"
-    script: "scripts/osm_data_cleaning.py"
+    script: "scripts/clean_osm_data.py"
 
 
 rule build_osm_network:
@@ -94,7 +94,7 @@ rule build_osm_network:
         lines="data/base_network/africa_all_lines_build_network.csv",
         substations="data/base_network/africa_all_buses_build_network.csv",
     log: "logs/build_osm_network.log"
-    script: "scripts/osm_built_network.py"
+    script: "scripts/build_osm_network.py"
 
 
 rule build_shapes:
