@@ -255,7 +255,7 @@ if __name__ == "__main__":
                                     network="elec",
                                     simpl="",
                                     clusters="10",
-                                    ll="v0.3",
+                                    ll="copt",
                                     opts="Co2L-24H",
                                     attr='p_nom',
                                     ext="pdf",
