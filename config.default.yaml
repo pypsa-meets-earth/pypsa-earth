@@ -16,7 +16,7 @@ scenario:
   opts: [Co2L-3H]
 
 countries: ["africa"]
-# Can be replaced by country ["NG", "BI"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
+# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 summary_dir: results
 
