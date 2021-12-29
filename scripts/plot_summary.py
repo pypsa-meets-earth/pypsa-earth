@@ -85,25 +85,25 @@ def plot_costs(infn, fn=None):
     if not to_drop.empty:
         _logger.info("Remaining elements in dataframe:\n" + df.to_string() + "\n")
 
-    new_index = df.index.intersection(preferred_order).append(df.index.difference(preferred_order))
+    new_index_costs = df.index.intersection(preferred_order).append(df.index.difference(preferred_order))
 
     new_columns = df.sum().sort_values().index
 
-    fig, ax = plt.subplots()
-    fig.set_size_inches((12,8))
+    fig_costs, ax = plt.subplots()
+    fig_costs.set_size_inches((12,8))
 
-    if new_index.empty:
+    if new_index_costs.empty:
         _logger.error(f"No costs data to plot for country {snakemake.wildcards.country}, no valid plot is generated")
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:
             pass
         return
 
-    df.loc[new_index,new_columns].T.plot(
+    df.loc[new_index_costs,new_columns].T.plot(
         kind="bar",
         ax=ax,
         stacked=True,
-        color=[snakemake.config['plotting']['tech_colors'][i] for i in new_index]
+        color=[snakemake.config['plotting']['tech_colors'][i] for i in new_index_costs]
     )
 
     handles,labels = ax.get_legend_handles_labels()
@@ -122,10 +122,10 @@ def plot_costs(infn, fn=None):
     ax.legend(handles,labels,ncol=4,loc="upper left")
 
 
-    fig.tight_layout()
+    fig_costs.tight_layout()
 
     if fn is not None:
-        fig.savefig(fn, transparent=True)
+        fig_costs.savefig(fn, transparent=True)
 
 
 def plot_energy(infn, fn=None):
@@ -149,25 +149,25 @@ def plot_energy(infn, fn=None):
     if not to_drop.empty:
         _logger.info("Remaining elements in dataframe:\n" + df.to_string() + "\n")
 
-    new_index = df.index.intersection(preferred_order).append(df.index.difference(preferred_order))
+    new_index_energy = df.index.intersection(preferred_order).append(df.index.difference(preferred_order))
 
     new_columns = df.columns.sort_values()
 
-    fig, ax = plt.subplots()
-    fig.set_size_inches((12,8))
+    fig_energy, ax = plt.subplots()
+    fig_energy.set_size_inches((12,8))
 
-    if new_index.empty:
+    if new_index_energy.empty:
         _logger.error(f"No energy data to plot for country {snakemake.wildcards.country}, no valid plot is generated")
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:
             pass
         return
 
-    df.loc[new_index,new_columns].T.plot(
+    df.loc[new_index_energy,new_columns].T.plot(
         kind="bar",
         ax=ax,
         stacked=True,
-        color=[snakemake.config['plotting']['tech_colors'][i] for i in new_index]
+        color=[snakemake.config['plotting']['tech_colors'][i] for i in new_index_energy]
     )
 
     handles,labels = ax.get_legend_handles_labels()
@@ -185,10 +185,10 @@ def plot_energy(infn, fn=None):
 
     ax.legend(handles,labels,ncol=4,loc="upper left")
 
-    fig.tight_layout()
+    fig_energy.tight_layout()
 
     if fn is not None:
-        fig.savefig(fn, transparent=True)
+        fig_energy.savefig(fn, transparent=True)
 
 
 if __name__ == "__main__":
