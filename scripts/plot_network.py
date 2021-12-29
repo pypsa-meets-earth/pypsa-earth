@@ -21,10 +21,13 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from _helpers import (aggregate_costs, aggregate_p, configure_logging,
-                      load_network_for_plots)
+from _helpers import aggregate_costs
+from _helpers import aggregate_p
+from _helpers import configure_logging
+from _helpers import load_network_for_plots
 from matplotlib.legend_handler import HandlerPatch
-from matplotlib.patches import Circle, Ellipse
+from matplotlib.patches import Circle
+from matplotlib.patches import Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 
