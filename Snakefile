@@ -31,6 +31,18 @@ rule solve_all_networks:
     input: expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", **config['scenario'])
 
 
+rule plot_all_p_nom:
+    input: expand("results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.{ext}", **config['scenario'], ext=['png', 'pdf'])
+
+
+rule make_all_summaries:
+    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_all", **config['scenario'])
+
+
+rule make_country_summaries:
+    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}", **config['scenario'], country=config['countries'])
+
+
 datafiles = [
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
@@ -371,3 +383,37 @@ rule solve_network:
     resources: mem=memory
     shadow: "shallow"
     script: "scripts/solve_network.py"
+
+
+def input_make_summary(w):
+    # It's mildly hacky to include the separate costs input as first entry
+    if w.ll.endswith("all"):
+        ll = config["scenario"]["ll"]
+        if len(w.ll) == 4:
+            ll = [l for l in ll if l[0] == w.ll[0]]
+    else:
+        ll = w.ll
+    return ([COSTS] +
+            expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+                   ll=ll,
+                   **{k: config["scenario"][k] if getattr(w, k) == "all" else getattr(w, k)
+                      for k in ["simpl", "clusters", "opts"]}))
+
+
+rule make_summary:
+    input: input_make_summary
+    output: directory("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}")
+    log: "logs/make_summary/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.log",
+    script: "scripts/make_summary.py"
+
+
+rule plot_network:
+    input:
+        network="results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        africa_shape='resources/africa_shape.geojson',
+        tech_costs=COSTS,
+    output:
+        only_map="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}.{ext}",
+        ext="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_ext.{ext}"
+    log: "logs/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log"
+    script: "scripts/plot_network.py"
