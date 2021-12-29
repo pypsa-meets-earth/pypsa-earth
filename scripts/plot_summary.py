@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
-
 """
 Plots energy and cost summaries for solved networks.
 Relevant Settings
@@ -13,7 +12,6 @@ Outputs
 Description
 -----------
 """
-
 import logging
 import os
 
