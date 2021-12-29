@@ -409,7 +409,7 @@ rule make_summary:
 
 rule plot_network:
     input:
-        network="results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",        
+        network="results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         africa_shape='resources/africa_shape.geojson',
         tech_costs=COSTS,
     output:
