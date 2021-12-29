@@ -31,12 +31,8 @@ rule solve_all_networks:
     input: expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", **config['scenario'])
 
 
-rule plot_all_p_nom_to_pdf:
-    input: expand("results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.pdf", **config['scenario'])
-
-
-rule plot_all_p_nom_to_png:
-    input: expand("results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.png", **config['scenario'])
+rule plot_all_p_nom:
+    input: expand("results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.{ext}", **config['scenario'], ext=['png', 'pdf'])
 
 
 rule make_all_summaries:
