@@ -78,12 +78,12 @@ def plot_costs(infn, fn=None):
     to_drop = df.index[df.max(axis=1) < snakemake.config['plotting']['costs_threshold']]
 
     if not to_drop.empty:
-        _logger.info("Dropping elements from dataframe:\n" + df.loc[to_drop].to_string() + "\n")
+        _logger.info("Dropping elements from costs dataframe:\n" + df.loc[to_drop].to_string() + "\n")
 
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        _logger.info("Remaining elements in dataframe:\n" + df.to_string() + "\n")
+        _logger.info("Remaining elements in costs dataframe:\n" + df.to_string() + "\n")
 
     new_index_costs = df.index.intersection(preferred_order).append(df.index.difference(preferred_order))
 
@@ -142,12 +142,12 @@ def plot_energy(infn, fn=None):
     to_drop = df.index[df.abs().max(axis=1) < snakemake.config['plotting']['energy_threshold']]
 
     if not to_drop.empty:
-        _logger.info("Dropping elements from dataframe:\n" + df.loc[to_drop].to_string() + "\n")
+        _logger.info("Dropping elements from energy dataframe:\n" + df.loc[to_drop].to_string() + "\n")
 
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        _logger.info("Remaining elements in dataframe:\n" + df.to_string() + "\n")
+        _logger.info("Remaining elements in energy dataframe:\n" + df.to_string() + "\n")
 
     new_index_energy = df.index.intersection(preferred_order).append(df.index.difference(preferred_order))
 
