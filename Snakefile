@@ -39,6 +39,10 @@ rule make_all_summaries:
     input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}", **config['scenario'], country=['all'] + config['countries'])
 
 
+rule plot_all_summaries:
+    input: expand("results/plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}", summary=['energy', 'costs'], **config['scenario'], country=['all'] + config['countries'], ext=['png', 'pdf'])
+
+
 datafiles = [
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
@@ -401,6 +405,12 @@ rule make_summary:
     output: directory("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}")
     log: "logs/make_summary/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.log",
     script: "scripts/make_summary.py"
+
+rule plot_summary:
+    input: "results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}"
+    output: "results/plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}"
+    log: "logs/plot_summary/{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}_{ext}.log"
+    script: "scripts/plot_summary.py"
 
 
 rule plot_network:
