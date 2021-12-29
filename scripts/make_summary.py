@@ -166,7 +166,7 @@ def calculate_energy(n, label, energy):
 
         # fix to avoid missing data
         if c_energies.empty:
-            c_energies=pd.Series(0.0, index=[c.list_name])
+            c_energies = pd.Series(0.0, index=[c.list_name])
 
         energy = include_in_summary(energy, [c.list_name], label, c_energies)
 
