@@ -222,20 +222,20 @@ def calculate_supply_energy(n, label, supply_energy):
 
     for i in load_types:
 
-        buses = n.loads.bus[n.loads.carrier == i].values
+        buses_tot = n.loads.bus[n.loads.carrier == i].values
 
         bus_map = pd.Series(False,index=n.buses.index)
 
-        bus_map.loc[buses] = True
+        bus_map.loc[buses_tot] = True
 
         for c in n.iterate_components(n.one_port_components):
 
-            items = c.df.index[c.df.bus.map(bus_map)]
+            items_c = c.df.index[c.df.bus.map(bus_map)]
 
-            if len(items) == 0 or c.pnl.p.empty:
+            if len(items_c) == 0 or c.pnl.p.empty:
                 continue
 
-            s = c.pnl.p[items].sum().multiply(c.df.loc[items,'sign']).groupby(c.df.loc[items,'carrier']).sum()
+            s = c.pnl.p[items_c].sum().multiply(c.df.loc[items_c,'sign']).groupby(c.df.loc[items_c,'carrier']).sum()
 
             # Index tuple(s) indicating the newly to-be-added row(s)
             raw_index = tuple([[i],[c.list_name],list(s.index)])
@@ -248,12 +248,12 @@ def calculate_supply_energy(n, label, supply_energy):
 
             for end in ["0","1"]:
 
-                items = c.df.index[c.df["bus" + end].map(bus_map)]
+                items_cend = c.df.index[c.df["bus" + end].map(bus_map)]
 
-                if len(items) == 0  or c.pnl['p' + end].empty:
+                if len(items_cend) == 0  or c.pnl['p' + end].empty:
                     continue
 
-                s = (-1)*c.pnl["p"+end][items].sum().groupby(c.df.loc[items,'carrier']).sum()
+                s = (-1)*c.pnl["p"+end][items_cend].sum().groupby(c.df.loc[items_cend,'carrier']).sum()
 
                 supply_energy = supply_energy.reindex(supply_energy.index.union(pd.MultiIndex.from_product([[i],[c.list_name],s.index])))
                 supply_energy.loc[idx[i,c.list_name,list(s.index)],label] = s.values
