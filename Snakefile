@@ -31,6 +31,14 @@ rule solve_all_networks:
     input: expand("results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", **config['scenario'])
 
 
+rule plot_all_p_nom_to_pdf:
+    input: expand("results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.pdf", **config['scenario'])
+
+
+rule plot_all_p_nom_to_png:
+    input: expand("results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.png", **config['scenario'])
+
+
 datafiles = [
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
         "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
@@ -371,3 +379,14 @@ rule solve_network:
     resources: mem=memory
     shadow: "shallow"
     script: "scripts/solve_network.py"
+
+rule plot_network:
+    input:
+        network="results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",        
+        africa_shape='resources/africa_shape.geojson',
+        tech_costs=COSTS,
+    output:
+        only_map="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}.{ext}",
+        ext="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_ext.{ext}"
+    log: "logs/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log"
+    script: "scripts/plot_network.py"
