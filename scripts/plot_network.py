@@ -31,7 +31,7 @@ from matplotlib.patches import Circle, Ellipse
 from matplotlib.legend_handler import HandlerPatch
 to_rgba = mpl.colors.colorConverter.to_rgba
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
@@ -91,7 +91,7 @@ def plot_map(n, ax=None, attribute='p_nom', opts={}):
         link_widths_exp = n.links.p_nom_opt
         link_widths_cur = n.links.p_nom_min
     else:
-        raise 'plotting of {} has not been implemented yet'.format(attribute)
+        _logger.error('plotting of {} has not been implemented yet'.format(attribute))
 
 
     line_colors_with_alpha = \
