@@ -36,11 +36,7 @@ rule plot_all_p_nom:
 
 
 rule make_all_summaries:
-    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_all", **config['scenario'])
-
-
-rule make_country_summaries:
-    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}", **config['scenario'], country=config['countries'])
+    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}", **config['scenario'], country=['all'] + config['countries'])
 
 
 datafiles = [
