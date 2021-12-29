@@ -168,13 +168,20 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/davide-f">
+            <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
+            <br />
+            <sub><b>Davide-f</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/koen-vg">
             <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
             <br />
             <sub><b>Koen Van Greevenbroek</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Hazem-IEG">
             <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="Hazem-IEG"/>
@@ -187,13 +194,6 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
             <sub><b>EnergyLS</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/davide-f">
-            <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
-            <br />
-            <sub><b>Davide-f</b></sub>
         </a>
     </td>
     <td align="center">
