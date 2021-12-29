@@ -66,14 +66,11 @@ def assign_carriers(n):
     if "carrier" not in n.loads:
         n.loads["carrier"] = "electricity"
         for carrier in ["transport", "heat", "urban heat"]:
-            n.loads.loc[n.loads.index.str.contains(carrier),
-                        "carrier"] = carrier
+            n.loads.loc[n.loads.index.str.contains(carrier), "carrier"] = carrier
 
     n.storage_units["carrier"].replace(
-        {
-            "hydro": "hydro+PHS",
-            "PHS": "hydro+PHS"
-        }, inplace=True)
+        {"hydro": "hydro+PHS", "PHS": "hydro+PHS"}, inplace=True
+    )
 
     if "carrier" not in n.lines:
         n.lines["carrier"] = "AC"
@@ -84,30 +81,31 @@ def assign_carriers(n):
         n.links["carrier"] = pd.Series(dtype=str)
     n.links["carrier"].replace({"DC": "lines"}, inplace=True)
 
-    if ("EU gas store" in n.stores.index
-            and n.stores.loc["EU gas Store", "carrier"] == ""):
+    if (
+        "EU gas store" in n.stores.index
+        and n.stores.loc["EU gas Store", "carrier"] == ""
+    ):
         n.stores.loc["EU gas Store", "carrier"] = "gas Store"
 
 
 def calculate_costs(n, label, costs):
 
-    for c in n.iterate_components(n.branch_components
-                                  | n.controllable_one_port_components
-                                  ^ {"Load"}):
-        capital_costs = c.df.capital_cost * c.df[opt_name.get(c.name, "p") +
-                                                 "_nom_opt"]
+    for c in n.iterate_components(
+        n.branch_components | n.controllable_one_port_components ^ {"Load"}
+    ):
+        capital_costs = c.df.capital_cost * c.df[opt_name.get(c.name, "p") + "_nom_opt"]
         capital_costs_grouped = capital_costs.groupby(c.df.carrier).sum()
 
         # Index tuple(s) indicating the newly to-be-added row(s)
-        raw_index = tuple([[c.list_name], ["capital"],
-                           list(capital_costs_grouped.index)])
+        raw_index = tuple(
+            [[c.list_name], ["capital"], list(capital_costs_grouped.index)]
+        )
         costs = _add_indexed_rows(costs, raw_index)
 
         costs.loc[idx[raw_index], label] = capital_costs_grouped.values
 
         if c.name == "Link":
-            p = c.pnl.p0.multiply(n.snapshot_weightings.generators,
-                                  axis=0).sum()
+            p = c.pnl.p0.multiply(n.snapshot_weightings.generators, axis=0).sum()
         elif c.name == "Line":
             continue
         elif c.name == "StorageUnit":
@@ -115,8 +113,7 @@ def calculate_costs(n, label, costs):
             p_all[p_all < 0.0] = 0.0
             p = p_all.sum()
         else:
-            p = c.pnl.p.multiply(n.snapshot_weightings.generators,
-                                 axis=0).sum()
+            p = c.pnl.p.multiply(n.snapshot_weightings.generators, axis=0).sum()
 
         marginal_costs = p * c.df.marginal_cost
 
@@ -124,20 +121,27 @@ def calculate_costs(n, label, costs):
 
         costs = costs.reindex(
             costs.index.union(
-                pd.MultiIndex.from_product([[c.list_name], ["marginal"],
-                                            marginal_costs_grouped.index])))
+                pd.MultiIndex.from_product(
+                    [[c.list_name], ["marginal"], marginal_costs_grouped.index]
+                )
+            )
+        )
 
-        costs.loc[idx[c.list_name, "marginal",
-                      list(marginal_costs_grouped.index)],
-                  label] = marginal_costs_grouped.values
+        costs.loc[
+            idx[c.list_name, "marginal", list(marginal_costs_grouped.index)], label
+        ] = marginal_costs_grouped.values
 
     return costs
 
 
 def calculate_curtailment(n, label, curtailment):
 
-    avail = (n.generators_t.p_max_pu.multiply(
-        n.generators.p_nom_opt).sum().groupby(n.generators.carrier).sum())
+    avail = (
+        n.generators_t.p_max_pu.multiply(n.generators.p_nom_opt)
+        .sum()
+        .groupby(n.generators.carrier)
+        .sum()
+    )
     used = n.generators_t.p.sum().groupby(n.generators.carrier).sum()
 
     curtailment[label] = (((avail - used) / avail) * 100).round(3)
@@ -150,19 +154,30 @@ def calculate_energy(n, label, energy):
     for c in n.iterate_components(n.one_port_components | n.branch_components):
 
         if c.name in {"Generator", "Load", "ShuntImpedance"}:
-            c_energies = (c.pnl.p.multiply(
-                n.snapshot_weightings.generators,
-                axis=0).sum().multiply(c.df.sign).groupby(c.df.carrier).sum())
+            c_energies = (
+                c.pnl.p.multiply(n.snapshot_weightings.generators, axis=0)
+                .sum()
+                .multiply(c.df.sign)
+                .groupby(c.df.carrier)
+                .sum()
+            )
         elif c.name in {"StorageUnit", "Store"}:
-            c_energies = (c.pnl.p.multiply(
-                n.snapshot_weightings.stores,
-                axis=0).sum().multiply(c.df.sign).groupby(c.df.carrier).sum())
+            c_energies = (
+                c.pnl.p.multiply(n.snapshot_weightings.stores, axis=0)
+                .sum()
+                .multiply(c.df.sign)
+                .groupby(c.df.carrier)
+                .sum()
+            )
         else:
-            c_energies = ((-c.pnl.p1.multiply(n.snapshot_weightings.generators,
-                                              axis=0).sum() -
-                           c.pnl.p0.multiply(n.snapshot_weightings.generators,
-                                             axis=0).sum()).groupby(
-                                                 c.df.carrier).sum())
+            c_energies = (
+                (
+                    -c.pnl.p1.multiply(n.snapshot_weightings.generators, axis=0).sum()
+                    - c.pnl.p0.multiply(n.snapshot_weightings.generators, axis=0).sum()
+                )
+                .groupby(c.df.carrier)
+                .sum()
+            )
 
         energy = include_in_summary(energy, [c.list_name], label, c_energies)
 
@@ -184,20 +199,18 @@ def calculate_capacity(n, label, capacity):
 
     for c in n.iterate_components(n.one_port_components):
         if "p_nom_opt" in c.df.columns:
-            c_capacities = (abs(c.df.p_nom_opt.multiply(c.df.sign)).groupby(
-                c.df.carrier).sum())
-            capacity = include_in_summary(capacity, [c.list_name], label,
-                                          c_capacities)
+            c_capacities = (
+                abs(c.df.p_nom_opt.multiply(c.df.sign)).groupby(c.df.carrier).sum()
+            )
+            capacity = include_in_summary(capacity, [c.list_name], label, c_capacities)
 
     for c in n.iterate_components(n.passive_branch_components):
         c_capacities = c.df["s_nom_opt"].groupby(c.df.carrier).sum()
-        capacity = include_in_summary(capacity, [c.list_name], label,
-                                      c_capacities)
+        capacity = include_in_summary(capacity, [c.list_name], label, c_capacities)
 
     for c in n.iterate_components(n.controllable_branch_components):
         c_capacities = c.df.p_nom_opt.groupby(c.df.carrier).sum()
-        capacity = include_in_summary(capacity, [c.list_name], label,
-                                      c_capacities)
+        capacity = include_in_summary(capacity, [c.list_name], label, c_capacities)
 
     return capacity
 
@@ -222,9 +235,13 @@ def calculate_supply(n, label, supply):
             if len(items) == 0 or c.pnl.p.empty:
                 continue
 
-            s = (c.pnl.p[items].max().multiply(
-                c.df.loc[items, "sign"]).groupby(c.df.loc[items,
-                                                          "carrier"]).sum())
+            s = (
+                c.pnl.p[items]
+                .max()
+                .multiply(c.df.loc[items, "sign"])
+                .groupby(c.df.loc[items, "carrier"])
+                .sum()
+            )
 
             # Index tuple(s) indicating the newly to-be-added row(s)
             raw_index = tuple([[i], [c.list_name], list(s.index)])
@@ -242,16 +259,16 @@ def calculate_supply(n, label, supply):
                     continue
 
                 # lots of sign compensation for direction and to do maximums
-                s = (-1)**(1 - int(end)) * (
-                    (-1)**int(end) * c.pnl["p" + end][items]).max().groupby(
-                        c.df.loc[items, "carrier"]).sum()
+                s = (-1) ** (1 - int(end)) * (
+                    (-1) ** int(end) * c.pnl["p" + end][items]
+                ).max().groupby(c.df.loc[items, "carrier"]).sum()
 
                 supply = supply.reindex(
                     supply.index.union(
-                        pd.MultiIndex.from_product([[i], [c.list_name],
-                                                    s.index])))
-                supply.loc[idx[i, c.list_name, list(s.index)],
-                           label] = s.values
+                        pd.MultiIndex.from_product([[i], [c.list_name], s.index])
+                    )
+                )
+                supply.loc[idx[i, c.list_name, list(s.index)], label] = s.values
 
     return supply
 
@@ -276,9 +293,13 @@ def calculate_supply_energy(n, label, supply_energy):
             if len(items_c) == 0 or c.pnl.p.empty:
                 continue
 
-            s = (c.pnl.p[items_c].sum().multiply(
-                c.df.loc[items_c, "sign"]).groupby(c.df.loc[items_c,
-                                                            "carrier"]).sum())
+            s = (
+                c.pnl.p[items_c]
+                .sum()
+                .multiply(c.df.loc[items_c, "sign"])
+                .groupby(c.df.loc[items_c, "carrier"])
+                .sum()
+            )
 
             # Index tuple(s) indicating the newly to-be-added row(s)
             raw_index = tuple([[i], [c.list_name], list(s.index)])
@@ -296,14 +317,15 @@ def calculate_supply_energy(n, label, supply_energy):
                     continue
 
                 s = (-1) * c.pnl["p" + end][items_cend].sum().groupby(
-                    c.df.loc[items_cend, "carrier"]).sum()
+                    c.df.loc[items_cend, "carrier"]
+                ).sum()
 
                 supply_energy = supply_energy.reindex(
                     supply_energy.index.union(
-                        pd.MultiIndex.from_product([[i], [c.list_name],
-                                                    s.index])))
-                supply_energy.loc[idx[i, c.list_name,
-                                      list(s.index)], label] = s.values
+                        pd.MultiIndex.from_product([[i], [c.list_name], s.index])
+                    )
+                )
+                supply_energy.loc[idx[i, c.list_name, list(s.index)], label] = s.values
 
     return supply_energy
 
@@ -312,23 +334,26 @@ def calculate_metrics(n, label, metrics):
 
     metrics = metrics.reindex(
         metrics.index.union(
-            pd.Index([
-                "line_volume",
-                "line_volume_limit",
-                "line_volume_AC",
-                "line_volume_DC",
-                "line_volume_shadow",
-                "co2_shadow",
-            ])))
+            pd.Index(
+                [
+                    "line_volume",
+                    "line_volume_limit",
+                    "line_volume_AC",
+                    "line_volume_DC",
+                    "line_volume_shadow",
+                    "co2_shadow",
+                ]
+            )
+        )
+    )
 
-    metrics.at["line_volume_DC",
-               label] = (n.links.length *
-                         n.links.p_nom_opt)[n.links.carrier == "DC"].sum()
-    metrics.at["line_volume_AC",
-               label] = (n.lines.length * n.lines.s_nom_opt).sum()
-    metrics.at["line_volume",
-               label] = metrics.loc[["line_volume_AC", "line_volume_DC"],
-                                    label].sum()
+    metrics.at["line_volume_DC", label] = (n.links.length * n.links.p_nom_opt)[
+        n.links.carrier == "DC"
+    ].sum()
+    metrics.at["line_volume_AC", label] = (n.lines.length * n.lines.s_nom_opt).sum()
+    metrics.at["line_volume", label] = metrics.loc[
+        ["line_volume_AC", "line_volume_DC"], label
+    ].sum()
 
     if hasattr(n, "line_volume_limit"):
         metrics.at["line_volume_limit", label] = n.line_volume_limit
@@ -337,16 +362,16 @@ def calculate_metrics(n, label, metrics):
         metrics.at["line_volume_shadow", label] = n.line_volume_limit_dual
 
     if "CO2Limit" in n.global_constraints.index:
-        metrics.at["co2_shadow", label] = n.global_constraints.at["CO2Limit",
-                                                                  "mu"]
+        metrics.at["co2_shadow", label] = n.global_constraints.at["CO2Limit", "mu"]
 
     return metrics
 
 
 def calculate_prices(n, label, prices):
 
-    bus_type = pd.Series(n.buses.index.str[3:],
-                         n.buses.index).replace("", "electricity")
+    bus_type = pd.Series(n.buses.index.str[3:], n.buses.index).replace(
+        "", "electricity"
+    )
 
     prices = prices.reindex(prices.index.union(bus_type.value_counts().index))
 
@@ -361,15 +386,18 @@ def calculate_weighted_prices(n, label, weighted_prices):
     logger.warning("Weighted prices don't include storage units as loads")
 
     weighted_prices = weighted_prices.reindex(
-        pd.Index([
-            "electricity",
-            "heat",
-            "space heat",
-            "urban heat",
-            "space urban heat",
-            "gas",
-            "H2",
-        ]))
+        pd.Index(
+            [
+                "electricity",
+                "heat",
+                "space heat",
+                "urban heat",
+                "space urban heat",
+                "gas",
+                "H2",
+            ]
+        )
+    )
 
     link_loads = {
         "electricity": [
@@ -409,25 +437,30 @@ def calculate_weighted_prices(n, label, weighted_prices):
 
         for tech in link_loads[carrier]:
 
-            names = n.links.index[n.links.index.to_series().str[-len(tech):] ==
-                                  tech]
+            names = n.links.index[n.links.index.to_series().str[-len(tech) :] == tech]
 
             if names.empty:
                 continue
 
-            load += (n.links_t.p0[names].groupby(n.links.loc[names, "bus0"],
-                                                 axis=1).sum(axis=1))
+            load += (
+                n.links_t.p0[names]
+                .groupby(n.links.loc[names, "bus0"], axis=1)
+                .sum(axis=1)
+            )
 
         # Add H2 Store when charging
         if carrier == "H2":
-            stores = (n.stores_t.p[buses + " Store"].groupby(
-                n.stores.loc[buses + " Store", "bus"], axis=1).sum(axis=1))
+            stores = (
+                n.stores_t.p[buses + " Store"]
+                .groupby(n.stores.loc[buses + " Store", "bus"], axis=1)
+                .sum(axis=1)
+            )
             stores[stores > 0.0] = 0.0
             load += -stores
 
-        weighted_prices.loc[carrier,
-                            label] = (load * n.buses_t.marginal_price[buses]
-                                      ).sum().sum() / load.sum().sum()
+        weighted_prices.loc[carrier, label] = (
+            load * n.buses_t.marginal_price[buses]
+        ).sum().sum() / load.sum().sum()
 
         if carrier[:5] == "space":
             print(load * n.buses_t.marginal_price[buses])
@@ -451,7 +484,8 @@ outputs = [
 def make_summaries(networks_dict, country="all"):
 
     columns = pd.MultiIndex.from_tuples(
-        networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"])
+        networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
+    )
 
     dfs = {}
 
@@ -485,8 +519,7 @@ def make_summaries(networks_dict, country="all"):
         assign_carriers(n)
 
         for output in outputs:
-            dfs[output] = globals()["calculate_" + output](n, label,
-                                                           dfs[output])
+            dfs[output] = globals()["calculate_" + output](n, label, dfs[output])
 
     return dfs
 
@@ -529,11 +562,12 @@ if __name__ == "__main__":
         ll = [snakemake.wildcards.ll]
 
     networks_dict = {
-        (simpl, clusters, l, opts):
-        os.path.join(network_dir, f"elec_s{simpl}_"
-                     f"{clusters}_ec_l{l}_{opts}.nc")
+        (simpl, clusters, l, opts): os.path.join(
+            network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"
+        )
         for simpl in expand_from_wildcard("simpl")
-        for clusters in expand_from_wildcard("clusters") for l in ll
+        for clusters in expand_from_wildcard("clusters")
+        for l in ll
         for opts in expand_from_wildcard("opts")
     }
 
