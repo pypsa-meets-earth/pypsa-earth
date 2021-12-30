@@ -52,7 +52,7 @@ jobs:
         cp test/config.test1.yaml config.yaml
         snakemake --cores all solve_all_networks
     
-    - name: Test plotting and summaries networks
+    - name: Test plotting and summaries
       run: |
         snakemake --cores all plot_all_p_nom
         snakemake --cores all plot_all_summaries
