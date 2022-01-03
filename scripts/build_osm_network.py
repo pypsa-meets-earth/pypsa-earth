@@ -550,7 +550,7 @@ def built_network(inputs, outputs):
             "bus_id":
             np.arange(len(buses) + 1,
                       len(buses) + (length + 1), 1),
-            "station_id": [np.nan] * 4,
+            "station_id": [np.nan] * length,
             "dc": [False] * length,
             "under_construction": [False] * length,
             "tag_area": [0.0] * length,
