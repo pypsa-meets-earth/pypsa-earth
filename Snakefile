@@ -36,11 +36,11 @@ rule plot_all_p_nom:
 
 
 rule make_all_summaries:
-    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_all", **config['scenario'])
+    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}", **config['scenario'], country=['all'] + config['countries'])
 
 
-rule make_country_summaries:
-    input: expand("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}", **config['scenario'], country=config['countries'])
+rule plot_all_summaries:
+    input: expand("results/plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}", summary=['energy', 'costs'], **config['scenario'], country=['all'] + config['countries'], ext=['png', 'pdf'])
 
 
 datafiles = [
@@ -405,6 +405,12 @@ rule make_summary:
     output: directory("results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}")
     log: "logs/make_summary/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.log",
     script: "scripts/make_summary.py"
+
+rule plot_summary:
+    input: "results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}"
+    output: "results/plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}"
+    log: "logs/plot_summary/{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}_{ext}.log"
+    script: "scripts/plot_summary.py"
 
 
 rule plot_network:

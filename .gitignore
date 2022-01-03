@@ -22,11 +22,12 @@ data/
 data/osm/
 data/raw/
 data/base_network/
+results/summaries/
+results/plots/
 networks/
 resources/
 scripts/temp
 scripts/test.py
-results/summaries/*
 
 # Untrack some Jupyter changes
 .ipynb_checkpoints

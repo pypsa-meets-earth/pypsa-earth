@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
 """
@@ -163,6 +163,10 @@ def calculate_energy(n, label, energy):
                            c.pnl.p0.multiply(n.snapshot_weightings.generators,
                                              axis=0).sum()).groupby(
                                                  c.df.carrier).sum())
+
+        # fix to avoid missing data
+        if c_energies.empty:
+            c_energies = pd.Series(0.0, index=[c.list_name])
 
         energy = include_in_summary(energy, [c.list_name], label, c_energies)
 
@@ -510,7 +514,7 @@ if __name__ == "__main__":
             clusters="10",
             ll="copt",
             opts="Co2L-24H",
-            country="all",
+            country="NG",
         )
         network_dir = os.path.join("..", "results", "networks")
     else:
