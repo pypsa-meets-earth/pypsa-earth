@@ -115,6 +115,10 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                         "waste": "Waste",
                         "osmotic": "Other",
                         "wave": "Other",
+                        # approximation
+                        "gas;oil": "Oil",  # TODO: this shall be improved, one entry shall be Oil and the otherone gas
+                        "steam": "Natural Gas",
+                        "waste_heat": "Other",
                     },
                     Technology={
                         "combined_cycle": "CCGT",
@@ -147,7 +151,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     lon=custom_ppls_coords.x,
                     EIC=lambda df: df.id,
                     projectID=lambda df: "OSM" + df.id.astype(str),
-                ))
+                ).dropna(subset=["Fueltype"])
+        )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
     # However, everithing extracted from OSM seems to belong
