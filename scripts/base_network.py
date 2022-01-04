@@ -137,6 +137,16 @@ def _load_buses_from_osm():
 
     return buses
 
+def _set_links_underwater_fraction(n):
+    if n.links.empty: return
+
+    if not hasattr(n.links, 'geometry'):
+        n.links['underwater_fraction'] = 0.
+    else:
+        offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
+        links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
+        n.links['underwater_fraction'] = links.intersection(offshore_shape).length / links.length
+
 
 def _load_lines_from_osm(buses):
     lines = (_read_csv_nafix(
