@@ -62,9 +62,9 @@ if tutorial == False:
     # BUNDLE 1
     destination = "./resources"
     zip_path = destination + ".zip"
-    url = "https://drive.google.com/file/d/1nrWntieUVUcyya0xaadt4T3JFTDrqhLf/view?usp=sharing"
+    url = "https://drive.google.com/file/d/1hklbiRLyb_rx6WTvgCJ1Dx_9rooA85y1/view?usp=sharing"
     gdd.download_file_from_google_drive(
-        file_id="1nrWntieUVUcyya0xaadt4T3JFTDrqhLf",
+        file_id="1hklbiRLyb_rx6WTvgCJ1Dx_9rooA85y1",
         dest_path=zip_path,
         showsize=True,
         unzip=True,
