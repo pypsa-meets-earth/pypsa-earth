@@ -372,8 +372,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # load africa shape to identify borders of the image
-    africa_shape = (gpd.read_file(snakemake.input.africa_shape).to_crs(
-        ccrs.PlateCarree())["geometry"].iloc[0])
+    africa_shape = (gpd.read_file(snakemake.input.africa_shape)["geometry"].iloc[0])
 
     set_plot_style()
 
