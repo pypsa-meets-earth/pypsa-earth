@@ -27,7 +27,12 @@ Relevant Settings
         estimate_renewable_capacities_from_capacity_stats:
 
     load:
-        scaling_factor:
+        scale:
+		ssp:
+		weather_year:
+		prediction_year:
+		region_load:
+		
 
     renewable:
         hydro:
@@ -218,7 +223,7 @@ def load_powerplants(ppl_fn=None):
         columns=["efficiency"]).replace({"carrier": carrier_dict}))
 
 
-def attach_load(n, regions, load, admin_shapes, countries, scale):
+def attach_load(n, regions, weather_year, prediction_year, region_load, ssp, admin_shapes, countries, scale):
     """
     Add load to the network and distributes them according GDP and population.
 
@@ -228,6 +233,10 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     regions : .geojson
         Contains bus_id of low voltage substations and
         bus region shapes (voronoi cells)
+	weather_year: weather year to consider when defining the load (different renewable potentials)
+	prediction_year: prediction year to consider when defining the load (different GDP, population)
+	region_load: world region to consider when defining the load
+	ssp: shared socio-economic pathway (GDP and population growth) scenario to consider when defining the load
     load : .nc
         Contains timeseries of load data per country
     admin_shapes : .geojson
@@ -247,7 +256,14 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
-    load_path = load
+    
+	weather_year = snakemake.config["load_options"]["weather_year"]
+	prediction_year = snakemake.config["load_options"]["prediction_year"]
+	region_load = snakemake.config["region_load"]["scale"]
+	ssp = snakemake.config["region_load"]["scale"]
+	
+	load = "resources/" +  ssp + "/" + prediction_year + "/era5_" + weather_year + "/" + region_load + ".nc"
+	load_path = load
     gegis_load = xr.open_dataset(load_path)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
