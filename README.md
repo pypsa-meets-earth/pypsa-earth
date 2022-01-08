@@ -36,8 +36,8 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **Specific code meeting (by invitation)**
-  - current meetings: 1) AI asset detection (WP6) and 2) Data workflow updates (covering WP1-WP5)
-  - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
+  - current meetings: 1) Demand creation (WP1) 2) AI asset detection (WP6) and 3) Data workflow updates (WP1-WP5)
+  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
   - updates, demos, task distribution, weekly targets, Q&A
 - **Outreach meeting (by invitation)**
   - every second week
