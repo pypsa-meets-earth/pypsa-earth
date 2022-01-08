@@ -32,7 +32,7 @@ Relevant Settings
 		weather_year:
 		prediction_year:
 		region_load:
-		
+
 
     renewable:
         hydro:

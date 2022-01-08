@@ -25,7 +25,7 @@ library(gtools)
 water_yg$irr_demand_to_closeYgap_m3_cut <- cut(water_yg$irr_demand_to_closeYgap_m3/1e6, round(quantile(water_yg$irr_demand_to_closeYgap_m3/1e6, c(1:5)/5 ,na.rm=T), 1))
 
 a <- ggplot()+
-  geom_tile(data = water_yg, 
+  geom_tile(data = water_yg,
             aes(x = x, y = y, fill = irr_demand_to_closeYgap_m3_cut)) +
   scale_fill_brewer("Irrigation needs /nto close the yield gap /n(million m3)", palette = "YlGnBu", na.value = NA)+
   geom_sf(data=world, fill=NA, size =.3)+
@@ -54,7 +54,7 @@ popnoaccess$X7 <- ifelse(popnoaccess$X7/625 < 2.5, NA, popnoaccess$X7)
 popnoaccess$X7_cut <- cut(popnoaccess$X7/625, c(5, 10, 50, 250, 1000, 1500))
 
 b <- ggplot()+
-  geom_tile(data = popnoaccess, 
+  geom_tile(data = popnoaccess,
             aes(x = x, y = y, fill = X7_cut)) +
   scale_fill_brewer("Density of population /nwithout electricity /n(people / sq. km)", palette = "YlOrRd", na.value = NA)+
   geom_sf(data=world, fill=NA, size =.3)+
@@ -80,7 +80,7 @@ cleanwat <- as.data.frame(cleanwat, xy=T)
 cleanwat$layer_cut <- cut(cleanwat$layer, c(5, 10, 50, 250, 1000, 1500))
 
 c <- ggplot()+
-  geom_tile(data = cleanwat, 
+  geom_tile(data = cleanwat,
             aes(x = x, y = y, fill = layer_cut)) +
   scale_fill_brewer("Density of population /nwithout clean water /n(people / sq. km)", palette = "PuBu", na.value = NA)+
   geom_sf(data=world, fill=NA, size =.3)+
@@ -104,7 +104,7 @@ sanitation <- as.data.frame(sanitation, xy=T)
 sanitation$layer_cut <- cut(sanitation$layer, c(5, 10, 50, 250, 1000, 1500))
 
 d <- ggplot()+
-  geom_tile(data = sanitation, 
+  geom_tile(data = sanitation,
             aes(x = x, y = y, fill = layer_cut)) +
   scale_fill_brewer("Density of population /nwithout sanitation /n(people / sq. km)", palette = "PuRd", na.value = NA)+
   geom_sf(data=world, fill=NA, size =.3)+
@@ -121,14 +121,14 @@ d <- ggplot()+
 
 all <- cowplot::plot_grid(a, b, c, d, ncol=2)
 
-ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps.pdf", all, device="pdf", width = 9, height = 9)  
+ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps.pdf", all, device="pdf", width = 9, height = 9)
 
-ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps.png", all, device="png", width = 9, height = 9)  
+ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps.png", all, device="png", width = 9, height = 9)
 
 
 ###
 
-# UR/RUR 
+# UR/RUR
 
 world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
 
@@ -207,9 +207,9 @@ rainfed <- na.exclude(rainfed)
 #
 
 e <- ggplot()+
-  geom_tile(data = rainfed, 
+  geom_tile(data = rainfed,
             aes(x = x, y = y), fill="forestgreen", alpha=0.5) +
-  geom_tile(data = merger, 
+  geom_tile(data = merger,
             aes(x = x, y = y, fill = as.factor(value)), alpha=0.75) +
   scale_fill_discrete(na.value = NA)+
   geom_sf(data=world, fill=NA, size =.3)+
@@ -224,7 +224,6 @@ e <- ggplot()+
   ylab("")
   # geom_rect(data=boxes1, aes(xmin=minlong , xmax=maxlong, ymin=minlat, ymax=maxlat ), color="blue", size=.7, fill="transparent") + geom_rect(data=boxes2, aes(xmin=minlong , xmax=maxlong, ymin=minlat, ymax=maxlat ), color="blue", size=.7, fill="transparent")  + geom_rect(data=boxes3, aes(xmin=minlong , xmax=maxlong, ymin=minlat, ymax=maxlat ), color="blue", size=.7, fill="transparent")
 
-#ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps_hotspot.pdf", e, device="pdf")  
+#ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps_hotspot.pdf", e, device="pdf")
 
-ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps_hotspot.png", e, device="png", width = 4.5, height = 4.5, dpi=450)  
-
+ggsave("D:/OneDrive - IIASA/Current papers/LEAP_RE_position_paper/maps_hotspot.png", e, device="png", width = 4.5, height = 4.5, dpi=450)
