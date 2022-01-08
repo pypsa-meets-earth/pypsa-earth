@@ -175,7 +175,8 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
                                  costs.at["solar-utility", "capital_cost"])
 
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+        capital_cost = link1["capital_cost"] + \
+            max_hours * store["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
@@ -233,10 +234,10 @@ def attach_load(n, regions, weather_year, prediction_year, region_load, ssp, adm
     regions : .geojson
         Contains bus_id of low voltage substations and
         bus region shapes (voronoi cells)
-	weather_year: weather year to consider when defining the load (different renewable potentials)
-	prediction_year: prediction year to consider when defining the load (different GDP, population)
-	region_load: world region to consider when defining the load
-	ssp: shared socio-economic pathway (GDP and population growth) scenario to consider when defining the load
+        weather_year: weather year to consider when defining the load (different renewable potentials)
+        prediction_year: prediction year to consider when defining the load (different GDP, population)
+        region_load: world region to consider when defining the load
+        ssp: shared socio-economic pathway (GDP and population growth) scenario to consider when defining the load
     load : .nc
         Contains timeseries of load data per country
     admin_shapes : .geojson
@@ -256,14 +257,15 @@ def attach_load(n, regions, weather_year, prediction_year, region_load, ssp, adm
         gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
-    
-	weather_year = snakemake.config["load_options"]["weather_year"]
-	prediction_year = snakemake.config["load_options"]["prediction_year"]
-	region_load = snakemake.config["region_load"]["scale"]
-	ssp = snakemake.config["region_load"]["scale"]
-	
-	load = "resources/" +  ssp + "/" + prediction_year + "/era5_" + weather_year + "/" + region_load + ".nc"
-	load_path = load
+
+    weather_year = snakemake.config["load_options"]["weather_year"]
+    prediction_year = snakemake.config["load_options"]["prediction_year"]
+    region_load = snakemake.config["region_load"]["scale"]
+    ssp = snakemake.config["region_load"]["scale"]
+
+    load = "resources/" + ssp + "/" + prediction_year + \
+        "/era5_" + weather_year + "/" + region_load + ".nc"
+    load_path = load
     gegis_load = xr.open_dataset(load_path)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
@@ -290,10 +292,10 @@ def attach_load(n, regions, weather_year, prediction_year, region_load, ssp, adm
                                                normed=False).T.tocsr()
             gdp_n = pd.Series(transfer.dot(
                 shapes_cntry["gdp"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
             pop_n = pd.Series(transfer.dot(
                 shapes_cntry["pop"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to EU continent load data
