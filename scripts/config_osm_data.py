@@ -556,11 +556,11 @@ world_geofk = {
         "AZ": "azerbaijan",
         "BD": "bangladesh",
         "BT": "bhutan",
-        # 'IO': 'british indian ocean territory',
+        # 'IO': 'british indian ocean territory', # Island
         "KH": "cambodia",
         "CN": "china",
-        # 'CX': 'christmas island',
-        # 'CC': 'cocos (keeling) islands',
+        # 'CX': 'christmas island', # Island
+        # 'CC': 'cocos (keeling) islands', # Island
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
@@ -595,30 +595,30 @@ world_geofk = {
     # 'norfolk island', 'french-polynesia', 'guam' are N/A via "australia-oceania" domain
     # but they are islands, anyway
     "australia-oceania": {
-        "AS": "american-oceania",
+        # "AS": "american-oceania", # Islands
         "AU": "australia",
         # 'CK': 'cook islands',
         "FJ": "fiji",
-        # "GU": "guam", # island
-        "KI": "kiribati",
-        # 'MH': 'marshall islands',
-        "FM": "micronesia",
-        "NR": "nauru",
         # "PF": "french-polynesia", # Islands
+        # "GU": "guam", # Island
+        # "KI": "kiribati", # Islands
+        # 'MH': 'marshall islands', # Islands
+        # "FM": "micronesia", # Islands
+        # "NR": "nauru", # Islands
         "NC": "new-caledonia",
         "NZ": "new-zealand",
-        "NU": "niue",
-        # 'MP': 'northern mariana islands',
-        "PW": "palau",
+        # "NU": "niue", # Island
         # "NF": "norfolk island", # Island
+        # 'MP': 'northern mariana islands', # Islands
+        # "PW": "palau", # Islands
         "PG": "papua-new-guinea",
-        "WS": "samoa",
-        # 'SB': 'solomon islands',
-        "TK": "tokelau",
-        "TO": "tonga",
-        "TV": "tuvalu",
-        "VU": "vanuatu",
-        "WF": "wallis-et-futuna",
+        # "WS": "samoa", # Islands
+        # 'SB': 'solomon islands', # Islands
+        # "TK": "tokelau", # Islands
+        # "TO": "tonga", # Islands
+        # "TV": "tuvalu", # Islands
+        # "VU": "vanuatu", # Islands
+        # "WF": "wallis-et-futuna", # Islands
     },
     # Cyprus and Georgia are included into European domain
     # "FO": "faroe islands" are N/A in this way (part of Denmark?)
