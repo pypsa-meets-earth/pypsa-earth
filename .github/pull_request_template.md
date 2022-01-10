@@ -1,4 +1,4 @@
-Closes # (if applicable).
+# Closes # (if applicable).
 
 ## Changes proposed in this Pull Request
 
