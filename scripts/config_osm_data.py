@@ -494,7 +494,7 @@ world_geofk = {
         "BF": "burkina-faso",
         "BI": "burundi",
         "CM": "cameroon",
-        # canary-islands    # Island
+        # canary-islands, # Island
         # "CV": "cape-verde", # Island
         "CF": "central-african-republic",
         "TD": "chad",
@@ -508,7 +508,7 @@ world_geofk = {
         "ET": "ethiopia",
         "GA": "gabon",
         "GH": "ghana",
-        "GW": "guinea-bissau",  # No Data
+        "GW": "guinea-bissau", # No Data
         "GN": "guinea",
         "CI": "ivory-coast",
         "KE": "kenya",
@@ -519,7 +519,7 @@ world_geofk = {
         "MW": "malawi",
         "ML": "mali",
         "MR": "mauritania",
-        # "MU": "mauritius", Island
+        # "MU": "mauritius", #Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
@@ -528,7 +528,7 @@ world_geofk = {
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha
         # "ST": "sao-tome-and-principe", #Island
-        "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
+        "SNGM": "senegal-and-gambia", # See Map # Self-created country code
         # "SC": "seychelles", #Island
         "SL": "sierra-leone",
         "SO": "somalia",  # No Data
@@ -599,18 +599,18 @@ world_geofk = {
         "AU": "australia",
         # 'CK': 'cook islands',
         "FJ": "fiji",
-        # "PF": "french-polynesia", # islands
         # "GU": "guam", # island
         "KI": "kiribati",
         # 'MH': 'marshall islands',
         "FM": "micronesia",
         "NR": "nauru",
+        # "PF": "french-polynesia", # Islands
         "NC": "new-caledonia",
         "NZ": "new-zealand",
         "NU": "niue",
-        # "NF": "norfolk island", # island
         # 'MP': 'northern mariana islands',
         "PW": "palau",
+        # "NF": "norfolk island", # Island
         "PG": "papua-new-guinea",
         "WS": "samoa",
         # 'SB': 'solomon islands',
@@ -635,20 +635,20 @@ world_geofk = {
         "CY": "cyprus",       
         "DK": "denmark",
         "EE": "estonia",
-        # "FO": "faroe islands",
+        # "FO": "faroe islands", # Islands
         "FI": "finland",
         "FR": "france",
         "GE": "georgia",         
         "DE": "germany",
         # 'GI': 'gibraltar', Island ?
         "GR": "greece",
-        # 'GG': 'guernsey', Island
+        # 'GG': 'guernsey', # Island
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
-        # 'IM': 'isle of man',
+        # 'IM': 'isle of man', # Island
         "IT": "italy",
-        # 'JE': 'jersey',
+        # 'JE': 'jersey', # Island
         "LV": "latvia",
         "LI": "liechtenstein",
         "LT": "lithuania",
@@ -668,7 +668,7 @@ world_geofk = {
         "SK": "slovakia",
         "SI": "slovenia",
         "ES": "spain",
-        # 'SJ': 'svalbard-and-jan-mayen',
+        # 'SJ': 'svalbard-and-jan-mayen', # Islands
         "SE": "sweden",
         "CH": "switzerland",
         "UA": "ukraine",
