@@ -526,12 +526,12 @@ world_geofk = {
         "NE": "niger",
         "NG": "nigeria",
         "RW": "rwanda",
-        # saint-helena-ascension-and-tristan-da-cunha
-        # "ST": "sao-tome-and-principe", #Island
+        # saint-helena-ascension-and-tristan-da-cunha # Islands
+        # "ST": "sao-tome-and-principe", # Island
         "SNGM": "senegal-and-gambia", # See Map # Self-created country code
-        # "SC": "seychelles", #Island
+        # "SC": "seychelles", # Island
         "SL": "sierra-leone",
-        "SO": "somalia",  # No Data
+        "SO": "somalia", # No Data
         # south-africa-and-lesotho
         "ZA": "south-africa",
         "SS": "south-sudan",
@@ -574,7 +574,7 @@ world_geofk = {
         "KG": "kyrgyzstan",
         "LB": "lebanon",
         "MY-SG-BN":
-        "malaysia-singapore-brunei",  # Note 3 countries shortcut based on geofabrik
+        "malaysia-singapore-brunei",  # Shortcut
         "MV": "maldives",
         "MN": "mongolia",
         "MM": "myanmar",
