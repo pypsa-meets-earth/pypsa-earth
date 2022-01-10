@@ -546,10 +546,6 @@ world_geofk = {
     },
     # NB1 Hong Kong and Macao belong to China
     # NB2 'BN': 'brunei darussalam', 'SG': singapore merged with MY
-    # NB3 Some countries seem to be not available via GeoFK
-    # 'BH': bahrain, 'LA': "lao people's democratic republic"
-    # 'AE': 'united arab emirates', 'OM': 'oman',
-    # 'QA': 'qatar', 'KW': 'kuwait', 'SA': 'saudi arabia'
     "asia": {
         "AF": "afghanistan",
         "AM": "armenia",
@@ -561,6 +557,7 @@ world_geofk = {
         "CN": "china",
         # 'CX': 'christmas island', # Island
         # 'CC': 'cocos (keeling) islands', # Island
+        "GCC": "gulf cooperation council" # Shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
@@ -572,6 +569,7 @@ world_geofk = {
         "KP": "north-korea",
         "KR": "south-korea",
         "KG": "kyrgyzstan",
+        'LA': "laos",
         "LB": "lebanon",
         "MY-SG-BN":
         "malaysia-singapore-brunei",  # Shortcut
@@ -580,7 +578,6 @@ world_geofk = {
         "MM": "myanmar",
         "NP": "nepal",
         "PK": "pakistan",
-        # 'PS': 'palestine',
         "PH": "philippines",
         "LK": "sri-lanka",
         "SY": "syria",
