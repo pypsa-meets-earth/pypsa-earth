@@ -22,6 +22,6 @@ assignees: ''
 *If applicable, paste any terminal output to help illustrating your problem.*
 *In some cases it may also be useful to share your list of installed packages: `conda list`.*
 
-```
+```bash
 <paste here>
 ```
