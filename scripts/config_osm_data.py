@@ -544,8 +544,7 @@ world_geofk = {
         "ZM": "zambia",
         "ZW": "zimbabwe",
     },
-    # NB1 Hong Kong and Macao belong to China
-    # NB2 'BN': 'brunei darussalam', 'SG': singapore merged with MY
+    # Hong Kong and Macao belong to China
     "asia": {
         "AF": "afghanistan",
         "AM": "armenia",
@@ -637,7 +636,7 @@ world_geofk = {
         "FR": "france",
         "GE": "georgia",         
         "DE": "germany",
-        # 'GI': 'gibraltar', Island ?
+        # 'GI': 'gibraltar', # Peninsula; Isolated PS?
         "GR": "greece",
         # 'GG': 'guernsey', # Island
         "HU": "hungary",
