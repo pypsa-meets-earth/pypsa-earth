@@ -13,39 +13,34 @@ scenario:
   simpl: ['']
   ll: ['copt']
   clusters: [6]
-  opts: [Co2L-3H]
+  opts: [Co2L-24H]
 
-countries: ["africa"]
-# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
+countries: ["NG", "BJ"]
 
-summary_dir: results
+  # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
+  # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
+  # 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
+  # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
 
-snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
-  closed: "left" # end is not inclusive
-
-enable:
-  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false  # If True, than an exclusion raster will be build
-  build_cutout: false
-  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-
+  #["NG"]  # Nigeria
+  #["NE"]  # Niger
+  #["SL"]  # Sierra Leone
+  #["MA"]  # Morroco
+  #["ZA"]  # South Africa
 
 augmented_line_connection:
-  add_to_snakefile: True  # If True, includes this rule to the workflow
-  connectivity_upgrade: 3  # Min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
-  new_line_type: "HVDC"  # Expanded lines can be either "HVAC" or "HVDC"
-  min_expansion: 1  # New created line expands by float/int input [MW]
+  add_to_snakefile: True
+  connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: "HVDC"  # or "HVAC"
+  min_expansion: 1  # [MW]
 
+# if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
-  alternative_clustering: False  # Cluster on "False" GADM shapes, "True" Voronoi cells
-  distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
-  out_logging: True  # When "True", logging is printed to console
+  alternative_clustering: False
+  distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
+  out_logging: True  # When true, logging is printed to console
 
+# options for build_shapes
 build_shape_options:
     gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
     update_file: False  # When true, all the input files are downloaded again and replace the existing files
@@ -53,16 +48,16 @@ build_shape_options:
     year: 2020  # reference year used to derive shapes, info on population and info on GDP
     nprocesses: 5  # number of processes to be used in build_shapes
 
-clean_osm_data_options:  # osm = OpenStreetMap
+clean_osm_data_options:
   names_by_shapes: True  # Set the country name based on the extended country shapes
-  threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
-  tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)
-  add_line_endings: True  # When "True", then line endings are added to the dataset of the substations
-  group_close_buses: True  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
+  add_line_endings: True  # When true, the line endings are added to the dataset of the substations
+  group_close_buses: True  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 35000  # [V] minimum voltage in base network
+  min_voltage_rebase_voltage: 35000
 
 load_options:
   ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
@@ -71,19 +66,38 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
   region_load: "Africa" # Load demand scenarios based on a specified reference region
 
+summary_dir: results
+
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-14"
+  closed: "left" # end is not inclusive
+
+enable:
+  # prepare_links_p_nom: false
+  retrieve_databundle: true
+  download_osm_data: true
+  # retrieve_cutout: true
+  # retrieve_natura_raster: true
+  # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+  build_cutout: false
+  build_natura_raster: true  # If True, then build_natura_raster can be run
+  # custom_busmap: false
+
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 1.487e9  # European default, adjustment to Africa necessary
+  co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
+  co2base: 1.487e9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
 
   extendable_carriers:
     Generator: []
-    StorageUnit: []
+    StorageUnit: [] # battery, H2
     Store: [battery, H2]
     Link: []
 
-  conventional_carriers: ["OCGT", "CCGT", "oil"]
+  conventional_carriers: [coal, CCGT]
 
   max_hours:
     battery: 6
@@ -115,21 +129,39 @@ transformers:
 atlite:
   nprocesses: 4
   cutouts:
-    # geographical bounds automatically determined from countries input
-    africa-2013-era5:
+    # use 'base' to determine geographical bounds and time span from config
+    # base:
+    # module: era5
+    africa-2013-era5-tutorial:
       module: era5
-      dx: 0.3  # cutout resolution
-      dy: 0.3  # cutout resolution
-      time: ["2013", "2013"]  # cutout weather year (~40 years available)
-
+      dx: 0.3
+      dy: 0.3
+      time: ["2013-03", "2013-03"]
+    # europe-2013-era5:
+    #   module: era5 # in priority order
+    #   x: [-12., 35.]
+    #   y: [33., 72]
+    #   dx: 0.3
+    #   dy: 0.3
+    #   time: ["2013", "2013"]
+    # europe-2013-sarah:
+    #   module: [sarah, era5] # in priority order
+    #   x: [-12., 45.]
+    #   y: [33., 65]
+    #   dx: 0.2
+    #   dy: 0.2
+    #   time: ["2013", "2013"]
+    #   sarah_interpolate: false
+    #   sarah_dir:
+    #   features: [influx, temperature]
 
 renewable:
   onwind:
-    cutout: africa-2013-era5
+    cutout: africa-2013-era5-tutorial
     resource:
       method: wind
       turbine: Vestas_V112_3MW
-    capacity_per_sqkm: 3 # conservative, ScholzPhd Tab 4.3.1: 10MW/km^2
+    capacity_per_sqkm: 3 # ScholzPhd Tab 4.3.1: 10MW/km^2
     # correction_factor: 0.93
     corine:
       # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
@@ -143,11 +175,11 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: africa-2013-era5
+    cutout: africa-2013-era5-tutorial
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
-    capacity_per_sqkm: 2
+    capacity_per_sqkm: 3
     # correction_factor: 0.93
     corine: [44, 255]
     natura: true
@@ -157,7 +189,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: africa-2013-era5
+    cutout: africa-2013-era5-tutorial
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -172,7 +204,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: africa-2013-era5
+    cutout: africa-2013-era5-tutorial
     resource:
       method: pv
       panel: CSi
@@ -193,7 +225,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: africa-2013-era5
+    cutout: africa-2013-era5-tutorial
     resource:
       method: hydro
       plants: data/clean/africa_all_substations.geojson
@@ -203,9 +235,8 @@ renewable:
       # show_progress: true
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
-    hydro_max_hours: "energy_capacity_totals_by_country"  # not active
+    hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     clip_min_inflow: 1.0
-    extendable: true
 
 # TODO: Needs to be adjusted for Africa
 costs:
@@ -234,19 +265,11 @@ solving:
     min_iterations: 4
     max_iterations: 6
     clip_p_max_pu: 0.01
-    skip_iterations: true
+    skip_iterations: false
     track_iterations: false
     #nhours: 10
   solver:
-    name: gurobi
-    threads: 4
-    method: 2 # barrier (=ipm)
-    crossover: 0
-    BarConvTol: 1.e-5
-    FeasibilityTol: 1.e-6
-    AggFill: 0
-    PreDual: 0
-    GURO_PAR_BARDENSETHRESH: 200
+    name: highs
 
 
 plotting:

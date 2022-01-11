@@ -269,8 +269,8 @@ def attach_load(
 
     weather_year = snakemake.config["load_options"]["weather_year"]
     prediction_year = snakemake.config["load_options"]["prediction_year"]
-    region_load = snakemake.config["region_load"]["scale"]
-    ssp = snakemake.config["region_load"]["scale"]
+    region_load = snakemake.config["load_options"]["region_load"]
+    ssp = snakemake.config["load_options"]["ssp"]
 
     load = ("resources/" + ssp + "/" + prediction_year + "/era5_" +
             weather_year + "/" + region_load + ".nc")
@@ -730,15 +730,20 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     regions = snakemake.input.regions
-    load = snakemake.input.load
-    countries = create_country_list(snakemake.config["countries"])
+	
+    weather_year = snakemake.config["load_options"]["weather_year"]
+    prediction_year = snakemake.config["load_options"]["prediction_year"]
+    region_load = snakemake.config["load_options"]["region_load"]
+    ssp = snakemake.config["load_options"]["ssp"]
+
+	countries = create_country_list(snakemake.config["countries"])
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
 
     costs = load_costs(Nyears)
     ppl = load_powerplants()
 
-    attach_load(n, regions, load, admin_shapes, countries, scale)
+    attach_load(n,regions,weather_year,prediction_year,region_load,ssp,admin_shapes,countries,scale)
     update_transmission_costs(n, costs)
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
