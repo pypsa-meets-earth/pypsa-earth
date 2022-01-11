@@ -267,8 +267,7 @@ def attach_load(
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
 
-    load = "resources/" + ssp + "/" + prediction_year + "/era5_" +
-            weather_year + "/" + region_load + ".nc"
+    load = ("resources/" + ssp + "/" + prediction_year + "/era5_" + weather_year + "/" + region_load + ".nc")
     load_path = load
     gegis_load = xr.open_dataset(load_path)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
