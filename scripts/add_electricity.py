@@ -727,7 +727,7 @@ if __name__ == "__main__":
     prediction_year = snakemake.config["load_options"]["prediction_year"]
     region_load = snakemake.config["load_options"]["region_load"]
     ssp = snakemake.config["load_options"]["ssp"]
-	countries = create_country_list(snakemake.config["countries"]
+	countries = create_country_list(snakemake.config["countries"])
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
 
