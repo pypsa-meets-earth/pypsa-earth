@@ -485,7 +485,7 @@ iso_to_geofk_dict = {
     "GM": "SNGM",  # gambia -> senegal-gambia
 }
 
-# For the following countries geofabrik and iso norm deviates
+# Geofabrik and iso norm deviate for the following countries 
 
 # Western Sahara -> Morocco ("EH": "MA")
 # Senegal -> Senegal-Gambia ("SN": "SNGM")
@@ -723,4 +723,3 @@ world_geofk = {
         "CR": "costa-rica",
     },
 }
-
