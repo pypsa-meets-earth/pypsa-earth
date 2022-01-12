@@ -61,7 +61,7 @@ base_network:
 
 load_options:
   ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
-  weather_year: 2014  # Load scenarios available with different weather year (different renewable potentials)
+  weather_year: 2018  # Load scenarios available with different weather year (different renewable potentials)
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
   region_load: "Africa" # Load demand scenarios based on a specified reference region
