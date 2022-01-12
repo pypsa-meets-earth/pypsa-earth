@@ -538,7 +538,7 @@ world_geofk = {
         "MW": "malawi",
         "ML": "mali",
         "MR": "mauritania",
-        # "MU": "mauritius", #Island
+        # "MU": "mauritius", # Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
@@ -547,7 +547,7 @@ world_geofk = {
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
         # "ST": "sao-tome-and-principe", # Island
-        "SNGM": "senegal-and-gambia", # See Map # Self-created country code
+        "SNGM": "senegal-and-gambia", # Geofk shortcurt
         # "SC": "seychelles", # Island
         "SL": "sierra-leone",
         "SO": "somalia", # No Data
@@ -563,7 +563,6 @@ world_geofk = {
         "ZM": "zambia",
         "ZW": "zimbabwe",
     },
-    # Hong Kong and Macao belong to China
     "asia": {
         "AF": "afghanistan",
         "AM": "armenia",
@@ -575,7 +574,7 @@ world_geofk = {
         "CN": "china",
         # 'CX': 'christmas island', # Island
         # 'CC': 'cocos (keeling) islands', # Island
-        "GCC": "gulf cooperation council", # Shortcurt for SA, KW, BH, QA, AE, OM
+        "GCC": "gulf cooperation council", #  Geofk shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
@@ -590,7 +589,7 @@ world_geofk = {
         'LA': "laos",
         "LB": "lebanon",
         "MY-SG-BN":
-        "malaysia-singapore-brunei",  # Shortcut
+        "malaysia-singapore-brunei",  # Geofk shortcurt
         "MV": "maldives",
         "MN": "mongolia",
         "MM": "myanmar",
@@ -607,24 +606,22 @@ world_geofk = {
         "VN": "vietnam",
         "YE": "yemen",
     },
-    # 'norfolk island', 'french-polynesia', 'guam' are N/A via "australia-oceania" domain
-    # but they are islands, anyway
     "australia-oceania": {
         # "AS": "american-oceania", # Islands
         "AU": "australia",
-        # 'CK': 'cook islands',
+        # "CK": 'cook islands',
         "FJ": "fiji",
         # "PF": "french-polynesia", # Islands
         # "GU": "guam", # Island
         # "KI": "kiribati", # Islands
-        # 'MH': 'marshall islands', # Islands
+        # "MH": 'marshall islands', # Islands
         # "FM": "micronesia", # Islands
         # "NR": "nauru", # Islands
         "NC": "new-caledonia",
         "NZ": "new-zealand",
         # "NU": "niue", # Island
         # "NF": "norfolk island", # Island
-        # 'MP': 'northern mariana islands', # Islands
+        # "MP": 'northern mariana islands', # Islands
         # "PW": "palau", # Islands
         "PG": "papua-new-guinea",
         # "WS": "samoa", # Islands
@@ -635,8 +632,6 @@ world_geofk = {
         # "VU": "vanuatu", # Islands
         # "WF": "wallis-et-futuna", # Islands
     },
-    # Cyprus and Georgia are included into European domain
-    # "FO": "faroe islands" are N/A in this way (part of Denmark?)
     "europe": {
         "AL": "albania",
         "AD": "andorra",
