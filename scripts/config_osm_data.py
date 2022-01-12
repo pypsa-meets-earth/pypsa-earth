@@ -485,21 +485,21 @@ iso_to_geofk_dict = {
     "GM": "SNGM",  # gambia -> senegal-gambia
 }
 
-# Geofabrik and iso norm deviate for the following countries 
+# Geofabrik and iso norm deviate for the following countries
 
 # Western Sahara -> Morocco ("EH": "MA")
 # Senegal -> Senegal-Gambia ("SN": "SNGM")
 # Gambia -> Senegal-Gambia  ("GM": "SNGM")
-# Hong Kong  -> China 
+# Hong Kong  -> China
 # Macao  -> China
 # Cyprus and Georgia -> European domain
 # Russia -> a separate domain
 
 # Data for some islands seem to be merged with some other areas data
-# That is the case for 
+# That is the case for
 # "FO": "faroe islands"
-# "NF": "norfolk island", 
-# "PF": "french-polynesia" 
+# "NF": "norfolk island",
+# "PF": "french-polynesia"
 # "GU": "guam"
 
 # "latin_america" -> "south-america"
@@ -527,7 +527,7 @@ world_geofk = {
         "ET": "ethiopia",
         "GA": "gabon",
         "GH": "ghana",
-        "GW": "guinea-bissau", # No Data
+        "GW": "guinea-bissau",  # No Data
         "GN": "guinea",
         "CI": "ivory-coast",
         "KE": "kenya",
@@ -547,10 +547,10 @@ world_geofk = {
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
         # "ST": "sao-tome-and-principe", # Island
-        "SNGM": "senegal-and-gambia", # Geofk shortcurt
+        "SNGM": "senegal-and-gambia",  # Geofk shortcurt
         # "SC": "seychelles", # Island
         "SL": "sierra-leone",
-        "SO": "somalia", # No Data
+        "SO": "somalia",  # No Data
         # south-africa-and-lesotho
         "ZA": "south-africa",
         "SS": "south-sudan",
@@ -574,7 +574,7 @@ world_geofk = {
         "CN": "china",
         # 'CX': 'christmas island', # Island
         # 'CC': 'cocos (keeling) islands', # Island
-        "GCC": "gulf cooperation council", #  Geofk shortcurt for SA, KW, BH, QA, AE, OM
+        "GCC": "gulf cooperation council",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
@@ -642,13 +642,13 @@ world_geofk = {
         "BG": "bulgaria",
         "HR": "croatia",
         "CZ": "czech-republic",
-        "CY": "cyprus",       
+        "CY": "cyprus",
         "DK": "denmark",
         "EE": "estonia",
         # "FO": "faroe islands", # Islands
         "FI": "finland",
         "FR": "france",
-        "GE": "georgia",         
+        "GE": "georgia",
         "DE": "germany",
         # 'GI': 'gibraltar', # Peninsula; Isolated PS?
         "GR": "greece",
