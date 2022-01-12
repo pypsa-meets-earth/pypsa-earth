@@ -266,7 +266,6 @@ def attach_load(
         gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
-
     load = ("resources/" + ssp + "/" + prediction_year + "/era5_" + weather_year + "/" + region_load + ".nc")
     load_path = load
     gegis_load = xr.open_dataset(load_path)
@@ -275,11 +274,10 @@ def attach_load(
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
     logger.info(f"Load data scaled with scalling factor {scale}.")
     gegis_load *= scale
-
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes.loc[:,
                "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
-
+	
     def upsample(cntry, group):
         """
         Distributes load in country according to population and gdp
@@ -729,8 +727,7 @@ if __name__ == "__main__":
     prediction_year = snakemake.config["load_options"]["prediction_year"]
     region_load = snakemake.config["load_options"]["region_load"]
     ssp = snakemake.config["load_options"]["ssp"]
-
-	countries = create_country_list(snakemake.config["countries"])
+	countries = create_country_list(snakemake.config["countries"]
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
 
