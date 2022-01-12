@@ -485,6 +485,25 @@ iso_to_geofk_dict = {
     "GM": "SNGM",  # gambia -> senegal-gambia
 }
 
+# For the following countries geofabrik and iso norm deviates
+
+# Western Sahara -> Morocco ("EH": "MA")
+# Senegal -> Senegal-Gambia ("SN": "SNGM")
+# Gambia -> Senegal-Gambia  ("GM": "SNGM")
+# Hong Kong  -> China 
+# Macao  -> China
+# Cyprus and Georgia -> European domain
+# Russia -> a separate domain
+
+# Data for some islands seem to be merged with some other areas data
+# That is the case for 
+# "FO": "faroe islands"
+# "NF": "norfolk island", 
+# "PF": "french-polynesia" 
+# "GU": "guam"
+
+# "latin_america" -> "south-america"
+
 world_geofk = {
     "africa": {
         "DZ": "algeria",
@@ -556,7 +575,7 @@ world_geofk = {
         "CN": "china",
         # 'CX': 'christmas island', # Island
         # 'CC': 'cocos (keeling) islands', # Island
-        "GCC": "gulf cooperation council" # Shortcurt for SA, KW, BH, QA, AE, OM
+        "GCC": "gulf cooperation council", # Shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
