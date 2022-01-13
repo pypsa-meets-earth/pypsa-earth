@@ -252,8 +252,7 @@ world = {
         # 'LA': "lao people's democratic republic",
         "LB": "lebanon",
         "MO": "macao",
-        "MY-SG-BN":
-        "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
+        "MY-SG-BN": "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
         "MV": "maldives",
         "MN": "mongolia",
         "MM": "myanmar",
@@ -384,7 +383,8 @@ world = {
 
 world_countries = {
     country_2D: country_name
-    for d in world.values() for (country_2D, country_name) in d.items()
+    for d in world.values()
+    for (country_2D, country_name) in d.items()
 }
 
 continent_regions = {
@@ -481,11 +481,11 @@ continent_regions = {
 
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 iso_to_geofk_dict = {
-    "EH": "MA",    # Western Sahara -> Morocco
+    "EH": "MA",  # Western Sahara -> Morocco
     "SN": "SNGM",  # Senegal -> Senegal-Gambia
     "GM": "SNGM",  # Gambia -> Senegal-Gambia
-    "HK": "CN",    # Hong Kong  -> China
-    "MO": "CN"     # Macao  -> China
+    "HK": "CN",  # Hong Kong  -> China
+    "MO": "CN",  # Macao  -> China
 }
 
 # Cyprus and Georgia -> European domain
