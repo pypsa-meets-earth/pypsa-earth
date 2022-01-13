@@ -483,6 +483,8 @@ iso_to_geofk_dict = {
     "EH": "MA",  # western sahara -> Morocco
     "SN": "SNGM",  # senegal -> senegal-gambia
     "GM": "SNGM",  # gambia -> senegal-gambia
+    "HK": "CN",    # Hong Kong  -> China
+    "MO": "CN"     # Macao  -> China
 }
 
 # Geofabrik and iso norm deviate for the following countries
