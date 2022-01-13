@@ -26,9 +26,9 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 
 - **General code meeting (Open)**
 
-  - every second Thursday 16-17:00 (UK time) `download .ics file <https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download>`_
+  - every second Thursday 16-17:00 (UK time) `download .ics file <https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing>`_
   - updates on overall project and code blocks
-  - meeting on `Zoom <https://ed-ac-uk.zoom.us/j/89486720170>`_, password: energy101
+  - meeting hosted on `Discord <https://discord.gg/AnuJBk23FU>`_; join us, we are waiting for you!
   - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
 
 - **Specific code meeting (by invitation)**
