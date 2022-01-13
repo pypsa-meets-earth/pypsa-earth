@@ -477,7 +477,8 @@ continent_regions = {
     "TEST": ["NG", "NE", "SL", "MA"],
 }
 
-# Problematic countries, where geofabrik and iso norm deviates
+# Geofabrik and iso norm deviate for some countries and domains
+
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 iso_to_geofk_dict = {
     "EH": "MA",    # Western Sahara -> Morocco
@@ -487,18 +488,10 @@ iso_to_geofk_dict = {
     "MO": "CN"     # Macao  -> China
 }
 
-# Geofabrik and iso norm deviate for the following countries
-
-# Western Sahara -> Morocco ("EH": "MA")
-# Senegal -> Senegal-Gambia ("SN": "SNGM")
-# Gambia -> Senegal-Gambia  ("GM": "SNGM")
-# Hong Kong  -> China
-# Macao  -> China
 # Cyprus and Georgia -> European domain
 # Russia -> a separate domain
 
-# Data for some islands seem to be merged with some other areas data
-# That is the case for
+# data for some islands seem to be merged with some other areas data
 # "FO": "faroe islands"
 # "NF": "norfolk island",
 # "PF": "french-polynesia"
