@@ -28,7 +28,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
         <a/>
       </p>
 - **General code meeting (Open)**
-  - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
+  - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing" >download .ics</a>
   - join for project news and high-level code updates
   - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
