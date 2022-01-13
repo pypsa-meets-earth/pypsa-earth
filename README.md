@@ -1,13 +1,13 @@
 # PyPSA meets Africa
 
-## Development Status: **Prototype**
+## Development Status: **Stable and Active**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg)](https://github.com/pypsa-meets-africa/pypsa-africa/actions)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
 
-PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission!
+PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
 
 A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
