@@ -20,7 +20,8 @@ A short presentation about our project and its aims is given on our [website](ht
 There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
 
 - [**Discord NEW! (Open)**](https://discord.gg/AnuJBk23FU)
-  - Chat with the community, team up on features, exchange with developers, code in voice channels
+  - chat with the community, team up on features, exchange with developers, code in voice channels
+  - registration and usage is for free
       <p align="left">
         <a href="https://discord.gg/AnuJBk23FU">
           <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
@@ -29,7 +30,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **General code meeting (Open)**
   - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
   - join for project news and high-level code updates
-  - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
+  - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - every Friday between 17-18:00 (UK time)
