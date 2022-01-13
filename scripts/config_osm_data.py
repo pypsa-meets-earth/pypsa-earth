@@ -480,9 +480,9 @@ continent_regions = {
 # Problematic countries, where geofabrik and iso norm deviates
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 iso_to_geofk_dict = {
-    "EH": "MA",  # western sahara -> Morocco
-    "SN": "SNGM",  # senegal -> senegal-gambia
-    "GM": "SNGM",  # gambia -> senegal-gambia
+    "EH": "MA",    # Western Sahara -> Morocco
+    "SN": "SNGM",  # Senegal -> Senegal-Gambia
+    "GM": "SNGM",  # Gambia -> Senegal-Gambia
     "HK": "CN",    # Hong Kong  -> China
     "MO": "CN"     # Macao  -> China
 }
@@ -576,8 +576,7 @@ world_geofk = {
         "CN": "china",
         # 'CX': 'christmas island', # Island
         # 'CC': 'cocos (keeling) islands', # Island
-        "GCC":
-        "gulf cooperation council",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
+        "GCC": "gulf cooperation council",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
