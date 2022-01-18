@@ -175,7 +175,8 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
                                  costs.at["solar-utility", "capital_cost"])
 
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+        capital_cost = link1["capital_cost"] + \
+            max_hours * store["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
@@ -266,9 +267,10 @@ def attach_load(
         gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
-    
+
     cwd_path = os.path.dirname(os.getcwd())
-    load_path = os.path.join(cwd_path, "resources", str(ssp), str(prediction_year), "era5_" + str(weather_year), str(region_load) + ".nc")
+    load_path = os.path.join(cwd_path, "resources", str(ssp), str(
+        prediction_year), "era5_" + str(weather_year), str(region_load) + ".nc")
     gegis_load = xr.open_dataset(load_path)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
@@ -294,10 +296,10 @@ def attach_load(
                                                normed=False).T.tocsr()
             gdp_n = pd.Series(transfer.dot(
                 shapes_cntry["gdp"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
             pop_n = pd.Series(transfer.dot(
                 shapes_cntry["pop"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to EU continent load data
@@ -734,7 +736,8 @@ if __name__ == "__main__":
     costs = load_costs(Nyears)
     ppl = load_powerplants()
 
-    attach_load(n,regions,weather_year,prediction_year,region_load,ssp,admin_shapes,countries,scale)
+    attach_load(n, regions, weather_year, prediction_year,
+                region_load, ssp, admin_shapes, countries, scale)
     update_transmission_costs(n, costs)
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
