@@ -1,13 +1,13 @@
 # PyPSA meets Africa
 
-## Development Status: **Prototype**
+## Development Status: **Stable and Active**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg)](https://github.com/pypsa-meets-africa/pypsa-africa/actions)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
 
-PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool which is currently under development and will be heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission!
+PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
 
 A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
@@ -20,24 +20,25 @@ A short presentation about our project and its aims is given on our [website](ht
 There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
 
 - [**Discord NEW! (Open)**](https://discord.gg/AnuJBk23FU)
-  - Chat with the community, team up on features, exchange with developers, code in voice channels
+  - chat with the community, team up on features, exchange with developers, code in voice channels
+  - registration and usage is for free
       <p align="left">
         <a href="https://discord.gg/AnuJBk23FU">
           <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
         <a/>
       </p>
 - **General code meeting (Open)**
-  - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download" >download .ics</a>
+  - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing" >download .ics</a>
   - join for project news and high-level code updates
-  - meeting on [Zoom](https://ed-ac-uk.zoom.us/j/89486720170), password: energy101
+  - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **Specific code meeting (by invitation)**
-  - current meetings: 1) AI asset detection (WP6) and 2) Data workflow updates (covering WP1-WP5)
-  - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
+  - current meetings: 1) Demand creation (WP1) 2) AI asset detection (WP6) and 3) Data workflow updates (WP1-WP5)
+  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
   - updates, demos, task distribution, weekly targets, Q&A
 - **Outreach meeting (by invitation)**
   - every second week

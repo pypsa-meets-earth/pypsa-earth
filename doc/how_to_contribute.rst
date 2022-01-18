@@ -31,29 +31,35 @@ Get Involved
 
 The PyPSA meets Africa team is currenlty running four types of meetings:
 
-- **Buddy talk (Open)**
-
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: `app.autobook.me/max-parzen/pypsa-meets-africa <https://app.autobook.me/max-parzen/pypsa-meets-africa>`_ (developed by @mnm-matin)
+- **Discord (Open)**
+  
+  - Chat with the community, team up on features, exchange with developers, code in voice channels
+  - `Discord invitation link <https://discord.gg/AnuJBk23FU>`_
 
 - **General code meeting (Open)**
 
-  - every second Thursday 16-17:00 (UK time) `download .ics file <https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download>`_
-  - updates on overall project and code blocks
+  - every second Thursday 16-17:00 (UK time) `download .ics <https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download>`_
+  - join for project news and high-level code updates
   - meeting on `Zoom <https://ed-ac-uk.zoom.us/j/89486720170>`_, password: energy101
-
+  - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
+  
 - **Specific code meeting (by invitation)**
 
-  - current meetings: 1) AI asset recognition (WP6) and 2) Data workflow updates (covering WP1-WP5)
-  - every week Friday 1) 14-14:45 (UK time), 2) 15-16:00 (UK time)
+  - current meetings: 1) Demand creation (WP1) 2) AI asset detection (WP6) and 3) Data workflow updates (WP1-WP5)
+  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
   - updates, demos, task distribution, weekly targets, Q&A
 
 - **Outreach meeting (by invitation)**
 
   - every second week
   - planning, discussing events, workshops, communication, community activities
+  
+- **Buddy talk (Open)**
 
+  - every Friday between 17-18:00 (UK time)
+  - book a 20min meeting with Max to discuss anything you like
+  - booking link: `app.autobook.me/max-parzen/pypsa-meets-africa <https://app.autobook.me/max-parzen/pypsa-meets-africa>`_ (developed by @mnm-matin)
+  
 
 .. _code_wp:
 
