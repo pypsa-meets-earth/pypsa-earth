@@ -28,10 +28,10 @@ Relevant Settings
 
     load:
         scale:
-		ssp:
-		weather_year:
-		prediction_year:
-		region_load:
+        ssp:
+        weather_year:
+        prediction_year:
+        region_load:
 
 
     renewable:
@@ -266,8 +266,9 @@ def attach_load(
         gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
-    load = ("resources/" + str(ssp) + "/" + str(prediction_year) + "/era5_" + str(weather_year) + "/" + str(region_load) + ".nc")
-    load_path = load
+    
+    cwd_path = os.path.dirname(os.getcwd())
+    load_path = os.path.join(cwd_path, "resources", str(ssp), str(prediction_year), "era5_" + str(weather_year), str(region_load) + ".nc")
     gegis_load = xr.open_dataset(load_path)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
@@ -277,7 +278,7 @@ def attach_load(
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes.loc[:,
                "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
-	
+
     def upsample(cntry, group):
         """
         Distributes load in country according to population and gdp
@@ -722,12 +723,11 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     regions = snakemake.input.regions
-	
+    countries = create_country_list(snakemake.config["countries"])
     weather_year = snakemake.config["load_options"]["weather_year"]
     prediction_year = snakemake.config["load_options"]["prediction_year"]
     region_load = snakemake.config["load_options"]["region_load"]
     ssp = snakemake.config["load_options"]["ssp"]
-	countries = create_country_list(snakemake.config["countries"])
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
 
