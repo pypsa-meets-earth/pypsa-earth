@@ -39,6 +39,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **Specific code meeting (by invitation)**
   - current meetings: 1) Demand creation (WP1) 2) AI asset detection (WP6) and 3) Data workflow updates (WP1-WP5)
   - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
+  - Sector-coupled model development: every week Thursday 09:00-10:00 (UK time)
   - updates, demos, task distribution, weekly targets, Q&A
 - **Outreach meeting (by invitation)**
   - every second week
