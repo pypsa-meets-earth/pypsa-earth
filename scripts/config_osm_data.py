@@ -569,8 +569,7 @@ world_geofk = {
         "CN": "china",
         # 'CX': 'christmas island', # Island
         # 'CC': 'cocos (keeling) islands', # Island
-        "GCC":
-        "gulf cooperation council",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
+        "GCC": "gcc-states",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
