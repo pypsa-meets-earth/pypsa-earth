@@ -147,6 +147,7 @@ def custom_voronoi_partition_pts(points,
 
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
+
     def locate_bus(coords):
         try:
             return gadm_shapes[gadm_shapes.contains(
