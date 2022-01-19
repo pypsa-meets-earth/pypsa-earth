@@ -69,7 +69,7 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON", schema=schema)
     else:
         # create empty file to avoid issues with snakemake
-        with os.open(fn, "w") as fp:
+        with open(fn, "w") as fp:
             pass
 
 
