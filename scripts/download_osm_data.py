@@ -428,20 +428,22 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
                         driver="GeoJSON")  # Generate GeoJson
 
 
-    
 # Auxiliary function to initialize the parallel data download
 def _init_process_pop(update_, verify_):
     global update, verify
     update, verify = update_, verify_
 
 # Auxiliary function to download the data
+
+
 def _process_func_pop(c_code):
     download_pbf(c_code, update, verify)
 
+
 def parallel_download_pbf(country_list,
-                            nprocesses,
-                            update=False,
-                            verify=False):
+                          nprocesses,
+                          update=False,
+                          verify=False):
 
     # argument for the parallel processing
     kwargs = {
@@ -454,12 +456,12 @@ def parallel_download_pbf(country_list,
     # execute the parallel download with tqdm progressbar
     with mp.get_context("spawn").Pool(**kwargs) as pool:
         for _ in tqdm(
-                pool.imap(_process_func_pop, country_list),
-                ascii=False,
-                unit=" countries",
-                total=len(country_list),
-                desc="Download pbf ",
-            ):
+            pool.imap(_process_func_pop, country_list),
+            ascii=False,
+            unit=" countries",
+            total=len(country_list),
+            desc="Download pbf ",
+        ):
             pass
 
 
@@ -613,7 +615,8 @@ if __name__ == "__main__":
 
     input = snakemake.config["countries"]  # country list or region
     output_files = snakemake.output  # output snakemake
-    nprocesses = snakemake.config.get("download_osm_data_nprocesses", 1)  # number of threads
+    nprocesses = snakemake.config.get(
+        "download_osm_data_nprocesses", 1)  # number of threads
 
     country_list = create_country_list(input)
 
