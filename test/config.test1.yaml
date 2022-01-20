@@ -338,7 +338,7 @@ plotting:
     "HVDC links": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
-    "Load": "#FF0000"
+    "load": "#FF0000"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"
