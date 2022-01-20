@@ -13,6 +13,7 @@
 import hashlib
 import json
 import logging
+import multiprocessing as mp
 import os
 import pickle
 import shutil
@@ -41,7 +42,6 @@ from shapely import geometry
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
-import multiprocessing as mp
 from tqdm import tqdm
 
 # esy.osm filter: https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
@@ -428,20 +428,23 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
                         driver="GeoJSON")  # Generate GeoJson
 
 
-    
 # Auxiliary function to initialize the parallel data download
 def _init_process_pop(update_, verify_):
     global update, verify
     update, verify = update_, verify_
 
+
 # Auxiliary function to download the data
+
+
 def _process_func_pop(c_code):
     download_pbf(c_code, update, verify)
 
+
 def parallel_download_pbf(country_list,
-                            nprocesses,
-                            update=False,
-                            verify=False):
+                          nprocesses,
+                          update=False,
+                          verify=False):
 
     # argument for the parallel processing
     kwargs = {
@@ -459,7 +462,7 @@ def parallel_download_pbf(country_list,
                 unit=" countries",
                 total=len(country_list),
                 desc="Download pbf ",
-            ):
+        ):
             pass
 
 
@@ -554,6 +557,7 @@ def create_country_list(input, iso_coding=True):
     full_codes_list : list
         Example ["NG","ZA"]
     """
+
     def filter_codes(c_list, iso_coding=True):
         """
         Filter list according to the specified coding.
@@ -613,7 +617,8 @@ if __name__ == "__main__":
 
     input = snakemake.config["countries"]  # country list or region
     output_files = snakemake.output  # output snakemake
-    nprocesses = snakemake.config.get("download_osm_data_nprocesses", 1)  # number of threads
+    nprocesses = snakemake.config.get("download_osm_data_nprocesses",
+                                      1)  # number of threads
 
     country_list = create_country_list(input)
 
@@ -625,5 +630,5 @@ if __name__ == "__main__":
         iso_coding=True,
         update=False,
         verify=False,
-        nprocesses=nprocesses
+        nprocesses=nprocesses,
     )
