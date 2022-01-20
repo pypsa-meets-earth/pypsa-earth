@@ -41,6 +41,8 @@ from shapely import geometry
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
+import multiprocessing as mp
+from tqdm import tqdm
 
 # esy.osm filter: https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
@@ -426,6 +428,41 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
                         driver="GeoJSON")  # Generate GeoJson
 
 
+    
+# Auxiliary function to initialize the parallel data download
+def _init_process_pop(update_, verify_):
+    global update, verify
+    update, verify = update_, verify_
+
+# Auxiliary function to download the data
+def _process_func_pop(c_code):
+    download_pbf(c_code, update, verify)
+
+def parallel_download_pbf(country_list,
+                            nprocesses,
+                            update=False,
+                            verify=False):
+
+    # argument for the parallel processing
+    kwargs = {
+        "initializer": _init_process_pop,
+        "initargs": (update, verify),
+        "maxtasksperchild": 20,
+        "processes": nprocesses,
+    }
+
+    # execute the parallel download with tqdm progressbar
+    with mp.get_context("spawn").Pool(**kwargs) as pool:
+        for _ in tqdm(
+                pool.imap(_process_func_pop, country_list),
+                ascii=False,
+                unit=" countries",
+                total=len(country_list),
+                desc="Download pbf ",
+            ):
+            pass
+
+
 def process_data(
     feature_list,
     country_list,
@@ -433,10 +470,16 @@ def process_data(
     iso_coding=True,
     update=False,
     verify=False,
+    nprocesses=1,
 ):
     """
     Download the features in feature_list for each country of the country_list
     """
+
+    # parallel download of data if parallel download is enabled
+    if nprocesses > 1:
+        _logger.info(f"Parallel pbf download with {nprocesses} threads")
+        parallel_download_pbf(country_list, nprocesses, update, verify)
 
     # loop the request for each feature
 
@@ -568,8 +611,9 @@ if __name__ == "__main__":
     # ["substation", "generator", "line", "cable", "tower"]
     feature_list = ["substation", "generator", "line", "cable"]
 
-    input = snakemake.config["countries"]
-    output_files = snakemake.output
+    input = snakemake.config["countries"]  # country list or region
+    output_files = snakemake.output  # output snakemake
+    nprocesses = snakemake.config.get("download_osm_data_nprocesses", 1)  # number of threads
 
     country_list = create_country_list(input)
 
@@ -581,4 +625,5 @@ if __name__ == "__main__":
         iso_coding=True,
         update=False,
         verify=False,
+        nprocesses=nprocesses
     )

@@ -34,6 +34,7 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
+# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 
 augmented_line_connection:
   add_to_snakefile: True  # If True, includes this rule to the workflow
