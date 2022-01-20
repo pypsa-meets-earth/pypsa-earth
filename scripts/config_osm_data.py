@@ -383,7 +383,8 @@ world = {
 
 world_countries = {
     country_2D: country_name
-    for d in world.values() for (country_2D, country_name) in d.items()
+    for d in world.values()
+    for (country_2D, country_name) in d.items()
 }
 
 continent_regions = {
@@ -481,22 +482,19 @@ continent_regions = {
 
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 iso_to_geofk_dict = {
-    "EH": "MA",    # Western Sahara -> Morocco
+    "EH": "MA",  # Western Sahara -> Morocco
     "SN": "SNGM",  # Senegal -> Senegal-Gambia
     "GM": "SNGM",  # Gambia -> Senegal-Gambia
-
-    "HK": "CN",    # Hong Kong  -> China
-    "MO": "CN",    # Macao  -> China
-
-    "SG": "MY",    # Singapore -> Malaysia
-    "BN": "MY",    # Brunei -> Malaysia
-
-    "SA": "GCC",   # Saudi Arabia -> Gulf Cooperation Council
-    "KW": "GCC",   # Kuwait -> Gulf Cooperation Council
-    "BH": "GCC",   # Bahrain -> Gulf Cooperation Council
-    "QA": "GCC",   # Qatar -> Gulf Cooperation Council
-    "AE": "GCC",   # United Arab Emirates -> Gulf Cooperation Council
-    "OM": "GCC"    # Oman -> Gulf Cooperation Council
+    "HK": "CN",  # Hong Kong  -> China
+    "MO": "CN",  # Macao  -> China
+    "SG": "MY",  # Singapore -> Malaysia
+    "BN": "MY",  # Brunei -> Malaysia
+    "SA": "GCC",  # Saudi Arabia -> Gulf Cooperation Council
+    "KW": "GCC",  # Kuwait -> Gulf Cooperation Council
+    "BH": "GCC",  # Bahrain -> Gulf Cooperation Council
+    "QA": "GCC",  # Qatar -> Gulf Cooperation Council
+    "AE": "GCC",  # United Arab Emirates -> Gulf Cooperation Council
+    "OM": "GCC",  # Oman -> Gulf Cooperation Council
 }
 
 # Cyprus and Georgia -> European domain
