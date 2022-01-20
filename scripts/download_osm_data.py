@@ -435,8 +435,6 @@ def _init_process_pop(update_, verify_):
 
 
 # Auxiliary function to download the data
-
-
 def _process_func_pop(c_code):
     download_pbf(c_code, update, verify)
 
@@ -445,6 +443,20 @@ def parallel_download_pbf(country_list,
                           nprocesses,
                           update=False,
                           verify=False):
+    """
+    Function to download pbf data in parallel
+
+    Parameters
+    ----------
+    country_list : str
+        List of geofabrik country codes to download
+    nprocesses : int
+        Number of parallel processes
+    update : bool
+        If true, existing pbf files are updated. Default: False
+    verify : bool
+        If true, checks the md5 of the file. Default: False
+    """
 
     # argument for the parallel processing
     kwargs = {
