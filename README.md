@@ -3,7 +3,7 @@
 ## Development Status: **Stable and Active**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
-[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg)](https://github.com/pypsa-meets-africa/pypsa-africa/actions)
+[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
 

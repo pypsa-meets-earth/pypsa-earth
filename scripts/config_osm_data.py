@@ -457,6 +457,7 @@ continent_regions = {
         "SY",  # SYRIA
         "AE",  # UNITED ARAB EMIRATES
         "YE",
+        # XNC is missing for nothern cyprus
     ],  # YEMEN
     # FAR EASTREN AISIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN"],
