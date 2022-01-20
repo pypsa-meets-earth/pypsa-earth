@@ -83,6 +83,8 @@ enable:
   build_natura_raster: true  # If True, then build_natura_raster can be run
   # custom_busmap: false
 
+download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
+
 electricity:
   voltages: [220., 300., 380.]
   co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
@@ -258,7 +260,7 @@ costs:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: false
+    load_shedding: true
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
@@ -336,6 +338,7 @@ plotting:
     "HVDC links": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
+    "load": "#FF0000"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"

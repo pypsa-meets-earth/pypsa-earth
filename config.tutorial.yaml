@@ -258,7 +258,7 @@ costs:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: false
+    load_shedding: true
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
@@ -336,6 +336,7 @@ plotting:
     "HVDC links": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
+    "load": "#FF0000"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"
