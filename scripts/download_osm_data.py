@@ -61,7 +61,7 @@ def getContinentCountry(code):
     return continent, country
 
 
-def download_pbf(country_code, update, verify):
+def download_pbf(country_code, update, verify, logging=True):
     """
     Download pbf file from geofabrik for a given country code
 
@@ -87,7 +87,8 @@ def download_pbf(country_code, update, verify):
                                  geofabrik_filename)  # Input filepath
 
     if not os.path.exists(PBF_inputfile):
-        _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
+        if logging:
+            _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True, verify=False) as r:
@@ -96,7 +97,8 @@ def download_pbf(country_code, update, verify):
 
     if verify is True:
         if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
-            _logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
+            if logging:
+                _logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
             if os.path.exists(PBF_inputfile):
                 os.remove(PBF_inputfile)
 
@@ -436,7 +438,7 @@ def _init_process_pop(update_, verify_):
 
 # Auxiliary function to download the data
 def _process_func_pop(c_code):
-    download_pbf(c_code, update, verify)
+    download_pbf(c_code, update, verify, False)
 
 
 def parallel_download_pbf(country_list,
@@ -576,10 +578,18 @@ def create_country_list(input, iso_coding=True):
         When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
         When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
         """
-        if iso_coding:
-            return [c for c in c_list if len(c) == 2]
+        if iso_coding:  # if country lists are in iso coding, then check if they are 2-string
+            # 2-code countries
+            ret_list = [c for c in c_list if len(c) == 2]
+
+            # check if elements have been removed and return a working if so
+            if len(ret_list) < len(c_list):
+                _logger.warning("Specified country list contains the following non-iso codes: " + 
+                    ", ".join(list(set(c_list) - set(ret_list))))
+            
+            return ret_list
         else:
-            return [c for c in c_list if c not in iso_to_geofk_dict]
+            return c_list  # [c for c in c_list if c not in iso_to_geofk_dict]
 
     full_codes_list = []
 
@@ -613,6 +623,31 @@ def create_country_list(input, iso_coding=True):
     return full_codes_list
 
 
+def country_list_to_geofk(country_list):
+    """
+    Convert the requested country list into geofk norm
+
+    Parameters
+    ----------
+    input : str
+        Any two-letter country name or aggregation of countries given in config_osm_data.py
+        Country name duplications won't distort the result.
+        Examples are:
+        ["NG","ZA"], downloading osm data for Nigeria and South Africa
+        ["SNGM"], downloading data for Senegal&Gambia shape
+        ["NG","ZA","NG"], won't distort result.
+
+    Returns
+    -------
+    full_codes_list : list
+        Example ["NG","ZA"]
+    """
+
+    full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
+
+    return full_codes_list
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -627,12 +662,11 @@ if __name__ == "__main__":
     # ["substation", "generator", "line", "cable", "tower"]
     feature_list = ["substation", "generator", "line", "cable"]
 
-    input = snakemake.config["countries"]  # country list or region
+    # get list of countries into geofabrik convention; expected iso norm in input
+    country_list = country_list_to_geofk(snakemake.config["countries"])
     output_files = snakemake.output  # output snakemake
     nprocesses = snakemake.config.get("download_osm_data_nprocesses",
                                       1)  # number of threads
-
-    country_list = create_country_list(input)
 
     # Set update # Verify = True checks local md5s and pre-filters data again
     process_data(
