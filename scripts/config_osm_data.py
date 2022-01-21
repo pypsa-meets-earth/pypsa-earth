@@ -156,7 +156,7 @@ continents = {
     "OC": "australia",
     "AF": "africa",
     "EU": "europe",
-    # 'AN': 'antarctica'
+    # "AN": "antarctica"
 }
 
 world_iso = {
@@ -227,12 +227,12 @@ world_iso = {
         "BH": "bahrain",
         "BD": "bangladesh",
         "BT": "bhutan",
-        # 'IO': 'british indian ocean territory',
-        # 'BN': 'brunei darussalam', # merged with MY
+        # "IO": "british indian ocean territory",
+        # "BN": "brunei darussalam", # merged with MY
         "KH": "cambodia",
         "CN": "china",
-        # 'CX': 'christmas island',
-        # 'CC': 'cocos (keeling) islands',
+        # "CX": "christmas island",
+        # "CC": "cocos (keeling) islands",
         "CY": "cyprus",
         "GE": "georgia",
         "HK": "hong kong",
@@ -254,7 +254,7 @@ world_iso = {
         "MY": "malaysia",
         "SG": "singapore",
         "BN": "brunei",
-        "MV": "maldives",
+        # "MV": "maldives",  # Island
         "MN": "mongolia",
         "MM": "myanmar",
         "NP": "nepal",
@@ -277,30 +277,30 @@ world_iso = {
         "YE": "yemen",
     },
     "australia": {
-        "AS": "american-oceania",
+        # "AS": "american-oceania",  # Island
         "AU": "australia",
-        # 'CK': 'cook islands',
-        "FJ": "fiji",
-        "PF": "french-polynesia",
-        "GU": "guam",
-        "KI": "kiribati",
-        # 'MH': 'marshall islands',
-        "FM": "micronesia",
-        "NR": "nauru",
+        # "CK": "cook islands",  # Island
+        # "FJ": "fiji",  # Island
+        # "PF": "french-polynesia",  # Island
+        # "GU": "guam",  # Island
+        # "KI": "kiribati",  # Island
+        # "MH": "marshall islands",  # Island
+        # "FM": "micronesia",  # Island
+        # "NR": "nauru",  # Island
         "NC": "new-caledonia",
         "NZ": "new-zealand",
-        "NU": "niue",
-        # "NF": "norfolk island",
-        # 'MP': 'northern mariana islands',
-        "PW": "palau",
+        # "NU": "niue",  # Island
+        # "NF": "norfolk island",  # Island
+        # "MP": "northern mariana islands",
+        # "PW": "palau",  # Island
         "PG": "papua-new-guinea",
-        "WS": "samoa",
-        # 'SB': 'solomon islands',
-        "TK": "tokelau",
-        "TO": "tonga",
-        "TV": "tuvalu",
-        "VU": "vanuatu",
-        "WF": "wallis-et-futuna",
+        # "WS": "samoa",  # Island
+        # "SB": "solomon islands",
+        # "TK": "tokelau",  # Island
+        # "TO": "tonga",  # Island
+        # "TV": "tuvalu",  # Island
+        # "VU": "vanuatu",  # Island
+        # "WF": "wallis-et-futuna",  # Island
     },
     "europe": {
         "AL": "albania",
@@ -318,15 +318,15 @@ world_iso = {
         "FI": "finland",
         "FR": "france",
         "DE": "germany",
-        # 'GI': 'gibraltar', Island ?
+        # "GI": "gibraltar", Island ?
         "GR": "greece",
-        # 'GG': 'guernsey', Island
+        # "GG": "guernsey", Island
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
-        # 'IM': 'isle of man',
+        # "IM": "isle of man",
         "IT": "italy",
-        # 'JE': 'jersey',
+        # "JE": "jersey",
         "LV": "latvia",
         "LI": "liechtenstein",
         "LT": "lithuania",
@@ -347,7 +347,7 @@ world_iso = {
         "SK": "slovakia",
         "SI": "slovenia",
         "ES": "spain",
-        # 'SJ': 'svalbard-and-jan-mayen',
+        # "SJ": "svalbard-and-jan-mayen",
         "SE": "sweden",
         "CH": "switzerland",
         "UA": "ukraine",
@@ -579,11 +579,11 @@ world_geofk = {
         "AZ": "azerbaijan",
         "BD": "bangladesh",
         "BT": "bhutan",
-        # 'IO': 'british indian ocean territory', # Island
+        # "IO": "british indian ocean territory", # Island
         "KH": "cambodia",
         "CN": "china",
-        # 'CX': 'christmas island', # Island
-        # 'CC': 'cocos (keeling) islands', # Island
+        # "CX": "christmas island", # Island
+        # "CC": "cocos (keeling) islands", # Island
         "GCC": "gcc-states",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
@@ -599,7 +599,7 @@ world_geofk = {
         "LA": "laos",
         "LB": "lebanon",
         "MY-SG-BN": "malaysia-singapore-brunei",  # Geofk shortcurt
-        "MV": "maldives",
+        # "MV": "maldives",  # Island
         "MN": "mongolia",
         "MM": "myanmar",
         "NP": "nepal",
@@ -616,30 +616,30 @@ world_geofk = {
         "YE": "yemen",
     },
     "australia-oceania": {
-        # "AS": "american-oceania", # Islands
+        # "AS": "american-oceania",  # Islands
         "AU": "australia",
-        # "CK": 'cook islands',
-        "FJ": "fiji",
-        # "PF": "french-polynesia", # Islands
-        # "GU": "guam", # Island
-        # "KI": "kiribati", # Islands
-        # "MH": 'marshall islands', # Islands
-        # "FM": "micronesia", # Islands
-        # "NR": "nauru", # Islands
+        # "CK": "cook islands",  # Island
+        # "FJ": "fiji",  # Islands
+        # "PF": "french-polynesia",  # Islands
+        # "GU": "guam",  # Island
+        # "KI": "kiribati",  # Islands
+        # "MH": "marshall islands",  # Islands
+        # "FM": "micronesia",  # Islands
+        # "NR": "nauru",  # Islands
         "NC": "new-caledonia",
         "NZ": "new-zealand",
-        # "NU": "niue", # Island
-        # "NF": "norfolk island", # Island
-        # "MP": 'northern mariana islands', # Islands
-        # "PW": "palau", # Islands
+        # "NU": "niue",  # Island
+        # "NF": "norfolk island",  # Island
+        # "MP": "northern mariana islands",  # Islands
+        # "PW": "palau",  # Islands
         "PG": "papua-new-guinea",
-        # "WS": "samoa", # Islands
-        # 'SB': 'solomon islands', # Islands
-        # "TK": "tokelau", # Islands
-        # "TO": "tonga", # Islands
-        # "TV": "tuvalu", # Islands
-        # "VU": "vanuatu", # Islands
-        # "WF": "wallis-et-futuna", # Islands
+        # "WS": "samoa",  # Islands
+        # "SB": "solomon islands",  # Islands
+        # "TK": "tokelau",  # Islands
+        # "TO": "tonga",  # Islands
+        # "TV": "tuvalu",  # Islands
+        # "VU": "vanuatu",  # Islands
+        # "WF": "wallis-et-futuna",  # Islands
     },
     "europe": {
         "AL": "albania",
@@ -659,15 +659,15 @@ world_geofk = {
         "FR": "france",
         "GE": "georgia",
         "DE": "germany",
-        # 'GI': 'gibraltar', # Peninsula; Isolated PS?
+        # "GI": "gibraltar", # Peninsula; Isolated PS?
         "GR": "greece",
-        # 'GG': 'guernsey', # Island
+        # "GG": "guernsey", # Island
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
-        # 'IM': 'isle of man', # Island
+        # "IM": "isle of man", # Island
         "IT": "italy",
-        # 'JE': 'jersey', # Island
+        # "JE": "jersey", # Island
         "LV": "latvia",
         "LI": "liechtenstein",
         "LT": "lithuania",
@@ -682,12 +682,12 @@ world_geofk = {
         "PL": "poland",
         "PT": "portugal",
         "RO": "romania",
-        # 'SM': 'san-marino',
+        "SM": "san-marino",
         "RS": "serbia",
         "SK": "slovakia",
         "SI": "slovenia",
         "ES": "spain",
-        # 'SJ': 'svalbard-and-jan-mayen', # Islands
+        # "SJ": "svalbard-and-jan-mayen", # Islands
         "SE": "sweden",
         "CH": "switzerland",
         "UA": "ukraine",
