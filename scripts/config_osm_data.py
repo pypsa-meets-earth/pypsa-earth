@@ -470,8 +470,8 @@ continent_regions = {
     # MIDDLE EASTREN ASIAN REGION
     "MEAR": ["TR", "SY", "IQ", "IR", "JO", "IL", "AE", "YE"],
     # American continent regions
-    "NACR": ["CA", "GL", "MX", "US"],  # NORTHREN AMERCIAN CONTINENT REGION
-    # SOUTHERN LATIN AMERICAL REGION
+    "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
+    # SOUTHERN LATIN AMERICAN REGION
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "SR", "UY", "VE"],
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR"],  # CENTRAL AMERICAN REGION
     # Customized test set
