@@ -489,8 +489,9 @@ iso_to_geofk_dict = {
     "GM": "SNGM",  # Gambia -> Senegal-Gambia
     "HK": "CN",  # Hong Kong  -> China
     "MO": "CN",  # Macao  -> China
-    "SG": "MY",  # Singapore -> Malaysia
-    "BN": "MY",  # Brunei -> Malaysia
+    "SG": "MY-SG-BN",  # Singapore -> Malaysia-Singapore-Brunei
+    "BN": "MY-SG-BN",  # Brunei -> Malaysia-Singapore-Brunei
+    "MY": "MY-SG-BN",  # Malaysia -> Malaysia-Singapore-Brunei
     "SA": "GCC",  # Saudi Arabia -> Gulf Cooperation Council
     "KW": "GCC",  # Kuwait -> Gulf Cooperation Council
     "BH": "GCC",  # Bahrain -> Gulf Cooperation Council
