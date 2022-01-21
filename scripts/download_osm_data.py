@@ -90,6 +90,10 @@ def download_pbf(country_code, update, verify):
     geofabrik_filename = f"{country_name_geofk}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
     geofabrik_url = f"https://download.geofabrik.de/{continent_geofk}/{geofabrik_filename}"
+    _logger.info(
+        f" Trying {geofabrik_url} for {country_name}, iso-code: {country_code}, geofk_id: {country_name_geofk}, continent in GeoFk: {continent_geofk}"
+    )
+
     PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
                                  geofabrik_filename)  # Input filepath
 
