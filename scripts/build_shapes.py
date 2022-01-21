@@ -628,7 +628,6 @@ def add_population_data(
         kwargs = {
             "initializer": _init_process_pop,
             "initargs": (df_gadm, year),
-            "maxtasksperchild": 20,
             "processes": nprocesses,
         }
         with mp.get_context("spawn").Pool(**kwargs) as pool:
