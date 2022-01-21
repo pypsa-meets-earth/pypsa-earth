@@ -506,7 +506,6 @@ def parallel_download_pbf(country_list,
     kwargs = {
         "initializer": _init_process_pop,
         "initargs": (update, verify),
-        "maxtasksperchild": 20,
         "processes": nprocesses,
     }
 
