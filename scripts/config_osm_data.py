@@ -264,7 +264,7 @@ world_iso = {
         "PH": "philippines",
         "QA": "qatar",
         "SA": "saudi-arabia",
-        "SG": "singapore", # merged with MY
+        "SG": "singapore",  # merged with MY
         "LK": "sri-lanka",
         "SY": "syria",
         "TW": "taiwan",
@@ -733,7 +733,6 @@ world_geofk = {
         "CR": "costa-rica",
     },
 }
-
 
 world_countries = {
     country_2D: country_name

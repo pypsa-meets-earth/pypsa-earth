@@ -84,20 +84,22 @@ def download_pbf(country_code, update, verify, logging=True):
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
 
     # Specify the url depending on the requested element, whether it is a continent or a region
-    if continent==country_name:
+    if continent == country_name:
         # Example continent-specific data: https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
         geofabrik_url = f"https://download.geofabrik.de/{geofabrik_filename}"
     else:
         # Example country- or sub-region-specific data: https://download.geofabrik.de/africa-latest.osm.pbf
-        geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
-    
+        geofabrik_url = (
+            f"https://download.geofabrik.de/{continent}/{geofabrik_filename}")
+
     # Filepath of the pbf
     PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
                                  geofabrik_filename)
 
     if not os.path.exists(PBF_inputfile):
         if logging:
-            _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
+            _logger.info(
+                f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True, verify=False) as r:
@@ -108,7 +110,9 @@ def download_pbf(country_code, update, verify, logging=True):
                     shutil.copyfileobj(r.raw, f)
             else:
                 # error status code: file not found
-                _logger.error(f"Error code: {r.status_code}. File {geofabrik_filename} not downloaded from {geofabrik_url}")
+                _logger.error(
+                    f"Error code: {r.status_code}. File {geofabrik_filename} not downloaded from {geofabrik_url}"
+                )
 
     if verify is True:
         if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
@@ -395,7 +399,7 @@ def convert_iso_to_geofk(iso_code,
     Function to convert the iso code name of a country into the corresponding geofabrik
     In Geofabrik, some countries are aggregated, thus if a single country is requested,
     then all the agglomeration shall be downloaded
-    For example, Senegal (SN) and Gambia (GM) cannot be found alone in geofabrik, 
+    For example, Senegal (SN) and Gambia (GM) cannot be found alone in geofabrik,
     but they can be downloaded as a whole SNGM
 
     The conversion directory, initialized to iso_to_geofk_dict is used to perform such conversion
@@ -433,13 +437,12 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
     if not os.path.exists(path_file_geojson):
         os.makedirs(os.path.dirname(path_file_geojson),
                     exist_ok=True)  # create raw directory
-    
+
     # remove non-line elements
     if feature_category[feature] == "way":
         # check geometry with multiple points: at least two needed to draw a line
-        is_linestring = df_all_feature["lonlat"].apply(lambda x: 
-            (len(x) >= 2) and (type(x[0]) == tuple)
-        )
+        is_linestring = df_all_feature["lonlat"].apply(
+            lambda x: (len(x) >= 2) and (type(x[0]) == tuple))
         df_all_feature = df_all_feature[is_linestring]
 
     df_all_feature = df_all_feature[df_all_feature.columns.intersection(
@@ -534,7 +537,9 @@ def process_data(
 
     # parallel download of data if parallel download is enabled
     if nprocesses > 1:
-        _logger.info(f"Parallel raw osm data (pbf files) download with {nprocesses} threads")
+        _logger.info(
+            f"Parallel raw osm data (pbf files) download with {nprocesses} threads"
+        )
         parallel_download_pbf(country_list, nprocesses, update, verify)
 
     # loop the request for each feature
@@ -617,15 +622,18 @@ def create_country_list(input, iso_coding=True):
         When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
         When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
         """
-        if iso_coding:  # if country lists are in iso coding, then check if they are 2-string
+        if (
+                iso_coding
+        ):  # if country lists are in iso coding, then check if they are 2-string
             # 2-code countries
             ret_list = [c for c in c_list if len(c) == 2]
 
             # check if elements have been removed and return a working if so
             if len(ret_list) < len(c_list):
-                _logger.warning("Specified country list contains the following non-iso codes: " + 
-                    ", ".join(list(set(c_list) - set(ret_list))))
-            
+                _logger.warning(
+                    "Specified country list contains the following non-iso codes: "
+                    + ", ".join(list(set(c_list) - set(ret_list))))
+
             return ret_list
         else:
             return c_list  # [c for c in c_list if c not in iso_to_geofk_dict]
@@ -682,7 +690,9 @@ def country_list_to_geofk(country_list):
         Example ["NG","ZA"]
     """
 
-    full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
+    full_codes_list = [
+        convert_iso_to_geofk(c_code) for c_code in set(country_list)
+    ]
 
     return full_codes_list
 
