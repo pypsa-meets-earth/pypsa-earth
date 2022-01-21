@@ -31,7 +31,7 @@ from config_osm_data import continents
 from config_osm_data import feature_category
 from config_osm_data import feature_columns
 from config_osm_data import iso_to_geofk_dict
-from config_osm_data import world
+from config_osm_data import world_geofk
 from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
@@ -54,8 +54,8 @@ _logger.setLevel(logging.INFO)
 
 
 def getContinentCountry(code):
-    for continent in world:
-        country = world[continent].get(code, 0)
+    for continent in world_geofk:
+        country = world_geofk[continent].get(code, 0)
         if country:
             return continent, country
     return continent, country
@@ -604,12 +604,12 @@ def create_country_list(input, iso_coding=True):
 
         # extract countries in world
         if value1 == "world":
-            for continent in world.keys():
-                codes_list.extend(list(world[continent]))
+            for continent in world_geofk.keys():
+                codes_list.extend(list(world_geofk[continent]))
 
         # extract countries in continent
-        elif value1 in world.keys():
-            codes_list = list(world[value1])
+        elif value1 in world_geofk.keys():
+            codes_list = list(world_geofk[value1])
 
         # extract countries in regions
         elif value1 in continent_regions.keys():
