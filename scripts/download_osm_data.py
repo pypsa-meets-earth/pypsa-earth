@@ -63,12 +63,15 @@ def getContinentCountry(code):
     return continent, country
 
 # get continent according to GeoFabrik naming
+
+
 def getGeofkContinentCountry(code):
     for continent in world_geofk:
         country = world_geofk[continent].get(code, 0)
         if country:
             return continent, country
     return continent, country
+
 
 def download_pbf(country_code, update, verify):
     """
@@ -88,7 +91,8 @@ def download_pbf(country_code, update, verify):
 
     """
     continent, country_name = getContinentCountry(country_code)
-    continent_geofk, country_name_geofk = getGeofkContinentCountry(country_code)
+    continent_geofk, country_name_geofk = getGeofkContinentCountry(
+        country_code)
     # Filename for geofabrik
     geofabrik_filename = f"{country_name_geofk}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
@@ -267,7 +271,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
 
     _logger.info(
         f"Check files: {PBF_inputfile}, {JSON_outputfile}"
-    ) 
+    )
 
     Data, Elements = run_filter(
         elementname,
@@ -454,6 +458,8 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
 # NB country_list consists of ISO codes
 
 # Auxiliary function to initialize the parallel data download
+
+
 def _init_process_pop(update_, verify_):
     global update, verify
     update, verify = update_, verify_

@@ -411,7 +411,8 @@ continent_regions = {
         "ME",
         "MK",
     ],
-    "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD", "LI"],  # WESTREN EUROPE
+    # WESTREN EUROPE
+    "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD", "LI"],
     "SER": ["ES", "IT", "PT"],  # SOUTHERN EUROPAIN REGION
     # African regions
     "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
