@@ -92,13 +92,18 @@ def download_pbf(country_code, update, verify, logging=True):
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True, verify=False) as r:
-            with open(PBF_inputfile, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+
+            if r.status_code == 200:
+                # url properly found, thus execute as expected
+                with open(PBF_inputfile, "wb") as f:
+                    shutil.copyfileobj(r.raw, f)
+            else:
+                # error status code: file not found
+                _logger.error(f"Error code: {r.status_code}. File {geofabrik_filename} not downloaded from {geofabrik_url}")
 
     if verify is True:
         if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
-            if logging:
-                _logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
+            _logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
             if os.path.exists(PBF_inputfile):
                 os.remove(PBF_inputfile)
 
@@ -438,7 +443,7 @@ def _init_process_pop(update_, verify_):
 
 # Auxiliary function to download the data
 def _process_func_pop(c_code):
-    download_pbf(c_code, update, verify, False)
+    download_pbf(c_code, update, verify, logging=False)
 
 
 def parallel_download_pbf(country_list,
@@ -495,7 +500,7 @@ def process_data(
 
     # parallel download of data if parallel download is enabled
     if nprocesses > 1:
-        _logger.info(f"Parallel pbf download with {nprocesses} threads")
+        _logger.info(f"Parallel raw osm data (pbf files) download with {nprocesses} threads")
         parallel_download_pbf(country_list, nprocesses, update, verify)
 
     # loop the request for each feature
