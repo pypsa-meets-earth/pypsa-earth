@@ -264,7 +264,7 @@ world_iso = {
         "PH": "philippines",
         "QA": "qatar",
         "SA": "saudi-arabia",
-        "SG": "singapore", # merged with MY
+        "SG": "singapore",  # merged with MY
         "LK": "sri-lanka",
         "SY": "syria",
         "TW": "taiwan",
