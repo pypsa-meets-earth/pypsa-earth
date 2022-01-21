@@ -109,7 +109,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
         dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
         index=new_links.index[found_i],
     ).sort_values(by="D")
-            [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
 
 
 def _load_buses_from_osm():
@@ -136,15 +136,19 @@ def _load_buses_from_osm():
 
     return buses
 
+
 def _set_links_underwater_fraction(n):
-    if n.links.empty: return
+    if n.links.empty:
+        return
 
     if not hasattr(n.links, 'geometry'):
         n.links['underwater_fraction'] = 0.
     else:
-        offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
+        offshore_shape = gpd.read_file(
+            snakemake.input.offshore_shapes).unary_union
         links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
-        n.links['underwater_fraction'] = links.intersection(offshore_shape).length / links.length
+        n.links['underwater_fraction'] = links.intersection(
+            offshore_shape).length / links.length
 
 
 def _load_lines_from_osm(buses):
