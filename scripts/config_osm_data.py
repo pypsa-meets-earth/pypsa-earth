@@ -480,6 +480,13 @@ continent_regions = {
 # Geofabrik and iso norm deviate for some countries and domains
 
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
+# This dictionary instructs the script download_osm_data about how to successfully download data
+# from countries that are aggregated into osm.
+# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SNGM
+#   That's the reason why in this dictionary they can be found the following entries:
+#       "SN": "SNGM"
+#       "GM": "SNGM"
+#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SNGM" file
 iso_to_geofk_dict = {
     "EH": "MA",  # Western Sahara -> Morocco
     "SN": "SNGM",  # Senegal -> Senegal-Gambia
