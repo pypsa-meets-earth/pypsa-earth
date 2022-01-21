@@ -81,10 +81,18 @@ def download_pbf(country_code, update, verify, logging=True):
     continent, country_name = getContinentCountry(country_code)
     # Filename for geofabrik
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
-    # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
-    geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
+
+    # Specify the url depending on the requested element, whether it is a continent or a region
+    if continent==country_name:
+        # Example continent-specific data: https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
+        geofabrik_url = f"https://download.geofabrik.de/{geofabrik_filename}"
+    else:
+        # Example country- or sub-region-specific data: https://download.geofabrik.de/africa-latest.osm.pbf
+        geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
+    
+    # Filepath of the pbf
     PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
-                                 geofabrik_filename)  # Input filepath
+                                 geofabrik_filename)
 
     if not os.path.exists(PBF_inputfile):
         if logging:
@@ -370,6 +378,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     if simplified is True:
         df_way["geometry"] = df_way["geometry"].apply(
             lambda x: x.simplify(0.005, preserve_topology=False))
+
     gdf = gpd.GeoDataFrame(df_way,
                            geometry=[LineString(x) for x in df_way.lonlat],
                            crs="EPSG:4326")
