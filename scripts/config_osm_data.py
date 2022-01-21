@@ -159,7 +159,7 @@ continents = {
     # 'AN': 'antarctica'
 }
 
-world = {
+world_iso = {
     "africa": {
         "DZ": "algeria",
         "AO": "angola",
@@ -290,7 +290,7 @@ world = {
         "NC": "new-caledonia",
         "NZ": "new-zealand",
         "NU": "niue",
-        "NF": "norfolk island",
+        # "NF": "norfolk island",
         # 'MP': 'northern mariana islands',
         "PW": "palau",
         "PG": "papua-new-guinea",
@@ -314,7 +314,7 @@ world = {
         "CZ": "czech-republic",
         "DK": "denmark",
         "EE": "estonia",
-        "FO": "faroe islands",
+        # "FO": "faroe islands",
         "FI": "finland",
         "FR": "france",
         "DE": "germany",
