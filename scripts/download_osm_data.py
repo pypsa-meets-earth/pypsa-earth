@@ -31,6 +31,7 @@ from config_osm_data import feature_category
 from config_osm_data import feature_columns
 from config_osm_data import iso_to_geofk_dict
 from config_osm_data import world
+from config_osm_data import world_geofk
 from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
