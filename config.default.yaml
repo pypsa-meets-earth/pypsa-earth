@@ -131,25 +131,64 @@ renewable:
       turbine: Vestas_V112_3MW
     capacity_per_sqkm: 3 # conservative, ScholzPhd Tab 4.3.1: 10MW/km^2
     # correction_factor: 0.93
-    corine:
-      # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
-      #  development of the REMix model and application for Europe. ( p.42 / p.28)
-      grid_codes: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                   24, 25, 26, 27, 28, 29, 31, 32]
+    copernicus:
+      grid_codes: [20,30,40,60,100,111,112,113,114,115,116,121,122,123,124,125,126] # maybe also: 0
+      distance_to_grid_codes: [50]
       distance: 1000
-      distance_grid_codes: [1, 2, 3, 4, 5, 6]
-    natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
-  offwind-ac:
-    cutout: africa-2013-era5
+    # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
+    #  development of the REMix model and application for Europe. ( p.42 / p.28)
+    # grid_codes are explained in the data/bundle/corine/legend/clc_legend.xlsx file
+    corine:
+      grid_codes: [
+        12   , # CLC_CODE: 211 (Agricultural areas->Arable land->Non-irrigated arable land)
+        13   , # CLC_CODE: 212 (Agricultural areas->Arable land->Permanently irrigated land)
+        14   , # CLC_CODE: 213 (Agricultural areas->Arable land->Rice fields)
+        15   , # CLC_CODE: 221 (Agricultural areas->Permanent crops->Vineyards)
+        16   , # CLC_CODE: 222 (Agricultural areas->Permanent crops->Fruit trees and berry plantations)
+        17   , # CLC_CODE: 223 (Agricultural areas->Permanent crops->Olive groves)
+        18   , # CLC_CODE: 231 (Agricultural areas->Pastures->Pastures)
+        19   , # CLC_CODE: 241 (Agricultural areas->Heterogeneous agricultural areas->Annual crops associated with permanent crops)
+        20   , # CLC_CODE: 242 (Agricultural areas->Heterogeneous agricultural areas->Complex cultivation patterns)
+        21   , # CLC_CODE: 243 (Agricultural areas->Heterogeneous agricultural areas->Land principally occupied by agriculture, with significant areas of natural vegetation)
+        22   , # CLC_CODE: 244 (Agricultural areas->Heterogeneous agricultural areas->Agro-forestry areas)
+        23   , # CLC_CODE: 311 (Forest and semi natural areas->Forests->Broad-leaved forest)
+        24   , # CLC_CODE: 312 (Forest and semi natural areas->Forests->Coniferous forest)
+        25   , # CLC_CODE: 313 (Forest and semi natural areas->Forests->Mixed forest)
+        26   , # CLC_CODE: 321 (Forest and semi natural areas->Scrub and/or herbaceous vegetation associations->Natural grasslands)
+        27   , # CLC_CODE: 322 (Forest and semi natural areas->Scrub and/or herbaceous vegetation associations->Moors and heathland)
+        28   , # CLC_CODE: 323 (Forest and semi natural areas->Scrub and/or herbaceous vegetation associations->Sclerophyllous vegetation)
+        29   , # CLC_CODE: 324 (Forest and semi natural areas->Scrub and/or herbaceous vegetation associations->Transitional woodland-shrub)
+        31   , # CLC_CODE: 332 (Forest and semi natural areas->Open spaces with little or no vegetation->Bare rocks)
+        32   , # CLC_CODE: 333 (Forest and semi natural areas->Open spaces with little or no vegetation->Sparsely vegetated areas)
+      ]
+      # Distance in m to keep from <distance_grid_codes>
+      distance: 1000
+      # CLC grid_codes from which to keep the distance
+      distance_grid_codes: [
+        1   , # CLC_CODE: 111 (Artificial surfaces->Urban fabric->Continuous urban fabric)
+        2   , # CLC_CODE: 112 (Artificial surfaces->Urban fabric->Discontinuous urban fabric)
+        3   , # CLC_CODE: 121 (Artificial surfaces->Industrial, commercial and transport units->Industrial or commercial units)
+        4   , # CLC_CODE: 122 (Artificial surfaces->Industrial, commercial and transport units->Road and rail networks and associated land)
+        5   , # CLC_CODE: 123 (Artificial surfaces->Industrial, commercial and transport units->Port areas)
+        6   , # CLC_CODE: 124 (Artificial surfaces->Industrial, commercial and transport units->Airports)
+      ]
+     natura: true
+     potential: simple # or conservative
+     clip_p_max_pu: 1.e-2
+     extendable: true
+   offwind-ac:
+     cutout: africa-2013-era5
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
     capacity_per_sqkm: 2
     # correction_factor: 0.93
-    corine: [44, 255]
+    copernicus:
+      grid_codes: [200] # maybe also: 0
+    corine: [
+      44   , # CLC_CODE: 523 (Water bodies->Marine waters->Sea and ocean)
+      255  , # CLC_CODE: 990 (UNCLASSIFIED->UNCLASSIFIED->UNCLASSIFIED)
+    ]
     natura: true
     max_depth: 50
     max_shore_distance: 30000
@@ -164,7 +203,12 @@ renewable:
     # ScholzPhd Tab 4.3.1: 10MW/km^2
     capacity_per_sqkm: 3
     # correction_factor: 0.93
-    corine: [44, 255]
+    copernicus:
+      grid_codes: [200] # maybe also: 0
+    corine: [
+      44   , # CLC_CODE: 523 (Water bodies->Marine waters->Sea and ocean)
+      255  , # CLC_CODE: 990 (UNCLASSIFIED->UNCLASSIFIED->UNCLASSIFIED)
+    ]
     natura: true
     max_depth: 50
     min_shore_distance: 30000
@@ -176,7 +220,7 @@ renewable:
     resource:
       method: pv
       panel: CSi
-      orientation:
+      orientation: #TODO: should be latitude optimal
         slope: 35.
         azimuth: 180.
     capacity_per_sqkm: 1.7 # ScholzPhd Tab 4.3.1: 170 MW/km^2
@@ -186,8 +230,33 @@ renewable:
     # sector: The economic potential of photovoltaics and concentrating solar
     # power." Applied Energy 135 (2014): 704-720.
     correction_factor: 0.854337
-    corine: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-             14, 15, 16, 17, 18, 19, 20, 26, 31, 32]
+    copernicus:
+      grid_codes: [20, 30, 40, 50, 60, 70, 80] # maybe also: 0, 90, 200
+    corine: [
+      1   , # CLC_CODE: 111 (Artificial surfaces->Urban fabric->Continuous urban fabric)
+      2   , # CLC_CODE: 112 (Artificial surfaces->Urban fabric->Discontinuous urban fabric)
+      3   , # CLC_CODE: 121 (Artificial surfaces->Industrial, commercial and transport units->Industrial or commercial units)
+      4   , # CLC_CODE: 122 (Artificial surfaces->Industrial, commercial and transport units->Road and rail networks and associated land)
+      5   , # CLC_CODE: 123 (Artificial surfaces->Industrial, commercial and transport units->Port areas)
+      6   , # CLC_CODE: 124 (Artificial surfaces->Industrial, commercial and transport units->Airports)
+      7   , # CLC_CODE: 131 (Artificial surfaces->Mine, dump and construction sites->Mineral extraction sites)
+      8   , # CLC_CODE: 132 (Artificial surfaces->Mine, dump and construction sites->Dump sites)
+      9   , # CLC_CODE: 133 (Artificial surfaces->Mine, dump and construction sites->Construction sites)
+      10  , # CLC_CODE: 141 (Artificial surfaces->Artificial, non-agricultural vegetated areas->Green urban areas)
+      11  , # CLC_CODE: 142 (Artificial surfaces->Artificial, non-agricultural vegetated areas->Sport and leisure facilities)
+      12  , # CLC_CODE: 211 (Agricultural areas->Arable land->Non-irrigated arable land)
+      13  , # CLC_CODE: 212 (Agricultural areas->Arable land->Permanently irrigated land)
+      14  , # CLC_CODE: 213 (Agricultural areas->Arable land->Rice fields)
+      15  , # CLC_CODE: 221 (Agricultural areas->Permanent crops->Vineyards)
+      16  , # CLC_CODE: 222 (Agricultural areas->Permanent crops->Fruit trees and berry plantations)
+      17  , # CLC_CODE: 223 (Agricultural areas->Permanent crops->Olive groves)
+      18  , # CLC_CODE: 231 (Agricultural areas->Pastures->Pastures)
+      19  , # CLC_CODE: 241 (Agricultural areas->Heterogeneous agricultural areas->Annual crops associated with permanent crops)
+      20  , # CLC_CODE: 242 (Agricultural areas->Heterogeneous agricultural areas->Complex cultivation patterns)
+      26  , # CLC_CODE: 321 (Forest and semi natural areas->Scrub and/or herbaceous vegetation associations->Natural grasslands)
+      31  , # CLC_CODE: 332 (Forest and semi natural areas->Open spaces with little or no vegetation->Bare rocks)
+      32  , # CLC_CODE: 333 (Forest and semi natural areas->Open spaces with little or no vegetation->Sparsely vegetated areas)
+    ]
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
