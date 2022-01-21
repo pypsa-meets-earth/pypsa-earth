@@ -737,5 +737,6 @@ world_geofk = {
 
 world_countries = {
     country_2D: country_name
-    for d in world_geofk.values() for (country_2D, country_name) in d.items()
+    for d in world_geofk.values()
+    for (country_2D, country_name) in d.items()
 }

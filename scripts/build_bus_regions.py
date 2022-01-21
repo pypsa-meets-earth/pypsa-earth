@@ -72,10 +72,7 @@ def save_to_geojson(df, fn):
             pass
 
 
-def custom_voronoi_partition_pts(points,
-                                 outline,
-                                 add_bounds_shape=True,
-                                 multiplier=5):
+def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
     """
     Compute the polygons of a voronoi partition of `points` within the
     polygon `outline`
@@ -121,17 +118,20 @@ def custom_voronoi_partition_pts(points,
         # to avoid any network positions outside all Voronoi cells, append
         # the corners of a rectangle framing these points
         vor = Voronoi(
-            np.vstack((
-                points,
-                [
-                    [xmin - multiplier * xspan, ymin - multiplier * yspan],
-                    [xmin - multiplier * xspan, ymax + multiplier * yspan],
-                    [xmax + multiplier * xspan, ymin - multiplier * yspan],
-                    [xmax + multiplier * xspan, ymax + multiplier * yspan],
-                ],
-            )))
+            np.vstack(
+                (
+                    points,
+                    [
+                        [xmin - multiplier * xspan, ymin - multiplier * yspan],
+                        [xmin - multiplier * xspan, ymax + multiplier * yspan],
+                        [xmax + multiplier * xspan, ymin - multiplier * yspan],
+                        [xmax + multiplier * xspan, ymax + multiplier * yspan],
+                    ],
+                )
+            )
+        )
 
-        polygons_arr = np.empty((len(points), ), "object")
+        polygons_arr = np.empty((len(points),), "object")
         for i in range(len(points)):
             poly = Polygon(vor.vertices[vor.regions[vor.point_region[i]]])
 
@@ -146,28 +146,31 @@ def custom_voronoi_partition_pts(points,
 
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
-
     def locate_bus(coords):
         try:
-            return gadm_shapes[gadm_shapes.contains(
-                Point(coords["x"], coords["y"]))].item()
+            return gadm_shapes[
+                gadm_shapes.contains(Point(coords["x"], coords["y"]))
+            ].item()
         except ValueError:
             # return 'not_found'
-            gadm_shapes[gadm_shapes.contains(Point(-9, 32))].item(
-            )  # TODO !!Fatal!! assigning not found to a random shape
+            gadm_shapes[
+                gadm_shapes.contains(Point(-9, 32))
+            ].item()  # TODO !!Fatal!! assigning not found to a random shape
 
     def get_id(coords):
         try:
-            return gadm_shapes[gadm_shapes.contains(
-                Point(coords["x"], coords["y"]))].index.item()
+            return gadm_shapes[
+                gadm_shapes.contains(Point(coords["x"], coords["y"]))
+            ].index.item()
         except ValueError:
             # return 'not_found'
-            gadm_shapes[gadm_shapes.contains(Point(-9, 32))].index.item(
-            )  # TODO !!Fatal!! assigning not found to a random shape
+            gadm_shapes[
+                gadm_shapes.contains(Point(-9, 32))
+            ].index.item()  # TODO !!Fatal!! assigning not found to a random shape
 
     sas = []
     sas.append(onshore_locs[["x", "y"]].apply(locate_bus, axis=1).values)
-    ss = numpy.empty((len(sas), ), "object")
+    ss = numpy.empty((len(sas),), "object")
     ss[:] = sas
     regions = onshore_locs[["x", "y"]].apply(locate_bus, axis=1)
     ids = onshore_locs[["x", "y"]].apply(get_id, axis=1)
@@ -186,12 +189,15 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
 
-    country_shapes = gpd.read_file(
-        snakemake.input.country_shapes).set_index("name")["geometry"]
-    offshore_shapes = gpd.read_file(
-        snakemake.input.offshore_shapes).set_index("name")["geometry"]
-    gadm_shapes = gpd.read_file(
-        snakemake.input.gadm_shapes).set_index("GADM_ID")["geometry"]
+    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
+        "geometry"
+    ]
+    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes).set_index("name")[
+        "geometry"
+    ]
+    gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")[
+        "geometry"
+    ]
 
     onshore_regions = []
     offshore_regions = []
@@ -210,17 +216,21 @@ if __name__ == "__main__":
             shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
         else:
             onshore_geometry = custom_voronoi_partition_pts(
-                onshore_locs.values, onshore_shape)
+                onshore_locs.values, onshore_shape
+            )
             shape_id = 0  # Not used
         onshore_regions.append(
-            gpd.GeoDataFrame({
-                "name": onshore_locs.index,
-                "x": onshore_locs["x"],
-                "y": onshore_locs["y"],
-                "geometry": onshore_geometry,
-                "country": country,
-                "shape_id": shape_id,
-            }))
+            gpd.GeoDataFrame(
+                {
+                    "name": onshore_locs.index,
+                    "x": onshore_locs["x"],
+                    "y": onshore_locs["y"],
+                    "geometry": onshore_geometry,
+                    "country": country,
+                    "shape_id": shape_id,
+                }
+            )
+        )
 
         # These two logging could be commented out
         if country not in offshore_shapes.index:
@@ -233,25 +243,27 @@ if __name__ == "__main__":
             _logger.warning(f"No off-shore substations found for {country}")
             continue
         else:
-            offshore_locs = n.buses.loc[c_b & n.buses.substation_off,
-                                        ["x", "y"]]
+            offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
             shape_id = 0  # Not used
             offshore_geometry = custom_voronoi_partition_pts(
-                offshore_locs.values, offshore_shape)
-            offshore_regions_c = gpd.GeoDataFrame({
-                "name": offshore_locs.index,
-                "x": offshore_locs["x"],
-                "y": offshore_locs["y"],
-                "geometry": offshore_geometry,
-                "country": country,
-                "shape_id": shape_id,
-            })
-            offshore_regions_c = offshore_regions_c.loc[
-                offshore_regions_c.area > 1e-2]
+                offshore_locs.values, offshore_shape
+            )
+            offshore_regions_c = gpd.GeoDataFrame(
+                {
+                    "name": offshore_locs.index,
+                    "x": offshore_locs["x"],
+                    "y": offshore_locs["y"],
+                    "geometry": offshore_geometry,
+                    "country": country,
+                    "shape_id": shape_id,
+                }
+            )
+            offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
             offshore_regions.append(offshore_regions_c)
 
-    save_to_geojson(pd.concat(onshore_regions, ignore_index=True),
-                    snakemake.output.regions_onshore)
+    save_to_geojson(
+        pd.concat(onshore_regions, ignore_index=True), snakemake.output.regions_onshore
+    )
     if len(offshore_regions) != 0:
         offshore_regions = pd.concat(offshore_regions, ignore_index=True)
     save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
