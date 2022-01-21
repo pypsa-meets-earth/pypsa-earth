@@ -370,6 +370,7 @@ world_iso = {
         "GF": "french-guyane",
         "GY": "guyane",
         "PE": "peru",
+        "PY": "paraguay",
         "SR": "suriname",
         "UY": "uruguay",
         "VE": "venezuela",
