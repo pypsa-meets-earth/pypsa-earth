@@ -692,6 +692,7 @@ world_geofk = {
         "SOFD": "south-fed-district",
         "URDF": "ural-fed-district",
         "VOFD": "volga-fed-district",
+        "RU": "russia",
     },
     "north-america": {
         "CA": "canada",
@@ -708,6 +709,7 @@ world_geofk = {
         "EC": "ecuador",
         "PE": "peru",
         "SR": "suriname",
+        "PY": "paraguay",
         "UY": "uruguay",
         "VE": "venezuela",
     },
