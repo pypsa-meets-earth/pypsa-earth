@@ -91,37 +91,39 @@ def _get_country(df):
 
 
 def _find_closest_links(links, new_links, distance_upper_bound=1.5):
-    treecoords = np.asarray([
-        np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten()
-        for s in links.geometry
-    ])
-    querycoords = np.vstack([
-        new_links[["x1", "y1", "x2", "y2"]],
-        new_links[["x2", "y2", "x1", "y1"]]
-    ])
+    treecoords = np.asarray(
+        [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten() for s in links.geometry]
+    )
+    querycoords = np.vstack(
+        [new_links[["x1", "y1", "x2", "y2"]], new_links[["x2", "y2", "x1", "y1"]]]
+    )
     tree = sp.spatial.KDTree(treecoords)
-    dist, ind = tree.query(querycoords,
-                           distance_upper_bound=distance_upper_bound)
+    dist, ind = tree.query(querycoords, distance_upper_bound=distance_upper_bound)
     found_b = ind < len(links)
     found_i = np.arange(len(new_links) * 2)[found_b] % len(new_links)
 
-    return (pd.DataFrame(
-        dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
-        index=new_links.index[found_i],
-    ).sort_values(by="D")
-        [lambda ds: ~ds.index.duplicated(keep="first")].sort_index()["i"])
+    return (
+        pd.DataFrame(
+            dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
+            index=new_links.index[found_i],
+        )
+        .sort_values(by="D")[lambda ds: ~ds.index.duplicated(keep="first")]
+        .sort_index()["i"]
+    )
 
 
 def _load_buses_from_osm():
-    buses = (_read_csv_nafix(
-        snakemake.input.osm_buses).set_index("bus_id").drop(
-            ["station_id"], axis=1).rename(columns=dict(voltage="v_nom")))
+    buses = (
+        _read_csv_nafix(snakemake.input.osm_buses)
+        .set_index("bus_id")
+        .drop(["station_id"], axis=1)
+        .rename(columns=dict(voltage="v_nom"))
+    )
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
     buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
-    buses["under_construction"] = buses["under_construction"].fillna(
-        False).astype(bool)
+    buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
     # TODO: Drop NAN maybe somewhere else?
@@ -130,9 +132,13 @@ def _load_buses_from_osm():
     # Rebase all voltages to three levels
     buses = _rebase_voltage_to_config(buses)
 
-    logger.info("Removing buses with voltages {}".format(
-        pd.Index(buses.v_nom.unique()).dropna().difference(
-            snakemake.config["electricity"]["voltages"])))
+    logger.info(
+        "Removing buses with voltages {}".format(
+            pd.Index(buses.v_nom.unique())
+            .dropna()
+            .difference(snakemake.config["electricity"]["voltages"])
+        )
+    )
 
     return buses
 
@@ -141,33 +147,35 @@ def _set_links_underwater_fraction(n):
     if n.links.empty:
         return
 
-    if not hasattr(n.links, 'geometry'):
-        n.links['underwater_fraction'] = 0.
+    if not hasattr(n.links, "geometry"):
+        n.links["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(
-            snakemake.input.offshore_shapes).unary_union
+        offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
         links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
-        n.links['underwater_fraction'] = links.intersection(
-            offshore_shape).length / links.length
+        n.links["underwater_fraction"] = (
+            links.intersection(offshore_shape).length / links.length
+        )
 
 
 def _load_lines_from_osm(buses):
-    lines = (_read_csv_nafix(
-        snakemake.input.osm_lines,
-        dtype=dict(
-            line_id="str",
-            bus0="str",
-            bus1="str",
-            underground="bool",
-            under_construction="bool",
-        ),
-    ).set_index("line_id").rename(
-        columns=dict(voltage="v_nom", circuits="num_parallel")))
+    lines = (
+        _read_csv_nafix(
+            snakemake.input.osm_lines,
+            dtype=dict(
+                line_id="str",
+                bus0="str",
+                bus1="str",
+                underground="bool",
+                under_construction="bool",
+            ),
+        )
+        .set_index("line_id")
+        .rename(columns=dict(voltage="v_nom", circuits="num_parallel"))
+    )
 
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
-    lines = lines.loc[:, ~lines.columns.str.contains(
-        "^Unnamed")]  # remove unnamed col
+    lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
     lines = _rebase_voltage_to_config(lines)  # rebase voltage to config inputs
     # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
@@ -188,13 +196,18 @@ def _set_electrical_parameters_lines(lines):
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
-    n.lines["s_nom"] = (np.sqrt(3) * n.lines["type"].map(n.line_types.i_nom) *
-                        n.lines["v_nom"] * n.lines.num_parallel)
+    n.lines["s_nom"] = (
+        np.sqrt(3)
+        * n.lines["type"].map(n.line_types.i_nom)
+        * n.lines["v_nom"]
+        * n.lines.num_parallel
+    )
 
 
 def _remove_dangling_branches(branches, buses):
-    return pd.DataFrame(branches.loc[branches.bus0.isin(buses.index)
-                                     & branches.bus1.isin(buses.index)])
+    return pd.DataFrame(
+        branches.loc[branches.bus0.isin(buses.index) & branches.bus1.isin(buses.index)]
+    )
 
 
 def _set_countries_and_substations(n):
@@ -202,11 +215,14 @@ def _set_countries_and_substations(n):
     buses = n.buses
 
     countries = snakemake.config["countries"]
-    country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
-        "name")["geometry"].set_crs(4326))
+    country_shapes = (
+        gpd.read_file(snakemake.input.country_shapes)
+        .set_index("name")["geometry"]
+        .set_crs(4326)
+    )
     offshore_shapes = unary_union(
-        gpd.read_file(
-            snakemake.input.offshore_shapes)["geometry"].set_crs(4326))
+        gpd.read_file(snakemake.input.offshore_shapes)["geometry"].set_crs(4326)
+    )
 
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
@@ -219,9 +235,9 @@ def _set_countries_and_substations(n):
 
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
-        buses["v_nom"] >=
-        snakemake.config["base_network"]["min_voltage_substation_offshore"] /
-        1000)
+        buses["v_nom"]
+        >= snakemake.config["base_network"]["min_voltage_substation_offshore"] / 1000
+    )
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
 
@@ -243,22 +259,29 @@ def _set_countries_and_substations(n):
         n.transformers.drop("length", axis=1, inplace=True)
 
         for b in n.buses.index[c_tag_nan_b]:
-            df = (pd.DataFrame(
-                dict(pathlength=nx.single_source_dijkstra_path_length(
-                    graph, b, cutoff=200))).join(n.buses.country).dropna())
+            df = (
+                pd.DataFrame(
+                    dict(
+                        pathlength=nx.single_source_dijkstra_path_length(
+                            graph, b, cutoff=200
+                        )
+                    )
+                )
+                .join(n.buses.country)
+                .dropna()
+            )
             assert (
                 not df.empty
-            ), "No buses with defined country within 200km of bus `{}`".format(
-                b)
-            n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(),
-                                              "country"]
+            ), "No buses with defined country within 200km of bus `{}`".format(b)
+            n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(), "country"]
 
         logger.warning(
             "{} buses are not in any country or offshore shape,"
             " {} have been assigned from the tag of the entsoe map,"
             " the rest from the next bus in terms of pathlength.".format(
-                c_nan_b.sum(),
-                c_nan_b.sum() - c_tag_nan_b.sum()))
+                c_nan_b.sum(), c_nan_b.sum() - c_tag_nan_b.sum()
+            )
+        )
 
     return buses
 
@@ -276,17 +299,20 @@ def _rebase_voltage_to_config(component):
     ----------
     component : dataframe
     """
-    v_min = (snakemake.config["base_network"]["min_voltage_rebase_voltage"] /
-             1000)  # min. filtered value in dataset
+    v_min = (
+        snakemake.config["base_network"]["min_voltage_rebase_voltage"] / 1000
+    )  # min. filtered value in dataset
     v_low = snakemake.config["electricity"]["voltages"][0]
     v_mid = snakemake.config["electricity"]["voltages"][1]
     v_up = snakemake.config["electricity"]["voltages"][2]
     v_low_mid = (v_mid - v_low) / 2 + v_low  # between low and mid voltage
     v_mid_up = (v_up - v_mid) / 2 + v_mid  # between mid and upper voltage
-    component.loc[(v_min <= component["v_nom"]) &
-                  (component["v_nom"] < v_low_mid), "v_nom"] = v_low
-    component.loc[(v_low_mid <= component["v_nom"]) &
-                  (component["v_nom"] < v_mid_up), "v_nom"] = v_mid
+    component.loc[
+        (v_min <= component["v_nom"]) & (component["v_nom"] < v_low_mid), "v_nom"
+    ] = v_low
+    component.loc[
+        (v_low_mid <= component["v_nom"]) & (component["v_nom"] < v_mid_up), "v_nom"
+    ] = v_mid
     component.loc[v_mid_up <= component["v_nom"], "v_nom"] = v_up
 
     return component
