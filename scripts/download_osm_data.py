@@ -416,6 +416,14 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
     if not os.path.exists(path_file_geojson):
         os.makedirs(os.path.dirname(path_file_geojson),
                     exist_ok=True)  # create raw directory
+    
+    # remove non-line elements
+    if feature_category[feature] == "way":
+        # check geometry with multiple points: at least two needed to draw a line
+        is_linestring = df_all_feature["lonlat"].apply(lambda x: 
+            (len(x) >= 2) and (type(x[0]) == tuple)
+        )
+        df_all_feature = df_all_feature[is_linestring]
 
     df_all_feature = df_all_feature[df_all_feature.columns.intersection(
         set(columns_feature))]
