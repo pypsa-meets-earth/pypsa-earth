@@ -66,16 +66,26 @@ if config['enable'].get('retrieve_databundle', True):
         log: "logs/retrieve_databundle.log"
         script: 'scripts/retrieve_databundle_light.py'
 
-if config['enable'].get('download_osm_data', True):
-    rule download_osm_data:
-        output:
-            cables="data/raw/africa_all_raw_cables.geojson",
-            generators="data/raw/africa_all_raw_generators.geojson",
-            generators_csv="data/raw/africa_all_raw_generators.csv",
-            lines="data/raw/africa_all_raw_lines.geojson",
-            substations="data/raw/africa_all_raw_substations.geojson",
-        log: "logs/download_osm_data.log"
-        script: "scripts/download_osm_data.py"
+rule download_osm_in_region:
+    output:
+        cables="data/raw/test_area_raw_cables.geojson",
+        generators="data/raw/test_area_raw_generators.geojson",
+        generators_csv="data/raw/test_area_raw_generators.csv",
+        lines="data/raw/test_area_raw_lines.geojson",
+        substations="data/raw/test_area_raw_substations.geojson",
+    log: "logs/download_osm_data.log"
+    script: "scripts/download_osm_data.py"
+
+# if config['enable'].get('download_osm_data', True):
+#     rule download_osm_data:
+#         output:
+#             cables="data/raw/" + cnt + "_raw_cables.geojson",
+#             generators="data/raw/" + cnt + "_raw_generators.geojson",
+#             generators_csv="data/raw/" + cnt + "_raw_generators.csv",
+#             lines="data/raw/" + cnt + "_raw_lines.geojson",
+#             substations="data/raw/" + cnt + "_raw_substations.geojson",
+#         log: "logs/download_osm_" + cnt + "_data.log"
+#         script: "scripts/download_osm_data.py"
 
 
 rule clean_osm_data:
