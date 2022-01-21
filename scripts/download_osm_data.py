@@ -52,6 +52,7 @@ _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
 
+# get continent according to ISO conventions
 def getContinentCountry(code):
     for continent in world:
         country = world[continent].get(code, 0)
