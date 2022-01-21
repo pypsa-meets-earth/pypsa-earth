@@ -69,7 +69,7 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON", schema=schema)
     else:
         # create empty file to avoid issues with snakemake
-        with os.open(fn, "w") as fp:
+        with open(fn, "w") as fp:
             pass
 
 
@@ -147,6 +147,7 @@ def custom_voronoi_partition_pts(points,
 
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
+
     def locate_bus(coords):
         try:
             return gadm_shapes[gadm_shapes.contains(

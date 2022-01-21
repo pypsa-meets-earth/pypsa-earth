@@ -34,6 +34,7 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
+# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 
 augmented_line_connection:
   add_to_snakefile: True  # If True, includes this rule to the workflow
@@ -228,7 +229,7 @@ costs:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: false
+    load_shedding: true
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
@@ -314,6 +315,7 @@ plotting:
     "HVDC links": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
+    "load": "#FF0000"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"
