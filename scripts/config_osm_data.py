@@ -461,9 +461,11 @@ continent_regions = {
         # XNC is missing for nothern cyprus
     ],  # YEMEN
     # FAR EASTREN AISIAN REGION
-    "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN"],
+    "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN", "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
-    "SEAR": ["LA", "TH", "KH", "VN", "PH", "MYSGBN", "ID"],
+    "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
+        "SG": "MY",  # Singapore -> Malaysia
+    "BN": "MY",  # Brunei -> Malaysia
     "CAR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
     # SOUTHERN AISIAN REGION
     "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
