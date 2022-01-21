@@ -59,6 +59,13 @@ def getContinentCountry(code):
             return continent, country
     return continent, country
 
+# get continent according to GeoFabrik naming
+def getGeofkContinentCountry(code):
+    for continent in world_geofk:
+        country = world_geofk[continent].get(code, 0)
+        if country:
+            return continent, country
+    return continent, country
 
 def download_pbf(country_code, update, verify):
     """
