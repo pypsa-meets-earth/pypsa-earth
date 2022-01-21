@@ -593,7 +593,7 @@ world_geofk = {
         "LA": "laos",
         "LB": "lebanon",
         "MY-SG-BN": "malaysia-singapore-brunei",  # Geofk shortcurt
-        "MV": "maldives",
+        # "MV": "maldives", # Islands
         "MN": "mongolia",
         "MM": "myanmar",
         "NP": "nepal",
