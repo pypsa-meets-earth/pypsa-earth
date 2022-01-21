@@ -91,12 +91,18 @@ def download_pbf(country_code, update, verify):
     geofabrik_filename = f"{country_name_geofk}-latest.osm.pbf"
     # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
     geofabrik_url = f"https://download.geofabrik.de/{continent_geofk}/{geofabrik_filename}"
+
     _logger.info(
         f" Trying {geofabrik_url} for {country_name}, iso-code: {country_code}, geofk_id: {country_name_geofk}, continent in GeoFk: {continent_geofk}"
     )
 
+    # NB a continent folder set according ISO while file name corresponds to OSM
     PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
                                  geofabrik_filename)  # Input filepath
+
+    _logger.info(
+        f" Input file {PBF_inputfile} "
+    )
 
     if not os.path.exists(PBF_inputfile):
         _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
@@ -256,6 +262,10 @@ def download_and_filter(feature, country_code, update=False, verify=False):
             ("power", feature),
         ],
     ]
+
+    _logger.info(
+        f"Check files: {PBF_inputfile}, {JSON_outputfile}"
+    ) 
 
     Data, Elements = run_filter(
         elementname,
@@ -439,7 +449,7 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
     gdf_feature.to_file(path_file_geojson,
                         driver="GeoJSON")  # Generate GeoJson
 
-
+# NB country_list consists of ISO codes
 def process_data(
     feature_list,
     country_list,
@@ -504,6 +514,7 @@ def process_data(
         )
 
 
+# returns a code according to a shortcut
 def create_country_list(input, iso_coding=True):
     """
     Create a country list for defined regions in config_osm_data.py
