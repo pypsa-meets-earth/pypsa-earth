@@ -68,7 +68,6 @@ import shapely.wkt
 import yaml
 from _helpers import _read_csv_nafix
 from _helpers import configure_logging
-from download_osm_data import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
@@ -198,7 +197,7 @@ def _set_countries_and_substations(n):
 
     buses = n.buses
 
-    countries = create_country_list(snakemake.config["countries"])
+    countries = snakemake.config["countries"]
     country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
         "name")["geometry"].set_crs(4326))
     offshore_shapes = unary_union(

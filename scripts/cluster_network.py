@@ -138,7 +138,6 @@ from add_electricity import load_costs
 from build_shapes import add_gdp_data
 from build_shapes import add_population_data
 from build_shapes import get_GADM_layer
-from download_osm_data import create_country_list
 from pypsa.networkclustering import _make_consense
 from pypsa.networkclustering import busmap_by_kmeans
 from pypsa.networkclustering import busmap_by_spectral_clustering
@@ -177,7 +176,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
     distribution_cluster = snakemake.config["cluster_options"][
         "distribute_cluster"]
-    countries_list = create_country_list(snakemake.config["countries"])
+    country_list = snakemake.config["countries"]
     year = snakemake.config["build_shape_options"]["year"]
     update = snakemake.config["build_shape_options"]["update_file"]
     out_logging = snakemake.config["build_shape_options"]["out_logging"]
@@ -199,7 +198,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         df_pop_c = gpd.read_file(
             snakemake.input.country_shapes).rename(columns={"name": "country"})
         add_population_data(df_pop_c,
-                            countries_list,
+                            country_list,
                             year,
                             update,
                             out_logging,
@@ -496,7 +495,7 @@ if __name__ == "__main__":
         "alternative_clustering"]
     gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
     focus_weights = snakemake.config.get("focus_weights", None)
-    country_list = create_country_list(snakemake.config["countries"])
+    country_list = snakemake.config["countries"]
 
     if alternative_clustering:
         renewable_carriers = pd.Index([
