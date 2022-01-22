@@ -501,6 +501,8 @@ iso_to_geofk_dict = {
     "QA": "GCC",  # Qatar -> Gulf Cooperation Council
     "AE": "GCC",  # United Arab Emirates -> Gulf Cooperation Council
     "OM": "GCC",  # Oman -> Gulf Cooperation Council
+    "PS": "IL-PL",
+    "IL": "IL-PL"
 }
 
 # Cyprus and Georgia -> European domain
