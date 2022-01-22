@@ -47,7 +47,6 @@ import numpy
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from download_osm_data import create_country_list
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 from vresutils.graph import voronoi_partition_pts
@@ -183,7 +182,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_bus_regions")
     configure_logging(snakemake)
 
-    countries = create_country_list(snakemake.config["countries"])
+    countries = snakemake.config["countries"]
 
     n = pypsa.Network(snakemake.input.base_network)
 
