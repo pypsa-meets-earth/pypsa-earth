@@ -58,7 +58,6 @@ tutorial = snakemake.config["tutorial"]
 host = "zenodo"  # hard coded for now. Could be a snakemake rule param./attri
 logger.info(f"Retrieving data from {host}.")
 
-
 if host == "zenodo":
     # BUNDLE 1
     destination = Path(f"{rootpath}/resources")
@@ -109,7 +108,6 @@ if host == "zenodo":
         url = "https://zenodo.org/record/5894926/files/africa-2013-era5.nc"
         progress_retrieve(url, file_path)
         logger.info(f"Download cutouts to '{destination}' from cloud '{url}'.")
-
 
 if host == "google":
     if tutorial == False:
