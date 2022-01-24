@@ -66,7 +66,7 @@ if host == "zenodo":
     progress_retrieve(url, file_path)
     logger.info(f"Extracting resources")
     with ZipFile(file_path, 'r') as zipObj:
-    # Extract all the contents of zip file in current directory
+        # Extract all the contents of zip file in current directory
         zipObj.extractall()
     os.remove(file_path)
     logger.info(f"Download data to '{destination}' from cloud '{url}'.")
@@ -87,7 +87,7 @@ if host == "zenodo":
         destination = Path(f"{rootpath}/cutouts")
         file_path = Path(f"{rootpath}/cutouts/africa-2013-era5-tutorial.nc")
         url = "https://zenodo.org/record/5894926/files/africa-2013-era5-tutorial.nc"
-        progress_retrieve(url, file_path)            
+        progress_retrieve(url, file_path)
         logger.info(f"Download cutouts to '{destination}' from cloud '{url}'.")
 
     elif tutorial == False:
