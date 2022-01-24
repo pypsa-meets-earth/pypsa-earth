@@ -239,6 +239,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>EmreYorat</b></sub>
         </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/stephenjlee">
+            <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
+            <br />
+            <sub><b>Stephen J Lee</b></sub>
+        </a>
     </td></tr>
 </table>
 <!-- readme: collaborators,contributors -end -->
