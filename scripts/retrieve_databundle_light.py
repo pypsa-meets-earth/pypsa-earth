@@ -47,6 +47,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from _helpers import mock_snakemake
+
         snakemake = mock_snakemake("retrieve_databundle_light")
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
@@ -65,7 +66,7 @@ if host == "zenodo":
     url = "https://zenodo.org/record/5894972/files/resources.zip"
     progress_retrieve(url, file_path)
     logger.info(f"Extracting resources")
-    with ZipFile(file_path, 'r') as zipObj:
+    with ZipFile(file_path, "r") as zipObj:
         # Extract all the contents of zip file in current directory
         zipObj.extractall()
     os.remove(file_path)
@@ -78,7 +79,7 @@ if host == "zenodo":
         url = "https://zenodo.org/record/5895010/files/data-tutorial.zip"
         progress_retrieve(url, file_path)
         logger.info(f"Extracting data")
-        with ZipFile(file_path, 'r') as zipObj:
+        with ZipFile(file_path, "r") as zipObj:
             zipObj.extractall()
         os.remove(file_path)
         logger.info(f"Download data to '{destination}' from cloud '{url}'.")
@@ -97,7 +98,7 @@ if host == "zenodo":
         url = "https://zenodo.org/record/5895010/files/data.zip"
         progress_retrieve(url, file_path)
         logger.info(f"Extracting data")
-        with ZipFile(file_path, 'r') as zipObj:
+        with ZipFile(file_path, "r") as zipObj:
             zipObj.extractall()
         os.remove(file_path)
         logger.info(f"Download data to '{destination}' from cloud '{url}'.")
