@@ -447,7 +447,7 @@ continent_regions = {
         "CY",  # CYPRUS (NORTH AND SOUTH)
         "GE",  # GEORGIA
         "IQ",  # IRAQ
-        "IL",  # ISRAEL 
+        "IL",  # ISRAEL
         "JO",  # JORDAN
         "KW",  # KUWAIT
         "LB",  # LEBANON
