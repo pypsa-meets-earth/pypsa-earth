@@ -97,7 +97,7 @@ electricity:
     Store: [battery, H2]
     Link: []
 
-  conventional_carriers: [coal, CCGT]
+  conventional_carriers: [coal, OCGT, CCGT, oil]
 
   max_hours:
     battery: 6
@@ -288,7 +288,7 @@ plotting:
   energy_threshold: 50.
 
   vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
-  conv_techs: ["OCGT", "CCGT", "Nuclear", "Coal"]
+  conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]
