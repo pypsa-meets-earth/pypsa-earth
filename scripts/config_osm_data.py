@@ -391,7 +391,7 @@ continent_regions = {
     # Eurpean regions
     "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
     # EASTREN EUROPIAN REGION
-    "EER": ["BY", "BU", "CZ", "RU", "SK", "UA", "GB", "LT", "LV", "EE", "SI"],
+    "EER": ["BY", "BU", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "SI"],
     # CENTRAL EUROPIAN REGION
     "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK"],
     # BALKAN PENISULAN REGION
