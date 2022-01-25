@@ -391,7 +391,7 @@ continent_regions = {
     # Eurpean regions
     "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
     # EASTREN EUROPIAN REGION
-    "EER": ["BY", "BU", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "SI"],
+    "EER": ["BY", "PL", "BU", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "SI"],
     # CENTRAL EUROPIAN REGION
     "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK"],
     # BALKAN PENISULAN REGION
@@ -448,7 +448,6 @@ continent_regions = {
         "GE",  # GEORGIA
         "IQ",  # IRAQ
         "IL",  # ISRAEL 
-        "PL",  # PALESTINE
         "JO",  # JORDAN
         "KW",  # KUWAIT
         "LB",  # LEBANON
