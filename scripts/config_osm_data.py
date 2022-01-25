@@ -464,10 +464,8 @@ continent_regions = {
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN", "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
-    "SG":
-    "MY",  # Singapore -> Malaysia
-    "BN":
-    "MY",  # Brunei -> Malaysia
+    "SG": "MY",  # Singapore -> Malaysia
+    "BN": "MY",  # Brunei -> Malaysia
     "CAR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
     # SOUTHERN AISIAN REGION
     "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
@@ -739,5 +737,6 @@ world_geofk = {
 
 world_countries = {
     country_2D: country_name
-    for d in world_geofk.values() for (country_2D, country_name) in d.items()
+    for d in world_geofk.values()
+    for (country_2D, country_name) in d.items()
 }
