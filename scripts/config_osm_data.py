@@ -397,7 +397,7 @@ continent_regions = {
     # BALKAN PENISULAN REGION
     "BPR": [
         "AL",
-        "AN",
+        # "AN", # non-existing code
         "BA",
         "BG",
         "GR",
