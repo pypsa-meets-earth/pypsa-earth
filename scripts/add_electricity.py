@@ -92,7 +92,6 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
-from download_osm_data import create_country_list
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -704,7 +703,7 @@ if __name__ == "__main__":
     # Snakemake imports:
     regions = snakemake.input.regions
     load = snakemake.input.load
-    countries = create_country_list(snakemake.config["countries"])
+    countries = snakemake.config["countries"]
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
 

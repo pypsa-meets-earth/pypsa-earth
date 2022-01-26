@@ -68,7 +68,6 @@ import shapely.wkt
 import yaml
 from _helpers import _read_csv_nafix
 from _helpers import configure_logging
-from download_osm_data import create_country_list
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
@@ -137,15 +136,19 @@ def _load_buses_from_osm():
 
     return buses
 
-def _set_links_underwater_fraction(n):
-    if n.links.empty: return
 
-    if not hasattr(n.links, 'geometry'):
-        n.links['underwater_fraction'] = 0.
+def _set_links_underwater_fraction(n):
+    if n.links.empty:
+        return
+
+    if not hasattr(n.links, "geometry"):
+        n.links["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
+        offshore_shape = gpd.read_file(
+            snakemake.input.offshore_shapes).unary_union
         links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
-        n.links['underwater_fraction'] = links.intersection(offshore_shape).length / links.length
+        n.links["underwater_fraction"] = (
+            links.intersection(offshore_shape).length / links.length)
 
 
 def _load_lines_from_osm(buses):
@@ -198,7 +201,7 @@ def _set_countries_and_substations(n):
 
     buses = n.buses
 
-    countries = create_country_list(snakemake.config["countries"])
+    countries = snakemake.config["countries"]
     country_shapes = (gpd.read_file(snakemake.input.country_shapes).set_index(
         "name")["geometry"].set_crs(4326))
     offshore_shapes = unary_union(
