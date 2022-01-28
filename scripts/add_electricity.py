@@ -169,7 +169,8 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
                                  costs.at["solar-utility", "capital_cost"])
 
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+        capital_cost = link1["capital_cost"] + \
+            max_hours * store["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
@@ -273,10 +274,10 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
                                                normed=False).T.tocsr()
             gdp_n = pd.Series(transfer.dot(
                 shapes_cntry["gdp"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
             pop_n = pd.Series(transfer.dot(
                 shapes_cntry["pop"].fillna(1.0).values),
-                              index=group.index)
+                index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to EU continent load data
@@ -428,14 +429,15 @@ def attach_hydro(n, costs, ppl, profile_hydro, hydro_capacities, carriers, **con
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
-        dist_key = ppl.loc[inflow_idx, 'p_nom'].groupby(country).transform(normed)
+        dist_key = ppl.loc[inflow_idx, 'p_nom'].groupby(
+            country).transform(normed)
 
         with xr.open_dataarray(profile_hydro) as inflow:
             inflow_countries = pd.Index(country[inflow_idx])
             missing_c = (inflow_countries.unique()
                          .difference(inflow.indexes['countries']))
             assert missing_c.empty, (f"'{profile_hydro}' is missing "
-                f"inflow time-series for at least one country: {', '.join(missing_c)}")
+                                     f"inflow time-series for at least one country: {', '.join(missing_c)}")
 
             inflow_t = (inflow.sel(countries=inflow_countries)
                         .rename({'countries': 'name'})
@@ -454,7 +456,7 @@ def attach_hydro(n, costs, ppl, profile_hydro, hydro_capacities, carriers, **con
                weight=ror['p_nom'],
                p_max_pu=(inflow_t[ror.index]
                          .divide(ror['p_nom'], axis=1)
-                         .where(lambda df: df<=1., other=1.)))
+                         .where(lambda df: df <= 1., other=1.)))
 
     if 'PHS' in carriers and not phs.empty:
         # fill missing max hours to config value and
@@ -467,8 +469,8 @@ def attach_hydro(n, costs, ppl, profile_hydro, hydro_capacities, carriers, **con
                p_nom=phs['p_nom'],
                capital_cost=costs.at['PHS', 'capital_cost'],
                max_hours=phs['max_hours'],
-               efficiency_store=np.sqrt(costs.at['PHS','efficiency']),
-               efficiency_dispatch=np.sqrt(costs.at['PHS','efficiency']),
+               efficiency_store=np.sqrt(costs.at['PHS', 'efficiency']),
+               efficiency_dispatch=np.sqrt(costs.at['PHS', 'efficiency']),
                cyclic_state_of_charge=True)
 
     if 'hydro' in carriers and not hydro.empty:
@@ -477,20 +479,21 @@ def attach_hydro(n, costs, ppl, profile_hydro, hydro_capacities, carriers, **con
         assert hydro_max_hours is not None, "No path for hydro capacities given."
 
         hydro_stats = pd.read_csv(hydro_capacities,
-                                   comment="#", na_values='-', index_col=0)
+                                  comment="#", na_values='-', index_col=0)
         e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
-        e_installed = hydro.eval('p_nom * max_hours').groupby(hydro.country).sum()
+        e_installed = hydro.eval(
+            'p_nom * max_hours').groupby(hydro.country).sum()
         e_missing = e_target - e_installed
         missing_mh_i = hydro.query('max_hours == 0').index
 
         if hydro_max_hours == 'energy_capacity_totals_by_country':
             # watch out some p_nom values like IE's are totally underrepresented
             max_hours_country = e_missing / \
-                                hydro.loc[missing_mh_i].groupby('country').p_nom.sum()
+                hydro.loc[missing_mh_i].groupby('country').p_nom.sum()
 
         elif hydro_max_hours == 'estimate_by_large_installations':
             max_hours_country = hydro_stats['E_store[TWh]'] * 1e3 / \
-                                hydro_stats['p_nom_discharge[GW]']
+                hydro_stats['p_nom_discharge[GW]']
 
         missing_countries = (pd.Index(hydro['country'].unique())
                              .difference(max_hours_country.dropna().index))
@@ -498,7 +501,7 @@ def attach_hydro(n, costs, ppl, profile_hydro, hydro_capacities, carriers, **con
             logger.warning("Assuming max_hours=6 for hydro reservoirs in the countries: {}"
                            .format(", ".join(missing_countries)))
         hydro_max_hours = hydro.max_hours.where(hydro.max_hours > 0,
-                                hydro.country.map(max_hours_country)).fillna(6)
+                                                hydro.country.map(max_hours_country)).fillna(6)
 
         n.madd('StorageUnit', hydro.index, carrier='hydro',
                bus=hydro['bus'],
