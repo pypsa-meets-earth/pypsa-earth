@@ -193,15 +193,15 @@ world_iso = {
         "MW": "malawi",
         "ML": "mali",
         "MR": "mauritania",
-        # "MU": "mauritius", Island
+        # "MU": "mauritius", # Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
         "NE": "niger",
         "NG": "nigeria",
         "RW": "rwanda",
-        # saint-helena-ascension-and-tristan-da-cunha
-        # "ST": "sao-tome-and-principe", #Island
+        # saint-helena-ascension-and-tristan-da-cunha # Islands
+        # "ST": "sao-tome-and-principe", # Island
         "SN": "senegal",
         "GM": "gambia",
         # "SC": "seychelles", #Island
@@ -231,8 +231,8 @@ world_iso = {
         # "BN": "brunei darussalam", # merged with MY
         "KH": "cambodia",
         "CN": "china",
-        # "CX": "christmas island",
-        # "CC": "cocos (keeling) islands",
+        # "CX": "christmas island", # Island
+        # "CC": "cocos (keeling) islands", # Island
         "CY": "cyprus",
         "GE": "georgia",
         "HK": "hong kong",
@@ -314,7 +314,7 @@ world_iso = {
         "CZ": "czech-republic",
         "DK": "denmark",
         "EE": "estonia",
-        # "FO": "faroe islands",
+        # "FO": "faroe islands", # Islands
         "FI": "finland",
         "FR": "france",
         "DE": "germany",
@@ -324,9 +324,9 @@ world_iso = {
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
-        # "IM": "isle of man",
+        # "IM": "isle of man", # Island
         "IT": "italy",
-        # "JE": "jersey",
+        # "JE": "jersey", # Island
         "LV": "latvia",
         "LI": "liechtenstein",
         "LT": "lithuania",
@@ -347,7 +347,7 @@ world_iso = {
         "SK": "slovakia",
         "SI": "slovenia",
         "ES": "spain",
-        # "SJ": "svalbard-and-jan-mayen",
+        # "SJ": "svalbard-and-jan-mayen",  # Islands
         "SE": "sweden",
         "CH": "switzerland",
         "UA": "ukraine",
