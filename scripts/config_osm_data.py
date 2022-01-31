@@ -386,9 +386,10 @@ world_iso = {
     },
 }
 
+# Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
 continent_regions = {
-    # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
-    # Eurpean regions
+
+    # European regions
     "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
     # EASTREN EUROPIAN REGION
     "EER": ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "FI", "MD"],
@@ -397,10 +398,13 @@ continent_regions = {
     # BALKAN PENISULAN REGION
     "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
     # WESTREN EUROPE
+    # SOUTHERN EUROPAIN REGION
     "SER": ["ES", "AD", "IT", "PT", "SM"], 
+
     # African regions
-    # WESTREN AFRICAN REGION
+    # NORTHERN AFRICAN REGION
     "NAR": ["EG","LY", "TN", "DZ", "MA", "SD", "SS"],  
+    # WESTREN AFRICAN REGION 
     # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
     "WAR": ["MR", "ML", "NE", "NG", "BJ", "BF", "TG", "GH", "CI", "LR", "SL", "GN", "GM"],
     # CENTRAL AFRICAN REGION
@@ -410,6 +414,7 @@ continent_regions = {
     "EAR": ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
+
     # Asian regions
     "KVR": ["AZ", "GE", "AM"],
     "WAS": ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL", "JO", "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"],
@@ -426,11 +431,14 @@ continent_regions = {
     "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
     "MEAR": ["TR", "SY", "LB", "CY", "IQ", "IR", "JO", "IL", "PS", "AE", "YE", "KW", "BH", "QA", "SA", "OM"],
+    
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "SR", "UY", "VE"],
-    "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],  # CENTRAL AMERICAN REGION
+    # CENTRAL AMERICAN REGION
+    "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
+
     # Customized test set
     "TEST": ["NG", "NE", "SL", "MA"],
 }
