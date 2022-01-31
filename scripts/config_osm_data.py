@@ -395,21 +395,7 @@ continent_regions = {
     # CENTRAL EUROPIAN REGION
     "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK"],
     # BALKAN PENISULAN REGION
-    "BPR": [
-        "AL",
-        # "AN", # non-existing code
-        "BA",
-        "BG",
-        "GR",
-        "HR",
-        "MD",
-        "MT",
-        "RO",
-        "SL",
-        "RS",
-        "ME",
-        "MK",
-    ],
+    "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
     # WESTREN EUROPE
     "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD", "LI"],
     "SER": ["ES", "IT", "PT"],  # SOUTHERN EUROPAIN REGION
