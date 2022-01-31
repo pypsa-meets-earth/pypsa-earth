@@ -477,7 +477,7 @@ continent_regions = {
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "SR", "UY", "VE"],
-    "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR"],  # CENTRAL AMERICAN REGION
+    "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],  # CENTRAL AMERICAN REGION
     # Customized test set
     "TEST": ["NG", "NE", "SL", "MA"],
 }
@@ -734,6 +734,7 @@ world_geofk = {
         "HN": "honduras",
         "NI": "nicaragua",
         "CR": "costa-rica",
+        "PA": "panama"
     },
 }
 
