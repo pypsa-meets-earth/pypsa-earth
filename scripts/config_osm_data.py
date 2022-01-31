@@ -318,9 +318,9 @@ world_iso = {
         "FI": "finland",
         "FR": "france",
         "DE": "germany",
-        # "GI": "gibraltar", Island ?
+        # "GI": "gibraltar", # Island ?
         "GR": "greece",
-        # "GG": "guernsey", Island
+        # "GG": "guernsey", # Island
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
