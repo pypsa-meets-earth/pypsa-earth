@@ -398,6 +398,7 @@ continent_regions = {
     # BALKAN PENISULAN REGION
     "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
     # WESTREN EUROPE
+    "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD"],
     # SOUTHERN EUROPAIN REGION
     "SER": ["ES", "AD", "IT", "PT", "SM"], 
 
