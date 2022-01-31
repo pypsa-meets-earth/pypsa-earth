@@ -397,7 +397,7 @@ continent_regions = {
     # BALKAN PENISULAN REGION
     "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
     # WESTREN EUROPE
-    "SER": ["ES", "IT", "PT"],  # SOUTHERN EUROPAIN REGION
+    "SER": ["ES", "AD", "IT", "PT", "SM"], 
     # African regions
     "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
     # WESTREN AFRICAN REGION
@@ -459,6 +459,7 @@ iso_to_geofk_dict = {
     "OM": "GCC",  # Oman -> Gulf Cooperation Council
     "PS": "IL-PL", # Israel and Palestine are merged in OSM 
     "IL": "IL-PL", # Israel and Palestine are merged in OSM 
+    "SM": "IT" # San-Marino is merged to Italy
 }
 
 # Cyprus and Georgia -> European domain
