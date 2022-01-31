@@ -406,7 +406,8 @@ continent_regions = {
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
-    "EAR": ["ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
+    # Somalia ["SO"] belongs to the region but power data are NA in OSM)    
+    "EAR": ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
     # Asian regions
@@ -419,7 +420,7 @@ continent_regions = {
     # "MY",  # Singapore -> Malaysia
     # "BN":
     # "MY",  # Brunei -> Malaysia
-    "CAR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
+    "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
     # SOUTHERN AISIAN REGION
     "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
