@@ -411,6 +411,7 @@ continent_regions = {
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
     # Asian regions
+    "KVR": ["AZ", "GE", "AM"],
     "WAS": ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL", "JO", "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"],
     # FAR EASTREN AISIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN", "HK", "MO"],
