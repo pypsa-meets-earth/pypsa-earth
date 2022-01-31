@@ -461,7 +461,7 @@ continent_regions = {
         # XNC is missing for nothern cyprus
     ],  # YEMEN
     # FAR EASTREN AISIAN REGION
-    "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN", "HK", "MO"],
+    "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN", "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
     # "SG":
