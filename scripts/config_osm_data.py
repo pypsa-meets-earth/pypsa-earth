@@ -400,8 +400,9 @@ continent_regions = {
     "SER": ["ES", "AD", "IT", "PT", "SM"], 
     # African regions
     # WESTREN AFRICAN REGION
-    "WAR": ["MR","ML","NE","NG","BJ","BF","TG","GH","CI","LR","SL","GN","GM","SL"],
     "NAR": ["EG","LY", "TN", "DZ", "MA", "SD", "SS"],  
+    # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
+    "WAR": ["MR", "ML", "NE", "NG", "BJ", "BF", "TG", "GH", "CI", "LR", "SL", "GN", "GM"],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
