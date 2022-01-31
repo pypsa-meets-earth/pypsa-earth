@@ -416,22 +416,7 @@ continent_regions = {
     # African regions
     "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
     # WESTREN AFRICAN REGION
-    "WAR": [
-        "MR",
-        "ML",
-        "NE",
-        "NG",
-        "BJ",
-        "BF",
-        "TG",
-        "GH",
-        "CI",
-        "LR",
-        "SL",
-        "GN",
-        "GM",
-        "SL",
-    ],
+    "WAR": ["MR","ML","NE","NG","BJ","BF","TG","GH","CI","LR","SL","GN","GM","SL"],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
@@ -439,27 +424,7 @@ continent_regions = {
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
     # Asian regions
-    "WAS": [
-        "TR",  # TURKEY
-        "AM",  # ARMENIA
-        "AZ",  # AZERBAIJAN
-        "BH",  # BAHREIN
-        "CY",  # CYPRUS (NORTH AND SOUTH)
-        "GE",  # GEORGIA
-        "IQ",  # IRAQ
-        "IL",  # ISRAEL
-        "JO",  # JORDAN
-        "KW",  # KUWAIT
-        "LB",  # LEBANON
-        "OM",  # OMAN
-        "PS",  # PALESTINE
-        "QA",  # QATAR
-        "SA",  # SAUDI ARABIA
-        "SY",  # SYRIA
-        "AE",  # UNITED ARAB EMIRATES
-        "YE",
-        # XNC is missing for nothern cyprus
-    ],  # YEMEN
+    "WAS": ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL", "JO", "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"],
     # FAR EASTREN AISIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN", "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
