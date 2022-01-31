@@ -399,9 +399,9 @@ continent_regions = {
     # WESTREN EUROPE
     "SER": ["ES", "AD", "IT", "PT", "SM"], 
     # African regions
-    "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
     # WESTREN AFRICAN REGION
     "WAR": ["MR","ML","NE","NG","BJ","BF","TG","GH","CI","LR","SL","GN","GM","SL"],
+    "NAR": ["EG","LY", "TN", "DZ", "MA", "SD", "SS"],  
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
