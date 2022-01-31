@@ -472,7 +472,7 @@ continent_regions = {
     # SOUTHERN AISIAN REGION
     "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
-    "MEAR": ["TR", "SY", "IQ", "IR", "JO", "IL", "AE", "YE"],
+    "MEAR": ["TR", "SY", "LB", "CY", "IQ", "IR", "JO", "IL", "PS", "AE", "YE", "KW", "BH", "QA", "SA", "OM"],
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
