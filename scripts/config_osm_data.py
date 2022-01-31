@@ -393,11 +393,10 @@ continent_regions = {
     # EASTREN EUROPIAN REGION
     "EER": ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "SI"],
     # CENTRAL EUROPIAN REGION
-    "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK"],
+    "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK", "LI"],
     # BALKAN PENISULAN REGION
     "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
     # WESTREN EUROPE
-    "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD", "LI"],
     "SER": ["ES", "IT", "PT"],  # SOUTHERN EUROPAIN REGION
     # African regions
     "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
