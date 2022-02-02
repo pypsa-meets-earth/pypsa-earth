@@ -714,7 +714,7 @@ if __name__ == "__main__":
     update_transmission_costs(n, costs)
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
-    # attach_hydro(n, costs, ppl)
+    attach_hydro(n, costs, ppl)
     attach_extendable_generators(n, costs, ppl)
 
     # TODO: Feature to uncomment and debug

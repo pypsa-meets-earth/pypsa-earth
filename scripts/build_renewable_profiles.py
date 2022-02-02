@@ -210,7 +210,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_renewable_profiles",
-                                   technology="solar")
+                                   technology="hydro")
         _sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
@@ -262,12 +262,22 @@ if __name__ == "__main__":
             for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
         ]]  # TODO: filtering by presence of hydro generators should be the way to go
 
-        inflow = correction_factor * func(capacity_factor=True, **resource)
+        # check if there are hydro powerplants
+        if resource["plants"].empty:
+            # when no powerplants are available save an empty file
+            xr.DataArray(
+                [[]],
+                dims=["plants", "time"],
+                name="inflow"
+            ).to_netcdf(snakemake.output.profile)
+        else:
+            # otherwise perform the calculations
+            inflow = correction_factor * func(capacity_factor=True, **resource)
 
-        if "clip_min_inflow" in config:
-            inflow = inflow.where(inflow > config["clip_min_inflow"], 0)
+            if "clip_min_inflow" in config:
+                inflow = inflow.where(inflow > config["clip_min_inflow"], 0)
 
-        inflow.rename("inflow").to_netcdf(snakemake.output.profile)
+            inflow.rename("inflow").to_netcdf(snakemake.output.profile)
     else:
 
         capacity_per_sqkm = config["capacity_per_sqkm"]
