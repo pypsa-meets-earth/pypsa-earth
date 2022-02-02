@@ -90,8 +90,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging
-from _helpers import update_p_nom_max
+from _helpers import configure_logging, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
