@@ -266,8 +266,8 @@ if __name__ == "__main__":
         if resource["plants"].empty:
             # when no powerplants are available save an empty file
             xr.DataArray(
-                [[]],
                 dims=["plants", "time"],
+                coords={"plants": []},
                 name="inflow"
             ).to_netcdf(snakemake.output.profile)
         else:

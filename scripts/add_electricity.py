@@ -441,14 +441,14 @@ def attach_hydro(n, costs, ppl):
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             inflow_stations = pd.Index(bus_id[inflow_idx])
             missing_c = inflow_stations.unique().difference(
-                inflow.indexes["plant"])
+                inflow.indexes["plants"])
             assert missing_c.empty, (
                 f"'{snakemake.input.profile_hydro}' is missing "
                 f"inflow time-series for at least one bus: {', '.join(missing_c)}"
             )
 
             inflow_t = (inflow.sel(plant=inflow_stations).rename({
-                "plant":
+                "plants":
                 "name"
             }).assign_coords(name=inflow_idx).transpose("time",
                                                         "name").to_pandas())
