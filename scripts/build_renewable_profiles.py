@@ -265,11 +265,8 @@ if __name__ == "__main__":
         # check if there are hydro powerplants
         if resource["plants"].empty:
             # when no powerplants are available save an empty file
-            xr.DataArray(
-                [[]],
-                dims=["plants", "time"],
-                name="inflow"
-            ).to_netcdf(snakemake.output.profile)
+            xr.DataArray([[]], dims=["plants", "time"],
+                         name="inflow").to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
