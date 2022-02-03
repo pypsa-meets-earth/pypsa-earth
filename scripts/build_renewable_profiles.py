@@ -254,7 +254,7 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         hydrobasins = gpd.read_file(resource["hydrobasins"])
         merged_hydrobasin_shape = unary_union(hydrobasins.geometry)
-        resource["plants"] = regions.rename(columns={
+        resource["plant"] = regions.rename(columns={
             "x": "lon",
             "y": "lat"
         })[[
@@ -263,11 +263,11 @@ if __name__ == "__main__":
         ]]  # TODO: filtering by presence of hydro generators should be the way to go
 
         # check if there are hydro powerplants
-        if resource["plants"].empty:
+        if resource["plant"].empty:
             # when no powerplants are available save an empty file
             xr.DataArray(
-                dims=["plants", "time"],
-                coords={"plants": []},
+                dims=["plant", "time"],
+                coords={"plant": []},
                 name="inflow"
             ).to_netcdf(snakemake.output.profile)
         else:
