@@ -453,11 +453,8 @@ continent_regions = {
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN", "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
-    # "SG":
-    # "MY",  # Singapore -> Malaysia
-    # "BN":
-    # "MY",  # Brunei -> Malaysia
-    "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
+    # CENTRAL AISIAN REGION
+    "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],  
     # SOUTHERN AISIAN REGION
     "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
