@@ -429,7 +429,7 @@ continent_regions = {
     # "MY",  # Brunei -> Malaysia
     "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
     # SOUTHERN AISIAN REGION
-    "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
+    "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
     "MEAR": ["TR", "SY", "LB", "CY", "IQ", "IR", "JO", "IL", "PS", "AE", "YE", "KW", "BH", "QA", "SA", "OM"],
     
