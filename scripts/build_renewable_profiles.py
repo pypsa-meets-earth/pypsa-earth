@@ -196,7 +196,8 @@ import geopandas as gpd
 import numpy as np
 import progressbar as pgb
 import xarray as xr
-from _helpers import _sets_path_to_root, configure_logging
+from _helpers import _sets_path_to_root
+from _helpers import configure_logging
 from pypsa.geo import haversine
 from shapely.geometry import LineString
 from shapely.ops import unary_union
