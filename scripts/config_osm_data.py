@@ -400,18 +400,18 @@ continent_regions = {
     # WESTREN EUROPE
     "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD"],
     # SOUTHERN EUROPAIN REGION
-    "SER": ["ES", "AD", "IT", "PT", "SM"], 
+    "SER": ["ES", "AD", "IT", "PT", "SM"],
 
     # African regions
     # NORTHERN AFRICAN REGION
-    "NAR": ["EG","LY", "TN", "DZ", "MA", "SD", "SS"],  
-    # WESTREN AFRICAN REGION 
+    "NAR": ["EG", "LY", "TN", "DZ", "MA", "SD", "SS"],
+    # WESTREN AFRICAN REGION
     # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
     "WAR": ["MR", "ML", "NE", "NG", "BJ", "BF", "TG", "GH", "CI", "LR", "SL", "GN", "GM"],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
-    # Somalia ["SO"] belongs to the region but power data are NA in OSM)    
+    # Somalia ["SO"] belongs to the region but power data are NA in OSM)
     "EAR": ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
@@ -432,7 +432,7 @@ continent_regions = {
     "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
     "MEAR": ["TR", "SY", "LB", "CY", "IQ", "IR", "JO", "IL", "PS", "AE", "YE", "KW", "BH", "QA", "SA", "OM"],
-    
+
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
@@ -469,9 +469,9 @@ iso_to_geofk_dict = {
     "QA": "GCC",  # Qatar -> Gulf Cooperation Council
     "AE": "GCC",  # United Arab Emirates -> Gulf Cooperation Council
     "OM": "GCC",  # Oman -> Gulf Cooperation Council
-    "PS": "IL-PL", # Israel and Palestine are merged in OSM 
-    "IL": "IL-PL", # Israel and Palestine are merged in OSM 
-    "SM": "IT" # San-Marino is merged to Italy
+    "PS": "IL-PL",  # Israel and Palestine are merged in OSM
+    "IL": "IL-PL",  # Israel and Palestine are merged in OSM
+    "SM": "IT"  # San-Marino is merged to Italy
 }
 
 # Cyprus and Georgia -> European domain
