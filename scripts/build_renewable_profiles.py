@@ -209,8 +209,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles",
-                                   technology="hydro")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
         _sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
@@ -236,13 +235,19 @@ if __name__ == "__main__":
     regions = regions.dropna(axis="index", subset=["geometry"])
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(
-            regions.reset_index().groupby("shape_id").agg({
-                "x": "mean",
-                "y": "mean",
-                "country": "first",
-                "geometry": "first",
-                "bus": "first",
-            }).set_index("bus"))
+            regions.reset_index()
+            .groupby("shape_id")
+            .agg(
+                {
+                    "x": "mean",
+                    "y": "mean",
+                    "country": "first",
+                    "geometry": "first",
+                    "bus": "first",
+                }
+            )
+            .set_index("bus")
+        )
         regions.crs = regions_crs
 
     buses = regions.index
@@ -254,21 +259,18 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         hydrobasins = gpd.read_file(resource["hydrobasins"])
         merged_hydrobasin_shape = unary_union(hydrobasins.geometry)
-        resource["plant"] = regions.rename(columns={
-            "x": "lon",
-            "y": "lat"
-        })[[
-            merged_hydrobasin_shape.intersects(p)
-            for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
-        ]]  # TODO: filtering by presence of hydro generators should be the way to go
+        resource["plant"] = regions.rename(columns={"x": "lon", "y": "lat"})[
+            [
+                merged_hydrobasin_shape.intersects(p)
+                for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
+            ]
+        ]  # TODO: filtering by presence of hydro generators should be the way to go
 
         # check if there are hydro powerplants
         if resource["plant"].empty:
             # when no powerplants are available save an empty file
             xr.DataArray(
-                dims=["plant", "time"],
-                coords={"plant": []},
-                name="inflow"
+                dims=["plant", "time"], coords={"plant": []}, name="inflow"
             ).to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
@@ -290,27 +292,18 @@ if __name__ == "__main__":
         copernicus = config.get("copernicus", {})
         if "grid_codes" in copernicus:
             codes = copernicus["grid_codes"]
-            excluder.add_raster(paths.copernicus,
-                                codes=codes,
-                                invert=True,
-                                crs=3035)
+            excluder.add_raster(paths.copernicus, codes=codes, invert=True, crs=3035)
         if copernicus.get("distance", 0.0) > 0.0:
             codes = copernicus["distance_grid_codes"]
             buffer = copernicus["distance"]
-            excluder.add_raster(paths.copernicus,
-                                codes=codes,
-                                buffer=buffer,
-                                crs=3035)
+            excluder.add_raster(paths.copernicus, codes=codes, buffer=buffer, crs=3035)
 
         if "max_depth" in config:
             # lambda not supported for atlite + multiprocessing
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
             func_depth = functools.partial(np.greater, -config["max_depth"])
-            excluder.add_raster(paths.gebco,
-                                codes=func_depth,
-                                crs=4236,
-                                nodata=-1000)
+            excluder.add_raster(paths.gebco, codes=func_depth, crs=4236, nodata=-1000)
 
         if "min_shore_distance" in config:
             buffer = config["min_shore_distance"]
@@ -318,31 +311,26 @@ if __name__ == "__main__":
 
         if "max_shore_distance" in config:
             buffer = config["max_shore_distance"]
-            excluder.add_geometry(paths.country_shapes,
-                                  buffer=buffer,
-                                  invert=True)
+            excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 
         kwargs = dict(nprocesses=nprocesses, disable_progressbar=noprogress)
         if noprogress:
             logger.info("Calculate landuse availabilities...")
             start = time.time()
-            availability = cutout.availabilitymatrix(regions, excluder,
-                                                     **kwargs)
+            availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
             duration = time.time() - start
-            logger.info(
-                f"Completed availability calculation ({duration:2.2f}s)")
+            logger.info(f"Completed availability calculation ({duration:2.2f}s)")
         else:
-            availability = cutout.availabilitymatrix(regions, excluder,
-                                                     **kwargs)
+            availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
 
         area = cutout.grid.to_crs(3035).area / 1e6
-        area = xr.DataArray(area.values.reshape(cutout.shape),
-                            [cutout.coords["y"], cutout.coords["x"]])
+        area = xr.DataArray(
+            area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]
+        )
 
         potential = capacity_per_sqkm * availability.sum("bus") * area
 
-        capacity_factor = correction_factor * func(capacity_factor=True,
-                                                   **resource)
+        capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
         profile, capacities = func(
@@ -354,19 +342,17 @@ if __name__ == "__main__":
             **resource,
         )
 
-        logger.info(
-            f"Calculating maximal capacity per bus (method '{p_nom_max_meth}')"
-        )
+        logger.info(f"Calculating maximal capacity per bus (method '{p_nom_max_meth}')")
         if p_nom_max_meth == "simple":
             p_nom_max = capacity_per_sqkm * availability @ area
         elif p_nom_max_meth == "conservative":
-            max_cap_factor = capacity_factor.where(availability != 0).max(
-                ["x", "y"])
+            max_cap_factor = capacity_factor.where(availability != 0).max(["x", "y"])
             p_nom_max = capacities / max_cap_factor
         else:
             raise AssertionError(
                 'Config key `potential` should be one of "simple" '
-                f'(default) or "conservative", not "{p_nom_max_meth}"')
+                f'(default) or "conservative", not "{p_nom_max_meth}"'
+            )
 
         logger.info("Calculate average distances.")
         layoutmatrix = (layout * availability).stack(spatial=["y", "x"])
@@ -386,21 +372,21 @@ if __name__ == "__main__":
             centre_of_mass.append(co.values.T @ (row / row.sum()))
 
         average_distance = xr.DataArray(average_distance, [buses])
-        centre_of_mass = xr.DataArray(centre_of_mass,
-                                      [buses, ("spatial", ["x", "y"])])
+        centre_of_mass = xr.DataArray(centre_of_mass, [buses, ("spatial", ["x", "y"])])
 
-        ds = xr.merge([
-            (correction_factor * profile).rename("profile"),
-            capacities.rename("weight"),
-            p_nom_max.rename("p_nom_max"),
-            potential.rename("potential"),
-            average_distance.rename("average_distance"),
-        ])
+        ds = xr.merge(
+            [
+                (correction_factor * profile).rename("profile"),
+                capacities.rename("weight"),
+                p_nom_max.rename("p_nom_max"),
+                potential.rename("potential"),
+                average_distance.rename("average_distance"),
+            ]
+        )
 
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
-            offshore_shape = gpd.read_file(
-                paths["offshore_shapes"]).unary_union
+            offshore_shape = gpd.read_file(paths["offshore_shapes"]).unary_union
             underwater_fraction = []
             for bus in buses:
                 p = centre_of_mass.sel(bus=bus).data
@@ -408,17 +394,18 @@ if __name__ == "__main__":
                 frac = line.intersection(offshore_shape).length / line.length
                 underwater_fraction.append(frac)
 
-            ds["underwater_fraction"] = xr.DataArray(underwater_fraction,
-                                                     [buses])
+            ds["underwater_fraction"] = xr.DataArray(underwater_fraction, [buses])
 
         # select only buses with some capacity and minimal capacity factor
         ds = ds.sel(
-            bus=((ds["profile"].mean("time") > config.get("min_p_max_pu", 0.0))
-                 & (ds["p_nom_max"] > config.get("min_p_nom_max", 0.0))))
+            bus=(
+                (ds["profile"].mean("time") > config.get("min_p_max_pu", 0.0))
+                & (ds["p_nom_max"] > config.get("min_p_nom_max", 0.0))
+            )
+        )
 
         if "clip_p_max_pu" in config:
             min_p_max_pu = config["clip_p_max_pu"]
-            ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu,
-                                                0)
+            ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
         ds.to_netcdf(snakemake.output.profile)
