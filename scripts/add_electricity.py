@@ -437,7 +437,6 @@ def attach_hydro(n, costs, ppl):
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
-
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             inflow_stations = pd.Index(bus_id[inflow_idx])
             missing_c = inflow_stations.unique().difference(
