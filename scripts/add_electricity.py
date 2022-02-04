@@ -437,7 +437,6 @@ def attach_hydro(n, costs, ppl):
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
-
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             inflow_stations = pd.Index(bus_id[inflow_idx])
             missing_c = inflow_stations.unique().difference(
@@ -714,7 +713,7 @@ if __name__ == "__main__":
     update_transmission_costs(n, costs)
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
-    # attach_hydro(n, costs, ppl)
+    attach_hydro(n, costs, ppl)
     attach_extendable_generators(n, costs, ppl)
 
     # TODO: Feature to uncomment and debug
