@@ -67,6 +67,7 @@ if config.get('tutorial')==True:
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
+        input: "configs/bundle_config.yaml"
         output: #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand('{file}', file=datafiles),
             directory("data/raw/landcover")
