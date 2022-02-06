@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: : 2021 The PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# File of the bundle configurations
+# 
+# bundle_name:  # name of the bundle
+#   countries: [country code, region code or country list]  # list of countries represented in the databundle
+#   [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
+#   category: resources/data/cutouts  # category of data contained in the bundle
+#   [mandatory: true/false]  # (optional, default false) true when the bundle must be downloaded when a config. country belongs to the countries
+#   destination: ""  # folder where to unzip the files with respect to the repository root
+#   urls:  # list of urls by source, e.g. zenodo or google
+#     zenodo:  {zenodo url}
+#     google: {google url}
+
+# tutorial bundle specific for Nigeria and Benin only
+bundle_data_tutorial:
+  countries: [NG, BJ]
+  tutorial: true
+  category: data
+  destination: "data"
+  urls:
+    zenodo: https://zenodo.org/record/5895010/files/data-tutorial.zip
+    google: https://drive.google.com/file/d/1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ
+
+# tutorial bundle specific for Nigeria and Benin only
+bundle_resources_tutorial:
+  countries: [NG, BJ]
+  tutorial: true
+  category: resources
+  destination: "resources"
+  urls:
+    zenodo: https://zenodo.org/record/5894972/files/resources.zip
+    google: https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8
+
+# tutorial bundle specific for Nigeria and Benin only
+bundle_cutouts_tutorial:
+  countries: [NG, BJ]
+  tutorial: true
+  category: cutouts
+  destination: "cutouts"
+  urls:
+    zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5-tutorial.nc
+    google: https://drive.google.com/file/d/1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O
+
+# data bundle containing the data of the data folder common to all regions of the world
+bundle_data_world:
+  countries: [world]
+  category: data
+  mandatory: true
+  destination: ""
+  urls:
+    zenodo: []
+    google: []
+
+# resources bundle containing the resources folder for africa only
+bundle_resources_africa:
+  countries: [africa]
+  category: resources
+  destination: "resources"
+  urls:
+    zenodo: https://zenodo.org/record/5894972/files/resources.zip
+    google: https://drive.google.com/file/d/1hklbiRLyb_rx6WTvgCJ1Dx_9rooA85y1
+
+# data bundle of the data folder for the african continent
+bundle_data_africa:
+  countries: [africa]
+  category: data
+  destination: "data"
+  urls:
+    zenodo: https://zenodo.org/record/5895010/files/data.zip
+    google: https://drive.google.com/file/d/1Jv4UMw7CoinZwIzl5nm1Z5oIuK7dG7gu
+
+# cutouts bundle of the cutouts folder for the african continent
+bundle_cutouts_africa:
+  countries: [africa]
+  category: cutouts
+  destination: "cutouts"
+  urls:
+    zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5.nc
+    google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh
