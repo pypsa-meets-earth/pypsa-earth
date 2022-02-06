@@ -21,7 +21,7 @@ Upcoming Release
 
 * Rule build_shape extended to the world
 
-* Replace google by zenodo data retrieval
+* Generalized version of Data retrieval with google and zenodo hosting platforms
 
 
 PyPSA-Africa 0.0.1 (24th December 2021)
