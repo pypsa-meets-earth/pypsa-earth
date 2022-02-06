@@ -7,9 +7,7 @@
 # bundle_name:  # name of the bundle
 #   countries: [country code, region code or country list]  # list of countries represented in the databundle
 #   [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
-#   category: resources/data/cutouts  # category of data contained in the bundle
-#   [necessary: true/false]  # (optional, default false) true when the bundle is common data that must be 
-#                         # downloaded when a config. country belongs to the countries on top of other data
+#   category: common/resources/data/cutouts  # category of data contained in the bundle:
 #   destination: ""  # folder where to unzip the files with respect to the repository root
 #   urls:  # list of urls by source, e.g. zenodo or google
 #     zenodo:  {zenodo url}
@@ -48,8 +46,7 @@ bundle_cutouts_tutorial:
 # data bundle containing the data of the data folder common to all regions of the world
 bundle_data_world:
   countries: [world]
-  category: data
-  necessary: true
+  category: common
   destination: ""
   urls:
     zenodo: []
