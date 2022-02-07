@@ -418,6 +418,7 @@ continent_regions = {
         "LR",
         "SL",
         "GN",
+        "SN",
         "GM",
     ],
     # CENTRAL AFRICAN REGION
