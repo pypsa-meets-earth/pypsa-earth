@@ -743,6 +743,9 @@ world_geofk = {
         "CR": "costa-rica",
         "PA": "panama",
     },
+    "europe/france": {
+        "GF": "guyane",
+    }
 }
 
 world_countries = {
