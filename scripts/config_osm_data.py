@@ -483,6 +483,8 @@ continent_regions = {
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "PY", "SR", "UY", "VE"],
     # CENTRAL AMERICAN REGION
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
+    # Australasia
+    "AUO": ["AU", "NC", "NZ", "PG"],
     # Customized test set
     "TEST": ["NG", "NE", "SL", "MA"],
 }
