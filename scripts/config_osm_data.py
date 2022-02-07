@@ -480,7 +480,7 @@ continent_regions = {
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
-    "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "PY", "SR", "UY", "VE"],
+    "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
     # CENTRAL AMERICAN REGION
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
     # Australasia
