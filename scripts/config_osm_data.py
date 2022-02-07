@@ -402,7 +402,7 @@ continent_regions = {
     "SER": ["ES", "AD", "IT", "PT", "SM", "MT"],
     # African regions
     # NORTHERN AFRICAN REGION
-    "NAR": ["EG", "LY", "TN", "DZ", "MA", "SD", "SS"],
+    "NAR": ["EG", "LY", "TN", "DZ", "MA", "EH", "SD", "SS"],
     # WESTREN AFRICAN REGION
     # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
     "WAR": [
