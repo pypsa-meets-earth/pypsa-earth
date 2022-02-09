@@ -1,0 +1,54 @@
+# Specify what should be ignored in git
+
+# Files
+.snakemake*
+.ipynb_checkpoints
+__pycache__
+gurobi.log
+.vscode
+#config.yaml
+
+# Folders
+/bak
+/resources*
+/results
+/networks
+/benchmarks
+/logs
+/notebooks
+/data/links_p_nom.csv
+/data/*totals.csv
+/data/biomass*
+/data/emobility/
+/data/eea*
+/data/jrc*
+/data/heating/
+/data/eurostat*
+/data/odyssee/
+/data/transport_data.csv
+/data/switzerland*
+/data/.nfs*
+/data/Industrial_Database.csv
+/data/retro/tabula-calculator-calcsetbuilding.csv
+/data/nuts*
+/scripts/old
+doc/_build
+/cutouts
+/tmp
+/pypsa
+
+# File extensions
+*.org
+*.nc
+*.xls
+*.xlsx
+*~
+*.pyc
+
+
+
+
+
+
+
+
