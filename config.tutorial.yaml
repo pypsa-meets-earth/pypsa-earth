@@ -226,7 +226,6 @@ renewable:
     cutout: africa-2013-era5-tutorial
     resource:
       method: hydro
-      plants: data/clean/africa_all_substations.geojson
       hydrobasins: data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp
       # flowspeed: 1.0
       # weight_with_height: false
