@@ -39,3 +39,8 @@ Gurobi 9.5.0 (linux64, gurobi_cl) logging started Wed Feb  9 09:30:49 2022
 
 Set parameter Username
 Set parameter LogFile to value "gurobi.log"
+
+Gurobi 9.5.0 (linux64, gurobi_cl) logging started Wed Feb  9 09:52:02 2022
+
+Set parameter Username
+Set parameter LogFile to value "gurobi.log"
