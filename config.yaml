@@ -1,8 +1,7 @@
-
 results_dir: results/
 summary_dir: results
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: test 
+run: test
 
 costs:
   lifetime: 25 #default lifetime

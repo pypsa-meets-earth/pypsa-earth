@@ -202,7 +202,7 @@ biomass EOP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_an
 biomass HOP,FOM,5.75,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw HOP:  Fixed O&M, heat output"
 biomass HOP,VOM,2.78,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Variable O&M heat output
 biomass HOP,efficiency,1.03,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw HOP:  Total efficiency , net, annual average"
-biomass HOP,investment,832.63,EUR/kW_th - heat output,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Nominal investment 
+biomass HOP,investment,832.63,EUR/kW_th - heat output,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Nominal investment
 biomass HOP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Technical lifetime
 cement capture,FOM,3.0,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
 cement capture,capture_rate,0.9,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
@@ -325,7 +325,7 @@ electricity distribution grid,lifetime,40.0,years,TODO, from old pypsa cost assu
 electricity grid connection,FOM,2.0,%/year,TODO, from old pypsa cost assumptions
 electricity grid connection,investment,140.0,EUR/kW,DEA, from old pypsa cost assumptions
 electricity grid connection,lifetime,40.0,years,TODO, from old pypsa cost assumptions
-electrolysis,FOM,2.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Fixed O&M 
+electrolysis,FOM,2.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Fixed O&M
 electrolysis,efficiency,0.68,per unit,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Hydrogen
 electrolysis,investment,450.0,EUR/kW_e,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Specific investment
 electrolysis,lifetime,30.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Technical lifetime
@@ -422,7 +422,7 @@ oil,investment,343.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh
 oil,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",50 Diesel engine farm:  Technical lifetime
 onwind,FOM,1.22,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Fixed O&M
 onwind,VOM,1.35,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Variable O&M
-onwind,investment,1035.56,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Nominal investment 
+onwind,investment,1035.56,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Nominal investment
 onwind,lifetime,30.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Technical lifetime
 ror,FOM,2.0,%/year,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 ror,efficiency,0.9,per unit,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
