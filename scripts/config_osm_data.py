@@ -456,7 +456,7 @@ continent_regions = {
     # SOUTHEASTREN AISIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
     # CENTRAL AISIAN REGION
-    "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],  
+    "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],
     # SOUTHERN AISIAN REGION
     "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
