@@ -707,14 +707,6 @@ world_geofk = {
         "TR": "turkey",
     },
     "russia": {
-        "CEFD": "central-fed-district",
-        "FEFD": "far-eastern-fed-district",
-        "NCDF": "north-caucasus-fed-district",
-        "NWDF": "northwestern-fed-district",
-        "SBFD": "siberian-fed-district",
-        "SOFD": "south-fed-district",
-        "URDF": "ural-fed-district",
-        "VOFD": "volga-fed-district",
         "RU": "russia",
     },
     "north-america": {
