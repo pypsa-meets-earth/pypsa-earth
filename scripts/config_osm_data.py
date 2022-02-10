@@ -368,7 +368,7 @@ world_iso = {
         "CO": "colombia",
         "EC": "ecuador",
         "GF": "french-guyane",
-        "GY": "guyane",
+        # "GY": "guyane", # No Data
         "PE": "peru",
         "PY": "paraguay",
         "SR": "suriname",
