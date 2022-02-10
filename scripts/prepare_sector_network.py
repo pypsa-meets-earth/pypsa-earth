@@ -1,95 +1,12 @@
 import pypsa
 import os
 import pandas as pd
-from vresutils.costdata import annuity
-from pathlib import Path
+import numpy as np
 
-
-
-
-
-# from pypsa-eur/_helpers.py
-def mock_snakemake(rulename, **wildcards):
-    """
-    This function is expected to be executed from the 'scripts'-directory of '
-    the snakemake project. It returns a snakemake.script.Snakemake object,
-    based on the Snakefile.
-
-    If a rule has wildcards, you have to specify them in **wildcards.
-
-    Parameters
-    ----------
-    rulename: str
-        name of the rule for which the snakemake object should be generated
-    **wildcards:
-        keyword arguments fixing the wildcards. Only necessary if wildcards are
-        needed.
-    """
-    import snakemake as sm
-    import os
-    from pypsa.descriptors import Dict
-    from snakemake.script import Snakemake
-
-    script_dir = Path(__file__).parent.resolve()
-    assert Path.cwd().resolve() == script_dir, \
-      f'mock_snakemake has to be run from the repository scripts directory {script_dir}'
-    os.chdir(script_dir.parent)
-    for p in sm.SNAKEFILE_CHOICES:
-        if os.path.exists(p):
-            snakefile = p
-            break
-    workflow = sm.Workflow(snakefile,  overwrite_configfiles=[])
-    workflow.include(snakefile)
-    workflow.global_resources = {}
-    rule = workflow.get_rule(rulename)
-    dag = sm.dag.DAG(workflow, rules=[rule])
-    wc = Dict(wildcards)
-    job = sm.jobs.Job(rule, dag, wc)
-
-    def make_accessable(*ios):
-        for io in ios:
-            for i in range(len(io)):
-                io[i] = os.path.abspath(io[i])
-
-    make_accessable(job.input, job.output, job.log)
-    snakemake = Snakemake(job.input, job.output, job.params, job.wildcards,
-                          job.threads, job.resources, job.log,
-                          job.dag.workflow.config, job.rule.name, None,)
-    # create log and output dir if not existent
-    for path in list(snakemake.log) + list(snakemake.output):
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-
-    os.chdir(script_dir)
-    return snakemake
-
-def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
-
-    #set all asset costs and other parameters
-    costs = pd.read_csv(cost_file, index_col=[0,1]).sort_index()
-
-    #correct units to MW and EUR
-    costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-    costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
-
-    #min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
-    costs = costs.fillna({"CO2 intensity" : 0,
-                          "FOM" : 0,
-                          "VOM" : 0,
-                          "discount rate" : discount_rate,
-                          "efficiency" : 1,
-                          "fuel" : 0,
-                          "investment" : 0,
-                          "lifetime" : lifetime
-    })
-
-    annuity_factor = lambda v: annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
-    costs["fixed"] = [annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()]
-
-    return costs
-
+from helpers import mock_snakemake, prepare_costs, create_network_topology  
 
 def add_hydrogen(n, costs):
+    "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
 
     n.add('Carrier', 'H2')
 
@@ -121,6 +38,160 @@ def add_hydrogen(n, costs):
         lifetime=costs.at['fuel cell', 'lifetime']
     )
 
+    cavern_nodes = pd.DataFrame()
+    if options['hydrogen_underground_storage']:
+        
+          h2_salt_cavern_potential = pd.read_csv(snakemake.input.h2_cavern, index_col=0, squeeze=True)
+          h2_cavern_ct = h2_salt_cavern_potential[~h2_salt_cavern_potential.isna()]
+          cavern_nodes = n.buses[n.buses.country.isin(h2_cavern_ct.index)]
+
+          h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
+
+          # assumptions: weight storage potential in a country by population
+          # TODO: fix with real geographic potentials
+          # convert TWh to MWh with 1e6
+          h2_pot = h2_cavern_ct.loc[cavern_nodes.country]
+          h2_pot.index = cavern_nodes.index
+          # h2_pot = h2_pot * cavern_nodes.fraction * 1e6
+
+          n.madd("Store",
+            cavern_nodes.index + " H2 Store",
+            bus=cavern_nodes.index + " H2",
+            e_nom_extendable=True,
+            e_nom_max=h2_pot.values,
+            e_cyclic=True,
+            carrier="H2 Store",
+            capital_cost=h2_capital_cost
+        )
+
+    # hydrogen stored overground (where not already underground)
+    h2_capital_cost = costs.at["hydrogen storage tank incl. compressor", "fixed"]
+    nodes_overground = cavern_nodes.index.symmetric_difference(nodes)
+
+    n.madd("Store",
+            nodes_overground + " H2 Store",
+            bus=nodes_overground + " H2",
+            e_nom_extendable=True,
+            e_cyclic=True,
+            carrier="H2 Store",
+            capital_cost=h2_capital_cost
+            )
+
+    attrs = ["bus0", "bus1", "length"]
+    h2_links = pd.DataFrame(columns=attrs)
+
+    candidates = pd.concat({"lines": n.lines[attrs],
+                            "links": n.links.loc[n.links.carrier == "DC", attrs]})
+
+    for candidate in candidates.index:
+        buses = [candidates.at[candidate, "bus0"],
+                  candidates.at[candidate, "bus1"]]
+        buses.sort()
+        name = f"H2 pipeline {buses[0]} -> {buses[1]}"
+        if name not in h2_links.index:
+            h2_links.at[name, "bus0"] = buses[0]
+            h2_links.at[name, "bus1"] = buses[1]
+            h2_links.at[name, "length"] = candidates.at[candidate, "length"]
+
+    # TODO Add efficiency losses
+    n.madd("Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links.length.values,
+            capital_cost=costs.at['H2 (g) pipeline',
+                                  'fixed'] * h2_links.length.values,
+            carrier="H2 pipeline",
+            lifetime=costs.at['H2 (g) pipeline', 'lifetime']
+            )
+
+
+def add_co2(n, costs):
+    from types import SimpleNamespace
+    spatial = SimpleNamespace()
+
+    spatial.nodes = nodes
+
+    spatial.co2 = SimpleNamespace()
+
+    if options["co2_network"]:
+        spatial.co2.nodes = nodes + " co2 stored"
+        spatial.co2.locations = nodes
+        spatial.co2.vents = nodes + " co2 vent"
+    else:
+        spatial.co2.nodes = ["co2 stored"]
+        spatial.co2.locations = ["Africa"]
+        spatial.co2.vents = ["co2 vent"]
+
+    spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
+
+    # minus sign because opposite to how fossil fuels used:
+    # CH4 burning puts CH4 down, atmosphere up
+    n.add("Carrier", "co2",
+          co2_emissions=-1.)
+
+    # this tracks CO2 in the atmosphere
+    n.add("Bus",
+        "co2 atmosphere",
+        location="Africa",
+        carrier="co2"
+    )
+
+    # can also be negative
+    n.add("Store",
+        "co2 atmosphere",
+        e_nom_extendable=True,
+        e_min_pu=-1,
+        carrier="co2",
+        bus="co2 atmosphere"
+    )
+
+    # this tracks CO2 stored, e.g. underground
+    n.madd("Bus",
+        spatial.co2.nodes,
+        location=spatial.co2.locations,
+        carrier="co2 stored"
+    )
+
+    n.madd("Store",
+        spatial.co2.nodes,
+        e_nom_extendable=True,
+        e_nom_max=np.inf,
+        capital_cost=options['co2_sequestration_cost'],
+        carrier="co2 stored",
+        bus=spatial.co2.nodes
+    )
+
+   
+    n.madd("Link",
+        spatial.co2.vents,
+        bus0=spatial.co2.nodes,
+        bus1="co2 atmosphere",
+        carrier="co2 vent",
+        efficiency=1.,
+        p_nom_extendable=
+        True
+    )
+
+    #logger.info("Adding CO2 network.")
+    co2_links = create_network_topology(n, "CO2 pipeline ")
+
+    cost_onshore = (1 - co2_links.underwater_fraction) * costs.at['CO2 pipeline', 'fixed'] * co2_links.length
+    cost_submarine = co2_links.underwater_fraction * costs.at['CO2 submarine pipeline', 'fixed'] * co2_links.length
+    capital_cost = cost_onshore + cost_submarine
+
+    n.madd("Link",
+        co2_links.index,
+        bus0=co2_links.bus0.values + " co2 stored",
+        bus1=co2_links.bus1.values + " co2 stored",
+        p_min_pu=-1,
+        p_nom_extendable=True,
+        length=co2_links.length.values,
+        capital_cost=capital_cost.values,
+        carrier="CO2 pipeline",
+        lifetime=costs.at['CO2 pipeline', 'lifetime'])
 
 
 if __name__ == "__main__":
@@ -154,7 +225,15 @@ if __name__ == "__main__":
 
     # TODO fetch options from the config file
 
+    options = {"co2_network": True,
+               "co2_sequestration_potential": 200,  #MtCO2/a sequestration potential for Europe
+                "co2_sequestration_cost": 10,
+                "hydrogen_underground_storage": True,
+                "h2_cavern": True}   #EUR/tCO2 for sequestration of CO2}
+    
     add_hydrogen(n, costs)      #TODO add costs
+    
+    add_co2(n, costs)      #TODO add costs
 
     # TODO define spatial (for biomass and co2)
 
