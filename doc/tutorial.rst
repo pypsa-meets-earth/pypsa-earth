@@ -33,7 +33,7 @@ PyPSA Introduction (essential)
 - Watch how PyPSA-Eur is designed https://www.youtube.com/watch?v=ty47YU1_eeQ (1h)
 - Watch and put your hands on to make PyPSA-Eur work on your computer https://www.youtube.com/watch?v=mAwhQnNRIvs (1-3h)
 - While watching these PyPSA videos always have a look into the excellent `PyPSA-Eur documentation <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_
-- To see what data we can extract we work usually closely with the `basic PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html>`_ 
+- To see what data we can extract we work usually closely with the `basic PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html>`_
 
 
 Git and GitHub (essential)
@@ -50,10 +50,10 @@ For code collaboration we use GitHub. Which is a common source control tool that
 Snakemake and advanced changes (essential)
 -------------------------------------------
 
-Snakemake is our brain in PyPSA. 
-It automates many tasks & keeps the code structure clean. 
+Snakemake is our brain in PyPSA.
+It automates many tasks & keeps the code structure clean.
 Therefore, it is quite useful to learn if your task is to integrate features into PyPSA.
-We can recommend: 
+We can recommend:
 
 - `snakemake basic and advanced tutorial here <https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html>`__ (takes max 3-5h and makes a lot of fun).
 - Explore how PyPSA uses snakemake in the Snakefile and scripts - the GitHub search function is your best friend to find quickly what interests you.
@@ -117,7 +117,7 @@ To do so, follow the following procedure:
 1. Make a copy of the ``config.default.yaml`` file and rename it as ``config.yaml``
 2. In ``config.yaml`` modify the option ``countries = ["AA", ..., "ZZ"]`` with the list
    of countries that you desire; 2-digit country codes are requested or region names.
-   
+
    For example, to investigate Nigeria, the following specification shall be applied in
    the configuration file.
 
