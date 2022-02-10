@@ -75,6 +75,7 @@ the rules, in the ``notebooks`` folder, the following notebooks are available:
 
 - ``network_comparison``: compares the network models developed along the data workflow; useful and interactive plots are generated
 - ``osm_build_network_plot``: provides specific plots and outputs for the ``download_osm_data`` rule
+- ``osm_data_access``: explains how OSM data are being loaded by using ``download_osm_data``
 - ``osm_powermap``: contains nice plots and description of the output of the data downloaded and cleaned by using ``download_osm_data`` and ``clean_osm_data``
 - ``solve_network_results``: provides useful plots and textual outputs to investigate the results of the last optimization performed using solve_network
 - ``build_bus_regions``: it explores the inputs and outputs of the ``build_bus_regions`` rule,
