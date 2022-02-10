@@ -387,6 +387,7 @@ world_iso = {
 }
 
 # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
+# Australasia region includes New Caledonia and Papua New Guinea
 continent_regions = {
     # European regions
     "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
