@@ -299,27 +299,28 @@ def busmap_for_gadm_clusters(n, gadm_level):
     gdf = get_GADM_layer(country_list, gadm_level)
 
     def locate_bus(coords, co):
-        if co =='TN':
-            gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains('TUN')] #TODO change naming convention to 2 letter
+        if co == 'TN':
+            # TODO change naming convention to 2 letter
+            gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains('TUN')]
         else:
             gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(co)]
 
-        point = Point(coords["x"], coords["y"])        
-        
+        point = Point(coords["x"], coords["y"])
+
         try:
             return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item()
-        
+
         except ValueError:
-            return gdf_co[gdf_co.geometry==\
-                          min(gdf_co.geometry, 
-                              key=(point.distance))]["GID_{}".format(gadm_level)].item() 
+            return gdf_co[gdf_co.geometry ==
+                          min(gdf_co.geometry,
+                              key=(point.distance))]["GID_{}".format(gadm_level)].item()
 
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
-        lambda bus: locate_bus(bus[['x','y']], bus['country']), axis=1)
+        lambda bus: locate_bus(bus[['x', 'y']], bus['country']), axis=1)
     busmap = buses["gadm_{}".format(gadm_level)]
     not_founds = busmap[busmap == "not_found"].index.tolist()
-    for not_found in not_founds:            #TODO remove when model is more mature
+    for not_found in not_founds:  # TODO remove when model is more mature
         for tech in ["solar", "onwind"]:
             try:
                 n.remove("Generator", "{0} {1}".format(not_found, tech))
@@ -430,9 +431,9 @@ def clustering_for_n_clusters(
                                            focus_weights, algorithm)
 
     weighted_agg_gens = True
-    
-    #ss=n.buses[n.buses.gadm_1==n.buses.loc['739']['gadm_1']].country
-    #print(ss[ss!='ZA'])
+
+    # ss=n.buses[n.buses.gadm_1==n.buses.loc['739']['gadm_1']].country
+    # print(ss[ss!='ZA'])
 
     clustering = get_clustering_from_busmap(
         n,

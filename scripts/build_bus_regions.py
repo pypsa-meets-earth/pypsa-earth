@@ -149,37 +149,37 @@ def custom_voronoi_partition_pts(points,
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
 
-
     def locate_bus(coords):
         point = Point(Point(coords["x"], coords["y"]))
-        if country =='TN':
-            gadm_shapes_country = gadm_shapes.filter(like='TUN', axis=0)        #TODO change the naming to 2 letter
+        if country == 'TN':
+            gadm_shapes_country = gadm_shapes.filter(
+                like='TUN', axis=0)  # TODO change the naming to 2 letter
         else:
-            gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)   
+            gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)
 
         try:
             return gadm_shapes[gadm_shapes.contains(point
-                )].item()
+                                                    )].item()
         except ValueError:
             # return 'not_found'
-            return min(gadm_shapes_country, key=(point.distance))             # TODO 
+            # TODO
+            return min(gadm_shapes_country, key=(point.distance))
 
     def get_id(coords):
         point = Point(Point(coords["x"], coords["y"]))
-        if country =='TN':
-            gadm_shapes_country = gadm_shapes.filter(like='TUN', axis=0)   
+        if country == 'TN':
+            gadm_shapes_country = gadm_shapes.filter(like='TUN', axis=0)
         else:
-            gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)   
-                    
+            gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)
+
         try:
             return gadm_shapes[gadm_shapes.contains(
                 point)].index.item()
         except ValueError:
             # return 'not_found'
-            return gadm_shapes_country[gadm_shapes_country.geometry==\
-                min(gadm_shapes_country, 
-                    key=(point.distance))].index.item() # TODO 
-
+            return gadm_shapes_country[gadm_shapes_country.geometry ==
+                                       min(gadm_shapes_country,
+                                           key=(point.distance))].index.item()  # TODO
 
     regions = onshore_locs[["x", "y"]].apply(locate_bus, axis=1)
     ids = onshore_locs[["x", "y"]].apply(get_id, axis=1)
