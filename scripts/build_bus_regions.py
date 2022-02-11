@@ -51,6 +51,8 @@ from shapely.geometry import Point
 from shapely.geometry import Polygon
 from vresutils.graph import voronoi_partition_pts
 
+# from scripts.build_shapes import gadm
+
 _logger = logging.getLogger(__name__)
 
 
@@ -147,28 +149,38 @@ def custom_voronoi_partition_pts(points,
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
 
+
     def locate_bus(coords):
+        point = Point(Point(coords["x"], coords["y"]))
+        if country =='TN':
+            gadm_shapes_country = gadm_shapes.filter(like='TUN', axis=0)        #TODO change the naming to 2 letter
+        else:
+            gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)   
+
         try:
-            return gadm_shapes[gadm_shapes.contains(
-                Point(coords["x"], coords["y"]))].item()
+            return gadm_shapes[gadm_shapes.contains(point
+                )].item()
         except ValueError:
             # return 'not_found'
-            gadm_shapes[gadm_shapes.contains(Point(-9, 32))].item(
-            )  # TODO !!Fatal!! assigning not found to a random shape
+            return min(gadm_shapes_country, key=(point.distance))             # TODO 
 
     def get_id(coords):
+        point = Point(Point(coords["x"], coords["y"]))
+        if country =='TN':
+            gadm_shapes_country = gadm_shapes.filter(like='TUN', axis=0)   
+        else:
+            gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)   
+                    
         try:
             return gadm_shapes[gadm_shapes.contains(
-                Point(coords["x"], coords["y"]))].index.item()
+                point)].index.item()
         except ValueError:
             # return 'not_found'
-            gadm_shapes[gadm_shapes.contains(Point(-9, 32))].index.item(
-            )  # TODO !!Fatal!! assigning not found to a random shape
+            return gadm_shapes_country[gadm_shapes_country.geometry==\
+                min(gadm_shapes_country, 
+                    key=(point.distance))].index.item() # TODO 
 
-    sas = []
-    sas.append(onshore_locs[["x", "y"]].apply(locate_bus, axis=1).values)
-    ss = numpy.empty((len(sas), ), "object")
-    ss[:] = sas
+
     regions = onshore_locs[["x", "y"]].apply(locate_bus, axis=1)
     ids = onshore_locs[["x", "y"]].apply(get_id, axis=1)
     return regions.values, ids.values

@@ -298,20 +298,28 @@ def busmap_for_gadm_clusters(n, gadm_level):
 
     gdf = get_GADM_layer(country_list, gadm_level)
 
-    def locate_bus(coords):
+    def locate_bus(coords, co):
+        if co =='TN':
+            gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains('TUN')] #TODO change naming convention to 2 letter
+        else:
+            gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(co)]
+
+        point = Point(coords["x"], coords["y"])        
+        
         try:
-            return gdf[gdf.contains(
-                Point(coords["x"],
-                      coords["y"]))]["GID_{}".format(gadm_level)].item()
+            return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item()
+        
         except ValueError:
-            return "not_found"
+            return gdf_co[gdf_co.geometry==\
+                          min(gdf_co.geometry, 
+                              key=(point.distance))]["GID_{}".format(gadm_level)].item() 
 
     buses = n.buses
-    buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus,
-                                                                  axis=1)
+    buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
+        lambda bus: locate_bus(bus[['x','y']], bus['country']), axis=1)
     busmap = buses["gadm_{}".format(gadm_level)]
     not_founds = busmap[busmap == "not_found"].index.tolist()
-    for not_found in not_founds:
+    for not_found in not_founds:            #TODO remove when model is more mature
         for tech in ["solar", "onwind"]:
             try:
                 n.remove("Generator", "{0} {1}".format(not_found, tech))
@@ -422,6 +430,10 @@ def clustering_for_n_clusters(
                                            focus_weights, algorithm)
 
     weighted_agg_gens = True
+    
+    #ss=n.buses[n.buses.gadm_1==n.buses.loc['739']['gadm_1']].country
+    #print(ss[ss!='ZA'])
+
     clustering = get_clustering_from_busmap(
         n,
         busmap,
@@ -490,6 +502,21 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
+    #n.buses.at[['3773'], 'country']='BJ'
+    #n.buses.at[['2822', '240', '6285'], 'country']='ZW'
+    #n.buses.at[['2807', '4258', '623', '88'], 'country']='ZA'
+    #n.buses.at[['3420'], 'country']='EH'
+    #n.buses.at[['2288'], 'country']='LS'
+    #n.buses.at[['3068'], 'country']='MA'
+    #n.buses.at[['6156'], 'country']='SZ'
+    #n.buses.at[['544'], 'country']='UG'
+    #n.buses.at[['7096'], 'country']='ZM'
+    #n.buses.at[['223', '257', '648'], 'country']='ZW'
+    #n.buses.at[['120', '52', '6139'], 'country']='NA'
+    #n.buses.at[['3829', '641', '168', '689'], 'country']='MZ'
+    #n.buses.at[['309', '7725'], 'country']='ET'
+    #n.buses.at[['7174', '4152', '4154', '4159'], 'country']='DZ'
+    #n.buses.at[['217', '251', '1565', '1315', '1840', '1965'], 'country']='BW'
 
     alternative_clustering = snakemake.config["cluster_options"][
         "alternative_clustering"]
