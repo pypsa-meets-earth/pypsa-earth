@@ -5,8 +5,14 @@
 name: CI-windows
 
 on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
   schedule:
-    - cron: "0 5 * * TUE,FRI"
+    - cron: "0 5 * * TUE"
 
 jobs:
   build:
