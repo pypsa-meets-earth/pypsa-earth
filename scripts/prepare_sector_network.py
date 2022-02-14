@@ -1,8 +1,12 @@
 import os
+import pypsa
 import pandas as pd
 import numpy as np
 
 from helpers import mock_snakemake, prepare_costs, create_network_topology  
+
+from types import SimpleNamespace
+spatial = SimpleNamespace()
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
@@ -108,8 +112,7 @@ def add_hydrogen(n, costs):
 
 
 def add_co2(n, costs):
-    from types import SimpleNamespace
-    spatial = SimpleNamespace()
+
 
     spatial.nodes = nodes
 
@@ -230,6 +233,196 @@ def add_co2(n, costs):
         carrier="CO2 pipeline",
         lifetime=costs.at['CO2 pipeline', 'lifetime'])
 
+# def add_aviation(n, cost):
+    
+#     all_aviation = ["total international aviation", "total domestic aviation"]
+#     p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+
+#     n.add("Load",
+#         "kerosene for aviation",
+#         bus="EU oil",
+#         carrier="kerosene for aviation",
+#         p_set=p_set
+#     )
+    
+#     co2_release = ["kerosene for aviation"]
+#     co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
+
+#     n.add("Load",
+#         "oil emissions",
+#         bus="co2 atmosphere",
+#         carrier="oil emissions",
+#         p_set=-co2
+#     )
+
+
+def add_industry(n, costs):
+
+#     print("adding industrial demand")
+
+
+
+#     # 1e6 to convert TWh to MWh
+#     industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) * 1e6
+    industrial_demand=create_dummy_data(n, 'industry', '')
+
+
+################################################## CARRIER = FOSSIL GAS
+
+    n.add("Bus",
+        "gas for industry",
+        location="EU",
+        carrier="gas for industry")
+
+    n.add("Load",
+        "gas for industry",
+        bus="gas for industry",
+        carrier="gas for industry",
+        p_set=industrial_demand.loc[nodes, "methane"].sum() / 8760
+    )
+
+    n.add("Link",
+        "gas for industry",
+        bus0="EU gas",
+        bus1="gas for industry",
+        bus2="co2 atmosphere",
+        carrier="gas for industry",
+        p_nom_extendable=True,
+        efficiency=1.,
+        efficiency2=costs.at['gas', 'CO2 intensity']
+    )
+
+    n.madd("Link",
+        spatial.co2.locations,
+        suffix=" gas for industry CC",
+        bus0="EU gas",
+        bus1="gas for industry",
+        bus2="co2 atmosphere",
+        bus3=spatial.co2.nodes,
+        carrier="gas for industry CC",
+        p_nom_extendable=True,
+        capital_cost=costs.at["cement capture", "fixed"] * costs.at['gas', 'CO2 intensity'],
+        efficiency=0.9,
+        efficiency2=costs.at['gas', 'CO2 intensity'] * (1 - costs.at["cement capture", "capture_rate"]),
+        efficiency3=costs.at['gas', 'CO2 intensity'] * costs.at["cement capture", "capture_rate"],
+        lifetime=costs.at['cement capture', 'lifetime']
+    )
+
+#################################################### CARRIER = HYDROGEN
+    n.madd("Load",
+        nodes,
+        suffix=" H2 for industry",
+        bus=nodes + " H2",
+        carrier="H2 for industry",
+        p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760
+    )
+    
+################################################ CARRIER = LIQUID HYDROCARBONS
+    n.add("Load",
+        "naphtha for industry",
+        bus="EU oil",
+        carrier="naphtha for industry",
+        p_set=industrial_demand.loc[nodes, "naphtha"].sum() / 8760
+    )
+
+#     #NB: CO2 gets released again to atmosphere when plastics decay or kerosene is burned
+#     #except for the process emissions when naphtha is used for petrochemicals, which can be captured with other industry process emissions
+#     #tco2 per hour
+    co2_release = ["naphtha for industry"] #TODO kerosene for aviation should be added too but in the right func.
+                                            #check land tranport
+    co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] - industrial_demand.loc[nodes, "process emission from feedstock"].sum() / 8760
+
+    n.add("Load",
+        "industry oil emissions",
+        bus="co2 atmosphere",
+        carrier="industry oil emissions",
+        p_set=-co2
+    )
+
+
+########################################################### CARIER = HEAT
+#     # TODO simplify bus expression
+#     n.madd("Load",
+#         nodes,
+#         suffix=" low-temperature heat for industry",
+#         bus=[node + " urban central heat" if node + " urban central heat" in n.buses.index else node + " services urban decentral heat" for node in nodes],
+#         carrier="low-temperature heat for industry",
+#         p_set=industrial_demand.loc[nodes, "low-temperature heat"] / 8760
+#     )
+
+
+################################################## CARRIER = ELECTRICITY
+
+#     # remove today's industrial electricity demand by scaling down total electricity demand
+    for ct in n.buses.country.dropna().unique():
+        # TODO map onto n.bus.country
+        loads_i = n.loads.index[(n.loads.index.str[:2] == ct) & (n.loads.carrier == "electricity")] # TODO make sure to check this one, should AC have carrier pf "electricity"?
+        if n.loads_t.p_set[loads_i].empty: continue
+        factor = 1 - industrial_demand.loc[loads_i, "current electricity"].sum() / n.loads_t.p_set[loads_i].sum().sum()
+        n.loads_t.p_set[loads_i] *= factor
+
+    n.madd("Load",
+        nodes,
+        suffix=" industry electricity",
+        bus=nodes,
+        carrier="industry electricity",
+        p_set=industrial_demand.loc[nodes, "electricity"] / 8760
+    )
+
+    n.add("Bus",
+        "process emissions",
+        location="EU",
+        carrier="process emissions"
+    )
+
+    # this should be process emissions fossil+feedstock
+    # then need load on atmosphere for feedstock emissions that are currently going to atmosphere via Link Fischer-Tropsch demand
+    n.add("Load",
+        "process emissions",
+        bus="process emissions",
+        carrier="process emissions",
+        p_set=-industrial_demand.loc[nodes,["process emission", "process emission from feedstock"]].sum(axis=1).sum() / 8760
+    )
+
+    n.add("Link",
+        "process emissions",
+        bus0="process emissions",
+        bus1="co2 atmosphere",
+        carrier="process emissions",
+        p_nom_extendable=True,
+        efficiency=1.
+    )
+
+    #assume enough local waste heat for CC
+    n.madd("Link",
+        spatial.co2.locations,
+        suffix=" process emissions CC",
+        bus0="process emissions",
+        bus1="co2 atmosphere",
+        bus2=spatial.co2.nodes,
+        carrier="process emissions CC",
+        p_nom_extendable=True,
+        capital_cost=costs.at["cement capture", "fixed"],
+        efficiency=1 - costs.at["cement capture", "capture_rate"],
+        efficiency2=costs.at["cement capture", "capture_rate"],
+        lifetime=costs.at['cement capture', 'lifetime']
+    )
+
+def create_dummy_data(n, sector, carriers):
+    ind=n.buses_t.p.index
+    ind=n.buses.index[n.buses.carrier=='AC']
+    
+    if sector == 'industry':
+        col = ["electricity","coal","coke","solid biomass","methane","hydrogen",
+               "low-temperature heat","naphtha","process emission",
+               "process emission from feedstock","current electricity"]
+    else:
+        raise Exception("sector not found")
+    data=np.random.randint(10, 500, size=(len(ind), len(col)))
+    
+    return pd.DataFrame(data, index=ind, columns=col)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -270,6 +463,8 @@ if __name__ == "__main__":
     add_hydrogen(n, costs)      #TODO add costs
     
     add_co2(n, costs)      #TODO add costs
+    
+    add_industry(n, costs)
 
     # TODO define spatial (for biomass and co2)
 
