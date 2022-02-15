@@ -2,16 +2,24 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-# File of the bundle configurations
-# 
-# bundle_name:  # name of the bundle
-#   countries: [country code, region code or country list]  # list of countries represented in the databundle
-#   [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
-#   category: common/resources/data/cutouts  # category of data contained in the bundle:
-#   destination: ""  # folder where to unzip the files with respect to the repository root
-#   urls:  # list of urls by source, e.g. zenodo or google
-#     zenodo:  {zenodo url}
-#     google: {google url}
+"""
+File describing the data bundle configurations that can be downloaded
+by using the retrieve_databundle fule
+
+Each bundle shall have the following structure:
+
+.. code:: yaml
+
+  bundle_name:  # name of the bundle
+    countries: [country code, region code or country list]  # list of countries represented in the databundle
+    [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
+    category: common/resources/data/cutouts  # category of data contained in the bundle:
+    destination: ""  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
+    urls:  # list of urls by source, e.g. zenodo or google
+      zenodo: {zenodo url}
+      google: {google url}
+
+"""
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_data_tutorial:
@@ -47,34 +55,56 @@ bundle_cutouts_tutorial:
 bundle_data_world:
   countries: [world]
   category: common
-  destination: ""
+  destination: "data"
   urls:
-    zenodo: []
-    google: []
+    google: https://drive.google.com/file/d/1qmWQhaVdFZyUbUY98AdPByjrXHQ79m7Y/view?usp=sharing
 
 # resources bundle containing the resources folder for africa only
 bundle_resources_africa:
   countries: [africa]
   category: resources
-  destination: "resources"
+  destination: "."
   urls:
     zenodo: https://zenodo.org/record/5894972/files/resources.zip
     google: https://drive.google.com/file/d/1hklbiRLyb_rx6WTvgCJ1Dx_9rooA85y1/view
 
 # data bundle of the data folder for the african continent
-bundle_data_africa:
+bundle_landcover_africa:
   countries: [africa]
-  category: data
-  destination: "data"
+  category: landcover
+  destination: "data\\raw\\landcover"
   urls:
-    zenodo: https://zenodo.org/record/5895010/files/data.zip
-    google: https://drive.google.com/file/d/1Jv4UMw7CoinZwIzl5nm1Z5oIuK7dG7gu/view
+    google: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
+
+# data bundle of the data folder for the african continent
+bundle_landcover_asiapacific:
+  countries: [asia]
+  category: landcover
+  destination: "data\\raw\\landcover"
+  urls:
+    google: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
+
+# data bundle of the data folder for the african continent
+bundle_landcover_latinamerica_caribbean:
+  countries: [southamerica]
+  category: landcover
+  destination: "data\\raw\\landcover"
+  urls:
+    google: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
+
+# data bundle of the data folder for the african continent
+bundle_landcover_westasia:
+  countries: [westasia]
+  category: landcover
+  destination: "data\\raw\\landcover"
+  urls:
+    google: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
 
 # cutouts bundle of the cutouts folder for the african continent
 bundle_cutouts_africa:
   countries: [africa]
   category: cutouts
-  destination: "cutouts"
+  destination: "."
   urls:
     zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5.nc
     google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
