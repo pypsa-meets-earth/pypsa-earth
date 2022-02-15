@@ -208,3 +208,6 @@ if __name__ == "__main__":
         for host in host_list:
             if download_and_unzip(host, config_bundles[b_name], rootpath):
                 break
+
+    logger.info("Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download))
+    print("Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download))
