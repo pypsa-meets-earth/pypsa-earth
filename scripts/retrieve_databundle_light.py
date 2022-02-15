@@ -37,6 +37,7 @@ from pathlib import Path
 from numpy import False_
 import yaml
 from zipfile import ZipFile
+import re
 
 from _helpers import _sets_path_to_root
 from _helpers import configure_logging
@@ -53,7 +54,10 @@ def load_databundle_config(path):
 
     # parse the "countries" list specified in the file before processing
     for bundle_name in config:
-        config[bundle_name]["countries"] = create_country_list(config[bundle_name]["countries"])
+        config[bundle_name]["countries"] = create_country_list(
+                                                config[bundle_name]["countries"],
+                                                iso_coding=False
+                                            )
     
     return config
 
@@ -79,19 +83,19 @@ def download_and_unzip(host, config, rootpath):
 
         url=config["urls"]["google"]
         # retrieve file_id from path
-        partition_view = str(url).split("/view", 1)  # cut the part before the ending \view
+        partition_view = re.split(r"/view|\\view", str(url), 1)  # cut the part before the ending \view
         if len(partition_view) < 2:
             logger.error(f"Resource {resource} cannot be downloaded: \"\\view\" not found in url {url}")
             return False
         
-        code_split = partition_view[0].rsplit("\\", 1)  # split url to get the file_id
+        code_split = re.split(r"\\|/", partition_view[0])  # split url to get the file_id
 
-        if len(partition_view) < 2:
+        if len(code_split) < 2:
             logger.error(f"Resource {resource} cannot be downloaded: character \"\\\" not found in {partition_view[0]}")
             return False
         
         # get file id
-        file_id = code_split[1]
+        file_id = code_split[-1]
 
         # gdd.download_file_from_google_drive(
         #     file_id=file_id,
@@ -107,21 +111,38 @@ def download_and_unzip(host, config, rootpath):
         logger.error(f"Host {host} not implemented")
         return False
 
-def get_best_bundle(category, config_bundles, tutorial):
+def get_best_bundle(country_list, category, config_bundles, tutorial):
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
     dict_n_matched = {bname:config_bundles[bname]["n_matched"] for bname in config_bundles
         if config_bundles[bname]["category"] == category and config_bundles[bname].get("tutorial", False) == tutorial
     }
 
+    returned_countries = []
+
     # check if non-empty dictionary
     if dict_n_matched:
-        # if non-empty, then pick the first bundle
+        # if non-empty, then pick bundles until all countries are selected
+        # or no mor bundles are found
         dict_sort = sorted(dict_n_matched.items(), key=lambda d: d[1])
 
-        dname_download = dict_sort[0][0]
-        return [dname_download]
-    else:
-        return []
+        current_matched_countries = []
+        remaining_countries = set(country_list)
+
+        for d_val in dict_sort:
+
+            bname = d_val[0]
+            cbundle_list = set(config_bundles[bname]["countries"])
+
+            # list of countries in the bundle that are not yet matched
+            intersect = cbundle_list.intersection(remaining_countries)
+
+            if intersect:
+                current_matched_countries.extend(intersect)
+                remaining_countries = remaining_countries.difference(intersect)
+
+                returned_countries.append(bname)
+
+    return returned_countries
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -163,14 +184,17 @@ if __name__ == "__main__":
 
             # check if non-empty dictionary
             if selection_bundles:
-                # if non-empty, then 
                 bundle_to_download.extend(selection_bundles)
+
+                if len(selection_bundles) == 1:
+                    logger.warning(f"Multiple bundle data for category {cat}: " * ", ".join(selection_bundles.keys()))
+
                 continue
             else:
                 logger.info(f"Tutorial data for {cat} not found, fall back to non-tutorial data")
 
         
-        selection_bundles = get_best_bundle(cat, config_bundles, False)
+        selection_bundles = get_best_bundle(countries, cat, config_bundles, False)
 
         # check if non-empty dictionary
         if selection_bundles:
