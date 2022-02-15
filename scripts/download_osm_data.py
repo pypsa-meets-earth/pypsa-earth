@@ -51,9 +51,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
+
 # logger.setLevel(logging.WARNING)
 
 
+# get continent according to ISO conventions
 def getContinentCountry(code):
     for continent in world_geofk:
         country = world_geofk[continent].get(code, 0)
@@ -95,6 +97,8 @@ def download_pbf(country_code, update, verify, logging=True):
     # Filepath of the pbf
     PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
                                  geofabrik_filename)
+
+    _logger.info(f" Input file {PBF_inputfile} ")
 
     if not os.path.exists(PBF_inputfile):
         if logging:
