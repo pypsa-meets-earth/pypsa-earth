@@ -61,7 +61,7 @@ def load_databundle_config(path):
     
     return config
 
-def download_and_unzip(host, config, rootpath):
+def download_and_unzip(host, config, rootpath, dest_path):
     """
     Function to download and unzip data depending on the hosting platform.
     Currently, hosts accepted: zenodo and google
@@ -71,12 +71,12 @@ def download_and_unzip(host, config, rootpath):
 
     if host=="zenodo":
         url=config["urls"]["zenodo"]
-        # progress_retrieve(url, file_path)
-        # logger.info(f"Extracting resources")
-        # with ZipFile(file_path, "r") as zipObj:
-        #     # Extract all the contents of zip file in current directory
-        #     zipObj.extractall()
-        # os.remove(file_path)
+        progress_retrieve(url, file_path)
+        logger.info(f"Extracting resources")
+        with ZipFile(file_path, "r") as zipObj:
+            # Extract all the contents of zip file in current directory
+            zipObj.extractall(path=dest_path)
+        os.remove(file_path)
         logger.info(f"Download resource '{resource}' from cloud '{url}'.")
         return True
     elif host=="google":
@@ -97,13 +97,18 @@ def download_and_unzip(host, config, rootpath):
         # get file id
         file_id = code_split[-1]
 
-        # gdd.download_file_from_google_drive(
-        #     file_id=file_id,
-        #     dest_path=file_path,
-        #     showsize=True,
-        #     unzip=True,
-        # )
-        # os.remove(file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        gdd.download_file_from_google_drive(
+            file_id=file_id,
+            dest_path=file_path,
+            showsize=True,
+            unzip=False,
+        )
+        with ZipFile(file_path, "r") as zipObj:
+            # Extract all the contents of zip file in current directory
+            zipObj.extractall(path=dest_path)
+        os.remove(file_path)
         logger.info(f"Download resource '{resource}' from cloud '{url}'.")
 
         return True
@@ -204,9 +209,10 @@ if __name__ == "__main__":
     # download the selected bundles
     for b_name in bundle_to_download:
         host_list = config_bundles[b_name]["urls"]
+        dest_path = os.path.abspath(config_bundles[b_name]["destination"])
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-            if download_and_unzip(host, config_bundles[b_name], rootpath):
+            if download_and_unzip(host, config_bundles[b_name], rootpath, dest_path):
                 break
 
     logger.info("Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download))
