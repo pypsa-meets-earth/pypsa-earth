@@ -2,24 +2,22 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-"""
-File describing the data bundle configurations that can be downloaded
-by using the retrieve_databundle fule
+# File describing the data bundle configurations that can be downloaded
+# by using the retrieve_databundle fule
 
-Each bundle shall have the following structure:
+# Each bundle shall have the following structure:
 
-.. code:: yaml
+# .. code:: yaml
 
-  bundle_name:  # name of the bundle
-    countries: [country code, region code or country list]  # list of countries represented in the databundle
-    [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
-    category: common/resources/data/cutouts  # category of data contained in the bundle:
-    destination: ""  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
-    urls:  # list of urls by source, e.g. zenodo or google
-      zenodo: {zenodo url}
-      google: {google url}
+#   bundle_name:  # name of the bundle
+#     countries: [country code, region code or country list]  # list of countries represented in the databundle
+#     [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
+#     category: common/resources/data/cutouts  # category of data contained in the bundle:
+#     destination: ""  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
+#     urls:  # list of urls by source, e.g. zenodo or google
+#       zenodo: {zenodo url}
+#       google: {google url}
 
-"""
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_data_tutorial:
