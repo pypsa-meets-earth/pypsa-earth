@@ -78,7 +78,7 @@ bundle_landcover_africa:
 
 # data bundle of the data folder for the african continent
 bundle_landcover_asiapacific:
-  countries: [asia]
+  countries: [asia, australia-oceania]
   category: landcover
   destination: "data\\raw\\landcover"
   urls:
@@ -86,7 +86,7 @@ bundle_landcover_asiapacific:
 
 # data bundle of the data folder for the african continent
 bundle_landcover_latinamerica_caribbean:
-  countries: [southamerica]
+  countries: [latin_america, central_america]
   category: landcover
   destination: "data\\raw\\landcover"
   urls:
@@ -94,7 +94,7 @@ bundle_landcover_latinamerica_caribbean:
 
 # data bundle of the data folder for the african continent
 bundle_landcover_westasia:
-  countries: [westasia]
+  countries: [WAS]
   category: landcover
   destination: "data\\raw\\landcover"
   urls:
