@@ -1,9 +1,10 @@
-# PyPSA meets Africa
+# PyPSA meets Africa and PyPSA meets Earth
 
 ## Development Status: **Stable and Active**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
-[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml)
+[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux-mac.yaml)
+[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
 
@@ -36,15 +37,18 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
-- **Specific code meeting (by invitation)**
-  - current meetings: 1) Demand creation (WP1) 2) Data workflow updates (WP1-WP5) and 3) AI asset detection (WP6)
-  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
-  - updates, demos, task distribution, weekly targets, Q&A
-- **Outreach meeting (by invitation)**
-  - every second week
+- **Specific code meeting (Open)**
+  - meeting hosted on Discord
+  - join updates, demos, Q&A's, discussions and the coordination of each work package
+  1) Demand creation and prediction meeting, every Wednesday 21:00 UTC+0 
+  2) AI asset detection meeting, every Tuesday 16:00 UTC+0
+  3) Sector coupling meeting, every Thursday 9:00 UTC+0
+  4) Data workflow and architecture meeting, every Friday 14:00 UTC+0
+- **Outreach meeting (Open)**
+  - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
 - [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
-  - access to presentations, lists, documents
+  - access to minutes, presentations, lists, documents
 
 
 ## Installation
