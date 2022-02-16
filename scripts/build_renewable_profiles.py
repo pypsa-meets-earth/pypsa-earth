@@ -252,7 +252,7 @@ if __name__ == "__main__":
 
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
-        country_shapes = gpd.read_file(paths.country_shapes) 
+        country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins = gpd.read_file(resource["hydrobasins"])
         hydrobasins = hydrobasins[[
             any(country_shapes.geometry.intersects(geom))
@@ -273,8 +273,8 @@ if __name__ == "__main__":
             xr.DataArray(dims=["plant", "time"],
                          coords={
                              "plant": []
-                         },
-                         name="inflow").to_netcdf(snakemake.output.profile)
+            },
+                name="inflow").to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
