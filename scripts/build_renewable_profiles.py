@@ -266,7 +266,6 @@ if __name__ == "__main__":
             any(hydrobasins.geometry.intersects(p))
             for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
         ]]  # TODO: filtering by presence of hydro generators should be the way to go
-        # Skip filtering if powerplant location is in shape
 
         # check if there are hydro powerplants
         if resource["plants"].empty:
