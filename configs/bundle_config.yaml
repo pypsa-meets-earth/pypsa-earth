@@ -27,7 +27,7 @@ bundle_data_tutorial:
   destination: "data"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016004/files/tutorial_data.zip?download=1
-    # google: https://drive.google.com/file/d/1Jv4UMw7CoinZwIzl5nm1Z5oIuK7dG7gu/view?usp=sharing
+    google: https://drive.google.com/file/d/1orUhMsWxUUOc1xFEiNBi1Yzd4U_3zar9/view?usp=sharing
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_resources_tutorial:
@@ -37,7 +37,7 @@ bundle_resources_tutorial:
   destination: "resources"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016001/files/tutorial_resources.zip?download=1
-    # google: https://drive.google.com/file/d/1yBDOBc1ufbJQjacZ4FNH7tEp6kX72kUL/view?usp=sharing
+    google: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_cutouts_tutorial:
@@ -47,7 +47,7 @@ bundle_cutouts_tutorial:
   destination: "cutouts"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016015/files/tutorial_cutouts.zip?download=1
-    # google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view?usp=sharing
+    google: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
 
 # data bundle containing the data of the data folder common to all regions of the world
 bundle_data_world:
