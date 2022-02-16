@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     for cat in categories:
         if tutorial:
-            selection_bundles = get_best_bundle(cat, config_bundles, tutorial)
+            selection_bundles = get_best_bundle(countries, cat, config_bundles, tutorial)
 
             # check if non-empty dictionary
             if selection_bundles:
