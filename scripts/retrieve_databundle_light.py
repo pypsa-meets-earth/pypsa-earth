@@ -56,8 +56,7 @@ def load_databundle_config(path):
     # parse the "countries" list specified in the file before processing
     for bundle_name in config:
         config[bundle_name]["countries"] = create_country_list(
-            config[bundle_name]["countries"], iso_coding=False
-        )
+            config[bundle_name]["countries"], iso_coding=False)
 
     return config
 
@@ -241,8 +240,7 @@ if __name__ == "__main__":
 
     # categories of data to download
     categories = list(
-        set([config_bundles[conf]["category"] for conf in config_bundles])
-    )
+        set([config_bundles[conf]["category"] for conf in config_bundles]))
 
     # idenfify matched countries for every bundle
     for bname in config_bundles:
@@ -256,17 +254,16 @@ if __name__ == "__main__":
     bundle_to_download = []
 
     for cat in categories:
-        selection_bundles = get_best_bundles(countries, cat, config_bundles, tutorial)
+        selection_bundles = get_best_bundles(countries, cat, config_bundles,
+                                             tutorial)
 
         # check if non-empty dictionary
         if selection_bundles:
             bundle_to_download.extend(selection_bundles)
 
             if len(selection_bundles) > 1:
-                logger.warning(
-                    f"Multiple bundle data for category {cat}: "
-                    + ", ".join(selection_bundles)
-                )
+                logger.warning(f"Multiple bundle data for category {cat}: " +
+                               ", ".join(selection_bundles))
 
     # download the selected bundles
     for b_name in bundle_to_download:
@@ -276,9 +273,7 @@ if __name__ == "__main__":
             if download_and_unzip(host, config_bundles[b_name], rootpath):
                 break
 
-    logger.info(
-        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download)
-    )
-    print(
-        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download)
-    )
+    logger.info("Bundle successfully loaded and unzipped:\n\t" +
+                "\n\t".join(bundle_to_download))
+    print("Bundle successfully loaded and unzipped:\n\t" +
+          "\n\t".join(bundle_to_download))
