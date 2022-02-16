@@ -191,8 +191,8 @@ if __name__ == "__main__":
             if selection_bundles:
                 bundle_to_download.extend(selection_bundles)
 
-                if len(selection_bundles) == 1:
-                    logger.warning(f"Multiple bundle data for category {cat}: " * ", ".join(selection_bundles))
+                if len(selection_bundles) > 1:
+                    logger.warning(f"Multiple bundle data for category {cat}: " + ", ".join(selection_bundles))
 
                 continue
             else:
