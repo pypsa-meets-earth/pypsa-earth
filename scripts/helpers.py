@@ -1,6 +1,7 @@
 from vresutils.costdata import annuity
 from pathlib import Path
 import pandas as pd
+import numpy as np
 
 def mock_snakemake(rulename, **wildcards):
     """
@@ -128,3 +129,18 @@ def create_network_topology(n, prefix, like='ac', connector=" <-> ", bidirection
         topo = topo.append(topo_reverse)
 
     return topo
+
+
+def create_dummy_data(n, sector, carriers):
+    ind=n.buses_t.p.index
+    ind=n.buses.index[n.buses.carrier=='AC']
+    
+    if sector == 'industry':
+        col = ["electricity","coal","coke","solid biomass","methane","hydrogen",
+               "low-temperature heat","naphtha","process emission",
+               "process emission from feedstock","current electricity"]
+    else:
+        raise Exception("sector not found")
+    data=np.random.randint(10, 500, size=(len(ind), len(col)))
+    
+    return pd.DataFrame(data, index=ind, columns=col)    

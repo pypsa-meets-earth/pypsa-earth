@@ -3,7 +3,7 @@ import pypsa
 import pandas as pd
 import numpy as np
 
-from helpers import mock_snakemake, prepare_costs, create_network_topology  
+from helpers import mock_snakemake, prepare_costs, create_network_topology, create_dummy_data
 
 from types import SimpleNamespace
 spatial = SimpleNamespace()
@@ -137,7 +137,7 @@ def add_co2(n, costs):
     # this tracks CO2 in the atmosphere
     n.add("Bus",
         "co2 atmosphere",
-        location="Africa",
+        location="Africa", #TODO Ignoed by pypsa chck
         carrier="co2"
     )
 
@@ -158,7 +158,7 @@ def add_co2(n, costs):
     )
 
     n.madd("Store",
-        spatial.co2.nodes,
+        spatial.co2.nodes.str[:-2] + 'age',
         e_nom_extendable=True,
         e_nom_max=np.inf,
         capital_cost=options['co2_sequestration_cost'],
@@ -204,16 +204,6 @@ def add_co2(n, costs):
         bus=spatial.co2.nodes
     )
 
-   
-    n.madd("Link",
-        spatial.co2.vents,
-        bus0=spatial.co2.nodes,
-        bus1="co2 atmosphere",
-        carrier="co2 vent",
-        efficiency=1.,
-        p_nom_extendable=
-        True
-    )
 
     #logger.info("Adding CO2 network.")
     co2_links = create_network_topology(n, "CO2 pipeline ")
@@ -222,16 +212,6 @@ def add_co2(n, costs):
     cost_submarine = co2_links.underwater_fraction * costs.at['CO2 submarine pipeline', 'fixed'] * co2_links.length
     capital_cost = cost_onshore + cost_submarine
 
-    n.madd("Link",
-        co2_links.index,
-        bus0=co2_links.bus0.values + " co2 stored",
-        bus1=co2_links.bus1.values + " co2 stored",
-        p_min_pu=-1,
-        p_nom_extendable=True,
-        length=co2_links.length.values,
-        capital_cost=capital_cost.values,
-        carrier="CO2 pipeline",
-        lifetime=costs.at['CO2 pipeline', 'lifetime'])
 
 # def add_aviation(n, cost):
     
@@ -266,6 +246,7 @@ def add_industry(n, costs):
 #     industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) * 1e6
     industrial_demand=create_dummy_data(n, 'industry', '')
 
+#TODO carrier Biomass
 
 ################################################## CARRIER = FOSSIL GAS
 
@@ -408,19 +389,6 @@ def add_industry(n, costs):
         lifetime=costs.at['cement capture', 'lifetime']
     )
 
-def create_dummy_data(n, sector, carriers):
-    ind=n.buses_t.p.index
-    ind=n.buses.index[n.buses.carrier=='AC']
-    
-    if sector == 'industry':
-        col = ["electricity","coal","coke","solid biomass","methane","hydrogen",
-               "low-temperature heat","naphtha","process emission",
-               "process emission from feedstock","current electricity"]
-    else:
-        raise Exception("sector not found")
-    data=np.random.randint(10, 500, size=(len(ind), len(col)))
-    
-    return pd.DataFrame(data, index=ind, columns=col)
 
 
 if __name__ == "__main__":
