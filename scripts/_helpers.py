@@ -273,7 +273,8 @@ def progress_retrieve(url, file):
     pbar = tqdm(total=100)
 
     def dlProgress(count, blockSize, totalSize):
-        pbar.n = count * blockSize * 100 / totalSize
+        pbar.n = round(
+            count * blockSize * 100 / totalSize * 100) / 100  # round to 0.01
         pbar.refresh()
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress)
