@@ -268,12 +268,13 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 def progress_retrieve(url, file):
     import urllib
 
-    from progressbar import ProgressBar
+    from tqdm import tqdm
 
-    pbar = ProgressBar(0, 100)
+    pbar = tqdm(total=100)
 
     def dlProgress(count, blockSize, totalSize):
-        pbar.update(int(count * blockSize * 100 / totalSize))
+        pbar.n = count * blockSize * 100 / totalSize
+        pbar.refresh()
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress)
 
