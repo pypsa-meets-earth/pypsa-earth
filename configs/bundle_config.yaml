@@ -13,7 +13,7 @@
 #     countries: [country code, region code or country list]  # list of countries represented in the databundle
 #     [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
 #     category: common/resources/data/cutouts  # category of data contained in the bundle:
-#     destination: ""  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
+#     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
 #     urls:  # list of urls by source, e.g. zenodo or google
 #       zenodo: {zenodo url}
 #       google: {google url}
@@ -26,7 +26,7 @@ bundle_data_tutorial:
   category: data
   destination: "data"
   urls:
-    zenodo: https://zenodo.org/record/5895010/files/data-tutorial.zip
+    # zenodo: https://zenodo.org/record/5895010/files/data-tutorial.zip
     google: https://drive.google.com/file/d/1IfSofV2PWUkAD_7yY-Xqv1X4duma2NkJ/view
 
 # tutorial bundle specific for Nigeria and Benin only
@@ -36,7 +36,7 @@ bundle_resources_tutorial:
   category: resources
   destination: "resources"
   urls:
-    zenodo: https://zenodo.org/record/5894972/files/resources.zip
+    # zenodo: https://zenodo.org/record/5894972/files/resources.zip
     google: https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8/view
 
 # tutorial bundle specific for Nigeria and Benin only
@@ -46,7 +46,7 @@ bundle_cutouts_tutorial:
   category: cutouts
   destination: "cutouts"
   urls:
-    zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5-tutorial.nc
+    # zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5-tutorial.nc
     google: https://drive.google.com/file/d/1kyOH8wxm_cvnS7OoahCrFFVP-U7kWr_O/view
 
 # data bundle containing the data of the data folder common to all regions of the world
@@ -61,16 +61,16 @@ bundle_data_world:
 bundle_resources_africa:
   countries: [africa]
   category: resources
-  destination: "."
+  destination: "resources"
   urls:
-    zenodo: https://zenodo.org/record/5894972/files/resources.zip
-    google: https://drive.google.com/file/d/1hklbiRLyb_rx6WTvgCJ1Dx_9rooA85y1/view
+    # zenodo: https://zenodo.org/record/5894972/files/resources.zip
+    google: https://drive.google.com/file/d/19hN7YDMbJlj7I4Qe6ChmePN3sQ8S9Qqk/view?usp=sharing
 
 # data bundle of the data folder for the african continent
 bundle_landcover_africa:
   countries: [africa]
   category: landcover
-  destination: "data\\raw\\landcover"
+  destination: "data/raw/landcover"
   urls:
     google: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
 
@@ -78,7 +78,7 @@ bundle_landcover_africa:
 bundle_landcover_asiapacific:
   countries: [asia, australia-oceania]
   category: landcover
-  destination: "data\\raw\\landcover"
+  destination: "data/raw/landcover"
   urls:
     google: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
 
@@ -86,7 +86,7 @@ bundle_landcover_asiapacific:
 bundle_landcover_latinamerica_caribbean:
   countries: [latin_america, central_america]
   category: landcover
-  destination: "data\\raw\\landcover"
+  destination: "data/raw/landcover"
   urls:
     google: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
 
@@ -94,7 +94,7 @@ bundle_landcover_latinamerica_caribbean:
 bundle_landcover_westasia:
   countries: [WAS]
   category: landcover
-  destination: "data\\raw\\landcover"
+  destination: "data/raw/landcover"
   urls:
     google: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
 
@@ -104,5 +104,5 @@ bundle_cutouts_africa:
   category: cutouts
   destination: "."
   urls:
-    zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5.nc
+    # zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5.nc
     google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
