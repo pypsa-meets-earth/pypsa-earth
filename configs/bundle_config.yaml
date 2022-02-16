@@ -55,6 +55,7 @@ bundle_data_world:
   category: common
   destination: "data"
   urls:
+    zenodo: https://sandbox.zenodo.org/record/1016042/files/common_data.zip?download=1
     google: https://drive.google.com/file/d/1qmWQhaVdFZyUbUY98AdPByjrXHQ79m7Y/view?usp=sharing
 
 # resources bundle containing the resources folder for africa only
@@ -63,7 +64,7 @@ bundle_resources_africa:
   category: resources
   destination: "resources"
   urls:
-    # zenodo: https://zenodo.org/record/5894972/files/resources.zip
+    zenodo: https://zenodo.org/record/5894972/files/resources.ziphttps://sandbox.zenodo.org/record/1016042/files/resources_africa.zip?download=1
     google: https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8/view?usp=sharing
 
 # data bundle of the data folder for the african continent
@@ -72,6 +73,7 @@ bundle_landcover_africa:
   category: landcover
   destination: "data/raw/landcover"
   urls:
+    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_africa.zip?download=1
     google: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
 
 # data bundle of the data folder for the african continent
@@ -80,6 +82,7 @@ bundle_landcover_asiapacific:
   category: landcover
   destination: "data/raw/landcover"
   urls:
+    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_asiapacific.zip?download=1
     google: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
 
 # data bundle of the data folder for the african continent
@@ -88,6 +91,7 @@ bundle_landcover_latinamerica_caribbean:
   category: landcover
   destination: "data/raw/landcover"
   urls:
+    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_latinamerica_caribbean.zip?download=1
     google: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
 
 # data bundle of the data folder for the african continent
@@ -96,6 +100,7 @@ bundle_landcover_westasia:
   category: landcover
   destination: "data/raw/landcover"
   urls:
+    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
     google: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
 
 # cutouts bundle of the cutouts folder for the african continent
@@ -104,5 +109,5 @@ bundle_cutouts_africa:
   category: cutouts
   destination: "."
   urls:
-    # zenodo: https://zenodo.org/record/5894926/files/africa-2013-era5.nc
+    zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
     google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
