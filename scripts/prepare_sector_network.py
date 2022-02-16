@@ -235,7 +235,116 @@ def add_co2(n, costs):
 #         p_set=-co2
 #     )
 
+def add_storage(n, costs):
+    
+    n.add("Carrier", "battery")
 
+    n.madd("Bus",
+        nodes + " battery",
+        location=nodes,
+        carrier="battery"
+    )
+
+    n.madd("Store",
+        nodes + " battery",
+        bus=nodes + " battery",
+        e_cyclic=True,
+        e_nom_extendable=True,
+        carrier="battery",
+        capital_cost=costs.at['battery storage', 'fixed'],
+        lifetime=costs.at['battery storage', 'lifetime']
+    )
+
+    n.madd("Link",
+        nodes + " battery charger",
+        bus0=nodes,
+        bus1=nodes + " battery",
+        carrier="battery charger",
+        efficiency=costs.at['battery inverter', 'efficiency']**0.5,
+        capital_cost=costs.at['battery inverter', 'fixed'],
+        p_nom_extendable=True,
+        lifetime=costs.at['battery inverter', 'lifetime']
+    )
+
+    n.madd("Link",
+        nodes + " battery discharger",
+        bus0=nodes + " battery",
+        bus1=nodes,
+        carrier="battery discharger",
+        efficiency=costs.at['battery inverter', 'efficiency']**0.5,
+        marginal_cost=options['marginal_cost_storage'],
+        p_nom_extendable=True,
+        lifetime=costs.at['battery inverter', 'lifetime']
+    )
+    
+    
+def h2_ch4_conversions(n, costs):
+    
+    if options['methanation']:
+
+        n.madd("Link",
+            spatial.nodes,
+            suffix=" Sabatier",
+            bus0=nodes + " H2",
+            bus1="EU gas",
+            bus2=spatial.co2.nodes,
+            p_nom_extendable=True,
+            carrier="Sabatier",
+            efficiency=costs.at["methanation", "efficiency"],
+            efficiency2=-costs.at["methanation", "efficiency"] * costs.at['gas', 'CO2 intensity'],
+            capital_cost=costs.at["methanation", "fixed"] * costs.at["methanation", "efficiency"],  # costs given per kW_gas
+            lifetime=costs.at['methanation', 'lifetime']
+        )
+
+    if options['helmeth']:
+
+        n.madd("Link",
+            spatial.nodes,
+            suffix=" helmeth",
+            bus0=nodes,
+            bus1="EU gas",
+            bus2=spatial.co2.nodes,
+            carrier="helmeth",
+            p_nom_extendable=True,
+            efficiency=costs.at["helmeth", "efficiency"],
+            efficiency2=-costs.at["helmeth", "efficiency"] * costs.at['gas', 'CO2 intensity'],
+            capital_cost=costs.at["helmeth", "fixed"],
+            lifetime=costs.at['helmeth', 'lifetime']
+        )
+
+
+    if options['SMR']:
+
+        n.madd("Link",
+            spatial.nodes,
+            suffix=" SMR CC",
+            bus0="EU gas",
+            bus1=nodes + " H2",
+            bus2="co2 atmosphere",
+            bus3=spatial.co2.nodes,
+            p_nom_extendable=True,
+            carrier="SMR CC",
+            efficiency=costs.at["SMR CC", "efficiency"],
+            efficiency2=costs.at['gas', 'CO2 intensity'] * (1 - options["cc_fraction"]),
+            efficiency3=costs.at['gas', 'CO2 intensity'] * options["cc_fraction"],
+            capital_cost=costs.at["SMR CC", "fixed"],
+            lifetime=costs.at['SMR CC', 'lifetime']
+        )
+
+        n.madd("Link",
+            nodes + " SMR",
+            bus0="EU gas",
+            bus1=nodes + " H2",
+            bus2="co2 atmosphere",
+            p_nom_extendable=True,
+            carrier="SMR",
+            efficiency=costs.at["SMR", "efficiency"],
+            efficiency2=costs.at['gas', 'CO2 intensity'],
+            capital_cost=costs.at["SMR", "fixed"],
+            lifetime=costs.at['SMR', 'lifetime']
+        )
+        
+        
 def add_industry(n, costs):
 
 #     print("adding industrial demand")
@@ -424,13 +533,22 @@ if __name__ == "__main__":
 
     options = {"co2_network": True,
                "co2_sequestration_potential": 200,  #MtCO2/a sequestration potential for Europe
-                "co2_sequestration_cost": 10,
+                "co2_sequestration_cost": 10, #EUR/tCO2 for sequestration of CO2
                 "hydrogen_underground_storage": True,
-                "h2_cavern": True}   #EUR/tCO2 for sequestration of CO2}
+                "h2_cavern": True,
+                "marginal_cost_storage": 0,
+                "methanation": True, 
+                "helmeth": True,
+                "SMR": True,
+                "cc_fraction": 0.9}  
     
     add_hydrogen(n, costs)      #TODO add costs
     
     add_co2(n, costs)      #TODO add costs
+    
+    add_storage(n, costs)
+    
+    h2_ch4_conversions(n, costs)
     
     add_industry(n, costs)
 
