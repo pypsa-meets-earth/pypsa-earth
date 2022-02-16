@@ -33,7 +33,6 @@ The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/35179
 import logging
 import os
 import re
-from pathlib import Path
 from zipfile import ZipFile
 
 import yaml
@@ -89,7 +88,7 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
     Currently, hosts accepted: zenodo and google
     """
     resource = "-".join(config["category"])
-    file_path = Path(rootpath, "tempfile.zip")
+    file_path = os.path.join(rootpath, "tempfile.zip")
 
     if host == "zenodo":
         url = config["urls"]["zenodo"]

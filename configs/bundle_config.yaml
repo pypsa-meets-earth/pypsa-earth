@@ -26,8 +26,8 @@ bundle_data_tutorial:
   category: data
   destination: "data"
   urls:
-    zenodo: https://sandbox.zenodo.org/record/1016424/files/tutorial_data.zip?download=1
-    google: https://drive.google.com/file/d/1xeiZUH7shVL3an2mdeHVPi7_AxchRzmH/view?usp=sharing
+    zenodo: https://sandbox.zenodo.org/record/1016522/files/tutorial_data.zip?download=1
+    google: https://drive.google.com/file/d/1Yd2iM892WFBRxh5NX22if6laRF1RxZKu/view?usp=sharing
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_resources_tutorial:
