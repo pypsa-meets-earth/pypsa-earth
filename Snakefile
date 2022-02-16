@@ -57,6 +57,8 @@ datafiles = [
         "data/raw/eez/eez_v11.gpkg",
         # "data/raw/landcover",  # set as an explicit directory in the rule
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
+        "data/custom_powerplants.csv",
+        "data/hydro_capacities.csv",
         "data/costs.csv",
 ]
 
