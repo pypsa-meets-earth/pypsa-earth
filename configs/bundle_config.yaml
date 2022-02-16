@@ -34,10 +34,10 @@ bundle_resources_tutorial:
   countries: [NG, BJ]
   tutorial: true
   category: resources
-  destination: "."
+  destination: "resources"
   urls:
     # zenodo: https://zenodo.org/record/5894972/files/resources.zip
-    google: https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8/view?usp=sharing
+    google: https://drive.google.com/file/d/1yBDOBc1ufbJQjacZ4FNH7tEp6kX72kUL/view?usp=sharing
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_cutouts_tutorial:

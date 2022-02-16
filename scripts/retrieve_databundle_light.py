@@ -184,27 +184,14 @@ if __name__ == "__main__":
     bundle_to_download = []
 
     for cat in categories:
-        if tutorial:
-            selection_bundles = get_best_bundle(countries, cat, config_bundles, tutorial)
-
-            # check if non-empty dictionary
-            if selection_bundles:
-                bundle_to_download.extend(selection_bundles)
-
-                if len(selection_bundles) > 1:
-                    logger.warning(f"Multiple bundle data for category {cat}: " + ", ".join(selection_bundles))
-
-                continue
-            else:
-                logger.info(f"Tutorial data for {cat} not found, fall back to non-tutorial data")
-
-        
-        selection_bundles = get_best_bundle(countries, cat, config_bundles, False)
+        selection_bundles = get_best_bundle(countries, cat, config_bundles, tutorial)
 
         # check if non-empty dictionary
         if selection_bundles:
-            # if non-empty, then 
             bundle_to_download.extend(selection_bundles)
+
+            if len(selection_bundles) > 1:
+                logger.warning(f"Multiple bundle data for category {cat}: " + ", ".join(selection_bundles))
     
     # download the selected bundles
     for b_name in bundle_to_download:
