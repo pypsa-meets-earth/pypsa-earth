@@ -56,16 +56,22 @@ datafiles = [
         "data/raw/gebco/GEBCO_2021_TID.nc",
         "data/raw/eez/eez_v11.gpkg",
         # "data/raw/landcover",  # set as an explicit directory in the rule
-        "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
+        # "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
         "data/custom_powerplants.csv",
         "data/hydro_capacities.csv",
         "data/costs.csv",
 ]
 
 if config.get('tutorial')==False:
-    datafiles.extend(["cutouts/africa-2013-era5.nc"])
+    datafiles.extend([
+        "cutouts/africa-2013-era5.nc",
+        "data/raw/hydrobasins/hybas_world_lev04_v1c.shp",
+    ])
 if config.get('tutorial')==True:
-    datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
+    datafiles.extend([
+        "cutouts/africa-2013-era5-tutorial.nc", 
+        "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
+    ])
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
