@@ -69,7 +69,7 @@ if config.get('tutorial')==False:
     ])
 if config.get('tutorial')==True:
     datafiles.extend([
-        "cutouts/africa-2013-era5-tutorial.nc", 
+        "cutouts/africa-2013-era5-tutorial.nc",
         "data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp",
     ])
 
