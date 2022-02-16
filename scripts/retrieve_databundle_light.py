@@ -47,6 +47,7 @@ from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)
 
+
 def load_databundle_config(path):
     "Load databundle configurations from path file"
     with open(path) as file:
@@ -55,11 +56,12 @@ def load_databundle_config(path):
     # parse the "countries" list specified in the file before processing
     for bundle_name in config:
         config[bundle_name]["countries"] = create_country_list(
-                                                config[bundle_name]["countries"],
-                                                iso_coding=False
-                                            )
-    
+            config[bundle_name]["countries"],
+            iso_coding=False
+        )
+
     return config
+
 
 """
     download_and_unzip(host, config, rootpath, dest_path, hot_run=True)
@@ -83,16 +85,18 @@ Outputs
 True when download is successful, False otherwise
 
 """
+
+
 def download_and_unzip(host, config, rootpath, hot_run=True):
     """
     Function to download and unzip data depending on the hosting platform.
     Currently, hosts accepted: zenodo and google
     """
-    resource="-".join(config["category"])
-    file_path=Path(rootpath, "tempfile.zip")
+    resource = "-".join(config["category"])
+    file_path = Path(rootpath, "tempfile.zip")
 
-    if host=="zenodo":
-        url=config["urls"]["zenodo"]
+    if host == "zenodo":
+        url = config["urls"]["zenodo"]
         if hot_run:
             progress_retrieve(url, file_path)
             logger.info(f"Extracting resources")
@@ -102,21 +106,25 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
             os.remove(file_path)
             logger.info(f"Download resource '{resource}' from cloud '{url}'.")
         return True
-    elif host=="google":
+    elif host == "google":
 
-        url=config["urls"]["google"]
+        url = config["urls"]["google"]
         # retrieve file_id from path
-        partition_view = re.split(r"/view|\\view", str(url), 1)  # cut the part before the ending \view
+        # cut the part before the ending \view
+        partition_view = re.split(r"/view|\\view", str(url), 1)
         if len(partition_view) < 2:
-            logger.error(f"Resource {resource} cannot be downloaded: \"\\view\" not found in url {url}")
+            logger.error(
+                f"Resource {resource} cannot be downloaded: \"\\view\" not found in url {url}")
             return False
-        
-        code_split = re.split(r"\\|/", partition_view[0])  # split url to get the file_id
+
+        # split url to get the file_id
+        code_split = re.split(r"\\|/", partition_view[0])
 
         if len(code_split) < 2:
-            logger.error(f"Resource {resource} cannot be downloaded: character \"\\\" not found in {partition_view[0]}")
+            logger.error(
+                f"Resource {resource} cannot be downloaded: character \"\\\" not found in {partition_view[0]}")
             return False
-        
+
         # get file id
         file_id = code_split[-1]
 
@@ -139,6 +147,8 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
     else:
         logger.error(f"Host {host} not implemented")
         return False
+
+
 """
     get_best_bundles(country_list, category, config_bundles, tutorial)
 
@@ -169,11 +179,13 @@ returned_bundles : list
     List of bundles to download
 
 """
+
+
 def get_best_bundles(country_list, category, config_bundles, tutorial):
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
-    dict_n_matched = {bname:config_bundles[bname]["n_matched"] for bname in config_bundles
-        if config_bundles[bname]["category"] == category and config_bundles[bname].get("tutorial", False) == tutorial
-    }
+    dict_n_matched = {bname: config_bundles[bname]["n_matched"] for bname in config_bundles
+                      if config_bundles[bname]["category"] == category and config_bundles[bname].get("tutorial", False) == tutorial
+                      }
 
     returned_bundles = []
 
@@ -202,6 +214,7 @@ def get_best_bundles(country_list, category, config_bundles, tutorial):
 
     return returned_bundles
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -212,7 +225,6 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     _sets_path_to_root("pypsa-africa")
-    
 
     rootpath = os.getcwd()
     tutorial = snakemake.config["tutorial"]
@@ -224,7 +236,8 @@ if __name__ == "__main__":
     config_bundles = load_databundle_config(snakemake.input[0])
 
     # categories of data to download
-    categories = list(set([config_bundles[conf]["category"] for conf in config_bundles]))
+    categories = list(set([config_bundles[conf]["category"]
+                      for conf in config_bundles]))
 
     # idenfify matched countries for every bundle
     for bname in config_bundles:
@@ -237,15 +250,17 @@ if __name__ == "__main__":
     bundle_to_download = []
 
     for cat in categories:
-        selection_bundles = get_best_bundles(countries, cat, config_bundles, tutorial)
+        selection_bundles = get_best_bundles(
+            countries, cat, config_bundles, tutorial)
 
         # check if non-empty dictionary
         if selection_bundles:
             bundle_to_download.extend(selection_bundles)
 
             if len(selection_bundles) > 1:
-                logger.warning(f"Multiple bundle data for category {cat}: " + ", ".join(selection_bundles))
-    
+                logger.warning(
+                    f"Multiple bundle data for category {cat}: " + ", ".join(selection_bundles))
+
     # download the selected bundles
     for b_name in bundle_to_download:
         host_list = config_bundles[b_name]["urls"]
@@ -254,5 +269,7 @@ if __name__ == "__main__":
             if download_and_unzip(host, config_bundles[b_name], rootpath):
                 break
 
-    logger.info("Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download))
-    print("Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download))
+    logger.info("Bundle successfully loaded and unzipped:\n\t" +
+                "\n\t".join(bundle_to_download))
+    print("Bundle successfully loaded and unzipped:\n\t" +
+          "\n\t".join(bundle_to_download))
