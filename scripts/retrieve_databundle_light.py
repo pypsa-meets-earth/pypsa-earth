@@ -161,7 +161,7 @@ The selected bundles shall adhere to the following criteria:
 - The bundles' category shall match the category of data to download
 - When multiple bundles are identified for the same set of users,
   the bundles matching more countries are first selected and more bundles
-  are added until all countries are matched or no more bundles are available 
+  are added until all countries are matched or no more bundles are available
 
 Inputs
 ------
