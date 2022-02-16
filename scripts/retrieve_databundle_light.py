@@ -37,7 +37,9 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import yaml
-from _helpers import _sets_path_to_root, configure_logging, progress_retrieve
+from _helpers import _sets_path_to_root
+from _helpers import configure_logging
+from _helpers import progress_retrieve
 from download_osm_data import create_country_list
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
