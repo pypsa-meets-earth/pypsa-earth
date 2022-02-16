@@ -8,6 +8,93 @@ from helpers import mock_snakemake, prepare_costs, create_network_topology
 from types import SimpleNamespace
 spatial = SimpleNamespace()
 
+
+def add_fossil_gas(n, costs):
+    """
+    Function to add fossil gas as an energy carrier (in nodal resolution)
+    
+    Parameters:
+    -
+    n : pypsa.network
+    costs : cost file with cost parameters
+
+    Returns:
+    -
+    param1 : test
+    """
+
+    # Add Carrier "Fossil Gas" to network
+    n.add("Carrier", "Fossil Gas")
+
+    # Add one bus to every node and link them to carrier "Fossil Gas"
+    n.madd("Bus", nodes + "Fossil Gas", location = nodes, carrier = "Fossil Gas")
+
+    # Add links between carriers "H2" and "Fossil Gas": Sabatier (Methanation)
+    # Note: multilinks are used here. (https://groups.google.com/g/pypsa/c/vhF-_FZv9Dw/m/ZA8vRxBQAwAJ)
+    #   Input  (bus0): H2
+    #   Output (bus1): Fossil Gas
+    #   Output (bus2): CO2
+
+    n.madd("Link",
+        nodes + " Sabatier",             # spatial.nodes,
+                                         # suffix=" Sabatier",
+        bus0=nodes + " H2",
+        bus1=nodes + " Fossil Gas",  # bus1=spatial.gas.nodes,
+        bus2=nodes + " CO2",         # bus2=spatial.co2.nodes,
+        p_nom_extendable=True,
+        carrier="Sabatier",         # Where is carrier sabatier declared?
+        efficiency=costs.at["methanation", "efficiency"],
+        efficiency2=-costs.at["methanation", "efficiency"] * costs.at['gas', 'CO2 intensity'],
+        capital_cost=costs.at["methanation", "fixed"] * costs.at["methanation", "efficiency"],  # costs given per kW_gas
+        lifetime=costs.at['methanation', 'lifetime']
+    )
+
+    # Add links between carriers "Fossil Gas" and "H2": SMR CC (steam methane reforming with CC)
+    # https://github.com/PyPSA/pypsa-eur-sec/blob/b6cfcf6364e1037ce2bdad53504c8df7eb2b72b0/scripts/prepare_sector_network.py#L1290
+    #   Input  (bus0): Fossil Gas
+    #   Output (bus1): H2
+    #   Output (bus2): co2 atmosphere
+    #   Output (bus3): CO2
+    
+    n.madd("Link",
+        nodes + " SMR CC",        
+                                           #     suffix=" SMR CC",
+        bus0=nodes + " Fossil Gas",        #     bus0=spatial.gas.nodes,
+        bus1=nodes + " H2",
+        bus2="co2 atmosphere",
+        bus3=nodes + "CO2",
+        p_nom_extendable=True,
+        carrier="SMR CC",
+        efficiency=costs.at["SMR CC", "efficiency"],
+        efficiency2=costs.at['gas', 'CO2 intensity'] * (1 - options["cc_fraction"]),
+        efficiency3=costs.at['gas', 'CO2 intensity'] * options["cc_fraction"],
+        capital_cost=costs.at["SMR CC", "fixed"],
+        lifetime=costs.at['SMR CC', 'lifetime']
+    )
+    # Add links between carriers "Fossil Gas" and "H2": SMR (steam methane reforming)
+    #   Input  (bus0): Fossil Gas
+    #   Output (bus1): H2
+    #   Output (bus2): co2 atmosphere
+
+    n.madd("Link",
+        nodes + " SMR",              
+        bus0=nodes + " Fossil Gas",      
+        bus1=nodes + " H2",
+        bus2="co2 atmosphere",
+        p_nom_extendable=True,
+        carrier="SMR",
+        efficiency=costs.at["SMR CC", "efficiency"],
+        efficiency2=costs.at['gas', 'CO2 intensity'],
+        capital_cost=costs.at["SMR", "fixed"],
+        lifetime=costs.at['SMR', 'lifetime']
+    )
+
+
+    # TODO: Helmeth? Probably not relevant
+
+
+
+
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
 
