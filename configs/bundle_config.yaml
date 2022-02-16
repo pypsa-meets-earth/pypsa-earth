@@ -107,7 +107,7 @@ bundle_landcover_westasia:
 bundle_cutouts_africa:
   countries: [africa]
   category: cutouts
-  destination: "."
+  destination: "cutouts"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
     google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
