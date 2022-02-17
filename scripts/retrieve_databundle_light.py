@@ -6,16 +6,16 @@
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5894972.svg
    :target: https://doi.org/10.5281/zenodo.5894972
 
-The data bundles contains common GIS datasets like EEZ shapes, Copernicus Landcover, Hydrobasins 
+The data bundles contains common GIS datasets like EEZ shapes, Copernicus Landcover, Hydrobasins
 and also electricity specific summary statistics like historic per country yearly totals of hydro generation,
 GDP and POP on NUTS3 levels and per-country load time-series.
 
-This rule downloads the data bundle from `zenodo <https://doi.org/10.5281/zenodo.5894972>`_ 
-or `google drive <https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM>`_ 
+This rule downloads the data bundle from `zenodo <https://doi.org/10.5281/zenodo.5894972>`_
+or `google drive <https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM>`_
 and extracts it in the ``data``, ``resources`` and ``cutouts`` sub-directory.
 Bundle data are then deleted once downloaded and unzipped.
 
-The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_ 
+The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_
 than required for the full model (around 500 MB)
 
 The required bundles are downloaded automatically according to the list names, in agreement to
@@ -53,7 +53,7 @@ according to the following rules:
 .. code:: yaml
 
     tutorial:  # configuration stating whether the tutorial is needed
-    
+
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
