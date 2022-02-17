@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
+
 def mock_snakemake(rulename, **wildcards):
     """
     This function is expected to be executed from the 'scripts'-directory of '
@@ -26,7 +27,7 @@ def mock_snakemake(rulename, **wildcards):
 
     script_dir = Path(__file__).parent.resolve()
     assert Path.cwd().resolve() == script_dir, \
-      f'mock_snakemake has to be run from the repository scripts directory {script_dir}'
+        f'mock_snakemake has to be run from the repository scripts directory {script_dir}'
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
         if os.path.exists(p):
@@ -56,32 +57,35 @@ def mock_snakemake(rulename, **wildcards):
     os.chdir(script_dir)
     return snakemake
 
+
 def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
 
-    #set all asset costs and other parameters
-    costs = pd.read_csv(cost_file, index_col=[0,1]).sort_index()
+    # set all asset costs and other parameters
+    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
-    #correct units to MW and EUR
+    # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
 
-    #min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
-    costs = costs.fillna({"CO2 intensity" : 0,
-                          "FOM" : 0,
-                          "VOM" : 0,
-                          "discount rate" : discount_rate,
-                          "efficiency" : 1,
-                          "fuel" : 0,
-                          "investment" : 0,
-                          "lifetime" : lifetime
-    })
+    # min_count=1 is important to generate NaNs which are then filled by fillna
+    costs = costs.loc[:, "value"].unstack(
+        level=1).groupby("technology").sum(min_count=1)
+    costs = costs.fillna({"CO2 intensity": 0,
+                          "FOM": 0,
+                          "VOM": 0,
+                          "discount rate": discount_rate,
+                          "efficiency": 1,
+                          "fuel": 0,
+                          "investment": 0,
+                          "lifetime": lifetime
+                          })
 
-    annuity_factor = lambda v: annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
-    costs["fixed"] = [annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()]
+    def annuity_factor(v): return annuity(
+        v["lifetime"], v["discount rate"]) + v["FOM"] / 100
+    costs["fixed"] = [annuity_factor(
+        v) * v["investment"] * Nyears for i, v in costs.iterrows()]
 
     return costs
-
 
 
 def create_network_topology(n, prefix, like='ac', connector=" <-> ", bidirectional=True):
@@ -132,15 +136,15 @@ def create_network_topology(n, prefix, like='ac', connector=" <-> ", bidirection
 
 
 def create_dummy_data(n, sector, carriers):
-    ind=n.buses_t.p.index
-    ind=n.buses.index[n.buses.carrier=='AC']
-    
+    ind = n.buses_t.p.index
+    ind = n.buses.index[n.buses.carrier == 'AC']
+
     if sector == 'industry':
-        col = ["electricity","coal","coke","solid biomass","methane","hydrogen",
-               "low-temperature heat","naphtha","process emission",
-               "process emission from feedstock","current electricity"]
+        col = ["electricity", "coal", "coke", "solid biomass", "methane", "hydrogen",
+               "low-temperature heat", "naphtha", "process emission",
+               "process emission from feedstock", "current electricity"]
     else:
         raise Exception("sector not found")
-    data=np.random.randint(10, 500, size=(len(ind), len(col)))
-    
-    return pd.DataFrame(data, index=ind, columns=col)    
+    data = np.random.randint(10, 500, size=(len(ind), len(col)))
+
+    return pd.DataFrame(data, index=ind, columns=col)
