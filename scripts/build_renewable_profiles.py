@@ -262,8 +262,9 @@ if __name__ == "__main__":
             "x": "lon",
             "y": "lat"
         })[[
-            any(hydrobasins.geometry.intersects(p))  # select busbar whose location (p)
-                                                     # belongs to at least one hydrobasin geometry
+            # select busbar whose location (p)
+            any(hydrobasins.geometry.intersects(p))
+            # belongs to at least one hydrobasin geometry
             for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
         ]]  # TODO: filtering by presence of hydro generators should be the way to go
 
@@ -273,8 +274,8 @@ if __name__ == "__main__":
             xr.DataArray(dims=["plant", "time"],
                          coords={
                              "plant": []
-                         },
-                         name="inflow").to_netcdf(snakemake.output.profile)
+            },
+                name="inflow").to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
