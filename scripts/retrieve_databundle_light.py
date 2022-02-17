@@ -44,6 +44,9 @@ according to the following rules:
   the algorithm sorts the bundles by the number of countries that are matched and starts
   downloading them starting from those matching more countries till all countries are matched
   or no more bundles are available
+- For every bundle to download, it is given priority to the first bundle source,
+  as listed in the ``urls`` option of each bundle configuration; when a source fails,
+  the following source is used and so on
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3517921.svg
     :target: https://doi.org/10.5281/zenodo.3517921

@@ -64,8 +64,8 @@ bundle_resources_africa:
   category: resources
   destination: "resources"
   urls:
-    zenodo: https://sandbox.zenodo.org/record/1016042/files/resources_africa.zip?download=1
-    google: https://drive.google.com/file/d/1he31BBLtdemZt2dmBOwUCbP_jVuI3KS8/view?usp=sharing
+    zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
+    google: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
 
 # data bundle of the data folder for the african continent
 bundle_landcover_africa:
