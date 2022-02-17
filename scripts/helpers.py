@@ -26,14 +26,15 @@ def mock_snakemake(rulename, **wildcards):
     from snakemake.script import Snakemake
 
     script_dir = Path(__file__).parent.resolve()
-    assert Path.cwd().resolve() == script_dir, \
-        f'mock_snakemake has to be run from the repository scripts directory {script_dir}'
+    assert (
+        Path.cwd().resolve() == script_dir
+    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = sm.Workflow(snakefile,  overwrite_configfiles=[])
+    workflow = sm.Workflow(snakefile, overwrite_configfiles=[])
     workflow.include(snakefile)
     workflow.global_resources = {}
     rule = workflow.get_rule(rulename)
@@ -47,9 +48,18 @@ def mock_snakemake(rulename, **wildcards):
                 io[i] = os.path.abspath(io[i])
 
     make_accessable(job.input, job.output, job.log)
-    snakemake = Snakemake(job.input, job.output, job.params, job.wildcards,
-                          job.threads, job.resources, job.log,
-                          job.dag.workflow.config, job.rule.name, None,)
+    snakemake = Snakemake(
+        job.input,
+        job.output,
+        job.params,
+        job.wildcards,
+        job.threads,
+        job.resources,
+        job.log,
+        job.dag.workflow.config,
+        job.rule.name,
+        None,
+    )
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -68,27 +78,35 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
     costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = costs.loc[:, "value"].unstack(
-        level=1).groupby("technology").sum(min_count=1)
-    costs = costs.fillna({"CO2 intensity": 0,
-                          "FOM": 0,
-                          "VOM": 0,
-                          "discount rate": discount_rate,
-                          "efficiency": 1,
-                          "fuel": 0,
-                          "investment": 0,
-                          "lifetime": lifetime
-                          })
+    costs = (
+        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    )
+    costs = costs.fillna(
+        {
+            "CO2 intensity": 0,
+            "FOM": 0,
+            "VOM": 0,
+            "discount rate": discount_rate,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": lifetime,
+        }
+    )
 
-    def annuity_factor(v): return annuity(
-        v["lifetime"], v["discount rate"]) + v["FOM"] / 100
-    costs["fixed"] = [annuity_factor(
-        v) * v["investment"] * Nyears for i, v in costs.iterrows()]
+    def annuity_factor(v):
+        return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
+
+    costs["fixed"] = [
+        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
+    ]
 
     return costs
 
 
-def create_network_topology(n, prefix, like='ac', connector=" <-> ", bidirectional=True):
+def create_network_topology(
+    n, prefix, like="ac", connector=" <-> ", bidirectional=True
+):
     """
     Create a network topology like the power transmission network.
 
@@ -109,10 +127,9 @@ def create_network_topology(n, prefix, like='ac', connector=" <-> ", bidirection
     ln_attrs = ["bus0", "bus1", "length"]
     lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
 
-    candidates = pd.concat([
-        n.lines[ln_attrs],
-        n.links.loc[n.links.carrier == "DC", lk_attrs]
-    ]).fillna(0)
+    candidates = pd.concat(
+        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
+    ).fillna(0)
 
     positive_order = candidates.bus0 < candidates.bus1
     candidates_p = candidates[positive_order]
@@ -137,12 +154,22 @@ def create_network_topology(n, prefix, like='ac', connector=" <-> ", bidirection
 
 def create_dummy_data(n, sector, carriers):
     ind = n.buses_t.p.index
-    ind = n.buses.index[n.buses.carrier == 'AC']
+    ind = n.buses.index[n.buses.carrier == "AC"]
 
-    if sector == 'industry':
-        col = ["electricity", "coal", "coke", "solid biomass", "methane", "hydrogen",
-               "low-temperature heat", "naphtha", "process emission",
-               "process emission from feedstock", "current electricity"]
+    if sector == "industry":
+        col = [
+            "electricity",
+            "coal",
+            "coke",
+            "solid biomass",
+            "methane",
+            "hydrogen",
+            "low-temperature heat",
+            "naphtha",
+            "process emission",
+            "process emission from feedstock",
+            "current electricity",
+        ]
     else:
         raise Exception("sector not found")
     data = np.random.randint(10, 500, size=(len(ind), len(col)))
