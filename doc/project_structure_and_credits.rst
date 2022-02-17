@@ -26,6 +26,7 @@ The structure might be adjusted in future:
 - Director (`Max Parzen <https://www.linkedin.com/in/maximilian-parzen-b047a1126/>`_)
 - `Co-Director <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EfjniQIxmfZIp8ih_WQuy-0BfCiOCLPKEvDZUuylp9xOhA?e=s7KRQy>`_ (`Davide Fioriti <https://www.linkedin.com/in/davide-fioriti-745693a5/>`_)
 - `Data and Workflow leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (temporary Davide and Max)
+- Demand leader (`Stephen J. Lee <http://stephenjl.com>`_)
 - `AI leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
 - `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
 - `Finance leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EbBuUGDNwrRBqmeT8xbQT3MBL1MOMkemCDXi7EMbzXEmHw?e=E3Cbc7>`_ (Not assigned)
@@ -56,6 +57,7 @@ Code Team
 - Matin Mahmood (University of Edinburgh, United Kingdom)
 - Max Parzen (University of Edinburgh, United Kingdom)
 - Olukunle Owolabi (Tufts University, United States)
+- Stephen Lee (Massachusetts Institute of Technology, United States)
 - Ekatarina Fedotova (Moscow Power Engineering Institute, Russia)
 
 Outreach Team

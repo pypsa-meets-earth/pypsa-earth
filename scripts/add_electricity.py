@@ -97,7 +97,6 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
-from download_osm_data import create_country_list
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -465,7 +464,6 @@ def attach_hydro(n, costs, ppl):
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
-
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             inflow_stations = pd.Index(bus_id[inflow_idx])
             missing_c = inflow_stations.unique().difference(
@@ -730,6 +728,7 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     regions = snakemake.input.regions
+
     countries = create_country_list(snakemake.config["countries"])
     weather_year = snakemake.config["load_options"]["weather_year"]
     prediction_year = snakemake.config["load_options"]["prediction_year"]
@@ -755,7 +754,7 @@ if __name__ == "__main__":
     update_transmission_costs(n, costs)
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)
-    # attach_hydro(n, costs, ppl)
+    attach_hydro(n, costs, ppl)
     attach_extendable_generators(n, costs, ppl)
 
     # TODO: Feature to uncomment and debug

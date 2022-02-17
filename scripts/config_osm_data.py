@@ -156,10 +156,10 @@ continents = {
     "OC": "australia",
     "AF": "africa",
     "EU": "europe",
-    # 'AN': 'antarctica'
+    # "AN": "antarctica"
 }
 
-world = {
+world_iso = {
     "africa": {
         "DZ": "algeria",
         "AO": "angola",
@@ -193,16 +193,15 @@ world = {
         "MW": "malawi",
         "ML": "mali",
         "MR": "mauritania",
-        # "MU": "mauritius", Island
+        # "MU": "mauritius", # Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
         "NE": "niger",
         "NG": "nigeria",
         "RW": "rwanda",
-        # saint-helena-ascension-and-tristan-da-cunha
-        # "ST": "sao-tome-and-principe", #Island
-        "SNGM": "senegal-and-gambia",  # See Map # Self-created country code
+        # saint-helena-ascension-and-tristan-da-cunha # Islands
+        # "ST": "sao-tome-and-principe", # Island
         "SN": "senegal",
         "GM": "gambia",
         # "SC": "seychelles", #Island
@@ -225,15 +224,15 @@ world = {
         "AF": "afghanistan",
         "AM": "armenia",
         "AZ": "azerbaijan",
-        # 'BH': 'bahrain',
+        "BH": "bahrain",
         "BD": "bangladesh",
         "BT": "bhutan",
-        # 'IO': 'british indian ocean territory',
-        # 'BN': 'brunei darussalam', # merged with MY
+        # "IO": "british indian ocean territory",
+        # "BN": "brunei darussalam", # merged with MY
         "KH": "cambodia",
         "CN": "china",
-        # 'CX': 'christmas island',
-        # 'CC': 'cocos (keeling) islands',
+        # "CX": "christmas island", # Island
+        # "CC": "cocos (keeling) islands", # Island
         "CY": "cyprus",
         "GE": "georgia",
         "HK": "hong kong",
@@ -241,66 +240,67 @@ world = {
         "ID": "indonesia",
         "IR": "iran",
         "IQ": "iraq",
-        "IL-PL": "israel-and-palestine",
+        "IL": "israel",
         "JP": "japan",
         "JO": "jordan",
         "KZ": "kazakhstan",
         "KP": "north-korea",
         "KR": "south-korea",
-        # 'KW': 'kuwait',
+        "KW": "kuwait",
         "KG": "kyrgyzstan",
-        # 'LA': "lao people's democratic republic",
+        "LA": "lao-people's-democratic-republic",
         "LB": "lebanon",
         "MO": "macao",
-        "MY-SG-BN":
-        "malaysia-singapore-brunei",  # Note 3 countries based on geofabrik
-        "MV": "maldives",
+        "MY": "malaysia",
+        "SG": "singapore",
+        "BN": "brunei",
+        # "MV": "maldives",  # Island
         "MN": "mongolia",
         "MM": "myanmar",
         "NP": "nepal",
-        # 'OM': 'oman',
+        "OM": "oman",
         "PK": "pakistan",
-        # 'PS': 'palestine',
+        "PS": "palestine",
         "PH": "philippines",
-        # 'QA': 'qatar',
-        # 'SA': 'saudi arabia',
-        # 'SG': 'singapore', # merged with MY
+        "QA": "qatar",
+        "SA": "saudi-arabia",
+        "SG": "singapore",  # merged with MY
         "LK": "sri-lanka",
         "SY": "syria",
         "TW": "taiwan",
         "TJ": "tajikistan",
         "TH": "thailand",
         "TM": "turkmenistan",
-        # 'AE': 'united arab emirates',
+        "AE": "united-arab-emirates",
         "UZ": "uzbekistan",
         "VN": "vietnam",
         "YE": "yemen",
     },
     "australia": {
-        "AS": "american-oceania",
+        # "AS": "american-oceania",  # Island
         "AU": "australia",
-        # 'CK': 'cook islands',
-        "FJ": "fiji",
-        "PF": "french-polynesia",
-        "GU": "guam",
-        "KI": "kiribati",
-        # 'MH': 'marshall islands',
-        "FM": "micronesia",
-        "NR": "nauru",
+        # "CK": "cook islands",  # Island
+        # "FJ": "fiji",  # Island
+        # "PF": "french-polynesia",  # Island
+        # "GU": "guam",  # Island
+        # "KI": "kiribati",  # Island
+        # "MH": "marshall islands",  # Island
+        # "FM": "micronesia",  # Island
+        # "NR": "nauru",  # Island
         "NC": "new-caledonia",
         "NZ": "new-zealand",
-        "NU": "niue",
-        "NF": "norfolk island",
-        # 'MP': 'northern mariana islands',
-        "PW": "palau",
+        # "NU": "niue",  # Island
+        # "NF": "norfolk island",  # Island
+        # "MP": "northern mariana islands",
+        # "PW": "palau",  # Island
         "PG": "papua-new-guinea",
-        "WS": "samoa",
-        # 'SB': 'solomon islands',
-        "TK": "tokelau",
-        "TO": "tonga",
-        "TV": "tuvalu",
-        "VU": "vanuatu",
-        "WF": "wallis-et-futuna",
+        # "WS": "samoa",  # Island
+        # "SB": "solomon islands",
+        # "TK": "tokelau",  # Island
+        # "TO": "tonga",  # Island
+        # "TV": "tuvalu",  # Island
+        # "VU": "vanuatu",  # Island
+        # "WF": "wallis-et-futuna",  # Island
     },
     "europe": {
         "AL": "albania",
@@ -314,19 +314,19 @@ world = {
         "CZ": "czech-republic",
         "DK": "denmark",
         "EE": "estonia",
-        "FO": "faroe islands",
+        # "FO": "faroe islands", # Islands
         "FI": "finland",
         "FR": "france",
         "DE": "germany",
-        # 'GI': 'gibraltar', Island ?
+        # "GI": "gibraltar", # Island ?
         "GR": "greece",
-        # 'GG': 'guernsey', Island
+        # "GG": "guernsey", # Island
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
-        # 'IM': 'isle of man',
+        # "IM": "isle of man", # Island
         "IT": "italy",
-        # 'JE': 'jersey',
+        # "JE": "jersey", # Island
         "LV": "latvia",
         "LI": "liechtenstein",
         "LT": "lithuania",
@@ -342,12 +342,12 @@ world = {
         "PT": "portugal",
         "RO": "romania",
         "RU": "russia",
-        # 'SM': 'san-marino',
+        "SM": "san-marino",
         "RS": "serbia",
         "SK": "slovakia",
         "SI": "slovenia",
         "ES": "spain",
-        # 'SJ': 'svalbard-and-jan-mayen',
+        # "SJ": "svalbard-and-jan-mayen",  # Islands
         "SE": "sweden",
         "CH": "switzerland",
         "UA": "ukraine",
@@ -367,55 +367,45 @@ world = {
         "CL": "chile",
         "CO": "colombia",
         "EC": "ecuador",
+        "GF": "french-guyane",
+        # "GY": "guyane", # No Data
         "PE": "peru",
+        "PY": "paraguay",
         "SR": "suriname",
         "UY": "uruguay",
         "VE": "venezuela",
     },
     "central_america": {
         "BZ": "belize",
-        "GT": "guatemala",
-        "SV": "el-salvador",
-        "HN": "honduras",
-        "NI": "nicaragua",
         "CR": "costa-rica",
+        "HN": "honduras",
+        "GT": "guatemala",
+        "NI": "nicaragua",
+        "PA": "panama",
+        "SV": "el-salvador",
     },
 }
 
-world_countries = {
-    country_2D: country_name
-    for d in world.values() for (country_2D, country_name) in d.items()
-}
-
+# Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
+# Australasia region includes New Caledonia and Papua New Guinea
 continent_regions = {
-    # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
-    # Eurpean regions
+    # European regions
     "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
     # EASTREN EUROPIAN REGION
-    "EER": ["BY", "BU", "CZ", "RU", "SK", "UA", "GB", "LT", "LV", "EE"],
+    "EER": ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "FI", "MD"],
     # CENTRAL EUROPIAN REGION
-    "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK"],
+    "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK", "LI"],
     # BALKAN PENISULAN REGION
-    "BPR": [
-        "AL",
-        "AN",
-        "BA",
-        "BG",
-        "GR",
-        "HR",
-        "MD",
-        "MT",
-        "RO",
-        "SL",
-        "RS",
-        "ME",
-        "MK",
-    ],
-    "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL"],  # WESTREN EUROPE
-    "SER": ["ES", "IT", "PT"],  # SOUTHERN EUROPAIN REGION
+    "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
+    # WESTREN EUROPE
+    "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD"],
+    # SOUTHERN EUROPAIN REGION
+    "SER": ["ES", "AD", "IT", "PT", "SM", "MT"],
     # African regions
-    "NAR": ["EG", "DZ", "LY", "MA", "SD", "SS"],  # NORTHERN AFRICAN REGION
+    # NORTHERN AFRICAN REGION
+    "NAR": ["EG", "LY", "TN", "DZ", "MA", "EH", "SD", "SS"],
     # WESTREN AFRICAN REGION
+    # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
     "WAR": [
         "MR",
         "ML",
@@ -429,59 +419,330 @@ continent_regions = {
         "LR",
         "SL",
         "GN",
+        "SN",
         "GM",
-        "SL",
     ],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
     # EASTREN AFRICAN REGION
-    "EAR": ["ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
+    # Somalia ["SO"] belongs to the region but power data are NA in OSM)
+    "EAR": ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
     "SAR": ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"],
     # Asian regions
+    "KVR": ["AZ", "GE", "AM"],
     "WAS": [
-        "TR",  # TURKEY
-        "AM",  # ARMENIA
-        "AZ",  # AZERBAIJAN
-        "BH",  # BAHREIN
-        "CY",  # CYPRUS (NORTH AND SOUTH)
-        "GE",  # GEORGIA
-        "IQ",  # IRAQ
-        "IL-PL",  # ISRAEL AND PALESTINE
-        "JO",  # JORDAN
-        "KW",  # KUWAIT
-        "LB",  # LEBANON
-        "OM",  # OMAN
-        "PS",  # PALESTINE
-        "QA",  # QATAR
-        "SA",  # SAUDI ARABIA
-        "SY",  # SYRIA
-        "AE",  # UNITED ARAB EMIRATES
+        "TR",
+        "AM",
+        "AZ",
+        "BH",
+        "CY",
+        "GE",
+        "IQ",
+        "IL",
+        "JO",
+        "KW",
+        "LB",
+        "OM",
+        "PS",
+        "QA",
+        "SA",
+        "SY",
+        "AE",
         "YE",
-        # XNC is missing for nothern cyprus
-    ],  # YEMEN
+    ],
     # FAR EASTREN AISIAN REGION
-    "FEAR": ["JP", "KP", "KR", "CN", "TW", "CN", "MN"],
+    "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN", "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
-    "SEAR": ["LA", "TH", "KH", "VN", "PH", "MYSGBN", "ID"],
-    "CAR": ["KZ", "KG", "UZ", "TM", "TJ"],  # CENTRAL AISIAN REGION
+    "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
+    # CENTRAL AISIAN REGION
+    "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],
     # SOUTHERN AISIAN REGION
-    "SAR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
+    "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
     # MIDDLE EASTREN ASIAN REGION
-    "MEAR": ["TR", "SY", "IQ", "IR", "JO", "IL", "AE", "YE"],
+    "MEAR": [
+        "TR",
+        "SY",
+        "LB",
+        "CY",
+        "IQ",
+        "IR",
+        "JO",
+        "IL",
+        "PS",
+        "AE",
+        "YE",
+        "KW",
+        "BH",
+        "QA",
+        "SA",
+        "OM",
+    ],
     # American continent regions
-    "NACR": ["CA", "GL", "MX", "US"],  # NORTHREN AMERCIAN CONTINENT REGION
-    # SOUTHERN LATIN AMERICAL REGION
-    "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "PE", "SR", "UY", "VE"],
-    "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR"],  # CENTRAL AMERICAN REGION
+    "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
+    # SOUTHERN LATIN AMERICAN REGION
+    "LACR":
+    ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
+    # CENTRAL AMERICAN REGION
+    "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
+    # Australasia
+    "AUO": ["AU", "NC", "NZ", "PG"],
     # Customized test set
     "TEST": ["NG", "NE", "SL", "MA"],
 }
 
-# Problematic countries, where geofabrik and iso norm deviates
+# Geofabrik and iso norm deviate for some countries and domains
+
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
+# This dictionary instructs the script download_osm_data about how to successfully download data
+# from countries that are aggregated into osm.
+# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SNGM
+#   That's the reason why in this dictionary they can be found the following entries:
+#       "SN": "SNGM"
+#       "GM": "SNGM"
+#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SNGM" file
 iso_to_geofk_dict = {
-    "EH": "MA",  # western sahara -> Morocco
-    "SN": "SNGM",  # senegal -> senegal-gambia
-    "GM": "SNGM",  # gambia -> senegal-gambia
+    "EH": "MA",  # Western Sahara -> Morocco
+    "SN": "SNGM",  # Senegal -> Senegal-Gambia
+    "GM": "SNGM",  # Gambia -> Senegal-Gambia
+    "HK": "CN",  # Hong Kong  -> China
+    "MO": "CN",  # Macao  -> China
+    "SG": "MY-SG-BN",  # Singapore -> Malaysia-Singapore-Brunei
+    "BN": "MY-SG-BN",  # Brunei -> Malaysia-Singapore-Brunei
+    "MY": "MY-SG-BN",  # Malaysia -> Malaysia-Singapore-Brunei
+    "SA": "GCC",  # Saudi Arabia -> Gulf Cooperation Council
+    "KW": "GCC",  # Kuwait -> Gulf Cooperation Council
+    "BH": "GCC",  # Bahrain -> Gulf Cooperation Council
+    "QA": "GCC",  # Qatar -> Gulf Cooperation Council
+    "AE": "GCC",  # United Arab Emirates -> Gulf Cooperation Council
+    "OM": "GCC",  # Oman -> Gulf Cooperation Council
+    "PS": "IL-PL",  # Israel and Palestine are merged in OSM
+    "IL": "IL-PL",  # Israel and Palestine are merged in OSM
+    "SM": "IT",  # San-Marino is merged to Italy
+}
+
+# Cyprus and Georgia -> European domain
+# Russia -> a separate domain
+
+# data for some islands seem to be merged with some other areas data
+# "FO": "faroe islands"
+# "NF": "norfolk island",
+# "PF": "french-polynesia"
+# "GU": "guam"
+
+# "latin_america" -> "south-america"
+
+world_geofk = {
+    "africa": {
+        "DZ": "algeria",
+        "AO": "angola",
+        "BJ": "benin",
+        "BW": "botswana",
+        "BF": "burkina-faso",
+        "BI": "burundi",
+        "CM": "cameroon",
+        # canary-islands, # Island
+        # "CV": "cape-verde", # Island
+        "CF": "central-african-republic",
+        "TD": "chad",
+        # "KM": "comores", # Island
+        "CG": "congo-brazzaville",
+        "CD": "congo-democratic-republic",
+        "DJ": "djibouti",
+        "EG": "egypt",
+        "GQ": "equatorial-guinea",
+        "ER": "eritrea",
+        "ET": "ethiopia",
+        "GA": "gabon",
+        "GH": "ghana",
+        "GW": "guinea-bissau",  # No Data
+        "GN": "guinea",
+        "CI": "ivory-coast",
+        "KE": "kenya",
+        "LS": "lesotho",
+        "LR": "liberia",
+        "LY": "libya",
+        "MG": "madagascar",
+        "MW": "malawi",
+        "ML": "mali",
+        "MR": "mauritania",
+        # "MU": "mauritius", # Island
+        "MA": "morocco",
+        "MZ": "mozambique",
+        "NA": "namibia",
+        "NE": "niger",
+        "NG": "nigeria",
+        "RW": "rwanda",
+        # saint-helena-ascension-and-tristan-da-cunha # Islands
+        # "ST": "sao-tome-and-principe", # Island
+        "SNGM": "senegal-and-gambia",  # Geofk shortcurt
+        # "SC": "seychelles", # Island
+        "SL": "sierra-leone",
+        "SO": "somalia",  # No Data
+        # south-africa-and-lesotho
+        "ZA": "south-africa",
+        "SS": "south-sudan",
+        "SD": "sudan",
+        "SZ": "swaziland",
+        "TZ": "tanzania",
+        "TG": "togo",
+        "TN": "tunisia",
+        "UG": "uganda",
+        "ZM": "zambia",
+        "ZW": "zimbabwe",
+    },
+    "asia": {
+        "AF": "afghanistan",
+        "AM": "armenia",
+        "AZ": "azerbaijan",
+        "BD": "bangladesh",
+        "BT": "bhutan",
+        "KH": "cambodia",
+        "CN": "china",
+        "GCC": "gcc-states",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
+        "IN": "india",
+        "ID": "indonesia",
+        "IR": "iran",
+        "IQ": "iraq",
+        "IL-PL": "israel-and-palestine",
+        "JP": "japan",
+        "JO": "jordan",
+        "KZ": "kazakhstan",
+        "KP": "north-korea",
+        "KR": "south-korea",
+        "KG": "kyrgyzstan",
+        "LA": "laos",
+        "LB": "lebanon",
+        "MY-SG-BN": "malaysia-singapore-brunei",  # Geofk shortcurt
+        "MN": "mongolia",
+        "MM": "myanmar",
+        "NP": "nepal",
+        "PK": "pakistan",
+        "PH": "philippines",
+        "LK": "sri-lanka",
+        "SY": "syria",
+        "TW": "taiwan",
+        "TJ": "tajikistan",
+        "TH": "thailand",
+        "TM": "turkmenistan",
+        "UZ": "uzbekistan",
+        "VN": "vietnam",
+        "YE": "yemen",
+    },
+    "australia-oceania": {
+        "AU": "australia",
+        # "CK": "cook islands",  # Island
+        # "FJ": "fiji",  # Islands
+        # "PF": "french-polynesia",  # Islands
+        # "GU": "guam",  # Island
+        # "KI": "kiribati",  # Islands
+        # "MH": "marshall islands",  # Islands
+        # "FM": "micronesia",  # Islands
+        # "NR": "nauru",  # Islands
+        "NC": "new-caledonia",
+        "NZ": "new-zealand",
+        # "NU": "niue",  # Island
+        # "NF": "norfolk island",  # Island
+        # "MP": "northern mariana islands",  # Islands
+        # "PW": "palau",  # Islands
+        "PG": "papua-new-guinea",
+        # "WS": "samoa",  # Islands
+        # "SB": "solomon islands",  # Islands
+        # "TK": "tokelau",  # Islands
+        # "TO": "tonga",  # Islands
+        # "TV": "tuvalu",  # Islands
+        # "VU": "vanuatu",  # Islands
+        # "WF": "wallis-et-futuna",  # Islands
+    },
+    "europe": {
+        "AL": "albania",
+        "AD": "andorra",
+        "AT": "austria",
+        "BY": "belarus",
+        "BE": "belgium",
+        "BA": "bosnia-herzegovina",
+        "BG": "bulgaria",
+        "HR": "croatia",
+        "CZ": "czech-republic",
+        "CY": "cyprus",
+        "DK": "denmark",
+        "EE": "estonia",
+        # "FO": "faroe islands", # Islands
+        "FI": "finland",
+        "FR": "france",
+        "GE": "georgia",
+        "DE": "germany",
+        # "GI": "gibraltar", # Peninsula; Isolated PS?
+        "GR": "greece",
+        # "GG": "guernsey", # Island
+        "HU": "hungary",
+        "IS": "iceland",
+        "IE": "ireland-and-northern-ireland",
+        # "IM": "isle of man", # Island
+        "IT": "italy",
+        # "JE": "jersey", # Island
+        "LV": "latvia",
+        "LI": "liechtenstein",
+        "LT": "lithuania",
+        "LU": "luxembourg",
+        "MK": "macedonia",
+        "MT": "malta",
+        "MD": "moldova",
+        "MC": "monaco",
+        "ME": "montenegro",
+        "NL": "netherlands",
+        "NO": "norway",
+        "PL": "poland",
+        "PT": "portugal",
+        "RO": "romania",
+        "RS": "serbia",
+        "SK": "slovakia",
+        "SI": "slovenia",
+        "ES": "spain",
+        # "SJ": "svalbard-and-jan-mayen", # Islands
+        "SE": "sweden",
+        "CH": "switzerland",
+        "UA": "ukraine",
+        "GB": "great-britain",
+        "TR": "turkey",
+    },
+    "russia": {
+        "RU": "russia",
+    },
+    "north-america": {
+        "CA": "canada",
+        "GL": "greenland",
+        "MX": "mexico",
+        "US": "us",
+    },
+    "south-america": {
+        "AR": "argentina",
+        "BO": "bolivia",
+        "BR": "brazil",
+        "CL": "chile",
+        "CO": "colombia",
+        "EC": "ecuador",
+        "PE": "peru",
+        "SR": "suriname",
+        "PY": "paraguay",
+        "UY": "uruguay",
+        "VE": "venezuela",
+    },
+    "central-america": {
+        "BZ": "belize",
+        "GT": "guatemala",
+        "SV": "el-salvador",
+        "HN": "honduras",
+        "NI": "nicaragua",
+        "CR": "costa-rica",
+        "PA": "panama",
+    },
+    "europe/france": {
+        "GF": "guyane",
+    },
+}
+
+world_countries = {
+    country_2D: country_name
+    for d in world_geofk.values() for (country_2D, country_name) in d.items()
 }

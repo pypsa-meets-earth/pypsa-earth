@@ -11,7 +11,6 @@ from _helpers import _read_geojson
 from _helpers import _sets_path_to_root
 from _helpers import _to_csv_nafix
 from _helpers import configure_logging
-from download_osm_data import create_country_list
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
@@ -531,7 +530,7 @@ def built_network(inputs, outputs):
     country_shapes = (gpd.read_file(country_shapes_fn).set_index("name")
                       ["geometry"].set_crs(4326))
     input = snakemake.config["countries"]
-    country_list = create_country_list(input)
+    country_list = input
     bus_country_list = buses["country"].unique().tolist()
 
     if len(bus_country_list) != len(country_list):

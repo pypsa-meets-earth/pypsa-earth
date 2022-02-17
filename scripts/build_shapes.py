@@ -21,7 +21,6 @@ from _helpers import _three_2_two_digits_country
 from _helpers import _two_2_three_digits_country
 from _helpers import _two_digits_2_name_country
 from _helpers import configure_logging
-from download_osm_data import create_country_list
 from rasterio.mask import mask
 from shapely.geometry import LineString
 from shapely.geometry import MultiPolygon
@@ -629,7 +628,6 @@ def add_population_data(
         kwargs = {
             "initializer": _init_process_pop,
             "initargs": (df_gadm, year),
-            "maxtasksperchild": 20,
             "processes": nprocesses,
         }
         with mp.get_context("spawn").Pool(**kwargs) as pool:
@@ -702,7 +700,7 @@ if __name__ == "__main__":
 
     out = snakemake.output
 
-    countries_list = create_country_list(snakemake.config["countries"])
+    countries_list = snakemake.config["countries"]
     layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
     update = snakemake.config["build_shape_options"]["update_file"]
     out_logging = snakemake.config["build_shape_options"]["out_logging"]

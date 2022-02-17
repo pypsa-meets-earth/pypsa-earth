@@ -1,9 +1,10 @@
-# PyPSA meets Africa
+# PyPSA meets Africa and PyPSA meets Earth
 
 ## Development Status: **Stable and Active**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
-[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg)](https://github.com/pypsa-meets-africa/pypsa-africa/actions)
+[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux-mac.yaml)
+[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
 
@@ -36,15 +37,18 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
-- **Specific code meeting (by invitation)**
-  - current meetings: 1) Demand creation (WP1) 2) AI asset detection (WP6) and 3) Data workflow updates (WP1-WP5)
-  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
-  - updates, demos, task distribution, weekly targets, Q&A
-- **Outreach meeting (by invitation)**
-  - every second week
+- **Specific code meeting (Open)**
+  - meeting hosted on Discord
+  - join updates, demos, Q&A's, discussions and the coordination of each work package
+  1) Demand creation and prediction meeting, every Wednesday 21:00 UTC+0 
+  2) AI asset detection meeting, every Tuesday 16:00 UTC+0
+  3) Sector coupling meeting, every Thursday 9:00 UTC+0
+  4) Data workflow and architecture meeting, every Friday 14:00 UTC+0
+- **Outreach meeting (Open)**
+  - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
 - [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
-  - access to presentations, lists, documents
+  - access to minutes, presentations, lists, documents
 
 
 ## Installation
@@ -78,6 +82,13 @@ The environment can be installed using:
   snakemake -j 1 solve_all_networks -n
   ```
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
+
+## Training
+  - We recently updated some [hackathon material](https://github.com/pypsa-meets-africa/pypsa-africa-hackathon) for PyPSA-Africa. The hackathon contains jupyter notebooks with exercises.  After going through the 1 day theoretical and practical material you should have a suitable coding setup and feel confident about contributing.
+  - The get a general feeling about the PyPSA functionality, we further recommend going through the [PyPSA](https://github.com/PyPSA/PyPSA/tree/master/examples) and [Atlite](https://github.com/PyPSA/atlite/tree/master/examples) examples.
+  
+## Questions and Issues
+  - We are happy to answer questions and help with issues **if they are public**. Through being public the wider community can benefit from the raised points. Some tips. **Bugs** and **feature requests** should be raised in the [**GitHub Issues**](https://github.com/pypsa-meets-africa/pypsa-africa/issues/new/choose). **General workflow** or **user questions** as well as discussion points should be posted at the [**GitHub Discussions**](https://github.com/pypsa-meets-africa/pypsa-africa/discussions/categories/q-a) tab. Happy coding. 
   
 ## Documentation
 
@@ -94,7 +105,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>hazemakhalek</b></sub>
         </a>
     </td>
     <td align="center">
@@ -115,7 +126,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/euronion">
             <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
             <br />
-            <sub><b>Euronion</b></sub>
+            <sub><b>euronion</b></sub>
         </a>
     </td>
     <td align="center">
@@ -194,7 +205,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/energyLS">
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
-            <sub><b>EnergyLS</b></sub>
+            <sub><b>energyLS</b></sub>
         </a>
     </td>
     <td align="center">
@@ -231,6 +242,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
             <sub><b>EmreYorat</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/stephenjlee">
+            <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
+            <br />
+            <sub><b>Stephen J Lee</b></sub>
         </a>
     </td></tr>
 </table>

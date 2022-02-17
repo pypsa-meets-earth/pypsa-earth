@@ -2,10 +2,15 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import sys
+sys.path.append('./scripts')
+
 from os.path import normpath, exists, isdir
 from shutil import copyfile
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+
+from scripts.download_osm_data import create_country_list
 
 HTTP = HTTPRemoteProvider()
 
@@ -15,6 +20,8 @@ if not exists("config.yaml"):
 
 configfile: "config.yaml"
 
+# convert country list according to the desired region
+config["countries"] = create_country_list(config["countries"])
 
 COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 20)
@@ -239,8 +246,7 @@ rule add_electricity:
         powerplants='resources/powerplants.csv',
         load='resources/ssp2-2.6/2030/era5_2013/Africa.nc',
         gadm_shapes='resources/gadm_shapes.geojson',
-        # hydro_capacities='data/bundle/hydro_capacities.csv',
-        # geth_hydro_capacities='data/geth2015_hydro_capacities.csv',
+        hydro_capacities='data/hydro_capacities.csv',
         **{f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config['renewable']}
     output: "networks/elec.nc"

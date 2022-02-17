@@ -11,6 +11,20 @@ Release Notes
 Upcoming Release
 ================
 
+**New Features and major Changes**
+
+* Attach hydro enabled with all hydro types
+
+* Parallel download of osm data
+
+* Rule download_osm_data extended to the world
+
+* Rule build_shape extended to the world
+
+* Replace google by zenodo data retrieval
+
+* Fix random state for kmean clustering, `adopted from PR <https://github.com/PyPSA/pypsa-eur/pull/313>`
+
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================

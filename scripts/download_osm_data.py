@@ -13,6 +13,7 @@
 import hashlib
 import json
 import logging
+import multiprocessing as mp
 import os
 import pickle
 import shutil
@@ -30,7 +31,8 @@ from config_osm_data import continents
 from config_osm_data import feature_category
 from config_osm_data import feature_columns
 from config_osm_data import iso_to_geofk_dict
-from config_osm_data import world
+from config_osm_data import world_geofk
+from config_osm_data import world_iso
 from esy.osmfilter import Node
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
@@ -41,6 +43,7 @@ from shapely import geometry
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry import Polygon
+from tqdm import tqdm
 
 # esy.osm filter: https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/
 
@@ -48,18 +51,20 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
+
 # logger.setLevel(logging.WARNING)
 
 
+# get continent according to ISO conventions
 def getContinentCountry(code):
-    for continent in world:
-        country = world[continent].get(code, 0)
+    for continent in world_geofk:
+        country = world_geofk[continent].get(code, 0)
         if country:
             return continent, country
     return continent, country
 
 
-def download_pbf(country_code, update, verify):
+def download_pbf(country_code, update, verify, logging=True):
     """
     Download pbf file from geofabrik for a given country code
 
@@ -79,18 +84,39 @@ def download_pbf(country_code, update, verify):
     continent, country_name = getContinentCountry(country_code)
     # Filename for geofabrik
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
-    # https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
-    geofabrik_url = f"https://download.geofabrik.de/{continent}/{geofabrik_filename}"
+
+    # Specify the url depending on the requested element, whether it is a continent or a region
+    if continent == country_name:
+        # Example continent-specific data: https://download.geofabrik.de/africa/nigeria-latest.osm.pbf
+        geofabrik_url = f"https://download.geofabrik.de/{geofabrik_filename}"
+    else:
+        # Example country- or sub-region-specific data: https://download.geofabrik.de/africa-latest.osm.pbf
+        geofabrik_url = (
+            f"https://download.geofabrik.de/{continent}/{geofabrik_filename}")
+
+    # Filepath of the pbf
     PBF_inputfile = os.path.join(os.getcwd(), "data", "osm", continent, "pbf",
-                                 geofabrik_filename)  # Input filepath
+                                 geofabrik_filename)
+
+    _logger.info(f" Input file {PBF_inputfile} ")
 
     if not os.path.exists(PBF_inputfile):
-        _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
+        if logging:
+            _logger.info(
+                f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True, verify=False) as r:
-            with open(PBF_inputfile, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+
+            if r.status_code == 200:
+                # url properly found, thus execute as expected
+                with open(PBF_inputfile, "wb") as f:
+                    shutil.copyfileobj(r.raw, f)
+            else:
+                # error status code: file not found
+                _logger.error(
+                    f"Error code: {r.status_code}. File {geofabrik_filename} not downloaded from {geofabrik_url}"
+                )
 
     if verify is True:
         if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
@@ -361,6 +387,7 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
     if simplified is True:
         df_way["geometry"] = df_way["geometry"].apply(
             lambda x: x.simplify(0.005, preserve_topology=False))
+
     gdf = gpd.GeoDataFrame(df_way,
                            geometry=[LineString(x) for x in df_way.lonlat],
                            crs="EPSG:4326")
@@ -372,12 +399,28 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
 def convert_iso_to_geofk(iso_code,
                          iso_coding=True,
                          convert_dict=iso_to_geofk_dict):
-    """Function to convert the iso code name of a country into the corresponding geofabrik"""
-    if iso_code in convert_dict:
-        if not iso_coding:
-            _logger.error(
-                f"Unexpected iso code {iso_code}: expected only geofabrik codes"
-            )
+    """
+    Function to convert the iso code name of a country into the corresponding geofabrik
+    In Geofabrik, some countries are aggregated, thus if a single country is requested,
+    then all the agglomeration shall be downloaded
+    For example, Senegal (SN) and Gambia (GM) cannot be found alone in geofabrik,
+    but they can be downloaded as a whole SNGM
+
+    The conversion directory, initialized to iso_to_geofk_dict is used to perform such conversion
+    When a two-letter code country is found in convert_dict, and iso_coding is enabled,
+    then that two-letter code is converted into the corresponding value of the dictionary
+
+    Parameters
+    ----------
+    iso_code : str
+        Two-code country code to be converted
+    iso_coding : bool
+        When true, the iso to geofk is performed
+    convert_dict : dict
+        Dictionary used to apply the conversion iso to geofk
+        The keys correspond to the countries iso codes that need a different region to be downloaded
+    """
+    if iso_coding and iso_code in convert_dict:
         return convert_dict[iso_code]
     else:
         return iso_code
@@ -398,6 +441,13 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
     if not os.path.exists(path_file_geojson):
         os.makedirs(os.path.dirname(path_file_geojson),
                     exist_ok=True)  # create raw directory
+
+    # remove non-line elements
+    if feature_category[feature] == "way":
+        # check geometry with multiple points: at least two needed to draw a line
+        is_linestring = df_all_feature["lonlat"].apply(
+            lambda x: (len(x) >= 2) and (type(x[0]) == tuple))
+        df_all_feature = df_all_feature[is_linestring]
 
     df_all_feature = df_all_feature[df_all_feature.columns.intersection(
         set(columns_feature))]
@@ -426,6 +476,55 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
                         driver="GeoJSON")  # Generate GeoJson
 
 
+# Auxiliary function to initialize the parallel data download
+def _init_process_pop(update_, verify_):
+    global update, verify
+    update, verify = update_, verify_
+
+
+# Auxiliary function to download the data
+def _process_func_pop(c_code):
+    download_pbf(c_code, update, verify, logging=False)
+
+
+def parallel_download_pbf(country_list,
+                          nprocesses,
+                          update=False,
+                          verify=False):
+    """
+    Function to download pbf data in parallel
+
+    Parameters
+    ----------
+    country_list : str
+        List of geofabrik country codes to download
+    nprocesses : int
+        Number of parallel processes
+    update : bool
+        If true, existing pbf files are updated. Default: False
+    verify : bool
+        If true, checks the md5 of the file. Default: False
+    """
+
+    # argument for the parallel processing
+    kwargs = {
+        "initializer": _init_process_pop,
+        "initargs": (update, verify),
+        "processes": nprocesses,
+    }
+
+    # execute the parallel download with tqdm progressbar
+    with mp.get_context("spawn").Pool(**kwargs) as pool:
+        for _ in tqdm(
+                pool.imap(_process_func_pop, country_list),
+                ascii=False,
+                unit=" countries",
+                total=len(country_list),
+                desc="Download pbf ",
+        ):
+            pass
+
+
 def process_data(
     feature_list,
     country_list,
@@ -433,10 +532,18 @@ def process_data(
     iso_coding=True,
     update=False,
     verify=False,
+    nprocesses=1,
 ):
     """
     Download the features in feature_list for each country of the country_list
     """
+
+    # parallel download of data if parallel download is enabled
+    if nprocesses > 1:
+        _logger.info(
+            f"Parallel raw osm data (pbf files) download with {nprocesses} threads"
+        )
+        parallel_download_pbf(country_list, nprocesses, update, verify)
 
     # loop the request for each feature
 
@@ -511,16 +618,28 @@ def create_country_list(input, iso_coding=True):
     full_codes_list : list
         Example ["NG","ZA"]
     """
+
     def filter_codes(c_list, iso_coding=True):
         """
         Filter list according to the specified coding.
         When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
         When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
         """
-        if iso_coding:
-            return [c for c in c_list if len(c) == 2]
+        if (
+                iso_coding
+        ):  # if country lists are in iso coding, then check if they are 2-string
+            # 2-code countries
+            ret_list = [c for c in c_list if len(c) == 2]
+
+            # check if elements have been removed and return a working if so
+            if len(ret_list) < len(c_list):
+                _logger.warning(
+                    "Specified country list contains the following non-iso codes: "
+                    + ", ".join(list(set(c_list) - set(ret_list))))
+
+            return ret_list
         else:
-            return [c for c in c_list if c not in iso_to_geofk_dict]
+            return c_list  # [c for c in c_list if c not in iso_to_geofk_dict]
 
     full_codes_list = []
 
@@ -530,12 +649,12 @@ def create_country_list(input, iso_coding=True):
 
         # extract countries in world
         if value1 == "world":
-            for continent in world.keys():
-                codes_list.extend(list(world[continent]))
+            for continent in world_iso.keys():
+                codes_list.extend(list(world_iso[continent]))
 
         # extract countries in continent
-        elif value1 in world.keys():
-            codes_list = list(world[value1])
+        elif value1 in world_iso.keys():
+            codes_list = list(world_iso[value1])
 
         # extract countries in regions
         elif value1 in continent_regions.keys():
@@ -554,6 +673,33 @@ def create_country_list(input, iso_coding=True):
     return full_codes_list
 
 
+def country_list_to_geofk(country_list):
+    """
+    Convert the requested country list into geofk norm
+
+    Parameters
+    ----------
+    input : str
+        Any two-letter country name or aggregation of countries given in config_osm_data.py
+        Country name duplications won't distort the result.
+        Examples are:
+        ["NG","ZA"], downloading osm data for Nigeria and South Africa
+        ["SNGM"], downloading data for Senegal&Gambia shape
+        ["NG","ZA","NG"], won't distort result.
+
+    Returns
+    -------
+    full_codes_list : list
+        Example ["NG","ZA"]
+    """
+
+    full_codes_list = [
+        convert_iso_to_geofk(c_code) for c_code in set(country_list)
+    ]
+
+    return full_codes_list
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -568,10 +714,11 @@ if __name__ == "__main__":
     # ["substation", "generator", "line", "cable", "tower"]
     feature_list = ["substation", "generator", "line", "cable"]
 
-    input = snakemake.config["countries"]
-    output_files = snakemake.output
-
-    country_list = create_country_list(input)
+    # get list of countries into geofabrik convention; expected iso norm in input
+    country_list = country_list_to_geofk(snakemake.config["countries"])
+    output_files = snakemake.output  # output snakemake
+    nprocesses = snakemake.config.get("download_osm_data_nprocesses",
+                                      1)  # number of threads
 
     # Set update # Verify = True checks local md5s and pre-filters data again
     process_data(
@@ -581,4 +728,5 @@ if __name__ == "__main__":
         iso_coding=True,
         update=False,
         verify=False,
+        nprocesses=nprocesses,
     )

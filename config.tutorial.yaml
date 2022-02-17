@@ -97,7 +97,7 @@ electricity:
     Store: [battery, H2]
     Link: []
 
-  conventional_carriers: [coal, CCGT]
+  conventional_carriers: [coal, OCGT, CCGT, oil]
 
   max_hours:
     battery: 6
@@ -228,7 +228,6 @@ renewable:
     cutout: africa-2013-era5-tutorial
     resource:
       method: hydro
-      plants: data/clean/africa_all_substations.geojson
       hydrobasins: data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp
       # flowspeed: 1.0
       # weight_with_height: false
@@ -260,7 +259,7 @@ costs:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: false
+    load_shedding: true
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
@@ -288,7 +287,7 @@ plotting:
   energy_threshold: 50.
 
   vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
-  conv_techs: ["OCGT", "CCGT", "Nuclear", "Coal"]
+  conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]
@@ -338,6 +337,7 @@ plotting:
     "HVDC links": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
+    "load": "#FF0000"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"

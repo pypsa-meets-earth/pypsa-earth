@@ -47,7 +47,6 @@ import numpy
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from download_osm_data import create_country_list
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 from vresutils.graph import voronoi_partition_pts
@@ -69,7 +68,7 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON", schema=schema)
     else:
         # create empty file to avoid issues with snakemake
-        with os.open(fn, "w") as fp:
+        with open(fn, "w") as fp:
             pass
 
 
@@ -147,6 +146,7 @@ def custom_voronoi_partition_pts(points,
 
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
+
     def locate_bus(coords):
         try:
             return gadm_shapes[gadm_shapes.contains(
@@ -182,7 +182,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_bus_regions")
     configure_logging(snakemake)
 
-    countries = create_country_list(snakemake.config["countries"])
+    countries = snakemake.config["countries"]
 
     n = pypsa.Network(snakemake.input.base_network)
 
