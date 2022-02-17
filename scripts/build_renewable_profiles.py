@@ -262,9 +262,8 @@ if __name__ == "__main__":
             "x": "lon",
             "y": "lat"
         })[[
-            # select busbar whose location (p)
+            # select busbar whose location (p) belongs to at least one hydrobasin geometry
             any(hydrobasins.geometry.intersects(p))
-            # belongs to at least one hydrobasin geometry
             for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
         ]]  # TODO: filtering by presence of hydro generators should be the way to go
 
