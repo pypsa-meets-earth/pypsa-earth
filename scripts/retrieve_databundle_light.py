@@ -1,16 +1,49 @@
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa
+# SPDX-FileCopyrightText: : 2021-2022 PyPSA-Africa, 2017-2020 The PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3517935.svg
-   :target: https://doi.org/10.5281/zenodo.3517935
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5894972.svg
+   :target: https://doi.org/10.5281/zenodo.5894972
 
-The data bundle (1.4 GB) contains common GIS datasets like NUTS3 shapes, EEZ shapes, CORINE Landcover, Natura 2000 and also electricity specific summary statistics like historic per country yearly totals of hydro generation, GDP and POP on NUTS3 levels and per-country load time-series.
+The data bundles contains common GIS datasets like EEZ shapes, Copernicus Landcover, Hydrobasins 
+and also electricity specific summary statistics like historic per country yearly totals of hydro generation,
+GDP and POP on NUTS3 levels and per-country load time-series.
 
-This rule downloads the data bundle from `zenodo <https://doi.org/10.5281/zenodo.3517935>`_ and extracts it in the ``data`` sub-directory, such that all files of the bundle are stored in the ``data/bundle`` subdirectory.
+This rule downloads the data bundle from `zenodo <https://doi.org/10.5281/zenodo.5894972>`_ 
+or `google drive <https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM>`_ 
+and extracts it in the ``data``, ``resources`` and ``cutouts`` sub-directory.
+Bundle data are then deleted once downloaded and unzipped.
 
-The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_ than required for the full model (19 MB)
+The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_ 
+than required for the full model (around 500 MB)
+
+The required bundles are downloaded automatically according to the list names, in agreement to
+the data bundles specified in the bundle configuration file, typically located in the ``config`` folder.
+Each data bundle entry has the following structure:
+
+.. code:: yaml
+
+  bundle_name:  # name of the bundle
+    countries: [country code, region code or country list]  # list of countries represented in the databundle
+    [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
+    category: common/resources/data/cutouts  # category of data contained in the bundle:
+    destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
+    urls:  # list of urls by source, e.g. zenodo or google
+      zenodo: {zenodo url}
+      google: {google url}
+
+Depending on the country list that is asked to perform, all needed databundles are downloaded
+according to the following rules:
+
+- The databundle shall adhere to the tutorial configuration: when
+  the tutorial configuration is running, only the databundles having tutorial flag true
+  shall be downloaded
+- For every data category, the most suitable bundles are downloaded by order of
+  number of countries matched: for every bundles matching the category,
+  the algorithm sorts the bundles by the number of countries that are matched and starts
+  downloading them starting from those matching more countries till all countries are matched
+  or no more bundles are available
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3517921.svg
     :target: https://doi.org/10.5281/zenodo.3517921
@@ -19,7 +52,8 @@ The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/35179
 
 .. code:: yaml
 
-    tutorial:
+    tutorial:  # configuration stating whether the tutorial is needed
+    
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
@@ -27,7 +61,9 @@ The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/35179
 
 **Outputs**
 
-- ``cutouts/bundle``: input data collected from various sources
+- ``data``: input data unzipped into the data folder
+- ``resources``: input data unzipped into the resources folder
+- ``cutouts``: input data unzipped into the cutouts folder
 
 """
 import logging
@@ -229,8 +265,7 @@ if __name__ == "__main__":
     rootpath = os.getcwd()
     tutorial = snakemake.config["tutorial"]
     countries = snakemake.config["countries"]
-    host = "zenodo"  # hard coded for now. Could be a snakemake rule param./attri
-    logger.info(f"Retrieving data from {host}.")
+    logger.info(f"Retrieving data for {len(countries)} countries.")
 
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.input[0])
