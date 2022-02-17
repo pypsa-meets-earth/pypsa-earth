@@ -63,9 +63,9 @@ dependencies:
   # Cloud download
   - googledrivedownloader
 
-  # Default solver for tests
-  - glpk
-  - ipopt<=3.13.3
+  # # Default solver for tests (moved to the CI)
+  # - glpk
+  # - ipopt  # <=3.11.1 for windows; <= 3.13.3 for linux
 
   - pip:
     - git+https://github.com/pydata/xarray@main # till the main is not in conda
