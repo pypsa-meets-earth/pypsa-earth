@@ -94,34 +94,28 @@ def load_databundle_config(path):
     return config
 
 
-"""
-    download_and_unzip(host, config, rootpath, dest_path, hot_run=True)
-
-Function to download and unzip the data by category
-
-Inputs
-------
-host : str
-    Name of the hosting platform: zenodo or google
-config : Dict
-    Configuration data for the category to download
-rootpath : str
-    Absolute path of the repository
-hot_run : Bool (default True)
-    When true the data are downloaded
-    When false, the workflow is run without downloading and unzipping
-
-Outputs
--------
-True when download is successful, False otherwise
-
-"""
-
-
 def download_and_unzip(host, config, rootpath, hot_run=True):
     """
-    Function to download and unzip data depending on the hosting platform.
-    Currently, hosts accepted: zenodo and google
+        download_and_unzip(host, config, rootpath, dest_path, hot_run=True)
+
+    Function to download and unzip the data by category
+
+    Inputs
+    ------
+    host : str
+        Name of the hosting platform: zenodo or google
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+
     """
     resource = "-".join(config["category"])
     file_path = os.path.join(rootpath, "tempfile.zip")
@@ -182,39 +176,37 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
         return False
 
 
-"""
-    get_best_bundles(country_list, category, config_bundles, tutorial)
-
-Function to get the best bundles that download the datafor selected countries,
-given category and tutorial characteristics.
-
-The selected bundles shall adhere to the following criteria:
-- The bundles' tutorial parameter shall match the tutorial argument
-- The bundles' category shall match the category of data to download
-- When multiple bundles are identified for the same set of users,
-  the bundles matching more countries are first selected and more bundles
-  are added until all countries are matched or no more bundles are available
-
-Inputs
-------
-country_list : list
-    List of country codes for the countries to download
-category : str
-    Category of the data to download
-config_bundles : Dict
-    Dictionary of configurations for all available bundles
-tutorial : Bool
-    Whether data for tutorial shall be downloaded
-
-Outputs
--------
-returned_bundles : list
-    List of bundles to download
-
-"""
-
-
 def get_best_bundles(country_list, category, config_bundles, tutorial):
+    """
+        get_best_bundles(country_list, category, config_bundles, tutorial)
+
+    Function to get the best bundles that download the datafor selected countries,
+    given category and tutorial characteristics.
+
+    The selected bundles shall adhere to the following criteria:
+    - The bundles' tutorial parameter shall match the tutorial argument
+    - The bundles' category shall match the category of data to download
+    - When multiple bundles are identified for the same set of users,
+    the bundles matching more countries are first selected and more bundles
+    are added until all countries are matched or no more bundles are available
+
+    Inputs
+    ------
+    country_list : list
+        List of country codes for the countries to download
+    category : str
+        Category of the data to download
+    config_bundles : Dict
+        Dictionary of configurations for all available bundles
+    tutorial : Bool
+        Whether data for tutorial shall be downloaded
+
+    Outputs
+    -------
+    returned_bundles : list
+        List of bundles to download
+
+    """
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
     dict_n_matched = {
         bname: config_bundles[bname]["n_matched"]
