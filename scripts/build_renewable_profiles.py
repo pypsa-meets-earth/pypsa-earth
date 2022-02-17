@@ -24,8 +24,9 @@ Relevant settings
         {technology}:
             cutout:
             copernicus:
-            grid_codes:
-            distance:
+                grid_codes:
+                distance:
+                distancing_codes:
             natura:
             max_depth:
             max_shore_distance:
@@ -287,20 +288,17 @@ if __name__ == "__main__":
         if "natura" in config and config["natura"]:
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
-        copernicus = config.get("copernicus", {})
-        if "grid_codes" in copernicus:
-            codes = copernicus["grid_codes"]
+        if "copernicus" in config and config["copernicus"]:
+            copernicus = config["copernicus"]
             excluder.add_raster(paths.copernicus,
-                                codes=codes,
+                                codes=copernicus["grid_codes"],
                                 invert=True,
-                                crs=3035)
-        if copernicus.get("distance", 0.0) > 0.0:
-            codes = copernicus["distance_grid_codes"]
-            buffer = copernicus["distance"]
-            excluder.add_raster(paths.copernicus,
-                                codes=codes,
-                                buffer=buffer,
-                                crs=3035)
+                                crs="EPSG:4236")
+            if "distance" in copernicus and config["copernicus"]["distance"] > 0:
+                excluder.add_raster(paths.copernicus,
+                                    codes=copernicus["distancing_codes"],
+                                    buffer=copernicus["distance"],
+                                    crs="EPSG:4236")
 
         if "max_depth" in config:
             # lambda not supported for atlite + multiprocessing
