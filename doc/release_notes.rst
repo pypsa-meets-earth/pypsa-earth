@@ -23,6 +23,8 @@ Upcoming Release
 
 * Replace google by zenodo data retrieval
 
+* Fix random state for kmean clustering, `adopted from PR <https://github.com/PyPSA/pypsa-eur/pull/313>`
+
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
