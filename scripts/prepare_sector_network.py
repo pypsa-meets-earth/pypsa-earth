@@ -1,16 +1,11 @@
 import os
-import pypsa
-import pandas as pd
-import numpy as np
-
-from helpers import (
-    mock_snakemake,
-    prepare_costs,
-    create_network_topology,
-    create_dummy_data,
-)
-
 from types import SimpleNamespace
+
+import numpy as np
+import pandas as pd
+import pypsa
+from helpers import (create_dummy_data, create_network_topology,
+                     mock_snakemake, prepare_costs)
 
 spatial = SimpleNamespace()
 

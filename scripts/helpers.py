@@ -1,7 +1,8 @@
-from vresutils.costdata import annuity
 from pathlib import Path
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+from vresutils.costdata import annuity
 
 
 def mock_snakemake(rulename, **wildcards):
@@ -20,8 +21,9 @@ def mock_snakemake(rulename, **wildcards):
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
-    import snakemake as sm
     import os
+
+    import snakemake as sm
     from pypsa.descriptors import Dict
     from snakemake.script import Snakemake
 
