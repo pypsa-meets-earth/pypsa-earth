@@ -729,7 +729,7 @@ if __name__ == "__main__":
     # Snakemake imports:
     regions = snakemake.input.regions
 
-    countries = create_country_list(snakemake.config["countries"])
+    countries = snakemake.config["countries"]
     weather_year = snakemake.config["load_options"]["weather_year"]
     prediction_year = snakemake.config["load_options"]["prediction_year"]
     region_load = snakemake.config["load_options"]["region_load"]
