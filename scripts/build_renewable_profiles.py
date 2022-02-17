@@ -257,13 +257,13 @@ if __name__ == "__main__":
         hydrobasins = hydrobasins[[
             any(country_shapes.geometry.intersects(geom))
             for geom in hydrobasins.geometry
-        ]]
-        # merged_hydrobasin_shape = unary_union(_simplify_polys(hydrobasins.geometry))
+        ]]  # exclude hydrobasins shapes that do not intersect the countries of interest
         resource["plants"] = regions.rename(columns={
             "x": "lon",
             "y": "lat"
         })[[
-            any(hydrobasins.geometry.intersects(p))
+            any(hydrobasins.geometry.intersects(p))  # select busbar whose location (p)
+                                                     # belongs to at least one hydrobasin geometry
             for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
         ]]  # TODO: filtering by presence of hydro generators should be the way to go
 
