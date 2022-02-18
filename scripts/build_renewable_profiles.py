@@ -290,15 +290,20 @@ if __name__ == "__main__":
 
         if "copernicus" in config and config["copernicus"]:
             copernicus = config["copernicus"]
-            excluder.add_raster(paths.copernicus,
-                                codes=copernicus["grid_codes"],
-                                invert=True,
-                                crs="EPSG:4236")
-            if "distance" in copernicus and config["copernicus"]["distance"] > 0:
-                excluder.add_raster(paths.copernicus,
-                                    codes=copernicus["distance_grid_codes"],
-                                    buffer=copernicus["distance"],
-                                    crs="EPSG:4236")
+            excluder.add_raster(
+                paths.copernicus,
+                codes=copernicus["grid_codes"],
+                invert=True,
+                crs="EPSG:4236",
+            )
+            if "distance" in copernicus and config["copernicus"][
+                    "distance"] > 0:
+                excluder.add_raster(
+                    paths.copernicus,
+                    codes=copernicus["distance_grid_codes"],
+                    buffer=copernicus["distance"],
+                    crs="EPSG:4236",
+                )
 
         if "max_depth" in config:
             # lambda not supported for atlite + multiprocessing
