@@ -64,11 +64,7 @@ jobs:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles('envs/environment.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}    
 
-      - name: Update environment due to outdated or unavailable cache (linux/macos)
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n pypsa-africa -f envs/environment.yaml
-
-      - name: Update environment due to outdated or unavailable cache (windows) 
+      - name: Update environment due to outdated or unavailable cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: mamba env update -n pypsa-africa -f envs/environment.yaml
 
