@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-name: CI-windows
+name: CI
 
 on:
   push:
@@ -21,18 +21,19 @@ jobs:
   build:
     strategy:
       matrix:
-        # Matrix required to handle environment caching with Mambaforge
-        - os: ubuntu-latest
-          label: ubuntu-latest
-          prefix: /usr/share/miniconda3/envs/pypsa-africa
+        include:
+          # Matrix required to handle environment caching with Mambaforge
+          - os: ubuntu-latest
+            label: ubuntu-latest
+            prefix: /usr/share/miniconda3/envs/pypsa-africa
 
-        - os: macos-latest
-          label: macos-latest
-          prefix: /Users/runner/miniconda3/envs/pypsa-africa
+          - os: macos-latest
+            label: macos-latest
+            prefix: /Users/runner/miniconda3/envs/pypsa-africa
 
-        - os: windows-latest
-          label: windows-latest
-          prefix: C:\Miniconda3\envs\pypsa-africa
+          - os: windows-latest
+            label: windows-latest
+            prefix: C:\Miniconda3\envs\pypsa-africa
     
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
