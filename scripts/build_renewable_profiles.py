@@ -26,7 +26,7 @@ Relevant settings
             copernicus:
                 grid_codes:
                 distance:
-                distancing_codes:
+                distance_grid_codes:
             natura:
             max_depth:
             max_shore_distance:
@@ -296,7 +296,7 @@ if __name__ == "__main__":
                                 crs="EPSG:4236")
             if "distance" in copernicus and config["copernicus"]["distance"] > 0:
                 excluder.add_raster(paths.copernicus,
-                                    codes=copernicus["distancing_codes"],
+                                    codes=copernicus["distance_grid_codes"],
                                     buffer=copernicus["distance"],
                                     crs="EPSG:4236")
 
