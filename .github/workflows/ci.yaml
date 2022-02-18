@@ -45,15 +45,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Add solver to environment (linux/macos)
-        if: ${{ matrix.label }} != 'windows-latest'
+      - name: Add solver to environment
         run: |
           echo -e "  - glpk\n  - ipopt<3.13.3" >> envs/environment.yaml
-
-      - name: Add solver to environment (windows)
-        if: ${{ matrix.label }} == 'windows-latest'
-        run: |
-          echo -e "  - glpk\n  - ipopt<=3.11.1" >> envs/environment.yaml
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
@@ -70,10 +64,14 @@ jobs:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles('envs/environment.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}    
 
-      - name: Update environment due to outdated or unavailable cache
+      - name: Update environment due to outdated or unavailable cache (linux/macos)
         if: steps.cache.outputs.cache-hit != 'true'
         run: mamba env update -n pypsa-africa -f envs/environment.yaml
-          
+
+      - name: Update environment due to outdated or unavailable cache (windows) 
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n pypsa-africa -f envs/environment.yaml
+
       - name: Test snakemake workflow
         run: |
           conda list
