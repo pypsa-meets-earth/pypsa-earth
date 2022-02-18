@@ -34,6 +34,10 @@ jobs:
 
     - uses: actions/checkout@v2
 
+    - name: Add solver to environment
+      run: |
+        echo -e "  - glpk\n  - ipopt<3.13.3" >> envs/environment.yaml
+
     - name: Setup Miniconda
       uses: conda-incubator/setup-miniconda@v2.1.1 
       with: # checks out environment 'test' by default
