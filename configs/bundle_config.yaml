@@ -59,8 +59,8 @@ bundle_data_world:
     google: https://drive.google.com/file/d/1fo-YsyU2LKkVeg5Ea0JbcEx-zQ3kJKW7/view?usp=sharing
 
 # resources bundle containing the resources folder for africa only
-bundle_resources_africa:
-  countries: [africa]
+bundle_resources_world:
+  countries: [world]
   category: resources
   destination: "resources"
   urls:

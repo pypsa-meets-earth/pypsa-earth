@@ -62,7 +62,7 @@ datafiles = [
         "data/costs.csv",
 ]
 
-if config.get('tutorial')==False:
+if config.get('tutorial')==False and config['enable'].get('build_cutout', False)==False:
     datafiles.extend(["cutouts/africa-2013-era5.nc"])
 if config.get('tutorial')==True:
     datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
