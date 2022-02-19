@@ -34,7 +34,7 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 - **Specific code meeting (by invitation)**
 
   - current meetings: 1) Demand creation (WP1) 2) Data workflow updates (WP1-WP5) and 3) AI asset detection (WP6)
-  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
+  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) Tuesday 15:30-16:30 (UK time)
   - updates, demos, task distribution, weekly targets, Q&A
 
 - **Outreach meeting (by invitation)**
