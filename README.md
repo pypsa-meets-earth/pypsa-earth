@@ -40,7 +40,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
   1) Demand creation and prediction meeting, every Wednesday 21:00 UTC+0 
-  2) AI asset detection meeting, every Tuesday 16:00 UTC+0
+  2) AI asset detection meeting, every Thursday 15:30 UTC+0
   3) Sector coupling meeting, every Thursday 9:00 UTC+0
   4) Data workflow and architecture meeting, every Friday 14:00 UTC+0
 - **Outreach meeting (Open)**
