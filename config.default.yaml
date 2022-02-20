@@ -134,6 +134,16 @@ renewable:
     copernicus:
       # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
       #  development of the REMix model and application for Europe. ( p.42 / p.28)
+      # CLC grid codes:
+      # 11X/12X - Various forest types
+      # 20  - Shrubs
+      # 30  - Herbaceus vegetation
+      # 40  - Cropland
+      # 50  - Urban
+      # 60  - Bare / Sparse vegetation
+      # 80  - Permanent water bodies
+      # 100 - Moss and lichen
+      # 200 - Open sea
       grid_codes: [20, 30, 40, 60, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
       distance: 1000
       distance_grid_codes: [50]
