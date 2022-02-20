@@ -103,6 +103,33 @@ bundle_landcover_westasia:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
     google: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
 
+# data bundle of the data folder for europe
+bundle_landcover_europe:
+  countries: [europe]
+  category: landcover
+  destination: "data/raw/landcover"
+  urls:
+    zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_europe.zip?download=1
+    google: https://drive.google.com/file/d/1zQuKnZFp6ASYD_e-dbWbWXYg330E0occ/view?usp=sharing
+
+# data bundle of the data folder for the poles
+bundle_landcover_northamerica:
+  countries: [north_america]  # Greenland and antartica
+  category: landcover
+  destination: "data/raw/landcover"
+  urls:
+    zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_northamerica.zip?download=1
+    google: https://drive.google.com/file/d/1gu7PH08ZEpL4cBQa_fMUSq2m6LY1_UJo/view?usp=sharing
+
+# data bundle of the data folder for the poles
+bundle_landcover_poles:
+  countries: [GL, ATA]  # Greenland and antartica
+  category: landcover
+  destination: "data/raw/landcover"
+  urls:
+    zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_polar.zip?download=1
+    google: https://drive.google.com/file/d/1cUDcE6wpQVZNf3K9ffV6pNXfxq6sA65E/view?usp=sharing
+
 # cutouts bundle of the cutouts folder for the african continent
 bundle_cutouts_africa:
   countries: [africa]
