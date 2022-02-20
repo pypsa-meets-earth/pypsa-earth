@@ -4,10 +4,10 @@ resource,,,
 -- method,--,"Must be 'wind'","A superordinate technology type."
 -- turbine,--,"One of turbine types included in `atlite <https://github.com/PyPSA/atlite/tree/master/atlite/resources/windturbine>`__","Specifies the turbine type and its characteristic power curve."
 capacity_per_sqkm,:math:`MW/km^2`,float,"Allowable density of wind turbine placement."
-corine,,,
--- grid_codes,--,"Any subset of the `CORINE Land Cover code list <http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file>`_","Specifies areas according to CORINE Land Cover codes which are generally eligible for wind turbine placement."
--- distance,m,float,"Distance to keep from areas specified in ``distance_grid_codes``"
--- distance_grid_codes,--,"Any subset of the `CORINE Land Cover code list <http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file>`_","Specifies areas according to CORINE Land Cover codes to which wind turbines must maintain a distance specified in the setting ``distance``."
+copernicus,,,
+-- grid_codes,--,"Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement."
+-- distance,m,"int","(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology."
+-- distance_grid_codes,--,"(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies from which a distance of 'distance' metres is unavailable as a buffer area."
 natura,bool,"{true, false}","Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``."
 potential,--,"One of {'simple', 'conservative'}","Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`"
 clip_p_max_pu,p.u.,float,"To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero."
