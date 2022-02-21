@@ -4,7 +4,10 @@ resource,,,
 -- method,--,"Must be 'wind'","A superordinate technology type."
 -- turbine,--,"One of turbine types included in `atlite <https://github.com/PyPSA/atlite/tree/master/atlite/resources/windturbine>`__","Specifies the turbine type and its characteristic power curve."
 capacity_per_sqkm,:math:`MW/km^2`,float,"Allowable density of wind turbine placement."
-corine,--,"Any *realistic* subset of the `CORINE Land Cover code list <http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file>`_","Specifies areas according to CORINE Land Cover codes which are generally eligible for AC-connected offshore wind turbine placement."
+copernicus,,,
+-- grid_codes,--,"Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement."
+-- distance,m,"int","(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology."
+-- distance_grid_codes,--,"(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies from which a distance of 'distance' metres is unavailable as a buffer area."
 natura,bool,"{true, false}","Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``."
 max_depth,m,float,"Maximum sea water depth at which wind turbines can be build. Maritime areas with deeper waters are excluded in the process of calculating the AC-connected offshore wind potential."
 min_shore_distance,m,float,"Minimum distance to the shore below which wind turbines cannot be build. Such areas close to the shore are excluded in the process of calculating the AC-connected offshore wind potential."

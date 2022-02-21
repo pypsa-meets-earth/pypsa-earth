@@ -8,7 +8,10 @@ resource,,,
 -- -- azimuth,°,"Any angle in [0., 360.]","Specifies the `azimuth <https://en.wikipedia.org/wiki/Azimuth>`_ orientation of the solar panel. South corresponds to 180.°."
 capacity_per_sqkm,:math:`MW/km^2`,float,"Allowable density of solar panel placement."
 correction_factor,--,float,"A correction factor for the capacity factor (availability) time series."
-corine,--,"Any subset of the `CORINE Land Cover code list <http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file>`_","Specifies areas according to CORINE Land Cover codes which are generally eligible for solar panel placement."
+copernicus,,,
+-- grid_codes,--,"Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement."
+-- distance,m,"int","(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology."
+-- distance_grid_codes,--,"(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies from which a distance of 'distance' metres is unavailable as a buffer area."
 natura,bool,"{true, false}","Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``."
 potential,--,"One of {'simple', 'conservative'}","Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`"
 clip_p_max_pu,p.u.,float,"To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero."

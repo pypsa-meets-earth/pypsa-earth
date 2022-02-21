@@ -3,8 +3,7 @@
 ## Development Status: **Stable and Active**
 
 [![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
-[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux-mac.yaml)
-[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml)
+[![Build Status](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci.yaml)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
 
@@ -41,7 +40,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
   1) Demand creation and prediction meeting, every Wednesday 21:00 UTC+0 
-  2) AI asset detection meeting, every Tuesday 16:00 UTC+0
+  2) AI asset detection meeting, every Thursday 15:30 UTC+0
   3) Sector coupling meeting, every Thursday 9:00 UTC+0
   4) Data workflow and architecture meeting, every Friday 14:00 UTC+0
 - **Outreach meeting (Open)**
@@ -152,6 +151,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/LukasFrankenQ">
+            <img src="https://avatars.githubusercontent.com/u/55196140?v=4" width="100;" alt="LukasFrankenQ"/>
+            <br />
+            <sub><b>Lukas Franken</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/pz-max">
             <img src="https://avatars.githubusercontent.com/u/61968949?v=4" width="100;" alt="pz-max"/>
             <br />
@@ -178,15 +184,15 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>Ayman Alkhirbash</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/davide-f">
             <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
             <br />
             <sub><b>Davide-f</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/koen-vg">
             <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
@@ -221,20 +227,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>Ekaterina</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
             <sub><b>Tobie</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/LukasFrankenQ">
-            <img src="https://avatars.githubusercontent.com/u/55196140?v=4" width="100;" alt="LukasFrankenQ"/>
-            <br />
-            <sub><b>Lukas Franken</b></sub>
         </a>
     </td>
     <td align="center">
