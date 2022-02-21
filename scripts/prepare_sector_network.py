@@ -598,21 +598,7 @@ if __name__ == "__main__":
     )
     # TODO logging
 
-    # TODO fetch options from the config file
-
-    options = {
-        "co2_network": True,
-        "co2_sequestration_potential":
-        200,  # MtCO2/a sequestration potential for Europe
-        "co2_sequestration_cost": 10,  # EUR/tCO2 for sequestration of CO2
-        "hydrogen_underground_storage": True,
-        "h2_cavern": True,
-        "marginal_cost_storage": 0,
-        "methanation": True,
-        "helmeth": True,
-        "SMR": True,
-        "cc_fraction": 0.9,
-    }
+    options_config = snakemake.config["sector"]
 
     add_hydrogen(n, costs)  # TODO add costs
 
