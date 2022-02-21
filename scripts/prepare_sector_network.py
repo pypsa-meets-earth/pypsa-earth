@@ -34,6 +34,68 @@ def add_fossil_gas(n, costs):
 
     # TODO Add links to AC side, therefore use add_generation function from PyPSA-Eur-Sec
 
+def add_carrier_buses(n, carriers):
+    """
+    Add buses to connect e.g. coal, nuclear and oil plants
+    """
+    if isinstance(carriers, str):
+        carriers = [carriers]
+
+    for carrier in carriers:
+
+        n.add("Carrier", carrier)
+
+        n.add("Bus",
+            "Africa " + carrier,
+            location="Africa",
+            carrier=carrier
+        )
+
+        #capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
+        n.add("Store",
+            "Africa " + carrier + " Store",
+            bus="Africa " + carrier,
+            e_nom_extendable=True,
+            e_cyclic=True,
+            carrier=carrier,
+        )
+
+        n.add("Generator",
+            "Africa " + carrier,
+            bus="Africa " + carrier,
+            p_nom_extendable=True,
+            carrier=carrier,
+            marginal_cost=costs.at[carrier, 'fuel']
+        )
+
+def add_generation(n, costs):
+
+    print("adding electricity generation")
+
+    #Not required, because nodes are already defined in "nodes"
+    #nodes = pop_layout.index 
+
+    fallback = {"OCGT": "gas"}
+    conventionals = options.get("conventional_generation", fallback)
+
+    add_carrier_buses(n, np.unique(list(conventionals.values())))
+
+    for generator, carrier in conventionals.items():
+
+        n.madd("Link",
+            nodes + " " + generator,
+            bus0="Africa " + carrier,
+            bus1=nodes,
+            bus2="co2 atmosphere",
+            marginal_cost=costs.at[generator, 'efficiency'] * costs.at[generator, 'VOM'], #NB: VOM is per MWel
+            capital_cost=costs.at[generator, 'efficiency'] * costs.at[generator, 'fixed'], #NB: fixed cost is per MWel
+            p_nom_extendable=True,
+            carrier=generator,
+            efficiency=costs.at[generator, 'efficiency'],
+            efficiency2=costs.at[carrier, 'CO2 intensity'],
+            lifetime=costs.at[generator, 'lifetime']
+        )
+
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
@@ -598,7 +660,7 @@ if __name__ == "__main__":
     )
     # TODO logging
 
-    options_config = snakemake.config["sector"]
+    options = snakemake.config["sector"]
 
     add_hydrogen(n, costs)  # TODO add costs
 
