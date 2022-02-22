@@ -11,29 +11,6 @@ from helpers import prepare_costs
 
 spatial = SimpleNamespace()
 
-def add_fossil_gas(n, costs):
-    """
-    Function to add fossil gas as an energy carrier (in nodal resolution)
-    
-    Parameters:
-    -
-    n : pypsa.network
-    costs : cost file with cost parameters
-    Returns:
-    -
-    param1 : test
-    """
-
-    # Add Carrier "Fossil Gas" to network
-    n.add("Carrier", "Fossil Gas")
-
-    # Add one bus to every node and link them to carrier "Fossil Gas"
-    n.madd("Bus", nodes + "Fossil Gas", location = nodes, carrier = "Fossil Gas")
-
-    # Links between fossil gas and hydrogen are not added here, but in seperate function "h2_ch4_conversions"
-
-    # TODO Add links to AC side, therefore use add_generation function from PyPSA-Eur-Sec
-
 def add_carrier_buses(n, carriers):
     """
     Add buses to connect e.g. coal, nuclear and oil plants
