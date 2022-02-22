@@ -96,6 +96,38 @@ def add_generation(n, costs):
             lifetime=costs.at[generator, 'lifetime']
         )
 
+def H2_liquid_fossil_conversions(n, costs):
+    """
+    Function to add conversions between H2 and liquid fossil
+    """
+
+    # TODO add the bus in add_carrier_buses(n, carriers), via config? 
+    carrier = 'oil'
+
+    # Carrier oil exists already
+    #n.add("Carrier", carrier)
+
+    n.add("Bus",
+        "Africa " + carrier,
+        location="Africa",
+        carrier=carrier
+    )
+    # End of TODO
+
+
+    n.madd("Link",
+        nodes + " Fischer-Tropsch",
+        bus0=nodes + " H2",
+        bus1="Africa oil",
+        bus2=spatial.co2.nodes,
+        carrier="Fischer-Tropsch",
+        efficiency=costs.at["Fischer-Tropsch", 'efficiency'],
+        capital_cost=costs.at["Fischer-Tropsch", 'fixed'],
+        efficiency2=-costs.at["oil", 'CO2 intensity'] * costs.at["Fischer-Tropsch", 'efficiency'],
+        p_nom_extendable=True,
+        lifetime=costs.at['Fischer-Tropsch', 'lifetime']
+    )
+
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
@@ -662,11 +694,17 @@ if __name__ == "__main__":
 
     options = snakemake.config["sector"]
 
+    add_co2(n, costs)  # TODO add costs
+
     add_generation(n, costs)
+
+
+
+
 
     add_hydrogen(n, costs)  # TODO add costs
 
-    add_co2(n, costs)  # TODO add costs
+    H2_liquid_fossil_conversions(n, costs)
 
     add_storage(n, costs)
 
