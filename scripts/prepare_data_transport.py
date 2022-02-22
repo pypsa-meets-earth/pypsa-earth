@@ -10,6 +10,26 @@ from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
 
+def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
+    """
+    Give a 24*7 long list of weekly hourly profiles, generate this for each
+    country for the period dt_index, taking account of time zones and summer time.
+    """
+
+    weekly_profile = pd.Series(weekly_profile, range(24*7))
+
+    week_df = pd.DataFrame(index=dt_index, columns=nodes)
+
+    for node in nodes:
+        timezone = pytz.timezone(pytz.country_timezones[node[:2]][0])
+        tz_dt_index = dt_index.tz_convert(timezone)
+        week_df[node] = [24 * dt.weekday() + dt.hour for dt in tz_dt_index]
+        week_df[node] = week_df[node].map(weekly_profile)
+
+    week_df = week_df.tz_localize(localize)
+
+    return week_df
+
 
 def prepare_data(n):
 
@@ -157,11 +177,6 @@ def prepare_data(n):
     return nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share
 
 
-
-
-
-
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -174,4 +189,8 @@ if __name__ == "__main__":
     
     n = pypsa.Network(snakemake.input.network)
 
+    # Get pop_layout (dummy)
+    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout_dummy)
+
+    # Prepare data
     nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share = prepare_data(n)
