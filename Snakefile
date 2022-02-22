@@ -24,7 +24,21 @@ rule prepare_data_transport:
     input:
         traffic_data_KFZ = "data/emobility/KFZ__count",
         network='networks/elec_s{simpl}_{clusters}.nc',
+        # Get pop layouts from Morocco (dummy)
+        clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
 
     output: 
 
     script: "scripts/prepare_data_transport.py"
+
+rule calculate_dummy_pop_layout:
+    input:
+        network='networks/elec_s{simpl}_{clusters}.nc',
+
+        # Get pop layouts from Europe (update to Morocco/Africa layout)
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_37.csv",
+        #simplified_pop_layout="resources/pop_layout_elec_s{simpl}.csv",
+
+    output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
+
+    script: "scripts/calculate_dummy_pop_layout.py"
