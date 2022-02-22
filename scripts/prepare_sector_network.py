@@ -69,6 +69,9 @@ def add_carrier_buses(n, carriers):
         )
 
 def add_generation(n, costs):
+    """
+    Adds conventional generation as specified in config
+    """
 
     print("adding electricity generation")
 
@@ -96,24 +99,54 @@ def add_generation(n, costs):
             lifetime=costs.at[generator, 'lifetime']
         )
 
+def add_oil(n, costs):
+    """
+    Function to add oil carrier and bus to network. If-Statements are required in
+    case oil was already added from config ['sector']['conventional_generation']
+    Oil is copper plated
+    """
+    # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
+    # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
+
+    if "oil" not in n.carriers.index:
+        n.add("Carrier", "oil")
+
+    if "Africa oil" not in n.buses.index:
+
+        n.add("Bus",
+            "Africa oil",
+            location="Africa",
+            carrier="oil"
+        )
+
+    if "Africa oil Store" not in n.stores.index:
+
+        #could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+        n.add("Store",
+            "Africa oil Store",
+            bus="Africa oil",
+            e_nom_extendable=True,
+            e_cyclic=True,
+            carrier="oil",
+        )
+
+    if "Africa oil" not in n.generators.index:
+
+        n.add("Generator",
+            "Africa oil",
+            bus="Africa oil",
+            p_nom_extendable=True,
+            carrier="oil",
+            marginal_cost=costs.at["oil", 'fuel']
+        )
+
+
+
 def H2_liquid_fossil_conversions(n, costs):
     """
     Function to add conversions between H2 and liquid fossil
+    Carrier and bus is added in add_oil, which later on might be switched to add_generation
     """
-
-    # TODO add the bus in add_carrier_buses(n, carriers), via config? 
-    carrier = 'oil'
-
-    # Carrier oil exists already
-    #n.add("Carrier", carrier)
-
-    n.add("Bus",
-        "Africa " + carrier,
-        location="Africa",
-        carrier=carrier
-    )
-    # End of TODO
-
 
     n.madd("Link",
         nodes + " Fischer-Tropsch",
@@ -560,7 +593,7 @@ def add_industry(n, costs):
     n.add(
         "Load",
         "naphtha for industry",
-        bus="EU oil",
+        bus="Africa oil",
         carrier="naphtha for industry",
         p_set=industrial_demand.loc[nodes, "naphtha"].sum() / 8760,
     )
@@ -696,17 +729,18 @@ if __name__ == "__main__":
 
     add_co2(n, costs)  # TODO add costs
 
+    # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
     add_generation(n, costs)
 
-
-
-
+    # Add_oil() adds oil carrier/bus. 
+    # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
+    add_oil(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
-    H2_liquid_fossil_conversions(n, costs)
-
     add_storage(n, costs)
+
+    H2_liquid_fossil_conversions(n, costs)
 
     h2_ch4_conversions(n, costs)
 
