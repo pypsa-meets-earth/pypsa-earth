@@ -413,7 +413,7 @@ def _getContinent(code):
     >>> ["africa", "europe"]
     """
     from config_osm_data import world_iso
-    
+
     continent_list = []
     code_set = set(code)
     for continent in world_iso:
