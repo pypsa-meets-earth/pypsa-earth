@@ -485,7 +485,7 @@ def add_industry(n, costs):
     n.add(
         "Link",
         "gas for industry",
-        bus0="EU gas",
+        bus0="Africa gas",
         bus1="gas for industry",
         bus2="co2 atmosphere",
         carrier="gas for industry",
@@ -498,7 +498,7 @@ def add_industry(n, costs):
         "Link",
         spatial.co2.locations,
         suffix=" gas for industry CC",
-        bus0="EU gas",
+        bus0="Africa gas",
         bus1="gas for industry",
         bus2="co2 atmosphere",
         bus3=spatial.co2.nodes,
