@@ -19,3 +19,12 @@ rule prepare_sector_network:
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}.nc'
 
     script: "scripts/prepare_sector_network.py"
+
+rule prepare_data_transport:
+    input:
+        traffic_data_KFZ = "data/emobility/KFZ__count",
+        network='networks/elec_s{simpl}_{clusters}.nc',
+
+    output: 
+
+    script: "scripts/prepare_data_transport.py"
