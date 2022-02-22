@@ -36,6 +36,7 @@ doc/_build
 /cutouts
 /tmp
 /pypsa
+/notes_Leon
 
 # File extensions
 *.org
