@@ -23,26 +23,16 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
-from _helpers import _sets_path_to_root
-from _helpers import _to_csv_nafix
-from _helpers import configure_logging
-from config_osm_data import continent_regions
-from config_osm_data import continents
-from config_osm_data import feature_category
-from config_osm_data import feature_columns
-from config_osm_data import iso_to_geofk_dict
-from config_osm_data import world_geofk
-from config_osm_data import world_iso
-from esy.osmfilter import Node
+from _helpers import _sets_path_to_root, _to_csv_nafix, configure_logging
+from config_osm_data import (continent_regions, continents, feature_category,
+                             feature_columns, iso_to_geofk_dict, world_geofk,
+                             world_iso)
+from esy.osmfilter import Node, Relation, Way
 from esy.osmfilter import osm_info as osm_info
 from esy.osmfilter import osm_pickle as osm_pickle
-from esy.osmfilter import Relation
 from esy.osmfilter import run_filter
-from esy.osmfilter import Way
 from shapely import geometry
-from shapely.geometry import LineString
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, Point, Polygon
 from tqdm import tqdm
 
 # esy.osm filter: https://gitlab.com/dlr-ve-esy/esy-osmfilter/-/tree/master/

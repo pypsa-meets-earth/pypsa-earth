@@ -95,9 +95,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging
-from _helpers import update_p_nom_max
-from _helpers import _getContinent
+from _helpers import _getContinent, configure_logging, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -774,8 +772,7 @@ def add_nice_carrier_names(n, config=None):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-        from _helpers import _sets_path_to_root
+        from _helpers import _sets_path_to_root, mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("add_electricity")
