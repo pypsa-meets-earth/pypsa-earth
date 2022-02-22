@@ -29,8 +29,8 @@ costs:
 
 sector:
   co2_network: true
-  co2_sequestration_potential: 200  #MtCO2/a sequestration potential for Europe
-  co2_sequestration_cost: 10   #EUR/tCO2 for sequestration of CO2
+  co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
+  co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
   hydrogen_underground_storage: true
 
   h2_cavern: True
@@ -43,5 +43,3 @@ sector:
   conventional_generation: # generator : carrier
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
-
-

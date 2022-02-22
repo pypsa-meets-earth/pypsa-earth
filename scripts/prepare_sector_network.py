@@ -11,6 +11,7 @@ from helpers import prepare_costs
 
 spatial = SimpleNamespace()
 
+
 def add_carrier_buses(n, carriers):
     """
     Add buses to connect e.g. coal, nuclear and oil plants
@@ -22,14 +23,11 @@ def add_carrier_buses(n, carriers):
 
         n.add("Carrier", carrier)
 
-        n.add("Bus",
-            "Africa " + carrier,
-            location="Africa",
-            carrier=carrier
-        )
+        n.add("Bus", "Africa " + carrier, location="Africa", carrier=carrier)
 
-        #capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
-        n.add("Store",
+        # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
+        n.add(
+            "Store",
             "Africa " + carrier + " Store",
             bus="Africa " + carrier,
             e_nom_extendable=True,
@@ -37,13 +35,15 @@ def add_carrier_buses(n, carriers):
             carrier=carrier,
         )
 
-        n.add("Generator",
+        n.add(
+            "Generator",
             "Africa " + carrier,
             bus="Africa " + carrier,
             p_nom_extendable=True,
             carrier=carrier,
-            marginal_cost=costs.at[carrier, 'fuel']
+            marginal_cost=costs.at[carrier, "fuel"],
         )
+
 
 def add_generation(n, costs):
     """
@@ -52,8 +52,8 @@ def add_generation(n, costs):
 
     print("adding electricity generation")
 
-    #Not required, because nodes are already defined in "nodes"
-    #nodes = pop_layout.index 
+    # Not required, because nodes are already defined in "nodes"
+    # nodes = pop_layout.index
 
     fallback = {"OCGT": "gas"}
     conventionals = options.get("conventional_generation", fallback)
@@ -62,19 +62,24 @@ def add_generation(n, costs):
 
     for generator, carrier in conventionals.items():
 
-        n.madd("Link",
+        n.madd(
+            "Link",
             nodes + " " + generator,
             bus0="Africa " + carrier,
             bus1=nodes,
             bus2="co2 atmosphere",
-            marginal_cost=costs.at[generator, 'efficiency'] * costs.at[generator, 'VOM'], #NB: VOM is per MWel
-            capital_cost=costs.at[generator, 'efficiency'] * costs.at[generator, 'fixed'], #NB: fixed cost is per MWel
+            marginal_cost=costs.at[generator, "efficiency"] *
+            costs.at[generator, "VOM"],  # NB: VOM is per MWel
+            # NB: fixed cost is per MWel
+            capital_cost=costs.at[generator, "efficiency"] *
+            costs.at[generator, "fixed"],
             p_nom_extendable=True,
             carrier=generator,
-            efficiency=costs.at[generator, 'efficiency'],
-            efficiency2=costs.at[carrier, 'CO2 intensity'],
-            lifetime=costs.at[generator, 'lifetime']
+            efficiency=costs.at[generator, "efficiency"],
+            efficiency2=costs.at[carrier, "CO2 intensity"],
+            lifetime=costs.at[generator, "lifetime"],
         )
+
 
 def add_oil(n, costs):
     """
@@ -90,16 +95,13 @@ def add_oil(n, costs):
 
     if "Africa oil" not in n.buses.index:
 
-        n.add("Bus",
-            "Africa oil",
-            location="Africa",
-            carrier="oil"
-        )
+        n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
     if "Africa oil Store" not in n.stores.index:
 
-        #could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-        n.add("Store",
+        # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+        n.add(
+            "Store",
             "Africa oil Store",
             bus="Africa oil",
             e_nom_extendable=True,
@@ -109,14 +111,14 @@ def add_oil(n, costs):
 
     if "Africa oil" not in n.generators.index:
 
-        n.add("Generator",
+        n.add(
+            "Generator",
             "Africa oil",
             bus="Africa oil",
             p_nom_extendable=True,
             carrier="oil",
-            marginal_cost=costs.at["oil", 'fuel']
+            marginal_cost=costs.at["oil", "fuel"],
         )
-
 
 
 def H2_liquid_fossil_conversions(n, costs):
@@ -125,17 +127,19 @@ def H2_liquid_fossil_conversions(n, costs):
     Carrier and bus is added in add_oil, which later on might be switched to add_generation
     """
 
-    n.madd("Link",
+    n.madd(
+        "Link",
         nodes + " Fischer-Tropsch",
         bus0=nodes + " H2",
         bus1="Africa oil",
         bus2=spatial.co2.nodes,
         carrier="Fischer-Tropsch",
-        efficiency=costs.at["Fischer-Tropsch", 'efficiency'],
-        capital_cost=costs.at["Fischer-Tropsch", 'fixed'],
-        efficiency2=-costs.at["oil", 'CO2 intensity'] * costs.at["Fischer-Tropsch", 'efficiency'],
+        efficiency=costs.at["Fischer-Tropsch", "efficiency"],
+        capital_cost=costs.at["Fischer-Tropsch", "fixed"],
+        efficiency2=-costs.at["oil", "CO2 intensity"] *
+        costs.at["Fischer-Tropsch", "efficiency"],
         p_nom_extendable=True,
-        lifetime=costs.at['Fischer-Tropsch', 'lifetime']
+        lifetime=costs.at["Fischer-Tropsch", "lifetime"],
     )
 
 
@@ -709,7 +713,7 @@ if __name__ == "__main__":
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
     add_generation(n, costs)
 
-    # Add_oil() adds oil carrier/bus. 
+    # Add_oil() adds oil carrier/bus.
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
     add_oil(n, costs)
 
