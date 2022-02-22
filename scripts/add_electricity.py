@@ -97,6 +97,7 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
+from _helpers import _getContinent
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -242,10 +243,14 @@ def attach_load(
     regions : .geojson
         Contains bus_id of low voltage substations and
         bus region shapes (voronoi cells)
-        weather_year: weather year to consider when defining the load (different renewable potentials)
-        prediction_year: prediction year to consider when defining the load (different GDP, population)
-        region_load: world region to consider when defining the load
-        ssp: shared socio-economic pathway (GDP and population growth) scenario to consider when defining the load
+    weather_year: str
+        weather year to consider when defining the load (different renewable potentials)
+    prediction_year: str
+        prediction year to consider when defining the load (different GDP, population)
+    region_load: str
+        list of continents
+    ssp: str
+        name of shared socio-economic pathway (GDP and population growth) scenario to consider when defining the load
     load : .nc
         Contains timeseries of load data per country
     admin_shapes : .geojson
@@ -266,16 +271,20 @@ def attach_load(
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
 
-    cwd_path = os.path.dirname(os.getcwd())
-    load_path = os.path.join(
-        cwd_path,
-        "resources",
-        str(ssp),
-        str(prediction_year),
-        "era5_" + str(weather_year),
-        str(region_load) + ".nc",
-    )
-    gegis_load = xr.open_dataset(load_path)
+    cwd_path = os.getcwd()  # path $ ~/pypsa-africa
+    load_paths = []
+    for continent in region_load:
+        load_path = os.path.join(
+            cwd_path,
+            "resources",
+            str(ssp),
+            str(prediction_year),
+            "era5_" + str(weather_year),
+            str(continent).capitalize() + ".nc",
+        )
+        load_paths.append(load_path)
+    # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+    gegis_load = xr.open_mfdataset(load_paths)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
@@ -717,10 +726,10 @@ def add_nice_carrier_names(n, config=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
+        from _helpers import _sets_path_to_root
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("add_electricity")
+        _sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
@@ -732,7 +741,7 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     weather_year = snakemake.config["load_options"]["weather_year"]
     prediction_year = snakemake.config["load_options"]["prediction_year"]
-    region_load = snakemake.config["load_options"]["region_load"]
+    region_load = _getContinent(countries)
     ssp = snakemake.config["load_options"]["ssp"]
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes

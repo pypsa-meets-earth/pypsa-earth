@@ -391,6 +391,38 @@ def _get_country(target, **keys):
         return np.nan
 
 
+def _getContinent(code):
+    """
+    Returns continent names that contains list of iso-code countries
+
+    Parameters
+    ----------
+    code : str
+        List of two letter country ISO codes
+
+    Returns
+    -------
+    continent_list : str
+        List of continent names
+
+    Example
+    -------
+    from helpers import _getContinent
+    code = ["DE", "GB", "NG", "ZA"]
+    _getContinent(code)
+    >>> ["africa", "europe"]
+    """
+    from config_osm_data import world_iso
+    
+    continent_list = []
+    code_set = set(code)
+    for continent in world_iso:
+        single_continent_set = set(world_iso[continent])
+        if code_set.intersection(single_continent_set):
+            continent_list.append(continent)
+    return continent_list
+
+
 def _two_2_three_digits_country(two_code_country):
     """
     Convert 2-digit to 3-digit country code:

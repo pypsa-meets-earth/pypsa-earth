@@ -55,8 +55,10 @@ _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
 
-# get continent according to ISO conventions
 def getContinentCountry(code):
+    """
+    Gets continent and country name from geofabrik country code input
+    """
     for continent in world_geofk:
         country = world_geofk[continent].get(code, 0)
         if country:

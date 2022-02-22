@@ -64,7 +64,6 @@ load_options:
   weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
-  region_load: "Africa" # Load demand scenarios based on a specified reference region
 
 summary_dir: results
 
