@@ -393,7 +393,7 @@ def h2_ch4_conversions(n, costs):
             spatial.nodes,
             suffix=" Sabatier",
             bus0=nodes + " H2",
-            bus1="CH4",
+            bus1="Africa gas",
             bus2=spatial.co2.nodes,
             p_nom_extendable=True,
             carrier="Sabatier",
@@ -413,7 +413,7 @@ def h2_ch4_conversions(n, costs):
             spatial.nodes,
             suffix=" helmeth",
             bus0=nodes,
-            bus1="CH4",
+            bus1="Africa gas",
             bus2=spatial.co2.nodes,
             carrier="helmeth",
             p_nom_extendable=True,
@@ -430,7 +430,7 @@ def h2_ch4_conversions(n, costs):
             "Link",
             spatial.nodes,
             suffix=" SMR CC",
-            bus0="CH4",
+            bus0="Africa gas",
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             bus3=spatial.co2.nodes,
@@ -448,7 +448,7 @@ def h2_ch4_conversions(n, costs):
         n.madd(
             "Link",
             nodes + " SMR",
-            bus0="CH4",
+            bus0="Africa gas",
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             p_nom_extendable=True,
@@ -661,6 +661,8 @@ if __name__ == "__main__":
     # TODO logging
 
     options = snakemake.config["sector"]
+
+    add_generation(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 

@@ -42,5 +42,6 @@ sector:
 
   conventional_generation: # generator : carrier
     OCGT: gas
+    #Gen_Test: oil # Just for testing purposes
 
 
