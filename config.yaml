@@ -55,3 +55,6 @@ sector:
   conventional_generation: # generator : carrier
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
+
+atlite:
+  cutout: /cutouts/africa-2013-era5.nc
