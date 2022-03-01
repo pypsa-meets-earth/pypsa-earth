@@ -12,6 +12,137 @@ from helpers import prepare_costs
 spatial = SimpleNamespace()
 
 
+def add_carrier_buses(n, carriers):
+    """
+    Add buses to connect e.g. coal, nuclear and oil plants
+    """
+    if isinstance(carriers, str):
+        carriers = [carriers]
+
+    for carrier in carriers:
+
+        n.add("Carrier", carrier)
+
+        n.add("Bus", "Africa " + carrier, location="Africa", carrier=carrier)
+
+        # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
+        n.add(
+            "Store",
+            "Africa " + carrier + " Store",
+            bus="Africa " + carrier,
+            e_nom_extendable=True,
+            e_cyclic=True,
+            carrier=carrier,
+        )
+
+        n.add(
+            "Generator",
+            "Africa " + carrier,
+            bus="Africa " + carrier,
+            p_nom_extendable=True,
+            carrier=carrier,
+            marginal_cost=costs.at[carrier, "fuel"],
+        )
+
+
+def add_generation(n, costs):
+    """
+    Adds conventional generation as specified in config
+    """
+
+    print("adding electricity generation")
+
+    # Not required, because nodes are already defined in "nodes"
+    # nodes = pop_layout.index
+
+    fallback = {"OCGT": "gas"}
+    conventionals = options.get("conventional_generation", fallback)
+
+    add_carrier_buses(n, np.unique(list(conventionals.values())))
+
+    for generator, carrier in conventionals.items():
+
+        n.madd(
+            "Link",
+            nodes + " " + generator,
+            bus0="Africa " + carrier,
+            bus1=nodes,
+            bus2="co2 atmosphere",
+            marginal_cost=costs.at[generator, "efficiency"] *
+            costs.at[generator, "VOM"],  # NB: VOM is per MWel
+            # NB: fixed cost is per MWel
+            capital_cost=costs.at[generator, "efficiency"] *
+            costs.at[generator, "fixed"],
+            p_nom_extendable=True,
+            carrier=generator,
+            efficiency=costs.at[generator, "efficiency"],
+            efficiency2=costs.at[carrier, "CO2 intensity"],
+            lifetime=costs.at[generator, "lifetime"],
+        )
+
+
+def add_oil(n, costs):
+    """
+    Function to add oil carrier and bus to network. If-Statements are required in
+    case oil was already added from config ['sector']['conventional_generation']
+    Oil is copper plated
+    """
+    # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
+    # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
+
+    if "oil" not in n.carriers.index:
+        n.add("Carrier", "oil")
+
+    if "Africa oil" not in n.buses.index:
+
+        n.add("Bus", "Africa oil", location="Africa", carrier="oil")
+
+    if "Africa oil Store" not in n.stores.index:
+
+        # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+        n.add(
+            "Store",
+            "Africa oil Store",
+            bus="Africa oil",
+            e_nom_extendable=True,
+            e_cyclic=True,
+            carrier="oil",
+        )
+
+    if "Africa oil" not in n.generators.index:
+
+        n.add(
+            "Generator",
+            "Africa oil",
+            bus="Africa oil",
+            p_nom_extendable=True,
+            carrier="oil",
+            marginal_cost=costs.at["oil", "fuel"],
+        )
+
+
+def H2_liquid_fossil_conversions(n, costs):
+    """
+    Function to add conversions between H2 and liquid fossil
+    Carrier and bus is added in add_oil, which later on might be switched to add_generation
+    """
+
+    n.madd(
+        "Link",
+        nodes + " Fischer-Tropsch",
+        bus0=nodes + " H2",
+        bus1="Africa oil",
+        bus2=spatial.co2.nodes,
+        carrier="Fischer-Tropsch",
+        efficiency=costs.at["Fischer-Tropsch", "efficiency"],
+        capital_cost=costs.at["Fischer-Tropsch", "fixed"],
+        efficiency2=-costs.at["oil", "CO2 intensity"] *
+        costs.at["Fischer-Tropsch", "efficiency"],
+        p_nom_extendable=True,
+        lifetime=costs.at["Fischer-Tropsch", "lifetime"],
+    )
+
+
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
 
@@ -308,7 +439,7 @@ def h2_ch4_conversions(n, costs):
             spatial.nodes,
             suffix=" Sabatier",
             bus0=nodes + " H2",
-            bus1="CH4",
+            bus1="Africa gas",
             bus2=spatial.co2.nodes,
             p_nom_extendable=True,
             carrier="Sabatier",
@@ -328,7 +459,7 @@ def h2_ch4_conversions(n, costs):
             spatial.nodes,
             suffix=" helmeth",
             bus0=nodes,
-            bus1="CH4",
+            bus1="Africa gas",
             bus2=spatial.co2.nodes,
             carrier="helmeth",
             p_nom_extendable=True,
@@ -345,7 +476,7 @@ def h2_ch4_conversions(n, costs):
             "Link",
             spatial.nodes,
             suffix=" SMR CC",
-            bus0="CH4",
+            bus0="Africa gas",
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             bus3=spatial.co2.nodes,
@@ -363,7 +494,7 @@ def h2_ch4_conversions(n, costs):
         n.madd(
             "Link",
             nodes + " SMR",
-            bus0="CH4",
+            bus0="Africa gas",
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             p_nom_extendable=True,
@@ -400,7 +531,7 @@ def add_industry(n, costs):
     n.add(
         "Link",
         "gas for industry",
-        bus0="EU gas",
+        bus0="Africa gas",
         bus1="gas for industry",
         bus2="co2 atmosphere",
         carrier="gas for industry",
@@ -413,7 +544,7 @@ def add_industry(n, costs):
         "Link",
         spatial.co2.locations,
         suffix=" gas for industry CC",
-        bus0="EU gas",
+        bus0="Africa gas",
         bus1="gas for industry",
         bus2="co2 atmosphere",
         bus3=spatial.co2.nodes,
@@ -443,7 +574,7 @@ def add_industry(n, costs):
     n.add(
         "Load",
         "naphtha for industry",
-        bus="EU oil",
+        bus="Africa oil",
         carrier="naphtha for industry",
         p_set=industrial_demand.loc[nodes, "naphtha"].sum() / 8760,
     )
@@ -723,27 +854,22 @@ if __name__ == "__main__":
     )
     # TODO logging
 
-    # TODO fetch options from the config file
-
-    options = {
-        "co2_network": True,
-        "co2_sequestration_potential":
-        200,  # MtCO2/a sequestration potential for Europe
-        "co2_sequestration_cost": 10,  # EUR/tCO2 for sequestration of CO2
-        "hydrogen_underground_storage": True,
-        "h2_cavern": True,
-        "marginal_cost_storage": 0,
-        "methanation": True,
-        "helmeth": True,
-        "SMR": True,
-        "cc_fraction": 0.9,
-    }
-
-    add_hydrogen(n, costs)  # TODO add costs
+    options = snakemake.config["sector"]
 
     add_co2(n, costs)  # TODO add costs
 
+    # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
+    add_generation(n, costs)
+
+    # Add_oil() adds oil carrier/bus.
+    # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
+    add_oil(n, costs)
+
+    add_hydrogen(n, costs)  # TODO add costs
+
     add_storage(n, costs)
+
+    H2_liquid_fossil_conversions(n, costs)
 
     h2_ch4_conversions(n, costs)
 
