@@ -28,6 +28,20 @@ costs:
     length_factor: 1.25 #to estimate offwind connection costs
 
 sector:
+
+  bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
+  bev_charge_efficiency: 0.9  #BEV (dis-)charging efficiency
+  transport_heating_deadband_upper: 20.
+  transport_heating_deadband_lower: 15.
+  ICE_lower_degree_factor: 0.375  #in per cent increase in fuel consumption per degree above deadband
+  ICE_upper_degree_factor: 1.6
+  EV_lower_degree_factor: 0.98
+  EV_upper_degree_factor: 0.63
+  bev_avail_max: 0.95
+  bev_avail_mean: 0.8
+  bev_dsm_restriction_value: 0.75  #Set to 0 for no restriction on BEV DSM
+  bev_dsm_restriction_time: 7  #Time at which SOC of BEV has to be dsm_restriction_value
+
   land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
     # 2020: 0
     # 2030: 0.05
