@@ -26,6 +26,7 @@ rule prepare_transport_data:
         network='networks/elec_s{simpl}_{clusters}.nc',
         # Get pop layouts from Morocco (dummy)
         clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
+        temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
 
     output: 
 

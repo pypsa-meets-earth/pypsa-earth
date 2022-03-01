@@ -5,6 +5,9 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import pypsa
+import pytz
+import xarray as xr
+
 from helpers import create_dummy_data
 from helpers import create_network_topology
 from helpers import mock_snakemake
@@ -207,7 +210,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         # from helper import mock_snakemake #TODO remove func from here to helper script
-        snakemake = mock_snakemake("prepare_data_transport",
+        snakemake = mock_snakemake("prepare_transport_data",
                                    simpl="",
                                    clusters="4")
 
@@ -215,7 +218,32 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     # Get pop_layout (dummy)
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout_dummy)
+    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout_dummy, index_col=0)
+
+    # Add options
+    options = snakemake.config["sector"]
+
+
+    #Add this to snakemake and to files:
+    temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
+
+    def create_temperature_dummy(temperature):
+
+        temperature_dummy = pd.DataFrame(index = temperature.index)
+
+        for index in pop_layout.index:
+            temperature_dummy[index] = temperature['ES0 0']
+
+        return temperature_dummy
+        
+
+    # Test function transport_degree_factor
+    #transport_degree_factor()
+
+    
+
+    print('successfull run')
+
 
     # Prepare data
-    nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share = prepare_data(n)
+    #nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share = prepare_data(n)
