@@ -59,7 +59,7 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     return week_df
 
 
-def prepare_data(n):
+def prepare_transport_data(n):
 
 
     ##############
@@ -80,10 +80,10 @@ def prepare_data(n):
     energy_totals = create_energy_totals_dummy(pop_layout, energy_totals)
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.)
-    # nodal_energy_totals.index = pop_layout.index
+    nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
     # district_heat_share = nodal_energy_totals["district heat share"].round(2)
-    # nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
+    nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
     # # copy forward the daily average heat demand into each hour, so it can be multipled by the intraday profile
     # daily_space_heat_demand = xr.open_dataarray(snakemake.input.heat_demand_total).to_pandas().reindex(index=n.snapshots, method="ffill")
@@ -211,7 +211,7 @@ def prepare_data(n):
     )
 
 
-    return nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share
+    return nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data
 
 
 if __name__ == "__main__":
@@ -231,6 +231,12 @@ if __name__ == "__main__":
 
     # Add options
     options = snakemake.config["sector"]
+
+    # Get Nyears
+    Nyears = n.snapshot_weightings.generators.sum() / 8760
+
+    # Prepare transport data
+    nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
 
 
     #Create create_temperature_dummy
@@ -252,5 +258,3 @@ if __name__ == "__main__":
     print('successfull run')
 
 
-    # Prepare data
-    #nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share = prepare_data(n)

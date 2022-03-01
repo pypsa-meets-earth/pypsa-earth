@@ -8,6 +8,7 @@ from helpers import create_dummy_data
 from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
+from prepare_transport_data import prepare_transport_data
 
 spatial = SimpleNamespace()
 
@@ -876,7 +877,11 @@ if __name__ == "__main__":
     add_industry(n, costs)
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress 
-    #add_land_transport(n, costs)
+    # Prepare transport data
+    nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
+    add_land_transport(n, costs)
+
+
 
     # TODO define spatial (for biomass and co2)
 
@@ -889,3 +894,5 @@ if __name__ == "__main__":
     # TODO add storage  HERE THE H2 CARRIER IS ADDED IN PYPSA-EUR-SEC
 
     # TODO add options as in PyPSA-EUR-SEC
+
+    print('successfull run')
