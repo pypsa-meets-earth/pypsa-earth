@@ -4,10 +4,8 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import pypsa
-from helpers import create_dummy_data
-from helpers import create_network_topology
-from helpers import mock_snakemake
-from helpers import prepare_costs
+from helpers import (create_dummy_data, create_network_topology,
+                     mock_snakemake, prepare_costs)
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
