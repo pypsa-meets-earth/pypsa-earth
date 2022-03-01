@@ -20,7 +20,7 @@ rule prepare_sector_network:
 
     script: "scripts/prepare_sector_network.py"
 
-rule prepare_data_transport:
+rule prepare_transport_data:
     input:
         traffic_data_KFZ = "data/emobility/KFZ__count",
         network='networks/elec_s{simpl}_{clusters}.nc',
@@ -29,7 +29,7 @@ rule prepare_data_transport:
 
     output: 
 
-    script: "scripts/prepare_data_transport.py"
+    script: "scripts/prepare_transport_data.py"
 
 rule calculate_dummy_pop_layout:
     input:
