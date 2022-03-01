@@ -137,6 +137,9 @@ def prepare_data(n):
 
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
+    # Create transport data dummy for Morocco. TODO Remove once real data is available
+    transport_data = create_transport_data_dummy(pop_layout, transport_data, cars = 4000000, average_fuel_efficiency = 0.7)
+
     nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.)
     nodal_transport_data.index = pop_layout.index
     nodal_transport_data["number cars"] = pop_layout["fraction"] * nodal_transport_data["number cars"]
@@ -229,7 +232,7 @@ if __name__ == "__main__":
     #Create create_temperature_dummy
     temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
 
-    def create_temperature_dummy(temperature):
+    def create_temperature_dummy(pop_layout, temperature):
 
         temperature_dummy = pd.DataFrame(index = temperature.index)
 
@@ -239,13 +242,9 @@ if __name__ == "__main__":
         return temperature_dummy
 
 
-    # Create transport data dummy
-    transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
-
-
-
-    # test transport data dummy
-    transport_data_dummy = create_transport_data_dummy(pop_layout, transport_data)
+    # Test transport data dummy
+    # transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
+    # transport_data_dummy = create_transport_data_dummy(pop_layout, transport_data)
 
 
 
