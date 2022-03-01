@@ -13,6 +13,8 @@ from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
 
+from helpers import create_transport_data_dummy
+
 def transport_degree_factor(
     temperature,
     deadband_lower=15,
@@ -240,20 +242,10 @@ if __name__ == "__main__":
     # Create transport data dummy
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
-    def create_transport_data_dummy(transport_data, cars = 4000000, average_fuel_efficiency = 0.7):
 
-        for country in pop_layout.ct.unique():            
-
-            country_data = pd.DataFrame(data = [[cars, average_fuel_efficiency]], columns= transport_data.columns, index= [country])
-            transport_data = pd.concat([transport_data, country_data], axis = 0)
-
-        transport_data_dummy = transport_data
-
-
-        return transport_data_dummy
 
     # test transport data dummy
-    transport_data_dummy = create_transport_data_dummy(transport_data)
+    transport_data_dummy = create_transport_data_dummy(pop_layout, transport_data)
 
 
 

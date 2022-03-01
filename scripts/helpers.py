@@ -177,3 +177,15 @@ def create_dummy_data(n, sector, carriers):
     data = np.random.randint(10, 500, size=(len(ind), len(col)))
 
     return pd.DataFrame(data, index=ind, columns=col)
+
+
+def create_transport_data_dummy(pop_layout, transport_data, cars = 4000000, average_fuel_efficiency = 0.7):
+
+    for country in pop_layout.ct.unique():            
+
+        country_data = pd.DataFrame(data = [[cars, average_fuel_efficiency]], columns= transport_data.columns, index= [country])
+        transport_data = pd.concat([transport_data, country_data], axis = 0)
+
+    transport_data_dummy = transport_data
+
+    return transport_data_dummy
