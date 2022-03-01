@@ -22,8 +22,10 @@ rule prepare_sector_network:
 
 rule prepare_transport_data:
     input:
-        traffic_data_KFZ = "data/emobility/KFZ__count",
         network='networks/elec_s{simpl}_{clusters}.nc',
+        traffic_data_KFZ = "data/emobility/KFZ__count",
+        traffic_data_Pkw = "data/emobility/Pkw__count",
+        transport_name='resources/transport_data.csv',
         # Get pop layouts from Morocco (dummy)
         clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
         temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
