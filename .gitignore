@@ -10,7 +10,7 @@ gurobi.log
 
 # Folders
 /bak
-/resources*
+#/resources*
 /results
 /networks
 /benchmarks
