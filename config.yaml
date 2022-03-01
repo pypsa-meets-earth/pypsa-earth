@@ -28,12 +28,14 @@ costs:
     length_factor: 1.25 #to estimate offwind connection costs
 
 sector:
-  land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
+  land_transport_fuel_cell_share:
+    0.15 # 1 means all FCEVs
     # 2020: 0
     # 2030: 0.05
     # 2040: 0.1
     # 2050: 0.15
-  land_transport_electric_share: 0.85 # 1 means all EVs
+  land_transport_electric_share:
+    0.85 # 1 means all EVs
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6

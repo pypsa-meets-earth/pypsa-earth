@@ -1,4 +1,3 @@
-
 import os
 from types import SimpleNamespace
 
@@ -10,13 +9,14 @@ from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
 
+
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     """
     Give a 24*7 long list of weekly hourly profiles, generate this for each
     country for the period dt_index, taking account of time zones and summer time.
     """
 
-    weekly_profile = pd.Series(weekly_profile, range(24*7))
+    weekly_profile = pd.Series(weekly_profile, range(24 * 7))
 
     week_df = pd.DataFrame(index=dt_index, columns=nodes)
 
@@ -33,11 +33,9 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
 
 def prepare_data(n):
 
-
     ##############
-    #Heating
+    # Heating
     ##############
-
 
     # ashp_cop = xr.open_dataarray(snakemake.input.cop_air_total).to_pandas().reindex(index=n.snapshots)
     # gshp_cop = xr.open_dataarray(snakemake.input.cop_soil_total).to_pandas().reindex(index=n.snapshots)
@@ -90,91 +88,119 @@ def prepare_data(n):
     # n.loads_t.p_set[electric_nodes] = n.loads_t.p_set[electric_nodes] - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
 
     ##############
-    #Transport
+    # Transport
     ##############
 
-    ## Get overall demand curve for all vehicles
+    # Get overall demand curve for all vehicles
 
-    traffic = pd.read_csv(snakemake.input.traffic_data_KFZ, skiprows=2, usecols=["count"], squeeze=True)
+    traffic = pd.read_csv(snakemake.input.traffic_data_KFZ,
+                          skiprows=2,
+                          usecols=["count"],
+                          squeeze=True)
 
-    #Generate profiles
+    # Generate profiles
     transport_shape = generate_periodic_profiles(
         dt_index=n.snapshots.tz_localize("UTC"),
         nodes=pop_layout.index,
-        weekly_profile=traffic.values
+        weekly_profile=traffic.values,
     )
     transport_shape = transport_shape / transport_shape.sum()
 
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
-    nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.)
+    nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.0)
     nodal_transport_data.index = pop_layout.index
-    nodal_transport_data["number cars"] = pop_layout["fraction"] * nodal_transport_data["number cars"]
-    nodal_transport_data.loc[nodal_transport_data["average fuel efficiency"] == 0., "average fuel efficiency"] = transport_data["average fuel efficiency"].mean()
-
+    nodal_transport_data["number cars"] = (pop_layout["fraction"] *
+                                           nodal_transport_data["number cars"])
+    nodal_transport_data.loc[nodal_transport_data["average fuel efficiency"] ==
+                             0.0,
+                             "average fuel efficiency", ] = transport_data[
+                                 "average fuel efficiency"].mean()
 
     # electric motors are more efficient, so alter transport demand
 
     plug_to_wheels_eta = options.get("bev_plug_to_wheel_efficiency", 0.2)
-    battery_to_wheels_eta = plug_to_wheels_eta * options.get("bev_charge_efficiency", 0.9)
+    battery_to_wheels_eta = plug_to_wheels_eta * options.get(
+        "bev_charge_efficiency", 0.9)
 
-    efficiency_gain = nodal_transport_data["average fuel efficiency"] / battery_to_wheels_eta
+    efficiency_gain = (nodal_transport_data["average fuel efficiency"] /
+                       battery_to_wheels_eta)
 
-    #get heating demand for correction to demand time series
+    # get heating demand for correction to demand time series
     temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
 
     # correction factors for vehicle heating
     dd_ICE = transport_degree_factor(
         temperature,
-        options['transport_heating_deadband_lower'],
-        options['transport_heating_deadband_upper'],
-        options['ICE_lower_degree_factor'],
-        options['ICE_upper_degree_factor']
+        options["transport_heating_deadband_lower"],
+        options["transport_heating_deadband_upper"],
+        options["ICE_lower_degree_factor"],
+        options["ICE_upper_degree_factor"],
     )
 
     dd_EV = transport_degree_factor(
         temperature,
-        options['transport_heating_deadband_lower'],
-        options['transport_heating_deadband_upper'],
-        options['EV_lower_degree_factor'],
-        options['EV_upper_degree_factor']
+        options["transport_heating_deadband_lower"],
+        options["transport_heating_deadband_upper"],
+        options["EV_lower_degree_factor"],
+        options["EV_upper_degree_factor"],
     )
 
     # divide out the heating/cooling demand from ICE totals
     # and multiply back in the heating/cooling demand for EVs
-    ice_correction = (transport_shape * (1 + dd_ICE)).sum() / transport_shape.sum()
+    ice_correction = (transport_shape *
+                      (1 + dd_ICE)).sum() / transport_shape.sum()
 
-    energy_totals_transport = nodal_energy_totals["total road"] + nodal_energy_totals["total rail"] - nodal_energy_totals["electricity rail"]
+    energy_totals_transport = (nodal_energy_totals["total road"] +
+                               nodal_energy_totals["total rail"] -
+                               nodal_energy_totals["electricity rail"])
 
-    transport = (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears).divide(efficiency_gain * ice_correction).multiply(1 + dd_EV)
+    transport = ((transport_shape.multiply(energy_totals_transport) * 1e6 *
+                  Nyears).divide(efficiency_gain *
+                                 ice_correction).multiply(1 + dd_EV))
 
-    ## derive plugged-in availability for PKW's (cars)
+    # derive plugged-in availability for PKW's (cars)
 
-    traffic = pd.read_csv(snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"], squeeze=True)
+    traffic = pd.read_csv(snakemake.input.traffic_data_Pkw,
+                          skiprows=2,
+                          usecols=["count"],
+                          squeeze=True)
 
     avail_max = options.get("bev_avail_max", 0.95)
     avail_mean = options.get("bev_avail_mean", 0.8)
 
-    avail = avail_max - (avail_max - avail_mean) * (traffic - traffic.min()) / (traffic.mean() - traffic.min())
+    avail = avail_max - (avail_max - avail_mean) * (
+        traffic - traffic.min()) / (traffic.mean() - traffic.min())
 
     avail_profile = generate_periodic_profiles(
         dt_index=n.snapshots.tz_localize("UTC"),
         nodes=pop_layout.index,
-        weekly_profile=avail.values
+        weekly_profile=avail.values,
     )
 
-    dsm_week = np.zeros((24*7,))
+    dsm_week = np.zeros((24 * 7, ))
 
-    dsm_week[(np.arange(0,7,1) * 24 + options['bev_dsm_restriction_time'])] = options['bev_dsm_restriction_value']
+    dsm_week[(np.arange(0, 7, 1) * 24 + options["bev_dsm_restriction_time"]
+              )] = options["bev_dsm_restriction_value"]
 
     dsm_profile = generate_periodic_profiles(
         dt_index=n.snapshots.tz_localize("UTC"),
         nodes=pop_layout.index,
-        weekly_profile=dsm_week
+        weekly_profile=dsm_week,
     )
 
-
-    return nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share
+    return (
+        nodal_energy_totals,
+        heat_demand,
+        ashp_cop,
+        gshp_cop,
+        solar_thermal,
+        transport,
+        avail_profile,
+        dsm_profile,
+        nodal_transport_data,
+        district_heat_share,
+    )
 
 
 if __name__ == "__main__":
@@ -186,11 +212,21 @@ if __name__ == "__main__":
                                    simpl="",
                                    clusters="4")
 
-    
     n = pypsa.Network(snakemake.input.network)
 
     # Get pop_layout (dummy)
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout_dummy)
 
     # Prepare data
-    nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, transport, avail_profile, dsm_profile, nodal_transport_data, district_heat_share = prepare_data(n)
+    (
+        nodal_energy_totals,
+        heat_demand,
+        ashp_cop,
+        gshp_cop,
+        solar_thermal,
+        transport,
+        avail_profile,
+        dsm_profile,
+        nodal_transport_data,
+        district_heat_share,
+    ) = prepare_data(n)
