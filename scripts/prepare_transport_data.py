@@ -11,6 +11,7 @@ import xarray as xr
 from helpers import mock_snakemake
 from helpers import create_temperature_dummy
 from helpers import create_transport_data_dummy
+from helpers import create_energy_totals_dummy
 
 def transport_degree_factor(
     temperature,
@@ -73,9 +74,12 @@ def prepare_data(n):
     # # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     # solar_thermal = options['solar_cf_correction'] * solar_thermal / 1e3
 
-    # energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
+    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
 
-    # nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.)
+    # Create energy_totals data dummy for Morocco. TODO Remove once real data is available
+    energy_totals = create_energy_totals_dummy(pop_layout, energy_totals)
+
+    nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.)
     # nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
     # district_heat_share = nodal_energy_totals["district heat share"].round(2)
@@ -240,9 +244,10 @@ if __name__ == "__main__":
     # transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
     # transport_data_dummy = create_transport_data_dummy(pop_layout, transport_data)
 
+    # Test energy_totals_dummy
+    # energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
+    # energy_totals_dummy = create_energy_totals_dummy(pop_layout, energy_totals)
 
-
-    
 
     print('successfull run')
 

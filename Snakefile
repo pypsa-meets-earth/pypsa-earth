@@ -23,6 +23,7 @@ rule prepare_sector_network:
 rule prepare_transport_data:
     input:
         network='networks/elec_s{simpl}_{clusters}.nc',
+        energy_totals_name='resources/energy_totals.csv',
         traffic_data_KFZ = "data/emobility/KFZ__count",
         traffic_data_Pkw = "data/emobility/Pkw__count",
         transport_name='resources/transport_data.csv',

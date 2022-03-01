@@ -198,3 +198,13 @@ def create_temperature_dummy(pop_layout, temperature):
         temperature_dummy[index] = temperature['ES0 0']
 
     return temperature_dummy
+
+def create_energy_totals_dummy(pop_layout, energy_totals):
+    """
+    Function to add additional countries specified in pop_layout.index to energy_totals, these countries take the same values as Spain
+    """
+    # All countries in pop_layout get the same values as Spain
+    for country in pop_layout.ct.unique():
+        energy_totals.loc[country] = energy_totals.loc['ES']
+
+    return energy_totals
