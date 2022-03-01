@@ -10,6 +10,31 @@ from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
 
+def transport_degree_factor(
+    temperature,
+    deadband_lower=15,
+    deadband_upper=20,
+    lower_degree_factor=0.5,
+    upper_degree_factor=1.6):
+    """
+    Work out how much energy demand in vehicles increases due to heating and cooling.
+    There is a deadband where there is no increase.
+    Degree factors are % increase in demand compared to no heating/cooling fuel consumption.
+    Returns per unit increase in demand for each place and time
+    """
+
+    dd = temperature.copy()
+
+    dd[(temperature > deadband_lower) & (temperature < deadband_upper)] = 0.
+
+    dT_lower = deadband_lower - temperature[temperature < deadband_lower]
+    dd[temperature < deadband_lower] = lower_degree_factor / 100 * dT_lower
+
+    dT_upper = temperature[temperature > deadband_upper] - deadband_upper
+    dd[temperature > deadband_upper] = upper_degree_factor / 100 * dT_upper
+
+    return dd
+
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     """
     Give a 24*7 long list of weekly hourly profiles, generate this for each
