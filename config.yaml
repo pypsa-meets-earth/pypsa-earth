@@ -28,6 +28,18 @@ costs:
     length_factor: 1.25 #to estimate offwind connection costs
 
 sector:
+  land_transport_fuel_cell_share:
+    0.15 # 1 means all FCEVs
+    # 2020: 0
+    # 2030: 0.05
+    # 2040: 0.1
+    # 2050: 0.15
+  land_transport_electric_share:
+    0.85 # 1 means all EVs
+    # 2020: 0
+    # 2030: 0.25
+    # 2040: 0.6
+    # 2050: 0.85
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2

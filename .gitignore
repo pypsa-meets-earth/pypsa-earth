@@ -19,7 +19,7 @@ gurobi.log
 /data/links_p_nom.csv
 /data/*totals.csv
 /data/biomass*
-/data/emobility/
+#/data/emobility/
 /data/eea*
 /data/jrc*
 /data/heating/
