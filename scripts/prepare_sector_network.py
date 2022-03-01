@@ -794,10 +794,10 @@ def add_land_transport(n, costs):
 
     if ice_share > 0:
 
-        if "EU oil" not in n.buses.index:
+        if "Africa oil" not in n.buses.index:
             n.add("Bus",
-                "EU oil",
-                location="EU",
+                "Africa oil",
+                location="Africa",
                 carrier="oil"
             )
 
@@ -806,7 +806,7 @@ def add_land_transport(n, costs):
         n.madd("Load",
             nodes,
             suffix=" land transport oil",
-            bus="EU oil",
+            bus="Africa oil",
             carrier="land transport oil",
             p_set=ice_share / ice_efficiency * transport[nodes]
         )
