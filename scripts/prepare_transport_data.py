@@ -8,11 +8,8 @@ import pypsa
 import pytz
 import xarray as xr
 
-from helpers import create_dummy_data
-from helpers import create_network_topology
 from helpers import mock_snakemake
-from helpers import prepare_costs
-
+from helpers import create_temperature_dummy
 from helpers import create_transport_data_dummy
 
 def transport_degree_factor(
@@ -156,6 +153,9 @@ def prepare_data(n):
     #get heating demand for correction to demand time series
     temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
 
+    # Create temperature data dummy for Morocco. TODO Remove once real data is available
+    temperature = create_temperature_dummy(pop_layout, temperature)
+
     # correction factors for vehicle heating
     dd_ICE = transport_degree_factor(
         temperature,
@@ -230,16 +230,10 @@ if __name__ == "__main__":
 
 
     #Create create_temperature_dummy
-    temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
+    # temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
+    # temperature_dummy = create_temperature_dummy(pop_layout, temperature)
 
-    def create_temperature_dummy(pop_layout, temperature):
-
-        temperature_dummy = pd.DataFrame(index = temperature.index)
-
-        for index in pop_layout.index:
-            temperature_dummy[index] = temperature['ES0 0']
-
-        return temperature_dummy
+    # Test temperature dummy
 
 
     # Test transport data dummy

@@ -189,3 +189,12 @@ def create_transport_data_dummy(pop_layout, transport_data, cars = 4000000, aver
     transport_data_dummy = transport_data
 
     return transport_data_dummy
+
+def create_temperature_dummy(pop_layout, temperature):
+
+    temperature_dummy = pd.DataFrame(index = temperature.index)
+
+    for index in pop_layout.index:
+        temperature_dummy[index] = temperature['ES0 0']
+
+    return temperature_dummy
