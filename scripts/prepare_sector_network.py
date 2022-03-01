@@ -676,6 +676,7 @@ def add_industry(n, costs):
         lifetime=costs.at["cement capture", "lifetime"],
     )
 
+
 def get(item, investment_year=None):
     """Check whether item depends on investment year"""
     if isinstance(item, dict):
@@ -702,8 +703,10 @@ def add_land_transport(n, costs):
 
     print("adding land transport")
 
-    fuel_cell_share = get(options["land_transport_fuel_cell_share"], investment_year)
-    electric_share = get(options["land_transport_electric_share"], investment_year)
+    fuel_cell_share = get(
+        options["land_transport_fuel_cell_share"], investment_year)
+    electric_share = get(
+        options["land_transport_electric_share"], investment_year)
     ice_share = 1 - fuel_cell_share - electric_share
 
     print("FCEV share", fuel_cell_share)
@@ -720,105 +723,110 @@ def add_land_transport(n, costs):
         n.add("Carrier", "Li ion")
 
         n.madd("Bus",
-            nodes,
-            location=nodes,
-            suffix=" EV battery",
-            carrier="Li ion"
-        )
+               nodes,
+               location=nodes,
+               suffix=" EV battery",
+               carrier="Li ion"
+               )
 
-        p_set = electric_share * (transport[nodes] + cycling_shift(transport[nodes], 1) + cycling_shift(transport[nodes], 2)) / 3
+        p_set = electric_share * (transport[nodes] + cycling_shift(
+            transport[nodes], 1) + cycling_shift(transport[nodes], 2)) / 3
 
         n.madd("Load",
-            nodes,
-            suffix=" land transport EV",
-            bus=nodes + " EV battery",
-            carrier="land transport EV",
-            p_set=p_set
-        )
+               nodes,
+               suffix=" land transport EV",
+               bus=nodes + " EV battery",
+               carrier="land transport EV",
+               p_set=p_set
+               )
 
-
-        p_nom = nodal_transport_data["number cars"] * options.get("bev_charge_rate", 0.011) * electric_share
+        p_nom = nodal_transport_data["number cars"] * \
+            options.get("bev_charge_rate", 0.011) * electric_share
 
         n.madd("Link",
-            nodes,
-            suffix= " BEV charger",
-            bus0=nodes,
-            bus1=nodes + " EV battery",
-            p_nom=p_nom,
-            carrier="BEV charger",
-            p_max_pu=avail_profile[nodes],
-            efficiency=options.get("bev_charge_efficiency", 0.9),
-            #These were set non-zero to find LU infeasibility when availability = 0.25
-            #p_nom_extendable=True,
-            #p_nom_min=p_nom,
-            #capital_cost=1e6,  #i.e. so high it only gets built where necessary
-        )
+               nodes,
+               suffix=" BEV charger",
+               bus0=nodes,
+               bus1=nodes + " EV battery",
+               p_nom=p_nom,
+               carrier="BEV charger",
+               p_max_pu=avail_profile[nodes],
+               efficiency=options.get("bev_charge_efficiency", 0.9),
+               # These were set non-zero to find LU infeasibility when availability = 0.25
+               # p_nom_extendable=True,
+               # p_nom_min=p_nom,
+               # capital_cost=1e6,  #i.e. so high it only gets built where necessary
+               )
 
     if electric_share > 0 and options["v2g"]:
 
         n.madd("Link",
-            nodes,
-            suffix=" V2G",
-            bus1=nodes,
-            bus0=nodes + " EV battery",
-            p_nom=p_nom,
-            carrier="V2G",
-            p_max_pu=avail_profile[nodes],
-            efficiency=options.get("bev_charge_efficiency", 0.9),
-        )
+               nodes,
+               suffix=" V2G",
+               bus1=nodes,
+               bus0=nodes + " EV battery",
+               p_nom=p_nom,
+               carrier="V2G",
+               p_max_pu=avail_profile[nodes],
+               efficiency=options.get("bev_charge_efficiency", 0.9),
+               )
 
     if electric_share > 0 and options["bev_dsm"]:
 
-        e_nom = nodal_transport_data["number cars"] * options.get("bev_energy", 0.05) * options["bev_availability"] * electric_share
+        e_nom = nodal_transport_data["number cars"] * options.get(
+            "bev_energy", 0.05) * options["bev_availability"] * electric_share
 
         n.madd("Store",
-            nodes,
-            suffix=" battery storage",
-            bus=nodes + " EV battery",
-            carrier="battery storage",
-            e_cyclic=True,
-            e_nom=e_nom,
-            e_max_pu=1,
-            e_min_pu=dsm_profile[nodes]
-        )
+               nodes,
+               suffix=" battery storage",
+               bus=nodes + " EV battery",
+               carrier="battery storage",
+               e_cyclic=True,
+               e_nom=e_nom,
+               e_max_pu=1,
+               e_min_pu=dsm_profile[nodes]
+               )
 
     if fuel_cell_share > 0:
 
         n.madd("Load",
-            nodes,
-            suffix=" land transport fuel cell",
-            bus=nodes + " H2",
-            carrier="land transport fuel cell",
-            p_set=fuel_cell_share / options['transport_fuel_cell_efficiency'] * transport[nodes]
-        )
+               nodes,
+               suffix=" land transport fuel cell",
+               bus=nodes + " H2",
+               carrier="land transport fuel cell",
+               p_set=fuel_cell_share /
+               options['transport_fuel_cell_efficiency'] * transport[nodes]
+               )
 
     if ice_share > 0:
 
         if "EU oil" not in n.buses.index:
             n.add("Bus",
-                "EU oil",
-                location="EU",
-                carrier="oil"
-            )
+                  "EU oil",
+                  location="EU",
+                  carrier="oil"
+                  )
 
         ice_efficiency = options['transport_internal_combustion_efficiency']
 
         n.madd("Load",
-            nodes,
-            suffix=" land transport oil",
-            bus="EU oil",
-            carrier="land transport oil",
-            p_set=ice_share / ice_efficiency * transport[nodes]
-        )
+               nodes,
+               suffix=" land transport oil",
+               bus="EU oil",
+               carrier="land transport oil",
+               p_set=ice_share / ice_efficiency * transport[nodes]
+               )
 
-        co2 = ice_share / ice_efficiency * transport[nodes].sum().sum() / 8760 * costs.at["oil", 'CO2 intensity']
+        co2 = ice_share / ice_efficiency * \
+            transport[nodes].sum().sum() / 8760 * \
+            costs.at["oil", 'CO2 intensity']
 
         n.add("Load",
-            "land transport oil emissions",
-            bus="co2 atmosphere",
-            carrier="land transport oil emissions",
-            p_set=-co2
-        )
+              "land transport oil emissions",
+              bus="co2 atmosphere",
+              carrier="land transport oil emissions",
+              p_set=-co2
+              )
 
 
 if __name__ == "__main__":
@@ -843,7 +851,6 @@ if __name__ == "__main__":
 
     # TODO fetch investment year from config
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
-
 
     costs = prepare_costs(
         snakemake.input.costs,
@@ -875,7 +882,7 @@ if __name__ == "__main__":
 
     add_industry(n, costs)
 
-    # Add_land_transport doesn't run yet, data preparation missing and under progress 
+    # Add_land_transport doesn't run yet, data preparation missing and under progress
     #add_land_transport(n, costs)
 
     # TODO define spatial (for biomass and co2)
