@@ -24,6 +24,7 @@ rule prepare_sector_network:
 
     script: "scripts/prepare_sector_network.py"
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 rule prepare_transport_data:
     input:
@@ -46,10 +47,8 @@ rule calculate_dummy_pop_layout:
 
     output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
 
-    script: "scripts/calculate_dummy_pop_layout.py"
-=======
-    
-    
+    script: "scripts/calculate_dummy_pop_layout.py" 
+
 rule build_population_layouts:
     input:
         nuts3_shapes='resources/gadm_shapes.geojson',
@@ -62,4 +61,3 @@ rule build_population_layouts:
     benchmark: "benchmarks/build_population_layouts"
     threads: 8
     script: "scripts/build_population_layouts.py"
->>>>>>> added ule build_population_layout

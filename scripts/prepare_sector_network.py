@@ -1033,9 +1033,12 @@ if __name__ == "__main__":
     add_industry(n, costs)
     
     prepare_transport_data(n)
+<<<<<<< HEAD
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress
     # add_land_transport(n, costs)
+=======
+>>>>>>> 4ae699851f255aa77fdb4f13b406c2f264654a08
 
     # TODO define spatial (for biomass and co2)
 
