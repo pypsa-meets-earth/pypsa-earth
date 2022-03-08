@@ -28,12 +28,12 @@ There are multiple ways to get involved and learn more about our work. That's ho
         <a/>
       </p>
 - **General code meeting (Open)**
-  - every second Thursday 16-17:00 (UK time) <a href="https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing" >download .ics</a>
+  - every month Thursday 16-17:00 (UTC+0) <a href="https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing" >download .ics</a>
   - join for project news and high-level code updates
   - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
-  - every Friday between 17-18:00 (UK time)
+  - every Friday between 17-18:00 (UTC+0)
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **Specific code meeting (Open)**
@@ -41,8 +41,8 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - join updates, demos, Q&A's, discussions and the coordination of each work package
   1) Demand creation and prediction meeting, every Wednesday 21:00 UTC+0 
   2) AI asset detection meeting, every Tuesday 15:30 UTC+0
-  3) Sector coupling meeting, every Thursday 9:00 UTC+0
-  4) Data workflow and architecture meeting, every Friday 14:00 UTC+0
+  3) Sector coupling meeting, every Thursday 09:00 UTC+0
+  4) Data workflow and architecture meeting, every Thursday 13:30 UTC+0
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
