@@ -404,7 +404,7 @@ def add_hydrogen(n, costs):
 
 
 def add_co2(n, costs):
-
+    "add carbon carrier, it's networks and storage units"
     spatial.nodes = nodes
 
     spatial.co2 = SimpleNamespace()
@@ -536,7 +536,7 @@ def add_co2(n, costs):
 
 
 def add_storage(n, costs):
-
+    "function to add the different types of storage systems"
     n.add("Carrier", "battery")
 
     n.madd("Bus", nodes + " battery", location=nodes, carrier="battery")
@@ -577,8 +577,8 @@ def add_storage(n, costs):
     )
 
 
-def h2_ch4_conversions(n, costs):
-
+def h2_hc_conversions(n, costs):
+    "function to add the conversion technologies between H2 and hydrocarbons"
     if options["methanation"]:
 
         n.madd(
@@ -1028,11 +1028,11 @@ if __name__ == "__main__":
 
     H2_liquid_fossil_conversions(n, costs)
 
-    h2_ch4_conversions(n, costs)
+    h2_hc_conversions(n, costs)
 
     add_industry(n, costs)
     
-    prepare_transport_data(n)
+    #prepare_transport_data(n)
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress
     # add_land_transport(n, costs)
