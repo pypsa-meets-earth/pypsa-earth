@@ -23,8 +23,6 @@ rule prepare_sector_network:
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}.nc'
 
     script: "scripts/prepare_sector_network.py"
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 rule prepare_transport_data:
     input:
@@ -61,3 +59,23 @@ rule build_population_layouts:
     benchmark: "benchmarks/build_population_layouts"
     threads: 8
     script: "scripts/build_population_layouts.py"
+    
+    
+rule build_temperature_profiles:
+        input:
+            pop_layout_total="resources/pop_layout_total.nc",
+            pop_layout_urban="resources/pop_layout_urban.nc",
+            pop_layout_rural="resources/pop_layout_rural.nc",
+            regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        output:
+            temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
+            temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
+            temp_soil_urban="resources/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
+            temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
+            temp_air_rural="resources/temp_air_rural_elec_s{simpl}_{clusters}.nc",
+            temp_air_urban="resources/temp_air_urban_elec_s{simpl}_{clusters}.nc"
+        resources: mem_mb=20000
+        benchmark: "benchmarks/build_temperature_profiles/s{simpl}_{clusters}"
+        script: "scripts/build_temperature_profiles.py"
+
+    

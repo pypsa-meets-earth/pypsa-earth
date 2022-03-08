@@ -6,22 +6,24 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import geopandas as gpd
+import os
 
 from vresutils import shapes as vshapes
 
 if __name__ == '__main__':
     if 'snakemake' not in globals():
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from helpers import mock_snakemake
         snakemake = mock_snakemake('build_population_layouts')
 
-    cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
+    cutout = atlite.Cutout('../'+snakemake.config['atlite']['cutout'])
     # cutout = snakemake.config['atlite']['cutout']
 
     grid_cells = cutout.grid_cells()
 
     # nuts3 has columns country, gdp, pop, geometry
     # population is given in dimensions of 1e3=k
-    nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index('index')
+    nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index('GADM_ID')
 
     # Indicator matrix NUTS3 -> grid cells
     I = atlite.cutout.compute_indicatormatrix(nuts3.geometry, grid_cells)
@@ -30,18 +32,18 @@ if __name__ == '__main__':
     # but imprecisions mean not perfect
     Iinv = cutout.indicatormatrix(nuts3.geometry)
 
-    countries = np.sort(nuts3.country.unique())
-
+    # countries = np.sort(nuts3.country.unique())
+    countries = np.array(['MA'])
     urban_fraction = pd.read_csv(snakemake.input.urban_percent,
                                 header=None, index_col=0,
                                 names=['fraction'], squeeze=True) / 100.
 
     # fill missing Balkans values
-    missing = ["AL", "ME", "MK"]
-    reference = ["RS", "BA"]
-    average = urban_fraction[reference].mean()
-    fill_values = pd.Series({ct: average for ct in missing})
-    urban_fraction = urban_fraction.append(fill_values)
+    # missing = ["AL", "ME", "MK"]
+    # reference = ["RS", "BA"]
+    # average = urban_fraction[reference].mean()
+    # fill_values = pd.Series({ct: average for ct in missing})
+    # urban_fraction = urban_fraction.append(fill_values)
 
     # population in each grid cell
     pop_cells = pd.Series(I.dot(nuts3['pop']))
