@@ -6,10 +6,16 @@ import pandas as pd
 import pypsa
 from helpers import create_dummy_data
 from helpers import create_network_topology
+from helpers import cycling_shift
 from helpers import mock_snakemake
 from helpers import prepare_costs
+<<<<<<< HEAD
 import pytz
 import xarray as xr
+=======
+from prepare_transport_data import prepare_transport_data
+
+>>>>>>> prepare_transport_data
 spatial = SimpleNamespace()
 
 
@@ -811,8 +817,8 @@ def add_land_transport(n, costs):
 
     if ice_share > 0:
 
-        if "EU oil" not in n.buses.index:
-            n.add("Bus", "EU oil", location="EU", carrier="oil")
+        if "Africa oil" not in n.buses.index:
+            n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
         ice_efficiency = options["transport_internal_combustion_efficiency"]
 
@@ -820,7 +826,7 @@ def add_land_transport(n, costs):
             "Load",
             nodes,
             suffix=" land transport oil",
-            bus="EU oil",
+            bus="Africa oil",
             carrier="land transport oil",
             p_set=ice_share / ice_efficiency * transport[nodes],
         )
@@ -844,7 +850,8 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake("prepare_sector_network",
                                    simpl="",
-                                   clusters="4")
+                                   clusters="4",
+                                   planning_horizons="2020")
     # TODO add mock_snakemake func
 
     # TODO fetch from config
@@ -898,8 +905,16 @@ if __name__ == "__main__":
     #prepare_transport_data(n)
 
 
-    # Add_land_transport doesn't run yet, data preparation missing and under progress
-    # add_land_transport(n, costs)
+    # Get the data required for land transport
+    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals,
+                                      index_col=0)
+    transport = pd.read_csv(snakemake.input.transport, index_col=0)
+    avail_profile = pd.read_csv(snakemake.input.avail_profile, index_col=0)
+    dsm_profile = pd.read_csv(snakemake.input.dsm_profile, index_col=0)
+    nodal_transport_data = pd.read_csv(snakemake.input.nodal_transport_data,
+                                       index_col=0)
+
+    add_land_transport(n, costs)
 
     # TODO define spatial (for biomass and co2)
 

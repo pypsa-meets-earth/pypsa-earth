@@ -14,11 +14,12 @@ rule prepare_sector_network:
         network='networks/elec_s{simpl}_{clusters}.nc',
         costs=CDIR + "costs_2030.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
-        energy_totals_name="resources/energy_totals.csv",
-        traffic_data_KFZ = "data/emobility/KFZ__count",
-        traffic_data_Pkw = "data/emobility/Pkw__count",
-
-        transport_name='resources/transport_data.csv',
+        nodal_energy_totals='resources/nodal_energy_totals.csv',
+        transport='resources/transport.csv',
+        avail_profile='resources/avail_profile.csv',
+        dsm_profile='resources/dsm_profile.csv',
+        nodal_transport_data='resources/nodal_transport_data.csv',
+        
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}.nc'
 
@@ -26,12 +27,21 @@ rule prepare_sector_network:
 
 rule prepare_transport_data:
     input:
-        traffic_data_KFZ = "data/emobility/KFZ__count",
         network='networks/elec_s{simpl}_{clusters}.nc',
+        energy_totals_name='resources/energy_totals.csv',
+        traffic_data_KFZ = "data/emobility/KFZ__count",
+        traffic_data_Pkw = "data/emobility/Pkw__count",
+        transport_name='resources/transport_data.csv',
         # Get pop layouts from Morocco (dummy)
         clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
+        temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
 
     output: 
+        nodal_energy_totals='resources/nodal_energy_totals.csv',
+        transport='resources/transport.csv',
+        avail_profile='resources/avail_profile.csv',
+        dsm_profile='resources/dsm_profile.csv',
+        nodal_transport_data='resources/nodal_transport_data.csv',
 
     script: "scripts/prepare_transport_data.py"
 
