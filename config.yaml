@@ -55,3 +55,14 @@ sector:
   conventional_generation: # generator : carrier
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
+
+
+# snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
+snapshots:
+  # arguments to pd.date_range
+  start: "2013-01-01"
+  end: "2014-01-01"
+  closed: left # end is not inclusive
+
+atlite:
+  cutout: /cutouts/africa-2013-era5.nc

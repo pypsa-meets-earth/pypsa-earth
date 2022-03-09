@@ -8,8 +8,10 @@ from helpers import create_dummy_data
 from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
-
+import pytz
+import xarray as xr
 spatial = SimpleNamespace()
+
 
 
 def add_carrier_buses(n, carriers):
@@ -257,7 +259,7 @@ def add_hydrogen(n, costs):
 
 
 def add_co2(n, costs):
-
+    "add carbon carrier, it's networks and storage units"
     spatial.nodes = nodes
 
     spatial.co2 = SimpleNamespace()
@@ -391,7 +393,7 @@ def add_aviation(n, cost):
 
 
 def add_storage(n, costs):
-
+    "function to add the different types of storage systems"
     n.add("Carrier", "battery")
 
     n.madd("Bus", nodes + " battery", location=nodes, carrier="battery")
@@ -432,8 +434,8 @@ def add_storage(n, costs):
     )
 
 
-def h2_ch4_conversions(n, costs):
-
+def h2_hc_conversions(n, costs):
+    "function to add the conversion technologies between H2 and hydrocarbons"
     if options["methanation"]:
 
         n.madd(
@@ -856,7 +858,9 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
     # TODO fetch investment year from config
+
     #investment_year = int(snakemake.wildcards.planning_horizons[-4:])
+
 
     costs = prepare_costs(
         snakemake.input.costs,
@@ -884,12 +888,15 @@ if __name__ == "__main__":
 
     H2_liquid_fossil_conversions(n, costs)
 
-    h2_ch4_conversions(n, costs)
+    h2_hc_conversions(n, costs)
 
     add_industry(n, costs)
     
     # Add_aviation runs with dummy data
     add_aviation(n, costs)
+    
+    #prepare_transport_data(n)
+
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress
     # add_land_transport(n, costs)
