@@ -179,25 +179,34 @@ def create_dummy_data(n, sector, carriers):
     return pd.DataFrame(data, index=ind, columns=col)
 
 
-def create_transport_data_dummy(pop_layout, transport_data, cars = 4000000, average_fuel_efficiency = 0.7):
+def create_transport_data_dummy(pop_layout,
+                                transport_data,
+                                cars=4000000,
+                                average_fuel_efficiency=0.7):
 
-    for country in pop_layout.ct.unique():            
+    for country in pop_layout.ct.unique():
 
-        country_data = pd.DataFrame(data = [[cars, average_fuel_efficiency]], columns= transport_data.columns, index= [country])
-        transport_data = pd.concat([transport_data, country_data], axis = 0)
+        country_data = pd.DataFrame(
+            data=[[cars, average_fuel_efficiency]],
+            columns=transport_data.columns,
+            index=[country],
+        )
+        transport_data = pd.concat([transport_data, country_data], axis=0)
 
     transport_data_dummy = transport_data
 
     return transport_data_dummy
 
+
 def create_temperature_dummy(pop_layout, temperature):
 
-    temperature_dummy = pd.DataFrame(index = temperature.index)
+    temperature_dummy = pd.DataFrame(index=temperature.index)
 
     for index in pop_layout.index:
-        temperature_dummy[index] = temperature['ES0 0']
+        temperature_dummy[index] = temperature["ES0 0"]
 
     return temperature_dummy
+
 
 def create_energy_totals_dummy(pop_layout, energy_totals):
     """
@@ -205,7 +214,7 @@ def create_energy_totals_dummy(pop_layout, energy_totals):
     """
     # All countries in pop_layout get the same values as Spain
     for country in pop_layout.ct.unique():
-        energy_totals.loc[country] = energy_totals.loc['ES']
+        energy_totals.loc[country] = energy_totals.loc["ES"]
 
     return energy_totals
 
