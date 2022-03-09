@@ -32,6 +32,11 @@ rule prepare_transport_data:
         temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
 
     output: 
+        nodal_energy_totals='resources/nodal_energy_totals.csv',
+        transport='resources/transport.csv',
+        avail_profile='resources/avail_profile.csv',
+        dsm_profile='resources/dsm_profile.csv',
+        nodal_transport_data='resources/nodal_transport_data.csv',
 
     script: "scripts/prepare_transport_data.py"
 

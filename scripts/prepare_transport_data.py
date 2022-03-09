@@ -238,22 +238,12 @@ if __name__ == "__main__":
     # Prepare transport data
     nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
 
-
-    #Create create_temperature_dummy
-    # temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
-    # temperature_dummy = create_temperature_dummy(pop_layout, temperature)
-
-    # Test temperature dummy
-
-
-    # Test transport data dummy
-    # transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
-    # transport_data_dummy = create_transport_data_dummy(pop_layout, transport_data)
-
-    # Test energy_totals_dummy
-    # energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
-    # energy_totals_dummy = create_energy_totals_dummy(pop_layout, energy_totals)
-
+    # Save the generated output files
+    nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
+    transport.to_csv(snakemake.output.transport)
+    avail_profile.to_csv(snakemake.output.avail_profile)
+    dsm_profile.to_csv(snakemake.output.dsm_profile)
+    nodal_transport_data.to_csv(snakemake.output.nodal_transport_data)
 
     print('successfull run')
 
