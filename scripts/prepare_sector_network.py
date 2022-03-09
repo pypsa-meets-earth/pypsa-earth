@@ -888,7 +888,7 @@ if __name__ == "__main__":
 
     add_industry(n, costs)
     
-    # Add_aviation doesn't run yet, data preparation missing / under progress
+    # Add_aviation runs with dummy data
     add_aviation(n, costs)
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress

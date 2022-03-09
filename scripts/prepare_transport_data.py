@@ -44,13 +44,13 @@ def prepare_data(n):
     # # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     # solar_thermal = options['solar_cf_correction'] * solar_thermal / 1e3
 
-    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
+    #energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
 
-    nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.)
-    nodal_energy_totals.index = pop_layout.index
+    #nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.)
+    #nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
-    district_heat_share = nodal_energy_totals["district heat share"].round(2)
-    nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
+    #district_heat_share = nodal_energy_totals["district heat share"].round(2)
+    #nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
     # # copy forward the daily average heat demand into each hour, so it can be multipled by the intraday profile
     # daily_space_heat_demand = xr.open_dataarray(snakemake.input.heat_demand_total).to_pandas().reindex(index=n.snapshots, method="ffill")
