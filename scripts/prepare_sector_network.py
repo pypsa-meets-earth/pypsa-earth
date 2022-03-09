@@ -4,8 +4,11 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import pypsa
-from helpers import (create_dummy_data, create_network_topology, cycling_shift,
-                     mock_snakemake, prepare_costs)
+from helpers import create_dummy_data
+from helpers import create_network_topology
+from helpers import cycling_shift
+from helpers import mock_snakemake
+from helpers import prepare_costs
 from prepare_transport_data import prepare_transport_data
 
 spatial = SimpleNamespace()
