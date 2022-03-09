@@ -367,27 +367,29 @@ def add_co2(n, costs):
     capital_cost = cost_onshore + cost_submarine
 
 
-# def add_aviation(n, cost):
+def add_aviation(n, cost):
+     all_aviation = ["total international aviation", "total domestic aviation"]
+     nodal_energy_totals = pd.DataFrame(np.ones((4,2)), columns=all_aviation, index=nodes)
+     #temporary data nodal_energy_totals
+     
+     p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+     
+     n.add("Load",
+         "kerosene for aviation",
+         bus="EU oil",
+         carrier="kerosene for aviation",
+         p_set=p_set
+     )
 
-#     all_aviation = ["total international aviation", "total domestic aviation"]
-#     p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+     co2_release = ["kerosene for aviation"]
+     co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
 
-#     n.add("Load",
-#         "kerosene for aviation",
-#         bus="EU oil",
-#         carrier="kerosene for aviation",
-#         p_set=p_set
-#     )
-
-#     co2_release = ["kerosene for aviation"]
-#     co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
-
-#     n.add("Load",
-#         "oil emissions",
-#         bus="co2 atmosphere",
-#         carrier="oil emissions",
-#         p_set=-co2
-#     )
+     n.add("Load",
+         "oil emissions",
+         bus="co2 atmosphere",
+         carrier="oil emissions",
+         p_set=-co2
+     )
 
 
 def add_storage(n, costs):
@@ -690,6 +692,7 @@ def get(item, investment_year=None):
 """
 Missing data:
  - transport
+ - aviation data
  - nodal_transport_data
  - cycling_shift
  - dsm_profile
@@ -855,7 +858,9 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
     # TODO fetch investment year from config
-    # investment_year = int(snakemake.wildcards.planning_horizons[-4:])
+
+    #investment_year = int(snakemake.wildcards.planning_horizons[-4:])
+
 
     costs = prepare_costs(
         snakemake.input.costs,
@@ -887,7 +892,11 @@ if __name__ == "__main__":
 
     add_industry(n, costs)
     
+    # Add_aviation runs with dummy data
+    add_aviation(n, costs)
+    
     #prepare_transport_data(n)
+
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress
     # add_land_transport(n, costs)
