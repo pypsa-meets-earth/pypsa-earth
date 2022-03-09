@@ -8,6 +8,7 @@ from helpers import create_dummy_data
 from helpers import create_network_topology
 from helpers import mock_snakemake
 from helpers import prepare_costs
+from helpers import cycling_shift
 from prepare_transport_data import prepare_transport_data
 
 spatial = SimpleNamespace()
