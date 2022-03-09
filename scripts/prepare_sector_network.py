@@ -878,12 +878,6 @@ if __name__ == "__main__":
 
     add_industry(n, costs)
 
-    # Add_land_transport doesn't run yet, data preparation missing and under progress 
-    # Prepare transport data
-    #nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
-
-
-
     # Get the data required for land transport
     nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
     transport = pd.read_csv(snakemake.input.transport, index_col=0)
@@ -905,5 +899,3 @@ if __name__ == "__main__":
     # TODO add storage  HERE THE H2 CARRIER IS ADDED IN PYPSA-EUR-SEC
 
     # TODO add options as in PyPSA-EUR-SEC
-
-    print('successfull run')

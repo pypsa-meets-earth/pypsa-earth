@@ -1,6 +1,5 @@
 
 import os
-from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -60,6 +59,9 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
 
 
 def prepare_transport_data(n):
+    """
+    function to prepare the data required for the (land) transport sector
+    """
 
 
     ##############
@@ -238,13 +240,9 @@ if __name__ == "__main__":
     # Prepare transport data
     nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
 
-    # Save the generated output files
+    # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
     transport.to_csv(snakemake.output.transport)
     avail_profile.to_csv(snakemake.output.avail_profile)
     dsm_profile.to_csv(snakemake.output.dsm_profile)
     nodal_transport_data.to_csv(snakemake.output.nodal_transport_data)
-
-    print('successfull run')
-
-
