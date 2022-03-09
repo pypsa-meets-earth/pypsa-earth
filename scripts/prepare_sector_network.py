@@ -366,12 +366,12 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-
-     nodal_energy_totals = pd.DataFrame()
      all_aviation = ["total international aviation", "total domestic aviation"]
+     nodal_energy_totals = pd.DataFrame(np.ones((4,2)), columns=all_aviation, index=nodes)
+     #temporary data nodal_energy_totals
      
      p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
-
+     
      n.add("Load",
          "kerosene for aviation",
          bus="EU oil",
