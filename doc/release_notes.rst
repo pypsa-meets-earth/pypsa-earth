@@ -21,7 +21,7 @@ Upcoming Release
 
 * Rule build_shape extended to the world
 
-* Replace google by zenodo data retrieval
+* Generalized version of Data retrieval with google and zenodo hosting platforms
 
 * Fix random state for kmean clustering, `adopted from PR <https://github.com/PyPSA/pypsa-eur/pull/313>`
 
