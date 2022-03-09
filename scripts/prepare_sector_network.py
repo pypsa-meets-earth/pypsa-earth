@@ -879,9 +879,18 @@ if __name__ == "__main__":
 
     # Add_land_transport doesn't run yet, data preparation missing and under progress 
     # Prepare transport data
-    nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
-    add_land_transport(n, costs)
+    #nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
 
+
+
+    # Get the data required for land transport
+    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
+    transport = pd.read_csv(snakemake.input.transport, index_col=0)
+    avail_profile = pd.read_csv(snakemake.input.avail_profile, index_col=0)
+    dsm_profile = pd.read_csv(snakemake.input.dsm_profile, index_col=0)
+    nodal_transport_data = pd.read_csv(snakemake.input.nodal_transport_data, index_col=0)
+
+    add_land_transport(n, costs)
 
 
     # TODO define spatial (for biomass and co2)

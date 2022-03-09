@@ -13,7 +13,12 @@ rule prepare_sector_network:
     input:
         network='networks/elec_s{simpl}_{clusters}.nc',
         costs=CDIR + "costs_2030.csv",
-        h2_cavern="data/hydrogen_salt_cavern_potentials.csv"
+        h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
+        nodal_energy_totals='resources/nodal_energy_totals.csv',
+        transport='resources/transport.csv',
+        avail_profile='resources/avail_profile.csv',
+        dsm_profile='resources/dsm_profile.csv',
+        nodal_transport_data='resources/nodal_transport_data.csv',
         
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}.nc'
