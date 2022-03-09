@@ -41,6 +41,12 @@ sector:
   bev_avail_mean: 0.8
   bev_dsm_restriction_value: 0.75  #Set to 0 for no restriction on BEV DSM
   bev_dsm_restriction_time: 7  #Time at which SOC of BEV has to be dsm_restriction_value
+  v2g: true #allows feed-in to grid from EV battery
+  bev_dsm: true #turns on EV battery
+  bev_energy: 0.05  #average battery size in MWh
+  bev_availability: 0.5  #How many cars do smart charging
+  transport_fuel_cell_efficiency: 0.5
+  transport_internal_combustion_efficiency: 0.3
 
   land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
     # 2020: 0
@@ -52,6 +58,8 @@ sector:
     # 2030: 0.25
     # 2040: 0.6
     # 2050: 0.85
+
+
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
