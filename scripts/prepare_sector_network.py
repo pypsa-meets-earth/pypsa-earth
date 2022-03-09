@@ -9,13 +9,11 @@ from helpers import create_network_topology
 from helpers import cycling_shift
 from helpers import mock_snakemake
 from helpers import prepare_costs
-<<<<<<< HEAD
+
 import pytz
 import xarray as xr
-=======
 from prepare_transport_data import prepare_transport_data
 
->>>>>>> prepare_transport_data
 spatial = SimpleNamespace()
 
 
@@ -866,7 +864,7 @@ if __name__ == "__main__":
 
     # TODO fetch investment year from config
 
-    #investment_year = int(snakemake.wildcards.planning_horizons[-4:])
+    investment_year = int(snakemake.wildcards.planning_horizons[-4:])
 
 
     costs = prepare_costs(
