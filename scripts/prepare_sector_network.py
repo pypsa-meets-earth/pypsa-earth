@@ -810,10 +810,10 @@ def add_land_transport(n, costs):
 
         if "Africa oil" not in n.buses.index:
             n.add("Bus",
-                "Africa oil",
-                location="Africa",
-                carrier="oil"
-            )
+                  "Africa oil",
+                  location="Africa",
+                  carrier="oil"
+                  )
 
         ice_efficiency = options["transport_internal_combustion_efficiency"]
 
@@ -893,14 +893,15 @@ if __name__ == "__main__":
     add_industry(n, costs)
 
     # Get the data required for land transport
-    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
+    nodal_energy_totals = pd.read_csv(
+        snakemake.input.nodal_energy_totals, index_col=0)
     transport = pd.read_csv(snakemake.input.transport, index_col=0)
     avail_profile = pd.read_csv(snakemake.input.avail_profile, index_col=0)
     dsm_profile = pd.read_csv(snakemake.input.dsm_profile, index_col=0)
-    nodal_transport_data = pd.read_csv(snakemake.input.nodal_transport_data, index_col=0)
+    nodal_transport_data = pd.read_csv(
+        snakemake.input.nodal_transport_data, index_col=0)
 
     add_land_transport(n, costs)
-
 
     # TODO define spatial (for biomass and co2)
 

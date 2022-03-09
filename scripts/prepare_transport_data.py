@@ -11,12 +11,13 @@ from helpers import create_temperature_dummy
 from helpers import create_transport_data_dummy
 from helpers import create_energy_totals_dummy
 
+
 def transport_degree_factor(
-    temperature,
-    deadband_lower=15,
-    deadband_upper=20,
-    lower_degree_factor=0.5,
-    upper_degree_factor=1.6):
+        temperature,
+        deadband_lower=15,
+        deadband_upper=20,
+        lower_degree_factor=0.5,
+        upper_degree_factor=1.6):
     """
     Work out how much energy demand in vehicles increases due to heating and cooling.
     There is a deadband where there is no increase.
@@ -74,7 +75,8 @@ def prepare_transport_data(n):
     # # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     # solar_thermal = options['solar_cf_correction'] * solar_thermal / 1e3
 
-    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
+    energy_totals = pd.read_csv(
+        snakemake.input.energy_totals_name, index_col=0)
 
     # Create energy_totals data dummy for Morocco. TODO Remove once real data is available
     energy_totals = create_energy_totals_dummy(pop_layout, energy_totals)
@@ -83,7 +85,8 @@ def prepare_transport_data(n):
     nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
     # district_heat_share = nodal_energy_totals["district heat share"].round(2)
-    nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
+    nodal_energy_totals = nodal_energy_totals.multiply(
+        pop_layout.fraction, axis=0)
 
     # # copy forward the daily average heat demand into each hour, so it can be multipled by the intraday profile
     # daily_space_heat_demand = xr.open_dataarray(snakemake.input.heat_demand_total).to_pandas().reindex(index=n.snapshots, method="ffill")
@@ -142,7 +145,8 @@ def prepare_transport_data(n):
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
     # Create transport data dummy for Morocco. TODO Remove once real data is available
-    transport_data = create_transport_data_dummy(pop_layout, transport_data, cars = 4000000, average_fuel_efficiency = 0.7)
+    transport_data = create_transport_data_dummy(
+        pop_layout, transport_data, cars=4000000, average_fuel_efficiency=0.7)
 
     nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.)
 
@@ -229,9 +233,7 @@ def prepare_transport_data(n):
         weekly_profile=dsm_week,
     )
 
-
     return nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data
-
 
 
 if __name__ == "__main__":
@@ -246,7 +248,8 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     # Get pop_layout (dummy)
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout_dummy, index_col=0)
+    pop_layout = pd.read_csv(
+        snakemake.input.clustered_pop_layout_dummy, index_col=0)
 
     # Add options
     options = snakemake.config["sector"]
@@ -255,7 +258,8 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
     # Prepare transport data
-    nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(n)
+    nodal_energy_totals, transport, avail_profile, dsm_profile, nodal_transport_data = prepare_transport_data(
+        n)
 
     # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
@@ -263,4 +267,3 @@ if __name__ == "__main__":
     avail_profile.to_csv(snakemake.output.avail_profile)
     dsm_profile.to_csv(snakemake.output.dsm_profile)
     nodal_transport_data.to_csv(snakemake.output.nodal_transport_data)
-
