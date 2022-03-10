@@ -13,25 +13,25 @@ Upcoming Release
 
 **New Features and major Changes**
 
-* Attach hydro enabled with all hydro types
+* Attach hydro enabled with all hydro types `PR #232 <https://github.com/PyPSA/pypsa-eur/pull/232>`__
 
-* Parallel download of osm data
+* Parallel download of osm data `PR #232 <https://github.com/PyPSA/pypsa-eur/pull/232>`__
 
-* Rule download_osm_data extended to the world
+* Rule download_osm_data extended to the world `PR #236 <https://github.com/PyPSA/pypsa-eur/pull/236>`__
 
-* Rule build_shape extended to the world
+* Rule build_shape extended to the world `PR #236 <https://github.com/PyPSA/pypsa-eur/pull/236>`__
 
-* Generalized version of Data retrieval with google and zenodo hosting platforms
+* Generalized version of Data retrieval with google and zenodo hosting platforms: `PR #242 <https://github.com/PyPSA/pypsa-eur/pull/242>`__ and `PR #260 <https://github.com/PyPSA/pypsa-eur/pull/260>`__
 
-* Fix random state for kmean clustering, `adopted from PR <https://github.com/PyPSA/pypsa-eur/pull/313>`
+* Fix random state for kmean clustering, adopted from `PR 313 <https://github.com/PyPSA/pypsa-eur/pull/313>`__
 
-* Implement area exclusions based on land type using the Copernicus Land Cover (PR #272).
+* Implement area exclusions based on land type using the Copernicus Land Cover: `PR #272 <https://github.com/PyPSA/pypsa-eur/pull/272>`__.
 
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
 
-This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`.
+This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`__.
 
 **New Features and major Changes**
 
