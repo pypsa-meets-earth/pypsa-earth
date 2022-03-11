@@ -914,6 +914,8 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
 
+    n.export_to_netcdf(snakemake.output[0])
+
     #n.lopf()
     # TODO define spatial (for biomass and co2)
 
