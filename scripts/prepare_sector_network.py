@@ -914,6 +914,7 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
 
+    #n.lopf()
     # TODO define spatial (for biomass and co2)
 
     # TODO changes in case of myopic oversight
