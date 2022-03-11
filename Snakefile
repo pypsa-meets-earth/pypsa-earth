@@ -21,7 +21,7 @@ rule prepare_sector_network:
         nodal_transport_data='resources/nodal_transport_data.csv',
         
 
-    output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}.nc'
+    output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
 
     script: "scripts/prepare_sector_network.py"
 
@@ -92,16 +92,16 @@ rule build_temperature_profiles:
 rule solve_network:
         input:
             overrides="data/override_component_attrs",
-            network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
             costs=CDIR + "costs_{planning_horizons}.csv",
             config=SDIR + '/configs/config.yaml'
-        output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}.nc"
+        output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
         shadow: "shallow"
         log:
-            solver=RDIR + "/logs/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}_solver.log",
-            python=RDIR + "/logs/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}_python.log",
-            memory=RDIR + "/logs/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}_memory.log"
+            solver=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_solver.log",
+            python=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_python.log",
+            memory=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_memory.log"
         threads: 4
         resources: mem_mb=config['solving']['mem']
-        benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}"
+        benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_{planning_horizons}"
         script: "scripts/solve_network.py"
