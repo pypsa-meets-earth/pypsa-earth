@@ -11,7 +11,7 @@ from pypsa.linopf import network_lopf, ilopf
 
 from vresutils.benchmark import memory_logger
 
-from helper import override_component_attrs
+from helpers import override_component_attrs
 
 import logging
 logger = logging.getLogger(__name__)
