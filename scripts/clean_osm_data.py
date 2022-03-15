@@ -332,11 +332,24 @@ def integrate_lines_df(df_all_lines):
     # one circuit contains 3 cable
     df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = (
         df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3)
-    df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
 
     # where circuits are "0" make "1"
     df_all_lines.loc[(df_all_lines["circuits"] == "0") |
                      (df_all_lines["circuits"] == 0), "circuits"] = 1
+    if df_all_lines["circuits"].dtype != int:
+
+        # it's possible that df_all_lines["circuits"] == "1/3"
+        # but that seems to be a local feature
+        if any(df_all_lines["circuits"] == "1/3"):
+
+            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3", "geometry"]
+
+            _logger.warning(f"The circuits == '1/3' dropped")
+
+        # drop circuits if "None", "nan" or "1/3"
+        df_all_lines.loc[(df_all_lines["circuits"] == "1/3")
+                         | df_all_lines["circuits"].isna(), "circuits"] = "0"
+        df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
 
     # drop column if exist
     if "cables" in df_all_lines:
