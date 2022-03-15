@@ -344,7 +344,7 @@ def integrate_lines_df(df_all_lines):
 
             df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3", "geometry"]
 
-            _logger.warning(f"The circuits == '1/3' dropped")
+            logger.warning(f"The circuits == '1/3' dropped")
 
         # drop circuits if "None", "nan" or "1/3"
         df_all_lines.loc[(df_all_lines["circuits"] == "1/3")
