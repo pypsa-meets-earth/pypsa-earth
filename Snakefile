@@ -32,6 +32,8 @@ rule prepare_sector_network:
         avail_profile='resources/avail_profile.csv',
         dsm_profile='resources/dsm_profile.csv',
         nodal_transport_data='resources/nodal_transport_data.csv',
+        overrides="data/override_component_attrs",
+
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
     resources: mem_mb=2000
@@ -104,7 +106,6 @@ rule build_temperature_profiles:
     
 rule solve_network:
         input:
-            overrides="data/override_component_attrs",
             network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
             costs=CDIR + "costs_{planning_horizons}.csv",
             config=SDIR + '/configs/config.yaml'

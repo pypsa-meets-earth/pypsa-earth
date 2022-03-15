@@ -8,7 +8,7 @@ from helpers import create_dummy_data
 from helpers import create_network_topology
 from helpers import cycling_shift
 from helpers import mock_snakemake
-from helpers import prepare_costs
+from helpers import prepare_costs, override_component_attrs
 
 import pytz
 import xarray as xr
@@ -154,7 +154,10 @@ def add_hydrogen(n, costs):
 
     n.add("Carrier", "H2")
 
-    n.madd("Bus", nodes + " H2", location=nodes, carrier="H2")
+    n.madd("Bus", nodes + " H2", location=nodes, carrier="H2", 
+           x = n.buses.loc[list(nodes)].x.values,
+           y = n.buses.loc[list(nodes)].y.values,
+           )
 
     n.madd(
         "Link",
@@ -272,10 +275,14 @@ def add_co2(n, costs):
         spatial.co2.nodes = nodes + " co2 stored"
         spatial.co2.locations = nodes
         spatial.co2.vents = nodes + " co2 vent"
+        spatial.co2.x = n.buses.loc[list(nodes)].x.values,
+        spatial.co2.y = n.buses.loc[list(nodes)].y.values,
     else:
         spatial.co2.nodes = ["co2 stored"]
         spatial.co2.locations = ["Africa"]
         spatial.co2.vents = ["co2 vent"]
+        spatial.co2.x = 0,
+        spatial.co2.y = 0
 
     spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
 
@@ -305,7 +312,15 @@ def add_co2(n, costs):
     n.madd("Bus",
            spatial.co2.nodes,
            location=spatial.co2.locations,
-           carrier="co2 stored")
+           carrier="co2 stored",
+           x=spatial.co2.x[0],
+           y=spatial.co2.y[0] )
+    
+    co2_stored_x= n.buses.filter(like='co2 stored', axis=0).loc[:, 'x']
+    co2_stored_y= n.buses.loc[n.buses[n.buses.carrier=="co2 stored"].location].y
+    
+    n.buses[n.buses.carrier=="co2 stored"].x = co2_stored_x.values
+    n.buses[n.buses.carrier=="co2 stored"].y = co2_stored_y.values
 
     n.madd(
         "Store",
@@ -400,7 +415,10 @@ def add_storage(n, costs):
     "function to add the different types of storage systems"
     n.add("Carrier", "battery")
 
-    n.madd("Bus", nodes + " battery", location=nodes, carrier="battery")
+    n.madd("Bus", nodes + " battery", location=nodes, carrier="battery",
+           x = n.buses.loc[list(nodes)].x.values,
+           y = n.buses.loc[list(nodes)].y.values
+           )
 
     n.madd(
         "Store",
@@ -735,7 +753,9 @@ def add_land_transport(n, costs):
                nodes,
                location=nodes,
                suffix=" EV battery",
-               carrier="Li ion")
+               carrier="Li ion",
+               x = n.buses.loc[list(nodes)].x.values,
+               y = n.buses.loc[list(nodes)].y.values)
 
         p_set = (electric_share *
                  (transport[nodes] + cycling_shift(transport[nodes], 1) +
@@ -849,13 +869,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("prepare_sector_network",
                                    simpl="",
                                    clusters="4",
-                                   planning_horizons="2020")
+                                   planning_horizons="2030")
     # TODO add mock_snakemake func
 
     # TODO fetch from config
 
     n = pypsa.Network(snakemake.input.network)
-
+    # overrides = override_component_attrs(snakemake.input.overrides)
+    # n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     nodes = n.buses.index
 
     # costs = pd.read_csv( "{}/pypsa-earth-sec/data/costs.csv".format(os.path.dirname(os.getcwd())))
