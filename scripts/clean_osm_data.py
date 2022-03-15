@@ -329,7 +329,7 @@ def integrate_lines_df(df_all_lines):
         df_all_lines.loc[(df_all_lines["cables"] == 4) |
                          (df_all_lines["cables"] == 5), "cables"] = 3
 
-    # one circuit contains 3 cable
+    # one circuit contains 3 cable under a preliminary assumption of an AC line
     df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = (
         df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3)
 
