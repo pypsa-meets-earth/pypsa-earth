@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from prepare_sector_network import prepare_costs
-from helper import override_component_attrs
+from helpers import override_component_attrs
 
 idx = pd.IndexSlice
 
