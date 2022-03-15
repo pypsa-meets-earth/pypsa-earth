@@ -9,20 +9,33 @@ RDIR = config['results_dir'] + config['run']
 CDIR = config['costs_dir']
 
 
+
+rule prepare_sector_networks:
+    input:
+        expand(RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+               **config['scenario'])
+
+
+rule solve_all_networks:
+    input:
+        expand(RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+               **config['scenario'])
+
+
 rule prepare_sector_network:
     input:
         network='networks/elec_s{simpl}_{clusters}.nc',
-        costs=CDIR + "costs_2030.csv",
+        costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals='resources/nodal_energy_totals.csv',
         transport='resources/transport.csv',
         avail_profile='resources/avail_profile.csv',
         dsm_profile='resources/dsm_profile.csv',
         nodal_transport_data='resources/nodal_transport_data.csv',
-        
-
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
-
+    threads: 1
+    resources: mem_mb=2000
+    benchmark: RDIR + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_{planning_horizons}"
     script: "scripts/prepare_sector_network.py"
 
 rule prepare_transport_data:
@@ -105,3 +118,5 @@ rule solve_network:
         resources: mem_mb=config['solving']['mem']
         benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_{planning_horizons}"
         script: "scripts/solve_network.py"
+
+
