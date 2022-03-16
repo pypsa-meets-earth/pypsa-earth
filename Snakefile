@@ -32,7 +32,7 @@ rule prepare_transport_data:
         traffic_data_KFZ = "data/emobility/KFZ__count",
         traffic_data_Pkw = "data/emobility/Pkw__count",
         transport_name='resources/transport_data.csv',
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv"
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         # This is probably still dummy data, investigate and use real data TODO
         temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
 
