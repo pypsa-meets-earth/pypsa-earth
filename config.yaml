@@ -79,7 +79,6 @@ sector:
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
 
-
 # snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
@@ -89,8 +88,6 @@ snapshots:
 
 atlite:
   cutout: /cutouts/africa-2013-era5.nc
-
-
 
 solving:
   #tmpdir: "path/to/tmp"
