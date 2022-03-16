@@ -1,5 +1,4 @@
 """Build clustered population layouts."""
-
 import atlite
 import geopandas as gpd
 import pandas as pd
