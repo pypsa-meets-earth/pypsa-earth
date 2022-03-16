@@ -577,6 +577,101 @@ def add_industry(n, costs):
         carrier="H2 for industry",
         p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
     )
+    
+    if options["shipping_hydrogen_liquefaction"]: #how to implement options?
+
+        n.madd("Bus",
+            nodes,
+            suffix=" H2 liquid",
+            carrier="H2 liquid",
+            location=nodes
+        )
+
+        #link the H2 supply to liquified H2
+        n.madd("Link",
+            nodes + " H2 liquefaction",
+            bus0=nodes + " H2",
+            bus1=nodes + " H2 liquid",
+            carrier="H2 liquefaction",
+            efficiency=costs.at["H2 liquefaction", 'efficiency'],
+            capital_cost=costs.at["H2 liquefaction", 'fixed'],
+            p_nom_extendable=True,
+            lifetime=costs.at['H2 liquefaction', 'lifetime']
+        )
+
+        shipping_bus = nodes + " H2 liquid"
+    else:
+        shipping_bus = nodes + " H2"
+
+    all_navigation = ["total international navigation", "total domestic navigation"]
+    efficiency = options['shipping_average_efficiency'] / costs.at["fuel cell", "efficiency"]
+    shipping_hydrogen_share = get(options['shipping_hydrogen_share'], investment_year) #check whether item depends on investment year
+    
+    all_navigation = ["total international navigation", "total domestic navigation"]
+    nodal_energy_totals = pd.DataFrame(np.ones((4,2)), columns=all_navigation, index=nodes)
+    #temporary data nodal_energy_totals
+    
+    p_set = shipping_hydrogen_share * nodal_energy_totals.loc[nodes, all_navigation].sum(axis=1) * 1e6 * efficiency / 8760
+
+    n.madd("Load",
+        nodes,
+        suffix=" H2 for shipping",
+        bus=shipping_bus,
+        carrier="H2 for shipping",
+        p_set=p_set
+    )
+    
+    if shipping_hydrogen_share < 1:
+
+        shipping_oil_share = 1 - shipping_hydrogen_share
+
+        p_set = shipping_oil_share * nodal_energy_totals.loc[nodes, all_navigation].sum(axis=1) * 1e6 / 8760.
+
+        n.madd("Load",
+            nodes,
+            suffix=" shipping oil",
+            bus="EU oil",
+            carrier="shipping oil",
+            p_set=p_set
+        )
+
+        co2 = shipping_oil_share * nodal_energy_totals.loc[nodes, all_navigation].sum().sum() * 1e6 / 8760 * costs.at["oil", "CO2 intensity"]
+
+        n.add("Load",
+            "shipping oil emissions",
+            bus="co2 atmosphere",
+            carrier="shipping oil emissions",
+            p_set=-co2
+        )
+        
+    if "EU oil" not in n.buses.index:
+
+        n.add("Bus",
+            "EU oil",
+            location="EU",
+            carrier="oil"
+        )
+
+    if "EU oil Store" not in n.stores.index:
+
+        #could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+        n.add("Store",
+            "EU oil Store",
+            bus="EU oil",
+            e_nom_extendable=True,
+            e_cyclic=True,
+            carrier="oil",
+        )
+
+    if "EU oil" not in n.generators.index:
+
+        n.add("Generator",
+            "EU oil",
+            bus="EU oil",
+            p_nom_extendable=True,
+            carrier="oil",
+            marginal_cost=costs.at["oil", 'fuel']
+        )
 
     # CARRIER = LIQUID HYDROCARBONS
     n.add(
