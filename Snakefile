@@ -69,6 +69,18 @@ rule build_population_layouts:
     benchmark: "benchmarks/build_population_layouts"
     threads: 8
     script: "scripts/build_population_layouts.py"
+
+rule build_clustered_population_layouts:
+    input:
+        pop_layout_total="resources/pop_layout_total.nc",
+        pop_layout_urban="resources/pop_layout_urban.nc",
+        pop_layout_rural="resources/pop_layout_rural.nc",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+    output:
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv"
+    resources: mem_mb=10000
+    benchmark: "benchmarks/build_clustered_population_layouts/s{simpl}_{clusters}"
+    script: "scripts/build_clustered_population_layouts.py"
     
     
 rule build_temperature_profiles:
