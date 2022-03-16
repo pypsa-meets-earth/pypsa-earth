@@ -342,7 +342,8 @@ def integrate_lines_df(df_all_lines):
         # but that seems to be a local feature
         if any(df_all_lines["circuits"] == "1/3"):
 
-            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3"]
+            # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
+            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3"].reset_index()
             dropped_length = round(df_one_third_circuits["length"].sum()/1e3, 1)
 
             logger.warning(f"The circuits == '1/3' of an overal length {dropped_length} km dropped.")
