@@ -1,10 +1,9 @@
 """Build clustered population layouts."""
 
-import geopandas as gpd
-import xarray as xr
-import pandas as pd
 import atlite
-
+import geopandas as gpd
+import pandas as pd
+import xarray as xr
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
