@@ -344,15 +344,21 @@ def integrate_lines_df(df_all_lines):
 
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
             df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3"].reset_index()
+
+            # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
+            length_from_crs = df_one_third_circuits.to_crs("EPSG:3857").length
+            df_one_third_circuits["crs_length"] = length_from_crs
+
+            # in case a line length is not available directly
+            df_one_third_circuits.loc[df_one_third_circuits["length"].isna(), "length"] = (
+            df_one_third_circuits.loc[df_one_third_circuits["length"].isna(), "crs_length"])
             dropped_length = round(df_one_third_circuits["length"].sum()/1e3, 1)
 
             logger.warning(f"The circuits == '1/3' of an overal length {dropped_length} km dropped.")
 
             # the length is contained in the OSM directly and can be calculated from the coordinates
             tol = 0.1 #[m]
-            # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m
-            length_from_crs = df_one_third_circuits.to_crs("EPSG:3857").length
-            length_diff = df_one_third_circuits["length"] - length_from_crs
+            length_diff = df_one_third_circuits["length"] - df_one_third_circuits["crs_length"]
 
             if any(length_diff > tol):
                 total_length_diff = round(sum(length_diff > tol), 2)
