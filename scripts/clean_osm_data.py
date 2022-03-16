@@ -342,9 +342,20 @@ def integrate_lines_df(df_all_lines):
         # but that seems to be a local feature
         if any(df_all_lines["circuits"] == "1/3"):
 
-            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3", "geometry"]
+            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3"]
+            dropped_length = round(df_one_third_circuits["length"].sum()/1e3, 1)
 
-            logger.warning(f"The circuits == '1/3' dropped")
+            logger.warning(f"The circuits == '1/3' of an overal length {dropped_length} km dropped.")
+
+            # the length is contained in the OSM directly and can be calculated from the coordinates
+            tol = 0.1 #[m]
+            # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m
+            length_from_crs = df_one_third_circuits.to_crs("EPSG:3857").length
+            length_diff = df_one_third_circuits["length"] - length_from_crs
+
+            if any(length_diff > tol):
+                total_length_diff = round(sum(length_diff > tol), 2)
+                logger.warning(f"There is a difference of {total_length_diff} m in the dropped lines length as compared with values extracted from geographical coordinates.")
 
         # drop circuits if "None", "nan" or "1/3"
         df_all_lines.loc[(df_all_lines["circuits"] == "1/3")
