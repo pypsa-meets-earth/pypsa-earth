@@ -8,8 +8,8 @@ import cartopy.crs as ccrs
 from matplotlib.legend_handler import HandlerPatch
 from matplotlib.patches import Circle, Ellipse
 
-from make_summary import assign_carriers
-from plot_summary import rename_techs, preferred_order
+from make_summary_eur import assign_carriers
+from plot_summary_eur import rename_techs, preferred_order
 from helper import override_component_attrs
 
 plt.style.use('ggplot')

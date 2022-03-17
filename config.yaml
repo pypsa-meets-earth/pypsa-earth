@@ -1,10 +1,10 @@
 
 logging_level: INFO
 
-results_dir: results/
+results_dir: results
 summary_dir: results
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: test
+run: test3
 
 foresight: overnight 
 
@@ -12,9 +12,6 @@ foresight: overnight
 scenario:
   simpl: # only relevant for PyPSA-Eur
     - ''
-  lv: # allowed transmission line volume expansion, can be any float >= 1.0 (today) or "opt"
-    - 1.0
-    - 1.5
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
     - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
