@@ -26,15 +26,15 @@ The PyPSA meets Africa team is currenlty running four types of meetings:
 
 - **General code meeting (Open)**
 
-  - every second Thursday 16-17:00 (UK time) `download .ics file <https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing>`_
+  - every month, Thursday 16-17:00 (UTC+0) `download .ics file <https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing>`_
   - updates on overall project and code blocks
   - meeting hosted on `Discord <https://discord.gg/AnuJBk23FU>`_; join us, we are waiting for you!
   - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
 
 - **Specific code meeting (by invitation)**
 
-  - current meetings: 1) Demand creation (WP1) 2) Data workflow updates (WP1-WP5) and 3) AI asset detection (WP6)
-  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) Tuesday 15:30-16:30 (UK time)
+  - current meetings: 1) Demand creation (WP1) 2) Data workflow updates (WP1-WP5) 3) Sector coupling model and 4) AI asset detection (WP6)
+  - every week Friday 1) 13-13:45 (UTC+0) 2) Thursday 13:30-14:00 (UTC+0) 3) Thursday 09:00-09:30 (UTC+0) and 4) Tuesday 15:30-16:30 (UTC+0)
   - updates, demos, task distribution, weekly targets, Q&A
 
 - **Outreach meeting (by invitation)**

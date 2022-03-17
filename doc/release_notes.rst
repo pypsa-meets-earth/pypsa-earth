@@ -13,41 +13,49 @@ Upcoming Release
 
 **New Features and major Changes**
 
-* Attach hydro enabled with all hydro types
+* Plotting and summary features: `PR #211 <https://github.com/PyPSA/pypsa-eur/pull/211>`__ and `PR #214 <https://github.com/PyPSA/pypsa-eur/pull/214>`__
 
-* Parallel download of osm data
+* Templates for issue, PR, feature request: `PR #216 <https://github.com/PyPSA/pypsa-eur/pull/216>`__
 
-* Rule download_osm_data extended to the world
+* Attach hydro enabled with all hydro types: `PR #232 <https://github.com/PyPSA/pypsa-eur/pull/232>`__
 
-* Rule build_shape extended to the world
+* Parallel download of osm data: `PR #232 <https://github.com/PyPSA/pypsa-eur/pull/232>`__
 
-* Replace google by zenodo data retrieval
+* Decoupling iso coding from geofabrik; rule download_osm_data extended to the world: `PR #236 <https://github.com/PyPSA/pypsa-eur/pull/236>`__
 
-* Fix random state for kmean clustering, `adopted from PR <https://github.com/PyPSA/pypsa-eur/pull/313>`
+* Rule build_shape extended to the world: `PR #236 <https://github.com/PyPSA/pypsa-eur/pull/236>`__
 
-* Implement area exclusions based on land type using the Copernicus Land Cover (PR #272).
+* Validation of geofabrik links: `PR #249 <https://github.com/PyPSA/pypsa-eur/pull/249>`__
+
+* Generalized version of Data retrieval with google and zenodo hosting platforms: `PR #242 <https://github.com/PyPSA/pypsa-eur/pull/242>`__ and `PR #260 <https://github.com/PyPSA/pypsa-eur/pull/260>`__
+
+* Fix random state for kmean clustering, adopted from `PR 313 <https://github.com/PyPSA/pypsa-eur/pull/313>`__
+
+* Implement area exclusions based on land type using the Copernicus Land Cover: `PR #272 <https://github.com/PyPSA/pypsa-eur/pull/272>`__.
+
+* Add CI caching and windows CI: `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/PyPSA/pypsa-eur/pull/277>`__.
 
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
 
-This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`.
+This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`__.
 
 **New Features and major Changes**
 
 * Include new data streams for Africa model
 
-* Demand data implementation from `GEGIS <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/add_electricity.py#L221-L259>`. Demand can be chosen for weather years and socioeconomic `ssp` scenarios
+* Demand data implementation from `GEGIS <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/add_electricity.py#L221-L259>`__. Demand can be chosen for weather years and socioeconomic `ssp` scenarios
 
-* Network is built, cleaned and processed solely on `OpenStreetMap data <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/osm_pbf_power_data_extractor.py>`
+* Network is built, cleaned and processed solely on `OpenStreetMap data <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/osm_pbf_power_data_extractor.py>`__
 
-* Voronoi regions, where data is aggregated towards, can be replaced by administrative `GADM zones <https://github.com/pypsa-meets-africa/pypsa-africa/commit/4aa21a29b08c4794c5e15d4209389749775a5a52>`
+* Voronoi regions, where data is aggregated towards, can be replaced by administrative `GADM zones <https://github.com/pypsa-meets-africa/pypsa-africa/commit/4aa21a29b08c4794c5e15d4209389749775a5a52>`__
 
-* `Augmented line expansion feature <https://github.com/pypsa-meets-africa/pypsa-africa/pull/175>` can make network meshed, connect isolated mini-grids to the main-grid.
+* `Augmented line expansion feature <https://github.com/pypsa-meets-africa/pypsa-africa/pull/175>`__ can make network meshed, connect isolated mini-grids to the main-grid.
 
-* Community moved to `Discord <https://discord.gg/AnuJBk23FU>`.
+* Community moved to `Discord <https://discord.gg/AnuJBk23FU>`__.
 
-* Most meeting and agenda's are `open <https://github.com/pypsa-meets-africa/pypsa-africa#get-involved>`.
+* Most meeting and agenda's are `open <https://github.com/pypsa-meets-africa/pypsa-africa#get-involved>`__.
 
 
 Release Process
