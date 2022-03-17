@@ -1038,9 +1038,15 @@ if __name__ == "__main__":
     # Get the data required for land transport
     nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals,
                                       index_col=0)
-    transport = pd.read_csv(snakemake.input.transport, index_col=0)
-    avail_profile = pd.read_csv(snakemake.input.avail_profile, index_col=0)
-    dsm_profile = pd.read_csv(snakemake.input.dsm_profile, index_col=0)
+    transport = pd.read_csv(snakemake.input.transport,
+                            index_col=0,
+                            parse_dates=True)
+    avail_profile = pd.read_csv(snakemake.input.avail_profile,
+                                index_col=0,
+                                parse_dates=True)
+    dsm_profile = pd.read_csv(snakemake.input.dsm_profile,
+                              index_col=0,
+                              parse_dates=True)
     nodal_transport_data = pd.read_csv(snakemake.input.nodal_transport_data,
                                        index_col=0)
 
