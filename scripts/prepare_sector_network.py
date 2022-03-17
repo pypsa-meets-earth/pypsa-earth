@@ -853,7 +853,7 @@ if __name__ == "__main__":
     # TODO add mock_snakemake func
 
     # TODO fetch from config
-
+    #test lins
     n = pypsa.Network(snakemake.input.network)
 
     nodes = n.buses.index
