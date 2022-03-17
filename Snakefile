@@ -9,20 +9,35 @@ RDIR = config['results_dir'] + config['run']
 CDIR = config['costs_dir']
 
 
+
+rule prepare_sector_networks:
+    input:
+        expand(RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+               **config['scenario'])
+
+
+rule solve_all_networks:
+    input:
+        expand(RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+               **config['scenario'])
+
+
 rule prepare_sector_network:
     input:
         network='networks/elec_s{simpl}_{clusters}.nc',
-        costs=CDIR + "costs_2030.csv",
+        costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals='resources/nodal_energy_totals.csv',
         transport='resources/transport.csv',
         avail_profile='resources/avail_profile.csv',
         dsm_profile='resources/dsm_profile.csv',
         nodal_transport_data='resources/nodal_transport_data.csv',
-        
+        overrides="data/override_component_attrs",
 
-    output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}.nc'
-
+    output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
+    threads: 1
+    resources: mem_mb=2000
+    benchmark: RDIR + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_{planning_horizons}"
     script: "scripts/prepare_sector_network.py"
 
 rule prepare_transport_data:
@@ -104,16 +119,51 @@ rule build_temperature_profiles:
 rule solve_network:
         input:
             overrides="data/override_component_attrs",
-            network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
             costs=CDIR + "costs_{planning_horizons}.csv",
             config=SDIR + '/configs/config.yaml'
-        output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}.nc"
+            
+        output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
         shadow: "shallow"
         log:
-            solver=RDIR + "/logs/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}_solver.log",
-            python=RDIR + "/logs/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}_python.log",
-            memory=RDIR + "/logs/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}_memory.log"
+            solver=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_solver.log",
+            python=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_python.log",
+            memory=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_memory.log"
         threads: 4
         resources: mem_mb=config['solving']['mem']
-        benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_lv{lv}_{opts}_{sector_opts}_{planning_horizons}"
+        benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_{planning_horizons}"
         script: "scripts/solve_network.py"
+
+rule make_summary:
+    input:
+        overrides="data/override_component_attrs",
+        networks=expand(
+            RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            **config['scenario']
+        ),
+        costs=CDIR + "costs_{}.csv".format(config['scenario']['planning_horizons'][0]),
+        plots=expand(
+            RDIR + "/maps/elec_s{simpl}_{clusters}-costs-all_{planning_horizons}.pdf",
+            **config['scenario']
+        )
+    output:
+        nodal_costs=SDIR + '/csvs/nodal_costs.csv',
+        nodal_capacities=SDIR + '/csvs/nodal_capacities.csv',
+        nodal_cfs=SDIR + '/csvs/nodal_cfs.csv',
+        cfs=SDIR + '/csvs/cfs.csv',
+        costs=SDIR + '/csvs/costs.csv',
+        capacities=SDIR + '/csvs/capacities.csv',
+        curtailment=SDIR + '/csvs/curtailment.csv',
+        energy=SDIR + '/csvs/energy.csv',
+        supply=SDIR + '/csvs/supply.csv',
+        supply_energy=SDIR + '/csvs/supply_energy.csv',
+        prices=SDIR + '/csvs/prices.csv',
+        weighted_prices=SDIR + '/csvs/weighted_prices.csv',
+        market_values=SDIR + '/csvs/market_values.csv',
+        price_statistics=SDIR + '/csvs/price_statistics.csv',
+        metrics=SDIR + '/csvs/metrics.csv'
+    threads: 2
+    resources: mem_mb=10000
+    benchmark: SDIR + "/benchmarks/make_summary"
+    script: "scripts/make_summary.py"
+

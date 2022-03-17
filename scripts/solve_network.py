@@ -11,7 +11,7 @@ from pypsa.linopf import network_lopf, ilopf
 
 from vresutils.benchmark import memory_logger
 
-from helper import override_component_attrs
+from helpers import override_component_attrs
 
 import logging
 logger = logging.getLogger(__name__)
@@ -234,14 +234,16 @@ def solve_network(n, config, opts='', **kwargs):
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        from helper import mock_snakemake
+        from helpers import mock_snakemake
         snakemake = mock_snakemake(
             'solve_network',
             simpl='',
-            clusters=48,
-            lv=1.0,
-            sector_opts='Co2L0-168H-T-H-B-I-solar3-dist1',
-            planning_horizons=2050,
+            clusters=4,
+            planning_horizons=2020
+            #8,
+            # lv=1.0,
+            # sector_opts='Co2L0-168H-T-H-B-I-solar3-dist1',
+            # ,
         )
 
     logging.basicConfig(filename=snakemake.log.python,
@@ -250,7 +252,7 @@ if __name__ == "__main__":
     tmpdir = snakemake.config['solving'].get('tmpdir')
     if tmpdir is not None:
         Path(tmpdir).mkdir(parents=True, exist_ok=True)
-    opts = snakemake.wildcards.opts.split('-')
+ #   opts = snakemake.wildcards.opts.split('-')
     solve_opts = snakemake.config['solving']['options']
 
     fn = getattr(snakemake.log, 'memory', None)
@@ -261,7 +263,7 @@ if __name__ == "__main__":
 
         n = prepare_network(n, solve_opts)
 
-        n = solve_network(n, config=snakemake.config, opts=opts,
+        n = solve_network(n, config=snakemake.config,# opts=opts,
                           solver_dir=tmpdir,
                           solver_logfile=snakemake.log.solver)
 

@@ -1,7 +1,22 @@
-results_dir: results/
+
+logging_level: INFO
+
+results_dir: results
 summary_dir: results
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: test
+run: test3
+
+foresight: overnight 
+
+
+scenario:
+  simpl: # only relevant for PyPSA-Eur
+    - ''
+  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
+    - 4
+  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+    - 2030
+
 
 costs:
   lifetime: 25 #default lifetime

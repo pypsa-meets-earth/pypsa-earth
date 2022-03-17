@@ -4,16 +4,18 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import pypsa
-import pytz
-import xarray as xr
 from helpers import create_dummy_data
 from helpers import create_network_topology
 from helpers import cycling_shift
 from helpers import mock_snakemake
-from helpers import prepare_costs
+from helpers import prepare_costs, override_component_attrs
+
+import pytz
+import xarray as xr
 from prepare_transport_data import prepare_transport_data
 
 spatial = SimpleNamespace()
+
 
 
 def add_carrier_buses(n, carriers):
@@ -152,7 +154,10 @@ def add_hydrogen(n, costs):
 
     n.add("Carrier", "H2")
 
-    n.madd("Bus", nodes + " H2", location=nodes, carrier="H2")
+    n.madd("Bus", nodes + " H2", location=nodes, carrier="H2", 
+           x = n.buses.loc[list(nodes)].x.values,
+           y = n.buses.loc[list(nodes)].y.values,
+           )
 
     n.madd(
         "Link",
@@ -270,10 +275,14 @@ def add_co2(n, costs):
         spatial.co2.nodes = nodes + " co2 stored"
         spatial.co2.locations = nodes
         spatial.co2.vents = nodes + " co2 vent"
+        spatial.co2.x = n.buses.loc[list(nodes)].x.values,
+        spatial.co2.y = n.buses.loc[list(nodes)].y.values,
     else:
         spatial.co2.nodes = ["co2 stored"]
         spatial.co2.locations = ["Africa"]
         spatial.co2.vents = ["co2 vent"]
+        spatial.co2.x = 0,
+        spatial.co2.y = 0
 
     spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
 
@@ -303,7 +312,15 @@ def add_co2(n, costs):
     n.madd("Bus",
            spatial.co2.nodes,
            location=spatial.co2.locations,
-           carrier="co2 stored")
+           carrier="co2 stored",
+           x=spatial.co2.x[0],
+           y=spatial.co2.y[0] )
+    
+    co2_stored_x= n.buses.filter(like='co2 stored', axis=0).loc[:, 'x']
+    co2_stored_y= n.buses.loc[n.buses[n.buses.carrier=="co2 stored"].location].y
+    
+    n.buses[n.buses.carrier=="co2 stored"].x = co2_stored_x.values
+    n.buses[n.buses.carrier=="co2 stored"].y = co2_stored_y.values
 
     n.madd(
         "Store",
@@ -370,41 +387,38 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    all_aviation = ["total international aviation", "total domestic aviation"]
-    nodal_energy_totals = pd.DataFrame(np.ones((4, 2)),
-                                       columns=all_aviation,
-                                       index=nodes)
-    # temporary data nodal_energy_totals
+     all_aviation = ["total international aviation", "total domestic aviation"]
+     nodal_energy_totals = pd.DataFrame(np.ones((4,2)), columns=all_aviation, index=nodes)
+     #temporary data nodal_energy_totals
+     
+     p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+     
+     n.add("Load",
+         "kerosene for aviation",
+         bus="EU oil",
+         carrier="kerosene for aviation",
+         p_set=p_set
+     )
 
-    p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(
-        axis=1).sum() * 1e6 / 8760
+     co2_release = ["kerosene for aviation"]
+     co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
 
-    n.add(
-        "Load",
-        "kerosene for aviation",
-        bus="EU oil",
-        carrier="kerosene for aviation",
-        p_set=p_set,
-    )
-
-    co2_release = ["kerosene for aviation"]
-    co2 = (n.loads.loc[co2_release, "p_set"].sum() *
-           costs.at["oil", "CO2 intensity"] / 8760)
-
-    n.add(
-        "Load",
-        "oil emissions",
-        bus="co2 atmosphere",
-        carrier="oil emissions",
-        p_set=-co2,
-    )
+     n.add("Load",
+         "oil emissions",
+         bus="co2 atmosphere",
+         carrier="oil emissions",
+         p_set=-co2
+     )
 
 
 def add_storage(n, costs):
     "function to add the different types of storage systems"
     n.add("Carrier", "battery")
 
-    n.madd("Bus", nodes + " battery", location=nodes, carrier="battery")
+    n.madd("Bus", nodes + " battery", location=nodes, carrier="battery",
+           x = n.buses.loc[list(nodes)].x.values,
+           y = n.buses.loc[list(nodes)].y.values
+           )
 
     n.madd(
         "Store",
@@ -581,8 +595,7 @@ def add_industry(n, costs):
         carrier="H2 for industry",
         p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
     )
-
-    if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
+   if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
 
         n.madd("Bus",
                nodes,
@@ -693,6 +706,7 @@ def add_industry(n, costs):
             marginal_cost=costs.at["oil", "fuel"],
         )
 
+  
     # CARRIER = LIQUID HYDROCARBONS
     n.add(
         "Load",
@@ -850,7 +864,9 @@ def add_land_transport(n, costs):
                nodes,
                location=nodes,
                suffix=" EV battery",
-               carrier="Li ion")
+               carrier="Li ion",
+               x = n.buses.loc[list(nodes)].x.values,
+               y = n.buses.loc[list(nodes)].y.values)
 
         p_set = (electric_share *
                  (transport[nodes] + cycling_shift(transport[nodes], 1) +
@@ -964,13 +980,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("prepare_sector_network",
                                    simpl="",
                                    clusters="4",
-                                   planning_horizons="2020")
+                                   planning_horizons="2030")
     # TODO add mock_snakemake func
 
     # TODO fetch from config
 
     n = pypsa.Network(snakemake.input.network)
-
+    # overrides = override_component_attrs(snakemake.input.overrides)
+    # n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     nodes = n.buses.index
 
     # costs = pd.read_csv( "{}/pypsa-earth-sec/data/costs.csv".format(os.path.dirname(os.getcwd())))
@@ -980,6 +997,7 @@ if __name__ == "__main__":
     # TODO fetch investment year from config
 
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
+
 
     costs = prepare_costs(
         snakemake.input.costs,
@@ -1010,11 +1028,12 @@ if __name__ == "__main__":
     h2_hc_conversions(n, costs)
 
     add_industry(n, costs)
-
+    
     # Add_aviation runs with dummy data
     add_aviation(n, costs)
+    
+    #prepare_transport_data(n)
 
-    # prepare_transport_data(n)
 
     # Get the data required for land transport
     nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals,
@@ -1029,7 +1048,7 @@ if __name__ == "__main__":
 
     n.export_to_netcdf(snakemake.output[0])
 
-    # n.lopf()
+    #n.lopf()
     # TODO define spatial (for biomass and co2)
 
     # TODO changes in case of myopic oversight
