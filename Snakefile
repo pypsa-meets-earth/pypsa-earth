@@ -32,8 +32,8 @@ rule prepare_transport_data:
         traffic_data_KFZ = "data/emobility/KFZ__count",
         traffic_data_Pkw = "data/emobility/Pkw__count",
         transport_name='resources/transport_data.csv',
-        # Get pop layouts from Morocco (dummy)
-        clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+        # This is probably still dummy data, investigate and use real data TODO
         temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
 
     output: 
@@ -69,6 +69,18 @@ rule build_population_layouts:
     benchmark: "benchmarks/build_population_layouts"
     threads: 8
     script: "scripts/build_population_layouts.py"
+
+rule build_clustered_population_layouts:
+    input:
+        pop_layout_total="resources/pop_layout_total.nc",
+        pop_layout_urban="resources/pop_layout_urban.nc",
+        pop_layout_rural="resources/pop_layout_rural.nc",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+    output:
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv"
+    resources: mem_mb=10000
+    benchmark: "benchmarks/build_clustered_population_layouts/s{simpl}_{clusters}"
+    script: "scripts/build_clustered_population_layouts.py"
     
     
 rule build_temperature_profiles:
