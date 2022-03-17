@@ -95,7 +95,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import _getContinent
+from _helpers import getContinent
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from powerplantmatching.export import map_country_bus
@@ -725,11 +725,11 @@ def add_nice_carrier_names(n, config=None):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import _sets_path_to_root, mock_snakemake
+        from _helpers import sets_path_to_root, mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("add_electricity")
-        _sets_path_to_root("pypsa-africa")
+        sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
@@ -741,7 +741,7 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     weather_year = snakemake.config["load_options"]["weather_year"]
     prediction_year = snakemake.config["load_options"]["prediction_year"]
-    region_load = _getContinent(countries)
+    region_load = getContinent(countries)
     ssp = snakemake.config["load_options"]["ssp"]
     scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes

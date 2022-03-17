@@ -69,8 +69,8 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
-from _helpers import _read_csv_nafix
-from _helpers import _to_csv_nafix
+from _helpers import read_csv_nafix
+from _helpers import to_csv_nafix
 from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
@@ -80,7 +80,7 @@ logger = logging.getLogger(__name__)
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
-    add_ppls = _read_csv_nafix(filepath_ppl_osm,
+    add_ppls = read_csv_nafix(filepath_ppl_osm,
                                index_col=0,
                                dtype={"bus": "str"})
 
@@ -182,7 +182,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
         columns=["tags.generator:method", "geometry", "Area", "country", "id"])
 
-    _to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
+    to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
 
     return add_ppls
 

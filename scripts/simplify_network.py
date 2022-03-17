@@ -89,7 +89,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import _sets_path_to_root
+from _helpers import sets_path_to_root
 from _helpers import configure_logging
 from _helpers import update_p_nom_max
 from add_electricity import load_costs
