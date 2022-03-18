@@ -155,3 +155,29 @@ rule make_summary:
     benchmark: SDIR + "/benchmarks/make_summary"
     script: "scripts/make_summary.py"
 
+rule plot_network:
+    input:
+        overrides="data/override_component_attrs",
+        network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
+    output:
+        map=RDIR + "/maps/elec_s{simpl}_{clusters}_-costs-all_{planning_horizons}.pdf",
+        today=RDIR + "/maps/elec_s{simpl}_{clusters}_{planning_horizons}-today.pdf"
+    threads: 2
+    resources: mem_mb=10000
+    benchmark: RDIR + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_{planning_horizons}"
+    script: "scripts/plot_network_plot_network_pypsa_earth.py"
+
+rule plot_summary:
+    input:
+        costs=SDIR + '/csvs/costs.csv',
+        energy=SDIR + '/csvs/energy.csv',
+        balances=SDIR + '/csvs/supply_energy.csv'
+    output:
+        costs=SDIR + '/graphs/costs.pdf',
+        energy=SDIR + '/graphs/energy.pdf',
+        balances=SDIR + '/graphs/balances-energy.pdf'
+    threads: 2
+    resources: mem_mb=10000
+    benchmark: SDIR + "/benchmarks/plot_summary"
+    script: "scripts/plot_summary.py"
+    

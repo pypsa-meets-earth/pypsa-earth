@@ -432,6 +432,7 @@ plot_labeles={
 
 
 tech_colors={
+    "CO2 pipeline" : "gray",
     "onwind" : "b",
     "Africa gas" : "b",
     "Africa oil" : "b",
@@ -577,7 +578,7 @@ nice_names_n={
     'lines': "transmission\nlines",
     'ror': "run of river"}
 
-plot_map(network)
+plot_map(network, transmission=True)
 #%%
 
 
