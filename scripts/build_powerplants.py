@@ -81,8 +81,8 @@ logger = logging.getLogger(__name__)
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
     add_ppls = read_csv_nafix(filepath_ppl_osm,
-                               index_col=0,
-                               dtype={"bus": "str"})
+                              index_col=0,
+                              dtype={"bus": "str"})
 
     custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
     add_ppls = (
@@ -116,7 +116,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                         "osmotic": "Other",
                         "wave": "Other",
                         # approximation
-                        "gas;oil": "Oil",  # TODO: this shall be improved, one entry shall be Oil and the otherone gas
+                        # TODO: this shall be improved, one entry shall be Oil and the otherone gas
+                        "gas;oil": "Oil",
                         "steam": "Natural Gas",
                         "waste_heat": "Other",
                     },
@@ -151,8 +152,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     lon=custom_ppls_coords.x,
                     EIC=lambda df: df.id,
                     projectID=lambda df: "OSM" + df.id.astype(str),
-                ).dropna(subset=["Fueltype"])
-        )
+        ).dropna(subset=["Fueltype"])
+    )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
     # However, everithing extracted from OSM seems to belong
@@ -166,7 +167,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     for i in osm_ppm_df.index:
         add_ppls.loc[add_ppls["tags.generator:method"] == osm_ppm_df.loc[
             i, "osm_method"],
-                     "Technology", ] = osm_ppm_df.loc[i, "ppm_technology"]
+            "Technology", ] = osm_ppm_df.loc[i, "ppm_technology"]
 
     # originates from osm::"tags.generator:source"
     add_ppls.loc[add_ppls["Fueltype"] == "Nuclear",
@@ -235,14 +236,14 @@ if __name__ == "__main__":
         from_url=False, update_all=True,
         config=config).powerplant.fill_missing_decommyears().query(
             'Fueltype not in ["Solar", "Wind"] and Country in @countries').
-           replace({
-               "Technology": {
-                   "Steam Turbine": "OCGT"
-               }
-           }).assign(Fueltype=lambda df: (df.Fueltype.where(
-               df.Fueltype != "Natural Gas",
-               df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
-           ))))
+        replace({
+            "Technology": {
+                "Steam Turbine": "OCGT"
+            }
+        }).assign(Fueltype=lambda df: (df.Fueltype.where(
+            df.Fueltype != "Natural Gas",
+            df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
+        ))))
 
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]
     if isinstance(ppl_query, str):

@@ -509,7 +509,7 @@ def built_network(inputs, outputs):
                                                                inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
     generators = read_geojson(inputs["generators"]).set_crs(epsg=4326,
-                                                             inplace=True)
+                                                            inplace=True)
 
     logger.info("Stage 2/4: Add line endings to the substation datasets")
     # Use lines and create bus/line df

@@ -480,7 +480,7 @@ if __name__ == "__main__":
         n.buses = n.buses.drop([
             "symbol", "under_construction", "substation_lv", "substation_off"
         ],
-                               axis=1)
+            axis=1)
 
     update_p_nom_max(n)
 

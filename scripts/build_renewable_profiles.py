@@ -274,8 +274,8 @@ if __name__ == "__main__":
             xr.DataArray(dims=["plant", "time"],
                          coords={
                              "plant": []
-                         },
-                         name="inflow").to_netcdf(snakemake.output.profile)
+            },
+                name="inflow").to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
