@@ -69,9 +69,9 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
+from _helpers import configure_logging
 from _helpers import read_csv_nafix
 from _helpers import to_csv_nafix
-from _helpers import configure_logging
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
 
@@ -81,8 +81,8 @@ logger = logging.getLogger(__name__)
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
     add_ppls = read_csv_nafix(filepath_ppl_osm,
-                               index_col=0,
-                               dtype={"bus": "str"})
+                              index_col=0,
+                              dtype={"bus": "str"})
 
     custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
     add_ppls = (
@@ -93,66 +93,67 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                 "tags.generator:type": "Technology",
                 "tags.power": "Set",
                 "power_output_MW": "Capacity",
-            }).replace(
-                dict(
-                    Fueltype={
-                        "nuclear": "Nuclear",
-                        "wind": "Wind",
-                        "hydro": "Hydro",
-                        "tidal": "Other",
-                        "wave": "Other",
-                        "geothermal": "Geothermal",
-                        "solar": "Solar",
-                        # "Hard Coal" follows defauls of PPM
-                        "coal": "Hard Coal",
-                        "gas": "Natural Gas",
-                        "biomass": "Bioenergy",
-                        "biofuel": "Bioenergy",
-                        "biogas": "Bioenergy",
-                        "oil": "Oil",
-                        "diesel": "Oil",
-                        "gasoline": "Oil",
-                        "waste": "Waste",
-                        "osmotic": "Other",
-                        "wave": "Other",
-                        # approximation
-                        "gas;oil": "Oil",  # TODO: this shall be improved, one entry shall be Oil and the otherone gas
-                        "steam": "Natural Gas",
-                        "waste_heat": "Other",
-                    },
-                    Technology={
-                        "combined_cycle": "CCGT",
-                        "gas_turbine": "OCGT",
-                        "steam_turbine": "Steam Turbine",
-                        "reciprocating_engine": "Combustion Engine",
-                        # a very strong assumption
-                        "wind_turbine": "Onshore",
-                        "horizontal_axis": "Onshore",
-                        "vertical_axis": "Offhore",
-                        "solar_photovoltaic_panel": "Pv",
-                    },
-                    Set={
-                        "generator": "PP",
-                        "plant": "PP"
-                    },
-                )).assign(
-                    Name=lambda df: "OSM_" + df.Country.astype(str) + "_" + df.
-                    id.astype(str) + "-" + df.Name.astype(str),
-                    Efficiency="",
-                    Duration="",
-                    Volume_Mm3="",
-                    DamHeight_m="",
-                    StorageCapacity_MWh="",
-                    DateIn="",
-                    DateRetrofit="",
-                    DateMothball="",
-                    DateOut="",
-                    lat=custom_ppls_coords.y,
-                    lon=custom_ppls_coords.x,
-                    EIC=lambda df: df.id,
-                    projectID=lambda df: "OSM" + df.id.astype(str),
-                ).dropna(subset=["Fueltype"])
-        )
+            }).
+        replace(
+            dict(
+                Fueltype={
+                    "nuclear": "Nuclear",
+                    "wind": "Wind",
+                    "hydro": "Hydro",
+                    "tidal": "Other",
+                    "wave": "Other",
+                    "geothermal": "Geothermal",
+                    "solar": "Solar",
+                    # "Hard Coal" follows defauls of PPM
+                    "coal": "Hard Coal",
+                    "gas": "Natural Gas",
+                    "biomass": "Bioenergy",
+                    "biofuel": "Bioenergy",
+                    "biogas": "Bioenergy",
+                    "oil": "Oil",
+                    "diesel": "Oil",
+                    "gasoline": "Oil",
+                    "waste": "Waste",
+                    "osmotic": "Other",
+                    "wave": "Other",
+                    # approximation
+                    # TODO: this shall be improved, one entry shall be Oil and the otherone gas
+                    "gas;oil": "Oil",
+                    "steam": "Natural Gas",
+                    "waste_heat": "Other",
+                },
+                Technology={
+                    "combined_cycle": "CCGT",
+                    "gas_turbine": "OCGT",
+                    "steam_turbine": "Steam Turbine",
+                    "reciprocating_engine": "Combustion Engine",
+                    # a very strong assumption
+                    "wind_turbine": "Onshore",
+                    "horizontal_axis": "Onshore",
+                    "vertical_axis": "Offhore",
+                    "solar_photovoltaic_panel": "Pv",
+                },
+                Set={
+                    "generator": "PP",
+                    "plant": "PP"
+                },
+            )).assign(
+                Name=lambda df: "OSM_" + df.Country.astype(str) + "_" + df.id.
+                astype(str) + "-" + df.Name.astype(str),
+                Efficiency="",
+                Duration="",
+                Volume_Mm3="",
+                DamHeight_m="",
+                StorageCapacity_MWh="",
+                DateIn="",
+                DateRetrofit="",
+                DateMothball="",
+                DateOut="",
+                lat=custom_ppls_coords.y,
+                lon=custom_ppls_coords.x,
+                EIC=lambda df: df.id,
+                projectID=lambda df: "OSM" + df.id.astype(str),
+            ).dropna(subset=["Fueltype"]))
 
     # All Hydro objects can be interpreted by PPM as Storages, too
     # However, everithing extracted from OSM seems to belong

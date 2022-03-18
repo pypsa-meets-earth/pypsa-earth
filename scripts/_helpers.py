@@ -440,9 +440,7 @@ def two_2_three_digits_country(two_code_country):
         3-digit country name
     """
     if two_code_country == "SN-GM":
-        return (
-            f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
-        )
+        return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
 
     three_code_country = get_country("alpha_3", alpha_2=two_code_country)
     return three_code_country
@@ -463,9 +461,7 @@ def three_2_two_digits_country(three_code_country):
         2-digit country name
     """
     if three_code_country == "SEN-GMB":
-        return (
-            f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
-        )
+        return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
 
     two_code_country = get_country("alpha_2", alpha_3=three_code_country)
     return two_code_country

@@ -23,9 +23,9 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
+from _helpers import configure_logging
 from _helpers import sets_path_to_root
 from _helpers import to_csv_nafix
-from _helpers import configure_logging
 from config_osm_data import continent_regions
 from config_osm_data import continents
 from config_osm_data import feature_category
