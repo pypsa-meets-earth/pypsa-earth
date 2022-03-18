@@ -66,8 +66,8 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 import yaml
-from _helpers import read_csv_nafix
 from _helpers import configure_logging
+from _helpers import read_csv_nafix
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point

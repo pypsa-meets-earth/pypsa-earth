@@ -95,8 +95,8 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import getContinent
 from _helpers import configure_logging
+from _helpers import getContinent
 from _helpers import update_p_nom_max
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
@@ -292,7 +292,7 @@ def attach_load(
 
     load_paths = load_paths
     # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-    gegis_load = xr.open_mfdataset(load_paths, combine='nested')
+    gegis_load = xr.open_mfdataset(load_paths, combine="nested")
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
@@ -846,7 +846,7 @@ def add_nice_carrier_names(n, config=None):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import sets_path_to_root, mock_snakemake
+        from _helpers import mock_snakemake, sets_path_to_root
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("add_electricity")
