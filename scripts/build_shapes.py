@@ -16,16 +16,11 @@ import rasterio
 import requests
 import rioxarray as rx
 import xarray as xr
-from _helpers import sets_path_to_root
-from _helpers import three_2_two_digits_country
-from _helpers import two_2_three_digits_country
-from _helpers import two_digits_2_name_country
-from _helpers import configure_logging
+from _helpers import (configure_logging, sets_path_to_root,
+                      three_2_two_digits_country, two_2_three_digits_country,
+                      two_digits_2_name_country)
 from rasterio.mask import mask
-from shapely.geometry import LineString
-from shapely.geometry import MultiPolygon
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 from shapely.validation import make_valid
