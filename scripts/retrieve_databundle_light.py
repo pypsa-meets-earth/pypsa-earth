@@ -119,22 +119,22 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     True when download is successful, False otherwise
 
     """
-    resource = "-".join(config["category"])
+    resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
 
     url = config["urls"]["zenodo"]
     if hot_run:
         try:
-            logger.info(f"Downloading resource {resource} from cloud '{url}'")
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
             progress_retrieve(url, file_path)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
-            logger.info(f"Downloaded resource {resource} from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource {resource} from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
@@ -161,7 +161,7 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
     True when download is successful, False otherwise
 
     """
-    resource = "-".join(config["category"])
+    resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile_wpda.zip")
 
     url = config["urls"]["protectedplanet"]
@@ -171,7 +171,7 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
             os.remove(file_path)
         
         try:
-            logger.info(f"Downloading resource {resource} from cloud '{url}'.")
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
             progress_retrieve(url, file_path)
 
             zip_obj = ZipFile(file_path, 'r')
@@ -195,9 +195,9 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
             # remove outer zip file
             os.remove(file_path)
             
-            logger.info(f"Downloaded resource {resource} from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource {resource} from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
     
     return True
