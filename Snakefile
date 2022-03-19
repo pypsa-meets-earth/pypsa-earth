@@ -51,27 +51,17 @@ rule plot_all_summaries:
     input: expand("results/plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}", summary=['energy', 'costs'], **config['scenario'], country=['all'] + config['countries'], ext=['png', 'pdf'])
 
 
-datafiles = [
-        "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
-        "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        "data/raw/gebco/GEBCO_2021_TID.nc",
-        "data/raw/eez/eez_v11.gpkg",
-        # "data/raw/landcover",  # set as an explicit directory in the rule
-        "data/raw/hydrobasins/hybas_world_lev04_v1c.shp",
-        "data/custom_powerplants.csv",
-        "data/hydro_capacities.csv",
-        "data/costs.csv",
-]
-
-if config.get('tutorial')==False and config['enable'].get('build_cutout', False)==False:
-    datafiles.extend(["cutouts/africa-2013-era5.nc"])
-if config.get('tutorial')==True:
-    datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
+def datafiles_retrivedatabundle(config):
+    listoutputs = [
+        dvalue["output"] for (dname, dvalue) in config["databundles"].items()
+            if config.get('tutorial', False) == dvalue.get("tutorial", False)
+    ]
+    return set(([inneroutput for output in listoutputs for inneroutput in output]))
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
         output: #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
-            # expand('{file}', file=datafiles),
+            expand('{file}', file=datafiles_retrivedatabundle(config)),
             directory("data/raw/landcover")
         log: "logs/retrieve_databundle.log"
         script: 'scripts/retrieve_databundle_light.py'

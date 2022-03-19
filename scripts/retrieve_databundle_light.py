@@ -90,7 +90,7 @@ def load_databundle_config(config):
 
     if type(config) is str:
         with open(config) as file:
-            config = yaml.load(file, Loader=yaml.FullLoader)
+            config = yaml.load(file, Loader=yaml.FullLoader)["databundles"]
     elif type(config) is not dict:
         logger.error("Impossible to load the databundle configuration")
 
