@@ -139,11 +139,11 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     return True
 
 
-def download_and_unzip_gdrive(config, rootpath, hot_run=True):
+def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
     """
-        download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True)
+        download_and_unzip_protectedplanet(config, rootpath, dest_path, hot_run=True)
 
-    Function to download and unzip the data by category from google drive
+    Function to download and unzip the data by category from protectedplanet
 
     Inputs
     ------
@@ -161,46 +161,39 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True):
 
     """
     resource = "-".join(config["category"])
-    file_path = os.path.join(rootpath, "tempfile.zip")
+    file_path = os.path.join(rootpath, "tempfile_wpda.zip")
 
-    url = config["urls"]["google"]
-
-    # retrieve file_id from path
-    # cut the part before the ending \view
-    partition_view = re.split(r"/view|\\view", str(url), 1)
-    if len(partition_view) < 2:
-        logger.error(
-            f'Resource {resource} cannot be downloaded: "\\view" not found in url {url}'
-        )
-        return False
-
-    # split url to get the file_id
-    code_split = re.split(r"\\|/", partition_view[0])
-
-    if len(code_split) < 2:
-        logger.error(
-            f'Resource {resource} cannot be downloaded: character "\\" not found in {partition_view[0]}'
-        )
-        return False
-
-    # get file id
-    file_id = code_split[-1]
+    url = config["urls"]["protectedplanet"]
 
     if hot_run:
         if os.path.exists(file_path):
             os.remove(file_path)
         
         try:
-            gdd.download_file_from_google_drive(
-                file_id=file_id,
-                dest_path=file_path,
-                showsize=True,
-                unzip=False,
-            )
-            with ZipFile(file_path, "r") as zipObj:
-                # Extract all the contents of zip file in current directory
-                zipObj.extractall(path=config["destination"])
+            progress_retrieve(url, file_path)
+
+
+            zip_obj = ZipFile(file_path, 'r')
+
+            # list of zip files, which contains the shape files
+            zip_files = [fname for fname in zip_obj.namelist() if fname.endswith(".zip")]
+
+            # extract the nested zip files
+            for fzip in zip_files:
+                # final path of the file
+                inner_zipname = os.path.join(config["destination"], fzip)
+
+                zip_obj.extract(fzip, path=config["destination"])
+
+                with ZipFile(inner_zipname, 'r') as nested_zip:
+                    nested_zip.extractall(path=config["destination"])
+                
+                # remove inner zip file
+                os.remove(inner_zipname)
+                
+            # remove outer zip file
             os.remove(file_path)
+            
             logger.info(f"Download resource '{resource}' from cloud '{url}'.")
         except:
             logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
