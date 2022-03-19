@@ -131,9 +131,9 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
-            logger.info(f"Download resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Download resource {resource} from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource {resource} from cloud '{url}'.")
             return False
 
     return True
@@ -194,9 +194,9 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
             # remove outer zip file
             os.remove(file_path)
             
-            logger.info(f"Download resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Download resource {resource} from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource {resource} from cloud '{url}'.")
             return False
     
     return True
