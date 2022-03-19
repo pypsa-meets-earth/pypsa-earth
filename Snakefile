@@ -19,6 +19,7 @@ if not exists("config.yaml"):
 
 
 configfile: "config.yaml"
+configfile: "configs/bundle_config.yaml"
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
@@ -69,9 +70,8 @@ if config.get('tutorial')==True:
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
-        input: "configs/bundle_config.yaml"
         output: #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
-            expand('{file}', file=datafiles),
+            # expand('{file}', file=datafiles),
             directory("data/raw/landcover")
         log: "logs/retrieve_databundle.log"
         script: 'scripts/retrieve_databundle_light.py'
