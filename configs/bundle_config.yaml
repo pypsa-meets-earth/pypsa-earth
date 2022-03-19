@@ -16,7 +16,7 @@
 #     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
 #     urls:  # list of urls by source, e.g. zenodo or google
 #       zenodo: {zenodo url}
-#       google: {google url}
+#       gdrive: {google url}
 
 
 # tutorial bundle specific for Nigeria and Benin only
@@ -27,7 +27,7 @@ bundle_data_tutorial:
   destination: "data"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016522/files/tutorial_data.zip?download=1
-    google: https://drive.google.com/file/d/1Yd2iM892WFBRxh5NX22if6laRF1RxZKu/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1Yd2iM892WFBRxh5NX22if6laRF1RxZKu/view?usp=sharing
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_resources_tutorial:
@@ -37,7 +37,7 @@ bundle_resources_tutorial:
   destination: "resources"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016001/files/tutorial_resources.zip?download=1
-    google: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
 
 # tutorial bundle specific for Nigeria and Benin only
 bundle_cutouts_tutorial:
@@ -47,7 +47,7 @@ bundle_cutouts_tutorial:
   destination: "cutouts"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016015/files/tutorial_cutouts.zip?download=1
-    google: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
 
 # data bundle containing the data of the data folder common to all regions of the world
 bundle_data_world:
@@ -56,7 +56,7 @@ bundle_data_world:
   destination: "data"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
-    google: https://drive.google.com/file/d/1fo-YsyU2LKkVeg5Ea0JbcEx-zQ3kJKW7/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1fo-YsyU2LKkVeg5Ea0JbcEx-zQ3kJKW7/view?usp=sharing
 
 # resources bundle containing the resources folder for africa only
 bundle_resources_world:
@@ -65,7 +65,7 @@ bundle_resources_world:
   destination: "resources"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
-    google: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
 
 # data bundle of the data folder for the african continent
 bundle_landcover_africa:
@@ -74,7 +74,7 @@ bundle_landcover_africa:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_africa.zip?download=1
-    google: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
 
 # data bundle of the data folder for the african continent
 bundle_landcover_asiapacific:
@@ -83,7 +83,7 @@ bundle_landcover_asiapacific:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_asiapacific.zip?download=1
-    google: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
 
 # data bundle of the data folder for the african continent
 bundle_landcover_latinamerica_caribbean:
@@ -92,7 +92,7 @@ bundle_landcover_latinamerica_caribbean:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_latinamerica_caribbean.zip?download=1
-    google: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
 
 # data bundle of the data folder for the african continent
 bundle_landcover_westasia:
@@ -101,7 +101,7 @@ bundle_landcover_westasia:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
-    google: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
 
 # data bundle of the data folder for europe
 bundle_landcover_europe:
@@ -110,7 +110,7 @@ bundle_landcover_europe:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_europe.zip?download=1
-    google: https://drive.google.com/file/d/1zQuKnZFp6ASYD_e-dbWbWXYg330E0occ/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1zQuKnZFp6ASYD_e-dbWbWXYg330E0occ/view?usp=sharing
 
 # data bundle of the data folder for the poles
 bundle_landcover_northamerica:
@@ -119,7 +119,7 @@ bundle_landcover_northamerica:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_northamerica.zip?download=1
-    google: https://drive.google.com/file/d/1gu7PH08ZEpL4cBQa_fMUSq2m6LY1_UJo/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1gu7PH08ZEpL4cBQa_fMUSq2m6LY1_UJo/view?usp=sharing
 
 # data bundle of the data folder for the poles
 bundle_landcover_poles:
@@ -128,7 +128,7 @@ bundle_landcover_poles:
   destination: "data/raw/landcover"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_polar.zip?download=1
-    google: https://drive.google.com/file/d/1cUDcE6wpQVZNf3K9ffV6pNXfxq6sA65E/view?usp=sharing
+    gdrive: https://drive.google.com/file/d/1cUDcE6wpQVZNf3K9ffV6pNXfxq6sA65E/view?usp=sharing
 
 # cutouts bundle of the cutouts folder for the african continent
 bundle_cutouts_africa:
@@ -137,4 +137,4 @@ bundle_cutouts_africa:
   destination: "cutouts"
   urls:
     zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
-    google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
+    gdrive: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
