@@ -56,7 +56,10 @@ def datafiles_retrivedatabundle(config):
         dvalue["output"] for (dname, dvalue) in config["databundles"].items()
             if config.get('tutorial', False) == dvalue.get("tutorial", False)
     ]
-    return set(([inneroutput for output in listoutputs for inneroutput in output]))
+    return set(([
+            inneroutput for output in listoutputs for inneroutput in output
+                if "*" not in inneroutput or inneroutput.endswith("/")  # exclude directories
+        ]))
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
