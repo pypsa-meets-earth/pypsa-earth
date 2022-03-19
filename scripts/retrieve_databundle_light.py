@@ -203,6 +203,47 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
     return True
 
 
+def download_and_unzip_direct(config, rootpath, hot_run=True):
+    """
+        download_and_unzip_direct(config, rootpath, dest_path, hot_run=True)
+
+    Function to download and unzip the data by category from a direct url with no processing needed
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+
+    """
+    resource = config["category"]
+    url = config["urls"]["direct"]
+
+    file_path = os.path.join(config["destination"], os.path.basename(url))
+
+    if hot_run:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
+        try:
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            progress_retrieve(url, file_path)
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+        except:
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            return False
+    
+    return True
+
+
 def get_best_bundles(country_list, category, config_bundles, tutorial):
     """
         get_best_bundles(country_list, category, config_bundles, tutorial)
@@ -321,12 +362,12 @@ if __name__ == "__main__":
         host_list = config_bundles[b_name]["urls"]
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-            try:
+            #try:
                 download_and_unzip = globals()[f"download_and_unzip_{host}"]
                 if download_and_unzip(config_bundles[b_name], rootpath):
                     break
-            except KeyError:
-                logger.error(f"plotting function for {host} has not been defined")
+            # except KeyError:
+            #     logger.error(f"Function for {host} has not been defined")
 
     logger.info("Bundle successfully loaded and unzipped:\n\t" +
                 "\n\t".join(bundle_to_download))
