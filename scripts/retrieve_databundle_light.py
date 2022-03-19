@@ -88,10 +88,10 @@ logger.setLevel(logging.INFO)
 def load_databundle_config(config):
     "Load databundle configurations from path file or dictionary"
 
-    if config is str:
+    if type(config) is str:
         with open(config) as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
-    elif config is not dict:
+    elif type(config) is not dict:
         logger.error("Impossible to load the databundle configuration")
 
     # parse the "countries" list specified in the file before processing
@@ -388,7 +388,7 @@ if __name__ == "__main__":
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
     # load databundle configuration
-    config_bundles = load_databundle_config(snakemake.config["bundles"])
+    config_bundles = load_databundle_config(snakemake.config["databundles"])
 
     # categories of data to download
     categories = list(
