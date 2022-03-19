@@ -130,6 +130,29 @@ bundle_landcover_poles:
     zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_polar.zip?download=1
     gdrive: https://drive.google.com/file/d/1cUDcE6wpQVZNf3K9ffV6pNXfxq6sA65E/view?usp=sharing
 
+# # data bundle of the data folder for the african continent
+# bundle_landcover_world:
+#   countries: [world]
+#   category: landcover
+#   destination: "data/raw/landcover"
+#   urls:
+#     direct: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_WDOECM_Mar2022_Public_all_shp.zip
+
+# # data bundle of the data folder for the african continent
+# bundle_landclassification:
+#   countries: [world]
+#   category: copernicus
+#   destination: "data/raw/copernicus"
+#   urls:
+#     direct: https://zenodo.org/record/3939050/files/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+
+# bundle_gebco:
+#   countries: [world]
+#   category: gebco
+#   destination: "data/raw/gebco"
+#   urls:
+#     directzip: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2021/zip/
+    
 # cutouts bundle of the cutouts folder for the african continent
 bundle_cutouts_africa:
   countries: [africa]
