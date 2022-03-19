@@ -98,16 +98,14 @@ def load_databundle_config(path):
     return config
 
 
-def download_and_unzip(host, config, rootpath, hot_run=True):
+def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     """
-        download_and_unzip(host, config, rootpath, dest_path, hot_run=True)
+        download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True)
 
-    Function to download and unzip the data by category
+    Function to download and unzip the data from zenodo
 
     Inputs
     ------
-    host : str
-        Name of the hosting platform: zenodo or google
     config : Dict
         Configuration data for the category to download
     rootpath : str
@@ -124,9 +122,9 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
     resource = "-".join(config["category"])
     file_path = os.path.join(rootpath, "tempfile.zip")
 
-    if host == "zenodo":
-        url = config["urls"]["zenodo"]
-        if hot_run:
+    url = config["urls"]["zenodo"]
+    if hot_run:
+        try:
             progress_retrieve(url, file_path)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
@@ -134,34 +132,65 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
             logger.info(f"Download resource '{resource}' from cloud '{url}'.")
-        return True
-    elif host == "google":
-
-        url = config["urls"]["google"]
-        # retrieve file_id from path
-        # cut the part before the ending \view
-        partition_view = re.split(r"/view|\\view", str(url), 1)
-        if len(partition_view) < 2:
-            logger.error(
-                f'Resource {resource} cannot be downloaded: "\\view" not found in url {url}'
-            )
+        except:
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
-        # split url to get the file_id
-        code_split = re.split(r"\\|/", partition_view[0])
+    return True
 
-        if len(code_split) < 2:
-            logger.error(
-                f'Resource {resource} cannot be downloaded: character "\\" not found in {partition_view[0]}'
-            )
-            return False
 
-        # get file id
-        file_id = code_split[-1]
+def download_and_unzip_gdrive(config, rootpath, hot_run=True):
+    """
+        download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True)
 
-        if hot_run:
-            if os.path.exists(file_path):
-                os.remove(file_path)
+    Function to download and unzip the data by category from google drive
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+
+    """
+    resource = "-".join(config["category"])
+    file_path = os.path.join(rootpath, "tempfile.zip")
+
+    url = config["urls"]["google"]
+
+    # retrieve file_id from path
+    # cut the part before the ending \view
+    partition_view = re.split(r"/view|\\view", str(url), 1)
+    if len(partition_view) < 2:
+        logger.error(
+            f'Resource {resource} cannot be downloaded: "\\view" not found in url {url}'
+        )
+        return False
+
+    # split url to get the file_id
+    code_split = re.split(r"\\|/", partition_view[0])
+
+    if len(code_split) < 2:
+        logger.error(
+            f'Resource {resource} cannot be downloaded: character "\\" not found in {partition_view[0]}'
+        )
+        return False
+
+    # get file id
+    file_id = code_split[-1]
+
+    if hot_run:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
+        try:
             gdd.download_file_from_google_drive(
                 file_id=file_id,
                 dest_path=file_path,
@@ -172,12 +201,12 @@ def download_and_unzip(host, config, rootpath, hot_run=True):
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
-        logger.info(f"Download resource '{resource}' from cloud '{url}'.")
-
-        return True
-    else:
-        logger.error(f"Host {host} not implemented")
-        return False
+            logger.info(f"Download resource '{resource}' from cloud '{url}'.")
+        except:
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            return False
+    
+    return True
 
 
 def get_best_bundles(country_list, category, config_bundles, tutorial):
@@ -298,8 +327,12 @@ if __name__ == "__main__":
         host_list = config_bundles[b_name]["urls"]
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-            if download_and_unzip(host, config_bundles[b_name], rootpath):
-                break
+            try:
+                download_and_unzip = globals()[f"download_and_unzip_{host}"]
+                if download_and_unzip(config_bundles[b_name], rootpath):
+                    break
+            except KeyError:
+                logger.error(f"plotting function for {host} has not been defined")
 
     logger.info("Bundle successfully loaded and unzipped:\n\t" +
                 "\n\t".join(bundle_to_download))
