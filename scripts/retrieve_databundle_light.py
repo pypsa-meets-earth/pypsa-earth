@@ -104,7 +104,8 @@ def load_databundle_config(config):
     # parse the "countries" list specified in the file before processing
     for bundle_name in config:
         config[bundle_name]["countries"] = create_country_list(
-            config[bundle_name]["countries"], iso_coding=False)
+            config[bundle_name]["countries"], iso_coding=False
+        )
 
     return config
 
@@ -136,19 +137,16 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     url = config["urls"]["zenodo"]
     if hot_run:
         try:
-            logger.info(
-                f"Downloading resource '{resource}' from cloud '{url}'")
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
             progress_retrieve(url, file_path)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
-            logger.info(
-                f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(
-                f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
@@ -185,8 +183,7 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
             os.remove(file_path)
 
         try:
-            logger.info(
-                f"Downloading resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
             progress_retrieve(url, file_path)
 
             zip_obj = ZipFile(file_path, "r")
@@ -212,11 +209,9 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
             # remove outer zip file
             os.remove(file_path)
 
-            logger.info(
-                f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(
-                f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
@@ -254,8 +249,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
             os.remove(file_path)
 
         try:
-            logger.info(
-                f"Downloading resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
             progress_retrieve(url, file_path)
 
             # if the file is a zipfile and unzip is enabled
@@ -265,11 +259,9 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
                     zipfile.extractall(config["destination"])
 
                 os.remove(file_path)
-            logger.info(
-                f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(
-                f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
@@ -417,7 +409,8 @@ if __name__ == "__main__":
 
     # categories of data to download
     categories = list(
-        set([config_bundles[conf]["category"] for conf in config_bundles]))
+        set([config_bundles[conf]["category"] for conf in config_bundles])
+    )
 
     # idenfify matched countries for every bundle
     for bname in config_bundles:
@@ -431,16 +424,17 @@ if __name__ == "__main__":
     bundle_to_download = []
 
     for cat in categories:
-        selection_bundles = get_best_bundles(countries, cat, config_bundles,
-                                             tutorial)
+        selection_bundles = get_best_bundles(countries, cat, config_bundles, tutorial)
 
         # check if non-empty dictionary
         if selection_bundles:
             bundle_to_download.extend(selection_bundles)
 
             if len(selection_bundles) > 1:
-                logger.warning(f"Multiple bundle data for category {cat}: " +
-                               ", ".join(selection_bundles))
+                logger.warning(
+                    f"Multiple bundle data for category {cat}: "
+                    + ", ".join(selection_bundles)
+                )
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Africa is conditioned \
@@ -462,7 +456,8 @@ if __name__ == "__main__":
             # except KeyError:
             #     logger.error(f"Function for {host} has not been defined")
 
-    logger.info("Bundle successfully loaded and unzipped:\n\t" +
-                "\n\t".join(bundle_to_download))
+    logger.info(
+        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download)
+    )
     # print("Bundle successfully loaded and unzipped:\n\t" +
     #       "\n\t".join(bundle_to_download))
