@@ -22,7 +22,7 @@
 #       post:  # key to download data using an url post request; if unzip option is enabled data are unzipped
 #         url: {url}
 #         [post arguments]
-#     [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files 
+#     [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files
 #     output: [...] # list of outputs of the bundle used in snakemake
 
 databundles:
