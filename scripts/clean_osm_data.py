@@ -318,6 +318,9 @@ def integrate_lines_df(df_all_lines):
     if df_all_lines["cables"].dtype != int:
         # HERE. "0" if cables "None", "nan" or "1"
         df_all_lines.loc[(df_all_lines["cables"] < "3")
+                         | (df_all_lines["cables"] == "1/3")
+                         | (df_all_lines["cables"] == "3+3")
+                         | (df_all_lines["cables"] == "single")
                          | df_all_lines["cables"].isna(), "cables"] = "0"
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
