@@ -136,16 +136,19 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     url = config["urls"]["zenodo"]
     if hot_run:
         try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
+            logger.info(
+                f"Downloading resource '{resource}' from cloud '{url}'")
             progress_retrieve(url, file_path)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(
+                f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
@@ -180,15 +183,17 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
     if hot_run:
         if os.path.exists(file_path):
             os.remove(file_path)
-        
+
         try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            logger.info(
+                f"Downloading resource '{resource}' from cloud '{url}'.")
             progress_retrieve(url, file_path)
 
             zip_obj = ZipFile(file_path, 'r')
 
             # list of zip files, which contains the shape files
-            zip_files = [fname for fname in zip_obj.namelist() if fname.endswith(".zip")]
+            zip_files = [fname for fname in zip_obj.namelist()
+                         if fname.endswith(".zip")]
 
             # extract the nested zip files
             for fzip in zip_files:
@@ -199,18 +204,20 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
 
                 with ZipFile(inner_zipname, 'r') as nested_zip:
                     nested_zip.extractall(path=config["destination"])
-                
+
                 # remove inner zip file
                 os.remove(inner_zipname)
-                
+
             # remove outer zip file
             os.remove(file_path)
-            
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+
+            logger.info(
+                f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
-    
+
     return True
 
 
@@ -244,9 +251,10 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
     if hot_run:
         if os.path.exists(file_path):
             os.remove(file_path)
-        
+
         try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            logger.info(
+                f"Downloading resource '{resource}' from cloud '{url}'.")
             progress_retrieve(url, file_path)
 
             # if the file is a zipfile and unzip is enabled
@@ -256,11 +264,13 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
                     zipfile.extractall(config["destination"])
 
                 os.remove(file_path)
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(
+                f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
-    
+
     return True
 
 
@@ -297,7 +307,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True):
     if hot_run:
         if os.path.exists(file_path):
             os.remove(file_path)
-        
+
         # try:
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
 
@@ -314,7 +324,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True):
         # except:
         #     logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
         #     return False
-    
+
     return True
 
 
@@ -430,7 +440,7 @@ if __name__ == "__main__":
             if len(selection_bundles) > 1:
                 logger.warning(f"Multiple bundle data for category {cat}: " +
                                ", ".join(selection_bundles))
-    
+
     logger.warning("DISCLAIMER LICENSES: the use of PyPSA-Africa is conditioned \
         to the acceptance of its multiple licenses.\n \
         The use of the code automatically implies that you accept all the licenses.\n \
@@ -442,10 +452,10 @@ if __name__ == "__main__":
         host_list = config_bundles[b_name]["urls"]
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-            #try:
-                download_and_unzip = globals()[f"download_and_unzip_{host}"]
-                if download_and_unzip(config_bundles[b_name], rootpath):
-                    break
+            # try:
+            download_and_unzip = globals()[f"download_and_unzip_{host}"]
+            if download_and_unzip(config_bundles[b_name], rootpath):
+                break
             # except KeyError:
             #     logger.error(f"Function for {host} has not been defined")
 

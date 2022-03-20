@@ -276,7 +276,7 @@ def progress_retrieve(url, file, data=None):
         pbar.n = round(
             count * blockSize * 100 / totalSize * 100) / 100  # round to 0.01
         pbar.refresh()
-    
+
     if data is not None:
         data = urllib.parse.urlencode(data).encode()
 
