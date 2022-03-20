@@ -636,8 +636,11 @@ def fix_overpassing_lines(lines, buses, tol=1):
     # update line endings
     df_to_add = line_endings_to_bus_conversion(df_to_add)
 
+    # remove original lines
+    lines.drop(lines_to_split, inplace=True)
+
     lines = gpd.GeoDataFrame(
-        pd.concat([lines,df_to_add], ignore_index=True)).set_crs(lines.crs)
+        pd.concat([lines,df_to_add], ignore_index=True)).set_crs(lines.crs, inplace=True)
 
     return lines, buses
 
