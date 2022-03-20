@@ -597,12 +597,15 @@ def fix_overpassing_lines(lines, buses, tol=1):
     for l in tqdm(lines.index, **tqdm_kwargs_substation_ids):
 
         # bus indices being within tolerance from the line
-        bus_in_tol = buses_epsgmod[buses_epsgmod.geometry.distance(lines_epsgmod.geometry.loc[l]) <= tol]
+        bus_in_tol = buses_epsgmod[
+            buses_epsgmod.geometry.distance(lines_epsgmod.geometry.loc[l]) <= tol]
 
         # exclude endings of the lines
         bus_in_tol = bus_in_tol[(
-            (bus_in_tol.geometry.distance(lines_epsgmod.loc[l, "bus_0_coors"]) > tol)
-            & (bus_in_tol.geometry.distance(lines_epsgmod.loc[l, "bus_1_coors"]) > tol)
+            (bus_in_tol.geometry.distance(
+                lines_epsgmod.geometry.loc[l].boundary.geoms[0]) > tol)
+            & (bus_in_tol.geometry.distance(
+                lines_epsgmod.geometry.loc[l].boundary.geoms[1]) > tol)
         )]
 
         if not bus_in_tol.empty:
