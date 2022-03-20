@@ -30,8 +30,15 @@ Each data bundle entry has the following structure:
     category: common/resources/data/cutouts  # category of data contained in the bundle:
     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
     urls:  # list of urls by source, e.g. zenodo or google
-      zenodo: {zenodo url}
-      google: {google url}
+      zenodo: {zenodo url}  # key to download data from zenodo
+      gdrive: {google url}  # key to download data from google drive
+      protectedplanet: {url}  # key to download data from protected planet
+      direct: {url}  # key to download data directly from a url; if unzip option is enabled data are unzipped
+      post:  # key to download data using an url post request; if unzip option is enabled data are unzipped
+        url: {url}
+        [post arguments]
+    [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files
+    output: [...]  # list of outputs of the databundle
 
 Depending on the country list that is asked to perform, all needed databundles are downloaded
 according to the following rules:

@@ -15,9 +15,15 @@
 #     category: common/resources/data/cutouts  # category of data contained in the bundle:
 #     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
 #     urls:  # list of urls by source, e.g. zenodo or google
-#       zenodo: {zenodo url}
-#       gdrive: {google url}
-#     output:  # list of outputs of the bundle used in snakemake
+#       zenodo: {zenodo url}  # key to download data from zenodo
+#       gdrive: {google url}  # key to download data from google drive
+#       protectedplanet: {url}  # key to download data from protected planet
+#       direct: {url}  # key to download data directly from a url; if unzip option is enabled data are unzipped
+#       post:  # key to download data using an url post request; if unzip option is enabled data are unzipped
+#         url: {url}
+#         [post arguments]
+#     [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files 
+#     output: [...] # list of outputs of the bundle used in snakemake
 
 databundles:
   # tutorial bundle specific for Nigeria and Benin only
