@@ -423,6 +423,12 @@ if __name__ == "__main__":
             if len(selection_bundles) > 1:
                 logger.warning(f"Multiple bundle data for category {cat}: " +
                                ", ".join(selection_bundles))
+    
+    logger.warning("DISCLAIMER LICENSES: the use of PyPSA-Africa is conditioned \
+        to the acceptance of its multiple licenses.\n \
+        The use of the code automatically implies that you accept all the licenses.\n \
+        See our documentation for more information. \n \
+        Link: https://pypsa-meets-africa.readthedocs.io/en/latest/introduction.html#licence")
 
     # download the selected bundles
     for b_name in bundle_to_download:
