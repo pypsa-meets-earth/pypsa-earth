@@ -298,7 +298,7 @@ def get_transformers(buses, lines):
     Function to create fake transformer lines that connect buses of the same station_id at different voltage
     """
 
-    df_transformers = gpd.GeoDataFrame(columns=lines.columns)
+    df_transformers = []
 
     for g_name, g_value in buses.sort_values(
             "voltage", ascending=True).groupby(by=["station_id"]):
@@ -312,30 +312,31 @@ def get_transformers(buses, lines):
                 # when g_value has more than one node, it means that there are multiple voltages for the same bus
                 geom_trans = LineString(
                     [g_value.geometry.iloc[id], g_value.geometry.iloc[id + 1]])
-                transf_id = lines.shape[0] + df_transformers.shape[0] + 1
 
-                df_transformers.loc[transf_id] = {
-                    "line_id": f"transf_{g_name}_{id}",
-                    "bus0": g_value["bus_id"].iloc[id],
-                    "bus1": g_value["bus_id"].iloc[id + 1],
-                    "voltage": g_value.voltage.iloc[[id, id + 1]].max(),
-                    "circuits": 1,
-                    "length": 0.0,
-                    "underground": False,
-                    "under_construction": False,
-                    "tag_type": "transmission",
-                    "tag_frequency": 50,
-                    "country": g_value.country.iloc[id],
-                    "geometry": geom_trans,
-                    "bounds": geom_trans.bounds,
-                    "bus_0_coors": g_value.geometry.iloc[id],
-                    "bus_1_coors": g_value.geometry.iloc[id + 1],
-                    "bus0_lon": g_value.geometry.iloc[id].x,
-                    "bus0_lat": g_value.geometry.iloc[id].y,
-                    "bus1_lon": g_value.geometry.iloc[id + 1].x,
-                    "bus1_lat": g_value.geometry.iloc[id + 1].y,
-                }
+                df_transformers.append([
+                    f"transf_{g_name}_{id}",  # "line_id"
+                    g_value["bus_id"].iloc[id],  # "bus0"
+                    g_value["bus_id"].iloc[id + 1],  # "bus1"
+                    g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
+                    1,  # "circuits"
+                    0.0,  # "length"
+                    False,  # "underground"
+                    False,  # "under_construction"
+                    "transmission",  # "tag_type"
+                    50,  # "tag_frequency"
+                    g_value.country.iloc[id],  # "country"
+                    geom_trans,  # "geometry"
+                    geom_trans.bounds,  # "bounds"
+                    g_value.geometry.iloc[id],  # "bus_0_coors"
+                    g_value.geometry.iloc[id + 1],  # "bus_1_coors"
+                    g_value.geometry.iloc[id].x,  # "bus0_lon"
+                    g_value.geometry.iloc[id].y,  # "bus0_lat"
+                    g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
+                    g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
+                ])
 
+    df_transformers = gpd.GeoDataFrame(df_transformers, columns=lines.keys())
+    df_transformers.set_index(lines.shape[0] + df_transformers.index + 1)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
 
