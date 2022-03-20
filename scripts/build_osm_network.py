@@ -14,6 +14,7 @@ from _helpers import configure_logging
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
+from shapely.ops import split
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
@@ -507,8 +508,116 @@ def create_station_at_equal_bus_locations(lines, buses, tol=2000):
     return lines, buses
 
 
+def _split_linestring_by_point(linestring, points):
+    """
+    Function to split a linestring geometry by multiple inner points
+
+    Parameters
+    ----------
+    lstring : LineString
+        Linestring of the line to be splitted
+    points : list
+        List of points to split the linestring
+    
+    Return
+    ------
+    list_lines : list
+        List of linestring to split the line
+    """
+
+    list_linestrings = [linestring]
+
+    for p in points:
+        # execute split to all lines and store results
+        temp_list = [split(l, p) for l in list_linestrings]
+        # nest all geometries
+        list_linestrings = [
+            lstring for tval in temp_list for lstring in tval.geoms
+        ]
+    
+    return list_linestrings
+
+
+def fix_overpassing_lines(lines, buses, tol=1):
+    """
+    Function to avoid buses overpassing lines with no connection
+    when the bus is within a given tolerance from the line
+
+    Parameters
+    ----------
+    lines : GeoDataFrame
+        Geodataframe of lines
+    buses : GeoDataFrame
+        Geodataframe of substations
+    tol : float
+        Tolerance in meters of the distance between the substation and the line
+        below which the line will be splitted
+    """
+
+    lines_to_add = []  # list of lines to be added
+    lines_to_split = []  # list of lines that have been splitted
+
+    lines_epsgmod = lines.to_crs(epsg=3763)
+    buses_epsgmod = buses.to_crs(epsg=3763)
+    
+    # set tqdm options for substation ids
+    tqdm_kwargs_substation_ids = dict(
+        ascii=False,
+        unit=" lines",
+        total=lines.shape[0],
+        desc="Verify lines overpassing nodes ",
+    )
+
+    for l in tqdm(lines.index, **tqdm_kwargs_substation_ids):
+
+        # bus indices being within tolerance from the line
+        bus_in_tol = buses_epsgmod[buses_epsgmod.geometry.distance(lines_epsgmod.geometry.loc[l]) <= tol]
+
+        # exclude endings of the lines
+        bus_in_tol = bus_in_tol[(
+            (bus_in_tol.geometry.distance(lines_epsgmod.loc[l, "bus_0_coors"]) > tol)
+            & (bus_in_tol.geometry.distance(lines_epsgmod.loc[l, "bus_1_coors"]) > tol)
+        )]
+
+        if not bus_in_tol.empty:
+            # add index of line to split
+            lines_to_split.append(l)
+
+            buses_locs = bus_in_tol.geometry
+
+            # get new line geometries
+            new_geometries = _split_linestring_by_point(lines.geometry[l], buses_locs)
+            n_geoms = len(new_geometries)
+
+            # create temporary copies of the line
+            df_append = gpd.GeoDataFrame([lines.loc[l]]*n_geoms)
+            # update geometries
+            df_append["geometry"] = new_geometries
+            # update name of the line
+            df_append["line_id"] = [
+                df_append["line_id"].iloc[0] + f"_{id}" for id in range(n_geoms)
+            ]
+
+            lines_to_add.append(df_append)
+
+    df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True))
+    df_to_add.set_crs(lines.crs, inplace=True)
+    df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
+
+    # update length
+    df_to_add["length"] = df_to_add.to_crs(epsg=3763).geometry.length
+
+    # update line endings
+    df_to_add = line_endings_to_bus_conversion(df_to_add)
+
+    lines = gpd.GeoDataFrame(
+        pd.concat([lines,df_to_add], ignore_index=True)).set_crs(lines.crs)
+
+    return lines, buses
+
+
 def built_network(inputs, outputs):
-    logger.info("Stage 1/4: Read input data")
+    logger.info("Stage 1/5: Read input data")
 
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
                                                                inplace=True)
@@ -516,12 +625,18 @@ def built_network(inputs, outputs):
     generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
                                                              inplace=True)
 
-    logger.info("Stage 2/4: Add line endings to the substation datasets")
+    logger.info("Stage 2/5: Add line endings to the substation datasets")
+
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
     buses = add_line_endings_tosubstations(substations, lines)
 
-    logger.info("Stage 3/4: Aggregate close substations")
+    logger.info("Stage 3/5: Process lines dataset to avoid nodes overpassing lines")
+    
+    lines, buses = fix_overpassing_lines(lines, buses)
+
+
+    logger.info("Stage 4/5: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
     if snakemake.config["clean_osm_data_options"]["group_close_buses"]:
@@ -529,7 +644,7 @@ def built_network(inputs, outputs):
                                                                       buses,
                                                                       tol=4000)
 
-    logger.info("Stage 4/4: Add augmented substation to country with no data")
+    logger.info("Stage 5/5: Add augmented substation to country with no data")
 
     country_shapes_fn = snakemake.input.country_shapes
     country_shapes = (gpd.read_file(country_shapes_fn).set_index("name")
