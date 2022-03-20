@@ -446,7 +446,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     lines, buses = set_lines_ids(lines, buses)
 
     # drop lines starting and ending in the same node
-    lines = lines[lines["bus0"] != lines["bus1"]]
+    lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
 
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
