@@ -108,3 +108,23 @@ The content in this package is organized in folders as described below; for more
 - ``benchmarks``: Stores ``snakemake`` benchmarks.
 - ``logs``: Stores log files about solving, including the solver output, console output and the output of a memory logger.
 - ``envs``: Stores the conda environment files to successfully run the workflow.
+
+
+Licence
+=======
+
+PyPSA-Africa work is released under multiple licenses:
+
+* All original source code is licensed as free software under `GPL-3.0 License <https://github.com/pypsa-meets-africa/pypsa-africa/blob/main/LICENSE>`_.
+* The documentation is licensed under `CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>`_.
+* Configuration files are mostly licensed under `CC0-1.0 <https://creativecommons.org/publicdomain/zero/1.0/>`_.
+* Data files are licensed under different licenses as noted below.
+
+Licenses and urls of the data used in PyPSA-Africa:
+.. csv-table::
+   :header-rows: 1
+   :file: configtables/licenses.csv
+
+* *BY: Attribute Source*
+* *NC: Non-Commercial Use Only*
+* *SA: Share Alike*
