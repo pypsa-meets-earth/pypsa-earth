@@ -183,8 +183,26 @@ databundles:
   #   category: gebco
   #   destination: "data/raw/gebco"
   #   urls:
-  #     directzip: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2021/zip/
+  #     direct: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2021/zip/
+  #   unzip: True
   #   output: [data/raw/gebco/GEBCO_2021_TID.nc]
+
+  # bundle_eez:
+  #   countries: [world]
+  #   category: eez
+  #   destination: "data/raw/eez"
+  #   urls:
+  #     post:
+  #       url: https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip
+  #       name: NAME
+  #       organisation: ORGANISATION
+  #       email: youremail@email.com
+  #       country: Italy
+  #       user_category: academia
+  #       purpose_category: Research
+  #       agree: 1
+  #   output: [data/raw/gebco/GEBCO_2021_TID.nc]
+
   # cutouts bundle of the cutouts folder for the african continent
   bundle_cutouts_africa:
     countries: [africa]

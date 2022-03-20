@@ -255,7 +255,61 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
             return False
     
     return True
+
+
+def download_and_unzip_post(config, rootpath, hot_run=True):
+    """
+        download_and_unzip_post(config, rootpath, dest_path, hot_run=True)
+
+    Function to download the data by category from a post request.
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+
+    """
+    resource = config["category"]
+
+    # load data for post method
+    postdata = config["urls"]["post"]
+    # remove url feature
+    url = postdata.pop("url")
+
+    file_path = os.path.join(config["destination"], os.path.basename(url))
+
+    if hot_run:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
+        # try:
+        logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+
+        progress_retrieve(url, file_path, data=postdata)
+
+        # if the file is a zipfile and unzip is enabled
+        # then unzip it and remove the original file
+        if config.get("unzip", False):
+            with ZipFile(file_path, "r") as zipfile:
+                zipfile.extractall(config["destination"])
+
+            os.remove(file_path)
+        logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+        # except:
+        #     logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+        #     return False
     
+    return True
+
 
 def get_best_bundles(country_list, category, config_bundles, tutorial):
     """
