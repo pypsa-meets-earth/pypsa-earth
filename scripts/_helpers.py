@@ -265,7 +265,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
     return costs
 
 
-def progress_retrieve(url, file):
+def progress_retrieve(url, file, data=None):
     import urllib
 
     from tqdm import tqdm
@@ -277,7 +277,7 @@ def progress_retrieve(url, file):
             count * blockSize * 100 / totalSize * 100) / 100  # round to 0.01
         pbar.refresh()
 
-    urllib.request.urlretrieve(url, file, reporthook=dlProgress)
+    urllib.request.urlretrieve(url, file, reporthook=dlProgress, data)
 
 
 def mock_snakemake(rulename, **wildcards):
