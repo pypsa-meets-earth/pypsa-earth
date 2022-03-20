@@ -238,8 +238,8 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
     This function iterates over all substation ids and creates a bus_id for every substation and voltage level.
     Therefore, a substation with multiple voltage levels is represented with different buses, one per voltage level
     """
-    # initialize empty dataset of cleaned buses
-    buses_clean = gpd.GeoDataFrame(columns=buses.columns)
+    # initialize list of cleaned buses
+    buses_clean = []
 
     # initalize the number of buses
     n_buses = 0
@@ -256,41 +256,36 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
         for v_name, bus_row in g_value.groupby(by=["voltage"]):
 
             # add the bus
-            buses_clean.loc[n_buses] = {
-                "bus_id":
-                n_buses,
-                "station_id":
-                g_name,
-                "voltage":
-                v_name,
-                "dc":
-                bus_row["dc"].all(),
-                "symbol":
-                "|".join(bus_row["symbol"].unique()),
-                "under_construction":
-                bus_row["under_construction"].any(),
-                "tag_substation":
-                "|".join(bus_row["tag_substation"].unique()),
-                "tag_area":
-                bus_row["tag_area"].sum(),
-                "lon":
-                station_loc.lon + v_it * delta_lon,
-                "lat":
-                station_loc.lat + v_it * delta_lat,
-                "country":
-                bus_row["country"].iloc[0],
-                "geometry":
+            buses_clean.append([
+                n_buses,  # "bus_id"
+                g_name,  # "station_id"
+                v_name,  # "voltage"
+                bus_row["dc"].all(),  # "dc"
+                "|".join(bus_row["symbol"].unique()),  # "symbol"
+                bus_row["under_construction"].any(),  # "under_construction"
+                "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
+                bus_row["tag_area"].sum(),  # "tag_area"
+                station_loc.lon + v_it * delta_lon,  # "lon"
+                station_loc.lat + v_it * delta_lat,  # "lat"
+                bus_row["country"].iloc[0],  # "country"
                 Point(
                     station_loc.lon + v_it * delta_lon,
                     station_loc.lat + v_it * delta_lat,
-                ),
-            }
+                ),  # "geometry"
+            ])
 
             # increase counters
             v_it += 1
             n_buses += 1
 
-    return buses_clean
+    # names of the columns
+    buses_clean_columns = [
+        "bus_id", "station_id", "voltage", "dc", "symbol",
+        "under_construction", "tag_substation", "tag_area",
+        "lon", "lat", "country", "geometry"
+    ]
+
+    return gpd.GeoDataFrame(buses_clean, columns=buses_clean_columns)
 
 
 def get_transformers(buses, lines):
@@ -334,8 +329,16 @@ def get_transformers(buses, lines):
                     g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
                     g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
                 ])
+    
+    # name of the columns
+    trasf_columns = [
+        "line_id", "bus0", "bus1", "voltage", "circuits", "length",
+        "underground", "under_construction", "tag_type", "tag_frequency",
+        "country", "geometry", "bounds", "bus_0_coors", "bus_1_coors",
+        "bus0_lon", "bus0_lat", "bus1_lon", "bus1_lat"
+    ]
 
-    df_transformers = gpd.GeoDataFrame(df_transformers, columns=lines.keys())
+    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
     df_transformers.set_index(lines.shape[0] + df_transformers.index + 1)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
@@ -385,7 +388,7 @@ def connect_stations_same_station_id(lines, buses):
                     buses_station_id.lon.iloc[b_it],
                     buses_station_id.lat.iloc[b_it],
                 ])
-    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.keys()),
+    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.columns),
                         ignore_index=True)
 
 
