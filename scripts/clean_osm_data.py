@@ -359,7 +359,7 @@ def integrate_lines_df(df_all_lines):
 
             logger.warning(f"The circuits == '1/3' of an overal length {dropped_length} km dropped.")
 
-            # the length is contained in the OSM directly and can be calculated from the coordinates
+            # troubles with projections can lead to discrepancy between the length values
             tol = 0.1 #[m]
             length_diff = df_one_third_circuits["length"] - df_one_third_circuits["crs_length"]
 
