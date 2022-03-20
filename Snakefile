@@ -64,14 +64,14 @@ def datafiles_retrivedatabundle(config):
     # when option build_natura_raster is enabled, remove natura.tiff from the outputs
     if config['enable'].get("build_natura_raster", False):
         unique_outputs = [output for output in unique_outputs if "natura.tiff" not in output]
-        
+
     # when option build_cutout is enabled, remove cutouts from the outputs
     if config['enable'].get("build_cutout", False):
         unique_outputs = [output for output in unique_outputs if "cutouts/" not in output]
-    
+
     return unique_outputs
 
-    
+
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
