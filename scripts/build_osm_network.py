@@ -17,6 +17,7 @@ from shapely.ops import linemerge
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def line_endings_to_bus_conversion(lines):
@@ -339,7 +340,7 @@ def get_transformers(buses, lines):
     ]
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
-    df_transformers.set_index(lines.shape[0] + df_transformers.index + 1)
+    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1, inplace=True)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
 
