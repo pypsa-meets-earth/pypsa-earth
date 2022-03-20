@@ -265,8 +265,8 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
                 bus_row["dc"].all(),  # "dc"
                 "|".join(bus_row["symbol"].unique()),  # "symbol"
                 bus_row["under_construction"].any(),  # "under_construction"
-                # "tag_substation"
-                "|".join(bus_row["tag_substation"].unique()),
+                "|".join(
+                    bus_row["tag_substation"].unique()),  # "tag_substation"
                 bus_row["tag_area"].sum(),  # "tag_area"
                 station_loc.lon + v_it * delta_lon,  # "lon"
                 station_loc.lat + v_it * delta_lat,  # "lat"
