@@ -43,12 +43,12 @@ def create_bus_df_from_lines(substations, lines):
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
     # Read information from line.csv
-    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"]
-    ]  # line start points
-    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"]
-    ]  # line end points
+    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
+        "voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"
+    ]]  # line start points
+    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
+        "voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"
+    ]]  # line end points
     bus_all = bus_s.append(bus_e).reset_index(drop=True)
 
     # Assign index to bus_id
@@ -72,13 +72,15 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
     # Read information from line.csv
-    bus_s[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
+    bus_s[["voltage", "country"]] = lines[["voltage",
+                                           "country"]]  # line start points
     bus_s["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[0])
     bus_s["lon"] = bus_s["geometry"].x
     bus_s["lat"] = bus_s["geometry"].y
     bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
 
-    bus_e[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
+    bus_e[["voltage", "country"]] = lines[["voltage",
+                                           "country"]]  # line start points
     bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1])
     bus_e["lon"] = bus_s["geometry"].x
     bus_e["lat"] = bus_s["geometry"].y
@@ -140,8 +142,7 @@ def set_substations_ids(buses, tol=2000):
 
         # get substations within tolerance
         close_nodes = np.flatnonzero(
-            temp_bus_geom.distance(temp_bus_geom.loc[i]) <= tol
-        )
+            temp_bus_geom.distance(temp_bus_geom.loc[i]) <= tol)
 
         if len(close_nodes) == 1:
             # if only one substation is in tolerance, then the substation is the current one iì
@@ -153,7 +154,8 @@ def set_substations_ids(buses, tol=2000):
         else:
             # several substations in tolerance
             # get their ids
-            subset_substation_ids = buses.loc[buses.index[close_nodes], "station_id"]
+            subset_substation_ids = buses.loc[buses.index[close_nodes],
+                                              "station_id"]
             # check if all substation_ids are negative (<0)
             all_neg = subset_substation_ids.max() < 0
             # check if at least a substation_id is negative (<0)
@@ -201,35 +203,32 @@ def set_lines_ids(lines, buses):
         lines.loc[i, "bus0"] = buses.loc[bus0_id, "bus_id"]
 
         # check if the line starts exactly in the node, otherwise modify the linestring
-        distance_bus0 = buses.loc[bus0_id, "geometry"].distance(row["bus_0_coors"])
+        distance_bus0 = buses.loc[bus0_id,
+                                  "geometry"].distance(row["bus_0_coors"])
         if distance_bus0 > 0.0:
             # the line does not start in the node, thus modify the linestring
-            lines.loc[i, "geometry"] = linemerge(
-                [
-                    LineString(
-                        [
-                            buses.loc[bus0_id, "geometry"],
-                            row["bus_0_coors"],
-                        ]
-                    ),
-                    lines.loc[i, "geometry"],
-                ]
-            )
+            lines.loc[i, "geometry"] = linemerge([
+                LineString([
+                    buses.loc[bus0_id, "geometry"],
+                    row["bus_0_coors"],
+                ]),
+                lines.loc[i, "geometry"],
+            ])
 
         # find the closest node of the bus1 of the line
         bus1_id = buses_sel.geometry.distance(row["bus_1_coors"]).idxmin()
         lines.loc[i, "bus1"] = buses.loc[bus1_id, "bus_id"]
 
         # check if the line ends exactly in the node, otherwise modify the linestring
-        distance_bus1 = buses.loc[bus1_id, "geometry"].distance(row["bus_1_coors"])
+        distance_bus1 = buses.loc[bus1_id,
+                                  "geometry"].distance(row["bus_1_coors"])
         if distance_bus1 > 0.0:
             # the line does not end in the node, thus modify the linestring
-            lines.loc[i, "geometry"] = linemerge(
-                [
-                    lines.loc[i, "geometry"],
-                    LineString([row["bus_1_coors"], buses.loc[bus1_id, "geometry"]]),
-                ]
-            )
+            lines.loc[i, "geometry"] = linemerge([
+                lines.loc[i, "geometry"],
+                LineString(
+                    [row["bus_1_coors"], buses.loc[bus1_id, "geometry"]]),
+            ])
 
     return lines, buses
 
@@ -258,26 +257,24 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
         for v_name, bus_row in g_value.groupby(by=["voltage"]):
 
             # add the bus
-            buses_clean.append(
-                [
-                    n_buses,  # "bus_id"
-                    g_name,  # "station_id"
-                    v_name,  # "voltage"
-                    bus_row["dc"].all(),  # "dc"
-                    "|".join(bus_row["symbol"].unique()),  # "symbol"
-                    bus_row["under_construction"].any(),  # "under_construction"
-                    # "tag_substation"
-                    "|".join(bus_row["tag_substation"].unique()),
-                    bus_row["tag_area"].sum(),  # "tag_area"
-                    station_loc.lon + v_it * delta_lon,  # "lon"
-                    station_loc.lat + v_it * delta_lat,  # "lat"
-                    bus_row["country"].iloc[0],  # "country"
-                    Point(
-                        station_loc.lon + v_it * delta_lon,
-                        station_loc.lat + v_it * delta_lat,
-                    ),  # "geometry"
-                ]
-            )
+            buses_clean.append([
+                n_buses,  # "bus_id"
+                g_name,  # "station_id"
+                v_name,  # "voltage"
+                bus_row["dc"].all(),  # "dc"
+                "|".join(bus_row["symbol"].unique()),  # "symbol"
+                bus_row["under_construction"].any(),  # "under_construction"
+                # "tag_substation"
+                "|".join(bus_row["tag_substation"].unique()),
+                bus_row["tag_area"].sum(),  # "tag_area"
+                station_loc.lon + v_it * delta_lon,  # "lon"
+                station_loc.lat + v_it * delta_lat,  # "lat"
+                bus_row["country"].iloc[0],  # "country"
+                Point(
+                    station_loc.lon + v_it * delta_lon,
+                    station_loc.lat + v_it * delta_lat,
+                ),  # "geometry"
+            ])
 
             # increase counters
             v_it += 1
@@ -309,9 +306,8 @@ def get_transformers(buses, lines):
 
     df_transformers = []
 
-    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
-        by=["station_id"]
-    ):
+    for g_name, g_value in buses.sort_values(
+            "voltage", ascending=True).groupby(by=["station_id"]):
 
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
@@ -321,32 +317,29 @@ def get_transformers(buses, lines):
             for id in range(0, n_voltages - 1):
                 # when g_value has more than one node, it means that there are multiple voltages for the same bus
                 geom_trans = LineString(
-                    [g_value.geometry.iloc[id], g_value.geometry.iloc[id + 1]]
-                )
+                    [g_value.geometry.iloc[id], g_value.geometry.iloc[id + 1]])
 
-                df_transformers.append(
-                    [
-                        f"transf_{g_name}_{id}",  # "line_id"
-                        g_value["bus_id"].iloc[id],  # "bus0"
-                        g_value["bus_id"].iloc[id + 1],  # "bus1"
-                        g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
-                        1,  # "circuits"
-                        0.0,  # "length"
-                        False,  # "underground"
-                        False,  # "under_construction"
-                        "transmission",  # "tag_type"
-                        50,  # "tag_frequency"
-                        g_value.country.iloc[id],  # "country"
-                        geom_trans,  # "geometry"
-                        geom_trans.bounds,  # "bounds"
-                        g_value.geometry.iloc[id],  # "bus_0_coors"
-                        g_value.geometry.iloc[id + 1],  # "bus_1_coors"
-                        g_value.geometry.iloc[id].x,  # "bus0_lon"
-                        g_value.geometry.iloc[id].y,  # "bus0_lat"
-                        g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
-                        g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
-                    ]
-                )
+                df_transformers.append([
+                    f"transf_{g_name}_{id}",  # "line_id"
+                    g_value["bus_id"].iloc[id],  # "bus0"
+                    g_value["bus_id"].iloc[id + 1],  # "bus1"
+                    g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
+                    1,  # "circuits"
+                    0.0,  # "length"
+                    False,  # "underground"
+                    False,  # "under_construction"
+                    "transmission",  # "tag_type"
+                    50,  # "tag_frequency"
+                    g_value.country.iloc[id],  # "country"
+                    geom_trans,  # "geometry"
+                    geom_trans.bounds,  # "bounds"
+                    g_value.geometry.iloc[id],  # "bus_0_coors"
+                    g_value.geometry.iloc[id + 1],  # "bus_1_coors"
+                    g_value.geometry.iloc[id].x,  # "bus0_lon"
+                    g_value.geometry.iloc[id].y,  # "bus0_lat"
+                    g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
+                    g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
+                ])
 
     # name of the columns
     trasf_columns = [
@@ -372,7 +365,8 @@ def get_transformers(buses, lines):
     ]
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
-    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1, inplace=True)
+    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1,
+                              inplace=True)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
 
@@ -394,42 +388,35 @@ def connect_stations_same_station_id(lines, buses):
 
         if len(buses_station_id) > 1:
             for b_it in range(1, len(buses_station_id)):
-                add_lines.append(
-                    [
-                        f"link{buses_station_id}_{b_it}",
-                        buses_station_id.index[0],
-                        buses_station_id.index[b_it],
-                        400000,
-                        1,
-                        0.0,
-                        False,
-                        False,
-                        "transmission",
-                        50,
-                        buses_station_id.country.iloc[0],
-                        LineString(
-                            [
-                                buses_station_id.geometry.iloc[0],
-                                buses_station_id.geometry.iloc[b_it],
-                            ]
-                        ),
-                        LineString(
-                            [
-                                buses_station_id.geometry.iloc[0],
-                                buses_station_id.geometry.iloc[b_it],
-                            ]
-                        ).bounds,
+                add_lines.append([
+                    f"link{buses_station_id}_{b_it}",
+                    buses_station_id.index[0],
+                    buses_station_id.index[b_it],
+                    400000,
+                    1,
+                    0.0,
+                    False,
+                    False,
+                    "transmission",
+                    50,
+                    buses_station_id.country.iloc[0],
+                    LineString([
                         buses_station_id.geometry.iloc[0],
                         buses_station_id.geometry.iloc[b_it],
-                        buses_station_id.lon.iloc[0],
-                        buses_station_id.lat.iloc[0],
-                        buses_station_id.lon.iloc[b_it],
-                        buses_station_id.lat.iloc[b_it],
-                    ]
-                )
-    return lines.append(
-        gpd.GeoDataFrame(add_lines, columns=lines.columns), ignore_index=True
-    )
+                    ]),
+                    LineString([
+                        buses_station_id.geometry.iloc[0],
+                        buses_station_id.geometry.iloc[b_it],
+                    ]).bounds,
+                    buses_station_id.geometry.iloc[0],
+                    buses_station_id.geometry.iloc[b_it],
+                    buses_station_id.lon.iloc[0],
+                    buses_station_id.lat.iloc[0],
+                    buses_station_id.lon.iloc[b_it],
+                    buses_station_id.lat.iloc[b_it],
+                ])
+    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.columns),
+                        ignore_index=True)
 
 
 def set_lv_substations(buses):
@@ -442,14 +429,11 @@ def set_lv_substations(buses):
     buses["substation_lv"] = True
 
     # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    bus_with_stations_duplicates = buses[
-        buses.station_id.duplicated(keep=False)
-    ].sort_values(by=["station_id", "voltage"])
-    lv_bus_at_station_duplicates = (
-        buses[buses.station_id.duplicated(keep=False)]
-        .sort_values(by=["station_id", "voltage"])
-        .drop_duplicates(subset=["station_id"])
-    )
+    bus_with_stations_duplicates = buses[buses.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"])
+    lv_bus_at_station_duplicates = (buses[buses.station_id.duplicated(
+        keep=False)].sort_values(by=["station_id", "voltage"]).drop_duplicates(
+            subset=["station_id"]))
     # Set all buses with station duplicates "False"
     buses.loc[bus_with_stations_duplicates.index, "substation_lv"] = False
     # Set lv_buses with station duplicates "True"
@@ -471,9 +455,8 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
-    logger.info(
-        "Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol / 1000)
-    )
+    logger.info("Stage 3a/4: Set substation ids with tolerance of %.2f km" %
+                (tol / 1000))
 
     # set substation ids
     set_substations_ids(buses, tol=tol)
@@ -553,9 +536,11 @@ def create_station_at_equal_bus_locations(lines, buses, tol=2000):
 def built_network(inputs, outputs):
     logger.info("Stage 1/4: Read input data")
 
-    substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
+    substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
+                                                               inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
-    generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326, inplace=True)
+    generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
+                                                             inplace=True)
 
     logger.info("Stage 2/4: Add line endings to the substation datasets")
     # Use lines and create bus/line df
@@ -566,50 +551,47 @@ def built_network(inputs, outputs):
 
     # METHOD to merge buses with same voltage and within tolerance
     if snakemake.config["clean_osm_data_options"]["group_close_buses"]:
-        lines, buses = merge_stations_lines_by_station_id_and_voltage(
-            lines, buses, tol=4000
-        )
+        lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
+                                                                      buses,
+                                                                      tol=4000)
 
     logger.info("Stage 4/4: Add augmented substation to country with no data")
 
     country_shapes_fn = snakemake.input.country_shapes
-    country_shapes = (
-        gpd.read_file(country_shapes_fn).set_index("name")["geometry"].set_crs(4326)
-    )
+    country_shapes = (gpd.read_file(country_shapes_fn).set_index("name")
+                      ["geometry"].set_crs(4326))
     input = snakemake.config["countries"]
     country_list = input
     bus_country_list = buses["country"].unique().tolist()
 
     if len(bus_country_list) != len(country_list):
         no_data_countries = set(country_list).difference(set(bus_country_list))
-        no_data_countries_shape = (
-            country_shapes[country_shapes.index.isin(no_data_countries) == True]
-            .reset_index()
-            .set_crs(4326)
-        )
+        no_data_countries_shape = (country_shapes[country_shapes.index.isin(
+            no_data_countries) == True].reset_index().set_crs(4326))
         length = len(no_data_countries)
-        df = gpd.GeoDataFrame(
-            {
-                "voltage": [220000] * length,
-                "country": no_data_countries_shape["name"],
-                "lon": no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
-                "lat": no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
-                "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
-                "station_id": [np.nan] * length,
-                "dc": [False] * length,
-                "under_construction": [False] * length,
-                "tag_area": [0.0] * length,
-                "symbol": ["substation"] * length,
-                "tag_substation": ["transmission"] * length,
-                "geometry": no_data_countries_shape["geometry"]
-                .to_crs(epsg=4326)
-                .centroid,
-                "substation_lv": [True] * length,
-            }
-        )
-        buses = gpd.GeoDataFrame(
-            pd.concat([buses, df], ignore_index=True), crs=buses.geometry.crs
-        )
+        df = gpd.GeoDataFrame({
+            "voltage": [220000] * length,
+            "country":
+            no_data_countries_shape["name"],
+            "lon":
+            no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
+            "lat":
+            no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
+            "bus_id":
+            np.arange(len(buses) + 1,
+                      len(buses) + (length + 1), 1),
+            "station_id": [np.nan] * length,
+            "dc": [False] * length,
+            "under_construction": [False] * length,
+            "tag_area": [0.0] * length,
+            "symbol": ["substation"] * length,
+            "tag_substation": ["transmission"] * length,
+            "geometry":
+            no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
+            "substation_lv": [True] * length,
+        })
+        buses = gpd.GeoDataFrame(pd.concat([buses, df], ignore_index=True),
+                                 crs=buses.geometry.crs)
 
     logger.info("Save outputs")
 
