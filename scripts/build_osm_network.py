@@ -264,7 +264,8 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
                 bus_row["dc"].all(),  # "dc"
                 "|".join(bus_row["symbol"].unique()),  # "symbol"
                 bus_row["under_construction"].any(),  # "under_construction"
-                "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
+                # "tag_substation"
+                "|".join(bus_row["tag_substation"].unique()),
                 bus_row["tag_area"].sum(),  # "tag_area"
                 station_loc.lon + v_it * delta_lon,  # "lon"
                 station_loc.lat + v_it * delta_lat,  # "lat"
@@ -330,7 +331,7 @@ def get_transformers(buses, lines):
                     g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
                     g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
                 ])
-    
+
     # name of the columns
     trasf_columns = [
         "line_id", "bus0", "bus1", "voltage", "circuits", "length",
@@ -340,7 +341,8 @@ def get_transformers(buses, lines):
     ]
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
-    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1, inplace=True)
+    df_transformers.set_index(
+        lines.index[-1] + df_transformers.index + 1, inplace=True)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
 
