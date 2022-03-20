@@ -262,7 +262,7 @@ def finalize_lines_type(df_lines):
     return df_lines
 
 
-def split_cells_multiple(df, list_col=["cables", "voltage"]):
+def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
     """
     Split function for cables and voltage
 
