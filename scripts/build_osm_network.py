@@ -7,12 +7,9 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import _read_geojson
-from _helpers import _sets_path_to_root
-from _helpers import _to_csv_nafix
-from _helpers import configure_logging
-from shapely.geometry import LineString
-from shapely.geometry import Point
+from _helpers import (_read_geojson, _sets_path_to_root, _to_csv_nafix,
+                      configure_logging)
+from shapely.geometry import LineString, Point
 from shapely.ops import linemerge
 from tqdm import tqdm
 
