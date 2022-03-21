@@ -698,13 +698,16 @@ def built_network(inputs, outputs):
     lines, buses = fix_overpassing_lines(lines, buses)
 
 
-    logger.info("Stage 4/5: Aggregate close substations")
 
     # METHOD to merge buses with same voltage and within tolerance
-    if snakemake.config["clean_osm_data_options"]["group_close_buses"]:
+    if snakemake.config.get("build_osm_network", {}).get("group_close_buses", False):
+        tol = snakemake.config["build_osm_network"].get("group_tolerance_buses", 400)
+        logger.info("Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m")
         lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                       buses,
-                                                                      tol=4000)
+                                                                      tol=tol)
+    else:
+        logger.info("Stage 4/5: Aggregate close substations: disabled")
 
     logger.info("Stage 5/5: Add augmented substation to country with no data")
 
