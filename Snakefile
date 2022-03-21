@@ -5,7 +5,7 @@ HTTP = HTTPRemoteProvider()
 configfile: "config.yaml"
 
 SDIR = config['summary_dir'] + '/' + config['run']
-RDIR = config['results_dir'] + config['run']
+RDIR = config['results_dir'] + '/' + config['run']
 CDIR = config['costs_dir']
 
 wildcard_constraints:
