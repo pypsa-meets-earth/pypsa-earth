@@ -40,8 +40,8 @@ def line_endings_to_bus_conversion(lines):
 
 def create_bus_df_from_lines(substations, lines):
     # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
+    bus_s = gpd.GeoDataFrame(columns=substations.columns)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
     # Read information from line.csv
     bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
@@ -69,8 +69,8 @@ def create_bus_df_from_lines(substations, lines):
 
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
+    bus_s = gpd.GeoDataFrame(columns=substations.columns)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage",
@@ -251,7 +251,8 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
     for g_name, g_value in buses.groupby(by=["station_id"]):
 
         # average location of the buses having the same station_id
-        station_loc = g_value[["lon", "lat"]].mean()
+        station_point_x = g_value.geometry.x.mean()
+        station_point_y = g_value.geometry.y.mean()
 
         # loop for every voltage level in the bus
         # The location of the buses is averaged; in the case of multiple voltage levels for the same station_id,
@@ -270,12 +271,12 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
                 "|".join(
                     bus_row["tag_substation"].unique()),  # "tag_substation"
                 bus_row["tag_area"].sum(),  # "tag_area"
-                station_loc.lon + v_it * delta_lon,  # "lon"
-                station_loc.lat + v_it * delta_lat,  # "lat"
+                station_point_x + v_it * delta_lon,  # "lon"
+                station_point_y + v_it * delta_lat,  # "lat"
                 bus_row["country"].iloc[0],  # "country"
                 Point(
-                    station_loc.lon + v_it * delta_lon,
-                    station_loc.lat + v_it * delta_lat,
+                    station_point_x + v_it * delta_lon,
+                    station_point_y + v_it * delta_lat,
                 ),  # "geometry"
             ])
 
@@ -301,9 +302,8 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
 
     return gpd.GeoDataFrame(
             buses_clean,
-            columns=buses_clean_columns,
-            crs=buses.crs
-        )
+            columns=buses_clean_columns
+        ).set_crs(crs=buses.crs, inplace=True)
 
 
 def get_transformers(buses, lines):
@@ -371,7 +371,7 @@ def get_transformers(buses, lines):
         "bus1_lat",
     ]
 
-    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns, crs=lines.crs)
+    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
     df_transformers.set_index(lines.index[-1] + df_transformers.index + 1,
                               inplace=True)
     # update line endings
@@ -445,9 +445,11 @@ def connect_stations_same_station_id(lines, buses):
         "bus1_lon",
         "bus1_lat",
     ]
-    return lines.append(
-        gpd.GeoDataFrame(add_lines, columns=add_lines_columns, crs=lines.crs),
-        ignore_index=True)
+
+    df_add_lines = gpd.GeoDataFrame(pd.concat(add_lines), columns=add_lines_columns)
+    lines.append(df_add_lines, ignore_index=True).reset_index(drop=True, inplace=True)
+
+    return lines
 
 
 def set_lv_substations(buses):
@@ -649,7 +651,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
             n_geoms = len(new_geometries)
 
             # create temporary copies of the line
-            df_append = gpd.GeoDataFrame([lines.loc[l]]*n_geoms, crs=lines.crs)
+            df_append = gpd.GeoDataFrame([lines.loc[l]]*n_geoms)
             # update geometries
             df_append["geometry"] = new_geometries
             # update name of the line
@@ -659,7 +661,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
 
             lines_to_add.append(df_append)
 
-    df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True), crs=lines.crs)
+    df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True))
     df_to_add.set_crs(lines.crs, inplace=True)
     df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
 
@@ -672,8 +674,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
     # remove original lines
     lines.drop(lines_to_split, inplace=True)
 
-    lines = gpd.GeoDataFrame(
-        pd.concat([lines,df_to_add], ignore_index=True), crs=lines.crs)
+    lines = lines.append(df_to_add).reset_index(drop=True)
 
     return lines, buses
 
@@ -693,16 +694,20 @@ def built_network(inputs, outputs):
     lines = line_endings_to_bus_conversion(lines)
     buses = add_line_endings_tosubstations(substations, lines)
 
-    logger.info("Stage 3/5: Process lines dataset to avoid nodes overpassing lines")
-    
-    lines, buses = fix_overpassing_lines(lines, buses)
+    # Address the overpassing line issue Step 3/5
+    if snakemake.config.get("build_osm_network", {}).get("split_overpassing_lines", False):
+        tol = snakemake.config["build_osm_network"].get("overpassing_lines_tolerance", 1)
+        logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
+        
+        lines, buses = fix_overpassing_lines(lines, buses, tol=tol)
+    else:
+        logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
 
-
-    # METHOD to merge buses with same voltage and within tolerance
+    # METHOD to merge buses with same voltage and within tolerance Step 4/5
     if snakemake.config.get("build_osm_network", {}).get("group_close_buses", False):
-        tol = snakemake.config["build_osm_network"].get("group_tolerance_buses", 400)
-        logger.info("Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m")
+        tol = snakemake.config["build_osm_network"].get("group_tolerance_buses", 500)
+        logger.info(f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m")
         lines, buses = merge_stations_lines_by_station_id_and_voltage(lines,
                                                                       buses,
                                                                       tol=tol)
@@ -721,7 +726,7 @@ def built_network(inputs, outputs):
     if len(bus_country_list) != len(country_list):
         no_data_countries = set(country_list).difference(set(bus_country_list))
         no_data_countries_shape = (country_shapes[country_shapes.index.isin(
-            no_data_countries) == True].reset_index().set_crs(4326))
+            no_data_countries) == True].reset_index(drop=True).set_crs(4326))
         length = len(no_data_countries)
         df = gpd.GeoDataFrame({
                 "voltage": [220000] * length,
@@ -743,13 +748,9 @@ def built_network(inputs, outputs):
                 "geometry":
                 no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
                 "substation_lv": [True] * length,
-            },
-            crs=buses.crs
+            }
         )
-        buses = gpd.GeoDataFrame(
-            pd.concat([buses, df], ignore_index=True),
-            crs=buses.crs
-        )
+        buses = buses.append(df, ignore_index=True).reset_index(drop=True)
 
     logger.info("Save outputs")
 
