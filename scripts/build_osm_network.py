@@ -236,7 +236,7 @@ def set_lines_ids(lines, buses):
     return lines, buses
 
 
-def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
+def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001, precision=4):
     """
     Function to merge buses with same voltage and station_id
     This function iterates over all substation ids and creates a bus_id for every substation and voltage level.
@@ -251,14 +251,17 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
     for g_name, g_value in buses.groupby(by=["station_id"]):
 
         # average location of the buses having the same station_id
-        station_point_x = g_value.geometry.x.mean()
-        station_point_y = g_value.geometry.y.mean()
+        station_point_x = np.round(g_value.geometry.x.mean(), precision)
+        station_point_y = np.round(g_value.geometry.y.mean(), precision)
 
         # loop for every voltage level in the bus
         # The location of the buses is averaged; in the case of multiple voltage levels for the same station_id,
         # each bus corresponding to a voltage level is located at a distanceregulated by delta_lon/delta_lat
         v_it = 0
         for v_name, bus_row in g_value.groupby(by=["voltage"]):
+
+            lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
+            lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
 
             # add the bus
             buses_clean.append([
@@ -271,12 +274,12 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
                 "|".join(
                     bus_row["tag_substation"].unique()),  # "tag_substation"
                 bus_row["tag_area"].sum(),  # "tag_area"
-                station_point_x + v_it * delta_lon,  # "lon"
-                station_point_y + v_it * delta_lat,  # "lat"
+                lon_bus,  # "lon"
+                lat_bus,  # "lat"
                 bus_row["country"].iloc[0],  # "country"
                 Point(
-                    station_point_x + v_it * delta_lon,
-                    station_point_y + v_it * delta_lat,
+                    lon_bus,
+                    lat_bus,
                 ),  # "geometry"
             ])
 
