@@ -40,8 +40,8 @@ def line_endings_to_bus_conversion(lines):
 
 def create_bus_df_from_lines(substations, lines):
     # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns)
+    bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
 
     # Read information from line.csv
     bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[[
@@ -69,8 +69,8 @@ def create_bus_df_from_lines(substations, lines):
 
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns)
+    bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage",
@@ -126,7 +126,7 @@ def set_substations_ids(buses, tol=2000):
     buses["station_id"] = -1
 
     # create temporary series to execute distance calculations using m as reference distances
-    temp_bus_geom = buses.geometry.to_crs(3736)
+    temp_bus_geom = buses.geometry.to_crs(epsg=3736)
 
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -194,41 +194,43 @@ def set_lines_ids(lines, buses):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    for i, row in tqdm(lines.iterrows(), **tqdm_kwargs_line_ids):
+    busesepsg = buses.to_crs(epsg=3736)
+    linesepsg = lines.to_crs(epsg=3736)
+
+    for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
         # select buses having the voltage level of the current line
-        buses_sel = buses[buses["voltage"] == row["voltage"]]
+        buses_sel = busesepsg[buses["voltage"] == row["voltage"]]
 
         # find the closest node of the bus0 of the line
-        bus0_id = buses_sel.geometry.distance(row["bus_0_coors"]).idxmin()
+        bus0_id = buses_sel.geometry.distance(row.geometry.boundary.geoms[0]).idxmin()
         lines.loc[i, "bus0"] = buses.loc[bus0_id, "bus_id"]
 
         # check if the line starts exactly in the node, otherwise modify the linestring
-        distance_bus0 = buses.loc[bus0_id,
-                                  "geometry"].distance(row["bus_0_coors"])
+        distance_bus0 = busesepsg.geometry.loc[bus0_id].distance(
+            row.geometry.boundary.geoms[0])
         if distance_bus0 > 0.0:
             # the line does not start in the node, thus modify the linestring
-            lines.loc[i, "geometry"] = linemerge([
+            lines.geometry.loc[i] = linemerge([
                 LineString([
-                    buses.loc[bus0_id, "geometry"],
-                    row["bus_0_coors"],
+                    buses.geometry.loc[bus0_id],
+                    lines.geometry.loc[i].boundary.geoms[0],
                 ]),
-                lines.loc[i, "geometry"],
+                lines.geometry.loc[i],
             ])
 
         # find the closest node of the bus1 of the line
-        bus1_id = buses_sel.geometry.distance(row["bus_1_coors"]).idxmin()
+        bus1_id = buses_sel.geometry.distance(row.geometry.boundary.geoms[1]).idxmin()
         lines.loc[i, "bus1"] = buses.loc[bus1_id, "bus_id"]
 
         # check if the line ends exactly in the node, otherwise modify the linestring
-        distance_bus1 = buses.loc[bus1_id,
-                                  "geometry"].distance(row["bus_1_coors"])
+        distance_bus1 = busesepsg.geometry.loc[bus1_id].distance(row.geometry.boundary.geoms[1])
         if distance_bus1 > 0.0:
             # the line does not end in the node, thus modify the linestring
-            lines.loc[i, "geometry"] = linemerge([
-                lines.loc[i, "geometry"],
+            lines.geometry.loc[i] = linemerge([
+                lines.geometry.loc[i],
                 LineString(
-                    [row["bus_1_coors"], buses.loc[bus1_id, "geometry"]]),
+                    [lines.geometry.loc[i].boundary.geoms[1], buses.geometry.loc[bus1_id]]),
             ])
 
     return lines, buses
@@ -297,7 +299,11 @@ def merge_stations_same_station_id(buses, delta_lon=0.001, delta_lat=0.001):
         "geometry",
     ]
 
-    return gpd.GeoDataFrame(buses_clean, columns=buses_clean_columns)
+    return gpd.GeoDataFrame(
+            buses_clean,
+            columns=buses_clean_columns,
+            crs=buses.crs
+        )
 
 
 def get_transformers(buses, lines):
@@ -365,7 +371,7 @@ def get_transformers(buses, lines):
         "bus1_lat",
     ]
 
-    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
+    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns, crs=lines.crs)
     df_transformers.set_index(lines.index[-1] + df_transformers.index + 1,
                               inplace=True)
     # update line endings
@@ -439,8 +445,9 @@ def connect_stations_same_station_id(lines, buses):
         "bus1_lon",
         "bus1_lat",
     ]
-    return lines.append(gpd.GeoDataFrame(add_lines, columns=add_lines_columns),
-                        ignore_index=True)
+    return lines.append(
+        gpd.GeoDataFrame(add_lines, columns=add_lines_columns, crs=lines.crs),
+        ignore_index=True)
 
 
 def set_lv_substations(buses):
@@ -620,29 +627,29 @@ def fix_overpassing_lines(lines, buses, tol=1):
     for l in tqdm(lines.index, **tqdm_kwargs_substation_ids):
 
         # bus indices being within tolerance from the line
-        bus_in_tol = buses_epsgmod[
+        bus_in_tol_epsg = buses_epsgmod[
             buses_epsgmod.geometry.distance(lines_epsgmod.geometry.loc[l]) <= tol]
 
         # exclude endings of the lines
-        bus_in_tol = bus_in_tol[(
-            (bus_in_tol.geometry.distance(
+        bus_in_tol_epsg = bus_in_tol_epsg[(
+            (bus_in_tol_epsg.geometry.distance(
                 lines_epsgmod.geometry.loc[l].boundary.geoms[0]) > tol)
-            & (bus_in_tol.geometry.distance(
+            | (bus_in_tol_epsg.geometry.distance(
                 lines_epsgmod.geometry.loc[l].boundary.geoms[1]) > tol)
         )]
 
-        if not bus_in_tol.empty:
+        if not bus_in_tol_epsg.empty:
             # add index of line to split
             lines_to_split.append(l)
 
-            buses_locs = bus_in_tol.geometry
+            buses_locs = buses.geometry.loc[bus_in_tol_epsg.index]
 
             # get new line geometries
             new_geometries = _split_linestring_by_point(lines.geometry[l], buses_locs)
             n_geoms = len(new_geometries)
 
             # create temporary copies of the line
-            df_append = gpd.GeoDataFrame([lines.loc[l]]*n_geoms)
+            df_append = gpd.GeoDataFrame([lines.loc[l]]*n_geoms, crs=lines.crs)
             # update geometries
             df_append["geometry"] = new_geometries
             # update name of the line
@@ -652,7 +659,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
 
             lines_to_add.append(df_append)
 
-    df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True))
+    df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True), crs=lines.crs)
     df_to_add.set_crs(lines.crs, inplace=True)
     df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
 
@@ -666,7 +673,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
     lines.drop(lines_to_split, inplace=True)
 
     lines = gpd.GeoDataFrame(
-        pd.concat([lines,df_to_add], ignore_index=True)).set_crs(lines.crs, inplace=True)
+        pd.concat([lines,df_to_add], ignore_index=True), crs=lines.crs)
 
     return lines, buses
 
@@ -714,28 +721,32 @@ def built_network(inputs, outputs):
             no_data_countries) == True].reset_index().set_crs(4326))
         length = len(no_data_countries)
         df = gpd.GeoDataFrame({
-            "voltage": [220000] * length,
-            "country":
-            no_data_countries_shape["name"],
-            "lon":
-            no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
-            "lat":
-            no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
-            "bus_id":
-            np.arange(len(buses) + 1,
-                      len(buses) + (length + 1), 1),
-            "station_id": [np.nan] * length,
-            "dc": [False] * length,
-            "under_construction": [False] * length,
-            "tag_area": [0.0] * length,
-            "symbol": ["substation"] * length,
-            "tag_substation": ["transmission"] * length,
-            "geometry":
-            no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
-            "substation_lv": [True] * length,
-        })
-        buses = gpd.GeoDataFrame(pd.concat([buses, df], ignore_index=True),
-                                 crs=buses.geometry.crs)
+                "voltage": [220000] * length,
+                "country":
+                no_data_countries_shape["name"],
+                "lon":
+                no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
+                "lat":
+                no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
+                "bus_id":
+                np.arange(len(buses) + 1,
+                        len(buses) + (length + 1), 1),
+                "station_id": [np.nan] * length,
+                "dc": [False] * length,
+                "under_construction": [False] * length,
+                "tag_area": [0.0] * length,
+                "symbol": ["substation"] * length,
+                "tag_substation": ["transmission"] * length,
+                "geometry":
+                no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid,
+                "substation_lv": [True] * length,
+            },
+            crs=buses.crs
+        )
+        buses = gpd.GeoDataFrame(
+            pd.concat([buses, df], ignore_index=True),
+            crs=buses.crs
+        )
 
     logger.info("Save outputs")
 
