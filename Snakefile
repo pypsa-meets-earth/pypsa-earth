@@ -8,7 +8,12 @@ SDIR = config['summary_dir'] + '/' + config['run']
 RDIR = config['results_dir'] + config['run']
 CDIR = config['costs_dir']
 
-
+wildcard_constraints:
+    lv="[a-z0-9\.]+",
+    simpl="[a-zA-Z0-9]*",
+    clusters="[0-9]+m?",
+    opts="[-+a-zA-Z0-9]*",
+    sector_opts="[-+a-zA-Z0-9\.\s]*"
 
 rule prepare_sector_networks:
     input:
@@ -99,40 +104,39 @@ rule build_clustered_population_layouts:
     
     
 rule build_temperature_profiles:
-        input:
-            pop_layout_total="resources/pop_layout_total.nc",
-            pop_layout_urban="resources/pop_layout_urban.nc",
-            pop_layout_rural="resources/pop_layout_rural.nc",
-            regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
-        output:
-            temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
-            temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
-            temp_soil_urban="resources/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
-            temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
-            temp_air_rural="resources/temp_air_rural_elec_s{simpl}_{clusters}.nc",
-            temp_air_urban="resources/temp_air_urban_elec_s{simpl}_{clusters}.nc"
-        resources: mem_mb=20000
-        benchmark: "benchmarks/build_temperature_profiles/s{simpl}_{clusters}"
-        script: "scripts/build_temperature_profiles.py"
+    input:
+        pop_layout_total="resources/pop_layout_total.nc",
+        pop_layout_urban="resources/pop_layout_urban.nc",
+        pop_layout_rural="resources/pop_layout_rural.nc",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+    output:
+        temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
+        temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
+        temp_soil_urban="resources/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
+        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        temp_air_rural="resources/temp_air_rural_elec_s{simpl}_{clusters}.nc",
+        temp_air_urban="resources/temp_air_urban_elec_s{simpl}_{clusters}.nc"
+    resources: mem_mb=20000
+    benchmark: "benchmarks/build_temperature_profiles/s{simpl}_{clusters}"
+    script: "scripts/build_temperature_profiles.py"
 
     
 rule solve_network:
-        input:
-            overrides="data/override_component_attrs",
-            network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
-            costs=CDIR + "costs_{planning_horizons}.csv",
-            config=SDIR + '/configs/config.yaml'
-            
-        output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
-        shadow: "shallow"
-        log:
-            solver=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_solver.log",
-            python=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_python.log",
-            memory=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_memory.log"
-        threads: 4
-        resources: mem_mb=config['solving']['mem']
-        benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_{planning_horizons}"
-        script: "scripts/solve_network.py"
+    input:
+        overrides="data/override_component_attrs",
+        network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
+        costs=CDIR + "costs_{planning_horizons}.csv",
+        config=SDIR + '/configs/config.yaml',
+    output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
+    shadow: "shallow"
+    log:
+        solver=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_solver.log",
+        python=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_python.log",
+        memory=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_memory.log",
+    threads: 4
+    resources: mem_mb=config['solving']['mem']
+    benchmark: RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_{planning_horizons}"
+    script: "scripts/solve_network.py"
 
 rule make_summary:
     input:
