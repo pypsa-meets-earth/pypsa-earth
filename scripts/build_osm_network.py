@@ -390,33 +390,56 @@ def connect_stations_same_station_id(lines, buses):
         if len(buses_station_id) > 1:
             for b_it in range(1, len(buses_station_id)):
                 add_lines.append([
-                    f"link{buses_station_id}_{b_it}",
-                    buses_station_id.index[0],
-                    buses_station_id.index[b_it],
-                    400000,
-                    1,
-                    0.0,
-                    False,
-                    False,
-                    "transmission",
-                    50,
-                    buses_station_id.country.iloc[0],
+                    f"link{buses_station_id}_{b_it}",  # "line_id"
+                    buses_station_id.index[0],  # "bus0"
+                    buses_station_id.index[b_it],  # "bus1"
+                    400000,  # "voltage"
+                    1,  # "circuits"
+                    0.0,  # "length"
+                    False,  # "underground"
+                    False,  # "under_construction"
+                    "transmission",  # "tag_type"
+                    50,  # "tag_frequency"
+                    buses_station_id.country.iloc[0],  # "country"
                     LineString([
                         buses_station_id.geometry.iloc[0],
                         buses_station_id.geometry.iloc[b_it],
-                    ]),
+                    ]),  # "geometry"
                     LineString([
                         buses_station_id.geometry.iloc[0],
                         buses_station_id.geometry.iloc[b_it],
-                    ]).bounds,
-                    buses_station_id.geometry.iloc[0],
-                    buses_station_id.geometry.iloc[b_it],
-                    buses_station_id.lon.iloc[0],
-                    buses_station_id.lat.iloc[0],
-                    buses_station_id.lon.iloc[b_it],
-                    buses_station_id.lat.iloc[b_it],
+                    ]).bounds,  # "bounds"
+                    buses_station_id.geometry.iloc[0],  # "bus_0_coors"
+                    buses_station_id.geometry.iloc[b_it],  # "bus_1_coors"
+                    buses_station_id.lon.iloc[0],  # "bus0_lon"
+                    buses_station_id.lat.iloc[0],  # "bus0_lat"
+                    buses_station_id.lon.iloc[b_it],  # "bus1_lon"
+                    buses_station_id.lat.iloc[b_it],  # "bus1_lat"
                 ])
-    return lines.append(gpd.GeoDataFrame(add_lines, columns=lines.columns),
+
+    # name of the columns
+    add_lines_columns = [
+        "line_id",
+        "bus0",
+        "bus1",
+        "voltage",
+        "circuits",
+        "length",
+        "underground",
+        "under_construction",
+        "tag_type",
+        "tag_frequency",
+        "country",
+        "geometry",
+        "bounds",
+        "bus_0_coors",
+        "bus_1_coors",
+        "bus0_lon",
+        "bus0_lat",
+        "bus1_lon",
+        "bus1_lat",
+    ]
+    return lines.append(gpd.GeoDataFrame(add_lines, columns=add_lines_columns),
                         ignore_index=True)
 
 
