@@ -10,8 +10,8 @@ CDIR = config['costs_dir']
 
 wildcard_constraints:
     lv="[a-z0-9\.]+",
-    simpl="[a-zA-Z0-9]*",
-    clusters="[0-9]+m?",
+    simpl="[a-zA-Z0-9]*|all",
+    clusters="[0-9]+m?|all",
     opts="[-+a-zA-Z0-9]*",
     sector_opts="[-+a-zA-Z0-9\.\s]*"
 
@@ -54,27 +54,26 @@ rule prepare_transport_data:
         transport_name='resources/transport_data.csv',
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         # This is probably still dummy data, investigate and use real data TODO
-        temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
+        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
 
     output: 
-        nodal_energy_totals='resources/nodal_energy_totals.csv',
-        transport='resources/transport.csv',
-        avail_profile='resources/avail_profile.csv',
-        dsm_profile='resources/dsm_profile.csv',
-        nodal_transport_data='resources/nodal_transport_data.csv',
+        # nodal_energy_totals='resources/nodal_energy_totals.csv',
+        # transport='resources/transport.csv',
+        # avail_profile='resources/avail_profile.csv',
+        # dsm_profile='resources/dsm_profile.csv',
+        # nodal_transport_data='resources/nodal_transport_data.csv',
+        dummy_wildcard="resources/dummy{simpl}_{clusters}.nc"
 
     script: "scripts/prepare_transport_data.py"
 
 rule calculate_dummy_pop_layout:
     input:
-        network='networks/elec_s{simpl}_{clusters}.nc',
-
+        network='networks/elec_s{simpl}_37.nc',  # fixed number of clusters
         # Get pop layouts from Europe (update to Morocco/Africa layout)
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_37.csv",
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_37.csv",  # fixed number of clusters
         #simplified_pop_layout="resources/pop_layout_elec_s{simpl}.csv",
 
-    output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_dummy.csv",
-
+    output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_37.csv",  # fixed number of clusters
     script: "scripts/calculate_dummy_pop_layout.py" 
 
 rule build_population_layouts:
