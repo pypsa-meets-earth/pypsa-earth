@@ -373,6 +373,8 @@ def integrate_lines_df(df_all_lines):
 
             # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
             df_one_third_circuits_m = df_one_third_circuits.set_crs("EPSG:4326").to_crs("EPSG:3857")
+
+            length_from_crs = df_one_third_circuits_m.length
             df_one_third_circuits["crs_length"] = length_from_crs
 
             # in case a line length is not available directly
