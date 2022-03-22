@@ -47,22 +47,25 @@ rule prepare_sector_network:
 
 rule prepare_transport_data:
     input:
-        network='networks/elec_s{simpl}_{clusters}.nc',
+        network='networks/elec_s_4.nc',  # hardcoded wildcards temporary
+        # network='networks/elec_s{simpl}_{clusters}.nc',
         energy_totals_name='resources/energy_totals.csv',
         traffic_data_KFZ = "data/emobility/KFZ__count",
         traffic_data_Pkw = "data/emobility/Pkw__count",
         transport_name='resources/transport_data.csv',
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_pop_layout="resources/pop_layout_elec_s_4.csv",  # hardcoded wildcards temporary
+        # clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         # This is probably still dummy data, investigate and use real data TODO
-        temp_air_total="resources/temp_air_total_elec_s{simpl}_37.nc",
+        temp_air_total="resources/temp_air_total_elec_s_4.nc",  # hardcoded wildcards temporary
+        # temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
 
     output: 
-        # nodal_energy_totals='resources/nodal_energy_totals.csv',
-        # transport='resources/transport.csv',
-        # avail_profile='resources/avail_profile.csv',
-        # dsm_profile='resources/dsm_profile.csv',
-        # nodal_transport_data='resources/nodal_transport_data.csv',
-        dummy_wildcard="resources/dummy{simpl}_{clusters}.nc"
+        nodal_energy_totals='resources/nodal_energy_totals.csv',
+        transport='resources/transport.csv',
+        avail_profile='resources/avail_profile.csv',
+        dsm_profile='resources/dsm_profile.csv',
+        nodal_transport_data='resources/nodal_transport_data.csv',
+        # dummy_wildcard="resources/dummy{simpl}_{clusters}.nc"
 
     script: "scripts/prepare_transport_data.py"
 
