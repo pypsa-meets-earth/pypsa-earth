@@ -330,6 +330,8 @@ def integrate_lines_df(df_all_lines):
                          # e.g. in the DK data
                          | (df_all_lines["cables"] == "ground")
                          | df_all_lines["cables"].isna(), "cables"] = "0"
+        # quick fix of "1." problem for the cables data related to France 
+        df_all_lines.loc[(df_all_lines["cables"] == "1."), "cables"] = "1"                 
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
     # downgrade 4 and 5 cables to 3...
