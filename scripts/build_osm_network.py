@@ -126,7 +126,7 @@ def set_substations_ids(buses, tol=2000):
     buses["station_id"] = -1
 
     # create temporary series to execute distance calculations using m as reference distances
-    temp_bus_geom = buses.geometry.to_crs(epsg=3736)
+    temp_bus_geom = buses.geometry.to_crs(epsg=3857)
 
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -194,8 +194,8 @@ def set_lines_ids(lines, buses):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    busesepsg = buses.to_crs(epsg=3736)
-    linesepsg = lines.to_crs(epsg=3736)
+    busesepsg = buses.to_crs(epsg=3857)
+    linesepsg = lines.to_crs(epsg=3857)
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
@@ -618,8 +618,8 @@ def fix_overpassing_lines(lines, buses, tol=1):
     lines_to_add = []  # list of lines to be added
     lines_to_split = []  # list of lines that have been splitted
 
-    lines_epsgmod = lines.to_crs(epsg=3763)
-    buses_epsgmod = buses.to_crs(epsg=3763)
+    lines_epsgmod = lines.to_crs(epsg=3857)
+    buses_epsgmod = buses.to_crs(epsg=3857)
     
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -669,7 +669,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
     df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
 
     # update length
-    df_to_add["length"] = df_to_add.to_crs(epsg=3763).geometry.length
+    df_to_add["length"] = df_to_add.to_crs(epsg=3857).geometry.length
 
     # update line endings
     df_to_add = line_endings_to_bus_conversion(df_to_add)
