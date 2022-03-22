@@ -37,7 +37,7 @@ Upcoming Release
 
 * Improve automatic download by retrieve_databundle and add licence description: `PR #291 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/291>`__.
 
-* Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__. 
+* Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__.
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
