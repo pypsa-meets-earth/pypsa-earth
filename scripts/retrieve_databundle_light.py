@@ -341,7 +341,7 @@ def _check_disabled_by_opt(config_bundle, config_enable):
         True when the bundle is completely disabled
     """
     
-    disabled = False
+    disabled_outs = []
 
     if "disable_by_opt" in config_bundle:
         disabled_config = config_bundle["disable_by_opt"]
@@ -358,11 +358,11 @@ def _check_disabled_by_opt(config_bundle, config_enable):
                     all_disabled.append(out)
 
         if "all" in all_disabled:
-            disabled = True
+            disabled_outs = ["all"]
         elif "output" in config_enable:
-            disabled = set(all_disabled) == set(config_enable["outputs"])
+            disabled_outs = list(set(all_disabled))
 
-    return disabled
+    return disabled_outs
 
 
 def get_best_bundles(country_list, category, config_bundles, tutorial, config_enable):
@@ -404,7 +404,7 @@ def get_best_bundles(country_list, category, config_bundles, tutorial, config_en
         for bname in config_bundles
         if config_bundles[bname]["category"] == category
         and config_bundles[bname].get("tutorial", False) == tutorial
-        and not _check_disabled_by_opt(config_bundles[bname], config_enable)
+        and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]
     }
 
     returned_bundles = []
