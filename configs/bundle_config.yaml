@@ -24,6 +24,9 @@
 #         [post arguments]
 #     [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files
 #     output: [...] # list of outputs of the bundle used in snakemake
+#     [disable_by_opt:]  # option to disable outputs from the bundle; it contains a dictionary of options, each one with
+#                        # each one with its output. When "all" is specified, the entire bundle is not executed
+#       [{option}: [outputs]/all]  # list of options and the outputs to remove, or "all" corresponding to ignore everything
 
 databundles:
   # tutorial bundle specific for Nigeria and Benin only
@@ -66,6 +69,8 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1016015/files/tutorial_cutouts.zip?download=1
       gdrive: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
     output: [cutouts/africa-2013-era5-tutorial.nc]
+    disable_by_opt:
+      build_cutout: [all]
 
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_world:
@@ -218,3 +223,5 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
     output: [cutouts/africa-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]

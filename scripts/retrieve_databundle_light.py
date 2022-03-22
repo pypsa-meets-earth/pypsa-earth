@@ -39,6 +39,9 @@ Each data bundle entry has the following structure:
         [post arguments]
     [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files
     output: [...]  # list of outputs of the databundle
+    [disable_by_opt:]  # option to disable outputs from the bundle; it contains a dictionary of options, each one with
+                       # each one with its output. When "all" is specified, the entire bundle is not executed
+      [{option}: [outputs,...,/all]]  # list of options and the outputs to remove, or "all" corresponding to ignore everything
 
 Depending on the country list that is asked to perform, all needed databundles are downloaded
 according to the following rules:
@@ -328,8 +331,41 @@ def download_and_unzip_post(config, rootpath, hot_run=True):
 
     return True
 
+def _check_disabled_by_opt(config_bundle, config_enable):
+    """
+    Checks if the configbundle has conflicts with the enable configuration
 
-def get_best_bundles(country_list, category, config_bundles, tutorial):
+    Returns
+    -------
+    disabled : Bool
+        True when the bundle is completely disabled
+    """
+    
+    disabled = False
+
+    if "disable_by_opt" in config_bundle:
+        disabled_config = config_bundle["disable_by_opt"]
+        disabled_objs = [disabled_outputs 
+            for optname, disabled_outputs in disabled_config.items()
+            if config_enable.get(optname, False)
+        ]
+
+        # merge all the lists unique elements
+        all_disabled = []
+        for tot_outs in disabled_objs:
+            for out in tot_outs:
+                if out not in all_disabled:
+                    all_disabled.append(out)
+
+        if "all" in all_disabled:
+            disabled = True
+        elif "output" in config_enable:
+            disabled = set(all_disabled) == set(config_enable["outputs"])
+
+    return disabled
+
+
+def get_best_bundles(country_list, category, config_bundles, tutorial, config_enable):
     """
         get_best_bundles(country_list, category, config_bundles, tutorial)
 
@@ -353,6 +389,8 @@ def get_best_bundles(country_list, category, config_bundles, tutorial):
         Dictionary of configurations for all available bundles
     tutorial : Bool
         Whether data for tutorial shall be downloaded
+    config_enable : dict
+        Dictionary of the enabled/disabled scripts
 
     Outputs
     -------
@@ -366,6 +404,7 @@ def get_best_bundles(country_list, category, config_bundles, tutorial):
         for bname in config_bundles
         if config_bundles[bname]["category"] == category
         and config_bundles[bname].get("tutorial", False) == tutorial
+        and not _check_disabled_by_opt(config_bundles[bname], config_enable)
     }
 
     returned_bundles = []
@@ -382,6 +421,7 @@ def get_best_bundles(country_list, category, config_bundles, tutorial):
         for d_val in dict_sort:
 
             bname = d_val[0]
+
             cbundle_list = set(config_bundles[bname]["countries"])
 
             # list of countries in the bundle that are not yet matched
@@ -412,6 +452,8 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
+    # load enable configuration
+    config_enable = snakemake.config["enable"]
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
 
@@ -431,8 +473,13 @@ if __name__ == "__main__":
     bundle_to_download = []
 
     for cat in categories:
-        selection_bundles = get_best_bundles(countries, cat, config_bundles,
-                                             tutorial)
+        selection_bundles = get_best_bundles(
+                                countries,
+                                cat,
+                                config_bundles,
+                                tutorial,
+                                config_enable
+                            )
 
         # check if non-empty dictionary
         if selection_bundles:
