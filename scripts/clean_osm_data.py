@@ -321,6 +321,14 @@ def integrate_lines_df(df_all_lines):
                          | (df_all_lines["cables"] == "1/3")
                          | (df_all_lines["cables"] == "3+3")
                          | (df_all_lines["cables"] == "single")
+                         # in BPR data
+                         | (df_all_lines["cables"] == "triple")
+                         # e.g. in the ES data
+                         | (df_all_lines["cables"] == "e")
+                         # e.g. in the UA data
+                         | (df_all_lines["cables"] == "6+1")
+                         # e.g. in the DK data
+                         | (df_all_lines["cables"] == "ground")
                          | df_all_lines["cables"].isna(), "cables"] = "0"
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
