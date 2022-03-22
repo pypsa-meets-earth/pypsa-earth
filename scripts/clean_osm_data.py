@@ -330,8 +330,8 @@ def integrate_lines_df(df_all_lines):
                          # e.g. in the DK data
                          | (df_all_lines["cables"] == "ground")
                          | df_all_lines["cables"].isna(), "cables"] = "0"
-        # quick fix of "1." problem for the cables data related to France 
-        df_all_lines.loc[(df_all_lines["cables"] == "1."), "cables"] = "1"                 
+        # quick fix of "1." problem for the cables data related to France
+        df_all_lines.loc[(df_all_lines["cables"] == "1."), "cables"] = "1"
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
     # downgrade 4 and 5 cables to 3...
@@ -348,22 +348,22 @@ def integrate_lines_df(df_all_lines):
 
     # where circuits are "0" make "1"
     df_all_lines.loc[(df_all_lines["circuits"] == "0")
-                     # e.g. that's the case for Germany 
-                     |(df_all_lines["circuits"] == "0.5")
+                     # e.g. that's the case for Germany
+                     | (df_all_lines["circuits"] == "0.5")
                      # e.g. in the GB lines data
-                     |(df_all_lines["circuits"] == "d")
+                     | (df_all_lines["circuits"] == "d")
                      # e.g. in the GB lines data
-                     |(df_all_lines["circuits"] == "`")
+                     | (df_all_lines["circuits"] == "`")
                      # e.g. in the FR data
-                     |(df_all_lines["circuits"] == "1.")
+                     | (df_all_lines["circuits"] == "1.")
                      # e.g. in the PT data
-                     |(df_all_lines["circuits"] == "^1")
+                     | (df_all_lines["circuits"] == "^1")
                      # e.g. in the NO data
-                     |(df_all_lines["circuits"] == "partial")
+                     | (df_all_lines["circuits"] == "partial")
                      # e.g. in the JP data
-                     |(df_all_lines["circuits"] == "2/3")
-                     |(df_all_lines["circuits"] == 0), "circuits"] = 1  
-                     
+                     | (df_all_lines["circuits"] == "2/3")
+                     | (df_all_lines["circuits"] == 0), "circuits"] = 1
+
     if df_all_lines["circuits"].dtype != int:
 
         # it's possible that df_all_lines["circuits"] == "1/3"
@@ -371,28 +371,34 @@ def integrate_lines_df(df_all_lines):
         if any(df_all_lines["circuits"] == "1/3"):
 
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
-            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"] == "1/3"].reset_index()
+            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"]
+                                                     == "1/3"].reset_index()
 
             # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
-            df_one_third_circuits_m = df_one_third_circuits.set_crs("EPSG:4326").to_crs("EPSG:3857")
+            df_one_third_circuits_m = df_one_third_circuits.set_crs(
+                "EPSG:4326").to_crs("EPSG:3857")
 
             length_from_crs = df_one_third_circuits_m.length
             df_one_third_circuits["crs_length"] = length_from_crs
 
             # in case a line length is not available directly
             df_one_third_circuits.loc[df_one_third_circuits["length"].isna(), "length"] = (
-            df_one_third_circuits.loc[df_one_third_circuits["length"].isna(), "crs_length"])
-            dropped_length = round(df_one_third_circuits["length"].sum()/1e3, 1)
+                df_one_third_circuits.loc[df_one_third_circuits["length"].isna(), "crs_length"])
+            dropped_length = round(
+                df_one_third_circuits["length"].sum()/1e3, 1)
 
-            logger.warning(f"The circuits == '1/3' of an overal length {dropped_length} km dropped.")
+            logger.warning(
+                f"The circuits == '1/3' of an overal length {dropped_length} km dropped.")
 
             # troubles with projections can lead to discrepancy between the length values
-            tol = 0.1 #[m]
-            length_diff = df_one_third_circuits["length"] - df_one_third_circuits["crs_length"]
+            tol = 0.1  # [m]
+            length_diff = df_one_third_circuits["length"] - \
+                df_one_third_circuits["crs_length"]
 
             if any(length_diff > tol):
                 total_length_diff = round(sum(length_diff > tol), 2)
-                logger.warning(f"There is a difference of {total_length_diff} m in the dropped lines length as compared with values extracted from geographical coordinates.")
+                logger.warning(
+                    f"There is a difference of {total_length_diff} m in the dropped lines length as compared with values extracted from geographical coordinates.")
 
         # drop circuits if "None", "nan" or "1/3"
         df_all_lines.loc[(df_all_lines["circuits"] == "1/3")
@@ -638,10 +644,10 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = (gpd.read_file(
             snakemake.input.country_shapes).set_index("name")
-                          ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         offshore_shapes = (gpd.read_file(
             snakemake.input.offshore_shapes).set_index("name")
-                           ["geometry"].set_crs(4326))
+            ["geometry"].set_crs(4326))
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes)
     else:
