@@ -360,6 +360,8 @@ def integrate_lines_df(df_all_lines):
                      |(df_all_lines["circuits"] == "^1")
                      # e.g. in the NO data
                      |(df_all_lines["circuits"] == "partial")
+                     # e.g. in the JP data
+                     |(df_all_lines["circuits"] == "2/3")
                      |(df_all_lines["circuits"] == 0), "circuits"] = 1  
                      
     if df_all_lines["circuits"].dtype != int:
