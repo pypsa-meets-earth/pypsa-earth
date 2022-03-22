@@ -331,6 +331,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True):
 
     return True
 
+
 def _check_disabled_by_opt(config_bundle, config_enable):
     """
     Checks if the configbundle has conflicts with the enable configuration
@@ -340,15 +341,15 @@ def _check_disabled_by_opt(config_bundle, config_enable):
     disabled : Bool
         True when the bundle is completely disabled
     """
-    
+
     disabled_outs = []
 
     if "disable_by_opt" in config_bundle:
         disabled_config = config_bundle["disable_by_opt"]
-        disabled_objs = [disabled_outputs 
-            for optname, disabled_outputs in disabled_config.items()
-            if config_enable.get(optname, False)
-        ]
+        disabled_objs = [disabled_outputs
+                         for optname, disabled_outputs in disabled_config.items()
+                         if config_enable.get(optname, False)
+                         ]
 
         # merge all the lists unique elements
         all_disabled = []
@@ -474,12 +475,12 @@ if __name__ == "__main__":
 
     for cat in categories:
         selection_bundles = get_best_bundles(
-                                countries,
-                                cat,
-                                config_bundles,
-                                tutorial,
-                                config_enable
-                            )
+            countries,
+            cat,
+            config_bundles,
+            tutorial,
+            config_enable
+        )
 
         # check if non-empty dictionary
         if selection_bundles:
