@@ -1,13 +1,13 @@
 """Build mapping between grid cells and population (total, urban, rural)"""
 
 import multiprocessing as mp
+import os
+
 import atlite
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-import geopandas as gpd
-import os
-
 from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
