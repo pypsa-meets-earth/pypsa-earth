@@ -595,7 +595,7 @@ def add_industry(n, costs):
         carrier="H2 for industry",
         p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
     )
-   if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
+    if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
 
         n.madd("Bus",
                nodes,
