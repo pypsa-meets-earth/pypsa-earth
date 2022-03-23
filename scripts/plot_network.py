@@ -146,8 +146,9 @@ def plot_h2_infra(network):
     ax.add_artist(l1_1)
     
     # fig.savefig(snakemake.output.hydrogen, bbox_inches='tight', transparent=True,
-    fig.savefig('../results/test/plots', bbox_inches='tight', transparent=True,
-                dpi=300)
+    fig.savefig(
+        snakemake.output.map.replace("-costs-all","-h2_network"),
+        bbox_inches="tight")
 
 def plot_transmission_topology(network):
     
@@ -251,7 +252,7 @@ def rename_techs_tyndp(tech):
     else:
         return tech
     
-def plot_map(network, components=["links", "generators"],
+def plot_map(network, components=["links", "generators", "stores"],# "storage_units"], #TODO uncomment after adding storage units
              bus_size_factor=1.7e10, transmission=False):
 
     n = network.copy()
@@ -309,7 +310,7 @@ def plot_map(network, components=["links", "generators"],
     ac_color = "gray"
     dc_color = "m"
 
-    #if snakemake.wildcards["lv"] == "1.0":
+    #if snakemake.wildcards["lv"] == "1.0":         #TODO when we add wildcard lv
         # should be zero
     line_widths = n.lines.s_nom_opt - n.lines.s_nom
     link_widths = n.links.p_nom_opt - n.links.p_nom
@@ -322,7 +323,7 @@ def plot_map(network, components=["links", "generators"],
         line_lower_threshold = 0.
         title = "Technologies"
     # else:
-    #     line_widths = n.lines.s_nom_opt - n.lines.s_nom_min
+    #     line_widths = n.lines.s_nom_opt - n.lines.s_nom_min #TODO when we add wildcard lv
     #     link_widths = n.links.p_nom_opt - n.links.p_nom_min
     #     title = "Transmission reinforcement"
 
@@ -376,16 +377,16 @@ def plot_map(network, components=["links", "generators"],
                       fontsize=10)
 
     ax.add_artist(l1_1)
-    import matplotlib.patches as mpatches
-
+    
+    # import matplotlib.patches as mpatches
     # red_patch = mpatches.Patch(color='red', label='The red data')
     # plt.legend(handles=[red_patch])
 
     plt.show()
-    fig.savefig('plot_map.pdf', transparent=True,
+    fig.savefig(snakemake.output.map, transparent=True,
                 bbox_inches="tight")
-    fig.savefig('plot_map.png', transparent=True,
-            bbox_inches="tight", dpi=300)
+    # fig.savefig('plot_map.pdf', transparent=True,
+    #         bbox_inches="tight")#, dpi=300)
 
 
 #%%
