@@ -287,7 +287,7 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
 
     from tqdm import tqdm
 
-    pbar = tqdm(total=100)
+    pbar = tqdm(total=100, disable=disable_progress)
 
     def dlProgress(count, blockSize, totalSize, roundto=roundto):
         pbar.n = round(

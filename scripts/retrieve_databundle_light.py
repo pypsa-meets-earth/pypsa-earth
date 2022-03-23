@@ -112,9 +112,9 @@ def load_databundle_config(config):
     return config
 
 
-def download_and_unzip_zenodo(config, rootpath, hot_run=True):
+def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True)
+        download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
     Function to download and unzip the data from zenodo
 
@@ -127,6 +127,8 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
 
     Outputs
     -------
@@ -141,7 +143,7 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
         try:
             logger.info(
                 f"Downloading resource '{resource}' from cloud '{url}'")
-            progress_retrieve(url, file_path)
+            progress_retrieve(url, file_path, disable_progress=disable_progress)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
@@ -157,9 +159,9 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True):
     return True
 
 
-def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
+def download_and_unzip_protectedplanet(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_protectedplanet(config, rootpath, dest_path, hot_run=True)
+        download_and_unzip_protectedplanet(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
     Function to download and unzip the data by category from protectedplanet
 
@@ -172,6 +174,8 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
 
     Outputs
     -------
@@ -190,7 +194,7 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
         try:
             logger.info(
                 f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path)
+            progress_retrieve(url, file_path, disable_progress=disable_progress)
 
             zip_obj = ZipFile(file_path, "r")
 
@@ -225,9 +229,9 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True):
     return True
 
 
-def download_and_unzip_direct(config, rootpath, hot_run=True):
+def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_direct(config, rootpath, dest_path, hot_run=True)
+        download_and_unzip_direct(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
     Function to download the data by category from a direct url with no processing.
     If in the configuration file the unzip is specified True, then the downloaded data is unzipped.
@@ -241,6 +245,8 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
 
     Outputs
     -------
@@ -259,7 +265,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
         try:
             logger.info(
                 f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path)
+            progress_retrieve(url, file_path, disable_progress=disable_progress)
 
             # if the file is a zipfile and unzip is enabled
             # then unzip it and remove the original file
@@ -278,9 +284,9 @@ def download_and_unzip_direct(config, rootpath, hot_run=True):
     return True
 
 
-def download_and_unzip_post(config, rootpath, hot_run=True):
+def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_post(config, rootpath, dest_path, hot_run=True)
+        download_and_unzip_post(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
     Function to download the data by category from a post request.
 
@@ -293,6 +299,8 @@ def download_and_unzip_post(config, rootpath, hot_run=True):
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
 
     Outputs
     -------
@@ -315,7 +323,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True):
         # try:
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
 
-        progress_retrieve(url, file_path, data=postdata)
+        progress_retrieve(url, file_path, data=postdata, disable_progress=disable_progress)
 
         # if the file is a zipfile and unzip is enabled
         # then unzip it and remove the original file
@@ -456,6 +464,8 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
+    disable_progress = not snakemake.config.get("retrieve_databundle", {}).get("show_progress", False)
+
     # load enable configuration
     config_enable = snakemake.config["enable"]
     # load databundle configuration
@@ -503,7 +513,7 @@ if __name__ == "__main__":
         for host in host_list:
             # try:
             download_and_unzip = globals()[f"download_and_unzip_{host}"]
-            if download_and_unzip(config_bundles[b_name], rootpath):
+            if download_and_unzip(config_bundles[b_name], rootpath, disable_progress=disable_progress):
                 break
             # except KeyError:
             #     logger.error(f"Function for {host} has not been defined")
