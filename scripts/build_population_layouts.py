@@ -1,5 +1,4 @@
 """Build mapping between grid cells and population (total, urban, rural)"""
-
 import multiprocessing as mp
 import os
 
