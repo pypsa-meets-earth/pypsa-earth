@@ -595,7 +595,7 @@ def add_industry(n, costs):
         carrier="H2 for industry",
         p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
     )
-   if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
+    if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
 
         n.madd("Bus",
                nodes,
@@ -986,8 +986,8 @@ if __name__ == "__main__":
     # TODO fetch from config
 
     n = pypsa.Network(snakemake.input.network)
-    # overrides = override_component_attrs(snakemake.input.overrides)
-    # n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    overrides = override_component_attrs(snakemake.input.overrides)
+    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     nodes = n.buses.index
 
     # costs = pd.read_csv( "{}/pypsa-earth-sec/data/costs.csv".format(os.path.dirname(os.getcwd())))

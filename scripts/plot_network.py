@@ -185,10 +185,11 @@ def plot_transmission_topology(network):
             label='H2 Pipeline',markerfacecolor='w', markersize=16, lw=4)
     
     plt.legend(handles=[Elec_Circle, elec_Line, H2_Line], loc='upper left')
-    plt.savefig('networks.png', transparent=True,
-                bbox_inches="tight", dpi=300)
-    plt.savefig('networks.pdf', transparent=True,
-                bbox_inches="tight", dpi=300)
+    
+    fig.savefig(
+        snakemake.output.map.replace("-costs-all","-full_topology"),
+        bbox_inches="tight")
+
 #%%
 preferred_order = pd.Index(["transmission lines","hydroelectricity","hydro reservoir","run of river","pumped hydro storage","solid biomass","biogas","onshore wind","offshore wind","offshore wind (AC)","offshore wind (DC)","solar PV","solar thermal","solar","building retrofitting","ground heat pump","air heat pump","heat pump","resistive heater","power-to-heat","gas-to-power/heat","CHP","OCGT","gas boiler","gas","natural gas","helmeth","methanation","hydrogen storage","power-to-gas","power-to-liquid","battery storage","hot water storage","CO2 sequestration"])
 
