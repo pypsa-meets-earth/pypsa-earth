@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-name: CI
+name: CI-linux
 
 on:
   push:
