@@ -22,8 +22,10 @@ if __name__ == '__main__':
     grid_cells = cutout.grid_cells()
 
     # nuts3 has columns country, gdp, pop, geometry
-    # population is given in dimensions of 1e3=k
     nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index('GADM_ID')
+
+    # Set value of population to same dimension as in PyPSA-Eur-Sec, where the value is given in 1e3
+    nuts3['pop'] = nuts3['pop']/1000
 
     # Indicator matrix NUTS3 -> grid cells
     I = atlite.cutout.compute_indicatormatrix(nuts3.geometry, grid_cells)
