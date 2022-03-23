@@ -66,7 +66,7 @@ def make_legend_circles_for(sizes, scale=1.0, **kw):
 #%%
 #############################################
 # plot Hydrogen infrastructure map
-###################################################
+#############################################
 def plot_h2_infra(network):
     n = network.copy()
     

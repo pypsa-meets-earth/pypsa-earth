@@ -516,7 +516,7 @@ def make_summaries(networks_dict):
         "costs",
         "capacities",
         "curtailment",
-        "energy",
+        #"energy", #TODO check why this causes an error
         "supply",
         "supply_energy",
         "prices",
@@ -559,7 +559,7 @@ def to_csv(df):
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        #os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         from helpers import mock_snakemake
         snakemake = mock_snakemake('make_summary')
@@ -567,13 +567,13 @@ if __name__ == "__main__":
     networks_dict = {
         #(cluster, lv, opt+sector_opt, planning_horizon) :
         (cluster, planning_horizon) :
-        snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_{planning_horizon}.nc' \
+        f'../results/test/postnetworks/elec_s{simpl}_{cluster}_{planning_horizon}.nc' \
         # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
         for simpl in snakemake.config['scenario']['simpl'] \
         for cluster in snakemake.config['scenario']['clusters'] \
        # for opt in snakemake.config['scenario']['opts'] \
         #for sector_opt in snakemake.config['scenario']['sector_opts'] \
-        for lv in snakemake.config['scenario']['lv'] \
+        #for lv in snakemake.config['scenario']['lv'] \
         for planning_horizon in snakemake.config['scenario']['planning_horizons']
     }
 

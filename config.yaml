@@ -1,10 +1,10 @@
 
 logging_level: INFO
 
-results_dir: results
-summary_dir: results
+results_dir: results/
+summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: test3
+run: test
 
 foresight: overnight 
 
