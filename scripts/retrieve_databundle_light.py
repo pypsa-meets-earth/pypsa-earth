@@ -143,7 +143,8 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
         try:
             logger.info(
                 f"Downloading resource '{resource}' from cloud '{url}'")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
+            progress_retrieve(
+                url, file_path, disable_progress=disable_progress)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
@@ -194,7 +195,8 @@ def download_and_unzip_protectedplanet(config, rootpath, hot_run=True, disable_p
         try:
             logger.info(
                 f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
+            progress_retrieve(
+                url, file_path, disable_progress=disable_progress)
 
             zip_obj = ZipFile(file_path, "r")
 
@@ -265,7 +267,8 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
         try:
             logger.info(
                 f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
+            progress_retrieve(
+                url, file_path, disable_progress=disable_progress)
 
             # if the file is a zipfile and unzip is enabled
             # then unzip it and remove the original file
@@ -323,7 +326,8 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
         # try:
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
 
-        progress_retrieve(url, file_path, data=postdata, disable_progress=disable_progress)
+        progress_retrieve(url, file_path, data=postdata,
+                          disable_progress=disable_progress)
 
         # if the file is a zipfile and unzip is enabled
         # then unzip it and remove the original file
@@ -464,7 +468,8 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
-    disable_progress = not snakemake.config.get("retrieve_databundle", {}).get("show_progress", False)
+    disable_progress = not snakemake.config.get(
+        "retrieve_databundle", {}).get("show_progress", False)
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
