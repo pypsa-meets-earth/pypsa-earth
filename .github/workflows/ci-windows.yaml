@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText: : 2022 The PyPSA-meets-Africa Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  schedule:
+    - cron: "0 5 * * TUE"
+
+env:
+  CACHE_NUMBER: 1 # Change this value to manually reset the environment cache
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows-latest
+            prefix: C:\Miniconda3\envs\pypsa-africa
+    
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Add solver to environment
+        run: |
+          echo -e "  - glpk\n  - ipopt<3.13.3" >> envs/environment.yaml
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            miniforge-variant: Mambaforge
+            miniforge-version: latest
+            activate-environment: pypsa-africa
+            use-mamba: true
+
+      - name: Create environment cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ${{ matrix.prefix }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles('envs/environment.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}    
+
+      - name: Update environment due to outdated or unavailable cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n pypsa-africa -f envs/environment.yaml
+
+      - name: Test snakemake workflow
+        run: |
+          conda list
+          cp test/config.test1.yaml config.yaml
+          snakemake --cores all solve_all_networks
+      
+      # - name: Test plotting and summaries
+      #   run: |
+      #     snakemake --cores all plot_all_p_nom
+      #     snakemake --cores all plot_all_summaries
+      #     snakemake --cores all make_all_summaries
+      #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
