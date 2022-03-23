@@ -69,7 +69,7 @@ sector:
     # 2040: 0.1
     # 2050: 0.15
   land_transport_electric_share:
-    0.85 # 1 means all EVs
+    0.75 # 1 means all EVs
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
@@ -79,6 +79,9 @@ sector:
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
   hydrogen_underground_storage: true
+  shipping_hydrogen_liquefaction: true
+  shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
+  shipping_hydrogen_share: 1.0
 
   h2_cavern: True
   marginal_cost_storage: 0
@@ -91,7 +94,6 @@ sector:
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
 
-
 # snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
@@ -101,8 +103,6 @@ snapshots:
 
 atlite:
   cutout: /cutouts/africa-2013-era5.nc
-
-
 
 solving:
   #tmpdir: "path/to/tmp"
@@ -135,6 +135,7 @@ solving:
     #barrier_convergetol: 1.e-5
     #feasopt_tolerance: 1.e-6
   mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
+<<<<<<< HEAD
 
 plotting:
   tech_colors:
@@ -270,3 +271,5 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
+=======
+>>>>>>> origin/main

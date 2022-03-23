@@ -255,9 +255,8 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    # Get pop_layout (dummy)
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout_dummy,
-                             index_col=0)
+    # Get pop_layout
+    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Add options
     options = snakemake.config["sector"]
