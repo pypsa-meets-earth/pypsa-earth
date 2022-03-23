@@ -33,7 +33,7 @@ Upcoming Release
 
 * Implement area exclusions based on land type using the Copernicus Land Cover: `PR #272 <https://github.com/PyPSA/pypsa-eur/pull/272>`__.
 
-* Add CI caching and windows CI: `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/PyPSA/pypsa-eur/pull/277>`__.
+* Add CI caching and CI by OS: `PR #304 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/304>`__, `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/PyPSA/pypsa-eur/pull/277>`__.
 
 * Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__. 
 
