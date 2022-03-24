@@ -509,7 +509,6 @@ def calculate_price_statistics(n, label, price_statistics):
 def make_summaries(networks_dict):
 
     outputs = [
-        "energy",
         "nodal_costs",
         "nodal_capacities",
         "nodal_cfs",
@@ -517,7 +516,7 @@ def make_summaries(networks_dict):
         "costs",
         "capacities",
         "curtailment",
-        #"energy", #TODO check why this causes an error
+        "energy", #TODO check why this causes an error
         "supply",
         "supply_energy",
         "prices",
@@ -549,7 +548,7 @@ def make_summaries(networks_dict):
         
         if len(n.links_t.p4.columns) ==0:                        #TODO hardfix for error that arises with energy in outputs
             print('##################')
-            n.links_t.p4 =  n.links_t.p3 *0
+            n.links_t.p4 =  n.links_t.p3 * 0
         
         for output in outputs:
             df[output] = globals()["calculate_" + output](n, label, df[output])
