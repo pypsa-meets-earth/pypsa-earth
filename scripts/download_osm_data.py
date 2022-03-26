@@ -650,7 +650,7 @@ def create_country_list(input, iso_coding=True):
         codes_list = []
 
         # extract countries in world
-        if value1 == "world":
+        if value1 == "Earth":
             for continent in world_iso.keys():
                 codes_list.extend(list(world_iso[continent]))
 

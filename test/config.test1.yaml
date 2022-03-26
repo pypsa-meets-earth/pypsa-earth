@@ -28,6 +28,9 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
+retrieve_databundle:
+  show_progress: False  # Option to disable the progress bar in retrieve_databundle
+
 augmented_line_connection:
   add_to_snakefile: False
   connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation

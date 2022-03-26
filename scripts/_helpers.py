@@ -265,19 +265,42 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
     return costs
 
 
-def progress_retrieve(url, file):
+def progress_retrieve(url,
+                      file,
+                      data=None,
+                      disable_progress=False,
+                      roundto=1.0):
+    """
+    Function to download data from a url with a progress bar progress in retrieving data
+
+    Parameters
+    ----------
+    url : str
+        Url to download data from
+    file : str
+        File where to save the output
+    data : dict
+        Data for the request (default None), when not none Post method is used
+    disable_progress : bool
+        When true, no progress bar is shown
+    roundto : float
+        (default 0) Precision used to report the progress
+        e.g. 0.1 stands for 88.1, 10 stands for 90, 80
+    """
     import urllib
 
     from tqdm import tqdm
 
-    pbar = tqdm(total=100)
+    pbar = tqdm(total=100, disable=disable_progress)
 
-    def dlProgress(count, blockSize, totalSize):
-        pbar.n = round(
-            count * blockSize * 100 / totalSize * 100) / 100  # round to 0.01
+    def dlProgress(count, blockSize, totalSize, roundto=roundto):
+        pbar.n = round(count * blockSize * 100 / totalSize / roundto) * roundto
         pbar.refresh()
 
-    urllib.request.urlretrieve(url, file, reporthook=dlProgress)
+    if data is not None:
+        data = urllib.parse.urlencode(data).encode()
+
+    urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
 def mock_snakemake(rulename, **wildcards):

@@ -20,6 +20,7 @@ if not exists("config.yaml"):
 
 
 configfile: "config.yaml"
+configfile: "configs/bundle_config.yaml"
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
@@ -52,28 +53,32 @@ rule plot_all_summaries:
     input: expand("results/plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}", summary=['energy', 'costs'], **config['scenario'], country=['all'] + config['countries'], ext=['png', 'pdf'])
 
 
-datafiles = [
-        "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
-        "data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        "data/raw/gebco/GEBCO_2021_TID.nc",
-        "data/raw/eez/eez_v11.gpkg",
-        # "data/raw/landcover",  # set as an explicit directory in the rule
-        "data/raw/hydrobasins/hybas_world_lev04_v1c.shp",
-        "data/custom_powerplants.csv",
-        "data/hydro_capacities.csv",
-        "data/costs.csv",
-]
+def datafiles_retrivedatabundle(config):
+    listoutputs = [
+        dvalue["output"] for (dname, dvalue) in config["databundles"].items()
+            if config.get('tutorial', False) == dvalue.get("tutorial", False)
+    ]
+    unique_outputs = set(([
+        inneroutput for output in listoutputs for inneroutput in output
+            if "*" not in inneroutput or inneroutput.endswith("/")  # exclude directories
+    ]))
 
-if config.get('tutorial')==False and config['enable'].get('build_cutout', False)==False:
-    datafiles.extend(["cutouts/africa-2013-era5.nc"])
-if config.get('tutorial')==True:
-    datafiles.extend(["cutouts/africa-2013-era5-tutorial.nc"])
+    # when option build_natura_raster is enabled, remove natura.tiff from the outputs
+    if config['enable'].get("build_natura_raster", False):
+        unique_outputs = [output for output in unique_outputs if "natura.tiff" not in output]
+
+    # when option build_cutout is enabled, remove cutouts from the outputs
+    if config['enable'].get("build_cutout", False):
+        unique_outputs = [output for output in unique_outputs if "cutouts/" not in output]
+
+    return unique_outputs
+
+
 
 if config['enable'].get('retrieve_databundle', True):
     rule retrieve_databundle_light:
-        input: "configs/bundle_config.yaml"
         output: #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
-            expand('{file}', file=datafiles),
+            expand('{file}', file=datafiles_retrivedatabundle(config)),
             directory("data/raw/landcover")
         log: "logs/retrieve_databundle.log"
         script: 'scripts/retrieve_databundle_light.py'
