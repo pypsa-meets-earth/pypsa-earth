@@ -58,3 +58,4 @@ jobs:
           VALIDATE_PYTHON_FLAKE8: false
           VALIDATE_PYTHON_BLACK: false
           VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_JSCPD: false

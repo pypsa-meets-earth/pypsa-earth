@@ -26,10 +26,10 @@ developers and researchers in performing the most affordable, reliable, transpar
 We are committed to give tools that can efficiently provide instruments to all stakeholders to perform the best informed decisions and promote coordinated
 planning and dispatch to maximize the efficient use of energy that can sustain stable sustainable growth.
 
-..  
+..
     Despite being home to almost twice the population of Europe, Africa energy demand is a quarter of Europe [OWD]_.
     Access to energy is also very diverse and, according to IEA, still around 600mln people have no access to electricity in Sub-Saharan Africa [WEO2021]_.
-    
+
     .. [OWD] https://ourworldindata.org/grapher/primary-energy-consumption-by-region
     .. [WEO2021] https://www.iea.org/data-and-statistics/charts/people-without-access-to-electricity-in-sub-saharan-africa-2000-2021
 
@@ -56,8 +56,8 @@ Please use the following BibTeX: ::
 
     @INPROCEEDINGS{9570911,
         author={Kirli, Desen and Hampp, Johannes and van Greevenbroek, Koen and Grant, Rebecca and Mahmood, Matin and Parzen, Maximilian and Kiprakis, Aristides},
-        booktitle={2021 IEEE AFRICON}, 
-        title={PyPSA meets Africa: Developing an open source electricity network model of the African continent}, 
+        booktitle={2021 IEEE AFRICON},
+        title={PyPSA meets Africa: Developing an open source electricity network model of the African continent},
         year={2021},
         volume={},
         number={},
@@ -108,3 +108,23 @@ The content in this package is organized in folders as described below; for more
 - ``benchmarks``: Stores ``snakemake`` benchmarks.
 - ``logs``: Stores log files about solving, including the solver output, console output and the output of a memory logger.
 - ``envs``: Stores the conda environment files to successfully run the workflow.
+
+
+Licence
+=======
+
+PyPSA-Africa work is released under multiple licenses:
+
+* All original source code is licensed as free software under `GPL-3.0 License <https://github.com/pypsa-meets-africa/pypsa-africa/blob/main/LICENSE>`_.
+* The documentation is licensed under `CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>`_.
+* Configuration files are mostly licensed under `CC0-1.0 <https://creativecommons.org/publicdomain/zero/1.0/>`_.
+* Data files are licensed under different licenses as noted below.
+
+Licenses and urls of the data used in PyPSA-Africa:
+.. csv-table::
+   :header-rows: 1
+   :file: configtables/licenses.csv
+
+* *BY: Attribute Source*
+* *NC: Non-Commercial Use Only*
+* *SA: Share Alike*

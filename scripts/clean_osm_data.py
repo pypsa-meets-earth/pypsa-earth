@@ -7,9 +7,9 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import _save_to_geojson
-from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from _helpers import save_to_geojson
+from _helpers import to_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -485,7 +485,7 @@ def clean_data(
                                             ext_country_shapes,
                                             names_by_shapes=names_by_shapes)
 
-    _save_to_geojson(df_all_lines, output_files["lines"])
+    save_to_geojson(df_all_lines, output_files["lines"])
 
     # ----------- SUBSTATIONS -----------
 
@@ -527,7 +527,7 @@ def clean_data(
         col_country="Country",
     )
 
-    _save_to_geojson(df_all_substations, output_files["substations"])
+    save_to_geojson(df_all_substations, output_files["substations"])
 
     # ----------- GENERATORS -----------
 
@@ -542,10 +542,10 @@ def clean_data(
         df_all_generators, ext_country_shapes, names_by_shapes=names_by_shapes)
 
     # save to csv
-    _to_csv_nafix(df_all_generators, output_files["generators_csv"])
+    to_csv_nafix(df_all_generators, output_files["generators_csv"])
 
     # save to geojson
-    _save_to_geojson(df_all_generators, output_files["generators"])
+    save_to_geojson(df_all_generators, output_files["generators"])
 
     return None
 

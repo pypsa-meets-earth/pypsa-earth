@@ -66,8 +66,8 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 import yaml
-from _helpers import _read_csv_nafix
 from _helpers import configure_logging
+from _helpers import read_csv_nafix
 from scipy.sparse import csgraph
 from shapely.geometry import LineString
 from shapely.geometry import Point
@@ -83,7 +83,7 @@ def _get_oid(df):
         return pd.Series(np.nan, df.index)
 
 
-def _get_country(df):
+def get_country(df):
     if "tags" in df.columns:
         return df.tags.str.extract('"country"=>"([A-Z]{2})"', expand=False)
     else:
@@ -113,7 +113,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
 
 
 def _load_buses_from_osm():
-    buses = (_read_csv_nafix(
+    buses = (read_csv_nafix(
         snakemake.input.osm_buses).set_index("bus_id").drop(
             ["station_id"], axis=1).rename(columns=dict(voltage="v_nom")))
 
@@ -152,7 +152,7 @@ def _set_links_underwater_fraction(n):
 
 
 def _load_lines_from_osm(buses):
-    lines = (_read_csv_nafix(
+    lines = (read_csv_nafix(
         snakemake.input.osm_lines,
         dtype=dict(
             line_id="str",
@@ -228,7 +228,7 @@ def _set_countries_and_substations(n):
     # Busses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:
-        c_tag = _get_country(buses.loc[c_nan_b])
+        c_tag = get_country(buses.loc[c_nan_b])
         c_tag.loc[~c_tag.isin(countries)] = np.nan
         n.buses.loc[c_nan_b, "country"] = c_tag
 
