@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-name: CI
+name: CI-windows
 
 on:
   push:
@@ -20,18 +20,8 @@ env:
 jobs:
   build:
     strategy:
-      fail-fast: false  # don't break CI for ubuntu if windows fails before
       matrix:
         include:
-          # Matrix required to handle environment caching with Mambaforge
-          - os: ubuntu-latest
-            label: ubuntu-latest
-            prefix: /usr/share/miniconda3/envs/pypsa-africa
-
-          - os: macos-latest
-            label: macos-latest
-            prefix: /Users/runner/miniconda3/envs/pypsa-africa
-
           - os: windows-latest
             label: windows-latest
             prefix: C:\Miniconda3\envs\pypsa-africa
@@ -75,9 +65,9 @@ jobs:
           cp test/config.test1.yaml config.yaml
           snakemake --cores all solve_all_networks
       
-      - name: Test plotting and summaries
-        run: |
-          snakemake --cores all plot_all_p_nom
-          snakemake --cores all plot_all_summaries
-          snakemake --cores all make_all_summaries
-        # rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
+      # - name: Test plotting and summaries
+      #   run: |
+      #     snakemake --cores all plot_all_p_nom
+      #     snakemake --cores all plot_all_summaries
+      #     snakemake --cores all make_all_summaries
+      #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
