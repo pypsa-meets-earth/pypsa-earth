@@ -29,7 +29,7 @@ countries: ["NG", "BJ"]
   #["ZA"]  # South Africa
 
 retrieve_databundle:
-  show_progress: True  # Option to disable the progress bar in retrieve_databundle
+  show_progress: False  # Option to disable the progress bar in retrieve_databundle
 
 augmented_line_connection:
   add_to_snakefile: False

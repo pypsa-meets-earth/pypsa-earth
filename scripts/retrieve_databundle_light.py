@@ -486,7 +486,7 @@ if __name__ == "__main__":
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
     disable_progress = not snakemake.config.get("retrieve_databundle", {}).get(
-        "show_progress", False)
+        "show_progress", True)
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
