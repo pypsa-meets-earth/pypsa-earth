@@ -161,6 +161,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/giacfalk">
+            <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
+            <br />
+            <sub><b>Giacomo Falchetta</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/LukasFrankenQ">
             <img src="https://avatars.githubusercontent.com/u/55196140?v=4" width="100;" alt="LukasFrankenQ"/>
             <br />
@@ -182,56 +189,20 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/Hazem-IEG">
-            <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="Hazem-IEG"/>
-            <br />
-            <sub><b>Hazem-IEG</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/energyLS">
-            <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
-            <br />
-            <sub><b>EnergyLS</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/restyled-commits">
-            <img src="https://avatars.githubusercontent.com/u/65077583?v=4" width="100;" alt="restyled-commits"/>
-            <br />
-            <sub><b>Restyled Commits</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/ekatef">
-            <img src="https://avatars.githubusercontent.com/u/30229437?v=4" width="100;" alt="ekatef"/>
-            <br />
-            <sub><b>Ekaterina</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/giacfalk">
-            <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
-            <br />
-            <sub><b>Giacomo Falchetta</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/jarry7">
             <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
             <br />
             <sub><b>Jarrad Wright</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/EmreYorat">
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
             <sub><b>EmreYorat</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
