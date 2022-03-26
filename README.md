@@ -111,38 +111,31 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
 <table>
 <tr>
     <td align="center">
-        <a href="https://github.com/hazemakhalek">
-            <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
+        <a href="https://github.com/pz-max">
+            <img src="https://avatars.githubusercontent.com/u/61968949?v=4" width="100;" alt="pz-max"/>
             <br />
-            <sub><b>hazemakhalek</b></sub>
+            <sub><b>Max Parzen</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/jarry7">
-            <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
+        <a href="https://github.com/davide-f">
+            <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
             <br />
-            <sub><b>Jarrad Wright</b></sub>
+            <sub><b>Davide-f</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/fneum">
-            <img src="https://avatars.githubusercontent.com/u/29101152?v=4" width="100;" alt="fneum"/>
+        <a href="https://github.com/restyled-commits">
+            <img src="https://avatars.githubusercontent.com/u/65077583?v=4" width="100;" alt="restyled-commits"/>
             <br />
-            <sub><b>Fabian Neumann</b></sub>
+            <sub><b>Restyled Commits</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/euronion">
-            <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
+        <a href="https://github.com/ekatef">
+            <img src="https://avatars.githubusercontent.com/u/30229437?v=4" width="100;" alt="ekatef"/>
             <br />
-            <sub><b>Euronion</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Justus-coded">
-            <img src="https://avatars.githubusercontent.com/u/44394641?v=4" width="100;" alt="Justus-coded"/>
-            <br />
-            <sub><b>Justus Ilemobayo</b></sub>
+            <sub><b>Ekaterina</b></sub>
         </a>
     </td>
     <td align="center">
@@ -151,13 +144,20 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>Mnm-matin</b></sub>
         </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Hazem-IEG">
+            <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="Hazem-IEG"/>
+            <br />
+            <sub><b>Hazem-IEG</b></sub>
+        </a>
     </td></tr>
 <tr>
     <td align="center">
-        <a href="https://github.com/desenk">
-            <img src="https://avatars.githubusercontent.com/u/48335263?v=4" width="100;" alt="desenk"/>
+        <a href="https://github.com/euronion">
+            <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
             <br />
-            <sub><b>Desen Kirli</b></sub>
+            <sub><b>Euronion</b></sub>
         </a>
     </td>
     <td align="center">
@@ -168,39 +168,10 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/pz-max">
-            <img src="https://avatars.githubusercontent.com/u/61968949?v=4" width="100;" alt="pz-max"/>
+        <a href="https://github.com/Tooblippe">
+            <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
-            <sub><b>Max Parzen</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Cesare-Caputo">
-            <img src="https://avatars.githubusercontent.com/u/62548290?v=4" width="100;" alt="Cesare-Caputo"/>
-            <br />
-            <sub><b>Cesare-Caputo</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Nayara2020">
-            <img src="https://avatars.githubusercontent.com/u/64689686?v=4" width="100;" alt="Nayara2020"/>
-            <br />
-            <sub><b>Nayara2020</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Ay-Khi">
-            <img src="https://avatars.githubusercontent.com/u/65019030?v=4" width="100;" alt="Ay-Khi"/>
-            <br />
-            <sub><b>Ayman Alkhirbash</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/davide-f">
-            <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
-            <br />
-            <sub><b>Davide-f</b></sub>
+            <sub><b>Tobie</b></sub>
         </a>
     </td>
     <td align="center">
@@ -247,8 +218,8 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/Tooblippe">
-            <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
+        <a href="https://github.com/jarry7">
+            <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
             <br />
             <sub><b>Jarrad Wright</b></sub>
         </a>
@@ -259,7 +230,8 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>EmreYorat</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
