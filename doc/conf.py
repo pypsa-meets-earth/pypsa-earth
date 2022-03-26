@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -40,7 +41,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    'sphinx.ext.graphviz',
+    "sphinx.ext.graphviz",
     # "sphinx.ext.pngmath",
     # "sphinxcontrib.tikz",
     # "rinoh.frontend.sphinx",
@@ -54,7 +55,6 @@ numpydoc_show_class_members = False
 # documentation
 autodoc_mock_imports = [
     # "esy-osmfilter",
-    # "esy",
     # "pypsa",
     # "numpy",
     # "pandas",
@@ -115,8 +115,9 @@ texinfo_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "pypsa_meets_africa",
-              "pypsa_meets_africa Documentation", [author], 1)]
+man_pages = [
+    (master_doc, "pypsa_meets_africa", "pypsa_meets_africa Documentation", [author], 1)
+]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False

@@ -29,7 +29,7 @@ A pdf file will show up, introducing you to other activities in the roam of HR, 
 Get Involved
 ==============
 
-The PyPSA meets Africa team is currenlty running four types of meetings:
+The PyPSA meets Africa team is currently running four types of meetings:
 
 - **Discord (Open)**
   
@@ -104,7 +104,7 @@ Essential developments
 - WP2. Implement LISFLOOD to add hydro-timerseries
 - WP3. Set up Atlite for Africa to create renewable timeseries
 - WP3. Add different concentrated solar power (CSP) designs to Atlite
-- WP4. Addapt current Atlite land coverage constraint method for African continent. For instance, it may be forbidden to install power plants in protective areas such as national parks or to build wind plants in cities. Atlite can exclude this areas but might need to be adjusted for Africa. 
+- WP4. Adapt current Atlite land coverage constraint method for African continent. For instance, it may be forbidden to install power plants in protective areas such as national parks or to build wind plants in cities. Atlite can exclude this areas but might need to be adjusted for Africa. 
 - WP5. Support the creation of a network topology by applying `various methods <https://github.com/pypsa-meets-africa/pypsa-africa/discussions/15>`_
 - WP6. Contribute to the AI satellite image detection for energy asset recognition such `applied for detecting HV lines, substations <https://github.com/pypsa-meets-africa/pypsa-africa/discussions/13>`_ and power plants
 
@@ -152,6 +152,3 @@ After linking PyPSA-Africa with PyPSA-Eur/PyPSA-Eur-Sec:
 - **Sector coupling.** The benefits of sector coupling (electricity, gas, heat, transport, cooling) in Africa.
 - **Electric Vehicles.** Opportunities and pathways to integrate electric vehicles in Africa.
 - ...
-
-
-
