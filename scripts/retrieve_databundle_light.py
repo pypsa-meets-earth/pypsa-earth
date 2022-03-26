@@ -75,9 +75,9 @@ import re
 from zipfile import ZipFile
 
 import yaml
-from _helpers import _sets_path_to_root
 from _helpers import configure_logging
 from _helpers import progress_retrieve
+from _helpers import sets_path_to_root
 from download_osm_data import create_country_list
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
@@ -256,7 +256,7 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
-    _sets_path_to_root("pypsa-africa")
+    sets_path_to_root("pypsa-africa")
 
     rootpath = os.getcwd()
     tutorial = snakemake.config["tutorial"]

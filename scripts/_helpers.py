@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 
-def _sets_path_to_root(root_directory_name):
+def sets_path_to_root(root_directory_name):
     """
     Search and sets path to the given root directory (root/path/file).
 
@@ -353,7 +353,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def _get_country(target, **keys):
+def get_country(target, **keys):
     """
     Function to convert country codes using pycountry
 
@@ -379,9 +379,9 @@ def _get_country(target, **keys):
 
     Example of usage
     -------
-    - Convert 2-digit code to 3-digit codes: _get_country('alpha_3', alpha_2="ZA")
-    - Convert 3-digit code to 2-digit codes: _get_country('alpha_2', alpha_3="ZAF")
-    - Convert 2-digit code to full name: _get_country('name', alpha_2="ZA")
+    - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")
+    - Convert 3-digit code to 2-digit codes: get_country('alpha_2', alpha_3="ZAF")
+    - Convert 2-digit code to full name: get_country('name', alpha_2="ZA")
 
     """
     import pycountry as pyc
@@ -393,7 +393,39 @@ def _get_country(target, **keys):
         return np.nan
 
 
-def _two_2_three_digits_country(two_code_country):
+def getContinent(code):
+    """
+    Returns continent names that contains list of iso-code countries
+
+    Parameters
+    ----------
+    code : str
+        List of two letter country ISO codes
+
+    Returns
+    -------
+    continent_list : str
+        List of continent names
+
+    Example
+    -------
+    from helpers import getContinent
+    code = ["DE", "GB", "NG", "ZA"]
+    getContinent(code)
+    >>> ["africa", "europe"]
+    """
+    from config_osm_data import world_iso
+
+    continent_list = []
+    code_set = set(code)
+    for continent in world_iso:
+        single_continent_set = set(world_iso[continent])
+        if code_set.intersection(single_continent_set):
+            continent_list.append(continent)
+    return continent_list
+
+
+def two_2_three_digits_country(two_code_country):
     """
     Convert 2-digit to 3-digit country code:
 
@@ -408,15 +440,13 @@ def _two_2_three_digits_country(two_code_country):
         3-digit country name
     """
     if two_code_country == "SN-GM":
-        return (
-            f"{_two_2_three_digits_country('SN')}-{_two_2_three_digits_country('GM')}"
-        )
+        return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
 
-    three_code_country = _get_country("alpha_3", alpha_2=two_code_country)
+    three_code_country = get_country("alpha_3", alpha_2=two_code_country)
     return three_code_country
 
 
-def _three_2_two_digits_country(three_code_country):
+def three_2_two_digits_country(three_code_country):
     """
     Convert 3-digit to 2-digit country code:
 
@@ -431,15 +461,13 @@ def _three_2_two_digits_country(three_code_country):
         2-digit country name
     """
     if three_code_country == "SEN-GMB":
-        return (
-            f"{_three_2_two_digits_country('SN')}-{_three_2_two_digits_country('GM')}"
-        )
+        return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
 
-    two_code_country = _get_country("alpha_2", alpha_3=three_code_country)
+    two_code_country = get_country("alpha_2", alpha_3=three_code_country)
     return two_code_country
 
 
-def _two_digits_2_name_country(two_code_country):
+def two_digits_2_name_country(two_code_country):
     """
     Convert 2-digit country code to full name country:
 
@@ -454,13 +482,13 @@ def _two_digits_2_name_country(two_code_country):
         full country name
     """
     if two_code_country == "SN-GM":
-        return f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
+        return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
-    full_name = _get_country("name", alpha_2=two_code_country)
+    full_name = get_country("name", alpha_2=two_code_country)
     return full_name
 
 
-def _country_name_2_two_digits(country_name):
+def country_name_2_two_digits(country_name):
     """
     Convert full country name to 2-digit country code
 
@@ -475,18 +503,18 @@ def _country_name_2_two_digits(country_name):
         2-digit country name
     """
     if (country_name ==
-            f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
+            f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
         ):
         return "SN-GM"
 
-    full_name = _get_country("alpha_2", name=country_name)
+    full_name = get_country("alpha_2", name=country_name)
     return full_name
 
 
 NA_VALUE = "NULL"
 
 
-def _read_csv_nafix(file, **kwargs):
+def read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" in kwargs:
         del kwargs["keep_default_na"]
@@ -499,13 +527,13 @@ def _read_csv_nafix(file, **kwargs):
                        na_values=[NA_VALUE])
 
 
-def _to_csv_nafix(obj, path, **kwargs):
+def to_csv_nafix(obj, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
 
 
-def _save_to_geojson(df, fn):
+def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
 
@@ -519,7 +547,7 @@ def _save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def _read_geojson(fn):
+def read_geojson(fn):
     # if the file is non-zero, read the geodataframe and return it
     if os.path.getsize(fn) > 0:
         return gpd.read_file(fn)
