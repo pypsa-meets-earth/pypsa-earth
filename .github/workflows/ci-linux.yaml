@@ -20,6 +20,7 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false  # don't break CI for ubuntu if windows fails before
       matrix:
         include:
           # Matrix required to handle environment caching with Mambaforge

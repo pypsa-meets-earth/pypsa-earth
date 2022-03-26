@@ -197,8 +197,8 @@ import geopandas as gpd
 import numpy as np
 import progressbar as pgb
 import xarray as xr
-from _helpers import _sets_path_to_root
 from _helpers import configure_logging
+from _helpers import sets_path_to_root
 from pypsa.geo import haversine
 from shapely.geometry import LineString
 from shapely.ops import unary_union
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_renewable_profiles",
                                    technology="hydro")
-        _sets_path_to_root("pypsa-africa")
+        sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()

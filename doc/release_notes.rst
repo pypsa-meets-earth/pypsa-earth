@@ -35,8 +35,9 @@ Upcoming Release
 
 * Add CI caching and CI by OS: `PR #304 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/304>`__, `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/PyPSA/pypsa-eur/pull/277>`__.
 
-* Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__. 
+* Improve automatic download by retrieve_databundle and add licence description: `PR #291 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/291>`__.
 
+* Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__.
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
