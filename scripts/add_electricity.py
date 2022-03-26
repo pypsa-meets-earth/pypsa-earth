@@ -27,7 +27,12 @@ Relevant Settings
         estimate_renewable_capacities_from_capacity_stats:
 
     load:
-        scaling_factor:
+        scale:
+        ssp:
+        weather_year:
+        prediction_year:
+        region_load:
+
 
     renewable:
         hydro:
@@ -91,6 +96,7 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging
+from _helpers import getContinent
 from _helpers import update_p_nom_max
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
@@ -217,7 +223,45 @@ def load_powerplants(ppl_fn=None):
         columns=["efficiency"]).replace({"carrier": carrier_dict}))
 
 
-def attach_load(n, regions, load, admin_shapes, countries, scale):
+def get_load_paths_gegis(config):
+    """
+    Creates load paths for the GEGIS outputs
+
+    The paths are created automatically according to included country,
+    weather year, prediction year and ssp scenario
+
+    Example
+    -------
+    ["/resources/ssp2-2.6/2030/era5_2013/Africa.nc", "/resources/ssp2-2.6/2030/era5_2013/Africa.nc"]
+    """
+    countries = config.get("countries")
+    region_load = getContinent(countries)
+    weather_year = config.get("load_options")["weather_year"]
+    prediction_year = config.get("load_options")["prediction_year"]
+    ssp = config.get("load_options")["ssp"]
+
+    load_paths = []
+    for continent in region_load:
+        load_path = os.path.join(
+            "resources",
+            str(ssp),
+            str(prediction_year),
+            "era5_" + str(weather_year),
+            str(continent).capitalize() + ".nc",
+        )
+        load_paths.append(load_path)
+
+    return load_paths
+
+
+def attach_load(
+    n,
+    load_paths,
+    regions,
+    admin_shapes,
+    countries,
+    scale,
+):
     """
     Add load to the network and distributes them according GDP and population.
 
@@ -227,8 +271,7 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
     regions : .geojson
         Contains bus_id of low voltage substations and
         bus region shapes (voronoi cells)
-    load : .nc
-        Contains timeseries of load data per country
+    load_paths: paths of the load files
     admin_shapes : .geojson
         contains subregional gdp, population and shape data
     countries : list
@@ -246,14 +289,15 @@ def attach_load(n, regions, load, admin_shapes, countries, scale):
         gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     ).dropna(
         axis="rows")  # TODO: check if dropna required here. NaN shapes exist?
-    load_path = load
-    gegis_load = xr.open_dataset(load_path)
+
+    load_paths = load_paths
+    # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+    gegis_load = xr.open_mfdataset(load_paths, combine="nested")
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
     logger.info(f"Load data scaled with scalling factor {scale}.")
     gegis_load *= scale
-
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes.loc[:,
                "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
@@ -689,11 +733,11 @@ def add_nice_carrier_names(n, config=None):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from _helpers import mock_snakemake, sets_path_to_root
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("add_electricity")
+        sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
@@ -701,15 +745,23 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     regions = snakemake.input.regions
-    load = snakemake.input.load
+
+    load_paths = snakemake.input["load"]
     countries = snakemake.config["countries"]
-    scale = snakemake.config["load_options"]["scale"]
     admin_shapes = snakemake.input.gadm_shapes
+    scale = snakemake.config["load_options"]["scale"]
 
     costs = load_costs(Nyears)
     ppl = load_powerplants()
 
-    attach_load(n, regions, load, admin_shapes, countries, scale)
+    attach_load(
+        n,
+        load_paths,
+        regions,
+        admin_shapes,
+        countries,
+        scale,
+    )
     update_transmission_costs(n, costs)
     attach_conventional_generators(n, costs, ppl)
     attach_wind_and_solar(n, costs)

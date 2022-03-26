@@ -131,8 +131,8 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
-from _helpers import _sets_path_to_root
 from _helpers import configure_logging
+from _helpers import sets_path_to_root
 from _helpers import update_p_nom_max
 from add_electricity import load_costs
 from build_shapes import add_gdp_data
@@ -331,7 +331,7 @@ def busmap_for_n_clusters(n,
         algorithm_kwds.setdefault("n_init", 1000)
         algorithm_kwds.setdefault("max_iter", 30000)
         algorithm_kwds.setdefault("tol", 1e-6)
-        algorithm_kwds.setdefault('random_state', 0)
+        algorithm_kwds.setdefault("random_state", 0)
 
     n.determine_network_topology()
     n.lines.loc[:, "sub_network"] = "0"  # current fix
@@ -487,7 +487,7 @@ if __name__ == "__main__":
                                    network="elec",
                                    simpl="",
                                    clusters="60")
-        _sets_path_to_root("pypsa-africa")
+        sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

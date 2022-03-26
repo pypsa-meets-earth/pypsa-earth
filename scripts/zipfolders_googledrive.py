@@ -8,7 +8,7 @@ import os
 import zipfile
 from os.path import basename
 
-from _helpers import _sets_path_to_root
+from _helpers import sets_path_to_root
 
 # Zip the files from given directory that matches the filter
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # Set path to this file
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     # Required to set path to pypsa-africa
-    _sets_path_to_root("pypsa-africa")
+    sets_path_to_root("pypsa-africa")
 
 # Execute zip function
 zipFilesInDir("./resources", "resources.zip", lambda x: True)

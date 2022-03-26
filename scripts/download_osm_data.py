@@ -23,9 +23,9 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import urllib3
-from _helpers import _sets_path_to_root
-from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from _helpers import sets_path_to_root
+from _helpers import to_csv_nafix
 from config_osm_data import continent_regions
 from config_osm_data import continents
 from config_osm_data import feature_category
@@ -55,8 +55,10 @@ _logger.setLevel(logging.INFO)
 # logger.setLevel(logging.WARNING)
 
 
-# get continent according to ISO conventions
 def getContinentCountry(code):
+    """
+    Gets continent and country name from geofabrik country code input
+    """
     for continent in world_geofk:
         country = world_geofk[continent].get(code, 0)
         if country:
@@ -454,7 +456,7 @@ def output_csv_geojson(output_files, country_code, df_all_feature,
     df_all_feature.reset_index(drop=True, inplace=True)
 
     # Generate Files
-    _to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
+    to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
 
     if df_all_feature.empty:
         _logger.warning(f"Store empty Dataframe for {feature}.")
@@ -709,7 +711,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # Required to set path to pypsa-africa
-    _sets_path_to_root("pypsa-africa")
+    sets_path_to_root("pypsa-africa")
 
     # ["substation", "generator", "line", "cable", "tower"]
     feature_list = ["substation", "generator", "line", "cable"]

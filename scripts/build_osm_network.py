@@ -7,10 +7,10 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import _read_geojson
-from _helpers import _sets_path_to_root
-from _helpers import _to_csv_nafix
 from _helpers import configure_logging
+from _helpers import read_geojson
+from _helpers import sets_path_to_root
+from _helpers import to_csv_nafix
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.ops import linemerge
@@ -508,8 +508,8 @@ def built_network(inputs, outputs):
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326,
                                                                inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
-    generators = _read_geojson(inputs["generators"]).set_crs(epsg=4326,
-                                                             inplace=True)
+    generators = read_geojson(inputs["generators"]).set_crs(epsg=4326,
+                                                            inplace=True)
 
     logger.info("Stage 2/4: Add line endings to the substation datasets")
     # Use lines and create bus/line df
@@ -568,13 +568,13 @@ def built_network(inputs, outputs):
     if not os.path.exists(outputs["lines"]):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
-    _to_csv_nafix(lines, outputs["lines"])  # Generate CSV
+    to_csv_nafix(lines, outputs["lines"])  # Generate CSV
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):
         os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
     # Generate CSV
-    _to_csv_nafix(buses, outputs["substations"])
+    to_csv_nafix(buses, outputs["substations"])
 
     return None
 
@@ -587,6 +587,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 
-    _sets_path_to_root("pypsa-africa")
+    sets_path_to_root("pypsa-africa")
 
     built_network(snakemake.input, snakemake.output)
