@@ -232,6 +232,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/giacfalk">
+            <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
+            <br />
+            <sub><b>Giacomo Falchetta</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
