@@ -59,7 +59,12 @@ clean_osm_data_options:  # osm = OpenStreetMap
   threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
   tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: True  # When "True", then line endings are added to the dataset of the substations
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: True  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: True  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations

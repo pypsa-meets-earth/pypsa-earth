@@ -114,7 +114,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>hazemakhalek</b></sub>
         </a>
     </td>
     <td align="center">
@@ -250,7 +250,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
-            <sub><b>Tobie</b></sub>
+            <sub><b>Jarrad Wright</b></sub>
         </a>
     </td>
     <td align="center">
