@@ -90,10 +90,10 @@ It further adds extendable ``generators`` with **zero** capacity for
 import logging
 import os
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
+import geopandas as gpd
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
