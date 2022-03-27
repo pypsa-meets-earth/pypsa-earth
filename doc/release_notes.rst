@@ -41,6 +41,7 @@ Upcoming Release
 
 * Solved the issue of "overpassing nodes" and restyling osm_build_network: `PR #294 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/294>`__
 
+* Revise deprecations in build_shape: `PR #315 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/315>`__
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
