@@ -10,7 +10,7 @@ How to contribute
 ##########################################
 
 Contributions are welcome, and they are greatly appreciated! 
-Every little bit helps, and credit will always be given. 
+Every little bit helps, and you always earn credits.
 
 You can contribute on the code side in many ways:
 
@@ -18,18 +18,30 @@ You can contribute on the code side in many ways:
 - add new features,
 - report bugs, 
 - fix bugs, 
-- implement a new cluster/cloud comuptation backend,
+- implement a new cluster/cloud computation backend,
 - write documentation
 
-But we also have non-code related activities. 
-If you are interested in these then have a look at the `project structure <https://pypsa-meets-africa.readthedocs.io/en/latest/project_structure_and_credits.html>`_ & click on the 'leader' position.
+Code related. For linting, formatting and checking your code contributions
+against our guidelines (e.g. we use `Black <https://github.com/psf/black>`_ as code style
+and aim for `REUSE compliance <https://reuse.software/>`_),
+use `pre-commit <https://pre-commit.com/index.html>`_:
+
+1. Installation ``conda install -c conda-forge pre-commit`` or ``pip install pre-commit``
+2. Usage:
+    * To automatically activate ``pre-commit`` on every ``git commit``: Run ``pre-commit install``
+    * To manually run it: ``pre-commit run --all``
+
+Non code related.
+If you are interested in non-code related activities then have a look at the `project structure <https://pypsa-meets-africa.readthedocs.io/en/latest/project_structure_and_credits.html>`_ & click on the 'leader' position.
 A pdf file will show up, introducing you to other activities in the roam of HR, finance to outreach.
 
 
-Get Involved
-==============
+Join Us and Get Involved
+========================
 
-The PyPSA meets Africa team is currenlty running four types of meetings:
+Any person/ group is welcome to join us. Be it research leader, researcher, undergraduate, or industry professional.
+A simple way to explore this is to join our meeting.
+The PyPSA meets Africa team is currently running four types of meetings:
 
 - **Discord (Open)**
   
@@ -104,7 +116,7 @@ Essential developments
 - WP2. Implement LISFLOOD to add hydro-timerseries
 - WP3. Set up Atlite for Africa to create renewable timeseries
 - WP3. Add different concentrated solar power (CSP) designs to Atlite
-- WP4. Addapt current Atlite land coverage constraint method for African continent. For instance, it may be forbidden to install power plants in protective areas such as national parks or to build wind plants in cities. Atlite can exclude this areas but might need to be adjusted for Africa. 
+- WP4. Adapt current Atlite land coverage constraint method for African continent. For instance, it may be forbidden to install power plants in protective areas such as national parks or to build wind plants in cities. Atlite can exclude this areas but might need to be adjusted for Africa. 
 - WP5. Support the creation of a network topology by applying `various methods <https://github.com/pypsa-meets-africa/pypsa-africa/discussions/15>`_
 - WP6. Contribute to the AI satellite image detection for energy asset recognition such `applied for detecting HV lines, substations <https://github.com/pypsa-meets-africa/pypsa-africa/discussions/13>`_ and power plants
 
@@ -152,6 +164,3 @@ After linking PyPSA-Africa with PyPSA-Eur/PyPSA-Eur-Sec:
 - **Sector coupling.** The benefits of sector coupling (electricity, gas, heat, transport, cooling) in Africa.
 - **Electric Vehicles.** Opportunities and pathways to integrate electric vehicles in Africa.
 - ...
-
-
-
