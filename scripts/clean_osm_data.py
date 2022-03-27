@@ -323,6 +323,24 @@ cables_tag_to_n_cables = {
     "2x2": "4"   
 }
 
+circuits_tag_to_n_circuits = {
+    "2/3": "2",
+
+    # ? two lines one ground?
+    "2-1": "2"
+    
+    "single": "1",
+    "partial": "1",
+    # ? an out-of-order line?
+    "1 disused": "0",
+    
+    # assuming that in case of a typo there at least one line
+    "`": "1",
+    "^1": "1", 
+    "e": "1", 
+    "d": "1" 
+}
+
 def integrate_lines_df(df_all_lines):
     """
     Function to add underground, under_construction, frequency and circuits
