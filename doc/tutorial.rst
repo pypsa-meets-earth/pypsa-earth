@@ -39,7 +39,7 @@ PyPSA Introduction (essential)
 Git and GitHub (essential)
 ---------------------------
 
-For code collaboration we use GitHub. Which is a common source control tool that is a very popular collaborative code development tool. Here some notes if you are not already familar with it:
+For code collaboration we use GitHub. Which is a common source control tool that is a very popular collaborative code development tool. Here some notes if you are not already familiar with it:
 
 - Git and GitHub is not the same. Usually, you work with git on your computer (offline) to push changes to GitHub (online).
 - `Here <https://www.youtube.com/watch?v=8JJ101D3knE>`__ a great intro which we recommend

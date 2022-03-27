@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -97,9 +98,7 @@ import powerplantmatching as pm
 from powerplantmatching.export import map_country_bus
 import pypsa
 import xarray as xr
-from _helpers import configure_logging
-from _helpers import getContinent
-from _helpers import update_p_nom_max
+from _helpers import configure_logging, getContinent, update_p_nom_max
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
