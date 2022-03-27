@@ -6,9 +6,9 @@
 Welcome to the PyPSA meets Africa documentation!
 ================================================
 
-PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currenlty under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
+PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currently under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
 
-Watch our latest discusson with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
+Watch our latest discussion with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
 
 .. image:: img/africa_osm_map.png
     :width: 60%
@@ -18,7 +18,7 @@ Watch our latest discusson with African leaders about `Open Energy System Modell
 Get Involved
 ==============
 
-The PyPSA meets Africa team is currenlty running four types of meetings:
+The PyPSA meets Africa team is currently running four types of meetings:
 
 
 - `**Discord NEW! (Open)** <https://discord.gg/AnuJBk23FU>`_
@@ -114,4 +114,3 @@ Documentation
    how_to_contribute
    talks_and_papers
    
-
