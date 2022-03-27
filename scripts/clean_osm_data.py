@@ -292,6 +292,36 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
         df = df.drop(df.loc[sel_ids, cl_name].index, )
     return df  # return new frame
 
+# cable and circuit tags may be in a non-standard format
+cables_tag_to_n_cables = {
+    "1/3": "1", 
+    "2/3": "2",
+    
+    "single": "1",
+    "triple": "3",
+    
+    "partial": "1",
+    "1 disused": "0",
+    "3 disused": "0", 
+    
+    "1 (Looped - Haul & Return) + 1 power wire": "1", 
+    "ground": "0", 
+    "line": "1",
+    
+    # assuming that in case of a typo there at least one line
+    "`": "1",
+    "^1": "1", 
+    "e": "1", 
+    "d": "1", 
+        
+    "2-1": "3",
+    "3+3": "6",
+    "6+1": "6",
+    
+    "2x3": "6", 
+    "3x2": "6", 
+    "2x2": "4"   
+}
 
 def integrate_lines_df(df_all_lines):
     """
