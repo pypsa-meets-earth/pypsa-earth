@@ -15,7 +15,7 @@ on:
   - cron: "0 5 * * TUE"
 
 env:
-  CACHE_NUMBER: 1 # Change this value to manually reset the environment cache
+  CACHE_NUMBER: 2  # Change this value to manually reset the environment cache
 
 jobs:
   build:
