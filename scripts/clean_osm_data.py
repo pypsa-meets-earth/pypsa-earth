@@ -327,7 +327,7 @@ circuits_tag_to_n_circuits = {
     "2/3": "2",
 
     # ? two lines one ground?
-    "2-1": "2"
+    "2-1": "2",
     
     "single": "1",
     "partial": "1",
