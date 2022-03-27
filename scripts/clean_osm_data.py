@@ -338,7 +338,8 @@ circuits_tag_to_n_circuits = {
     "`": "1",
     "^1": "1", 
     "e": "1", 
-    "d": "1" 
+    "d": "1",
+    "1.": "1" 
 }
 
 def integrate_lines_df(df_all_lines):
