@@ -387,21 +387,7 @@ def integrate_lines_df(df_all_lines):
 
     # where circuits are "0" make "1"
     df_all_lines.loc[(df_all_lines["circuits"] == "0")
-                     # e.g. that's the case for Germany
-                     | (df_all_lines["circuits"] == "0.5")
-                     # e.g. in the GB lines data
-                     | (df_all_lines["circuits"] == "d")
-                     # e.g. in the GB lines data
-                     | (df_all_lines["circuits"] == "`")
-                     # e.g. in the FR data
-                     | (df_all_lines["circuits"] == "1.")
-                     # e.g. in the PT data
-                     | (df_all_lines["circuits"] == "^1")
-                     # e.g. in the NO data
-                     | (df_all_lines["circuits"] == "partial")
-                     # e.g. in the JP data
-                     | (df_all_lines["circuits"] == "2/3") |
-                     (df_all_lines["circuits"] == 0), "circuits", ] = 1
+                     | (df_all_lines["circuits"] == 0), "circuits", ] = 1                
 
     if df_all_lines["circuits"].dtype != int:
 
@@ -446,6 +432,9 @@ def integrate_lines_df(df_all_lines):
         # drop circuits if "None", "nan" or "1/3"
         df_all_lines.loc[(df_all_lines["circuits"] == "1/3")
                          | df_all_lines["circuits"].isna(), "circuits", ] = "0"
+
+        # map known non-numerical issues into a reasonable n_circuits value                  
+        df_all_lines["circuits"] = df_all_lines["circuits"].map(circuits_tag_to_n_circuits).fillna(df_all_lines["circuits"])                  
         df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
 
     # drop column if exist
