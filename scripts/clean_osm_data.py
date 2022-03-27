@@ -365,22 +365,12 @@ def integrate_lines_df(df_all_lines):
     # Add circuits information
     # if not int make int
     if df_all_lines["cables"].dtype != int:
+        # map known non-numerical issues into a reasonable n_cables value
+        df_all_lines["cables"] = df_all_lines["cables"].map(cables_tag_to_n_cables).fillna(df_all_lines['cables'])
         # HERE. "0" if cables "None", "nan" or "1"
         df_all_lines.loc[(df_all_lines["cables"] < "3")
-                         | (df_all_lines["cables"] == "1/3")
-                         | (df_all_lines["cables"] == "3+3")
-                         | (df_all_lines["cables"] == "single")
-                         # in BPR data
-                         | (df_all_lines["cables"] == "triple")
-                         # e.g. in the ES data
-                         | (df_all_lines["cables"] == "e")
-                         # e.g. in the UA data
-                         | (df_all_lines["cables"] == "6+1")
-                         # e.g. in the DK data
-                         | (df_all_lines["cables"] == "ground")
-                         | df_all_lines["cables"].isna(), "cables", ] = "0"
-        # quick fix of "1." problem for the cables data related to France
-        df_all_lines.loc[(df_all_lines["cables"] == "1."), "cables"] = "1"
+                         | df_all_lines["cables"].isna(), "cables", ] = "0"       
+
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
     # downgrade 4 and 5 cables to 3...
