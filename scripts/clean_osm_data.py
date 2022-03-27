@@ -294,7 +294,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
 
 # cable and circuit tags may be in a non-standard format
 cables_tag_to_n_cables = {
-    "1/3": "1", 
+    "1/3": "0", 
     "2/3": "2",
     
     "single": "1",
