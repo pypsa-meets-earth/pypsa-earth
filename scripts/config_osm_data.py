@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -478,8 +479,7 @@ continent_regions = {
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
-    "LACR":
-    ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
+    "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
     # CENTRAL AMERICAN REGION
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
     # Australasia
@@ -741,5 +741,6 @@ world_geofk = {
 
 world_countries = {
     country_2D: country_name
-    for d in world_geofk.values() for (country_2D, country_name) in d.items()
+    for d in world_geofk.values()
+    for (country_2D, country_name) in d.items()
 }

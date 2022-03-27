@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
@@ -82,12 +83,14 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from pypsa.linopf import define_constraints
-from pypsa.linopf import get_var
-from pypsa.linopf import ilopf
-from pypsa.linopf import join_exprs
-from pypsa.linopf import linexpr
-from pypsa.linopf import network_lopf
+from pypsa.linopf import (
+    define_constraints,
+    get_var,
+    ilopf,
+    join_exprs,
+    linexpr,
+    network_lopf,
+)
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
@@ -123,12 +126,13 @@ def prepare_network(n, solve_opts):
             #    t.df['capital_cost'] += 1e1 + 2.*(np.random.random(len(t.df)) - 0.5)
             if "marginal_cost" in t.df:
                 t.df["marginal_cost"] += 1e-2 + 2e-3 * (
-                    np.random.random(len(t.df)) - 0.5)
+                    np.random.random(len(t.df)) - 0.5
+                )
 
         for t in n.iterate_components(["Line", "Link"]):
             t.df["capital_cost"] += (
-                1e-1 + 2e-2 *
-                (np.random.random(len(t.df)) - 0.5)) * t.df["length"]
+                1e-1 + 2e-2 * (np.random.random(len(t.df)) - 0.5)
+            ) * t.df["length"]
 
     if solve_opts.get("nhours"):
         nhours = solve_opts["nhours"]
@@ -142,34 +146,41 @@ def add_CCL_constraints(n, config):
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
-        agg_p_nom_minmax = pd.read_csv(agg_p_nom_limits,
-                                       index_col=list(range(2)))
+        agg_p_nom_minmax = pd.read_csv(agg_p_nom_limits, index_col=list(range(2)))
     except IOError:
-        logger.exception("Need to specify the path to a .csv file containing "
-                         "aggregate capacity limits per country in "
-                         "config['electricity']['agg_p_nom_limit'].")
-    logger.info("Adding per carrier generation capacity constraints for "
-                "individual countries")
+        logger.exception(
+            "Need to specify the path to a .csv file containing "
+            "aggregate capacity limits per country in "
+            "config['electricity']['agg_p_nom_limit']."
+        )
+    logger.info(
+        "Adding per carrier generation capacity constraints for " "individual countries"
+    )
 
     gen_country = n.generators.bus.map(n.buses.country)
     # cc means country and carrier
-    p_nom_per_cc = (pd.DataFrame({
-        "p_nom":
-        linexpr((1, get_var(n, "Generator", "p_nom"))),
-        "country":
-        gen_country,
-        "carrier":
-        n.generators.carrier,
-    }).dropna(subset=["p_nom"]).groupby(["country",
-                                         "carrier"]).p_nom.apply(join_exprs))
+    p_nom_per_cc = (
+        pd.DataFrame(
+            {
+                "p_nom": linexpr((1, get_var(n, "Generator", "p_nom"))),
+                "country": gen_country,
+                "carrier": n.generators.carrier,
+            }
+        )
+        .dropna(subset=["p_nom"])
+        .groupby(["country", "carrier"])
+        .p_nom.apply(join_exprs)
+    )
     minimum = agg_p_nom_minmax["min"].dropna()
     if not minimum.empty:
-        minconstraint = define_constraints(n, p_nom_per_cc[minimum.index],
-                                           ">=", minimum, "agg_p_nom", "min")
+        minconstraint = define_constraints(
+            n, p_nom_per_cc[minimum.index], ">=", minimum, "agg_p_nom", "min"
+        )
     maximum = agg_p_nom_minmax["max"].dropna()
     if not maximum.empty:
-        maxconstraint = define_constraints(n, p_nom_per_cc[maximum.index],
-                                           "<=", maximum, "agg_p_nom", "max")
+        maxconstraint = define_constraints(
+            n, p_nom_per_cc[maximum.index], "<=", maximum, "agg_p_nom", "max"
+        )
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
@@ -183,20 +194,33 @@ def add_EQ_constraints(n, o, scaling=1e-1):
         ggrouper = n.generators.bus
         lgrouper = n.loads.bus
         sgrouper = n.storage_units.bus
-    load = (n.snapshot_weightings.generators @ n.loads_t.p_set.groupby(
-        lgrouper, axis=1).sum())
-    inflow = (n.snapshot_weightings.stores @ n.storage_units_t.inflow.groupby(
-        sgrouper, axis=1).sum())
+    load = (
+        n.snapshot_weightings.generators
+        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+    )
+    inflow = (
+        n.snapshot_weightings.stores
+        @ n.storage_units_t.inflow.groupby(sgrouper, axis=1).sum()
+    )
     inflow = inflow.reindex(load.index).fillna(0.0)
     rhs = scaling * (level * load - inflow)
-    lhs_gen = (linexpr((n.snapshot_weightings.generators * scaling,
-                        get_var(n, "Generator",
-                                "p").T)).T.groupby(ggrouper,
-                                                   axis=1).apply(join_exprs))
-    lhs_spill = (linexpr((
-        -n.snapshot_weightings.stores * scaling,
-        get_var(n, "StorageUnit", "spill").T,
-    )).T.groupby(sgrouper, axis=1).apply(join_exprs))
+    lhs_gen = (
+        linexpr(
+            (n.snapshot_weightings.generators * scaling, get_var(n, "Generator", "p").T)
+        )
+        .T.groupby(ggrouper, axis=1)
+        .apply(join_exprs)
+    )
+    lhs_spill = (
+        linexpr(
+            (
+                -n.snapshot_weightings.stores * scaling,
+                get_var(n, "StorageUnit", "spill").T,
+            )
+        )
+        .T.groupby(sgrouper, axis=1)
+        .apply(join_exprs)
+    )
     lhs_spill = lhs_spill.reindex(lhs_gen.index).fillna("")
     lhs = lhs_gen + lhs_spill
     define_constraints(n, lhs, ">=", rhs, "equity", "min")
@@ -204,21 +228,23 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 def add_BAU_constraints(n, config):
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
-    lhs = (linexpr(
-        (1, get_var(n, "Generator",
-                    "p_nom"))).groupby(n.generators.carrier).apply(join_exprs))
-    define_constraints(n, lhs, ">=", mincaps[lhs.index], "Carrier",
-                       "bau_mincaps")
+    lhs = (
+        linexpr((1, get_var(n, "Generator", "p_nom")))
+        .groupby(n.generators.carrier)
+        .apply(join_exprs)
+    )
+    define_constraints(n, lhs, ">=", mincaps[lhs.index], "Carrier", "bau_mincaps")
 
 
 def add_SAFE_constraints(n, config):
-    peakdemand = (1.0 + config["electricity"]["SAFE_reservemargin"]
-                  ) * n.loads_t.p_set.sum(axis=1).max()
+    peakdemand = (
+        1.0 + config["electricity"]["SAFE_reservemargin"]
+    ) * n.loads_t.p_set.sum(axis=1).max()
     conv_techs = config["plotting"]["conv_techs"]
     exist_conv_caps = n.generators.query(
-        "~p_nom_extendable & carrier in @conv_techs").p_nom.sum()
-    ext_gens_i = n.generators.query(
-        "carrier in @conv_techs & p_nom_extendable").index
+        "~p_nom_extendable & carrier in @conv_techs"
+    ).p_nom.sum()
+    ext_gens_i = n.generators.query("carrier in @conv_techs & p_nom_extendable").index
     lhs = linexpr((1, get_var(n, "Generator", "p_nom")[ext_gens_i])).sum()
     rhs = peakdemand - exist_conv_caps
     define_constraints(n, lhs, ">=", rhs, "Safe", "mintotalcap")
@@ -272,20 +298,24 @@ def solve_network(n, config, opts="", **kwargs):
     n.opts = opts
 
     if cf_solving.get("skip_iterations", False):
-        network_lopf(n,
-                     solver_name=solver_name,
-                     solver_options=solver_options,
-                     extra_functionality=extra_functionality,
-                     **kwargs)
+        network_lopf(
+            n,
+            solver_name=solver_name,
+            solver_options=solver_options,
+            extra_functionality=extra_functionality,
+            **kwargs
+        )
     else:
-        ilopf(n,
-              solver_name=solver_name,
-              solver_options=solver_options,
-              track_iterations=track_iterations,
-              min_iterations=min_iterations,
-              max_iterations=max_iterations,
-              extra_functionality=extra_functionality,
-              **kwargs)
+        ilopf(
+            n,
+            solver_name=solver_name,
+            solver_options=solver_options,
+            track_iterations=track_iterations,
+            min_iterations=min_iterations,
+            max_iterations=max_iterations,
+            extra_functionality=extra_functionality,
+            **kwargs
+        )
     return n
 
 

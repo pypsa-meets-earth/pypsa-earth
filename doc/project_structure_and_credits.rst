@@ -76,7 +76,7 @@ Advisor Team
 - Nafiu Tijjani (Assistant Chief Scientific Officer in the Renewable Energy Department of Energy Commission of Nigeria)
 - Aminu Haruna Isa (Energy Planning and Analysis Dep't at the Energy Commission of Nigeria)
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants EMRC, Nigeria)
-- Bruno Merven (Energy system modeller for IRENA, SEA and University of Capetown, South Africa)
+- Bruno Merven (Energy system modeller for IRENA, SEA and University of Cape Town, South Africa)
 - Jarrad Wright (Principal Researcher at Council for Scientific Research and Industry CSIR, South Africa)
 - Chandima Gomes (Professor at University of Witwatersrand and Chair of ESKOM Power Plant Engineering Institute, South Africa)
 - Dave Dorrell (Distinguished Professor at University of Witwatersrand, South Africa)

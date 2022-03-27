@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
@@ -45,21 +46,23 @@ def rename_techs(label):
     return label
 
 
-preferred_order = pd.Index([
-    "transmission lines",
-    "hydroelectricity",
-    "hydro reservoir",
-    "run of river",
-    "pumped hydro storage",
-    "onshore wind",
-    "offshore wind ac",
-    "offshore wind dc",
-    "solar PV",
-    "solar thermal",
-    "OCGT",
-    "hydrogen storage",
-    "battery storage",
-])
+preferred_order = pd.Index(
+    [
+        "transmission lines",
+        "hydroelectricity",
+        "hydro reservoir",
+        "run of river",
+        "pumped hydro storage",
+        "onshore wind",
+        "offshore wind ac",
+        "offshore wind dc",
+        "solar PV",
+        "solar thermal",
+        "OCGT",
+        "hydrogen storage",
+        "battery storage",
+    ]
+)
 
 
 def plot_costs(infn, fn=None):
@@ -74,21 +77,23 @@ def plot_costs(infn, fn=None):
 
     df = df.groupby(df.index.map(rename_techs)).sum()
 
-    to_drop = df.index[df.max(
-        axis=1) < snakemake.config["plotting"]["costs_threshold"]]
+    to_drop = df.index[df.max(axis=1) < snakemake.config["plotting"]["costs_threshold"]]
 
     if not to_drop.empty:
-        _logger.info("Dropping elements from costs dataframe:\n" +
-                     df.loc[to_drop].to_string() + "\n")
+        _logger.info(
+            "Dropping elements from costs dataframe:\n"
+            + df.loc[to_drop].to_string()
+            + "\n"
+        )
 
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        _logger.info("Remaining elements in costs dataframe:\n" +
-                     df.to_string() + "\n")
+        _logger.info("Remaining elements in costs dataframe:\n" + df.to_string() + "\n")
 
     new_index_costs = df.index.intersection(preferred_order).append(
-        df.index.difference(preferred_order))
+        df.index.difference(preferred_order)
+    )
 
     new_columns = df.sum().sort_values().index
 
@@ -108,10 +113,7 @@ def plot_costs(infn, fn=None):
         kind="bar",
         ax=ax,
         stacked=True,
-        color=[
-            snakemake.config["plotting"]["tech_colors"][i]
-            for i in new_index_costs
-        ],
+        color=[snakemake.config["plotting"]["tech_colors"][i] for i in new_index_costs],
     )
 
     handles, labels = ax.get_legend_handles_labels()
@@ -146,21 +148,27 @@ def plot_energy(infn, fn=None):
 
     df = df.groupby(df.index.map(rename_techs)).sum()
 
-    to_drop = df.index[df.abs().max(
-        axis=1) < snakemake.config["plotting"]["energy_threshold"]]
+    to_drop = df.index[
+        df.abs().max(axis=1) < snakemake.config["plotting"]["energy_threshold"]
+    ]
 
     if not to_drop.empty:
-        _logger.info("Dropping elements from energy dataframe:\n" +
-                     df.loc[to_drop].to_string() + "\n")
+        _logger.info(
+            "Dropping elements from energy dataframe:\n"
+            + df.loc[to_drop].to_string()
+            + "\n"
+        )
 
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        _logger.info("Remaining elements in energy dataframe:\n" +
-                     df.to_string() + "\n")
+        _logger.info(
+            "Remaining elements in energy dataframe:\n" + df.to_string() + "\n"
+        )
 
     new_index_energy = df.index.intersection(preferred_order).append(
-        df.index.difference(preferred_order))
+        df.index.difference(preferred_order)
+    )
 
     new_columns = df.columns.sort_values()
 
@@ -181,8 +189,7 @@ def plot_energy(infn, fn=None):
         ax=ax,
         stacked=True,
         color=[
-            snakemake.config["plotting"]["tech_colors"][i]
-            for i in new_index_energy
+            snakemake.config["plotting"]["tech_colors"][i] for i in new_index_energy
         ],
     )
 
@@ -191,10 +198,12 @@ def plot_energy(infn, fn=None):
     handles.reverse()
     labels.reverse()
 
-    ax.set_ylim([
-        snakemake.config["plotting"]["energy_min"],
-        snakemake.config["plotting"]["energy_max"],
-    ])
+    ax.set_ylim(
+        [
+            snakemake.config["plotting"]["energy_min"],
+            snakemake.config["plotting"]["energy_max"],
+        ]
+    )
 
     ax.set_ylabel("Energy [TWh/a]")
 
@@ -235,5 +244,4 @@ if __name__ == "__main__":
     except KeyError:
         _logger.error(f"plotting function for {summary} has not been defined")
 
-    func(os.path.join(snakemake.input[0], f"{summary}.csv"),
-         snakemake.output[0])
+    func(os.path.join(snakemake.input[0], f"{summary}.csv"), snakemake.output[0])
