@@ -90,15 +90,15 @@ It further adds extendable ``generators`` with **zero** capacity for
 import logging
 import os
 
+import geopandas as gpd
+import fiona
 import numpy as np
 import pandas as pd
-import fiona
-import geopandas as gpd
 import powerplantmatching as pm
-from powerplantmatching.export import map_country_bus
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 from vresutils.costdata import annuity
