@@ -90,8 +90,8 @@ It further adds extendable ``generators`` with **zero** capacity for
 import logging
 import os
 
-import geopandas as gpd
 import fiona
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
