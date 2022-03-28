@@ -429,10 +429,8 @@ def integrate_lines_df(df_all_lines):
                     f"There is a difference of {total_length_diff} m in the dropped lines length as compared with values extracted from geographical coordinates."
                 )
 
-        # drop circuits if "None", "nan" or "1/3"
-        df_all_lines.loc[(df_all_lines["circuits"] == "1/3")
-                         | df_all_lines["circuits"].isna(), "circuits", ] = "0"
-
+        # drop circuits if "None" or "nan"
+        df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits", ] = "0"
         # map known non-numerical issues into a reasonable n_circuits value                  
         df_all_lines["circuits"] = df_all_lines["circuits"].map(circuits_tag_to_n_circuits).fillna(df_all_lines["circuits"])                  
         df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
