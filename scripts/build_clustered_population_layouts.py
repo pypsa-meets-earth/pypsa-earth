@@ -21,8 +21,12 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(snakemake.config["atlite"]["cutout"])
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
-    clustered_regions = (gpd.read_file(
-        snakemake.input.regions_onshore).set_index("name").buffer(0).squeeze())
+    clustered_regions = (
+        gpd.read_file(snakemake.input.regions_onshore)
+        .set_index("name")
+        .buffer(0)
+        .squeeze()
+    )
 
     I = cutout.indicatormatrix(clustered_regions)
 

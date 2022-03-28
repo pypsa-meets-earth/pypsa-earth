@@ -38,13 +38,16 @@ if __name__ == "__main__":
 
     # countries = np.sort(nuts3.country.unique())
     countries = np.array(["MA"])
-    urban_fraction = (pd.read_csv(
-        snakemake.input.urban_percent,
-        header=None,
-        index_col=0,
-        names=["fraction"],
-        squeeze=True,
-    ) / 100.0)
+    urban_fraction = (
+        pd.read_csv(
+            snakemake.input.urban_percent,
+            header=None,
+            index_col=0,
+            names=["fraction"],
+            squeeze=True,
+        )
+        / 100.0
+    )
 
     # fill missing Balkans values
     # missing = ["AL", "ME", "MK"]
@@ -70,8 +73,7 @@ if __name__ == "__main__":
     for ct in countries:
         print(ct, urban_fraction[ct])
 
-        indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0
-                                                 if x == ct else 0.0)
+        indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0 if x == ct else 0.0)
 
         indicator_cells_ct = pd.Series(Iinv.T.dot(indicator_nuts3_ct))
 
@@ -85,8 +87,7 @@ if __name__ == "__main__":
 
         # The first low density grid cells to reach rural fraction are rural
         asc_density_i = density_cells_ct.sort_values().index
-        asc_density_cumsum = pop_cells_ct[asc_density_i].cumsum(
-        ) / pop_cells_ct.sum()
+        asc_density_cumsum = pop_cells_ct[asc_density_i].cumsum() / pop_cells_ct.sum()
         rural_fraction_ct = 1 - urban_fraction[ct]
         pop_ct_rural_b = asc_density_cumsum < rural_fraction_ct
         pop_ct_urban_b = ~pop_ct_rural_b

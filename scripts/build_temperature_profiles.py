@@ -24,8 +24,12 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(cutout_config).sel(time=time)
 
-    clustered_regions = (gpd.read_file(
-        snakemake.input.regions_onshore).set_index("name").buffer(0).squeeze())
+    clustered_regions = (
+        gpd.read_file(snakemake.input.regions_onshore)
+        .set_index("name")
+        .buffer(0)
+        .squeeze()
+    )
 
     I = cutout.indicatormatrix(clustered_regions)
 
@@ -40,12 +44,12 @@ if __name__ == "__main__":
         nonzero_sum[nonzero_sum == 0.0] = 1.0
         M_tilde = M / nonzero_sum
 
-        temp_air = cutout.temperature(matrix=M_tilde.T,
-                                      index=clustered_regions.index)
+        temp_air = cutout.temperature(matrix=M_tilde.T, index=clustered_regions.index)
 
         temp_air.to_netcdf(snakemake.output[f"temp_air_{area}"])
 
-        temp_soil = cutout.soil_temperature(matrix=M_tilde.T,
-                                            index=clustered_regions.index)
+        temp_soil = cutout.soil_temperature(
+            matrix=M_tilde.T, index=clustered_regions.index
+        )
 
         temp_soil.to_netcdf(snakemake.output[f"temp_soil_{area}"])
