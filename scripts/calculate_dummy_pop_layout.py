@@ -10,10 +10,12 @@ def calculate_dummy_pop_layout(n, inhabitants):
     Function to create dummy pop layout (clustered)
     """
     # Get pop_layout of PyPSA-Eur-Sec (to get column names)
-    pop_layout_eur = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
+    pop_layout_eur = pd.read_csv(snakemake.input.clustered_pop_layout,
+                                 index_col=0)
 
     # Create new pop_layout for morocco
-    pop_layout_dummy = pd.DataFrame(columns=pop_layout_eur.columns, index=n.buses.index)
+    pop_layout_dummy = pd.DataFrame(columns=pop_layout_eur.columns,
+                                    index=n.buses.index)
 
     # Calculate the rural and urban population for morocco, assuming an equal distribution between nodes and urban/rural
     pop_per_node = inhabitants / len(pop_layout_dummy.index) / 2
@@ -21,13 +23,13 @@ def calculate_dummy_pop_layout(n, inhabitants):
     # Add population to pop_layout_dummy
     pop_layout_dummy["urban"] = pop_per_node
     pop_layout_dummy["rural"] = pop_per_node
-    pop_layout_dummy["total"] = pop_layout_dummy["urban"] + pop_layout_dummy["rural"]
+    pop_layout_dummy[
+        "total"] = pop_layout_dummy["urban"] + pop_layout_dummy["rural"]
 
     # Add country and fraction of nodes population to countries total population
     pop_layout_dummy["ct"] = "MA"
     pop_layout_dummy["fraction"] = 1 / len(
-        pop_layout_dummy[pop_layout_dummy["ct"] == "MA"].index
-    )
+        pop_layout_dummy[pop_layout_dummy["ct"] == "MA"].index)
 
     return pop_layout_dummy
 
@@ -38,7 +40,9 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         # from helper import mock_snakemake #TODO remove func from here to helper script
-        snakemake = mock_snakemake("calculate_dummy_pop_layout", simpl="", clusters="4")
+        snakemake = mock_snakemake("calculate_dummy_pop_layout",
+                                   simpl="",
+                                   clusters="4")
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)
