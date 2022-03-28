@@ -39,8 +39,7 @@ def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
             print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(
-                os.path.abspath("."))  # name of upper folder
+            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
 
 
@@ -119,35 +118,35 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
     costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = (costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(
-        min_count=1))
-    costs = costs.fillna({
-        "CO2 intensity": 0,
-        "FOM": 0,
-        "VOM": 0,
-        "discount rate": discount_rate,
-        "efficiency": 1,
-        "fuel": 0,
-        "investment": 0,
-        "lifetime": lifetime,
-    })
+    costs = (
+        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    )
+    costs = costs.fillna(
+        {
+            "CO2 intensity": 0,
+            "FOM": 0,
+            "VOM": 0,
+            "discount rate": discount_rate,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": lifetime,
+        }
+    )
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
     costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears
-        for i, v in costs.iterrows()
+        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
     ]
 
     return costs
 
 
-def create_network_topology(n,
-                            prefix,
-                            like="ac",
-                            connector=" <-> ",
-                            bidirectional=True):
+def create_network_topology(
+    n, prefix, like="ac", connector=" <-> ", bidirectional=True
+):
     """
     Create a network topology like the power transmission network.
 
@@ -169,8 +168,8 @@ def create_network_topology(n,
     lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
 
     candidates = pd.concat(
-        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC",
-                                        lk_attrs]]).fillna(0)
+        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
+    ).fillna(0)
 
     positive_order = candidates.bus0 < candidates.bus1
     candidates_p = candidates[positive_order]
@@ -218,10 +217,9 @@ def create_dummy_data(n, sector, carriers):
     return pd.DataFrame(data, index=ind, columns=col)
 
 
-def create_transport_data_dummy(pop_layout,
-                                transport_data,
-                                cars=4000000,
-                                average_fuel_efficiency=0.7):
+def create_transport_data_dummy(
+    pop_layout, transport_data, cars=4000000, average_fuel_efficiency=0.7
+):
 
     for country in pop_layout.ct.unique():
 
@@ -275,7 +273,7 @@ def override_component_attrs(directory):
     Parameters
     ----------
     directory : string
-        Folder where component attributes to override are stored 
+        Folder where component attributes to override are stored
         analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
 
     Returns
