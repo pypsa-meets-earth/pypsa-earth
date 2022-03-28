@@ -7,14 +7,12 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from helpers import sets_path_to_root
 from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        from helpers import mock_snakemake
-
+        from helpers import mock_snakemake, sets_path_to_root
         snakemake = mock_snakemake("build_population_layouts")
         sets_path_to_root("pypsa-earth-sec")
 
