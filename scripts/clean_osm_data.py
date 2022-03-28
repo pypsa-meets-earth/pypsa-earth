@@ -394,8 +394,9 @@ def integrate_lines_df(df_all_lines):
         df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3)
 
     # where circuits are "0" make "1"
-    df_all_lines.loc[(df_all_lines["circuits"] == "0")
-                     | (df_all_lines["circuits"] == 0), "circuits", ] = 1                
+    df_all_lines.loc[
+        (df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0), "circuits", 
+    ] = 1                
 
     if df_all_lines["circuits"].dtype != int:
 
