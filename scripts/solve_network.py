@@ -1,5 +1,4 @@
 """Solve network."""
-
 import logging
 import os
 
@@ -7,8 +6,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 from helpers import override_component_attrs
-from pypsa.linopf import ilopf, network_lopf
-from pypsa.linopt import define_constraints, get_var, linexpr
+from pypsa.linopf import ilopf
+from pypsa.linopf import network_lopf
+from pypsa.linopt import define_constraints
+from pypsa.linopt import get_var
+from pypsa.linopt import linexpr
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
