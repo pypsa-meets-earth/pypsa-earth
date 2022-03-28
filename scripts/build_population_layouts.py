@@ -17,7 +17,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_population_layouts")
         sets_path_to_root("pypsa-earth-sec")
 
-
     cutout_path = os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
     # cutout = snakemake.config['atlite']['cutout']

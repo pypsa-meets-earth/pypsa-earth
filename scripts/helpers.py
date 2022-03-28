@@ -6,6 +6,7 @@ from vresutils.costdata import annuity
 from pypsa.descriptors import Dict
 from pypsa.components import components, component_attrs
 
+
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
     """
     Search and sets path to the given root directory (root/path/file).
@@ -38,8 +39,10 @@ def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
             print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
+            upper_path = os.path.dirname(
+                os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
+
 
 def mock_snakemake(rulename, **wildcards):
     """
@@ -280,7 +283,7 @@ def override_component_attrs(directory):
     Dictionary of overriden component attributes.
     """
 
-    attrs = Dict({k : v.copy() for k,v in component_attrs.items()})
+    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"
