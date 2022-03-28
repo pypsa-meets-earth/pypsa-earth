@@ -1,10 +1,11 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from vresutils.costdata import annuity
+from pypsa.components import component_attrs, components
 from pypsa.descriptors import Dict
-from pypsa.components import components, component_attrs
+from vresutils.costdata import annuity
 
 
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
