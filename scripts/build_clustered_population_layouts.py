@@ -9,6 +9,7 @@ import xarray as xr
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
@@ -20,8 +21,12 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(snakemake.config["atlite"]["cutout"])
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
-    clustered_regions = (gpd.read_file(
-        snakemake.input.regions_onshore).set_index("name").buffer(0).squeeze())
+    clustered_regions = (
+        gpd.read_file(snakemake.input.regions_onshore)
+        .set_index("name")
+        .buffer(0)
+        .squeeze()
+    )
 
     I = cutout.indicatormatrix(clustered_regions)
 
