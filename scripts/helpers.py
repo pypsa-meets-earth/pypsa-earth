@@ -1,10 +1,13 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from vresutils.costdata import annuity
+from pypsa.components import component_attrs
+from pypsa.components import components
 from pypsa.descriptors import Dict
-from pypsa.components import components, component_attrs
+from vresutils.costdata import annuity
+
 
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
     """
@@ -38,8 +41,10 @@ def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
             print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
+            upper_path = os.path.dirname(
+                os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
+
 
 def mock_snakemake(rulename, **wildcards):
     """
@@ -272,7 +277,7 @@ def override_component_attrs(directory):
     Parameters
     ----------
     directory : string
-        Folder where component attributes to override are stored 
+        Folder where component attributes to override are stored
         analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
 
     Returns
@@ -280,7 +285,7 @@ def override_component_attrs(directory):
     Dictionary of overriden component attributes.
     """
 
-    attrs = Dict({k : v.copy() for k,v in component_attrs.items()})
+    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"

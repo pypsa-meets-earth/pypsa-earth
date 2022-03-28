@@ -3,20 +3,20 @@ import multiprocessing as mp
 import os
 
 import atlite
-from helpers import sets_path_to_root
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+from helpers import sets_path_to_root
 from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from helpers import mock_snakemake
+
         snakemake = mock_snakemake("build_population_layouts")
         sets_path_to_root("pypsa-earth-sec")
-
 
     cutout_path = os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
