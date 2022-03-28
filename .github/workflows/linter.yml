@@ -58,3 +58,4 @@ jobs:
         VALIDATE_PYTHON_BLACK: false
         VALIDATE_NATURAL_LANGUAGE: false
         VALIDATE_JSCPD: false
+        VALIDATE_GITLEAKS: false
