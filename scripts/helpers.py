@@ -6,6 +6,41 @@ from vresutils.costdata import annuity
 from pypsa.descriptors import Dict
 from pypsa.components import components, component_attrs
 
+def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
+    """
+    Search and sets path to the given root directory (root/path/file).
+
+    Parameters
+    ----------
+    root_directory_name : str
+        Name of the root directory.
+    n : int
+        Number of folders the function will check upwards/root directed.
+
+    """
+    import os
+
+    repo_name = root_directory_name
+    n = 8  # check max 8 levels above. Random default.
+    n0 = n
+
+    while n >= 0:
+        n -= 1
+        # if repo_name is current folder name, stop and set path
+        if repo_name == os.path.basename(os.path.abspath(".")):
+            repo_path = os.getcwd()  # os.getcwd() = current_path
+            os.chdir(repo_path)  # change dir_path to repo_path
+            print("This is the repository path: ", repo_path)
+            print("Had to go %d folder(s) up." % (n0 - 1 - n))
+            break
+        # if repo_name NOT current folder name for 5 levels then stop
+        if n == 0:
+            print("Cant find the repo path.")
+        # if repo_name NOT current folder name, go one dir higher
+        else:
+            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
+            os.chdir(upper_path)
+
 def mock_snakemake(rulename, **wildcards):
     """
     This function is expected to be executed from the 'scripts'-directory of '
