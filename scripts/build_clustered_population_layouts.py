@@ -9,6 +9,7 @@ import xarray as xr
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",

@@ -37,6 +37,7 @@ def calculate_dummy_pop_layout(n, inhabitants):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake("calculate_dummy_pop_layout",
