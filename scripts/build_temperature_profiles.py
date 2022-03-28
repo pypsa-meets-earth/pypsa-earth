@@ -1,5 +1,4 @@
 """Build temperature profiles."""
-
 import os
 
 import atlite
