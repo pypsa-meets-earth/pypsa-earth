@@ -102,7 +102,7 @@ snapshots:
   closed: left # end is not inclusive
 
 atlite:
-  cutout: /cutouts/africa-2013-era5.nc
+  cutout: ./cutouts/africa-2013-era5.nc
 
 solving:
   #tmpdir: "path/to/tmp"
