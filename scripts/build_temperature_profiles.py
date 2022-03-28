@@ -1,5 +1,7 @@
 """Build temperature profiles."""
 
+import os
+
 import geopandas as gpd
 import atlite
 import pandas as pd
@@ -8,15 +10,17 @@ import numpy as np
 
 if __name__ == '__main__':
     if 'snakemake' not in globals():
-        from helpers import mock_snakemake
+        from helpers import mock_snakemake, sets_path_to_root
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             'build_temperature_profiles',
             simpl='',
             clusters=4,
         )
+        sets_path_to_root("pypsa-earth-sec")
 
     time = pd.date_range(freq='h', **snakemake.config['snapshots'])
-    cutout_config = '../' + snakemake.config['atlite']['cutout']
+    cutout_config = snakemake.config['atlite']['cutout']
 
     cutout = atlite.Cutout(cutout_config).sel(time=time)
 
