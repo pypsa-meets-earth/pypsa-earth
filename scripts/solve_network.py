@@ -1,16 +1,13 @@
 """Solve network."""
 
-import pypsa
+import os
 
+import pypsa
 import numpy as np
 import pandas as pd
-
 from pypsa.linopt import get_var, linexpr, define_constraints
-
 from pypsa.linopf import network_lopf, ilopf
-
 from vresutils.benchmark import memory_logger
-
 from helpers import override_component_attrs
 
 import logging
@@ -234,7 +231,8 @@ def solve_network(n, config, opts='', **kwargs):
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        from helpers import mock_snakemake
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from helpers import mock_snakemake, sets_path_to_root
         snakemake = mock_snakemake(
             'solve_network',
             simpl='',
@@ -245,6 +243,7 @@ if __name__ == "__main__":
             # sector_opts='Co2L0-168H-T-H-B-I-solar3-dist1',
             # ,
         )
+        sets_path_to_root("pypsa-earth-sec")
 
     logging.basicConfig(filename=snakemake.log.python,
                         level=snakemake.config['logging_level'])
