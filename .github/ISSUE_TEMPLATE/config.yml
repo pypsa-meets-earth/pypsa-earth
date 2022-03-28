@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Discussion board
-    url: https://github.com/pypsa-meets-africa/pypsa-africa/discussions
-    about: Please ask and answer general usage questions here.
+- name: Discussion board
+  url: https://github.com/pypsa-meets-africa/pypsa-africa/discussions
+  about: Please ask and answer general usage questions here.

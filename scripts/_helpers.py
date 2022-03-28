@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -9,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 
-def _sets_path_to_root(root_directory_name):
+def sets_path_to_root(root_directory_name):
     """
     Search and sets path to the given root directory (root/path/file).
 
@@ -41,8 +42,7 @@ def _sets_path_to_root(root_directory_name):
             print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(
-                os.path.abspath("."))  # name of upper folder
+            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
 
 
@@ -72,17 +72,21 @@ def configure_logging(snakemake, skip_handlers=False):
 
     if skip_handlers is False:
         fallback_path = Path(__file__).parent.joinpath(
-            "..", "logs", f"{snakemake.rule}.log")
+            "..", "logs", f"{snakemake.rule}.log"
+        )
         logfile = snakemake.log.get(
-            "python", snakemake.log[0] if snakemake.log else fallback_path)
-        kwargs.update({
-            "handlers": [
-                # Prefer the "python" log, otherwise take the first log for each
-                # Snakemake rule
-                logging.FileHandler(logfile),
-                logging.StreamHandler(),
-            ]
-        })
+            "python", snakemake.log[0] if snakemake.log else fallback_path
+        )
+        kwargs.update(
+            {
+                "handlers": [
+                    # Prefer the "python" log, otherwise take the first log for each
+                    # Snakemake rule
+                    logging.FileHandler(logfile),
+                    logging.StreamHandler(),
+                ]
+            }
+        )
     logging.basicConfig(**kwargs)
 
 
@@ -121,12 +125,13 @@ def load_network(import_name=None, custom_components=None):
     if custom_components is not None:
         override_components = pypsa.components.components.copy()
         override_component_attrs = Dict(
-            {k: v.copy()
-             for k, v in pypsa.components.component_attrs.items()})
+            {k: v.copy() for k, v in pypsa.components.component_attrs.items()}
+        )
         for k, v in custom_components.items():
             override_components.loc[k] = v["component"]
             override_component_attrs[k] = pd.DataFrame(
-                columns=["type", "unit", "default", "description", "status"])
+                columns=["type", "unit", "default", "description", "status"]
+            )
             for attr, val in v["attributes"].items():
                 override_component_attrs[k].loc[attr] = val
 
@@ -138,9 +143,9 @@ def load_network(import_name=None, custom_components=None):
 
 
 def pdbcast(v, h):
-    return pd.DataFrame(v.values.reshape((-1, 1)) * h.values,
-                        index=v.index,
-                        columns=h.index)
+    return pd.DataFrame(
+        v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
+    )
 
 
 def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
@@ -152,8 +157,9 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     n.loads["carrier"] = n.loads.bus.map(n.buses.carrier) + " load"
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
-    n.links["carrier"] = (n.links.bus0.map(n.buses.carrier) + "-" +
-                          n.links.bus1.map(n.buses.carrier))
+    n.links["carrier"] = (
+        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+    )
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
 
@@ -161,16 +167,16 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     n.links["p_nom"] = n.links["p_nom_min"]
 
     if combine_hydro_ps:
-        n.storage_units.loc[n.storage_units.carrier.isin({"PHS", "hydro"}),
-                            "carrier"] = "hydro+PHS"
+        n.storage_units.loc[
+            n.storage_units.carrier.isin({"PHS", "hydro"}), "carrier"
+        ] = "hydro+PHS"
 
     # if the carrier was not set on the heat storage units
     # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(Nyears, tech_costs, config["costs"],
-                       config["electricity"])
+    costs = load_costs(Nyears, tech_costs, config["costs"], config["electricity"])
     update_transmission_costs(n, costs)
 
     return n
@@ -186,38 +192,56 @@ def update_p_nom_max(n):
 
 
 def aggregate_p_nom(n):
-    return pd.concat([
-        n.generators.groupby("carrier").p_nom_opt.sum(),
-        n.storage_units.groupby("carrier").p_nom_opt.sum(),
-        n.links.groupby("carrier").p_nom_opt.sum(),
-        n.loads_t.p.groupby(n.loads.carrier, axis=1).sum().mean(),
-    ])
+    return pd.concat(
+        [
+            n.generators.groupby("carrier").p_nom_opt.sum(),
+            n.storage_units.groupby("carrier").p_nom_opt.sum(),
+            n.links.groupby("carrier").p_nom_opt.sum(),
+            n.loads_t.p.groupby(n.loads.carrier, axis=1).sum().mean(),
+        ]
+    )
 
 
 def aggregate_p(n):
-    return pd.concat([
-        n.generators_t.p.sum().groupby(n.generators.carrier).sum(),
-        n.storage_units_t.p.sum().groupby(n.storage_units.carrier).sum(),
-        n.stores_t.p.sum().groupby(n.stores.carrier).sum(),
-        -n.loads_t.p.sum().groupby(n.loads.carrier).sum(),
-    ])
+    return pd.concat(
+        [
+            n.generators_t.p.sum().groupby(n.generators.carrier).sum(),
+            n.storage_units_t.p.sum().groupby(n.storage_units.carrier).sum(),
+            n.stores_t.p.sum().groupby(n.stores.carrier).sum(),
+            -n.loads_t.p.sum().groupby(n.loads.carrier).sum(),
+        ]
+    )
 
 
 def aggregate_e_nom(n):
-    return pd.concat([
-        (n.storage_units["p_nom_opt"] * n.storage_units["max_hours"]).groupby(
-            n.storage_units["carrier"]).sum(),
-        n.stores["e_nom_opt"].groupby(n.stores.carrier).sum(),
-    ])
+    return pd.concat(
+        [
+            (n.storage_units["p_nom_opt"] * n.storage_units["max_hours"])
+            .groupby(n.storage_units["carrier"])
+            .sum(),
+            n.stores["e_nom_opt"].groupby(n.stores.carrier).sum(),
+        ]
+    )
 
 
 def aggregate_p_curtailed(n):
-    return pd.concat([
-        ((n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt) -
-          n.generators_t.p.sum()).groupby(n.generators.carrier).sum()),
-        ((n.storage_units_t.inflow.sum() - n.storage_units_t.p.sum()).groupby(
-            n.storage_units.carrier).sum()),
-    ])
+    return pd.concat(
+        [
+            (
+                (
+                    n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
+                    - n.generators_t.p.sum()
+                )
+                .groupby(n.generators.carrier)
+                .sum()
+            ),
+            (
+                (n.storage_units_t.inflow.sum() - n.storage_units_t.p.sum())
+                .groupby(n.storage_units.carrier)
+                .sum()
+            ),
+        ]
+    )
 
 
 def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
@@ -233,22 +257,22 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-            n.iterate_components(components.keys(), skip_empty=False),
-            components.values()):
+        n.iterate_components(components.keys(), skip_empty=False), components.values()
+    ):
         if c.df.empty:
             continue
         if not existing_only:
             p_nom += "_opt"
-        costs[(c.list_name,
-               "capital")] = ((c.df[p_nom] * c.df.capital_cost).groupby(
-                   c.df.carrier).sum())
+        costs[(c.list_name, "capital")] = (
+            (c.df[p_nom] * c.df.capital_cost).groupby(c.df.carrier).sum()
+        )
         if p_attr is not None:
             p = c.pnl[p_attr].sum()
             if c.name == "StorageUnit":
                 p = p.loc[p > 0]
-            costs[(c.list_name,
-                   "marginal")] = ((p * c.df.marginal_cost).groupby(
-                       c.df.carrier).sum())
+            costs[(c.list_name, "marginal")] = (
+                (p * c.df.marginal_cost).groupby(c.df.carrier).sum()
+            )
     costs = pd.concat(costs)
 
     if flatten:
@@ -257,27 +281,45 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
         costs = costs.reset_index(level=0, drop=True)
         costs = costs["capital"].add(
-            costs["marginal"].rename({t: t + " marginal"
-                                      for t in conv_techs}),
+            costs["marginal"].rename({t: t + " marginal" for t in conv_techs}),
             fill_value=0.0,
         )
 
     return costs
 
 
-def progress_retrieve(url, file):
+def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
+    """
+    Function to download data from a url with a progress bar progress in retrieving data
+
+    Parameters
+    ----------
+    url : str
+        Url to download data from
+    file : str
+        File where to save the output
+    data : dict
+        Data for the request (default None), when not none Post method is used
+    disable_progress : bool
+        When true, no progress bar is shown
+    roundto : float
+        (default 0) Precision used to report the progress
+        e.g. 0.1 stands for 88.1, 10 stands for 90, 80
+    """
     import urllib
 
     from tqdm import tqdm
 
-    pbar = tqdm(total=100)
+    pbar = tqdm(total=100, disable=disable_progress)
 
-    def dlProgress(count, blockSize, totalSize):
-        pbar.n = round(
-            count * blockSize * 100 / totalSize * 100) / 100  # round to 0.01
+    def dlProgress(count, blockSize, totalSize, roundto=roundto):
+        pbar.n = round(count * blockSize * 100 / totalSize / roundto) * roundto
         pbar.refresh()
 
-    urllib.request.urlretrieve(url, file, reporthook=dlProgress)
+    if data is not None:
+        data = urllib.parse.urlencode(data).encode()
+
+    urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
 def mock_snakemake(rulename, **wildcards):
@@ -353,7 +395,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def _get_country(target, **keys):
+def get_country(target, **keys):
     """
     Function to convert country codes using pycountry
 
@@ -379,9 +421,9 @@ def _get_country(target, **keys):
 
     Example of usage
     -------
-    - Convert 2-digit code to 3-digit codes: _get_country('alpha_3', alpha_2="ZA")
-    - Convert 3-digit code to 2-digit codes: _get_country('alpha_2', alpha_3="ZAF")
-    - Convert 2-digit code to full name: _get_country('name', alpha_2="ZA")
+    - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")
+    - Convert 3-digit code to 2-digit codes: get_country('alpha_2', alpha_3="ZAF")
+    - Convert 2-digit code to full name: get_country('name', alpha_2="ZA")
 
     """
     import pycountry as pyc
@@ -393,7 +435,39 @@ def _get_country(target, **keys):
         return np.nan
 
 
-def _two_2_three_digits_country(two_code_country):
+def getContinent(code):
+    """
+    Returns continent names that contains list of iso-code countries
+
+    Parameters
+    ----------
+    code : str
+        List of two letter country ISO codes
+
+    Returns
+    -------
+    continent_list : str
+        List of continent names
+
+    Example
+    -------
+    from helpers import getContinent
+    code = ["DE", "GB", "NG", "ZA"]
+    getContinent(code)
+    >>> ["africa", "europe"]
+    """
+    from config_osm_data import world_iso
+
+    continent_list = []
+    code_set = set(code)
+    for continent in world_iso:
+        single_continent_set = set(world_iso[continent])
+        if code_set.intersection(single_continent_set):
+            continent_list.append(continent)
+    return continent_list
+
+
+def two_2_three_digits_country(two_code_country):
     """
     Convert 2-digit to 3-digit country code:
 
@@ -408,15 +482,13 @@ def _two_2_three_digits_country(two_code_country):
         3-digit country name
     """
     if two_code_country == "SN-GM":
-        return (
-            f"{_two_2_three_digits_country('SN')}-{_two_2_three_digits_country('GM')}"
-        )
+        return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
 
-    three_code_country = _get_country("alpha_3", alpha_2=two_code_country)
+    three_code_country = get_country("alpha_3", alpha_2=two_code_country)
     return three_code_country
 
 
-def _three_2_two_digits_country(three_code_country):
+def three_2_two_digits_country(three_code_country):
     """
     Convert 3-digit to 2-digit country code:
 
@@ -431,15 +503,13 @@ def _three_2_two_digits_country(three_code_country):
         2-digit country name
     """
     if three_code_country == "SEN-GMB":
-        return (
-            f"{_three_2_two_digits_country('SN')}-{_three_2_two_digits_country('GM')}"
-        )
+        return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
 
-    two_code_country = _get_country("alpha_2", alpha_3=three_code_country)
+    two_code_country = get_country("alpha_2", alpha_3=three_code_country)
     return two_code_country
 
 
-def _two_digits_2_name_country(two_code_country):
+def two_digits_2_name_country(two_code_country):
     """
     Convert 2-digit country code to full name country:
 
@@ -454,13 +524,13 @@ def _two_digits_2_name_country(two_code_country):
         full country name
     """
     if two_code_country == "SN-GM":
-        return f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
+        return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
-    full_name = _get_country("name", alpha_2=two_code_country)
+    full_name = get_country("name", alpha_2=two_code_country)
     return full_name
 
 
-def _country_name_2_two_digits(country_name):
+def country_name_2_two_digits(country_name):
     """
     Convert full country name to 2-digit country code
 
@@ -474,38 +544,36 @@ def _country_name_2_two_digits(country_name):
     two_code_country: str
         2-digit country name
     """
-    if (country_name ==
-            f"{_two_digits_2_name_country('SN')}-{_two_digits_2_name_country('GM')}"
-        ):
+    if (
+        country_name
+        == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
+    ):
         return "SN-GM"
 
-    full_name = _get_country("alpha_2", name=country_name)
+    full_name = get_country("alpha_2", name=country_name)
     return full_name
 
 
 NA_VALUE = "NULL"
 
 
-def _read_csv_nafix(file, **kwargs):
+def read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" in kwargs:
         del kwargs["keep_default_na"]
     if "na_values" in kwargs:
         del kwargs["na_values"]
 
-    return pd.read_csv(file,
-                       **kwargs,
-                       keep_default_na=False,
-                       na_values=[NA_VALUE])
+    return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=[NA_VALUE])
 
 
-def _to_csv_nafix(obj, path, **kwargs):
+def to_csv_nafix(obj, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
 
 
-def _save_to_geojson(df, fn):
+def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
 
@@ -519,7 +587,7 @@ def _save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def _read_geojson(fn):
+def read_geojson(fn):
     # if the file is non-zero, read the geodataframe and return it
     if os.path.getsize(fn) > 0:
         return gpd.read_file(fn)

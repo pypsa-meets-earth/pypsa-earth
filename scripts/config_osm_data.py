@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -149,18 +150,17 @@ feature_columns = {
 # Dimitris Karagkasidis, https://github.com/pageflt
 
 continents = {
-    "LA": "latin_america",
-    "SA": "south_america",
-    "CA": "central_america",
-    "AS": "asia",
-    "OC": "australia",
-    "AF": "africa",
-    "EU": "europe",
+    "LA": "NorthAmerica",
+    "SA": "SouthAmerica",
+    "AS": "Asia",
+    "OC": "Oceania",
+    "AF": "Africa",
+    "EU": "Europe",
     # "AN": "antarctica"
 }
 
 world_iso = {
-    "africa": {
+    "Africa": {
         "DZ": "algeria",
         "AO": "angola",
         "BJ": "benin",
@@ -220,7 +220,7 @@ world_iso = {
         "ZW": "zimbabwe",
         "EH": "western-sahara",
     },
-    "asia": {
+    "Asia": {
         "AF": "afghanistan",
         "AM": "armenia",
         "AZ": "azerbaijan",
@@ -276,7 +276,7 @@ world_iso = {
         "VN": "vietnam",
         "YE": "yemen",
     },
-    "australia": {
+    "Oceania": {
         # "AS": "american-oceania",  # Island
         "AU": "australia",
         # "CK": "cook islands",  # Island
@@ -302,7 +302,7 @@ world_iso = {
         # "VU": "vanuatu",  # Island
         # "WF": "wallis-et-futuna",  # Island
     },
-    "europe": {
+    "Europe": {
         "AL": "albania",
         "AD": "andorra",
         "AT": "austria",
@@ -354,13 +354,20 @@ world_iso = {
         "GB": "great-britain",
         "TR": "turkey",
     },
-    "north_america": {
+    "NorthAmerica": {
         "CA": "canada",
         "GL": "greenland",
         "MX": "mexico",
         "US": "united states",
+        "BZ": "belize",
+        "CR": "costa-rica",
+        "HN": "honduras",
+        "GT": "guatemala",
+        "NI": "nicaragua",
+        "PA": "panama",
+        "SV": "el-salvador",
     },
-    "latin_america": {
+    "SouthAmerica": {
         "AR": "argentina",
         "BO": "bolivia",
         "BR": "brazil",
@@ -374,15 +381,6 @@ world_iso = {
         "SR": "suriname",
         "UY": "uruguay",
         "VE": "venezuela",
-    },
-    "central_america": {
-        "BZ": "belize",
-        "CR": "costa-rica",
-        "HN": "honduras",
-        "GT": "guatemala",
-        "NI": "nicaragua",
-        "PA": "panama",
-        "SV": "el-salvador",
     },
 }
 
@@ -481,8 +479,7 @@ continent_regions = {
     # American continent regions
     "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
-    "LACR":
-    ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
+    "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
     # CENTRAL AMERICAN REGION
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
     # Australasia
@@ -744,5 +741,6 @@ world_geofk = {
 
 world_countries = {
     country_2D: country_name
-    for d in world_geofk.values() for (country_2D, country_name) in d.items()
+    for d in world_geofk.values()
+    for (country_2D, country_name) in d.items()
 }

@@ -2,12 +2,15 @@
 
 ## Development Status: **Stable and Active**
 
-[![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Status Linux](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-mac.yaml)
 [![Status Windows](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml)
-![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
+![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![GitHub Super-Linter](https://github.com/pypsa-meets-africa/pypsa-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
 
@@ -41,56 +44,64 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
-  1) Demand creation and prediction meeting, every Wednesday 21:00 UTC+0 
-  2) AI asset detection meeting, every Tuesday 15:30 UTC+0
-  3) Sector coupling meeting, every Thursday 09:00 UTC+0
-  4) Data workflow and architecture meeting, every Thursday 13:30 UTC+0
+  1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0
+  2. AI asset detection meeting, every Tuesday 15:30 UTC+0
+  3. Sector coupling meeting, every Thursday 09:00 UTC+0
+  4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
 - [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
   - access to minutes, presentations, lists, documents
 
-
 ## Installation
 
-1) Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
-``` bash
+1. Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
+
+```bash
     .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
 ```
-2) The python package requirements are curated in the `envs/environment.yaml` file.
-The environment can be installed using:
-``` bash
-    .../pypsa-africa % conda env create -f envs/environment.yaml
-```  
-3) For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
 
-4) To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
-``` bash
+2. The python package requirements are curated in the `envs/environment.yaml` file.
+   The environment can be installed using:
+
+```bash
+    .../pypsa-africa % conda env create -f envs/environment.yaml
+```
+
+3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
+
+4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+
+```bash
     .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
 
     .../pypsa-africa % jupyter lab
 ```
+
 ## Test run on tutorial
+
 - In the folder open a terminal/command window to be located at this path `~/pypsa-africa/`
 - Activate the environment `conda activate pypsa-africa`
 - Rename config.tutorial.yaml to config.yaml. For instance in Linux:
-  ``` bash
-  mv config.tutorial.yaml config.yaml 
+  ```bash
+  mv config.tutorial.yaml config.yaml
   ```
 - Run a dryrun of the Snakemake workflow by typing simply in the terminal:
-  ``` bash
+  ```bash
   snakemake -j 1 solve_all_networks -n
   ```
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
 
 ## Training
-  - We recently updated some [hackathon material](https://github.com/pypsa-meets-africa/pypsa-africa-hackathon) for PyPSA-Africa. The hackathon contains jupyter notebooks with exercises.  After going through the 1 day theoretical and practical material you should have a suitable coding setup and feel confident about contributing.
-  - The get a general feeling about the PyPSA functionality, we further recommend going through the [PyPSA](https://github.com/PyPSA/PyPSA/tree/master/examples) and [Atlite](https://github.com/PyPSA/atlite/tree/master/examples) examples.
-  
+
+- We recently updated some [hackathon material](https://github.com/pypsa-meets-africa/pypsa-africa-hackathon) for PyPSA-Africa. The hackathon contains jupyter notebooks with exercises. After going through the 1 day theoretical and practical material you should have a suitable coding setup and feel confident about contributing.
+- The get a general feeling about the PyPSA functionality, we further recommend going through the [PyPSA](https://github.com/PyPSA/PyPSA/tree/master/examples) and [Atlite](https://github.com/PyPSA/atlite/tree/master/examples) examples.
+
 ## Questions and Issues
-  - We are happy to answer questions and help with issues **if they are public**. Through being public the wider community can benefit from the raised points. Some tips. **Bugs** and **feature requests** should be raised in the [**GitHub Issues**](https://github.com/pypsa-meets-africa/pypsa-africa/issues/new/choose). **General workflow** or **user questions** as well as discussion points should be posted at the [**GitHub Discussions**](https://github.com/pypsa-meets-africa/pypsa-africa/discussions/categories/q-a) tab. Happy coding. 
-  
+
+- We are happy to answer questions and help with issues **if they are public**. Through being public the wider community can benefit from the raised points. Some tips. **Bugs** and **feature requests** should be raised in the [**GitHub Issues**](https://github.com/pypsa-meets-africa/pypsa-africa/issues/new/choose). **General workflow** or **user questions** as well as discussion points should be posted at the [**GitHub Discussions**](https://github.com/pypsa-meets-africa/pypsa-africa/discussions/categories/q-a) tab. Happy coding.
+
 ## Documentation
 
 The documentation is available here: [documentation](https://pypsa-meets-africa.readthedocs.io/en/latest/index.html).
@@ -232,10 +243,17 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/giacfalk">
+            <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
+            <br />
+            <sub><b>Giacomo Falchetta</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
-            <sub><b>Tobie</b></sub>
+            <sub><b>Jarrad Wright</b></sub>
         </a>
     </td>
     <td align="center">
