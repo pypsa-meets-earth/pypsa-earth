@@ -30,8 +30,8 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-- fiona <= 1.18.20
-  # - xarray # till the main is not in conda
+- fiona <= 1.18.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+- xarray
 - netcdf4
 - networkx
 - scipy
@@ -68,10 +68,9 @@ dependencies:
   # - ipopt  # <=3.11.1 for windows; <= 3.13.3 for linux
 
 - pip:
-  - git+https://github.com/pydata/xarray@main   # till the main is not in conda
-  - git+https://github.com/pypsa/pypsa.git#egg=pypsa
+  # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
   - git+https://github.com/davide-f/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
-  - vresutils==0.3.1
+  - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf
   - esy-osmfilter
