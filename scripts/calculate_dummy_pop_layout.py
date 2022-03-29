@@ -3,7 +3,6 @@ import os
 import numpy as np
 import pandas as pd
 import pypsa
-from helpers import mock_snakemake
 
 
 def calculate_dummy_pop_layout(n, inhabitants):
@@ -37,12 +36,14 @@ def calculate_dummy_pop_layout(n, inhabitants):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from helpers import mock_snakemake, sets_path_to_root
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake("calculate_dummy_pop_layout",
                                    simpl="",
                                    clusters="4")
+        sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)
 

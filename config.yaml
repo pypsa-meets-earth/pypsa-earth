@@ -1,4 +1,3 @@
-
 logging_level: INFO
 
 results_dir: results
@@ -6,17 +5,15 @@ summary_dir: results
 costs_dir: data/ #TODO change to the equivalent of technology data
 run: test3
 
-foresight: overnight 
-
+foresight: overnight
 
 scenario:
   simpl: # only relevant for PyPSA-Eur
-    - ''
+    - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
     - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
     - 2030
-
 
 costs:
   lifetime: 25 #default lifetime
@@ -102,7 +99,7 @@ snapshots:
   closed: left # end is not inclusive
 
 atlite:
-  cutout: /cutouts/africa-2013-era5.nc
+  cutout: ./cutouts/africa-2013-era5.nc
 
 solving:
   #tmpdir: "path/to/tmp"

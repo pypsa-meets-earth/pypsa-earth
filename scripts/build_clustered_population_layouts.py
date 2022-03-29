@@ -1,4 +1,6 @@
 """Build clustered population layouts."""
+import os
+
 import atlite
 import geopandas as gpd
 import pandas as pd
@@ -6,15 +8,17 @@ import xarray as xr
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake
+        from helpers import mock_snakemake, sets_path_to_root
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
             simpl="",
             clusters=4,
         )
+        sets_path_to_root("pypsa-earth-sec")
 
-    cutout = atlite.Cutout("../" + snakemake.config["atlite"]["cutout"])
+    cutout = atlite.Cutout(snakemake.config["atlite"]["cutout"])
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
     clustered_regions = (gpd.read_file(
