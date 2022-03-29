@@ -5,9 +5,6 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from helpers import create_energy_totals_dummy
-from helpers import create_temperature_dummy
-from helpers import create_transport_data_dummy
 from helpers import mock_snakemake
 
 
@@ -78,9 +75,6 @@ def prepare_transport_data(n):
     energy_totals = pd.read_csv(snakemake.input.energy_totals_name,
                                 index_col=0)
 
-    # Create energy_totals data dummy for Morocco. TODO Remove once real data is available
-    energy_totals = create_energy_totals_dummy(pop_layout, energy_totals)
-
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
@@ -144,12 +138,6 @@ def prepare_transport_data(n):
 
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
-    # Create transport data dummy for Morocco. TODO Remove once real data is available
-    transport_data = create_transport_data_dummy(pop_layout,
-                                                 transport_data,
-                                                 cars=4000000,
-                                                 average_fuel_efficiency=0.7)
-
     nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.0)
 
     nodal_transport_data.index = pop_layout.index
@@ -171,9 +159,6 @@ def prepare_transport_data(n):
 
     # get heating demand for correction to demand time series
     temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
-
-    # Create temperature data dummy for Morocco. TODO Remove once real data is available
-    temperature = create_temperature_dummy(pop_layout, temperature)
 
     # correction factors for vehicle heating
     dd_ICE = transport_degree_factor(
