@@ -326,7 +326,6 @@ cables_tag_to_n_cables = {
 circuits_tag_to_n_circuits = {
     "1/3": "0",
     "2/3": "0",
-
     # ? two lines one ground?
     "2-1": "2",
     "single": "1",
