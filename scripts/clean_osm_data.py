@@ -427,8 +427,10 @@ def integrate_lines_df(df_all_lines):
             ]
             dropped_length = round(df_one_third_circuits["length"].sum() / 1e3, 1)
 
+            dropped_values = set(df_one_third_circuits["circuits"])
+
             logger.warning(
-                f"The circuits == '1/3' of an overal length {dropped_length} km dropped."
+                f"The circuits == {dropped_values} of an overal length {dropped_length} km dropped."
             )
 
             # troubles with projections can lead to discrepancy between the length values
