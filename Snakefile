@@ -127,7 +127,7 @@ rule build_temperature_profiles:
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
-        network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
+        network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         config=SDIR + '/configs/config.yaml',
     output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
