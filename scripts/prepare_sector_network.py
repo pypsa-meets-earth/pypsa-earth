@@ -388,8 +388,6 @@ def add_co2(n, costs):
 
 def add_aviation(n, cost):
      all_aviation = ["total international aviation", "total domestic aviation"]
-     nodal_energy_totals = pd.DataFrame(np.ones((4,2)), columns=all_aviation, index=nodes)
-     #temporary data nodal_energy_totals
      
      p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
      
@@ -531,70 +529,8 @@ def h2_hc_conversions(n, costs):
             lifetime=costs.at["SMR", "lifetime"],
         )
 
-
-def add_industry(n, costs):
-
-    #     print("adding industrial demand")
-
-    #     # 1e6 to convert TWh to MWh
-    #     industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) * 1e6
-    industrial_demand = create_dummy_data(n, "industry", "")
-
-    # TODO carrier Biomass
-
-    # CARRIER = FOSSIL GAS
-
-    n.add("Bus", "gas for industry", location="EU", carrier="gas for industry")
-
-    n.add(
-        "Load",
-        "gas for industry",
-        bus="gas for industry",
-        carrier="gas for industry",
-        p_set=industrial_demand.loc[nodes, "methane"].sum() / 8760,
-    )
-
-    n.add(
-        "Link",
-        "gas for industry",
-        bus0="Africa gas",
-        bus1="gas for industry",
-        bus2="co2 atmosphere",
-        carrier="gas for industry",
-        p_nom_extendable=True,
-        efficiency=1.0,
-        efficiency2=costs.at["gas", "CO2 intensity"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.co2.locations,
-        suffix=" gas for industry CC",
-        bus0="Africa gas",
-        bus1="gas for industry",
-        bus2="co2 atmosphere",
-        bus3=spatial.co2.nodes,
-        carrier="gas for industry CC",
-        p_nom_extendable=True,
-        capital_cost=costs.at["cement capture", "fixed"] *
-        costs.at["gas", "CO2 intensity"],
-        efficiency=0.9,
-        efficiency2=costs.at["gas", "CO2 intensity"] *
-        (1 - costs.at["cement capture", "capture_rate"]),
-        efficiency3=costs.at["gas", "CO2 intensity"] *
-        costs.at["cement capture", "capture_rate"],
-        lifetime=costs.at["cement capture", "lifetime"],
-    )
-
-    #################################################### CARRIER = HYDROGEN
-    n.madd(
-        "Load",
-        nodes,
-        suffix=" H2 for industry",
-        bus=nodes + " H2",
-        carrier="H2 for industry",
-        p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
-    )
+def add_shipping (n, costs):
+    
     if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
 
         n.madd("Bus",
@@ -632,9 +568,7 @@ def add_industry(n, costs):
     all_navigation = [
         "total international navigation", "total domestic navigation"
     ]
-    nodal_energy_totals = pd.DataFrame(np.ones((4, 2)),
-                                       columns=all_navigation,
-                                       index=nodes)
+
     # temporary data nodal_energy_totals
 
     p_set = (shipping_hydrogen_share *
@@ -705,6 +639,70 @@ def add_industry(n, costs):
             carrier="oil",
             marginal_cost=costs.at["oil", "fuel"],
         )
+
+def add_industry(n, costs):
+
+    #     print("adding industrial demand")
+
+    #     # 1e6 to convert TWh to MWh
+    #     industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) * 1e6
+    industrial_demand = create_dummy_data(n, "industry", "")
+
+    # TODO carrier Biomass
+
+    # CARRIER = FOSSIL GAS
+
+    n.add("Bus", "gas for industry", location="EU", carrier="gas for industry")
+
+    n.add(
+        "Load",
+        "gas for industry",
+        bus="gas for industry",
+        carrier="gas for industry",
+        p_set=industrial_demand.loc[nodes, "methane"].sum() / 8760,
+    )
+
+    n.add(
+        "Link",
+        "gas for industry",
+        bus0="Africa gas",
+        bus1="gas for industry",
+        bus2="co2 atmosphere",
+        carrier="gas for industry",
+        p_nom_extendable=True,
+        efficiency=1.0,
+        efficiency2=costs.at["gas", "CO2 intensity"],
+    )
+
+    n.madd(
+        "Link",
+        spatial.co2.locations,
+        suffix=" gas for industry CC",
+        bus0="Africa gas",
+        bus1="gas for industry",
+        bus2="co2 atmosphere",
+        bus3=spatial.co2.nodes,
+        carrier="gas for industry CC",
+        p_nom_extendable=True,
+        capital_cost=costs.at["cement capture", "fixed"] *
+        costs.at["gas", "CO2 intensity"],
+        efficiency=0.9,
+        efficiency2=costs.at["gas", "CO2 intensity"] *
+        (1 - costs.at["cement capture", "capture_rate"]),
+        efficiency3=costs.at["gas", "CO2 intensity"] *
+        costs.at["cement capture", "capture_rate"],
+        lifetime=costs.at["cement capture", "lifetime"],
+    )
+
+    #################################################### CARRIER = HYDROGEN
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" H2 for industry",
+        bus=nodes + " H2",
+        carrier="H2 for industry",
+        p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
+    )
 
   
     # CARRIER = LIQUID HYDROCARBONS
@@ -1010,6 +1008,21 @@ if __name__ == "__main__":
 
     options = snakemake.config["sector"]
 
+    # Get the data required for land transport
+    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals,
+                                      index_col=0)
+    transport = pd.read_csv(snakemake.input.transport,
+                            index_col=0,
+                            parse_dates=True)
+    avail_profile = pd.read_csv(snakemake.input.avail_profile,
+                                index_col=0,
+                                parse_dates=True)
+    dsm_profile = pd.read_csv(snakemake.input.dsm_profile,
+                              index_col=0,
+                              parse_dates=True)
+    nodal_transport_data = pd.read_csv(snakemake.input.nodal_transport_data,
+                                       index_col=0)
+
     add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
@@ -1029,26 +1042,12 @@ if __name__ == "__main__":
 
     add_industry(n, costs)
     
+    add_shipping(n, costs)
+    
     # Add_aviation runs with dummy data
     add_aviation(n, costs)
     
     #prepare_transport_data(n)
-
-
-    # Get the data required for land transport
-    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals,
-                                      index_col=0)
-    transport = pd.read_csv(snakemake.input.transport,
-                            index_col=0,
-                            parse_dates=True)
-    avail_profile = pd.read_csv(snakemake.input.avail_profile,
-                                index_col=0,
-                                parse_dates=True)
-    dsm_profile = pd.read_csv(snakemake.input.dsm_profile,
-                              index_col=0,
-                              parse_dates=True)
-    nodal_transport_data = pd.read_csv(snakemake.input.nodal_transport_data,
-                                       index_col=0)
 
     add_land_transport(n, costs)
 
