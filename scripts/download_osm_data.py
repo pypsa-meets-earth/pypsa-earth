@@ -442,8 +442,7 @@ def output_csv_geojson(
     # check dataframe structure to avoid KeyErrors
     if not "lonlat" in df_all_feature.columns:
         if not "geometry" in df_all_feature.columns:
-            _logger.warning(
-                f"Store empty Dataframe for {feature} as geometry missed.")
+            _logger.warning(f"Store empty Dataframe for {feature} as geometry missed.")
             gdf_feature = []
             # create empty file to avoid issues with snakemake
             with open(path_file_geojson, "w") as fp:
@@ -453,8 +452,7 @@ def output_csv_geojson(
         else:
             # TODO: is it possible that nodes dataframe will also be empty?
             gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
-            gdf_feature.to_file(path_file_geojson,
-                                driver="GeoJSON")  # Generate GeoJson
+            gdf_feature.to_file(path_file_geojson, driver="GeoJSON")  # Generate GeoJson
             return None
 
     # remove non-line elements

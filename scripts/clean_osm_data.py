@@ -299,32 +299,28 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
         )
     return df  # return new frame
 
+
 # cable and circuit tags may be in a non-standard format
 cables_tag_to_n_cables = {
     "single": "1",
     "triple": "3",
-    
     "partial": "1",
     "1 disused": "0",
-    "3 disused": "0", 
-    
-    "1 (Looped - Haul & Return) + 1 power wire": "1", 
-    "ground": "0", 
+    "3 disused": "0",
+    "1 (Looped - Haul & Return) + 1 power wire": "1",
+    "ground": "0",
     "line": "1",
-    
     # assuming that in case of a typo there at least one line
     "`": "1",
-    "^1": "1", 
-    "e": "1", 
-    "d": "1", 
-        
+    "^1": "1",
+    "e": "1",
+    "d": "1",
     "2-1": "3",
     "3+3": "6",
     "6+1": "6",
-    
-    "2x3": "6", 
-    "3x2": "6", 
-    "2x2": "4"   
+    "2x3": "6",
+    "3x2": "6",
+    "2x2": "4",
 }
 
 circuits_tag_to_n_circuits = {
@@ -333,19 +329,18 @@ circuits_tag_to_n_circuits = {
 
     # ? two lines one ground?
     "2-1": "2",
-    
     "single": "1",
     "partial": "1",
     # ? an out-of-order line?
     "1 disused": "0",
-    
     # assuming that in case of a typo there at least one line
     "`": "1",
-    "^1": "1", 
-    "e": "1", 
+    "^1": "1",
+    "e": "1",
     "d": "1",
-    "1.": "1" 
+    "1.": "1",
 }
+
 
 def integrate_lines_df(df_all_lines):
     """
@@ -371,7 +366,11 @@ def integrate_lines_df(df_all_lines):
     # if not int make int
     if df_all_lines["cables"].dtype != int:
         # map known non-numerical issues into a reasonable n_cables value
-        df_all_lines["cables"] = df_all_lines["cables"].map(cables_tag_to_n_cables).fillna(df_all_lines['cables'])
+        df_all_lines["cables"] = (
+            df_all_lines["cables"]
+            .map(cables_tag_to_n_cables)
+            .fillna(df_all_lines["cables"])
+        )
         # HERE. "0" if cables "None", "nan" or "1"
         df_all_lines.loc[
             (df_all_lines["cables"] < "3") | df_all_lines["cables"].isna(), "cables"
@@ -389,12 +388,14 @@ def integrate_lines_df(df_all_lines):
 
     # one circuit contains 3 cable under a preliminary assumption of an AC line
     df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = (
-        df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3)
+        df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3
+    )
 
     # where circuits are "0" make "1"
     df_all_lines.loc[
-        (df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0), "circuits", 
-    ] = 1                
+        (df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0),
+        "circuits",
+    ] = 1
 
     if df_all_lines["circuits"].dtype != int:
 
@@ -403,23 +404,25 @@ def integrate_lines_df(df_all_lines):
         if any(df_all_lines["circuits"] == "1/3"):
 
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
-            df_one_third_circuits = df_all_lines.loc[df_all_lines["circuits"]
-                                                     == "1/3"].reset_index()
+            df_one_third_circuits = df_all_lines.loc[
+                df_all_lines["circuits"] == "1/3"
+            ].reset_index()
 
             # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
-            df_one_third_circuits_m = df_one_third_circuits.set_crs(
-                "EPSG:4326").to_crs("EPSG:3857")
+            df_one_third_circuits_m = df_one_third_circuits.set_crs("EPSG:4326").to_crs(
+                "EPSG:3857"
+            )
 
             length_from_crs = df_one_third_circuits_m.length
             df_one_third_circuits["crs_length"] = length_from_crs
 
             # in case a line length is not available directly
             df_one_third_circuits.loc[
-                df_one_third_circuits["length"].isna(),
-                "length"] = df_one_third_circuits.loc[
-                    df_one_third_circuits["length"].isna(), "crs_length"]
-            dropped_length = round(df_one_third_circuits["length"].sum() / 1e3,
-                                   1)
+                df_one_third_circuits["length"].isna(), "length"
+            ] = df_one_third_circuits.loc[
+                df_one_third_circuits["length"].isna(), "crs_length"
+            ]
+            dropped_length = round(df_one_third_circuits["length"].sum() / 1e3, 1)
 
             logger.warning(
                 f"The circuits == '1/3' of an overal length {dropped_length} km dropped."
@@ -427,8 +430,9 @@ def integrate_lines_df(df_all_lines):
 
             # troubles with projections can lead to discrepancy between the length values
             tol = 0.1  # [m]
-            length_diff = (df_one_third_circuits["length"] -
-                           df_one_third_circuits["crs_length"])
+            length_diff = (
+                df_one_third_circuits["length"] - df_one_third_circuits["crs_length"]
+            )
 
             if any(length_diff > tol):
                 total_length_diff = round(sum(length_diff > tol), 2)
@@ -437,9 +441,16 @@ def integrate_lines_df(df_all_lines):
                 )
 
         # drop circuits if "None" or "nan"
-        df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits", ] = "0"
-        # map known non-numerical issues into a reasonable n_circuits value                  
-        df_all_lines["circuits"] = df_all_lines["circuits"].map(circuits_tag_to_n_circuits).fillna(df_all_lines["circuits"])                  
+        df_all_lines.loc[
+            df_all_lines["circuits"].isna(),
+            "circuits",
+        ] = "0"
+        # map known non-numerical issues into a reasonable n_circuits value
+        df_all_lines["circuits"] = (
+            df_all_lines["circuits"]
+            .map(circuits_tag_to_n_circuits)
+            .fillna(df_all_lines["circuits"])
+        )
         df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
 
     # drop column if exist
