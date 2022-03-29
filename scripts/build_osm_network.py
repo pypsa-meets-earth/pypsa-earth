@@ -690,7 +690,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
             df_append["geometry"] = new_geometries
             # update name of the line
             df_append["line_id"] = [
-                df_append["line_id"].iloc[0] + f"_{id}" for id in range(n_geoms)
+                str(df_append["line_id"].iloc[0]) + f"_{id}" for id in range(n_geoms)
             ]
 
             lines_to_add.append(df_append)

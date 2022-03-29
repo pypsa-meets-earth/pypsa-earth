@@ -10,6 +10,8 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-africa/pypsa-africa/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-africa/pypsa-africa/main)
+[![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/VHH8TCwn)
+[![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
 
 PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
@@ -51,8 +53,8 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
-- [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
-  - access to minutes, presentations, lists, documents
+- [**Google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
+  - access to minutes, presentations, lists, documents (access to minutes)
 
 ## Installation
 
@@ -117,7 +119,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>hazemakhalek</b></sub>
         </a>
     </td>
     <td align="center">
@@ -224,7 +226,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/energyLS">
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
-            <sub><b>EnergyLS</b></sub>
+            <sub><b>energyLS</b></sub>
         </a>
     </td>
     <td align="center">
