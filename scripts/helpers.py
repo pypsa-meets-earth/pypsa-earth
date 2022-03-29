@@ -215,7 +215,7 @@ def create_dummy_data(n, sector, carriers):
         ]
     else:
         raise Exception("sector not found")
-    data = np.random.randint(10, 500, size=(len(ind), len(col))) * 1e5
+    data = np.random.randint(10, 500, size=(len(ind), len(col)))
 
     return pd.DataFrame(data, index=ind, columns=col)
 

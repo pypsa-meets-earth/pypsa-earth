@@ -289,7 +289,7 @@ if __name__ == "__main__":
             "solve_network",
             simpl="",
             clusters=4,
-            planning_horizons=2020
+            planning_horizons=2030
             # 8,
             # lv=1.0,
             # sector_opts='Co2L0-168H-T-H-B-I-solar3-dist1',

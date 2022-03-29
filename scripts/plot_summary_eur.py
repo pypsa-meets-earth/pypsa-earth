@@ -5,8 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-from prepare_sector_network import co2_emissions_year
-
+#from prepare_sector_network import co2_emissions_year #TODO change back to older version in 0.1.0
+co2_emissions_year = 2030
 #consolidate and rename
 def rename_techs(label):
 
@@ -434,7 +434,7 @@ def plot_carbon_budget_distribution():
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        from helper import mock_snakemake
+        from helpers import mock_snakemake
         snakemake = mock_snakemake('plot_summary')
         
     n_header = 4
