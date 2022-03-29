@@ -238,7 +238,6 @@ def create_dummy_data(n, sector, carriers):
 
 #     return transport_data_dummy
 
-
 # def create_temperature_dummy(pop_layout, temperature):
 
 #     temperature_dummy = pd.DataFrame(index=temperature.index)
@@ -247,7 +246,6 @@ def create_dummy_data(n, sector, carriers):
 #         temperature_dummy[index] = temperature["ES0 0"]
 
 #     return temperature_dummy
-
 
 # def create_energy_totals_dummy(pop_layout, energy_totals):
 #     """
