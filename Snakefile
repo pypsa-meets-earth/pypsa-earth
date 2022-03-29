@@ -128,7 +128,6 @@ rule solve_network:
         overrides="data/override_component_attrs",
         network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
-        config=SDIR + '/configs/config.yaml',
     output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
     shadow: "shallow"
     log:
