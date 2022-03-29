@@ -341,6 +341,9 @@ circuits_tag_to_n_circuits = {
     "1.": "1",
 }
 
+# dropped manually as a result of visual checking of the corresponding grid
+dropped_tags = ["1/3", "2/3"]
+
 
 def integrate_lines_df(df_all_lines):
     """
@@ -399,13 +402,13 @@ def integrate_lines_df(df_all_lines):
 
     if df_all_lines["circuits"].dtype != int:
 
-        # it's possible that df_all_lines["circuits"] == "1/3"
+        # it's possible that df_all_lines["circuits"] in dropped_tags
         # but that seems to be a local feature
-        if any(df_all_lines["circuits"] == "1/3"):
+        if any(df_all_lines["circuits"].isin(dropped_tags)):
 
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
             df_one_third_circuits = df_all_lines.loc[
-                df_all_lines["circuits"] == "1/3"
+                df_all_lines["circuits"].isin(dropped_tags)
             ].reset_index()
 
             # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
