@@ -393,7 +393,7 @@ def add_aviation(n, cost):
      
      n.add("Load",
          "kerosene for aviation",
-         bus="EU oil",
+         bus="Africa oil",
          carrier="kerosene for aviation",
          p_set=p_set
      )
@@ -596,7 +596,7 @@ def add_shipping (n, costs):
             "Load",
             nodes,
             suffix=" shipping oil",
-            bus="EU oil",
+            bus="Africa oil",
             carrier="shipping oil",
             p_set=p_set,
         )
@@ -613,28 +613,28 @@ def add_shipping (n, costs):
             p_set=-co2,
         )
 
-    if "EU oil" not in n.buses.index:
+    if "Africa oil" not in n.buses.index:
 
-        n.add("Bus", "EU oil", location="EU", carrier="oil")
+        n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
-    if "EU oil Store" not in n.stores.index:
+    if "Africa oil Store" not in n.stores.index:
 
         # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
         n.add(
             "Store",
-            "EU oil Store",
-            bus="EU oil",
+            "Africa oil Store",
+            bus="Africa oil",
             e_nom_extendable=True,
             e_cyclic=True,
             carrier="oil",
         )
 
-    if "EU oil" not in n.generators.index:
+    if "Africa oil" not in n.generators.index:
 
         n.add(
             "Generator",
-            "EU oil",
-            bus="EU oil",
+            "Africa oil",
+            bus="Africa oil",
             p_nom_extendable=True,
             carrier="oil",
             marginal_cost=costs.at["oil", "fuel"],
@@ -652,7 +652,7 @@ def add_industry(n, costs):
 
     # CARRIER = FOSSIL GAS
 
-    n.add("Bus", "gas for industry", location="EU", carrier="gas for industry")
+    n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
 
     n.add(
         "Load",
@@ -770,7 +770,7 @@ def add_industry(n, costs):
 
     n.add("Bus",
           "process emissions",
-          location="EU",
+          location="Africa",
           carrier="process emissions")
 
     # this should be process emissions fossil+feedstock
