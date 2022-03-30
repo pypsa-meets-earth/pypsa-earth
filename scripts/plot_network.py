@@ -286,7 +286,7 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
     costs = costs.stack()  # .sort_index()
 
     # hack because impossible to drop buses...
-    #n.buses.loc["EU gas", ["x", "y"]] = n.buses.loc["MA 0", ["x", "y"]]
+    #n.buses.loc["EU gas", ["x", "y"]] = n.buses.loc["MA 0", ["x", "y"]] #TODO check this and what will change
 
     n.links.drop(n.links.index[(n.links.carrier != "DC") & (
         n.links.carrier != "B2B")], inplace=True)
@@ -379,7 +379,6 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
     # red_patch = mpatches.Patch(color='red', label='The red data')
     # plt.legend(handles=[red_patch])
 
-    plt.show()
     fig.savefig(snakemake.output.map, transparent=True,
                 bbox_inches="tight")
     # fig.savefig('plot_map.pdf', transparent=True,
