@@ -128,6 +128,7 @@ rule solve_network:
         overrides="data/override_component_attrs",
         network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
+        
     output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
     shadow: "shallow"
     log:
@@ -177,8 +178,7 @@ rule plot_network:
         overrides="data/override_component_attrs",
         network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
     output:
-        map=RDIR + "/maps/elec_s{simpl}_{clusters}_-costs-all_{planning_horizons}.pdf",
-        today=RDIR + "/maps/elec_s{simpl}_{clusters}_{planning_horizons}-today.pdf"
+        map=RDIR + "/maps/elec_s{simpl}_{clusters}-costs-all_{planning_horizons}.pdf",
     threads: 2
     resources: mem_mb=10000
     benchmark: RDIR + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_{planning_horizons}"

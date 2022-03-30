@@ -558,7 +558,7 @@ def make_summaries(networks_dict):
 
 def to_csv(df):
     for key in df:
-        df[key].to_csv(snakemake.output[key])
+        df[key].round(3).to_csv(snakemake.output[key])
 
 
 if __name__ == "__main__":
@@ -571,7 +571,7 @@ if __name__ == "__main__":
     networks_dict = {
         #(cluster, lv, opt+sector_opt, planning_horizon) :
         (cluster, planning_horizon) :
-        f'../results/test/postnetworks/elec_s{simpl}_{cluster}_{planning_horizon}.nc' \
+        snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_{planning_horizon}.nc' \
         # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
         for simpl in snakemake.config['scenario']['simpl'] \
         for cluster in snakemake.config['scenario']['clusters'] \
@@ -600,7 +600,7 @@ if __name__ == "__main__":
     to_csv(df)
 
     if snakemake.config["foresight"]=='myopic':
-        cumulative_cost=calculate_cumulative_cost()
+        cumulative_cost=calculate_cumulative_cost().round(3)
         cumulative_cost.to_csv(snakemake.config['summary_dir'] + '/' + snakemake.config['run'] + '/csvs/cumulative_cost.csv')
 
 

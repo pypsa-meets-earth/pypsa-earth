@@ -15,7 +15,7 @@ from matplotlib.patches import Circle, Ellipse
 from matplotlib.legend_handler import HandlerPatch
 
 
-#%%
+
 def assign_location(n):
     for c in n.iterate_components(n.one_port_components | n.branch_components):
 
@@ -59,7 +59,7 @@ def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
 
 def make_legend_circles_for(sizes, scale=1.0, **kw):
     return [Circle((0, 0), radius=(s / scale)**0.5, **kw) for s in sizes]    
-#%%
+
 #############################################
 # plot Hydrogen infrastructure map
 #############################################
@@ -186,7 +186,7 @@ def plot_transmission_topology(network):
         snakemake.output.map.replace("-costs-all","-full_topology"),
         bbox_inches="tight")
 
-#%%
+
 preferred_order = pd.Index(["transmission lines","hydroelectricity","hydro reservoir","run of river","pumped hydro storage","solid biomass","biogas","onshore wind","offshore wind","offshore wind (AC)","offshore wind (DC)","solar PV","solar thermal","solar","building retrofitting","ground heat pump","air heat pump","heat pump","resistive heater","power-to-heat","gas-to-power/heat","CHP","OCGT","gas boiler","gas","natural gas","helmeth","methanation","hydrogen storage","power-to-gas","power-to-liquid","battery storage","hot water storage","CO2 sequestration"])
 
 def rename_techs(label):
@@ -286,7 +286,7 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
     costs = costs.stack()  # .sort_index()
 
     # hack because impossible to drop buses...
-    #n.buses.loc["EU gas", ["x", "y"]] = n.buses.loc["MA 0", ["x", "y"]]
+    #n.buses.loc["EU gas", ["x", "y"]] = n.buses.loc["MA 0", ["x", "y"]] #TODO check this and what will change
 
     n.links.drop(n.links.index[(n.links.carrier != "DC") & (
         n.links.carrier != "B2B")], inplace=True)
@@ -379,14 +379,13 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
     # red_patch = mpatches.Patch(color='red', label='The red data')
     # plt.legend(handles=[red_patch])
 
-    plt.show()
     fig.savefig(snakemake.output.map, transparent=True,
                 bbox_inches="tight")
     # fig.savefig('plot_map.pdf', transparent=True,
     #         bbox_inches="tight")#, dpi=300)
 
 
-#%%
+
 
 
 plot_labeles={
@@ -423,7 +422,6 @@ nice_names_n={
     'lines': "transmission\nlines",
     'ror': "run of river"}
 
-#%%
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
