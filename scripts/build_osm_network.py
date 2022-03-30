@@ -752,7 +752,7 @@ def built_network(inputs, outputs):
         logger.info("Stage 4/5: Aggregate close substations: disabled")
 
     logger.info("Stage 5/5: Add augmented substation to country with no data")
-
+    buses=substations
     country_shapes_fn = snakemake.input.country_shapes
     country_shapes = (
         gpd.read_file(country_shapes_fn).set_index("name")["geometry"].set_crs(4326)
@@ -765,7 +765,7 @@ def built_network(inputs, outputs):
         no_data_countries = set(country_list).difference(set(bus_country_list))
         no_data_countries_shape = (
             country_shapes[country_shapes.index.isin(no_data_countries) == True]
-            .reset_index(drop=True)
+            .reset_index()
             .set_crs(4326)
         )
         length = len(no_data_countries)
@@ -788,7 +788,7 @@ def built_network(inputs, outputs):
                 "substation_lv": [True] * length,
             }
         )
-        buses = buses.append(df, ignore_index=True).reset_index(drop=True)
+        buses = pd.concat([buses, df], ignore_index=True).reset_index(drop=True)
 
     logger.info("Save outputs")
 
