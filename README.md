@@ -13,3 +13,4 @@ The demand sectors covered are: **residential**, **industry**, **land transport*
 
 The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included. 
 
+![alt text](https://github.com/pypsa-meets-africa/pypsa-earth-sec/blob/Readme-for-MVP/docs/0.0.5_wb.png?raw=true)
