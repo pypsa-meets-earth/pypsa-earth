@@ -714,17 +714,20 @@ def fix_overpassing_lines(lines, buses, tol=1):
 
 
 def built_network(inputs, outputs):
+
     logger.info("Stage 1/5: Read input data")
 
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
     generators = read_geojson(inputs["generators"]).set_crs(epsg=4326, inplace=True)
 
+
     logger.info("Stage 2/5: Add line endings to the substation datasets")
 
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
     buses = add_line_endings_tosubstations(substations, lines)
+
 
     # Address the overpassing line issue Step 3/5
     if snakemake.config.get("build_osm_network", {}).get(
@@ -739,6 +742,7 @@ def built_network(inputs, outputs):
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
+
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
     if snakemake.config.get("build_osm_network", {}).get("group_close_buses", False):
         tol = snakemake.config["build_osm_network"].get("group_tolerance_buses", 500)
@@ -751,8 +755,9 @@ def built_network(inputs, outputs):
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
 
+
     logger.info("Stage 5/5: Add augmented substation to country with no data")
-    buses=substations
+
     country_shapes_fn = snakemake.input.country_shapes
     country_shapes = (
         gpd.read_file(country_shapes_fn).set_index("name")["geometry"].set_crs(4326)
