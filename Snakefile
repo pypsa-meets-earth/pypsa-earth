@@ -183,7 +183,7 @@ rule plot_network:
     threads: 2
     resources: mem_mb=10000
     benchmark: RDIR + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_{planning_horizons}"
-    script: "scripts/plot_network.py"
+    script: "scripts/plot_network_plot_network_pypsa_earth.py"
 
 rule plot_summary:
     input:
