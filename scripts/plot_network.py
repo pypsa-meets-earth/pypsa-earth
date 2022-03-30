@@ -30,10 +30,6 @@ def assign_location(n):
 
             c.df.loc[names, 'location'] = names.str[:i]
 
-network = pypsa.Network(os.path.join(
-            "../results/test/postnetworks/elec_s_4_2050.nc"))
-# def plot_h2_map(network):
-
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
     fig = ax.get_figure()
 
@@ -79,7 +75,7 @@ def plot_h2_infra(network):
     bus_color = "m"
     link_color = "c"
     
-    n.links.loc[:,'p_nom_opt']=n.links.loc[:,'p_nom_opt']*1e7
+    n.links.loc[:,'p_nom_opt']=n.links.loc[:,'p_nom_opt']
     
     # n.links.loc[n.links.carrier == "H2 Electrolysis"].p_nom_opt
     
@@ -436,8 +432,10 @@ if __name__ == "__main__":
                                    simpl="",
                                    clusters="4",
                                    planning_horizons="2030")
-        
+    
+    n = pypsa.Network(snakemake.input.network)
+
     tech_colors = snakemake.config['plotting']['tech_colors']
-    plot_map(network, transmission=True)
-    plot_transmission_topology(network)
-    plot_h2_infra(network)
+    plot_map(n, transmission=True)
+    plot_transmission_topology(n)
+    plot_h2_infra(n)
