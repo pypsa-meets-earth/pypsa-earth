@@ -4,7 +4,7 @@ logging_level: INFO
 results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: MVP_test15
+run: Test_01April
 
 foresight: overnight 
 
@@ -310,6 +310,7 @@ plotting:
     process emissions to atmosphere: '#888888'
     process emissions: '#222222'
     oil emissions: '#666666'
+    industry oil emissions: '#666666'
     land transport oil emissions: '#666666'
     land transport fuel cell: '#AAAAAA'
     biogas: '#800000'
