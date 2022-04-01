@@ -22,7 +22,7 @@ if __name__ == "__main__":
     time = pd.date_range(freq="h", **snakemake.config["snapshots"])
     cutout_config = snakemake.config["atlite"]["cutout"]
 
-    cutout = atlite.Cutout(cutout_config).sel(time=time)
+    cutout = atlite.Cutout(cutout_config[1:]).sel(time=time)
 
     clustered_regions = (gpd.read_file(
         snakemake.input.regions_onshore).set_index("name").buffer(0).squeeze())
