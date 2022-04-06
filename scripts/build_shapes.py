@@ -13,6 +13,7 @@ from operator import attrgetter
 import fiona
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import rasterio
 import requests
 import rioxarray as rx
@@ -108,7 +109,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
     """
     # initialization of the geoDataFrame
-    geodf_GADM = gpd.GeoDataFrame()
+    geodf_list = []
 
     for country_code in country_list:
         # download file gpkg
@@ -139,9 +140,10 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
 
         # append geodataframes
-        geodf_GADM = geodf_GADM.append(geodf_temp)
+        geodf_list.append(geodf_temp)
 
-    geodf_GADM.reset_index(drop=True, inplace=True)
+    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
 
     return geodf_GADM
 
@@ -443,6 +445,8 @@ def generalized_mask(src, geom, **kwargs):
     "Generalize mask function to account for Polygon and MultiPolygon"
     if geom.geom_type == "Polygon":
         return mask(src, [geom], **kwargs)
+    elif geom.geom_type == "MultiPolygon":
+        return mask(src, geom.geoms, **kwargs)
     else:
         return mask(src, geom, **kwargs)
 
@@ -556,8 +560,10 @@ def _process_func_pop(c_code):
 
     with rasterio.open(WorldPop_inputfile) as src:
 
-        for i, row in country_rows.iterrows():
-            country_rows.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
+        for i in country_rows.index:
+            country_rows.loc[i, "pop"] = _sum_raster_over_mask(
+                country_rows.geometry.loc[i], src
+            )
 
     return country_rows
 
@@ -656,7 +662,11 @@ def gadm(
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
 
     # drop useless columns
-    df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
+    df_gadm.drop(
+        df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
+        axis=1,
+        inplace=True,
+    )
 
     # add the population data to the dataset
     add_population_data(

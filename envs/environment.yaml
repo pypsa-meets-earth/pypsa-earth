@@ -4,7 +4,6 @@
 
 name: pypsa-africa
 channels:
-- conda-forge/label/shapely_dev    # Until shapely 1.8+ is out of alpha
 - conda-forge
 - bioconda
 dependencies:

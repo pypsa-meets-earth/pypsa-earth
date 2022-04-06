@@ -13,6 +13,13 @@ Upcoming Release
 
 **New Features and major Changes**
 
+
+
+PyPSA-Africa 0.0.2 (6th April 2022)
+=====================================
+
+**New Features and major Changes**
+
 * Plotting and summary features: `PR #211 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/211>`__ and `PR #214 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/214>`__
 
 * Templates for issue, PR, feature request: `PR #216 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/216>`__
@@ -33,6 +40,8 @@ Upcoming Release
 
 * Implement area exclusions based on land type using the Copernicus Land Cover: `PR #272 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/272>`__.
 
+* Flexible demand extraction for multiple years across the globe: `PR #275 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/275>`_
+
 * Add CI caching and windows CI: `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/277>`__.
 
 * Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__.
@@ -41,6 +50,7 @@ Upcoming Release
 
 * Solved the issue of "overpassing nodes" and restyling osm_build_network: `PR #294 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/294>`__
 
+* Revise deprecations in build_shape: `PR #315 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/315>`__
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================

@@ -714,6 +714,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
 
 
 def built_network(inputs, outputs):
+
     logger.info("Stage 1/5: Read input data")
 
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
@@ -765,7 +766,7 @@ def built_network(inputs, outputs):
         no_data_countries = set(country_list).difference(set(bus_country_list))
         no_data_countries_shape = (
             country_shapes[country_shapes.index.isin(no_data_countries) == True]
-            .reset_index(drop=True)
+            .reset_index()
             .set_crs(4326)
         )
         length = len(no_data_countries)
@@ -788,7 +789,7 @@ def built_network(inputs, outputs):
                 "substation_lv": [True] * length,
             }
         )
-        buses = buses.append(df, ignore_index=True).reset_index(drop=True)
+        buses = pd.concat([buses, df], ignore_index=True).reset_index(drop=True)
 
     logger.info("Save outputs")
 
