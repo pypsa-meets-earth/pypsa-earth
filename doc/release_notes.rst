@@ -13,6 +13,13 @@ Upcoming Release
 
 **New Features and major Changes**
 
+
+
+PyPSA-Africa 0.0.2 (6th April 2022)
+=====================================
+
+**New Features and major Changes**
+
 * Plotting and summary features: `PR #211 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/211>`__ and `PR #214 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/214>`__
 
 * Templates for issue, PR, feature request: `PR #216 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/216>`__
