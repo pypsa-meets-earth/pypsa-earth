@@ -326,7 +326,7 @@ cables_tag_to_n_cables = {
 circuits_tag_to_n_circuits = {
     "1/3": "0",
     "2/3": "0",
-    # ? two lines one ground?
+    # ? two lines and one ground?
     "2-1": "2",
     "single": "1",
     "partial": "1",
@@ -340,7 +340,7 @@ circuits_tag_to_n_circuits = {
     "1.": "1",
 }
 
-# dropped manually as a result of visual checking of the corresponding grid
+# the tags which are dropped manually as a result of visual checking of the corresponding grid
 dropped_tags = ["1/3", "2/3"]
 
 
@@ -429,7 +429,7 @@ def integrate_lines_df(df_all_lines):
             dropped_values = set(df_one_third_circuits["circuits"])
 
             logger.warning(
-                f"The circuits == {dropped_values} of an overal length {dropped_length} km dropped."
+                f"The lines with a circuit tag in {dropped_values} of an overal length {dropped_length} km dropped."
             )
 
             # troubles with projections can lead to discrepancy between the length values
