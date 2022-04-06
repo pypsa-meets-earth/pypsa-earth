@@ -40,6 +40,8 @@ PyPSA-Africa 0.0.2 (6th April 2022)
 
 * Implement area exclusions based on land type using the Copernicus Land Cover: `PR #272 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/272>`__.
 
+* Flexible demand exrtraction for multiple years across the globe: `PR #275 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/275>`_
+
 * Add CI caching and windows CI: `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/277>`__.
 
 * Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__.
