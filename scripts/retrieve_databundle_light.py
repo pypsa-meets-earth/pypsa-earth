@@ -156,6 +156,79 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     return True
 
 
+def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=False):
+    """
+        download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+
+    Function to download and unzip the data from google drive
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+
+    """
+    resource = config["category"]
+    file_path = os.path.join(rootpath, "tempfile.zip")
+
+    url = config["urls"]["gdrive"]
+
+    # retrieve file_id from path
+    # cut the part before the ending \view
+    partition_view = re.split(r"/view|\\view", str(url), 1)
+    if len(partition_view) < 2:
+        logger.error(
+            f'Resource {resource} cannot be downloaded: "\\view" not found in url {url}'
+        )
+        return False
+
+    # split url to get the file_id
+    code_split = re.split(r"\\|/", partition_view[0])
+
+    if len(code_split) < 2:
+        logger.error(
+            f'Resource {resource} cannot be downloaded: character "\\" not found in {partition_view[0]}'
+        )
+        return False
+
+    # get file id
+    file_id = code_split[-1]
+
+    # if hot run enabled
+    if hot_run:
+        # remove file
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        # download file from google drive
+        gdd.download_file_from_google_drive(
+            file_id=file_id,
+            dest_path=file_path,
+            showsize=True,
+            unzip=False,
+        )
+        with ZipFile(file_path, "r") as zipObj:
+            # Extract all the contents of zip file in current directory
+            zipObj.extractall(path=config["destination"])
+        
+        logger.info(f"Download resource '{resource}' from cloud '{url}'.")
+
+        return True
+    else:
+        logger.error(f"Host {host} not implemented")
+        return False
+
+
 def download_and_unzip_protectedplanet(
     config, rootpath, hot_run=True, disable_progress=False
 ):

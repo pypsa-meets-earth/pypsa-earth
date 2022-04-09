@@ -57,7 +57,6 @@ databundles:
       gdrive: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
     output:
     - resources/ssp2-2.6/2030/era5_2013/Africa.nc
-    - resources/natura.tiff
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial:
