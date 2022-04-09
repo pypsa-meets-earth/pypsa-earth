@@ -220,7 +220,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
         with ZipFile(file_path, "r") as zipObj:
             # Extract all the contents of zip file in current directory
             zipObj.extractall(path=config["destination"])
-        
+
         logger.info(f"Download resource '{resource}' from cloud '{url}'.")
 
         return True
