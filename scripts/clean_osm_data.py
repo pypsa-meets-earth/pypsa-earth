@@ -409,24 +409,31 @@ def integrate_lines_df(df_all_lines):
                 df_all_lines["circuits"].isin(dropped_tags)
             ].reset_index()
 
+            # avoid mixing column name with geopandas method
+            df_one_third_circuits = df_one_third_circuits.rename(
+               columns={
+                   "length": "length_osm",
+               }
+            )   
+            
             # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
             df_one_third_circuits_m = df_one_third_circuits.set_crs("EPSG:4326").to_crs(
                 "EPSG:3857"
             )
 
             length_from_crs = df_one_third_circuits_m.length
-            df_one_third_circuits["crs_length"] = length_from_crs
+            df_one_third_circuits["length_crs"] = length_from_crs           
 
             # in case a line length is not available directly
             df_one_third_circuits.loc[
-                df_one_third_circuits["length"].isna(), "length"
+                df_one_third_circuits["length_osm"].isna(), "length_osm"
             ] = df_one_third_circuits.loc[
-                df_one_third_circuits["length"].isna(), "crs_length"
+                df_one_third_circuits["length_osm"].isna(), "length_crs"
             ]
-            dropped_length = round(df_one_third_circuits["length"].sum() / 1e3, 1)
 
+            # [m] -> [km]
+            dropped_length = round(df_one_third_circuits["length_osm"].sum() / 1e3, 1)
             dropped_values = set(df_one_third_circuits["circuits"])
-
             logger.warning(
                 f"The lines with a circuit tag in {dropped_values} of an overal length {dropped_length} km dropped."
             )
@@ -434,7 +441,7 @@ def integrate_lines_df(df_all_lines):
             # troubles with projections can lead to discrepancy between the length values
             tol = 0.1  # [m]
             length_diff = (
-                df_one_third_circuits["length"] - df_one_third_circuits["crs_length"]
+                df_one_third_circuits["length_osm"] - df_one_third_circuits["length_crs"]
             )
 
             if any(length_diff > tol):
