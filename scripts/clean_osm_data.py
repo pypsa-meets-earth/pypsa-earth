@@ -445,7 +445,7 @@ def integrate_lines_df(df_all_lines):
             )
 
             if any(length_diff > tol):
-                total_length_diff = round(sum(length_diff > tol), 2)
+                total_length_diff = round(sum(length_diff), 2)
                 logger.warning(
                     f"There is a difference of {total_length_diff} m in the dropped lines length as compared with values extracted from geographical coordinates."
                 )
