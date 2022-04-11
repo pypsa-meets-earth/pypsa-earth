@@ -300,7 +300,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
     return df  # return new frame
 
 
-# cable and circuit tags may be in a non-standard format
+# cable and circuit tags may be in a non-numeric format
 cables_tag_to_n_cables = {
     "single": "1",
     "triple": "3",
@@ -310,7 +310,7 @@ cables_tag_to_n_cables = {
     "1 (Looped - Haul & Return) + 1 power wire": "1",
     "ground": "0",
     "line": "1",
-    # assuming that in case of a typo there at least one line
+    # assuming that in case of a typo there is at least one line
     "`": "1",
     "^1": "1",
     "e": "1",
@@ -326,13 +326,12 @@ cables_tag_to_n_cables = {
 circuits_tag_to_n_circuits = {
     "1/3": "0",
     "2/3": "0",
-    # ? two lines and one ground?
+    # assumption of two lines and one grounding wire
     "2-1": "2",
     "single": "1",
     "partial": "1",
-    # ? an out-of-order line?
     "1 disused": "0",
-    # assuming that in case of a typo there at least one line
+    # assuming that in case of a typo there is at least one line
     "`": "1",
     "^1": "1",
     "e": "1",
@@ -340,7 +339,7 @@ circuits_tag_to_n_circuits = {
     "1.": "1",
 }
 
-# the tags which are dropped manually as a result of visual checking of the corresponding grid
+# the circuit tags being dropped manually (according to checks of the corresponding grid)
 dropped_tags = ["1/3", "2/3"]
 
 
@@ -401,8 +400,7 @@ def integrate_lines_df(df_all_lines):
 
     if df_all_lines["circuits"].dtype != int:
 
-        # it's possible that df_all_lines["circuits"] in dropped_tags
-        # but that seems to be a local feature
+        # it's possible that some df_all_lines["circuits"] are in manually dropped_tags
         if any(df_all_lines["circuits"].isin(dropped_tags)):
 
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
