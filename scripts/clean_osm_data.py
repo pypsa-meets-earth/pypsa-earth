@@ -339,9 +339,10 @@ circuits_tag_to_n_circuits = {
     "1.": "1",
 }
 
-# the circuit tags being dropped manually (according to checks of the corresponding grid)
-dropped_tags = ["1/3", "2/3"]
-
+# the circuit tags "1/3" and "2/3" are being dropped manually 
+# according to checks of the corresponding power grids
+dropped_tags = [x for x in ["1/3", "2/3"] if circuits_tag_to_n_circuits[x]=="0"]
+print(dropped_tags)
 
 def integrate_lines_df(df_all_lines):
     """
