@@ -339,10 +339,11 @@ circuits_tag_to_n_circuits = {
     "1.": "1",
 }
 
-# the circuit tags "1/3" and "2/3" are being dropped manually 
+# the circuit tags "1/3" and "2/3" are being dropped manually
 # according to checks of the corresponding power grids
-dropped_tags = [x for x in ["1/3", "2/3"] if circuits_tag_to_n_circuits[x]=="0"]
+dropped_tags = [x for x in ["1/3", "2/3"] if circuits_tag_to_n_circuits[x] == "0"]
 print(dropped_tags)
+
 
 def integrate_lines_df(df_all_lines):
     """
@@ -411,18 +412,18 @@ def integrate_lines_df(df_all_lines):
 
             # avoid mixing column name with geopandas method
             df_one_third_circuits = df_one_third_circuits.rename(
-               columns={
-                   "length": "length_osm",
-               }
-            )   
-            
+                columns={
+                    "length": "length_osm",
+                }
+            )
+
             # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
             df_one_third_circuits_m = df_one_third_circuits.set_crs("EPSG:4326").to_crs(
                 "EPSG:3857"
             )
 
             length_from_crs = df_one_third_circuits_m.length
-            df_one_third_circuits["length_crs"] = length_from_crs           
+            df_one_third_circuits["length_crs"] = length_from_crs
 
             # in case a line length is not available directly
             df_one_third_circuits.loc[
@@ -441,7 +442,8 @@ def integrate_lines_df(df_all_lines):
             # troubles with projections can lead to discrepancy between the length values
             tol = 0.1  # [m]
             length_diff = (
-                df_one_third_circuits["length_osm"] - df_one_third_circuits["length_crs"]
+                df_one_third_circuits["length_osm"]
+                - df_one_third_circuits["length_crs"]
             )
 
             if any(length_diff > tol):
