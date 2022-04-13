@@ -13,37 +13,65 @@ Upcoming Release
 
 **New Features and major Changes**
 
-* Attach hydro enabled with all hydro types
+* Bug fixing (script retrieve_databundle) and rule run_test to ease testing `PR #322 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/322>`__
 
-* Parallel download of osm data
+PyPSA-Africa 0.0.2 (6th April 2022)
+=====================================
 
-* Rule download_osm_data extended to the world
+**New Features and major Changes**
 
-* Rule build_shape extended to the world
+* Plotting and summary features: `PR #211 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/211>`__ and `PR #214 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/214>`__
 
-* Replace google by zenodo data retrieval
+* Templates for issue, PR, feature request: `PR #216 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/216>`__
 
+* Attach hydro enabled with all hydro types: `PR #232 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/232>`__
+
+* Parallel download of osm data: `PR #232 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/232>`__
+
+* Decoupling iso coding from geofabrik; rule download_osm_data extended to the world: `PR #236 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/236>`__
+
+* Rule build_shape extended to the world: `PR #236 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/236>`__
+
+* Validation of geofabrik links: `PR #249 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/249>`__
+
+* Generalized version of Data retrieval with google and zenodo hosting platforms: `PR #242 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/242>`__ and `PR #260 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/260>`__
+
+* Fix random state for kmean clustering, adopted from `PR 313 <https://github.com/PyPSA/pypsa-eur/pull/313>`__
+
+* Implement area exclusions based on land type using the Copernicus Land Cover: `PR #272 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/272>`__.
+
+* Flexible demand extraction for multiple years across the globe: `PR #275 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/275>`_
+
+* Add CI caching and windows CI: `Commit CI windows <https://github.com/pypsa-meets-africa/pypsa-africa/commit/c98cb30e828cfda17692b8f5e1dd8e39d33766ad>`__,  `PR #277 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/277>`__.
+
+* Change config to allow weather year extraction from snapshots as default: `PR #301 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/301>`__.
+
+* Replace Restyler by .pre-commit `PR #307 https://github.com/pypsa-meets-africa/pypsa-africa/pull/307`__.
+
+* Solved the issue of "overpassing nodes" and restyling osm_build_network: `PR #294 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/294>`__
+
+* Revise deprecations in build_shape: `PR #315 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/315>`__
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
 
-This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`.
+This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`__.
 
 **New Features and major Changes**
 
 * Include new data streams for Africa model
 
-* Demand data implementation from `GEGIS <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/add_electricity.py#L221-L259>`. Demand can be chosen for weather years and socioeconomic `ssp` scenarios
+* Demand data implementation from `GEGIS <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/add_electricity.py#L221-L259>`__. Demand can be chosen for weather years and socioeconomic `ssp` scenarios
 
-* Network is built, cleaned and processed solely on `OpenStreetMap data <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/osm_pbf_power_data_extractor.py>`
+* Network is built, cleaned and processed solely on `OpenStreetMap data <https://github.com/pypsa-meets-africa/pypsa-africa/blob/9acf89b8756bb60d61460c1dad54625f6a67ddd5/scripts/osm_pbf_power_data_extractor.py>`__
 
-* Voronoi regions, where data is aggregated towards, can be replaced by administrative `GADM zones <https://github.com/pypsa-meets-africa/pypsa-africa/commit/4aa21a29b08c4794c5e15d4209389749775a5a52>`
+* Voronoi regions, where data is aggregated towards, can be replaced by administrative `GADM zones <https://github.com/pypsa-meets-africa/pypsa-africa/commit/4aa21a29b08c4794c5e15d4209389749775a5a52>`__
 
-* `Augmented line expansion feature <https://github.com/pypsa-meets-africa/pypsa-africa/pull/175>` can make network meshed, connect isolated mini-grids to the main-grid.
+* `Augmented line expansion feature <https://github.com/pypsa-meets-africa/pypsa-africa/pull/175>`__ can make network meshed, connect isolated mini-grids to the main-grid.
 
-* Community moved to `Discord <https://discord.gg/AnuJBk23FU>`.
+* Community moved to `Discord <https://discord.gg/AnuJBk23FU>`__.
 
-* Most meeting and agenda's are `open <https://github.com/pypsa-meets-africa/pypsa-africa#get-involved>`.
+* Most meeting and agenda's are `open <https://github.com/pypsa-meets-africa/pypsa-africa#get-involved>`__.
 
 
 Release Process

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2017-2021 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -108,8 +109,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_cutout", cutout="africa-2013-era5")
     configure_logging(snakemake)
 
-    cutout_params = snakemake.config["atlite"]["cutouts"][
-        snakemake.wildcards.cutout]
+    cutout_params = snakemake.config["atlite"]["cutouts"][snakemake.wildcards.cutout]
 
     snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
     time = [snapshots[0], snapshots[-1]]
@@ -121,8 +121,7 @@ if __name__ == "__main__":
         onshore = gpd.read_file(snakemake.input.regions_onshore)
         offshore = gpd.read_file(snakemake.input.regions_offshore)
         regions = onshore.append(offshore)
-        d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy",
-                                                                 0.25)) * 2
+        d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
         cutout_params["bounds"] = regions.total_bounds + [d, d, d, d]
     elif {"x", "y"}.issubset(cutout_params):
         cutout_params["x"] = slice(*cutout_params["x"])

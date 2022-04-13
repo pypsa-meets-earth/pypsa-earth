@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.3.0
-tutorial: True
+version: 0.0.2
+tutorial: true
 
 logging:
   level: INFO
@@ -28,41 +28,50 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
+retrieve_databundle:
+  show_progress: false  # Option to disable the progress bar in retrieve_databundle
+
 augmented_line_connection:
-  add_to_snakefile: False
+  add_to_snakefile: false
   connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
   new_line_type: "HVDC"  # or "HVAC"
   min_expansion: 1  # [MW]
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
-  alternative_clustering: False
+  alternative_clustering: false
   distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
-  out_logging: True  # When true, logging is printed to console
+  out_logging: true  # When true, logging is printed to console
 
 # options for build_shapes
 build_shape_options:
-    gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
-    update_file: False  # When true, all the input files are downloaded again and replace the existing files
-    out_logging: True  # When true, logging is printed to console
-    year: 2020  # reference year used to derive shapes, info on population and info on GDP
-    nprocesses: 5  # number of processes to be used in build_shapes
+  gadm_layer_id: 1    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  update_file: false    # When true, all the input files are downloaded again and replace the existing files
+  out_logging: true    # When true, logging is printed to console
+  year: 2020    # reference year used to derive shapes, info on population and info on GDP
+  nprocesses: 5    # number of processes to be used in build_shapes
 
 clean_osm_data_options:
-  names_by_shapes: True  # Set the country name based on the extended country shapes
+  names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
-  add_line_endings: True  # When true, the line endings are added to the dataset of the substations
-  group_close_buses: True  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
+  add_line_endings: true  # When true, the line endings are added to the dataset of the substations
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
+  group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 35000
 
 load_options:
-  weather_year: 2014
-  prediction_year: 2030
-  scale: 1
+  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+  scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 summary_dir: results
 
@@ -79,7 +88,7 @@ enable:
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  build_cutout: true
+  build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
   # custom_busmap: false
 
@@ -163,13 +172,12 @@ renewable:
       turbine: Vestas_V112_3MW
     capacity_per_sqkm: 3 # ScholzPhd Tab 4.3.1: 10MW/km^2
     # correction_factor: 0.93
-    corine:
+    copernicus:
       # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
       #  development of the REMix model and application for Europe. ( p.42 / p.28)
-      grid_codes: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                   24, 25, 26, 27, 28, 29, 31, 32]
+      grid_codes: [20, 30, 40, 60, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
       distance: 1000
-      distance_grid_codes: [1, 2, 3, 4, 5, 6]
+      distance_grid_codes: [50]
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
@@ -181,8 +189,8 @@ renewable:
       turbine: NREL_ReferenceTurbine_5MW_offshore
     capacity_per_sqkm: 3
     # correction_factor: 0.93
-    corine: [44, 255]
-    natura: true
+    copernicus:
+      grid_codes: [80, 200]
     max_depth: 50
     max_shore_distance: 30000
     potential: simple # or conservative
@@ -196,7 +204,8 @@ renewable:
     # ScholzPhd Tab 4.3.1: 10MW/km^2
     capacity_per_sqkm: 3
     # correction_factor: 0.93
-    corine: [44, 255]
+    copernicus:
+      grid_codes: [80, 200]
     natura: true
     max_depth: 50
     min_shore_distance: 30000
@@ -218,8 +227,8 @@ renewable:
     # sector: The economic potential of photovoltaics and concentrating solar
     # power." Applied Energy 135 (2014): 704-720.
     correction_factor: 0.854337
-    corine: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-             14, 15, 16, 17, 18, 19, 20, 26, 31, 32]
+    copernicus:
+      grid_codes: [20, 30, 40, 50, 60, 90, 100]
     natura: true
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
@@ -228,7 +237,7 @@ renewable:
     cutout: africa-2013-era5-tutorial
     resource:
       method: hydro
-      hydrobasins: data/raw/hydrobasins/hybas_lake_af_lev04_v1c.shp
+      hydrobasins: data/raw/hydrobasins/hybas_world_lev04_v1c.shp
       # flowspeed: 1.0
       # weight_with_height: false
       # show_progress: true
