@@ -34,10 +34,10 @@ The PyPSA meets Africa team is currently running four types of meetings:
 - **Specific code meeting (by invitation)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
-  1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, `download .ics file <hhttps://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing>`__
-  2. AI asset detection meeting, every Tuesday 15:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing>`__
-  3. Sector coupling meeting, every Thursday 09:00 UTC+0, `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
-  4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing>`__
+    1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, `download .ics file <https://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing>`__
+    2. AI asset detection meeting, every Tuesday 15:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing>`__
+    3. Sector coupling meeting, every Thursday 09:00 UTC+0, `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
+    4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing>`__
 
 - **Outreach meeting (by invitation)**
 
