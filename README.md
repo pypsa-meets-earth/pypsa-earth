@@ -46,10 +46,10 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
-  1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0
-  2. AI asset detection meeting, every Tuesday 15:30 UTC+0
-  3. Sector coupling meeting, every Thursday 09:00 UTC+0
-  4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0
+  1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, <a href="hhttps://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing" >download .ics</a>
+  2. AI asset detection meeting, every Tuesday 15:30 UTC+0, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+  3. Sector coupling meeting, every Thursday 09:00 UTC+0, <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
+  4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a>
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
