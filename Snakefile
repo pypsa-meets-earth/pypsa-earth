@@ -38,6 +38,7 @@ rule prepare_sector_network:
         dsm_profile='resources/dsm_profile_{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
+	airports="data/airports.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
