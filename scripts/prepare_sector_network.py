@@ -9,6 +9,8 @@ from helpers import create_network_topology
 from helpers import cycling_shift
 from helpers import mock_snakemake
 from helpers import prepare_costs, override_component_attrs
+from helpers import locate_bus
+from helpers import three_2_two_digits_country
 
 import pytz
 import xarray as xr
@@ -388,6 +390,16 @@ def add_co2(n, costs):
 
 def add_aviation(n, cost):
      all_aviation = ["total international aviation", "total domestic aviation"]
+
+     airports = pd.read_csv(snakemake.input.airports, index_col=None, squeeze=True)
+    
+     gadm_level = 1 #TODO define gadm level in config file
+     
+     airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
+             lambda airport: locate_bus(airport[['x','y']], airport['country'], gadm_level), axis=1) 
+     
+     airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
+         lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
      
      p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
      
@@ -397,6 +409,14 @@ def add_aviation(n, cost):
          carrier="kerosene for aviation",
          p_set=p_set
      )
+     
+     n.madd("Load",
+         nodes,
+         "kerosene for aviation",
+         bus="Africa oil",
+         carrier="kerosene for aviation",
+         p_set=p_set
+         )
 
      co2_release = ["kerosene for aviation"]
      co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
