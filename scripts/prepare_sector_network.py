@@ -409,14 +409,6 @@ def add_aviation(n, cost):
          carrier="kerosene for aviation",
          p_set=p_set
      )
-     
-     n.madd("Load",
-         nodes,
-         "kerosene for aviation",
-         bus="Africa oil",
-         carrier="kerosene for aviation",
-         p_set=p_set
-         )
 
      co2_release = ["kerosene for aviation"]
      co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
