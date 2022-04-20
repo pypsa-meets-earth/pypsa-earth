@@ -4,7 +4,11 @@ logging_level: INFO
 results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
+<<<<<<< HEAD
 run: MVP_test15
+=======
+run: Test_01April
+>>>>>>> 3ee93d40da47103a3874f404fa9ff48cccdb8484
 
 foresight: overnight 
 
@@ -13,7 +17,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
     - ''
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-    - 4
+    - 15
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
     - 2030
 
@@ -102,7 +106,7 @@ snapshots:
   closed: left # end is not inclusive
 
 atlite:
-  cutout: /cutouts/africa-2013-era5.nc
+  cutout: cutouts/africa-2013-era5.nc
 
 solving:
   #tmpdir: "path/to/tmp"
@@ -310,6 +314,7 @@ plotting:
     process emissions to atmosphere: '#888888'
     process emissions: '#222222'
     oil emissions: '#666666'
+    industry oil emissions: '#666666'
     land transport oil emissions: '#666666'
     land transport fuel cell: '#AAAAAA'
     biogas: '#800000'

@@ -19,7 +19,6 @@ if __name__ == "__main__":
 
     cutout_path = os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
-    # cutout = snakemake.config['atlite']['cutout']
 
     grid_cells = cutout.grid_cells()
 
