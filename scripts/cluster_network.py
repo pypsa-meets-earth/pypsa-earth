@@ -310,20 +310,20 @@ def busmap_for_gadm_clusters(n, gadm_level):
     def locate_bus(coords, co):
 
         gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(two_2_three_digits_country(co))]
+        point = Point(coords["x"], coords["y"])
 
-        point = Point(coords["x"], coords["y"])        
-        
         try:
             return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item()
-        
+
         except ValueError:
-            return gdf_co[gdf_co.geometry==\
-                          min(gdf_co.geometry, 
-                              key=(point.distance))]["GID_{}".format(gadm_level)].item() 
+            return gdf_co[
+                gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
+            ]["GID_{}".format(gadm_level)].item()
 
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
-        lambda bus: locate_bus(bus[['x','y']], bus['country']), axis=1)
+        lambda bus: locate_bus(bus[["x", "y"]], bus["country"]), axis=1
+    )
     busmap = buses["gadm_{}".format(gadm_level)]
 
     return n, busmap
@@ -434,7 +434,6 @@ def clustering_for_n_clusters(
 
     weighted_agg_gens = True
 
-
     clustering = get_clustering_from_busmap(
         n,
         busmap,
@@ -510,7 +509,7 @@ if __name__ == "__main__":
         renewable_carriers = pd.Index(
             [
                 "solar",
-                "onwind",  
+                "onwind",
             ]
         )
     else:
