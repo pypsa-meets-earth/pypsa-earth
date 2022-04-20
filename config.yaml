@@ -4,7 +4,7 @@ logging_level: INFO
 results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: MVP_test3
+run: MVP_test15
 
 foresight: overnight 
 
