@@ -132,7 +132,8 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
-from _helpers import configure_logging, sets_path_to_root, update_p_nom_max
+from _helpers import configure_logging, sets_path_to_root, update_p_nom_max,two_2_three_digits_country
+
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
 from pypsa.networkclustering import (
@@ -308,7 +309,7 @@ def busmap_for_gadm_clusters(n, gadm_level):
 
     def locate_bus(coords, co):
 
-        gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(two_2_three_digits_cuntry(co))]
+        gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(two_2_three_digits_country(co))]
 
         point = Point(coords["x"], coords["y"])        
         
