@@ -389,29 +389,44 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-     all_aviation = ["total international aviation", "total domestic aviation"]
+     #all_aviation = ["total international aviation", "total domestic aviation"]
 
      airports = pd.read_csv(snakemake.input.airports, index_col=None, squeeze=True)
     
-     gadm_level = 1 #TODO define gadm level in config file
+     gadm_level = options["gadm_level"] 
      
      airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
              lambda airport: locate_bus(airport[['x','y']], airport['country'], gadm_level), axis=1) 
      
-     airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
-         lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
+     #To change 3 country code to 2
+     #airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
+         #lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
      
-     p_set = nodal_energy_totals.loc[nodes, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+     airports = airports.set_index("gadm_{}".format(gadm_level))
+    
+     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
+    
+     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
+    
+     airports["p_set"] = airports["fraction"].apply(
+         lambda frac: frac * 1e6 / 8760) #TODO use real data here
      
-     n.add("Load",
-         "kerosene for aviation",
+     airports = pd.concat([airports,ind])
+
+     airports = airports[~airports.index.duplicated(keep='first')]
+        
+     airports = airports.fillna(0)
+     
+     n.madd("Load",
+         nodes,
+         suffix=" kerosene for aviation",
          bus="Africa oil",
          carrier="kerosene for aviation",
-         p_set=p_set
-     )
+         p_set=airports["p_set"]
+     ) 
 
-     co2_release = ["kerosene for aviation"]
-     co2 = n.loads.loc[co2_release, "p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
+     #co2_release = ["kerosene for aviation"]
+     co2 = airports["p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
 
      n.add("Load",
          "oil emissions",
@@ -543,13 +558,45 @@ def h2_hc_conversions(n, costs):
 
 def add_shipping (n, costs):
     
+    gadm_level = options["gadm_level"] 
+    
+    efficiency = (options["shipping_average_efficiency"] /
+                  costs.at["fuel cell", "efficiency"])
+    
+    # check whether item depends on investment year
+    shipping_hydrogen_share = get(options["shipping_hydrogen_share"],
+                                  investment_year)
+
+    ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+    
+    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
+            lambda port: locate_bus(port[['x','y']], port['country'], gadm_level), axis=1) 
+    
+    ports = ports.set_index("gadm_{}".format(gadm_level))
+    
+    ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
+    
+    ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
+
+    ports["p_set"] = ports["fraction"].apply(
+        lambda frac: shipping_hydrogen_share * frac * 1e6 * efficiency / 8760)  #TODO use real data here
+    
+    ports = pd.concat([ports,ind])
+
+    ports = ports[~ports.index.duplicated(keep='first')]
+    
+    #TODO Where is MAR.7_1 ????? Only 13 nodes
+    
+    ports = ports.fillna(0)
+    
     if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
 
         n.madd("Bus",
                nodes,
                suffix=" H2 liquid",
                carrier="H2 liquid",
-               location=nodes)
+               location=nodes
+               )
 
         # link the H2 supply to liquified H2
         n.madd(
@@ -568,41 +615,21 @@ def add_shipping (n, costs):
     else:
         shipping_bus = nodes + " H2"
 
-    all_navigation = [
-        "total international navigation", "total domestic navigation"
-    ]
-    efficiency = (options["shipping_average_efficiency"] /
-                  costs.at["fuel cell", "efficiency"])
-    # check whether item depends on investment year
-    shipping_hydrogen_share = get(options["shipping_hydrogen_share"],
-                                  investment_year)
-
-    all_navigation = [
-        "total international navigation", "total domestic navigation"
-    ]
-
-    # temporary data nodal_energy_totals
-
-    p_set = (shipping_hydrogen_share *
-             nodal_energy_totals.loc[nodes, all_navigation].sum(axis=1) * 1e6 *
-             efficiency / 8760)
-
     n.madd(
         "Load",
         nodes,
         suffix=" H2 for shipping",
         bus=shipping_bus,
         carrier="H2 for shipping",
-        p_set=p_set,
+        p_set=ports["p_set"],
     )
 
     if shipping_hydrogen_share < 1:
 
         shipping_oil_share = 1 - shipping_hydrogen_share
-
-        p_set = (shipping_oil_share *
-                 nodal_energy_totals.loc[nodes, all_navigation].sum(axis=1) *
-                 1e6 / 8760.0)
+        
+        ports["p_set"] = ports["fraction"].apply(
+            lambda frac: shipping_oil_share * frac * 1e6 / 8760)
 
         n.madd(
             "Load",
@@ -610,11 +637,11 @@ def add_shipping (n, costs):
             suffix=" shipping oil",
             bus="Africa oil",
             carrier="shipping oil",
-            p_set=p_set,
+            p_set=ports["p_set"],
         )
 
         co2 = (shipping_oil_share *
-               nodal_energy_totals.loc[nodes, all_navigation].sum().sum() *
+               ports["p_set"].sum() *
                1e6 / 8760 * costs.at["oil", "CO2 intensity"])
 
         n.add(
@@ -989,8 +1016,8 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake("prepare_sector_network",
                                    simpl="",
-                                   clusters="4",
-                                   planning_horizons="2030")
+                                   clusters="15",
+                                   planning_horizons="2030") 
     # TODO add mock_snakemake func
 
     # TODO fetch from config
@@ -1022,7 +1049,7 @@ if __name__ == "__main__":
 
     # Get the data required for land transport
     nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals,
-                                      index_col=0)
+                                      index_col=0) #where is nodal_energy_totals_4
     transport = pd.read_csv(snakemake.input.transport,
                             index_col=0,
                             parse_dates=True)
