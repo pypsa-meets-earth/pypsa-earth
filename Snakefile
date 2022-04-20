@@ -39,6 +39,7 @@ rule prepare_sector_network:
         nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
 	airports="data/airports.csv",
+	ports="data/ports.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
