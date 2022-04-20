@@ -157,7 +157,9 @@ def get_gadm_shape(onshore_locs, gadm_shapes):
         try:
             return gadm_shapes[gadm_shapes.contains(point)].item()
         except ValueError:
-            return min(gadm_shapes_country, key=(point.distance))             # TODO returns closest shape if the point was not inside one. Works well but will not catch an outlier bus. 
+            return min(
+                gadm_shapes_country, key=(point.distance)
+            )  # TODO returns closest shape if the point was not inside one. Works well but will not catch an outlier bus.
 
     def get_id(coords):
         point = Point(Point(coords["x"], coords["y"]))
