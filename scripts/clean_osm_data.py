@@ -451,7 +451,7 @@ def integrate_lines_df(df_all_lines):
             # [m] -> [km]
             dropped_length = round(df_one_third_circuits["length_osm"].sum() / 1e3, 1)
             dropped_values = set(df_one_third_circuits["circuits"])
-            logger.info(
+            logger.warning(
                 f"The lines with a circuit tag in {dropped_values} of an overal length {dropped_length} km dropped."
             )
 
