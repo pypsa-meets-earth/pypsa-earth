@@ -18,7 +18,7 @@ wildcard_constraints:
 subworkflow pypsaearth:
     workdir: "../pypsa-africa"
     snakefile: "../pypsa-africa/Snakefile"
-    configfile: "../pypsa-africa/config.yaml"
+    configfile: "./config_pypsa-earth.yaml"
 
 rule prepare_sector_networks:
     input:
