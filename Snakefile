@@ -93,6 +93,11 @@ rule build_population_layouts:
     threads: 8
     script: "scripts/build_population_layouts.py"
 
+rule move_hardcoded_files_temp:
+    input: "data/temp_hard_coded/energy_totals.csv", "data/temp_hard_coded/transport_data.csv"
+    output: "resources/energy_totals.csv", "resources/transport_data.csv"
+    shell: "cp -a data/temp_hard_coded/. resources"
+
 rule build_clustered_population_layouts:
     input:
         pop_layout_total="resources/pop_layout_total.nc",
