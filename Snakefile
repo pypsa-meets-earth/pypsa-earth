@@ -70,19 +70,19 @@ rule prepare_transport_data:
 
     script: "scripts/prepare_transport_data.py"
 
-rule calculate_dummy_pop_layout:
-    input:
-        network='networks/elec_s{simpl}_37.nc',  # fixed number of clusters
-        # Get pop layouts from Europe (update to Morocco/Africa layout)
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_37.csv",  # fixed number of clusters
-        #simplified_pop_layout="resources/pop_layout_elec_s{simpl}.csv",
+# rule calculate_dummy_pop_layout:
+#     input:
+#         network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),  # fixed number of clusters
+#         # Get pop layouts from Europe (update to Morocco/Africa layout)
+#         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",  # fixed number of clusters
+#         #simplified_pop_layout="resources/pop_layout_elec_s{simpl}.csv",
 
-    output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_37.csv",  # fixed number of clusters
-    script: "scripts/calculate_dummy_pop_layout.py" 
+#     output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_{clusters}.csv",  # fixed number of clusters
+#     script: "scripts/calculate_dummy_pop_layout.py" 
 
 rule build_population_layouts:
     input:
-        nuts3_shapes='resources/gadm_shapes.geojson',
+        nuts3_shapes=pypsaearth('resources/gadm_shapes.geojson'),
         urban_percent="data/urban_percent.csv"
     output:
         pop_layout_total="resources/pop_layout_total.nc",
@@ -98,7 +98,7 @@ rule build_clustered_population_layouts:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson")
     output:
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv"
     resources: mem_mb=10000
@@ -111,7 +111,7 @@ rule build_temperature_profiles:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson")
     output:
         temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
