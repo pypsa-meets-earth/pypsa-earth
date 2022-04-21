@@ -22,7 +22,6 @@ The PyPSA meets Africa team is currently running four types of meetings:
 
 
 - `**Discord NEW! (Open)** <https://discord.gg/AnuJBk23FU>`_
-
   - Chat with the community, team up on features, exchange with developers, code in voice channels
 
 - **General code meeting (Open)**
@@ -34,13 +33,9 @@ The PyPSA meets Africa team is currently running four types of meetings:
 
 - **Specific code meeting (by invitation)**
 
-  - meeting hosted on Discord
-  - join updates, demos, Q&A's, discussions and the coordination of each work package
-  
-    1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, `download .ics file <hhttps://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing>`__
-    2. AI asset detection meeting, every Tuesday 15:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing>`__
-    3. Sector coupling meeting, every Thursday 09:00 UTC+0, `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
-    4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing>`__
+  - current meetings: 1) Demand creation (WP1) 2) Data workflow updates (WP1-WP5) 3) Sector coupling model and 4) AI asset detection (WP6)
+  - every week Friday 1) 13-13:45 (UTC+0) 2) Thursday 13:30-14:00 (UTC+0) 3) Thursday 09:00-09:30 (UTC+0) and 4) Tuesday 15:30-16:30 (UTC+0)
+  - updates, demos, task distribution, weekly targets, Q&A
 
 - **Outreach meeting (by invitation)**
 
