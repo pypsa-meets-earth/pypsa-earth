@@ -428,11 +428,11 @@ def integrate_lines_df(df_all_lines):
     if df_all_lines["circuits"].dtype != int:
 
         # it's possible that some df_all_lines["circuits"] are in manually dropped_tags
-        if any(df_all_lines["circuits"].isin(dropped_tags)):
+        if any(df_all_lines["circuits"].isin(dropped_circuits_tags)):
 
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
             df_one_third_circuits = df_all_lines.loc[
-                df_all_lines["circuits"].isin(dropped_tags)
+                df_all_lines["circuits"].isin(dropped_circuits_tags)
             ].reset_index()
 
             # avoid mixing column name with geopandas method
