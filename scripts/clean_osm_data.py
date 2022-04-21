@@ -365,6 +365,13 @@ def integrate_lines_df(df_all_lines):
     # Add circuits information
     # if not int make int
     if df_all_lines["cables"].dtype != int:
+
+        dropped_cables = [x for x in dropped_cables_tags if x in df_all_lines["cables"].values]
+        if len(dropped_cables) != 0:
+            logger.info(
+                    f"The lines with a cables tag in {set(dropped_cables)} will be dropped."
+            )
+
         # map known non-numerical issues into a reasonable n_cables value
         df_all_lines["cables"] = (
             df_all_lines["cables"]
