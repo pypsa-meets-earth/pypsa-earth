@@ -4,7 +4,9 @@ logging_level: INFO
 results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
-run: Test_01April
+
+run: MVP_test15
+
 
 foresight: overnight 
 
@@ -82,7 +84,6 @@ sector:
   shipping_hydrogen_liquefaction: true
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: 1.0
-  gadm_level: 1
 
   h2_cavern: True
   marginal_cost_storage: 0
