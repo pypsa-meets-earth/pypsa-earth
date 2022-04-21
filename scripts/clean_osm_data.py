@@ -339,10 +339,8 @@ circuits_tag_to_n_circuits = {
     "1.": "1",
 }
 
-# the circuit tags "1/3" and "2/3" are being dropped manually 
-# according to checks of the corresponding power grids
-dropped_tags = [x for x in ["1/3", "2/3"] if circuits_tag_to_n_circuits[x]=="0"]
-print(dropped_tags)
+dropped_cables_tags = [x for x in cables_tag_to_n_cables.keys() if cables_tag_to_n_cables[x]=="0"]
+dropped_circuits_tags = [x for x in circuits_tag_to_n_circuits.keys() if circuits_tag_to_n_circuits[x]=="0"]
 
 def integrate_lines_df(df_all_lines):
     """
