@@ -68,7 +68,6 @@ rule prepare_transport_data:
         avail_profile='resources/avail_profile_s{simpl}_{clusters}.csv',
         dsm_profile='resources/dsm_profile_s{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_s{simpl}_{clusters}.csv',
-        # dummy_wildcard="resources/dummy{simpl}_{clusters}.nc"
 
     script: "scripts/prepare_transport_data.py"
 
