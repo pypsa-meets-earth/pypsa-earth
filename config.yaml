@@ -66,7 +66,7 @@ sector:
     # 2040: 0.1
     # 2050: 0.15
   land_transport_electric_share:
-    0.75 # 1 means all EVs
+    0. # 1 means all EVs  # This leads to problems when non-zero
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
