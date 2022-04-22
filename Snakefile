@@ -38,12 +38,14 @@ rule prepare_sector_network:
         dsm_profile='resources/dsm_profile_{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
-        heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
-        heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
-        heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
 	    airports="data/airports.csv",
 	    ports="data/ports.csv",
+        heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
+        ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
+        gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
+        solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
+        district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
@@ -106,12 +108,12 @@ rule prepare_heat_data:
         heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
         heat_profile="data/heat_load_profile_BDEW.csv",
     output:
-        nodal_energy_totals='resources/nodal_energy_totals_{simpl}_{clusters}.csv',
-        heat_demand='resources/heat/heat_demand_{simpl}_{clusters}.csv',
-        ashp_cop='resources/heat/ashp_cop_{simpl}_{clusters}.csv',
-        gshp_cop='resources/heat/gshp_cop_{simpl}_{clusters}.csv',
-        solar_thermal='resources/heat/solar_thermal_{simpl}_{clusters}.csv',
-        district_heat_share='resources/heat/district_heat_share_{simpl}_{clusters}.csv'
+        nodal_energy_totals='resources/nodal_energy_totals_s{simpl}_{clusters}.csv',
+        heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
+        ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
+        gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
+        solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
+        district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
     script: "scripts/prepare_transport_data.py"
 
 
