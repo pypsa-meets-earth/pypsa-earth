@@ -41,3 +41,13 @@ The diagram below depicts one representative clustered node showing the combinat
 
     .../pypsa-africa % jupyter lab
 ```
+
+## Test run on tutorial
+
+- In the folder open a terminal/command window to be located at this path `~/pypsa-earth-sec/`
+- Activate the environment `conda activate pypsa-africa`
+- Run a dryrun of the Snakemake workflow by typing simply in the terminal:
+  ```bash
+  snakemake -j 1 solve_all_networks -n
+  ```
+  Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
