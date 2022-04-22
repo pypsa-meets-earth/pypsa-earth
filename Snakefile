@@ -72,16 +72,6 @@ rule prepare_transport_data:
 
     script: "scripts/prepare_transport_data.py"
 
-# rule calculate_dummy_pop_layout:
-#     input:
-#         network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),  # fixed number of clusters
-#         # Get pop layouts from Europe (update to Morocco/Africa layout)
-#         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",  # fixed number of clusters
-#         #simplified_pop_layout="resources/pop_layout_elec_s{simpl}.csv",
-
-#     output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_{clusters}.csv",  # fixed number of clusters
-#     script: "scripts/calculate_dummy_pop_layout.py" 
-
 rule build_population_layouts:
     input:
         nuts3_shapes=pypsaearth('resources/gadm_shapes.geojson'),
