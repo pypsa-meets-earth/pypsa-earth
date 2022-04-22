@@ -774,14 +774,14 @@ def add_industry(n, costs):
     )
 
     ########################################################### CARIER = HEAT
-    #     # TODO simplify bus expression
-    #     n.madd("Load",
-    #         nodes,
-    #         suffix=" low-temperature heat for industry",
-    #         bus=[node + " urban central heat" if node + " urban central heat" in n.buses.index else node + " services urban decentral heat" for node in nodes],
-    #         carrier="low-temperature heat for industry",
-    #         p_set=industrial_demand.loc[nodes, "low-temperature heat"] / 8760
-    #     )
+        # TODO simplify bus expression
+    n.madd("Load",
+        nodes,
+        suffix=" low-temperature heat for industry",
+        bus=[node + " urban central heat" if node + " urban central heat" in n.buses.index else node + " services urban decentral heat" for node in nodes],
+        carrier="low-temperature heat for industry",
+        p_set=industrial_demand.loc[nodes, "low-temperature heat"] / 8760
+    )
 
     ################################################## CARRIER = ELECTRICITY
 
