@@ -1076,8 +1076,7 @@ def add_heat(n, costs):
         "services rural",
         "residential urban decentral",
         "services urban decentral",
-        "urban central"
-    ]
+        "urban central"]
 
     for name in heat_systems:
 
@@ -1086,7 +1085,7 @@ def add_heat(n, costs):
         n.add("Carrier", name + " heat")
 
         n.madd("Bus",
-            nodes[name] + f" {name} heat",
+            nodes[name] + " {} heat".format(name),
             location=nodes[name],
             carrier=name + " heat"
         )
@@ -1446,7 +1445,7 @@ if __name__ == "__main__":
     ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0)                                  
     solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0)                                  
 
-    district_heat_share = pd.read_csv(snakemake.input.district_heat_share)
+    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
     add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
