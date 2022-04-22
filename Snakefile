@@ -38,8 +38,12 @@ rule prepare_sector_network:
         dsm_profile='resources/dsm_profile_{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
-	airports="data/airports.csv",
-	ports="data/ports.csv",
+        heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
+        heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
+        heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+	    airports="data/airports.csv",
+	    ports="data/ports.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
@@ -49,11 +53,10 @@ rule prepare_sector_network:
 
 rule prepare_transport_data:
     input:
-        #network='networks/elec_s_4.nc',  # hardcoded wildcards temporary
         network='networks/elec_s{simpl}_{clusters}.nc',
         energy_totals_name='resources/energy_totals.csv',
-        traffic_data_KFZ = "data/emobility/KFZ__count",
-        traffic_data_Pkw = "data/emobility/Pkw__count",
+        traffic_data_KFZ="data/emobility/KFZ__count",
+        traffic_data_Pkw="data/emobility/Pkw__count",
         transport_name='resources/transport_data.csv',
         #clustered_pop_layout="resources/pop_layout_elec_s_4.csv",  # hardcoded wildcards temporary
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
@@ -69,7 +72,62 @@ rule prepare_transport_data:
         nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
         #dummy_wildcard="resources/dummy{simpl}_{clusters}.nc"
 
+
+rule build_cop_profiles:
+    input:
+        temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
+        temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
+        temp_soil_urban="resources/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
+        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        temp_air_rural="resources/temp_air_rural_elec_s{simpl}_{clusters}.nc",
+        temp_air_urban="resources/temp_air_urban_elec_s{simpl}_{clusters}.nc"
+    output:
+        cop_soil_total="resources/cop_soil_total_elec_s{simpl}_{clusters}.nc",
+        cop_soil_rural="resources/cop_soil_rural_elec_s{simpl}_{clusters}.nc",
+        cop_soil_urban="resources/cop_soil_urban_elec_s{simpl}_{clusters}.nc",
+        cop_air_total="resources/cop_air_total_elec_s{simpl}_{clusters}.nc",
+        cop_air_rural="resources/cop_air_rural_elec_s{simpl}_{clusters}.nc",
+        cop_air_urban="resources/cop_air_urban_elec_s{simpl}_{clusters}.nc"
+    resources: mem_mb=20000
+    benchmark: "benchmarks/build_cop_profiles/s{simpl}_{clusters}"
+    script: "scripts/build_cop_profiles.py"
+
+rule prepare_heat_data:
+    input:
+        network='networks/elec_s{simpl}_{clusters}.nc',
+        energy_totals_name='resources/energy_totals.csv',
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+        # This is probably still dummy data, investigate and use real data TODO
+        #temp_air_total="resources/temp_air_total_elec_s_4.nc",  # hardcoded wildcards temporary
+        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        cop_soil_total="resources/cop_soil_total_elec_s{simpl}_{clusters}.nc",
+        cop_air_total="resources/cop_air_total_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
+        heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
+        heat_profile="data/heat_load_profile_BDEW.csv",
+    output:
+        nodal_energy_totals='resources/nodal_energy_totals_{simpl}_{clusters}.csv',
+        heat_demand='resources/heat/heat_demand_{simpl}_{clusters}.csv',
+        ashp_cop='resources/heat/ashp_cop_{simpl}_{clusters}.csv',
+        gshp_cop='resources/heat/gshp_cop_{simpl}_{clusters}.csv',
+        solar_thermal='resources/heat/solar_thermal_{simpl}_{clusters}.csv',
+        district_heat_share='resources/heat/district_heat_share_{simpl}_{clusters}.csv'
     script: "scripts/prepare_transport_data.py"
+
+
+rule build_solar_thermal_profiles:
+    input:
+        pop_layout_total="resources/pop_layout_total.nc",
+        pop_layout_urban="resources/pop_layout_urban.nc",
+        pop_layout_rural="resources/pop_layout_rural.nc",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+    output:
+        solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_urban="resources/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_rural="resources/solar_thermal_rural_elec_s{simpl}_{clusters}.nc"
+    resources: mem_mb=20000
+    benchmark: "benchmarks/build_solar_thermal_profiles/s{simpl}_{clusters}"
+    script: "scripts/build_solar_thermal_profiles.py"
 
 rule calculate_dummy_pop_layout:
     input:
@@ -106,6 +164,21 @@ rule build_clustered_population_layouts:
     benchmark: "benchmarks/build_clustered_population_layouts/s{simpl}_{clusters}"
     script: "scripts/build_clustered_population_layouts.py"
     
+
+rule build_heat_demands:
+    input:
+        pop_layout_total="resources/pop_layout_total.nc",
+        pop_layout_urban="resources/pop_layout_urban.nc",
+        pop_layout_rural="resources/pop_layout_rural.nc",
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+    output:
+        heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
+        heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
+        heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
+    resources: mem_mb=20000
+    benchmark: "benchmarks/build_heat_demands/s{simpl}_{clusters}"
+    script: "scripts/build_heat_demands.py"
+
     
 rule build_temperature_profiles:
     input:

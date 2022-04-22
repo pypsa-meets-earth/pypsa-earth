@@ -41,7 +41,11 @@ costs:
 
   lines:
     length_factor: 1.25 #to estimate offwind connection costs
-
+solar_thermal:
+  clearsky_model: simple
+  orientation:
+    slope: 45.
+    azimuth: 180.
 sector:
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
   bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
@@ -90,11 +94,14 @@ sector:
   helmeth: true
   SMR: true
   cc_fraction: 0.9
+  
 
   conventional_generation: # generator : carrier
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
-
+  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  solar_thermal: true
+  solar_cf_correction: 0.788457 # = >>>1/1.2683
 # snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
