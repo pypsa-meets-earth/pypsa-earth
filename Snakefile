@@ -18,7 +18,7 @@ wildcard_constraints:
 subworkflow pypsaearth:
     workdir: "../pypsa-africa"
     snakefile: "../pypsa-africa/Snakefile"
-    configfile: "./config_pypsa-earth.yaml"
+    configfile: "./config.pypsa-earth.yaml"
 
 rule prepare_sector_networks:
     input:
@@ -127,6 +127,14 @@ rule build_temperature_profiles:
     resources: mem_mb=20000
     benchmark: "benchmarks/build_temperature_profiles/s{simpl}_{clusters}"
     script: "scripts/build_temperature_profiles.py"
+
+
+rule copy_config:
+    output: SDIR + '/configs/config.yaml'
+    threads: 1
+    resources: mem_mb=1000
+    benchmark: SDIR + "/benchmarks/copy_config"
+    script: "scripts/copy_config.py"
 
     
 rule solve_network:
