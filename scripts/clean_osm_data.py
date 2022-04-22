@@ -342,7 +342,6 @@ circuits_tag_to_n_circuits = {
 dropped_cables_tags = [x for x in cables_tag_to_n_cables.keys() if cables_tag_to_n_cables[x]=="0"]
 dropped_circuits_tags = [x for x in circuits_tag_to_n_circuits.keys() if circuits_tag_to_n_circuits[x]=="0"]
 
-
 def integrate_lines_df(df_all_lines):
     """
     Function to add underground, under_construction, frequency and circuits
@@ -366,6 +365,13 @@ def integrate_lines_df(df_all_lines):
     # Add circuits information
     # if not int make int
     if df_all_lines["cables"].dtype != int:
+
+        dropped_cables = [x for x in dropped_cables_tags if x in df_all_lines["cables"].values]
+        if len(dropped_cables) != 0:
+            logger.info(
+                    f"The lines with a cables tag in {set(dropped_cables)} will be dropped."
+            )
+
         # map known non-numerical issues into a reasonable n_cables value
         df_all_lines["cables"] = (
             df_all_lines["cables"]
@@ -376,6 +382,18 @@ def integrate_lines_df(df_all_lines):
         df_all_lines.loc[
             (df_all_lines["cables"] < "3") | df_all_lines["cables"].isna(), "cables"
         ] = "0"
+
+        # there may be some non-known numerical issues
+        not_resolved_cables = pd.to_numeric(df_all_lines["cables"], errors = "coerce").isna()
+        unknown_cables_tags = set(df_all_lines.loc[not_resolved_cables]["cables"].values)
+        if any(not_resolved_cables):
+            df_all_lines.drop(
+                df_all_lines[not_resolved_cables].index, inplace = True
+            )
+            logger.warning(
+                    f"The lines with an unexpected cables tag value in {unknown_cables_tags} will be dropped."
+            )
+
         df_all_lines["cables"] = df_all_lines["cables"].astype("int")
 
     # downgrade 4 and 5 cables to 3...
@@ -461,6 +479,18 @@ def integrate_lines_df(df_all_lines):
             .map(circuits_tag_to_n_circuits)
             .fillna(df_all_lines["circuits"])
         )
+
+        # there may be some non-known numerical issues
+        not_resolved_circuits = pd.to_numeric(df_all_lines["circuits"], errors = "coerce").isna()
+        unknown_circuits_tags = set(df_all_lines.loc[not_resolved_circuits]["circuits"].values)
+        if any(not_resolved_circuits):
+            df_all_lines.drop(
+                df_all_lines[not_resolved_circuits].index, inplace = True
+            )
+            logger.warning(
+                    f"The lines with an unexpected circuits tag value in {unknown_circuits_tags} will be dropped."
+            )
+
         df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
 
     # drop column if exist
