@@ -17,7 +17,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_population_layouts")
         sets_path_to_root("pypsa-earth-sec")
 
-    cutout_path = os.path.abspath(snakemake.config["atlite"]["cutout"])
+    cutout_path = snakemake.input.cutout  #os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
     # cutout = snakemake.config['atlite']['cutout']
 
@@ -36,8 +36,8 @@ if __name__ == "__main__":
     # but imprecisions mean not perfect
     Iinv = cutout.indicatormatrix(nuts3.geometry)
 
-    # countries = np.sort(nuts3.country.unique())
-    countries = np.array(["MA"])
+    countries = np.sort(nuts3.country.unique())
+    # countries = np.array(["MA"])
     urban_fraction = (pd.read_csv(
         snakemake.input.urban_percent,
         header=None,
@@ -68,7 +68,6 @@ if __name__ == "__main__":
     pop_urban = pd.Series(0.0, density_cells.index)
 
     for ct in countries:
-        print(ct, urban_fraction[ct])
 
         indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0
                                                  if x == ct else 0.0)

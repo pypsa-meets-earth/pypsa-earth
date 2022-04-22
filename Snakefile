@@ -83,7 +83,8 @@ rule prepare_transport_data:
 rule build_population_layouts:
     input:
         nuts3_shapes=pypsaearth('resources/gadm_shapes.geojson'),
-        urban_percent="data/urban_percent.csv"
+        urban_percent="data/urban_percent.csv",
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
@@ -103,7 +104,8 @@ rule build_clustered_population_layouts:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson")
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv"
     resources: mem_mb=10000
@@ -116,7 +118,8 @@ rule build_temperature_profiles:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson")
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",

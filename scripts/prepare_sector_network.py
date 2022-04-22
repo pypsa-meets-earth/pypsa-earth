@@ -984,6 +984,7 @@ if __name__ == "__main__":
     # TODO fetch from config
 
     n = pypsa.Network(snakemake.input.network)
+
     # overrides = override_component_attrs(snakemake.input.overrides)
     # n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     nodes = n.buses.index
