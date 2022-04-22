@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 17 11:15:15 2021
+Created on Wed Mar 16 15:50:42 2022
 
-@author: haz43975
+@author: user
 """
 import matplotlib.pyplot as plt
 import pypsa
@@ -15,78 +16,20 @@ from matplotlib.legend_handler import HandlerPatch
 
 
 
+def assign_location(n):
+    for c in n.iterate_components(n.one_port_components | n.branch_components):
 
-base_path = os.path.dirname(os.path.realpath(__file__)) 
+        ifind = pd.Series(c.df.index.str.find(" ", start=4), c.df.index)
 
+        for i in ifind.value_counts().index:
+            # these have already been assigned defaults
+            if i == -1:
+                continue
 
-network_path = os.path.join(base_path, 'Networks')
+            names = ifind.index[ifind == i]
 
-network = pypsa.Network(os.path.join(
-            "../results/test/postnetworks/elec_s_4_2050.nc"))
+            c.df.loc[names, 'location'] = names.str[:i]
 
-n = network.copy()
-
-bus_size_factor = 1e5 #Def 1e5
-linewidth_factor = 2e4 #Def 1e4
-line_lower_threshold = 1e2 # MW below which not drawn. Def 1e3
-
-DC_lines=n.links[n.links.carrier=='DC']
-
-n.links = n.links[n.links.carrier=='H2 pipeline']
-n.links.bus0 = n.links.bus0.str.replace(" H2", "")
-n.links.bus1 = n.links.bus1.str.replace(" H2", "")
-
-n.lines.append(DC_lines[['bus0', 'bus1']])
-
-n.madd('Line', names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
-
-fig = plt.figure()
-fig.set_size_inches(10.5, 9)
-
-n.plot(branch_components=["Link", "Line"], boundaries=(-20, 0, 25, 40),
-       color_geomap={'ocean': 'lightblue', 'land': "oldlace"}, line_colors='darkblue',
-       link_colors='turquoise', link_widths=3, bus_sizes=0.03, bus_colors='red', line_widths=1)
-
-#Legend
-Elec_Circle = plt.Line2D([0], [0], marker='o', color='darkblue',
-label='Clustered node', markerfacecolor='red',
-markersize=10)
-elec_Line = plt.Line2D([0], [0], marker='_', color='darkblue', 
-            label='Electricity Lines', markerfacecolor='w', markersize=16, lw=4)
-
-H2_Line = plt.Line2D([0], [0], marker='_', color='turquoise', 
-        label='H2 Pipeline',markerfacecolor='w', markersize=16, lw=4)
-
-plt.legend(handles=[Elec_Circle, elec_Line, H2_Line], loc='upper left')
-plt.savefig('networks.png', transparent=True,
-            bbox_inches="tight", dpi=300)
-plt.savefig('networks.pdf', transparent=True,
-            bbox_inches="tight", dpi=300)
-# #%%
-# h2_emap_filled = pd.read_csv('h2_emap_filled.csv')
-
-# h2_emap_filled_ng = h2_emap_filled[h2_emap_filled.color=='chocolate']
-# h2_emap_filled_h = h2_emap_filled[h2_emap_filled.color=='cyan']
-
-# n.mremove('Line', names=n.lines.index.tolist())
-# n.mremove('Link', names=n.links.index.tolist())
-
-# n.madd('Link', names=h2_emap_filled_h.index, bus0=h2_emap_filled_h.bus0, bus1=h2_emap_filled_h.bus1)
-# n.madd('Line', names=h2_emap_filled_ng.index, bus0=h2_emap_filled_ng.bus0, bus1=h2_emap_filled_ng.bus1)
-
-# n.plot(branch_components=["Link", "Line"], boundaries=(-10, 30, 34, 70),
-#        color_geomap={'ocean': 'lightblue', 'land':'oldlace'}, line_colors='chocolate',
-#        link_colors='cyan', link_widths=1.5, bus_sizes=0.03, bus_colors='darkblue', line_widths=1.5)
-
-# Elec_Circle = plt.Line2D([0], [0], marker='o', color='darkblue',
-#                          label='Clustered node', markerfacecolor='darkblue',
-#                          markersize=10)
-
-# elec_Line = plt.Line2D([0], [0], marker='_', color='chocolate', label='Based on NG grid', markerfacecolor='w', markersize=16, lw=4)
-# H2_Line = plt.Line2D([0], [0], marker='_', color='cyan', label='Based on heuristics',markerfacecolor='w', markersize=16, lw=4)
-# plt.legend(handles=[Elec_Circle, elec_Line, H2_Line], loc='upper left')
-
-#%%
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
     fig = ax.get_figure()
 
@@ -115,109 +58,136 @@ def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
 
 
 def make_legend_circles_for(sizes, scale=1.0, **kw):
-    return [Circle((0, 0), radius=(s / scale)**0.5, **kw) for s in sizes]
+    return [Circle((0, 0), radius=(s / scale)**0.5, **kw) for s in sizes]    
 
-def assign_location(n):
-    for c in n.iterate_components(n.one_port_components | n.branch_components):
+#############################################
+# plot Hydrogen infrastructure map
+#############################################
+def plot_h2_infra(network):
+    n = network.copy()
+    
+    #assign_location(n)
+    
+    bus_size_factor = 1e5
+    linewidth_factor = 1e4
+    # MW below which not drawn
+    line_lower_threshold = 1e1
+    bus_color = "m"
+    link_color = "c"
+    
+    n.links.loc[:,'p_nom_opt']=n.links.loc[:,'p_nom_opt']
+    
+    # n.links.loc[n.links.carrier == "H2 Electrolysis"].p_nom_opt
+    
+    # Drop non-electric buses so they don't clutter the plot
+    n.buses.drop(n.buses.index[n.buses.carrier != "AC"], inplace=True)
+    
+    elec = n.links.index[n.links.carrier == "H2 Electrolysis"]
+    
+    bus_sizes = n.links.loc[elec,"p_nom_opt"].groupby(n.links.loc[elec,"bus0"]).sum() / bus_size_factor
+    
+    # make a fake MultiIndex so that area is correct for legend
+    bus_sizes.index = pd.MultiIndex.from_product(
+        [bus_sizes.index, ["electrolysis"]])
+    
+    n.links.drop(n.links.index[n.links.carrier != "H2 pipeline"], inplace=True)
+    
+    link_widths = n.links.p_nom_opt / linewidth_factor
+    link_widths[n.links.p_nom_opt < line_lower_threshold] = 0.
+    
+    n.links.bus0 = n.links.bus0.str.replace(" H2", "")
+    n.links.bus1 = n.links.bus1.str.replace(" H2", "")
+    
+    
+    
+    print(link_widths.sort_values())
+    
+    print(n.links[["bus0", "bus1"]])
+    
+    fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
+    
+    fig.set_size_inches(10.5, 9)
+    
+    n.plot(bus_sizes=bus_sizes,
+            bus_colors={"electrolysis": bus_color},
+            link_colors=link_color,
+            link_widths=link_widths,
+            branch_components=["Link"],
+            color_geomap={'ocean': 'lightblue', 'land': "oldlace"},
+            ax=ax,  boundaries=(-20, 0, 25, 40))
 
-        ifind = pd.Series(c.df.index.str.find(" ", start=4), c.df.index)
+    handles = make_legend_circles_for(
+            [50000, 10000], scale=bus_size_factor, facecolor=bus_color)
+    labels = ["{} GW".format(s) for s in (50, 10)]
+    l2 = ax.legend(handles, labels,
+                       loc="upper left", bbox_to_anchor=(0.01, 1.01),
+                       labelspacing=0.8,
+                       framealpha=1.,
+                       title='Electrolyzer capacity',
+                       handler_map=make_handler_map_to_scale_circles_as_in(ax))
+    ax.add_artist(l2)
+    
+    handles = []
+    labels = []
+    
+    for s in (50, 10):
+        handles.append(plt.Line2D([0], [0], color=link_color,
+                                  linewidth=s * 1e3 / linewidth_factor))
+        labels.append("{} GW".format(s))
+    l1_1 = ax.legend(handles, labels,
+                      loc="upper left", bbox_to_anchor=(0.32, 1.01),
+                      framealpha=1,
+                      labelspacing=0.8, handletextpad=1.5,
+                      title='H2 pipeline capacity')
+    ax.add_artist(l1_1)
+    
+    # fig.savefig(snakemake.output.hydrogen, bbox_inches='tight', transparent=True,
+    fig.savefig(
+        snakemake.output.map.replace("-costs-all","-h2_network"),
+        bbox_inches="tight")
 
-        for i in ifind.value_counts().index:
-            # these have already been assigned defaults
-            if i == -1:
-                continue
+def plot_transmission_topology(network):
+    
+    n = network.copy()
+    bus_size_factor = 1e5 #Def 1e5
+    linewidth_factor = 2e4 #Def 1e4
+    line_lower_threshold = 1e2 # MW below which not drawn. Def 1e3
+    
+    DC_lines=n.links[n.links.carrier=='DC']
+    
+    n.links = n.links[n.links.carrier=='H2 pipeline']
+    n.links.bus0 = n.links.bus0.str.replace(" H2", "")
+    n.links.bus1 = n.links.bus1.str.replace(" H2", "")
+    
+    n.lines.append(DC_lines[['bus0', 'bus1']])
+    
+    n.madd('Line', names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
+    
+    fig = plt.figure()
+    fig.set_size_inches(10.5, 9)
+    
+    n.plot(branch_components=["Link", "Line"], boundaries=(-20, 0, 25, 40),
+           color_geomap={'ocean': 'lightblue', 'land': "oldlace"}, line_colors='darkblue',
+           link_colors='turquoise', link_widths=5, bus_sizes=0.03, bus_colors='red', line_widths=1)
+    
+    #Legend
+    Elec_Circle = plt.Line2D([0], [0], marker='o', color='darkblue',
+    label='Clustered node', markerfacecolor='red',
+    markersize=10)
+    elec_Line = plt.Line2D([0], [0], marker='_', color='darkblue', 
+                label='Electricity Lines', markerfacecolor='w', markersize=16, lw=4)
+    
+    H2_Line = plt.Line2D([0], [0], marker='_', color='turquoise', 
+            label='H2 Pipeline',markerfacecolor='w', markersize=16, lw=4)
+    
+    plt.legend(handles=[Elec_Circle, elec_Line, H2_Line], loc='upper left')
+    
+    fig.savefig(
+        snakemake.output.map.replace("-costs-all","-full_topology"),
+        bbox_inches="tight")
 
-            names = ifind.index[ifind == i]
-
-            c.df.loc[names, 'location'] = names.str[:i]
-
-#%%
-# def plot_h2_map(network):
-
-n = network.copy()
-
-assign_location(n)
-
-bus_size_factor = 1e5
-linewidth_factor = 1e4
-# MW below which not drawn
-line_lower_threshold = 1e1
-bus_color = "m"
-link_color = "c"
-
-# Drop non-electric buses so they don't clutter the plot
-n.buses.drop(n.buses.index[n.buses.carrier != "AC"], inplace=True)
-
-elec = n.links.index[n.links.carrier == "H2 Electrolysis"]
-
-bus_sizes = n.links.loc[elec,"p_nom_opt"].groupby(n.links.loc[elec,"bus0"]).sum() / bus_size_factor
-
-# make a fake MultiIndex so that area is correct for legend
-bus_sizes.index = pd.MultiIndex.from_product(
-    [bus_sizes.index, ["electrolysis"]])
-
-n.links.drop(n.links.index[n.links.carrier != "H2 pipeline"], inplace=True)
-
-link_widths = n.links.p_nom_opt / linewidth_factor
-link_widths[n.links.p_nom_opt < line_lower_threshold] = 0.
-
-n.links.bus0 = n.links.bus0.str.replace(" H2", "")
-n.links.bus1 = n.links.bus1.str.replace(" H2", "")
-
-
-
-print(link_widths.sort_values())
-
-print(n.links[["bus0", "bus1"]])
-
-fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
-
-fig.set_size_inches(10.5, 9)
-
-n.plot(bus_sizes=bus_sizes,
-        bus_colors={"electrolysis": bus_color},
-        link_colors=link_color,
-        link_widths=link_widths,
-        branch_components=["Link"],
-        color_geomap={'ocean': 'lightblue', 'land': "oldlace"},
-        ax=ax,  boundaries=(-20, 0, 25, 40))
-
-handles = make_legend_circles_for(
-        [50000, 10000], scale=bus_size_factor, facecolor=bus_color)
-labels = ["{} GW".format(s) for s in (50, 10)]
-l2 = ax.legend(handles, labels,
-                   loc="upper left", bbox_to_anchor=(0.01, 1.01),
-                   labelspacing=0.8,
-                   framealpha=1.,
-                   title='Electrolyzer capacity',
-                   handler_map=make_handler_map_to_scale_circles_as_in(ax))
-ax.add_artist(l2)
-
-handles = []
-labels = []
-
-for s in (50, 10):
-    handles.append(plt.Line2D([0], [0], color=link_color,
-                              linewidth=s * 1e3 / linewidth_factor))
-    labels.append("{} GW".format(s))
-l1_1 = ax.legend(handles, labels,
-                  loc="upper left", bbox_to_anchor=(0.32, 1.01),
-                  framealpha=1,
-                  labelspacing=0.8, handletextpad=1.5,
-                  title='H2 pipeline capacity')
-ax.add_artist(l1_1)
-
-fig.savefig('h2.png', transparent=True,
-            bbox_inches="tight", dpi=300)
-fig.savefig('h2.pdf', transparent=True,
-            bbox_inches="tight", dpi=300)
-# plot_h2_map(n)
-
-
-#%%###################
 
 preferred_order = pd.Index(["transmission lines","hydroelectricity","hydro reservoir","run of river","pumped hydro storage","solid biomass","biogas","onshore wind","offshore wind","offshore wind (AC)","offshore wind (DC)","solar PV","solar thermal","solar","building retrofitting","ground heat pump","air heat pump","heat pump","resistive heater","power-to-heat","gas-to-power/heat","CHP","OCGT","gas boiler","gas","natural gas","helmeth","methanation","hydrogen storage","power-to-gas","power-to-liquid","battery storage","hot water storage","CO2 sequestration"])
-
 
 def rename_techs(label):
 
@@ -262,8 +232,6 @@ def rename_techs(label):
         if old == label:
             label = new
     return label
-
-
 def rename_techs_tyndp(tech):
     tech = rename_techs(tech)
     if "heat pump" in tech or "resistive heater" in tech:
@@ -280,9 +248,9 @@ def rename_techs_tyndp(tech):
         return "offshore wind"
     else:
         return tech
-#%%
-def plot_map(network, components=["links", "generators"],
-             bus_size_factor=1.7e10, transmission=False):
+    
+def plot_map(network, components=["links", "generators", "stores"],# "storage_units"], #TODO uncomment after adding storage units
+             bus_size_factor=1.7e10, transmission=False, geometry=True):
 
     n = network.copy()
     assign_location(n)
@@ -307,8 +275,8 @@ def plot_map(network, components=["links", "generators"],
 
     costs.drop(list(costs.columns[(costs == 0.).all()]), axis=1, inplace=True)
 
-    new_columns = ((preferred_order & costs.columns)
-                   .append(costs.columns.difference(preferred_order)))
+    new_columns = preferred_order.intersection(costs.columns)\
+                   .append(costs.columns.difference(preferred_order))
     costs = costs[new_columns]
 
     for item in new_columns:
@@ -317,16 +285,13 @@ def plot_map(network, components=["links", "generators"],
 
     costs = costs.stack()  # .sort_index()
 
-    # hack because impossible to drop buses...
-    #n.buses.loc["EU gas", ["x", "y"]] = n.buses.loc["MA 0", ["x", "y"]]
-
     n.links.drop(n.links.index[(n.links.carrier != "DC") & (
         n.links.carrier != "B2B")], inplace=True)
 
     # drop non-bus
-    to_drop = costs.index.levels[0] ^ n.buses.index
+    to_drop = costs.index.levels[0].symmetric_difference(n.buses.index)
     if len(to_drop) != 0:
-        print("dropping non-buses", to_drop)
+        print("dropping non-buses", list(to_drop))
         costs.drop(to_drop, level=0, inplace=True, axis=0)
 
     # make sure they are removed from index
@@ -339,7 +304,7 @@ def plot_map(network, components=["links", "generators"],
     ac_color = "gray"
     dc_color = "m"
 
-    #if snakemake.wildcards["lv"] == "1.0":
+    #if snakemake.wildcards["lv"] == "1.0":         #TODO when we add wildcard lv
         # should be zero
     line_widths = n.lines.s_nom_opt - n.lines.s_nom
     link_widths = n.links.p_nom_opt - n.links.p_nom
@@ -351,21 +316,21 @@ def plot_map(network, components=["links", "generators"],
         linewidth_factor = 2e3
         line_lower_threshold = 0.
         title = "Technologies"
-    # else:
-    #     line_widths = n.lines.s_nom_opt - n.lines.s_nom_min
-    #     link_widths = n.links.p_nom_opt - n.links.p_nom_min
-    #     title = "Transmission reinforcement"
+    else:
+        line_widths = n.lines.s_nom_opt - n.lines.s_nom_min #TODO when we add wildcard lv
+        link_widths = n.links.p_nom_opt - n.links.p_nom_min
+        title = "Transmission reinforcement"
 
-    #     if transmission:
-    #         line_widths = n.lines.s_nom_opt
-    #         link_widths = n.links.p_nom_opt
-    #         title = "Total transmission"
+        if transmission:
+            line_widths = n.lines.s_nom_opt
+            link_widths = n.links.p_nom_opt
+            title = "Total transmission"
 
-    line_widths[line_widths < line_lower_threshold] = 0.
-    link_widths[link_widths < line_lower_threshold] = 0.
+    line_widths.loc[line_widths < line_lower_threshold] = 0.
+    link_widths.loc[link_widths < line_lower_threshold] = 0.
 
-    line_widths[line_widths > line_upper_threshold] = line_upper_threshold
-    link_widths[link_widths > line_upper_threshold] = line_upper_threshold
+    line_widths.loc[line_widths > line_upper_threshold] = line_upper_threshold
+    link_widths.loc[link_widths > line_upper_threshold] = line_upper_threshold
 
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
     fig.set_size_inches(10.5, 9)
@@ -377,6 +342,7 @@ def plot_map(network, components=["links", "generators"],
            line_widths=line_widths / linewidth_factor,
            link_widths=link_widths / linewidth_factor,
            ax=ax,  boundaries=(-20, 0, 25, 40),
+           geomap='10m',
            color_geomap={'ocean': 'lightblue', 'land': "oldlace"})
 
     handles = make_legend_circles_for(
@@ -406,17 +372,20 @@ def plot_map(network, components=["links", "generators"],
                       fontsize=10)
 
     ax.add_artist(l1_1)
-    import matplotlib.patches as mpatches
-
+    
+    # import matplotlib.patches as mpatches
     # red_patch = mpatches.Patch(color='red', label='The red data')
     # plt.legend(handles=[red_patch])
 
-    plt.show()
-    fig.savefig('plot_map.pdf', transparent=True,
+    fig.savefig(snakemake.output.map, transparent=True,
                 bbox_inches="tight")
-    fig.savefig('plot_map.png', transparent=True,
-            bbox_inches="tight", dpi=300)
-    
+    # fig.savefig('plot_map.pdf', transparent=True,
+    #         bbox_inches="tight")#, dpi=300)
+
+
+
+
+
 plot_labeles={
     'onshore wind': 'b',
     'offshore wind': 'c',
@@ -430,132 +399,6 @@ plot_labeles={
     'electricity distribution grid':''
     }
 
-
-tech_colors={
-    "onwind" : "b",
-    "Africa gas" : "b",
-    "Africa oil" : "b",
-    "onshore wind" : "dodgerblue",                                               #needed
-    'offwind' : "c",
-    'offshore wind' : "c",                                                    #needed
-    'offwind-ac' : "c",
-    'offshore wind (AC)' : "b",
-    'offwind-dc' : "b",
-    'offshore wind (DC)' : "b",
-    'wave' : "b",
-    "hydro" : "b",
-    "hydro reservoir" : "b",
-    "ror" : "b",
-    "run of river" : "b",
-    'hydroelectricity' : 'blue',                                                                #needed
-    'solar' : "orange",                                                         #needed
-    'solar PV' : "red",
-    'solar thermal' : 'b',
-    'solar rooftop' : 'b',
-    "OCGT" : "wheat",
-    "OCGT marginal" : "b",
-    "OCGT-heat" : "b",
-    "gas boiler" : "b",
-    "gas boilers" : "b",
-    "gas boiler marginal" : "b",
-    "gas-to-power/heat" : "brown",                                               #needed
-    "gas" : "b",
-    "natural gas" : "b",
-    "SMR" : "#4F4F2F",
-    "oil" : "red",
-    "oil boiler" : "#B5A677",
-    "lines" : "k",
-    "transmission lines" : "k",
-    "H2" : "m",
-    "hydrogen storage" : "m",
-    "battery" : "slategray",
-    "battery storage" : "slategray",
-    "home battery" : "b",
-    "home battery storage" : "b",
-    "Nuclear" : "b",
-    "Nuclear marginal" : "b",
-    "nuclear" : "b",
-    "uranium" : "b",
-    "Coal" : "k",
-    "coal" : "k",
-    "Coal marginal" : "k",
-    "Lignite" : "grey",
-    "lignite" : "grey",
-    "Lignite marginal" : "grey",
-    "CCGT" : "b",
-    "CCGT marginal" : "orange",
-    "heat pumps" : "b", #light green
-    "heat pump" : "b", #light green
-    "air heat pump" : "b", #light green
-    "ground heat pump" : "b", #dark green
-    "power-to-heat" : "red",                                                   #needed
-    "resistive heater" : "b",
-    "Sabatier" : "#b",
-    "methanation" : "#b",
-    "power-to-gas" : "purple",                                                       #needed
-    "power-to-liquid" : "darkgreen",                                            #needed
-    "helmeth" : "b",
-    "helmeth" : "b",
-    "DAC" : "deeppink",                                                           #needed
-    "co2 stored" : "b",
-    "CO2 sequestration" : "b",
-    "CCS" : "b",
-    "co2" : "b",
-    "co2 vent" : "b",
-    "solid biomass for industry co2 from atmosphere" : "b",
-    "solid biomass for industry co2 to stored": "b",
-    "gas for industry co2 to atmosphere": "b",
-    "gas for industry co2 to stored": "b",
-    "Fischer-Tropsch" : "b",
-    "kerosene for aviation": "b",
-    "naphtha for industry" : "b",
-    "water tanks" : "b",
-    "hot water storage" : "b",
-    "hot water charging" : "b",
-    "hot water discharging" : "b",
-    "CHP" : "b",
-    "CHP heat" : "b",
-    "CHP electric" : "b",
-    "PHS" : "b",
-    "Ambient" : "b",
-    "Electric load" : "b",
-    "Heat load" : "b",
-    "Transport load" : "b",
-    "heat" : "b",
-    "rural heat" : "b",
-    "central heat" : "b",
-    "decentral heat" : "b",
-    "low-temperature heat for industry" : "b",
-    "process heat" : "b",
-    "heat demand" : "b",
-    "electric demand" : "b",
-    "Li ion" : "b",
-    "district heating" : "b",
-    "retrofitting" : "b",
-    "building retrofitting" : "b",
-    "BEV charger" : "b",
-    "V2G" : "b",
-    "transport" : "b",
-    "electricity" : "b",
-    "gas for industry" : "b",
-    "solid biomass for industry" : "b",
-    "industry electricity" : "b",
-    "industry new electricity" : "b",
-    "process emissions to stored" : "b",
-    "process emissions to atmosphere" : "b",
-    "process emissions" : "b",
-    "transport fuel cell" : "b",
-    "biogas" : "b",
-    "solid biomass" : "b",
-    "today" : "b",
-    "shipping" : 'b',
-    "electricity distribution grid" : "y",                                  #needed
-    'SMR CC': 'black',
-    'gas': 'black',
-    'process emissions CC': 'yellow',
-    'biomass for industry CC': 'yellow',
-    'gas for industry CC':'b',
-    'solid biomass for industry CC': 'b'}           
 
 nice_names={
     # OCGT: "Gas",
@@ -577,16 +420,18 @@ nice_names_n={
     'lines': "transmission\nlines",
     'ror': "run of river"}
 
-plot_map(network)
-#%%
 
+if __name__ == "__main__":
+    if 'snakemake' not in globals():
+        from helpers import mock_snakemake
+        snakemake = mock_snakemake("plot_network",
+                                   simpl="",
+                                   clusters="15",
+                                   planning_horizons="2030")
+    
+    n = pypsa.Network(snakemake.input.network)
 
-
-dfc=pd.DataFrame(data=tech_colors, index=['color']).T
-dfc['length'] = 255
-
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-ax1.barh(y=[50]*len(list(dfc.iloc[:30, 1])), width=0.052, color=dfc.color.iloc[:30])
-ax1.set_yticklabels(list(dfc.iloc[:30, 1].index))
-# ax2=dfc.iloc[30:60, 1].plot.barh(color=dfc.iloc[30:60].color)
-# ax3=dfc.iloc[60:, 1].plot.barh(color=dfc.iloc[60:].color)
+    tech_colors = snakemake.config['plotting']['tech_colors']
+    plot_map(n, transmission=True)
+    plot_transmission_topology(n)
+    plot_h2_infra(n)

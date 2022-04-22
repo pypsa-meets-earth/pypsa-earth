@@ -4,8 +4,8 @@ HTTP = HTTPRemoteProvider()
 
 configfile: "config.yaml"
 
-SDIR = config['summary_dir'] + '/' + config['run']
-RDIR = config['results_dir'] + '/' + config['run']
+SDIR = config['summary_dir'] + config['run']
+RDIR = config['results_dir'] + config['run']
 CDIR = config['costs_dir']
 
 wildcard_constraints:
@@ -43,6 +43,8 @@ rule prepare_sector_network:
         dsm_profile='resources/dsm_profile_s{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_s{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
+	airports="data/airports.csv",
+	ports="data/ports.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
@@ -145,7 +147,7 @@ rule solve_network:
         overrides="data/override_component_attrs",
         network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
-        config=SDIR + '/configs/config.yaml',
+        
     output: RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
     shadow: "shallow"
     log:
@@ -190,3 +192,28 @@ rule make_summary:
     benchmark: SDIR + "/benchmarks/make_summary"
     script: "scripts/make_summary.py"
 
+rule plot_network:
+    input:
+        overrides="data/override_component_attrs",
+        network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc"
+    output:
+        map=RDIR + "/maps/elec_s{simpl}_{clusters}-costs-all_{planning_horizons}.pdf",
+    threads: 2
+    resources: mem_mb=10000
+    benchmark: RDIR + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_{planning_horizons}"
+    script: "scripts/plot_network.py"
+
+rule plot_summary:
+    input:
+        costs=SDIR + '/csvs/costs.csv',
+        energy=SDIR + '/csvs/energy.csv',
+        balances=SDIR + '/csvs/supply_energy.csv'
+    output:
+        costs=SDIR + '/graphs/costs.pdf',
+        energy=SDIR + '/graphs/energy.pdf',
+        balances=SDIR + '/graphs/balances-energy.pdf'
+    threads: 2
+    resources: mem_mb=10000
+    benchmark: SDIR + "/benchmarks/plot_summary"
+    script: "scripts/plot_summary.py"
+    

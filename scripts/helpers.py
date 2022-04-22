@@ -1,12 +1,20 @@
 import os
 from pathlib import Path
 
+import logging
+import os
+import shutil
+import zipfile
+import fiona
+import requests
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from pypsa.components import component_attrs
 from pypsa.components import components
 from pypsa.descriptors import Dict
 from vresutils.costdata import annuity
+from shapely.geometry import Point
 
 
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
@@ -222,7 +230,7 @@ def create_dummy_data(n, sector, carriers):
         ]
     else:
         raise Exception("sector not found")
-    data = np.random.randint(10, 500, size=(len(ind), len(col))) * 1e5
+    data = np.random.randint(10, 500, size=(len(ind), len(col))) * 1000 * 1     #TODO change 1 with temp. resolution 
 
     return pd.DataFrame(data, index=ind, columns=col)
 
@@ -299,3 +307,233 @@ def override_component_attrs(directory):
             attrs[component] = overrides.combine_first(attrs[component])
 
     return attrs
+
+def get_country(target, **keys):
+    """
+    Function to convert country codes using pycountry
+    Parameters
+    ----------
+    target: str
+        Desired type of country code.
+        Examples:
+            - 'alpha_3' for 3-digit
+            - 'alpha_2' for 2-digit
+            - 'name' for full country name
+    keys: dict
+        Specification of the country name and reference system.
+        Examples:
+            - alpha_3="ZAF" for 3-digit
+            - alpha_2="ZA" for 2-digit
+            - name="South Africa" for full country name
+    Returns
+    -------
+    country code as requested in keys or np.nan, when country code is not recognized
+    Example of usage
+    -------
+    - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")
+    - Convert 3-digit code to 2-digit codes: get_country('alpha_2', alpha_3="ZAF")
+    - Convert 2-digit code to full name: get_country('name', alpha_2="ZA")
+    """
+    import pycountry as pyc
+
+    assert len(keys) == 1
+    try:
+        return getattr(pyc.countries.get(**keys), target)
+    except (KeyError, AttributeError):
+        return np.nan
+
+
+def two_2_three_digits_country(two_code_country):
+    """
+    Convert 2-digit to 3-digit country code:
+    Parameters
+    ----------
+    two_code_country: str
+        2-digit country name
+    Returns
+    ----------
+    three_code_country: str
+        3-digit country name
+    """
+    if two_code_country == "SN-GM":
+        return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
+
+    three_code_country = get_country("alpha_3", alpha_2=two_code_country)
+    return three_code_country
+
+
+def three_2_two_digits_country(three_code_country):
+    """
+    Convert 3-digit to 2-digit country code:
+    Parameters
+    ----------
+    three_code_country: str
+        3-digit country name
+    Returns
+    ----------
+    two_code_country: str
+        2-digit country name
+    """
+    if three_code_country == "SEN-GMB":
+        return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
+
+    two_code_country = get_country("alpha_2", alpha_3=three_code_country)
+    return two_code_country
+
+
+def two_digits_2_name_country(two_code_country):
+    """
+    Convert 2-digit country code to full name country:
+    Parameters
+    ----------
+    two_code_country: str
+        2-digit country name
+    Returns
+    ----------
+    full_name: str
+        full country name
+    """
+    if two_code_country == "SN-GM":
+        return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
+
+    full_name = get_country("name", alpha_2=two_code_country)
+    return full_name
+
+def download_GADM(country_code, update=False, out_logging=False):
+    """
+    Download gpkg file from GADM for a given country code
+
+    Parameters
+    ----------
+    country_code : str
+        Two letter country codes of the downloaded files
+    update : bool
+        Update = true, forces re-download of files
+
+    Returns
+    -------
+    gpkg file per country
+
+    """
+
+    GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
+    GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
+    _logger = logging.getLogger(__name__)
+    GADM_inputfile_zip = os.path.join(
+        os.getcwd(),
+        "data",
+        "raw",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".zip",
+    )  # Input filepath zip
+
+    GADM_inputfile_gpkg = os.path.join(
+        os.getcwd(),
+        "data",
+        "raw",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".gpkg",
+    )  # Input filepath gpkg
+
+    if not os.path.exists(GADM_inputfile_gpkg) or update is True:
+        if out_logging:
+            _logger.warning(
+                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
+            )
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
+
+        with requests.get(GADM_url, stream=True) as r:
+            with open(GADM_inputfile_zip, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
+            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
+
+    return GADM_inputfile_gpkg, GADM_filename
+
+
+
+def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
+    """
+    Function to retrive a specific layer id of a geopackage for a selection of countries
+
+    Parameters
+    ----------
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+
+    """
+    # initialization of the geoDataFrame
+    geodf_GADM = gpd.GeoDataFrame()
+
+    for country_code in country_list:
+        # download file gpkg
+        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
+
+        # get layers of a geopackage
+        list_layers = fiona.listlayers(file_gpkg)
+
+        # get layer name
+        if layer_id < 0 | layer_id >= len(list_layers):
+            # when layer id is negative or larger than the number of layers, select the last layer
+            layer_id = len(list_layers) - 1
+        code_layer = np.mod(layer_id, len(list_layers))
+        layer_name = (
+            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        )
+
+        # read gpkg file
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+
+        # convert country name representation of the main country (GID_0 column)
+        geodf_temp["GID_0"] = [
+            three_2_two_digits_country(twoD_c)
+            for twoD_c in geodf_temp["GID_0"]
+        ]
+
+        # create a subindex column that is useful
+        # in the GADM processing of sub-national zones
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
+
+        # append geodataframes
+        geodf_GADM = geodf_GADM.append(geodf_temp)
+
+    geodf_GADM.reset_index(drop=True, inplace=True)
+
+    return geodf_GADM
+
+def locate_bus(coords, co, gadm_level):
+    """
+    Function to locate the right node for a coordinate set
+    input coords of point
+
+    Parameters
+    ----------
+    coords: pandas dataseries
+        dataseries with 2 rows x & y representing the longitude and latitude
+    co: string (code for country where coords are MA Morocco)
+	code of the countries where the coordinates are	
+
+     """
+    country_list = ["MA"] #TODO connect with entire list of countries
+    gdf = get_GADM_layer(country_list, gadm_level)
+    gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(co)] #geodataframe of entire continent - output of prev function {} are placeholders
+    #in strings - conditional formatting
+    #insert any variable into that place using .format - extract string and filter for those containing co (MA)
+    point = Point(coords["x"], coords["y"])      #point object  
+    
+    try:
+        return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item() #filter gdf_co which contains point and returns the bus 
+    
+    except ValueError:
+        return gdf_co[gdf_co.geometry==\
+                      min(gdf_co.geometry, 
+                          key=(point.distance))]["GID_{}".format(gadm_level)].item() #looks for closest one shape=node
+    

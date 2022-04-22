@@ -516,7 +516,7 @@ def make_summaries(networks_dict):
         "costs",
         "capacities",
         "curtailment",
-        "energy",
+        "energy", #TODO check why this causes an error
         "supply",
         "supply_energy",
         "prices",
@@ -545,7 +545,11 @@ def make_summaries(networks_dict):
 
         assign_carriers(n)
         assign_locations(n)
-
+        
+        if len(n.links_t.p4.columns) ==0:                        #TODO hardfix for error that arises with energy in outputs
+            print('##################')
+            n.links_t.p4 =  n.links_t.p3 * 0
+        
         for output in outputs:
             df[output] = globals()["calculate_" + output](n, label, df[output])
 
@@ -554,12 +558,12 @@ def make_summaries(networks_dict):
 
 def to_csv(df):
     for key in df:
-        df[key].to_csv(snakemake.output[key])
+        df[key].round(3).to_csv(snakemake.output[key])
 
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        #os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         from helpers import mock_snakemake
         snakemake = mock_snakemake('make_summary')
@@ -573,7 +577,7 @@ if __name__ == "__main__":
         for cluster in snakemake.config['scenario']['clusters'] \
        # for opt in snakemake.config['scenario']['opts'] \
         #for sector_opt in snakemake.config['scenario']['sector_opts'] \
-        for lv in snakemake.config['scenario']['lv'] \
+        #for lv in snakemake.config['scenario']['lv'] \
         for planning_horizon in snakemake.config['scenario']['planning_horizons']
     }
 
@@ -596,7 +600,7 @@ if __name__ == "__main__":
     to_csv(df)
 
     if snakemake.config["foresight"]=='myopic':
-        cumulative_cost=calculate_cumulative_cost()
+        cumulative_cost=calculate_cumulative_cost().round(3)
         cumulative_cost.to_csv(snakemake.config['summary_dir'] + '/' + snakemake.config['run'] + '/csvs/cumulative_cost.csv')
 
 

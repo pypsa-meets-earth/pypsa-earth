@@ -5,9 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-from prepare_sector_network import co2_emissions_year
-
-#consolidate and rename
+#from prepare_sector_network import co2_emissions_year #TODO change back to older version in 0.1.0
+co2_emissions_year = 2030
+#consolidate and rename 
 def rename_techs(label):
 
     prefix_to_remove = [
@@ -33,9 +33,9 @@ def rename_techs(label):
     rename_if_contains_dict = {
         "water tanks": "hot water storage",
         "retrofitting": "building retrofitting",
-        # "H2 Electrolysis": "hydrogen storage",
-        # "H2 Fuel Cell": "hydrogen storage",
-        # "H2 pipeline": "hydrogen storage",
+        "H2 Electrolysis": "hydrogen storage",
+        "H2 Fuel Cell": "hydrogen storage",
+        "H2 pipeline": "hydrogen storage",
         "battery": "battery storage",
         # "CC": "CC"
     }
@@ -157,7 +157,7 @@ def plot_costs():
     handles.reverse()
     labels.reverse()
 
-    ax.set_ylim([0,snakemake.config['plotting']['costs_max']])
+    #ax.set_ylim([0,snakemake.config['plotting']['costs_max']])
 
     ax.set_ylabel("System Cost [EUR billion per year]")
 
@@ -166,6 +166,7 @@ def plot_costs():
     ax.grid(axis='x')
 
     ax.legend(handles, labels, ncol=1, loc="upper left", bbox_to_anchor=[1,1], frameon=False)
+    plt.xticks(rotation=0)
 
     fig.savefig(snakemake.output.costs, bbox_inches='tight')
 
@@ -217,15 +218,16 @@ def plot_energy():
     handles.reverse()
     labels.reverse()
 
-    ax.set_ylim([snakemake.config['plotting']['energy_min'], snakemake.config['plotting']['energy_max']])
+    #ax.set_ylim([snakemake.config['plotting']['energy_min'], snakemake.config['plotting']['energy_max']])
 
     ax.set_ylabel("Energy [TWh/a]")
 
     ax.set_xlabel("")
 
     ax.grid(axis="x")
-
     ax.legend(handles, labels, ncol=1, loc="upper left", bbox_to_anchor=[1, 1], frameon=False)
+    plt.xticks(rotation=0)
+
 
     fig.savefig(snakemake.output.energy, bbox_inches='tight')
 
@@ -276,7 +278,7 @@ def plot_balances():
 
         fig, ax = plt.subplots(figsize=(12,8))
 
-        df.loc[new_index,new_columns].T.plot(kind="bar",ax=ax,stacked=True,color=[snakemake.config['plotting']['tech_colors'][i] for i in new_index])
+        df.loc[new_index,new_columns].T.plot(kind="bar",ax=ax,stacked=True,color=[snakemake.config['plotting']['tech_colors'][i] for i in new_index], title=k)
 
 
         handles,labels = ax.get_legend_handles_labels()
@@ -294,6 +296,7 @@ def plot_balances():
         ax.grid(axis="x")
 
         ax.legend(handles, labels, ncol=1, loc="upper left", bbox_to_anchor=[1, 1], frameon=False)
+        plt.xticks(rotation=0)
 
 
         fig.savefig(snakemake.output.balances[:-10] + k + ".pdf", bbox_inches='tight')
@@ -434,7 +437,7 @@ def plot_carbon_budget_distribution():
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
-        from helper import mock_snakemake
+        from helpers import mock_snakemake
         snakemake = mock_snakemake('plot_summary')
         
     n_header = 4
@@ -445,7 +448,7 @@ if __name__ == "__main__":
 
     plot_balances()
     
-    for sector_opts in snakemake.config['scenario']['sector_opts']:
+    for sector_opts in snakemake.config['scenario']:
         opts=sector_opts.split('-')
         for o in opts:
             if "cb" in o:
