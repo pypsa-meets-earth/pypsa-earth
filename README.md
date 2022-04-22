@@ -13,3 +13,31 @@ The demand sectors covered are: **residential**, **industry**, **land transport*
 The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included. 
 
 ![alt text](https://github.com/pypsa-meets-africa/pypsa-earth-sec/blob/main/docs/0.0.5.png?raw=true)
+
+
+## Installation
+
+1. Open your terminal at a location where you want to install pypsa-earth-sec. Type the following in your terminal to download the package and the dependency (pypsa-earth) from GitHub:
+
+```bash
+    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-earth-sec.git
+```
+
+2. The python package requirements are curated in the `envs/environment.yaml` file.
+   The environment can be installed using:
+
+```bash
+    .../some/path/without/spaces % cd pypsa-africa
+    .../pypsa-africa % conda env create -f envs/environment.yaml
+```
+
+3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
+
+4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+
+```bash
+    .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+
+    .../pypsa-africa % jupyter lab
+```
