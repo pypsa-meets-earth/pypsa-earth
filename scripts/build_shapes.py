@@ -367,9 +367,9 @@ def download_WorldPop_API(
     """_summary_
 
     Args:
-        country_code (_type_): _description_
-        year (int, optional): _description_. Defaults to 2020.
-        update (bool, optional): _description_. Defaults to False.
+        country_code (_type_): Two letter country codes of the downloaded files.
+        year (int, optional): Year of the data to download. Defaults to 2020.
+        update (bool, optional):Update = true, forces re-download of files. Defaults to False.
         out_logging (bool, optional): _description_. Defaults to False.
         size_min (int, optional): _description_. Defaults to 300.
     """
@@ -407,8 +407,6 @@ def download_WorldPop_API(
             _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
-
-    pass
 
 
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
