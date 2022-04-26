@@ -40,6 +40,7 @@ rule prepare_sector_network:
         overrides="data/override_component_attrs",
 	airports="data/airports.csv",
 	ports="data/ports.csv",
+	industry_demands="data/industry_demand_locations.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
