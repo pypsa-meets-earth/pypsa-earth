@@ -698,14 +698,38 @@ def add_industry(n, costs):
 
     # CARRIER = FOSSIL GAS
 
+    demand_locations = pd.read_csv(snakemake.input.industry_demands, index_col=None, squeeze=True)
+
+    gadm_level = options["gadm_level"] 
+    #carrier = "kerosene for aviation"
+
+    demand_locations["gadm_{}".format(gadm_level)] = demand_locations[["x", "y", "country"]].apply(
+            lambda loc: locate_bus(loc[['x','y']], loc['country'], gadm_level), axis=1) 
+
+    demand_locations = demand_locations.set_index("gadm_{}".format(gadm_level))
+
+    ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
+
+    ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
+
+    #demand_locations["p_set_{}".format(carrier)] = demand_locations["fraction"].apply(
+    #        lambda frac: frac * 1e6 / 8760) 
+
+    demand_locations = pd.concat([demand_locations,ind])
+
+    demand_locations = demand_locations[~demand_locations.index.duplicated(keep='first')]
+   
+    demand_locations= demand_locations.fillna(0)
+    
     n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
 
-    n.add(
+    n.madd(
         "Load",
-        "gas for industry",
+        nodes,
+        suffix=" gas for industry",
         bus="gas for industry",
         carrier="gas for industry",
-        p_set=industrial_demand.loc[nodes, "methane"].sum() / 8760,
+        p_set=demand_locations["gas fraction"].apply(lambda frac: frac * 1e6 / 8760) #TODO Multiply by gas demand and find true gas fraction
     )
 
     n.add(
@@ -747,30 +771,32 @@ def add_industry(n, costs):
         suffix=" H2 for industry",
         bus=nodes + " H2",
         carrier="H2 for industry",
-        p_set=industrial_demand.loc[nodes, "hydrogen"] / 8760,
+        p_set=demand_locations["H2 fraction"].apply(lambda frac: frac * 1e6 / 8760) #TODO Multiply by gas demand and find true gas fraction
     )
 
   
     # CARRIER = LIQUID HYDROCARBONS
-    n.add(
+    n.madd(
         "Load",
-        "naphtha for industry",
+        nodes,
+        suffix=" naphtha for industry",
         bus="Africa oil",
         carrier="naphtha for industry",
-        p_set=industrial_demand.loc[nodes, "naphtha"].sum() / 8760,
+        p_set=demand_locations["naphta fraction"].apply(lambda frac: frac * 1e6 / 8760) #TODO Multiply by gas demand and find true gas fraction
     )
 
     #     #NB: CO2 gets released again to atmosphere when plastics decay or kerosene is burned
     #     #except for the process emissions when naphtha is used for petrochemicals, which can be captured with other industry process emissions
     #     #tco2 per hour
     # TODO kerosene for aviation should be added too but in the right func.
-    co2_release = ["naphtha for industry"]
+    co2_release = [" naphtha for industry"]
     # check land tranport
+
     co2 = (
-        n.loads.loc[co2_release, "p_set"].sum() *
-        costs.at["oil", "CO2 intensity"] -
-        industrial_demand.loc[nodes, "process emission from feedstock"].sum() /
-        8760)
+    n.loads.loc[nodes + co2_release, "p_set"].sum() *
+    costs.at["oil", "CO2 intensity"] -
+    demand_locations["feedstock emissions fraction"].sum() /
+    8760)
 
     n.add(
         "Load",
@@ -779,6 +805,15 @@ def add_industry(n, costs):
         carrier="industry oil emissions",
         p_set=-co2,
     )
+    
+     #co2 = airports["p_set"].sum() * costs.at["oil", 'CO2 intensity'] / 8760
+
+     #n.add("Load",
+     #    "oil emissions",
+     #    bus="co2 atmosphere",
+     #    carrier="oil emissions",
+     #    p_set=-co2
+     #)
 
     ########################################################### CARIER = HEAT
     #     # TODO simplify bus expression
@@ -811,7 +846,7 @@ def add_industry(n, costs):
         suffix=" industry electricity",
         bus=nodes,
         carrier="industry electricity",
-        p_set=industrial_demand.loc[nodes, "electricity"] / 8760,
+        p_set=demand_locations["electricity fraction"].apply(lambda frac: frac * 1e6 / 8760) #TODO Multiply by demand and find true fraction
     )
 
     n.add("Bus",
@@ -821,14 +856,14 @@ def add_industry(n, costs):
 
     # this should be process emissions fossil+feedstock
     # then need load on atmosphere for feedstock emissions that are currently going to atmosphere via Link Fischer-Tropsch demand
-    n.add(
+    n.madd(
         "Load",
-        "process emissions",
+        nodes,
+        suffix=" process emissions",
         bus="process emissions",
         carrier="process emissions",
-        p_set=-industrial_demand.loc[
-            nodes, ["process emission", "process emission from feedstock"]].
-        sum(axis=1).sum() / 8760,
+        p_set=-(demand_locations["feedstock emissions fraction"] 
+                + demand_locations["process emissions fraction"])/ 8760, #TODO multiply by total emissions
     )
 
     n.add(
