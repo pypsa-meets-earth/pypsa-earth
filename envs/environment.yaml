@@ -62,9 +62,9 @@ dependencies:
   # Cloud download
 - googledrivedownloader
 
-  # # Default solver for tests (moved to the CI)
-  # - glpk
-  # - ipopt  # <=3.11.1 for windows; <= 3.13.3 for linux
+# Default solver for tests (moved to the CI)
+- glpk
+- ipopt < 3.13.3
 
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa

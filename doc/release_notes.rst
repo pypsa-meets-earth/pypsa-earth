@@ -17,6 +17,8 @@ Upcoming Release
 
 * Handling non-numerical entries in raw OSM data: `PR #287 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/287>`__
 
+* General user experience improvements: `PR #326 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/326>`__
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
