@@ -13,7 +13,11 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Bug fixing (script retrieve_databundle) and rule run_test to ease testing `PR #322 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/322>`__
 
+* Handling non-numerical entries in raw OSM data: `PR #287 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/287>`__
+
+* General user experience improvements: `PR #326 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/326>`__
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================

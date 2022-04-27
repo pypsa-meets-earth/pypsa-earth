@@ -39,6 +39,12 @@ wildcard_constraints:
     opts="[-+a-zA-Z0-9\.]*",
 
 
+rule run_test:
+    run:
+        shell("cp test/config.test1.yaml config.yaml")
+        shell("snakemake --cores all solve_all_networks --forceall")
+
+
 rule solve_all_networks:
     input:
         expand(
