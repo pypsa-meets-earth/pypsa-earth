@@ -27,7 +27,7 @@ The PyPSA meets Africa team is currently running four types of meetings:
 
 - **General code meeting (Open)**
 
-  - every month, Thursday 16-17:00 (UTC+0) `download .ics file <https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing>`_
+  - every month, Thursday 16-17:00 (UTC+0) `download .ics file <https://drive.google.com/file/d/1YY2-oJrBSOGd-mAZV7AmyVhOG3LcM1ry/view?usp=sharing>`_
   - updates on overall project and code blocks
   - meeting hosted on `Discord <https://discord.gg/AnuJBk23FU>`_; join us, we are waiting for you!
   - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
