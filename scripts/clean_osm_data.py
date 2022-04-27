@@ -292,11 +292,12 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
-        sel_ids = df[cl_name].str.contains(";") == True
-        # TODO: split multiple cell need fix
-        df = df.drop(
-            df.loc[sel_ids, cl_name].index,
-        )
+        if df[cl_name].dtype == "string":
+            sel_ids = df[cl_name].str.contains(";") == True
+            # TODO: split multiple cell need fix
+            df = df.drop(
+                df.loc[sel_ids, cl_name].index,
+            )
     return df  # return new frame
 
 
