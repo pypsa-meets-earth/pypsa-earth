@@ -22,6 +22,7 @@ if ("config" not in globals() or not config):  # skip when used as sub-workflow
 
     configfile: "config.yaml"
 
+
 configfile: "configs/bundle_config.yaml"
 
 
