@@ -165,6 +165,7 @@ world_iso = {
         "AO": "angola",
         "BJ": "benin",
         "BW": "botswana",
+        # "IO": "british-indian-ocean-territory", # Island
         "BF": "burkina-faso",
         "BI": "burundi",
         "CM": "cameroon",
@@ -237,6 +238,7 @@ world_iso = {
         # "CX": "christmas island", # Island
         # "CC": "cocos (keeling) islands", # Island
         "CY": "cyprus",
+        "EG": "egypt",
         "GE": "georgia",
         "HK": "hong kong",
         "IN": "india",
@@ -266,6 +268,7 @@ world_iso = {
         "PS": "palestine",
         "PH": "philippines",
         "QA": "qatar",
+        "RU": "russian-federation",
         "SA": "saudi-arabia",
         "SG": "singapore",  # merged with MY
         # "XS": "spratly-islands", #Island
@@ -275,6 +278,7 @@ world_iso = {
         "TJ": "tajikistan",
         "TH": "thailand",
         "TL": "timor-leste",
+        "TR": "turkey",
         "TM": "turkmenistan",
         "AE": "united-arab-emirates",
         # "XD": "united-nations-neutral-zone"
@@ -430,6 +434,12 @@ world_iso = {
         "UY": "uruguay",
         "VE": "venezuela",
     },
+    #"Antarctica": {
+    #   "AQ": "antarctica",
+    #   "BV": "bouvet-island",
+    #   "HM": "heard-island-and-mcdonald-island",
+    #   "GS": "south-georgia-and-the-south-sandwich-islands",
+    # },
 }
 
 # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
