@@ -250,7 +250,7 @@ def rename_techs_tyndp(tech):
         return tech
     
 def plot_map(network, components=["links", "generators", "stores"],# "storage_units"], #TODO uncomment after adding storage units
-             bus_size_factor=1.7e10, transmission=False):
+             bus_size_factor=1.7e10, transmission=False, geometry=True):
 
     n = network.copy()
     assign_location(n)
@@ -285,9 +285,6 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
 
     costs = costs.stack()  # .sort_index()
 
-    # hack because impossible to drop buses...
-    #n.buses.loc["EU gas", ["x", "y"]] = n.buses.loc["MA 0", ["x", "y"]] #TODO check this and what will change
-
     n.links.drop(n.links.index[(n.links.carrier != "DC") & (
         n.links.carrier != "B2B")], inplace=True)
 
@@ -319,15 +316,15 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
         linewidth_factor = 2e3
         line_lower_threshold = 0.
         title = "Technologies"
-    # else:
-    #     line_widths = n.lines.s_nom_opt - n.lines.s_nom_min #TODO when we add wildcard lv
-    #     link_widths = n.links.p_nom_opt - n.links.p_nom_min
-    #     title = "Transmission reinforcement"
+    else:
+        line_widths = n.lines.s_nom_opt - n.lines.s_nom_min #TODO when we add wildcard lv
+        link_widths = n.links.p_nom_opt - n.links.p_nom_min
+        title = "Transmission reinforcement"
 
-    #     if transmission:
-    #         line_widths = n.lines.s_nom_opt
-    #         link_widths = n.links.p_nom_opt
-    #         title = "Total transmission"
+        if transmission:
+            line_widths = n.lines.s_nom_opt
+            link_widths = n.links.p_nom_opt
+            title = "Total transmission"
 
     line_widths.loc[line_widths < line_lower_threshold] = 0.
     link_widths.loc[link_widths < line_lower_threshold] = 0.
@@ -345,6 +342,7 @@ def plot_map(network, components=["links", "generators", "stores"],# "storage_un
            line_widths=line_widths / linewidth_factor,
            link_widths=link_widths / linewidth_factor,
            ax=ax,  boundaries=(-20, 0, 25, 40),
+           geomap='10m',
            color_geomap={'ocean': 'lightblue', 'land': "oldlace"})
 
     handles = make_legend_circles_for(
@@ -428,7 +426,7 @@ if __name__ == "__main__":
         from helpers import mock_snakemake
         snakemake = mock_snakemake("plot_network",
                                    simpl="",
-                                   clusters="4",
+                                   clusters="15",
                                    planning_horizons="2030")
     
     n = pypsa.Network(snakemake.input.network)

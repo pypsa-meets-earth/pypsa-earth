@@ -54,9 +54,16 @@ def add_carrier_buses(n, carriers):
 
 
 def add_generation(n, costs):
-    """
-    Adds conventional generation as specified in config
-    """
+    """Adds conventional generation as specified in config
+
+
+    Args:
+        n (network): PyPSA prenetwork
+        costs (dataframe): _description_
+
+    Returns:
+        _type_: _description_
+    """""""""
 
     print("adding electricity generation")
 
@@ -1402,8 +1409,6 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     nodes = n.buses.index
-
-    # costs = pd.read_csv( "{}/pypsa-earth-sec/data/costs.csv".format(os.path.dirname(os.getcwd())))
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
