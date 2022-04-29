@@ -38,14 +38,16 @@ rule prepare_sector_network:
         dsm_profile='resources/dsm_profile_{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
+
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-	    airports="data/airports.csv",
-	    ports="data/ports.csv",
+	      airports="data/airports.csv",
+	      ports="data/ports.csv",
         heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
         ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
         gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
         solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
         district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
+	      industry_demands="data/industry_demand_locations.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
