@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2021 PyPSA-Africa authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -12,20 +13,20 @@ from operator import attrgetter
 import fiona
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import rasterio
 import requests
 import rioxarray as rx
 import xarray as xr
-from _helpers import configure_logging
-from _helpers import sets_path_to_root
-from _helpers import three_2_two_digits_country
-from _helpers import two_2_three_digits_country
-from _helpers import two_digits_2_name_country
+from _helpers import (
+    configure_logging,
+    sets_path_to_root,
+    three_2_two_digits_country,
+    two_2_three_digits_country,
+    two_digits_2_name_country,
+)
 from rasterio.mask import mask
-from shapely.geometry import LineString
-from shapely.geometry import MultiPolygon
-from shapely.geometry import Point
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 from shapely.validation import make_valid
@@ -108,7 +109,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
     """
     # initialization of the geoDataFrame
-    geodf_GADM = gpd.GeoDataFrame()
+    geodf_list = []
 
     for country_code in country_list:
         # download file gpkg
@@ -131,8 +132,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c)
-            for twoD_c in geodf_temp["GID_0"]
+            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
         ]
 
         # create a subindex column that is useful
@@ -140,27 +140,28 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
 
         # append geodataframes
-        geodf_GADM = geodf_GADM.append(geodf_temp)
+        geodf_list.append(geodf_temp)
 
-    geodf_GADM.reset_index(drop=True, inplace=True)
+    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
 
     return geodf_GADM
 
 
-def _simplify_polys(polys,
-                    minarea=0.0001,
-                    tolerance=0.008,
-                    filterremote=False):
+def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
         mainpoly = polys[0]
         mainlength = np.sqrt(mainpoly.area / (2.0 * np.pi))
         if mainpoly.area > minarea:
-            polys = MultiPolygon([
-                p for p in takewhile(lambda p: p.area > minarea, polys)
-                if not filterremote or (mainpoly.distance(p) < mainlength)
-            ])
+            polys = MultiPolygon(
+                [
+                    p
+                    for p in takewhile(lambda p: p.area > minarea, polys)
+                    if not filterremote or (mainpoly.distance(p) < mainlength)
+                ]
+            )
         else:
             polys = mainpoly
     return polys.simplify(tolerance=tolerance)
@@ -185,14 +186,10 @@ def countries(countries, update=False, out_logging=False):
     return ret_df
 
 
-def country_cover(country_shapes,
-                  eez_shapes=None,
-                  out_logging=False,
-                  distance=0.1):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
 
     if out_logging:
-        _logger.info(
-            "Stage 3 of 4: Merge country shapes to create continent shape")
+        _logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
     shapes = country_shapes.apply(lambda x: x.buffer(distance))
     shapes_list = list(shapes)
@@ -239,11 +236,12 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
     selected_countries_codes_3D = [
         two_2_three_digits_country(x) for x in countries_codes
     ]
-    geodf_EEZ = geodf_EEZ[[
-        any([x in selected_countries_codes_3D]) for x in geodf_EEZ["ISO_TER1"]
-    ]]
+    geodf_EEZ = geodf_EEZ[
+        [any([x in selected_countries_codes_3D]) for x in geodf_EEZ["ISO_TER1"]]
+    ]
     geodf_EEZ["ISO_TER1"] = geodf_EEZ["ISO_TER1"].map(
-        lambda x: three_2_two_digits_country(x))
+        lambda x: three_2_two_digits_country(x)
+    )
     geodf_EEZ.reset_index(drop=True, inplace=True)
 
     geodf_EEZ.rename(columns={"ISO_TER1": "name"}, inplace=True)
@@ -276,14 +274,13 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
             # when multiple shapes per country, then merge polygons
             geom = ret_df[selection].geometry.unary_union
             ret_df.drop(ret_df[selection].index, inplace=True)
-            ret_df = ret_df.append({
-                "name": c_code,
-                "geometry": geom
-            },
-                                   ignore_index=True)
+            ret_df = ret_df.append(
+                {"name": c_code, "geometry": geom}, ignore_index=True
+            )
 
     ret_df = ret_df.set_index("name")["geometry"].map(
-        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001))
+        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+    )
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
     country_shapes = country_shapes.apply(lambda x: make_valid(x))
@@ -292,8 +289,11 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
 
     # repeat to simplify after the buffer correction
-    ret_df_new = ret_df_new.map(lambda x: x if x is None else _simplify_polys(
-        x, minarea=0.001, tolerance=0.0001))
+    ret_df_new = ret_df_new.map(
+        lambda x: x
+        if x is None
+        else _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+    )
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
     # Drops empty geometry
@@ -302,11 +302,9 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     return ret_df
 
 
-def download_WorldPop(country_code,
-                      year=2020,
-                      update=False,
-                      out_logging=False,
-                      size_min=300):
+def download_WorldPop(
+    country_code, year=2020, update=False, out_logging=False, size_min=300
+):
     """
     Download tiff file for each country code
 
@@ -339,8 +337,9 @@ def download_WorldPop(country_code,
         f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
         f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
     ]
-    WorldPop_inputfile = os.path.join(os.getcwd(), "data", "raw", "WorldPop",
-                                      WorldPop_filename)  # Input filepath tif
+    WorldPop_inputfile = os.path.join(
+        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
@@ -359,8 +358,7 @@ def download_WorldPop(country_code,
                         loaded = True
                         break
         if not loaded:
-            _logger.error(
-                f"Stage 4/4: Impossible to download {WorldPop_filename}")
+            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -378,12 +376,14 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "raw", "GDP",
-                          name_file_nc)  # Input filepath nc
+    GDP_nc = os.path.join(
+        os.getcwd(), "data", "raw", "GDP", name_file_nc
+    )  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(os.getcwd(), "data", "raw", "GDP",
-                           name_file_tif)  # Input filepath nc
+    GDP_tif = os.path.join(
+        os.getcwd(), "data", "raw", "GDP", name_file_tif
+    )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
@@ -427,8 +427,9 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(os.getcwd(), "data", "raw", "GDP",
-                           name_file_tif)  # Input filepath tif
+    GDP_tif = os.path.join(
+        os.getcwd(), "data", "raw", "GDP", name_file_tif
+    )  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
@@ -444,6 +445,8 @@ def generalized_mask(src, geom, **kwargs):
     "Generalize mask function to account for Polygon and MultiPolygon"
     if geom.geom_type == "Polygon":
         return mask(src, [geom], **kwargs)
+    elif geom.geom_type == "MultiPolygon":
+        return mask(src, geom.geoms, **kwargs)
     else:
         return mask(src, geom, **kwargs)
 
@@ -457,11 +460,9 @@ def _sum_raster_over_mask(shape, img):
     #   where the border of the shape lays. This leads to slightly overestimate
     #   the output, but the error is limited and it enables halving the
     #   computational time
-    out_image, out_transform = generalized_mask(img,
-                                                shape,
-                                                all_touched=True,
-                                                invert=False,
-                                                nodata=0.0)
+    out_image, out_transform = generalized_mask(
+        img, shape, all_touched=True, invert=False, nodata=0.0
+    )
     # calculate total output in the selected geometry
     out_sum = out_image.sum()
     # out_sum = out_image.sum()/2 + out_image_int.sum()/2
@@ -510,9 +511,7 @@ def add_gdp_data(
             desc="Compute GDP ",
         )
         for i in tqdm(df_gadm.index, **tqdm_kwargs):
-            df_gadm.loc[i,
-                        "gdp"] = _sum_raster_over_mask(df_gadm.geometry.loc[i],
-                                                       src)
+            df_gadm.loc[i, "gdp"] = _sum_raster_over_mask(df_gadm.geometry.loc[i], src)
     return df_gadm
 
     # for index, row in tqdm(df_gadm.iterrows(), index=df_gadm.shape[0]):
@@ -556,13 +555,15 @@ def _process_func_pop(c_code):
 
     # get worldpop image
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-        c_code, year, False, False)
+        c_code, year, False, False
+    )
 
     with rasterio.open(WorldPop_inputfile) as src:
 
-        for i, row in country_rows.iterrows():
-            country_rows.loc[i,
-                             "pop"] = _sum_raster_over_mask(row.geometry, src)
+        for i in country_rows.index:
+            country_rows.loc[i, "pop"] = _sum_raster_over_mask(
+                country_rows.geometry.loc[i], src
+            )
 
     return country_rows
 
@@ -614,13 +615,13 @@ def add_population_data(
 
                 # get worldpop image
                 WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-                    c_code, year, update, out_logging)
+                    c_code, year, update, out_logging
+                )
 
                 with rasterio.open(WorldPop_inputfile) as src:
 
                     for i, row in country_rows.iterrows():
-                        df_gadm.loc[i, "pop"] = _sum_raster_over_mask(
-                            row.geometry, src)
+                        df_gadm.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
                         pbar.update(1)
 
     else:
@@ -641,17 +642,15 @@ def add_population_data(
                         pool.imap(_process_func_pop, country_codes),
                         total=len(country_codes),
                         **tqdm_kwargs,
-                    ))
+                    )
+                )
                 for elem in _:
                     df_gadm.loc[elem.index, "pop"] = elem["pop"]
 
 
-def gadm(countries,
-         layer_id=2,
-         update=False,
-         out_logging=False,
-         year=2020,
-         nprocesses=None):
+def gadm(
+    countries, layer_id=2, update=False, out_logging=False, year=2020, nprocesses=None
+):
 
     if out_logging:
         _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
@@ -663,15 +662,16 @@ def gadm(countries,
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
 
     # drop useless columns
-    df_gadm = df_gadm[["country", "GADM_ID", "geometry"]]
+    df_gadm.drop(
+        df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
+        axis=1,
+        inplace=True,
+    )
 
     # add the population data to the dataset
-    add_population_data(df_gadm,
-                        countries,
-                        year,
-                        update,
-                        out_logging,
-                        nprocesses=nprocesses)
+    add_population_data(
+        df_gadm, countries, year, update, out_logging, nprocesses=nprocesses
+    )
 
     # add the gdp data to the dataset
     add_gdp_data(
@@ -711,17 +711,13 @@ if __name__ == "__main__":
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg,
-                          out_logging)
+    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg, out_logging)
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    gadm_shapes = gadm(countries_list,
-                       layer_id,
-                       update,
-                       out_logging,
-                       year,
-                       nprocesses=nprocesses)
+    gadm_shapes = gadm(
+        countries_list, layer_id, update, out_logging, year, nprocesses=nprocesses
+    )
     save_to_geojson(gadm_shapes, out.gadm_shapes)

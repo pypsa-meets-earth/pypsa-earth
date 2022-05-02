@@ -1,4 +1,3 @@
----
 ###########################
 ###########################
 ## Linter GitHub Actions ##
@@ -36,26 +35,27 @@ jobs:
       ##########################
       # Checkout the code base #
       ##########################
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+      with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
-          fetch-depth: 0
+        fetch-depth: 0
 
       ################################
       # Run Linter against code base #
       ################################
-      - name: Lint Code Base
-        uses: docker://ghcr.io/github/super-linter:slim-v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_SNAKEMAKE_LINT: false
-          VALIDATE_SNAKEMAKE_SNAKEFMT: false
-          VALIDATE_PYTHON_ISORT: false
-          VALIDATE_PYTHON_MYPY: false
-          VALIDATE_PYTHON_FLAKE8: false
-          VALIDATE_PYTHON_BLACK: false
-          VALIDATE_NATURAL_LANGUAGE: false
-          VALIDATE_JSCPD: false
+    - name: Lint Code Base
+      uses: docker://ghcr.io/github/super-linter:slim-v4
+      env:
+        VALIDATE_ALL_CODEBASE: false
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VALIDATE_SNAKEMAKE_LINT: false
+        VALIDATE_SNAKEMAKE_SNAKEFMT: false
+        VALIDATE_PYTHON_ISORT: false
+        VALIDATE_PYTHON_MYPY: false
+        VALIDATE_PYTHON_FLAKE8: false
+        VALIDATE_PYTHON_BLACK: false
+        VALIDATE_NATURAL_LANGUAGE: false
+        VALIDATE_JSCPD: false
+        VALIDATE_GITLEAKS: false

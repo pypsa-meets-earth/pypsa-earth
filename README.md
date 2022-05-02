@@ -2,12 +2,17 @@
 
 ## Development Status: **Stable and Active**
 
-[![GitHub Super-Linter](https://github.com/pz-max/pypsa-meets-africa/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Status Linux](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-mac.yaml)
 [![Status Windows](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml)
-![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
+![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-africa/pypsa-africa/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-africa/pypsa-africa/main)
+[![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/VHH8TCwn)
+[![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
+
 
 PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
 
@@ -30,7 +35,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
         <a/>
       </p>
 - **General code meeting (Open)**
-  - every month Thursday 16-17:00 (UTC+0) <a href="https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing" >download .ics</a>
+  - every month Thursday 16-17:00 (UTC+0) <a href="https://drive.google.com/file/d/1YY2-oJrBSOGd-mAZV7AmyVhOG3LcM1ry/view?usp=sharing" >download .ics</a>
   - join for project news and high-level code updates
   - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
@@ -41,15 +46,15 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
-  1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0
-  2. AI asset detection meeting, every Tuesday 15:30 UTC+0
-  3. Sector coupling meeting, every Thursday 09:00 UTC+0
-  4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0
+    1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, <a href="https://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing" >download .ics</a>
+    2. AI asset detection meeting, every Tuesday 15:30 UTC+0, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+    3. Sector coupling meeting, every Thursday 09:00 UTC+0, <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
+    4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a> 
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 UTC+0
   - planning, discussing events, workshops, communication, community activities
-- [**Google Drive (by invitation)**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
-  - access to minutes, presentations, lists, documents
+- [**Google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
+  - access to minutes, presentations, lists, documents (access to minutes)
 
 ## Installation
 

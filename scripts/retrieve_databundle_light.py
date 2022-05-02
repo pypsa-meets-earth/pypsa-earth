@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
 # SPDX-FileCopyrightText: : 2021-2022 PyPSA-Africa, 2017-2020 The PyPSA-Eur Authors
 #
@@ -85,9 +86,7 @@ import re
 from zipfile import ZipFile
 
 import yaml
-from _helpers import configure_logging
-from _helpers import progress_retrieve
-from _helpers import sets_path_to_root
+from _helpers import configure_logging, progress_retrieve, sets_path_to_root
 from download_osm_data import create_country_list
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
@@ -107,15 +106,13 @@ def load_databundle_config(config):
     # parse the "countries" list specified in the file before processing
     for bundle_name in config:
         config[bundle_name]["countries"] = create_country_list(
-            config[bundle_name]["countries"], iso_coding=False)
+            config[bundle_name]["countries"], iso_coding=False
+        )
 
     return config
 
 
-def download_and_unzip_zenodo(config,
-                              rootpath,
-                              hot_run=True,
-                              disable_progress=False):
+def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=False):
     """
         download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
@@ -144,30 +141,97 @@ def download_and_unzip_zenodo(config,
     url = config["urls"]["zenodo"]
     if hot_run:
         try:
-            logger.info(
-                f"Downloading resource '{resource}' from cloud '{url}'")
-            progress_retrieve(url,
-                              file_path,
-                              disable_progress=disable_progress)
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
+            progress_retrieve(url, file_path, disable_progress=disable_progress)
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=config["destination"])
             os.remove(file_path)
-            logger.info(
-                f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(
-                f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
 
 
-def download_and_unzip_protectedplanet(config,
-                                       rootpath,
-                                       hot_run=True,
-                                       disable_progress=False):
+def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=False):
+    """
+        download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+
+    Function to download and unzip the data from google drive
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+
+    """
+    resource = config["category"]
+    file_path = os.path.join(rootpath, "tempfile.zip")
+
+    url = config["urls"]["gdrive"]
+
+    # retrieve file_id from path
+    # cut the part before the ending \view
+    partition_view = re.split(r"/view|\\view", str(url), 1)
+    if len(partition_view) < 2:
+        logger.error(
+            f'Resource {resource} cannot be downloaded: "\\view" not found in url {url}'
+        )
+        return False
+
+    # split url to get the file_id
+    code_split = re.split(r"\\|/", partition_view[0])
+
+    if len(code_split) < 2:
+        logger.error(
+            f'Resource {resource} cannot be downloaded: character "\\" not found in {partition_view[0]}'
+        )
+        return False
+
+    # get file id
+    file_id = code_split[-1]
+
+    # if hot run enabled
+    if hot_run:
+        # remove file
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        # download file from google drive
+        gdd.download_file_from_google_drive(
+            file_id=file_id,
+            dest_path=file_path,
+            showsize=True,
+            unzip=False,
+        )
+        with ZipFile(file_path, "r") as zipObj:
+            # Extract all the contents of zip file in current directory
+            zipObj.extractall(path=config["destination"])
+
+        logger.info(f"Download resource '{resource}' from cloud '{url}'.")
+
+        return True
+    else:
+        logger.error(f"Host {host} not implemented")
+        return False
+
+
+def download_and_unzip_protectedplanet(
+    config, rootpath, hot_run=True, disable_progress=False
+):
     """
         download_and_unzip_protectedplanet(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
@@ -200,11 +264,8 @@ def download_and_unzip_protectedplanet(config,
             os.remove(file_path)
 
         try:
-            logger.info(
-                f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url,
-                              file_path,
-                              disable_progress=disable_progress)
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            progress_retrieve(url, file_path, disable_progress=disable_progress)
 
             zip_obj = ZipFile(file_path, "r")
 
@@ -229,20 +290,15 @@ def download_and_unzip_protectedplanet(config,
             # remove outer zip file
             os.remove(file_path)
 
-            logger.info(
-                f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(
-                f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
 
 
-def download_and_unzip_direct(config,
-                              rootpath,
-                              hot_run=True,
-                              disable_progress=False):
+def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
     """
         download_and_unzip_direct(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
@@ -276,11 +332,8 @@ def download_and_unzip_direct(config,
             os.remove(file_path)
 
         try:
-            logger.info(
-                f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url,
-                              file_path,
-                              disable_progress=disable_progress)
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            progress_retrieve(url, file_path, disable_progress=disable_progress)
 
             # if the file is a zipfile and unzip is enabled
             # then unzip it and remove the original file
@@ -289,20 +342,15 @@ def download_and_unzip_direct(config,
                     zipfile.extractall(config["destination"])
 
                 os.remove(file_path)
-            logger.info(
-                f"Downloaded resource '{resource}' from cloud '{url}'.")
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
-            logger.warning(
-                f"Failed download resource '{resource}' from cloud '{url}'.")
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
 
     return True
 
 
-def download_and_unzip_post(config,
-                            rootpath,
-                            hot_run=True,
-                            disable_progress=False):
+def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
     """
         download_and_unzip_post(config, rootpath, dest_path, hot_run=True, disable_progress=False)
 
@@ -341,10 +389,9 @@ def download_and_unzip_post(config,
         # try:
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
 
-        progress_retrieve(url,
-                          file_path,
-                          data=postdata,
-                          disable_progress=disable_progress)
+        progress_retrieve(
+            url, file_path, data=postdata, disable_progress=disable_progress
+        )
 
         # if the file is a zipfile and unzip is enabled
         # then unzip it and remove the original file
@@ -396,8 +443,7 @@ def _check_disabled_by_opt(config_bundle, config_enable):
     return disabled_outs
 
 
-def get_best_bundles(country_list, category, config_bundles, tutorial,
-                     config_enable):
+def get_best_bundles(country_list, category, config_bundles, tutorial, config_enable):
     """
         get_best_bundles(country_list, category, config_bundles, tutorial)
 
@@ -436,8 +482,7 @@ def get_best_bundles(country_list, category, config_bundles, tutorial,
         for bname in config_bundles
         if config_bundles[bname]["category"] == category
         and config_bundles[bname].get("tutorial", False) == tutorial
-        and _check_disabled_by_opt(config_bundles[bname],
-                                   config_enable) != ["all"]
+        and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]
     }
 
     returned_bundles = []
@@ -486,7 +531,8 @@ if __name__ == "__main__":
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
     disable_progress = not snakemake.config.get("retrieve_databundle", {}).get(
-        "show_progress", True)
+        "show_progress", True
+    )
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
@@ -495,7 +541,8 @@ if __name__ == "__main__":
 
     # categories of data to download
     categories = list(
-        set([config_bundles[conf]["category"] for conf in config_bundles]))
+        set([config_bundles[conf]["category"] for conf in config_bundles])
+    )
 
     # idenfify matched countries for every bundle
     for bname in config_bundles:
@@ -509,16 +556,19 @@ if __name__ == "__main__":
     bundle_to_download = []
 
     for cat in categories:
-        selection_bundles = get_best_bundles(countries, cat, config_bundles,
-                                             tutorial, config_enable)
+        selection_bundles = get_best_bundles(
+            countries, cat, config_bundles, tutorial, config_enable
+        )
 
         # check if non-empty dictionary
         if selection_bundles:
             bundle_to_download.extend(selection_bundles)
 
             if len(selection_bundles) > 1:
-                logger.warning(f"Multiple bundle data for category {cat}: " +
-                               ", ".join(selection_bundles))
+                logger.warning(
+                    f"Multiple bundle data for category {cat}: "
+                    + ", ".join(selection_bundles)
+                )
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Africa is conditioned \
@@ -535,14 +585,15 @@ if __name__ == "__main__":
         for host in host_list:
             # try:
             download_and_unzip = globals()[f"download_and_unzip_{host}"]
-            if download_and_unzip(config_bundles[b_name],
-                                  rootpath,
-                                  disable_progress=disable_progress):
+            if download_and_unzip(
+                config_bundles[b_name], rootpath, disable_progress=disable_progress
+            ):
                 break
             # except KeyError:
             #     logger.error(f"Function for {host} has not been defined")
 
-    logger.info("Bundle successfully loaded and unzipped:\n\t" +
-                "\n\t".join(bundle_to_download))
+    logger.info(
+        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download)
+    )
     # print("Bundle successfully loaded and unzipped:\n\t" +
     #       "\n\t".join(bundle_to_download))
