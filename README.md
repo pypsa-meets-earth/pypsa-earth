@@ -266,6 +266,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/squoilin">
+            <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
+            <br />
+            <sub><b>Sylvain Quoilin</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
             <br />
