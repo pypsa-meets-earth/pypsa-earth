@@ -281,6 +281,27 @@ def define_spatial_biomass(nodes):
     ----------
     nodes : list-like
     """
+    global spatial
+    global options
+
+    spatial.nodes = nodes
+
+    # biomass
+
+    spatial.biomass = SimpleNamespace()
+
+    if options["biomass_transport"]:
+        spatial.biomass.nodes = nodes + " solid biomass"
+        spatial.biomass.locations = nodes
+        spatial.biomass.industry = nodes + " solid biomass for industry"
+        spatial.biomass.industry_cc = nodes + " solid biomass for industry CC"
+    else:
+        spatial.biomass.nodes = ["EU solid biomass"]
+        spatial.biomass.locations = ["EU"]
+        spatial.biomass.industry = ["solid biomass for industry"]
+        spatial.biomass.industry_cc = ["solid biomass for industry CC"]
+
+    spatial.biomass.df = pd.DataFrame(vars(spatial.biomass), index=nodes)
 
 
 def add_co2(n, costs):
@@ -1640,6 +1661,10 @@ if __name__ == "__main__":
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()
+    
+    # Define spatial for biomass. TODO Move to function add_biomass?
+    define_spatial_biomass(pop_layout.index)
+
     # TODO define spatial (for biomass and co2)
 
     # TODO changes in case of myopic oversight
