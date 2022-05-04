@@ -178,6 +178,13 @@ def create_network_topology(n,
     ln_attrs = ["bus0", "bus1", "length"]
     lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
 
+    # TODO: temporary fix for whan underwater_fraction is not found
+    if "underwater_fraction" not in n.links.columns:
+        if n.links.empty:
+            n.links['underwater_fraction'] = None
+        else:
+            n.links['underwater_fraction'] = 0.0
+
     candidates = pd.concat(
         [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC",
                                         lk_attrs]]).fillna(0)
@@ -463,8 +470,8 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         When a negative value is requested, then, the last layer is requested
 
     """
-    # initialization of the geoDataFrame
-    geodf_GADM = gpd.GeoDataFrame()
+    # initialization of the list of geodataframes
+    geodf_list = []
 
     for country_code in country_list:
         # download file gpkg
@@ -496,9 +503,10 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
 
         # append geodataframes
-        geodf_GADM = geodf_GADM.append(geodf_temp)
+        geodf_list.append(geodf_temp)
 
-    geodf_GADM.reset_index(drop=True, inplace=True)
+    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
 
     return geodf_GADM
 

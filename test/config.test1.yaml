@@ -1,0 +1,356 @@
+logging_level: INFO
+
+results_dir: results/
+summary_dir: results/
+costs_dir: data/ #TODO change to the equivalent of technology data
+
+run: test3
+
+foresight: overnight
+
+scenario:
+  simpl: # only relevant for PyPSA-Eur
+    - ""
+  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
+    - 4
+  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+    - 2030
+
+costs:
+  lifetime: 25 #default lifetime
+  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
+  discountrate: 0.07
+  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
+  USD2013_to_EUR2013: 0.7532
+
+  # Marginal and capital costs can be overwritten
+  # capital_cost:
+  #   onwind: 500
+  marginal_cost:
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    battery: 0.
+
+  emission_prices: # only used with the option Ep (emission prices)
+    co2: 0.
+
+  lines:
+    length_factor: 1.25 #to estimate offwind connection costs
+
+solar_thermal:
+  clearsky_model: simple
+  orientation:
+    slope: 45.
+    azimuth: 180.
+
+sector:
+  district_heating:
+    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+      #increase of today's district heating demand to potential maximum district heating share
+      #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
+    progress: 1
+      #2020: 0.0
+      #2030: 0.3
+      #2040: 0.6
+      #2050: 1.0
+    district_heating_loss: 0.15
+  reduce_space_heat_exogenously: true  # reduces space heat demand by a given factor (applied before losses in DH)
+  # this can represent e.g. building renovation, building demolition, or if
+  # the factor is negative: increasing floor area, increased thermal comfort, population growth
+  reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
+  # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
+    # 2020: 0.10  # this results in a space heat demand reduction of 10%
+    # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
+    # 2030: 0.09
+    # 2035: 0.11
+    # 2040: 0.16
+    # 2045: 0.21
+    # 2050: 0.29
+  retrofitting :  # co-optimises building renovation to reduce space heat demand
+    retro_endogen: false  # co-optimise space heat savings
+    cost_factor: 1.0   # weight costs for building renovation
+    interest_rate: 0.04  # for investment in building components
+    annualise_cost: true  # annualise the investment costs
+    tax_weighting: false   # weight costs depending on taxes in countries
+    construction_index: true   # weight costs depending on labour/material costs per country
+  tes: true
+  tes_tau: # 180 day time constant for centralised, 3 day for decentralised
+    decentral: 3
+    central: 180
+  boilers: true
+  oil_boilers: false
+  chp: true
+  micro_chp: false
+  solar_thermal: true
+  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  time_dep_hp_cop: true #time dependent heat pump coefficient of performance
+  solar_cf_correction: 0.788457 # = >>>1/1.2683
+  
+  bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
+  bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
+  transport_heating_deadband_upper: 20.
+  transport_heating_deadband_lower: 15.
+  ICE_lower_degree_factor: 0.375 #in per cent increase in fuel consumption per degree above deadband
+  ICE_upper_degree_factor: 1.6
+  EV_lower_degree_factor: 0.98
+  EV_upper_degree_factor: 0.63
+  bev_avail_max: 0.95
+  bev_avail_mean: 0.8
+  bev_dsm_restriction_value: 0.75 #Set to 0 for no restriction on BEV DSM
+  bev_dsm_restriction_time: 7 #Time at which SOC of BEV has to be dsm_restriction_value
+  v2g: true #allows feed-in to grid from EV battery
+  bev_dsm: true #turns on EV battery
+  bev_energy: 0.05 #average battery size in MWh
+  bev_availability: 0.5 #How many cars do smart charging
+  transport_fuel_cell_efficiency: 0.5
+  transport_internal_combustion_efficiency: 0.3
+
+  land_transport_fuel_cell_share:
+    0.15 # 1 means all FCEVs
+    # 2020: 0
+    # 2030: 0.05
+    # 2040: 0.1
+    # 2050: 0.15
+  land_transport_electric_share:
+    0. # 1 means all EVs  # This leads to problems when non-zero
+    # 2020: 0
+    # 2030: 0.25
+    # 2040: 0.6
+    # 2050: 0.85
+
+  co2_network: true
+  co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
+  co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
+  hydrogen_underground_storage: true
+  shipping_hydrogen_liquefaction: true
+  shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
+  shipping_hydrogen_share: 1.0
+  gadm_level: 1
+  h2_cavern: True
+  marginal_cost_storage: 0
+  methanation: true
+  helmeth: true
+  SMR: true
+  cc_fraction: 0.9
+
+  conventional_generation: # generator : carrier
+    OCGT: gas
+    #Gen_Test: oil # Just for testing purposes
+
+# snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
+snapshots:
+  # arguments to pd.date_range
+  start: "2013-03-1"
+  end: "2013-03-8"
+  closed: "left" # end is not inclusive
+
+# atlite:
+#   cutout: ./cutouts/africa-2013-era5.nc
+
+solving:
+  #tmpdir: "path/to/tmp"
+  options:
+    formulation: kirchhoff
+    clip_p_max_pu: 1.e-2
+    load_shedding: false
+    noisy_costs: true
+    skip_iterations: true
+    track_iterations: false
+    min_iterations: 4
+    max_iterations: 6
+
+  solver:
+    name: glpk
+
+  mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
+
+plotting:
+  map:
+    boundaries: [-11, 30, 34, 71]
+    color_geomap:
+      ocean: white
+      land: whitesmoke
+  costs_max: 10
+  costs_threshold: 0.2
+  energy_max: 20000
+  energy_min: -20000
+  energy_threshold: 15
+  vre_techs:
+    - onwind
+    - offwind-ac
+    - offwind-dc
+    - solar
+    - ror
+  renewable_storage_techs:
+    - PHS
+    - hydro
+  conv_techs:
+    - OCGT
+    - CCGT
+    - Nuclear
+    - Coal
+  storage_techs:
+    - hydro+PHS
+    - battery
+    - H2
+  load_carriers:
+    - AC load
+  AC_carriers:
+    - AC line
+    - AC transformer
+  link_carriers:
+    - DC line
+    - Converter AC-DC
+  heat_links:
+    - heat pump
+    - resistive heater
+    - CHP heat
+    - CHP electric
+    - gas boiler
+    - central heat pump
+    - central resistive heater
+    - central CHP heat
+    - central CHP electric
+    - central gas boiler
+  heat_generators:
+    - gas boiler
+    - central gas boiler
+    - solar thermal collector
+    - central solar thermal collector
+  tech_colors:
+    SMR CC: "darkblue"
+    gas for industry CC: "brown"
+    process emissions CC: "gray"
+    CO2 pipeline: "gray"
+    onwind: "dodgerblue"
+    onshore wind: "#235ebc"
+    offwind: "#6895dd"
+    offshore wind: "#6895dd"
+    offwind-ac: "c"
+    offshore wind (AC): "#6895dd"
+    offwind-dc: "#74c6f2"
+    offshore wind (DC): "#74c6f2"
+    wave: '#004444'
+    hydro: '#3B5323'
+    hydro reservoir: '#3B5323'
+    ror: '#78AB46'
+    run of river: '#78AB46'
+    hydroelectricity: 'blue'
+    solar: "orange"
+    solar PV: "#f9d002"
+    solar thermal: coral
+    solar rooftop: '#ffef60'
+    OCGT: wheat
+    OCGT marginal: sandybrown
+    OCGT-heat: '#ee8340'
+    gas boiler: '#ee8340'
+    gas boilers: '#ee8340'
+    gas boiler marginal: '#ee8340'
+    gas-to-power/heat: 'brown'
+    gas: brown
+    natural gas: brown
+    SMR: '#4F4F2F'
+    oil: '#B5A642'
+    oil boiler: '#B5A677'
+    lines: k
+    transmission lines: k
+    H2: m
+    H2 liquefaction: m
+    hydrogen storage: m
+    battery: slategray
+    battery storage: slategray
+    home battery: '#614700'
+    home battery storage: '#614700'
+    Nuclear: r
+    Nuclear marginal: r
+    nuclear: r
+    uranium: r
+    Coal: k
+    coal: k
+    Coal marginal: k
+    Lignite: grey
+    lignite: grey
+    Lignite marginal: grey
+    CCGT: '#ee8340'
+    CCGT marginal: '#ee8340'
+    heat pumps: '#76EE00'
+    heat pump: '#76EE00'
+    air heat pump: '#76EE00'
+    ground heat pump: '#40AA00'
+    power-to-heat: 'red'
+    resistive heater: pink
+    Sabatier: '#FF1493'
+    methanation: '#FF1493'
+    power-to-gas: 'purple'
+    power-to-liquid: 'darkgreen'
+    helmeth: '#7D0552'
+    DAC: 'deeppink'
+    co2 stored: '#123456'
+    CO2 sequestration: '#123456'
+    CC: k
+    co2: '#123456'
+    co2 vent: '#654321'
+    agriculture heat: '#D07A7A'
+    agriculture machinery oil: '#1e1e1e'
+    agriculture machinery oil emissions: '#111111'
+    agriculture electricity: '#222222'
+    solid biomass for industry co2 from atmosphere: '#654321'
+    solid biomass for industry co2 to stored: '#654321'
+    gas for industry co2 to atmosphere: '#654321'
+    gas for industry co2 to stored: '#654321'
+    Fischer-Tropsch: '#44DD33'
+    kerosene for aviation: '#44BB11'
+    naphtha for industry: '#44FF55'
+    land transport oil: '#44DD33'
+    water tanks: '#BBBBBB'
+    hot water storage: '#BBBBBB'
+    hot water charging: '#BBBBBB'
+    hot water discharging: '#999999'
+    # CO2 pipeline: '#999999'
+    CHP: r
+    CHP heat: r
+    CHP electric: r
+    PHS: g
+    Ambient: k
+    Electric load: b
+    Heat load: r
+    heat: darkred
+    rural heat: '#880000'
+    central heat: '#b22222'
+    decentral heat: '#800000'
+    low-temperature heat for industry: '#991111'
+    process heat: '#FF3333'
+    heat demand: darkred
+    electric demand: k
+    Li ion: grey
+    district heating: '#CC4E5C'
+    retrofitting: purple
+    building retrofitting: purple
+    BEV charger: grey
+    V2G: grey
+    land transport EV: grey
+    electricity: k
+    gas for industry: '#333333'
+    solid biomass for industry: '#555555'
+    industry electricity: '#222222'
+    industry new electricity: '#222222'
+    process emissions to stored: '#444444'
+    process emissions to atmosphere: '#888888'
+    process emissions: '#222222'
+    oil emissions: '#666666'
+    industry oil emissions: '#666666'
+    land transport oil emissions: '#666666'
+    land transport fuel cell: '#AAAAAA'
+    biogas: '#800000'
+    solid biomass: '#DAA520'
+    today: '#D2691E'
+    shipping: '#6495ED'
+    shipping oil: "#6495ED"
+    shipping oil emissions: "#6495ED"
+    electricity distribution grid: 'y'
+    solid biomass transport: green
+    H2 for industry: "#222222"
+    H2 for shipping: "#6495ED"

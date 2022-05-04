@@ -1,24 +1,20 @@
-
 logging_level: INFO
 
 results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: MVP_test15
+run: test3
 
-
-foresight: overnight 
-
+foresight: overnight
 
 scenario:
   simpl: # only relevant for PyPSA-Eur
-    - ''
+    - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-    - 15
+    - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
     - 2030
-
 
 costs:
   lifetime: 25 #default lifetime
@@ -44,7 +40,55 @@ costs:
   lines:
     length_factor: 1.25 #to estimate offwind connection costs
 
+solar_thermal:
+  clearsky_model: simple
+  orientation:
+    slope: 45.
+    azimuth: 180.
+
 sector:
+  district_heating:
+    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+      #increase of today's district heating demand to potential maximum district heating share
+      #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
+    progress: 1
+      #2020: 0.0
+      #2030: 0.3
+      #2040: 0.6
+      #2050: 1.0
+    district_heating_loss: 0.15
+  reduce_space_heat_exogenously: true  # reduces space heat demand by a given factor (applied before losses in DH)
+  # this can represent e.g. building renovation, building demolition, or if
+  # the factor is negative: increasing floor area, increased thermal comfort, population growth
+  reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
+  # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
+    # 2020: 0.10  # this results in a space heat demand reduction of 10%
+    # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
+    # 2030: 0.09
+    # 2035: 0.11
+    # 2040: 0.16
+    # 2045: 0.21
+    # 2050: 0.29
+  retrofitting :  # co-optimises building renovation to reduce space heat demand
+    retro_endogen: false  # co-optimise space heat savings
+    cost_factor: 1.0   # weight costs for building renovation
+    interest_rate: 0.04  # for investment in building components
+    annualise_cost: true  # annualise the investment costs
+    tax_weighting: false   # weight costs depending on taxes in countries
+    construction_index: true   # weight costs depending on labour/material costs per country
+  tes: true
+  tes_tau: # 180 day time constant for centralised, 3 day for decentralised
+    decentral: 3
+    central: 180
+  boilers: true
+  oil_boilers: false
+  chp: true
+  micro_chp: false
+  solar_thermal: true
+  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  time_dep_hp_cop: true #time dependent heat pump coefficient of performance
+  solar_cf_correction: 0.788457 # = >>>1/1.2683
+  
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
   bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
   transport_heating_deadband_upper: 20.
@@ -71,7 +115,7 @@ sector:
     # 2040: 0.1
     # 2050: 0.15
   land_transport_electric_share:
-    0.75 # 1 means all EVs
+    0. # 1 means all EVs  # This leads to problems when non-zero
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
@@ -84,7 +128,7 @@ sector:
   shipping_hydrogen_liquefaction: true
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: 1.0
-
+  gadm_level: 1
   h2_cavern: True
   marginal_cost_storage: 0
   methanation: true
@@ -99,12 +143,12 @@ sector:
 # snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
-  start: "2013-01-01"
-  end: "2014-01-01"
-  closed: left # end is not inclusive
+  start: "2013-03-1"
+  end: "2013-03-8"
+  closed: "left" # end is not inclusive
 
-atlite:
-  cutout: cutouts/africa-2013-era5.nc
+# atlite:
+#   cutout: ./cutouts/africa-2013-era5.nc
 
 solving:
   #tmpdir: "path/to/tmp"
@@ -280,7 +324,7 @@ plotting:
     hot water storage: '#BBBBBB'
     hot water charging: '#BBBBBB'
     hot water discharging: '#999999'
-    CO2 pipeline: '#999999'
+    # CO2 pipeline: '#999999'
     CHP: r
     CHP heat: r
     CHP electric: r
@@ -325,3 +369,4 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
+
