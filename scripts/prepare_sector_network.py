@@ -1514,7 +1514,7 @@ if __name__ == "__main__":
     #prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    add_heat(n, costs)
+    # add_heat(n, costs)
     n.export_to_netcdf(snakemake.output[0])
 
     #n.lopf()
