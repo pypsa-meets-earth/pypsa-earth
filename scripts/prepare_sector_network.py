@@ -273,6 +273,7 @@ def add_hydrogen(n, costs):
         lifetime=costs.at["H2 (g) pipeline", "lifetime"],
     )
 
+
 def define_spatial_biomass(nodes):
     """
     Namespace for spatial
