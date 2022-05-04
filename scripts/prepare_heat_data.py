@@ -89,12 +89,13 @@ def prepare_heat_data(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        from helpers import mock_snakemake, sets_path_to_root
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake("prepare_heat_data",
                                    simpl="",
                                    clusters="15")
+        sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)
 

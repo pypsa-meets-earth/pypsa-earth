@@ -5,24 +5,18 @@ import atlite
 import pandas as pd
 import xarray as xr
 import numpy as np
+import os
 
 if __name__ == '__main__':
     if 'snakemake' not in globals():
-        from helpers import mock_snakemake
+        from helpers import mock_snakemake, sets_path_to_root
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             'build_solar_thermal_profiles',
             simpl='',
             clusters=15,
         )
-
-    if 'snakemake' not in globals():
-        from vresutils import Dict
-        import yaml
-        snakemake = Dict()
-        with open('config.yaml') as f:
-            snakemake.config = yaml.safe_load(f)
-        snakemake.input = Dict()
-        snakemake.output = Dict()
+        sets_path_to_root("pypsa-earth-sec")
 
     config = snakemake.config['solar_thermal']
 

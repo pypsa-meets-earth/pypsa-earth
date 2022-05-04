@@ -123,7 +123,7 @@ rule build_solar_thermal_profiles:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
         cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",

@@ -8,24 +8,14 @@ import numpy as np
 import os
 
 if __name__ == '__main__':
+
     if 'snakemake' not in globals():
-        from helpers import mock_snakemake
+        from helpers import mock_snakemake, sets_path_to_root
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-        snakemake = mock_snakemake(
-            'build_heat_demands',
-            simpl='',
-            clusters=15,
-        )
-
-    if 'snakemake' not in globals():
-        from vresutils import Dict
-        import yaml
-        snakemake = Dict()
-        with open('config.yaml') as f:
-            snakemake.config = yaml.safe_load(f)
-        snakemake.input = Dict()
-        snakemake.output = Dict()
+        snakemake = mock_snakemake("build_heat_demand",
+                                   simpl="",
+                                   clusters="4")
+        sets_path_to_root("pypsa-earth-sec")
 
     time = pd.date_range(freq='h', **snakemake.config['snapshots'])
     cutout_config = snakemake.input.cutout
