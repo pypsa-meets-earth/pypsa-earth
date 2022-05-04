@@ -4,7 +4,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test3
+run: test_4
 
 foresight: overnight
 
