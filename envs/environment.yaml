@@ -29,7 +29,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-- fiona <= 1.18.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+- fiona <= 1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
 - xarray
 - netcdf4
 - networkx
