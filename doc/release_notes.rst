@@ -19,6 +19,9 @@ Upcoming Release
 
 * General user experience improvements: `PR #326 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/326>`__
 
+* Fix minor validation notebook inaccuracy:  `PR #332 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/332>`__ 
+
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
