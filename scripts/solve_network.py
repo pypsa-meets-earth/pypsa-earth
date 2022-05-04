@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Solve network."""
 import logging
 import os
@@ -6,11 +7,8 @@ import numpy as np
 import pandas as pd
 import pypsa
 from helpers import override_component_attrs
-from pypsa.linopf import ilopf
-from pypsa.linopf import network_lopf
-from pypsa.linopt import define_constraints
-from pypsa.linopt import get_var
-from pypsa.linopt import linexpr
+from pypsa.linopf import ilopf, network_lopf
+from pypsa.linopt import define_constraints, get_var, linexpr
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
@@ -29,10 +27,11 @@ def _add_land_use_constraint(n):
     # warning: this will miss existing offwind which is not classed AC-DC and has carrier 'offwind'
 
     for carrier in ["solar", "onwind", "offwind-ac", "offwind-dc"]:
-        existing = (n.generators.loc[n.generators.carrier == carrier,
-                                     "p_nom"].groupby(
-                                         n.generators.bus.map(
-                                             n.buses.location)).sum())
+        existing = (
+            n.generators.loc[n.generators.carrier == carrier, "p_nom"]
+            .groupby(n.generators.bus.map(n.buses.location))
+            .sum()
+        )
         existing.index += " " + carrier + "-" + snakemake.wildcards.planning_horizons
         n.generators.loc[existing.index, "p_nom_max"] -= existing
 
@@ -50,28 +49,29 @@ def _add_land_use_constraint_m(n):
 
         existing = n.generators.loc[n.generators.carrier == carrier, "p_nom"]
         ind = list(
-            set([
-                i.split(sep=" ")[0] + " " + i.split(sep=" ")[1]
-                for i in existing.index
-            ]))
+            set(
+                [
+                    i.split(sep=" ")[0] + " " + i.split(sep=" ")[1]
+                    for i in existing.index
+                ]
+            )
+        )
 
         previous_years = [
-            str(y) for y in planning_horizons + grouping_years
+            str(y)
+            for y in planning_horizons + grouping_years
             if y < int(snakemake.wildcards.planning_horizons)
         ]
 
         for p_year in previous_years:
             ind2 = [
-                i for i in ind
-                if i + " " + carrier + "-" + p_year in existing.index
+                i for i in ind if i + " " + carrier + "-" + p_year in existing.index
             ]
-            sel_current = [
-                i + " " + carrier + "-" + current_horizon for i in ind2
-            ]
+            sel_current = [i + " " + carrier + "-" + current_horizon for i in ind2]
             sel_p_year = [i + " " + carrier + "-" + p_year for i in ind2]
-            n.generators.loc[sel_current,
-                             "p_nom_max"] -= existing.loc[sel_p_year].rename(
-                                 lambda x: x[:-4] + current_horizon)
+            n.generators.loc[sel_current, "p_nom_max"] -= existing.loc[
+                sel_p_year
+            ].rename(lambda x: x[:-4] + current_horizon)
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 
@@ -80,9 +80,9 @@ def prepare_network(n, solve_opts=None):
 
     if "clip_p_max_pu" in solve_opts:
         for df in (
-                n.generators_t.p_max_pu,
-                n.generators_t.p_min_pu,
-                n.storage_units_t.inflow,
+            n.generators_t.p_max_pu,
+            n.generators_t.p_min_pu,
+            n.storage_units_t.inflow,
         ):
             df.where(df > solve_opts["clip_p_max_pu"], other=0.0, inplace=True)
 
@@ -109,13 +109,14 @@ def prepare_network(n, solve_opts=None):
             if "marginal_cost" in t.df:
                 np.random.seed(174)
                 t.df["marginal_cost"] += 1e-2 + 2e-3 * (
-                    np.random.random(len(t.df)) - 0.5)
+                    np.random.random(len(t.df)) - 0.5
+                )
 
         for t in n.iterate_components(["Line", "Link"]):
             np.random.seed(123)
             t.df["capital_cost"] += (
-                1e-1 + 2e-2 *
-                (np.random.random(len(t.df)) - 0.5)) * t.df["length"]
+                1e-1 + 2e-2 * (np.random.random(len(t.df)) - 0.5)
+            ) * t.df["length"]
 
     if solve_opts.get("nhours"):
         nhours = solve_opts["nhours"]
@@ -152,12 +153,16 @@ def add_battery_constraints(n):
 
 def add_chp_constraints(n):
 
-    electric_bool = (n.links.index.str.contains("urban central")
-                     & n.links.index.str.contains("CHP")
-                     & n.links.index.str.contains("electric"))
-    heat_bool = (n.links.index.str.contains("urban central")
-                 & n.links.index.str.contains("CHP")
-                 & n.links.index.str.contains("heat"))
+    electric_bool = (
+        n.links.index.str.contains("urban central")
+        & n.links.index.str.contains("CHP")
+        & n.links.index.str.contains("electric")
+    )
+    heat_bool = (
+        n.links.index.str.contains("urban central")
+        & n.links.index.str.contains("CHP")
+        & n.links.index.str.contains("heat")
+    )
 
     electric = n.links.index[electric_bool]
     heat = n.links.index[heat_bool]
@@ -177,12 +182,11 @@ def add_chp_constraints(n):
         # ratio of output heat to electricity set by p_nom_ratio
         lhs = linexpr(
             (
-                n.links.loc[electric_ext, "efficiency"] *
-                n.links.loc[electric_ext, "p_nom_ratio"],
+                n.links.loc[electric_ext, "efficiency"]
+                * n.links.loc[electric_ext, "p_nom_ratio"],
                 link_p_nom[electric_ext],
             ),
-            (-n.links.loc[heat_ext, "efficiency"].values,
-             link_p_nom[heat_ext].values),
+            (-n.links.loc[heat_ext, "efficiency"].values, link_p_nom[heat_ext].values),
         )
 
         define_constraints(n, lhs, "=", 0, "chplink", "fix_p_nom_ratio")
@@ -203,20 +207,17 @@ def add_chp_constraints(n):
 
         rhs = n.links.loc[electric_fix, "p_nom"].values
 
-        define_constraints(n, lhs, "<=", rhs, "chplink",
-                           "top_iso_fuel_line_fix")
+        define_constraints(n, lhs, "<=", rhs, "chplink", "top_iso_fuel_line_fix")
 
     if not electric.empty:
 
         # backpressure
         lhs = linexpr(
             (
-                n.links.loc[electric, "c_b"].values *
-                n.links.loc[heat, "efficiency"],
+                n.links.loc[electric, "c_b"].values * n.links.loc[heat, "efficiency"],
                 link_p[heat],
             ),
-            (-n.links.loc[electric, "efficiency"].values,
-             link_p[electric].values),
+            (-n.links.loc[electric, "efficiency"].values, link_p[electric].values),
         )
 
         define_constraints(n, lhs, "<=", 0, "chplink", "backpressure")
@@ -235,14 +236,9 @@ def add_co2_sequestration_limit(n, sns):
     rhs = n.config["sector"].get("co2_sequestration_potential", 200) * 1e6
 
     name = "co2_sequestration_limit"
-    define_constraints(n,
-                       lhs,
-                       "<=",
-                       rhs,
-                       "GlobalConstraint",
-                       "mu",
-                       axes=pd.Index([name]),
-                       spec=name)
+    define_constraints(
+        n, lhs, "<=", rhs, "GlobalConstraint", "mu", axes=pd.Index([name]), spec=name
+    )
 
 
 def extra_functionality(n, snapshots):
@@ -263,20 +259,24 @@ def solve_network(n, config, opts="", **kwargs):
     n.opts = opts
 
     if cf_solving.get("skip_iterations", False):
-        network_lopf(n,
-                     solver_name=solver_name,
-                     solver_options=solver_options,
-                     extra_functionality=extra_functionality,
-                     **kwargs)
+        network_lopf(
+            n,
+            solver_name=solver_name,
+            solver_options=solver_options,
+            extra_functionality=extra_functionality,
+            **kwargs
+        )
     else:
-        ilopf(n,
-              solver_name=solver_name,
-              solver_options=solver_options,
-              track_iterations=track_iterations,
-              min_iterations=min_iterations,
-              max_iterations=max_iterations,
-              extra_functionality=extra_functionality,
-              **kwargs)
+        ilopf(
+            n,
+            solver_name=solver_name,
+            solver_options=solver_options,
+            track_iterations=track_iterations,
+            min_iterations=min_iterations,
+            max_iterations=max_iterations,
+            extra_functionality=extra_functionality,
+            **kwargs
+        )
     return n
 
 
@@ -297,8 +297,9 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-    logging.basicConfig(filename=snakemake.log.python,
-                        level=snakemake.config["logging_level"])
+    logging.basicConfig(
+        filename=snakemake.log.python, level=snakemake.config["logging_level"]
+    )
 
     tmpdir = snakemake.config["solving"].get("tmpdir")
     if tmpdir is not None:
@@ -310,8 +311,7 @@ if __name__ == "__main__":
     with memory_logger(filename=fn, interval=30.0) as mem:
 
         overrides = override_component_attrs(snakemake.input.overrides)
-        n = pypsa.Network(snakemake.input.network,
-                          override_component_attrs=overrides)
+        n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
         n = prepare_network(n, solve_opts)
 
@@ -323,10 +323,8 @@ if __name__ == "__main__":
         )
 
         if "lv_limit" in n.global_constraints.index:
-            n.line_volume_limit = n.global_constraints.at["lv_limit",
-                                                          "constant"]
-            n.line_volume_limit_dual = n.global_constraints.at["lv_limit",
-                                                               "mu"]
+            n.line_volume_limit = n.global_constraints.at["lv_limit", "constant"]
+            n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
 
         n.export_to_netcdf(snakemake.output[0])
 

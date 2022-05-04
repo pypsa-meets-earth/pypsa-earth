@@ -1,20 +1,19 @@
-import os
-from pathlib import Path
-
+# -*- coding: utf-8 -*-
 import logging
 import os
 import shutil
 import zipfile
+from pathlib import Path
+
 import fiona
-import requests
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from pypsa.components import component_attrs
-from pypsa.components import components
+import requests
+from pypsa.components import component_attrs, components
 from pypsa.descriptors import Dict
-from vresutils.costdata import annuity
 from shapely.geometry import Point
+from vresutils.costdata import annuity
 
 
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
@@ -49,8 +48,7 @@ def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
             print("Cant find the repo path.")
         # if repo_name NOT current folder name, go one dir higher
         else:
-            upper_path = os.path.dirname(
-                os.path.abspath("."))  # name of upper folder
+            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)
 
 
@@ -129,35 +127,35 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
     costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = (costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(
-        min_count=1))
-    costs = costs.fillna({
-        "CO2 intensity": 0,
-        "FOM": 0,
-        "VOM": 0,
-        "discount rate": discount_rate,
-        "efficiency": 1,
-        "fuel": 0,
-        "investment": 0,
-        "lifetime": lifetime,
-    })
+    costs = (
+        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    )
+    costs = costs.fillna(
+        {
+            "CO2 intensity": 0,
+            "FOM": 0,
+            "VOM": 0,
+            "discount rate": discount_rate,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": lifetime,
+        }
+    )
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
     costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears
-        for i, v in costs.iterrows()
+        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
     ]
 
     return costs
 
 
-def create_network_topology(n,
-                            prefix,
-                            like="ac",
-                            connector=" <-> ",
-                            bidirectional=True):
+def create_network_topology(
+    n, prefix, like="ac", connector=" <-> ", bidirectional=True
+):
     """
     Create a network topology like the power transmission network.
 
@@ -181,13 +179,13 @@ def create_network_topology(n,
     # TODO: temporary fix for whan underwater_fraction is not found
     if "underwater_fraction" not in n.links.columns:
         if n.links.empty:
-            n.links['underwater_fraction'] = None
+            n.links["underwater_fraction"] = None
         else:
-            n.links['underwater_fraction'] = 0.0
+            n.links["underwater_fraction"] = 0.0
 
     candidates = pd.concat(
-        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC",
-                                        lk_attrs]]).fillna(0)
+        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
+    ).fillna(0)
 
     positive_order = candidates.bus0 < candidates.bus1
     candidates_p = candidates[positive_order]
@@ -230,7 +228,9 @@ def create_dummy_data(n, sector, carriers):
         ]
     else:
         raise Exception("sector not found")
-    data = np.random.randint(10, 500, size=(len(ind), len(col))) * 1000 * 1     #TODO change 1 with temp. resolution 
+    data = (
+        np.random.randint(10, 500, size=(len(ind), len(col))) * 1000 * 1
+    )  # TODO change 1 with temp. resolution
 
     return pd.DataFrame(data, index=ind, columns=col)
 
@@ -307,6 +307,7 @@ def override_component_attrs(directory):
             attrs[component] = overrides.combine_first(attrs[component])
 
     return attrs
+
 
 def get_country(target, **keys):
     """
@@ -399,6 +400,7 @@ def two_digits_2_name_country(two_code_country):
     full_name = get_country("name", alpha_2=two_code_country)
     return full_name
 
+
 def download_GADM(country_code, update=False, out_logging=False):
     """
     Download gpkg file from GADM for a given country code
@@ -455,7 +457,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-
 def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
@@ -494,8 +495,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c)
-            for twoD_c in geodf_temp["GID_0"]
+            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
         ]
 
         # create a subindex column that is useful
@@ -510,6 +510,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
     return geodf_GADM
 
+
 def locate_bus(coords, co, gadm_level):
     """
     Function to locate the right node for a coordinate set
@@ -520,21 +521,24 @@ def locate_bus(coords, co, gadm_level):
     coords: pandas dataseries
         dataseries with 2 rows x & y representing the longitude and latitude
     co: string (code for country where coords are MA Morocco)
-	code of the countries where the coordinates are	
+        code of the countries where the coordinates are
 
-     """
-    country_list = ["MA"] #TODO connect with entire list of countries
+    """
+    country_list = ["MA"]  # TODO connect with entire list of countries
     gdf = get_GADM_layer(country_list, gadm_level)
-    gdf_co = gdf[gdf["GID_{}".format(gadm_level)].str.contains(co)] #geodataframe of entire continent - output of prev function {} are placeholders
-    #in strings - conditional formatting
-    #insert any variable into that place using .format - extract string and filter for those containing co (MA)
-    point = Point(coords["x"], coords["y"])      #point object  
-    
+    gdf_co = gdf[
+        gdf["GID_{}".format(gadm_level)].str.contains(co)
+    ]  # geodataframe of entire continent - output of prev function {} are placeholders
+    # in strings - conditional formatting
+    # insert any variable into that place using .format - extract string and filter for those containing co (MA)
+    point = Point(coords["x"], coords["y"])  # point object
+
     try:
-        return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item() #filter gdf_co which contains point and returns the bus 
-    
+        return gdf_co[gdf_co.contains(point)][
+            "GID_{}".format(gadm_level)
+        ].item()  # filter gdf_co which contains point and returns the bus
+
     except ValueError:
-        return gdf_co[gdf_co.geometry==\
-                      min(gdf_co.geometry, 
-                          key=(point.distance))]["GID_{}".format(gadm_level)].item() #looks for closest one shape=node
-    
+        return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
+            "GID_{}".format(gadm_level)
+        ].item()  # looks for closest one shape=node

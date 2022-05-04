@@ -10,7 +10,7 @@ gurobi.log
 
 # Folders
 /bak
-#/resources*
+/resources
 /results
 /networks
 /benchmarks
@@ -45,11 +45,3 @@ doc/_build
 *.xlsx
 *~
 *.pyc
-
-
-
-
-
-
-
-

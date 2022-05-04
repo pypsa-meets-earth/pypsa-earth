@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Build clustered population layouts."""
 import os
 
@@ -18,12 +19,18 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-    cutout_path = snakemake.input.cutout  #os.path.abspath(snakemake.config["atlite"]["cutout"])
+    cutout_path = (
+        snakemake.input.cutout
+    )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
-    clustered_regions = (gpd.read_file(
-        snakemake.input.regions_onshore).set_index("name").buffer(0).squeeze())
+    clustered_regions = (
+        gpd.read_file(snakemake.input.regions_onshore)
+        .set_index("name")
+        .buffer(0)
+        .squeeze()
+    )
 
     I = cutout.indicatormatrix(clustered_regions)
 
