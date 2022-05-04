@@ -98,7 +98,7 @@ rule build_cop_profiles:
 
 rule prepare_heat_data:
     input:
-        network='networks/elec_s{simpl}_{clusters}.nc',
+        network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),
         energy_totals_name='resources/energy_totals.csv',
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         # This is probably still dummy data, investigate and use real data TODO
@@ -123,7 +123,8 @@ rule build_solar_thermal_profiles:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
         solar_thermal_urban="resources/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
@@ -166,19 +167,20 @@ rule build_clustered_population_layouts:
     script: "scripts/build_clustered_population_layouts.py"
     
 
-rule build_heat_demands:
+rule build_heat_demand:
     input:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
         heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
         heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
     resources: mem_mb=20000
-    benchmark: "benchmarks/build_heat_demands/s{simpl}_{clusters}"
-    script: "scripts/build_heat_demands.py"
+    benchmark: "benchmarks/build_heat_demand/s{simpl}_{clusters}"
+    script: "scripts/build_heat_demand.py"
 
     
 rule build_temperature_profiles:
