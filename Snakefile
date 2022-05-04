@@ -15,6 +15,11 @@ wildcard_constraints:
     opts="[-+a-zA-Z0-9]*",
     sector_opts="[-+a-zA-Z0-9\.\s]*"
 
+subworkflow pypsaearth:
+    workdir: "../pypsa-africa"
+    snakefile: "../pypsa-africa/Snakefile"
+    configfile: "./config.pypsa-earth.yaml"
+
 rule prepare_sector_networks:
     input:
         expand(RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -29,25 +34,24 @@ rule solve_all_networks:
 
 rule prepare_sector_network:
     input:
-        network='networks/elec_s{simpl}_{clusters}.nc',
+        network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
-        nodal_energy_totals='resources/nodal_energy_totals_{simpl}_{clusters}.csv',
-        transport='resources/transport_{simpl}_{clusters}.csv',
-        avail_profile='resources/avail_profile_{simpl}_{clusters}.csv',
-        dsm_profile='resources/dsm_profile_{simpl}_{clusters}.csv',
-        nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
+        nodal_energy_totals='resources/nodal_energy_heat_totals_s{simpl}_{clusters}.csv',
+        transport='resources/transport_s{simpl}_{clusters}.csv',
+        avail_profile='resources/avail_profile_s{simpl}_{clusters}.csv',
+        dsm_profile='resources/dsm_profile_s{simpl}_{clusters}.csv',
+        nodal_transport_data='resources/nodal_transport_data_s{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
-
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-	      airports="data/airports.csv",
-	      ports="data/ports.csv",
+	    airports="data/airports.csv",
+	    ports="data/ports.csv",
         heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
         ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
         gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
         solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
-        district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
-	      industry_demands="data/industry_demand_locations.csv",
+        district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv',
+	    industry_demands="data/industry_demand_locations.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
@@ -57,24 +61,21 @@ rule prepare_sector_network:
 
 rule prepare_transport_data:
     input:
-        network='networks/elec_s{simpl}_{clusters}.nc',
+        network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),
         energy_totals_name='resources/energy_totals.csv',
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
         transport_name='resources/transport_data.csv',
-        #clustered_pop_layout="resources/pop_layout_elec_s_4.csv",  # hardcoded wildcards temporary
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        # This is probably still dummy data, investigate and use real data TODO
-        #temp_air_total="resources/temp_air_total_elec_s_4.nc",  # hardcoded wildcards temporary
         temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
 
     output: 
-        nodal_energy_totals='resources/nodal_energy_totals_{simpl}_{clusters}.csv',
-        transport='resources/transport_{simpl}_{clusters}.csv',
-        avail_profile='resources/avail_profile_{simpl}_{clusters}.csv',
-        dsm_profile='resources/dsm_profile_{simpl}_{clusters}.csv',
-        nodal_transport_data='resources/nodal_transport_data_{simpl}_{clusters}.csv',
-        #dummy_wildcard="resources/dummy{simpl}_{clusters}.nc"
+        nodal_energy_totals='resources/nodal_energy_totals_s{simpl}_{clusters}.csv',
+        transport='resources/transport_s{simpl}_{clusters}.csv',
+        avail_profile='resources/avail_profile_s{simpl}_{clusters}.csv',
+        dsm_profile='resources/dsm_profile_s{simpl}_{clusters}.csv',
+        nodal_transport_data='resources/nodal_transport_data_s{simpl}_{clusters}.csv',
+    script: "scripts/prepare_transport_data.py"
 
 
 rule build_cop_profiles:
@@ -98,7 +99,7 @@ rule build_cop_profiles:
 
 rule prepare_heat_data:
     input:
-        network='networks/elec_s{simpl}_{clusters}.nc',
+        network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),
         energy_totals_name='resources/energy_totals.csv',
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         # This is probably still dummy data, investigate and use real data TODO
@@ -110,21 +111,21 @@ rule prepare_heat_data:
         heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
         heat_profile="data/heat_load_profile_BDEW.csv",
     output:
-        nodal_energy_totals='resources/nodal_energy_totals_s{simpl}_{clusters}.csv',
+        nodal_energy_totals='resources/nodal_energy_heat_totals_s{simpl}_{clusters}.csv',
         heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
         ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
         gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
         solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
         district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
-    script: "scripts/prepare_transport_data.py"
-
+    script: "scripts/prepare_heat_data.py"
 
 rule build_solar_thermal_profiles:
     input:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
         solar_thermal_urban="resources/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
@@ -133,20 +134,12 @@ rule build_solar_thermal_profiles:
     benchmark: "benchmarks/build_solar_thermal_profiles/s{simpl}_{clusters}"
     script: "scripts/build_solar_thermal_profiles.py"
 
-rule calculate_dummy_pop_layout:
-    input:
-        network='networks/elec_s{simpl}_37.nc',  # fixed number of clusters
-        # Get pop layouts from Europe (update to Morocco/Africa layout)
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_37.csv",  # fixed number of clusters
-        #simplified_pop_layout="resources/pop_layout_elec_s{simpl}.csv",
-
-    output: clustered_pop_layout_dummy="resources/pop_layout_elec_s{simpl}_37.csv",  # fixed number of clusters
-    script: "scripts/calculate_dummy_pop_layout.py" 
 
 rule build_population_layouts:
     input:
-        nuts3_shapes='resources/gadm_shapes.geojson',
-        urban_percent="data/urban_percent.csv"
+        nuts3_shapes=pypsaearth('resources/gadm_shapes.geojson'),
+        urban_percent="data/urban_percent.csv",
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
@@ -156,12 +149,18 @@ rule build_population_layouts:
     threads: 8
     script: "scripts/build_population_layouts.py"
 
+rule move_hardcoded_files_temp:
+    input: "data/temp_hard_coded/energy_totals.csv", "data/temp_hard_coded/transport_data.csv"
+    output: "resources/energy_totals.csv", "resources/transport_data.csv"
+    shell: "cp -a data/temp_hard_coded/. resources"
+
 rule build_clustered_population_layouts:
     input:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv"
     resources: mem_mb=10000
@@ -169,19 +168,20 @@ rule build_clustered_population_layouts:
     script: "scripts/build_clustered_population_layouts.py"
     
 
-rule build_heat_demands:
+rule build_heat_demand:
     input:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
         heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
         heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
     resources: mem_mb=20000
-    benchmark: "benchmarks/build_heat_demands/s{simpl}_{clusters}"
-    script: "scripts/build_heat_demands.py"
+    benchmark: "benchmarks/build_heat_demand/s{simpl}_{clusters}"
+    script: "scripts/build_heat_demand.py"
 
     
 rule build_temperature_profiles:
@@ -189,7 +189,8 @@ rule build_temperature_profiles:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
-        regions_onshore="resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        regions_onshore=pypsaearth("resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"),
+        cutout=pypsaearth('cutouts/africa-2013-era5-tutorial.nc'),
     output:
         temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
@@ -200,6 +201,14 @@ rule build_temperature_profiles:
     resources: mem_mb=20000
     benchmark: "benchmarks/build_temperature_profiles/s{simpl}_{clusters}"
     script: "scripts/build_temperature_profiles.py"
+
+
+rule copy_config:
+    output: SDIR + '/configs/config.yaml'
+    threads: 1
+    resources: mem_mb=1000
+    benchmark: SDIR + "/benchmarks/copy_config"
+    script: "scripts/copy_config.py"
 
     
 rule solve_network:

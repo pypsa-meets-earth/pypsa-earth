@@ -1435,7 +1435,7 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake("prepare_sector_network",
                                    simpl="",
-                                   clusters="15",
+                                   clusters="4",
                                    planning_horizons="2030") 
     # TODO add mock_snakemake func
 
@@ -1443,6 +1443,7 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+
     nodes = n.buses.index
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
@@ -1485,7 +1486,7 @@ if __name__ == "__main__":
     ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0)                                  
     solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0)                                  
 
-    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
+    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0).iloc[:, 0]
     add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
@@ -1513,7 +1514,7 @@ if __name__ == "__main__":
     #prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    add_heat(n, costs)
+    # add_heat(n, costs)
     n.export_to_netcdf(snakemake.output[0])
 
     #n.lopf()
