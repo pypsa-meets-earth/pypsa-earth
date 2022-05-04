@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Build temperature profiles."""
 import os
 
@@ -20,12 +21,18 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth-sec")
 
     time = pd.date_range(freq="h", **snakemake.config["snapshots"])
-    cutout_path = snakemake.input.cutout  #os.path.abspath(snakemake.config["atlite"]["cutout"])
+    cutout_path = (
+        snakemake.input.cutout
+    )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
 
     cutout = atlite.Cutout(cutout_path).sel(time=time)
 
-    clustered_regions = (gpd.read_file(
-        snakemake.input.regions_onshore).set_index("name").buffer(0).squeeze())
+    clustered_regions = (
+        gpd.read_file(snakemake.input.regions_onshore)
+        .set_index("name")
+        .buffer(0)
+        .squeeze()
+    )
 
     I = cutout.indicatormatrix(clustered_regions)
 
@@ -40,12 +47,12 @@ if __name__ == "__main__":
         nonzero_sum[nonzero_sum == 0.0] = 1.0
         M_tilde = M / nonzero_sum
 
-        temp_air = cutout.temperature(matrix=M_tilde.T,
-                                      index=clustered_regions.index)
+        temp_air = cutout.temperature(matrix=M_tilde.T, index=clustered_regions.index)
 
         temp_air.to_netcdf(snakemake.output[f"temp_air_{area}"])
 
-        temp_soil = cutout.soil_temperature(matrix=M_tilde.T,
-                                            index=clustered_regions.index)
+        temp_soil = cutout.soil_temperature(
+            matrix=M_tilde.T, index=clustered_regions.index
+        )
 
         temp_soil.to_netcdf(snakemake.output[f"temp_soil_{area}"])

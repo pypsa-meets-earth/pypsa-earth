@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -6,8 +8,6 @@ import pypsa
 import pytz
 import xarray as xr
 from helpers import mock_snakemake
-
-from itertools import product
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -30,27 +30,42 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
 
     return week_df
 
+
 def prepare_heat_data(n):
 
-    ashp_cop = xr.open_dataarray(snakemake.input.cop_air_total).to_pandas().reindex(index=n.snapshots)
-    gshp_cop = xr.open_dataarray(snakemake.input.cop_soil_total).to_pandas().reindex(index=n.snapshots)
+    ashp_cop = (
+        xr.open_dataarray(snakemake.input.cop_air_total)
+        .to_pandas()
+        .reindex(index=n.snapshots)
+    )
+    gshp_cop = (
+        xr.open_dataarray(snakemake.input.cop_soil_total)
+        .to_pandas()
+        .reindex(index=n.snapshots)
+    )
 
-    solar_thermal = xr.open_dataarray(snakemake.input.solar_thermal_total).to_pandas().reindex(index=n.snapshots)
+    solar_thermal = (
+        xr.open_dataarray(snakemake.input.solar_thermal_total)
+        .to_pandas()
+        .reindex(index=n.snapshots)
+    )
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
-    solar_thermal = options['solar_cf_correction'] * solar_thermal / 1e3
+    solar_thermal = options["solar_cf_correction"] * solar_thermal / 1e3
 
-    energy_totals = pd.read_csv(snakemake.input.energy_totals_name,
-                                index_col=0)
+    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
     district_heat_share = nodal_energy_totals["district heat share"].round(2)
-    nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction,
-                                                       axis=0)
+    nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
     # copy forward the daily average heat demand into each hour, so it can be multipled by the intraday profile
-    daily_space_heat_demand = xr.open_dataarray(snakemake.input.heat_demand_total).to_pandas().reindex(index=n.snapshots, method="ffill")
+    daily_space_heat_demand = (
+        xr.open_dataarray(snakemake.input.heat_demand_total)
+        .to_pandas()
+        .reindex(index=n.snapshots, method="ffill")
+    )
 
     intraday_profiles = pd.read_csv(snakemake.input.heat_profile, index_col=0)
 
@@ -66,7 +81,7 @@ def prepare_heat_data(n):
         intraday_year_profile = generate_periodic_profiles(
             daily_space_heat_demand.index.tz_localize("UTC"),
             nodes=daily_space_heat_demand.columns,
-            weekly_profile=weekly_profile
+            weekly_profile=weekly_profile,
         )
 
         if use == "space":
@@ -74,27 +89,40 @@ def prepare_heat_data(n):
         else:
             heat_demand_shape = intraday_year_profile
 
-        heat_demand[f"{sector} {use}"] = (heat_demand_shape/heat_demand_shape.sum()).multiply(nodal_energy_totals[f"total {sector} {use}"]) * 1e6
-        electric_heat_supply[f"{sector} {use}"] = (heat_demand_shape/heat_demand_shape.sum()).multiply(nodal_energy_totals[f"electricity {sector} {use}"]) * 1e6
+        heat_demand[f"{sector} {use}"] = (
+            heat_demand_shape / heat_demand_shape.sum()
+        ).multiply(nodal_energy_totals[f"total {sector} {use}"]) * 1e6
+        electric_heat_supply[f"{sector} {use}"] = (
+            heat_demand_shape / heat_demand_shape.sum()
+        ).multiply(nodal_energy_totals[f"electricity {sector} {use}"]) * 1e6
 
     heat_demand = pd.concat(heat_demand, axis=1)
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
 
     # subtract from electricity load since heat demand already in heat_demand
     electric_nodes = n.loads.index[n.loads.carrier == "electricity"]
-    n.loads_t.p_set[electric_nodes] = n.loads_t.p_set[electric_nodes] - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
-    
-    return nodal_energy_totals, heat_demand, ashp_cop, gshp_cop, solar_thermal, district_heat_share
+    n.loads_t.p_set[electric_nodes] = (
+        n.loads_t.p_set[electric_nodes]
+        - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
+    )
+
+    return (
+        nodal_energy_totals,
+        heat_demand,
+        ashp_cop,
+        gshp_cop,
+        solar_thermal,
+        district_heat_share,
+    )
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        snakemake = mock_snakemake("prepare_heat_data",
-                                   simpl="",
-                                   clusters="15")
+        snakemake = mock_snakemake("prepare_heat_data", simpl="", clusters="15")
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)
@@ -115,7 +143,7 @@ if __name__ == "__main__":
         ashp_cop,
         gshp_cop,
         solar_thermal,
-        district_heat_share
+        district_heat_share,
     ) = prepare_heat_data(n)
 
     # Save the generated output files to snakemake paths

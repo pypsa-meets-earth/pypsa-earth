@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Build mapping between grid cells and population (total, urban, rural)"""
 import multiprocessing as mp
 import os
@@ -17,7 +18,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_population_layouts")
         sets_path_to_root("pypsa-earth-sec")
 
-    cutout_path = snakemake.input.cutout  #os.path.abspath(snakemake.config["atlite"]["cutout"])
+    cutout_path = (
+        snakemake.input.cutout
+    )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
 
     grid_cells = cutout.grid_cells()
@@ -37,13 +40,16 @@ if __name__ == "__main__":
 
     countries = np.sort(nuts3.country.unique())
     # countries = np.array(["MA"])
-    urban_fraction = (pd.read_csv(
-        snakemake.input.urban_percent,
-        header=None,
-        index_col=0,
-        names=["fraction"],
-        squeeze=True,
-    ) / 100.0)
+    urban_fraction = (
+        pd.read_csv(
+            snakemake.input.urban_percent,
+            header=None,
+            index_col=0,
+            names=["fraction"],
+            squeeze=True,
+        )
+        / 100.0
+    )
 
     # fill missing Balkans values
     # missing = ["AL", "ME", "MK"]
@@ -68,8 +74,7 @@ if __name__ == "__main__":
 
     for ct in countries:
 
-        indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0
-                                                 if x == ct else 0.0)
+        indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0 if x == ct else 0.0)
 
         indicator_cells_ct = pd.Series(Iinv.T.dot(indicator_nuts3_ct))
 
@@ -83,8 +88,7 @@ if __name__ == "__main__":
 
         # The first low density grid cells to reach rural fraction are rural
         asc_density_i = density_cells_ct.sort_values().index
-        asc_density_cumsum = pop_cells_ct[asc_density_i].cumsum(
-        ) / pop_cells_ct.sum()
+        asc_density_cumsum = pop_cells_ct[asc_density_i].cumsum() / pop_cells_ct.sum()
         rural_fraction_ct = 1 - urban_fraction[ct]
         pop_ct_rural_b = asc_density_cumsum < rural_fraction_ct
         pop_ct_urban_b = ~pop_ct_rural_b

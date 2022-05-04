@@ -1,10 +1,12 @@
-import os
-import pandas as pd
-from pathlib import Path
-from pypsa.descriptors import Dict
-from pypsa.components import components, component_attrs
-
+# -*- coding: utf-8 -*-
 import logging
+import os
+from pathlib import Path
+
+import pandas as pd
+from pypsa.components import component_attrs, components
+from pypsa.descriptors import Dict
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +19,7 @@ def override_component_attrs(directory):
     Parameters
     ----------
     directory : string
-        Folder where component attributes to override are stored 
+        Folder where component attributes to override are stored
         analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
 
     Returns
@@ -25,7 +27,7 @@ def override_component_attrs(directory):
     Dictionary of overriden component attributes.
     """
 
-    attrs = Dict({k : v.copy() for k,v in component_attrs.items()})
+    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"
@@ -53,14 +55,16 @@ def mock_snakemake(rulename, **wildcards):
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
-    import snakemake as sm
     import os
+
+    import snakemake as sm
     from pypsa.descriptors import Dict
     from snakemake.script import Snakemake
 
     script_dir = Path(__file__).parent.resolve()
-    assert Path.cwd().resolve() == script_dir, \
-      f'mock_snakemake has to be run from the repository scripts directory {script_dir}'
+    assert (
+        Path.cwd().resolve() == script_dir
+    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
         if os.path.exists(p):
@@ -80,9 +84,18 @@ def mock_snakemake(rulename, **wildcards):
                 io[i] = os.path.abspath(io[i])
 
     make_accessable(job.input, job.output, job.log)
-    snakemake = Snakemake(job.input, job.output, job.params, job.wildcards,
-                          job.threads, job.resources, job.log,
-                          job.dag.workflow.config, job.rule.name, None,)
+    snakemake = Snakemake(
+        job.input,
+        job.output,
+        job.params,
+        job.wildcards,
+        job.threads,
+        job.resources,
+        job.log,
+        job.dag.workflow.config,
+        job.rule.name,
+        None,
+    )
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
