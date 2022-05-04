@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!-- Please do not post usage questions here. Ask them on the Q&A at the discussion tab on GitHub: https://github.com/pypsa-meets-africa/pypsa-africa/discussions/categories/q-a -->
+<!-- Please do not post usage questions here. Ask them on the Q&A at the discussion tab on GitHub: https://github.com/pypsa-meets-africa/pypsa-earth-sec/discussions/categories/q-a -->
 
 ## Describe the feature you'd like to see
 

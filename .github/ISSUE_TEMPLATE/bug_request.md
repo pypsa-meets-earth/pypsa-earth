@@ -10,7 +10,7 @@ assignees: ''
 
 ## Checklist
 
-- [ ] I am using the current [`main`](https://github.com/pypsa-meets-africa/pypsa-africa/tree/main) branch or the latest [release](https://github.com/pypsa-meets-africa/pypsa-africa/releases). Please indicate.
+- [ ] I am using the current [`main`](https://github.com/pypsa-meets-africa/pypsa-earth-sec/tree/main) branch or the latest [release](https://github.com/pypsa-meets-africa/pypsa-earth-sec/releases). Please indicate.
 - [ ] I am running on an up-to-date [`pypsa-africa` environment](https://github.com/pypsa-meets-africa/pypsa-africa/blob/main/envs/environment.yaml). Update via `conda env update -f envs/environment.yaml`.
 
 ## Describe the Bug
