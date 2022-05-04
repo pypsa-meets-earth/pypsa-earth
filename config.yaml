@@ -47,16 +47,16 @@ solar_thermal:
     azimuth: 180.
 
 sector:
-    district_heating:
-    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
-     #increase of today's district heating demand to potential maximum district heating share
-     #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
-    progress: 1
-       #2020: 0.0
-       #2030: 0.3
-       #2040: 0.6
-       #2050: 1.0
-    district_heating_loss: 0.15
+  district_heating:
+  potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+    #increase of today's district heating demand to potential maximum district heating share
+    #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
+  progress: 1
+    #2020: 0.0
+    #2030: 0.3
+    #2040: 0.6
+    #2050: 1.0
+  district_heating_loss: 0.15
   reduce_space_heat_exogenously: true  # reduces space heat demand by a given factor (applied before losses in DH)
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth

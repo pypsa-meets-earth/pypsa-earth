@@ -37,22 +37,21 @@ rule prepare_sector_network:
         network=pypsaearth('networks/elec_s{simpl}_{clusters}.nc'),
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
-        nodal_energy_totals='resources/nodal_energy_totals_s{simpl}_{clusters}.csv',
+        nodal_energy_totals='resources/nodal_energy_heat_totals_s{simpl}_{clusters}.csv',
         transport='resources/transport_s{simpl}_{clusters}.csv',
         avail_profile='resources/avail_profile_s{simpl}_{clusters}.csv',
         dsm_profile='resources/dsm_profile_s{simpl}_{clusters}.csv',
         nodal_transport_data='resources/nodal_transport_data_s{simpl}_{clusters}.csv',
         overrides="data/override_component_attrs",
-
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-	      airports="data/airports.csv",
-	      ports="data/ports.csv",
+	    airports="data/airports.csv",
+	    ports="data/ports.csv",
         heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
         ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
         gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
         solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
-        district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
-	      industry_demands="data/industry_demand_locations.csv",
+        district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv',
+	    industry_demands="data/industry_demand_locations.csv",
 
     output: RDIR + '/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc'
     threads: 1
@@ -111,13 +110,13 @@ rule prepare_heat_data:
         heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
         heat_profile="data/heat_load_profile_BDEW.csv",
     output:
-        nodal_energy_totals='resources/nodal_energy_totals_s{simpl}_{clusters}.csv',
+        nodal_energy_totals='resources/nodal_energy_heat_totals_s{simpl}_{clusters}.csv',
         heat_demand='resources/heat/heat_demand_s{simpl}_{clusters}.csv',
         ashp_cop='resources/heat/ashp_cop_s{simpl}_{clusters}.csv',
         gshp_cop='resources/heat/gshp_cop_s{simpl}_{clusters}.csv',
         solar_thermal='resources/heat/solar_thermal_s{simpl}_{clusters}.csv',
         district_heat_share='resources/heat/district_heat_share_s{simpl}_{clusters}.csv'
-    script: "scripts/prepare_transport_data.py"
+    script: "scripts/prepare_heat_data.py"
 
 rule build_solar_thermal_profiles:
     input:
