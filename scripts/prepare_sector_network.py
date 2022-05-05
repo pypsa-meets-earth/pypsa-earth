@@ -304,6 +304,151 @@ def define_spatial_biomass(nodes):
 
     spatial.biomass.df = pd.DataFrame(vars(spatial.biomass), index=nodes)
 
+def add_biomass(n, costs):
+
+    print("adding biomass")
+
+    biomass_potentials = pd.read_csv(snakemake.input.biomass_potentials, index_col=0)
+
+    if options["biomass_transport"]:
+        biomass_potentials_spatial = biomass_potentials.rename(
+            index=lambda x: x + " solid biomass"
+        )
+    else:
+        biomass_potentials_spatial = biomass_potentials.sum()
+
+    n.add("Carrier", "biogas")
+    n.add("Carrier", "solid biomass")
+
+    n.add("Bus", "EU biogas", location="EU", carrier="biogas")
+
+    n.madd(
+        "Bus",
+        spatial.biomass.nodes,
+        location=spatial.biomass.locations,
+        carrier="solid biomass",
+    )
+
+    n.add(
+        "Store",
+        "EU biogas",
+        bus="EU biogas",
+        carrier="biogas",
+        e_nom=biomass_potentials["biogas"].sum(),
+        marginal_cost=costs.at["biogas", "fuel"],
+        e_initial=biomass_potentials["biogas"].sum(),
+    )
+
+    n.madd(
+        "Store",
+        spatial.biomass.nodes,
+        bus=spatial.biomass.nodes,
+        carrier="solid biomass",
+        e_nom=biomass_potentials_spatial["solid biomass"],
+        marginal_cost=costs.at["solid biomass", "fuel"],
+        e_initial=biomass_potentials_spatial["solid biomass"],
+    )
+
+    n.add(
+        "Link",
+        "biogas to gas",
+        bus0="EU biogas",
+        bus1="EU gas",
+        bus2="co2 atmosphere",
+        carrier="biogas to gas",
+        capital_cost=costs.loc["biogas upgrading", "fixed"],
+        marginal_cost=costs.loc["biogas upgrading", "VOM"],
+        efficiency2=-costs.at["gas", "CO2 intensity"],
+        p_nom_extendable=True,
+    )
+
+    if options["biomass_transport"]:
+
+        transport_costs = pd.read_csv(
+            snakemake.input.biomass_transport_costs, index_col=0, squeeze=True
+        )
+
+        # add biomass transport
+        biomass_transport = create_network_topology(
+            n, "biomass transport ", bidirectional=False
+        )
+
+        # costs
+        bus0_costs = biomass_transport.bus0.apply(lambda x: transport_costs[x[:2]])
+        bus1_costs = biomass_transport.bus1.apply(lambda x: transport_costs[x[:2]])
+        biomass_transport["costs"] = pd.concat([bus0_costs, bus1_costs], axis=1).mean(
+            axis=1
+        )
+
+        n.madd(
+            "Link",
+            biomass_transport.index,
+            bus0=biomass_transport.bus0 + " solid biomass",
+            bus1=biomass_transport.bus1 + " solid biomass",
+            p_nom_extendable=True,
+            length=biomass_transport.length.values,
+            marginal_cost=biomass_transport.costs * biomass_transport.length.values,
+            capital_cost=1,
+            carrier="solid biomass transport",
+        )
+
+    # AC buses with district heating
+    urban_central = n.buses.index[n.buses.carrier == "urban central heat"]
+    if not urban_central.empty and options["chp"]:
+        urban_central = urban_central.str[: -len(" urban central heat")]
+
+        key = "central solid biomass CHP"
+
+        n.madd(
+            "Link",
+            urban_central + " urban central solid biomass CHP",
+            bus0=spatial.biomass.df.loc[urban_central, "nodes"].values,
+            bus1=urban_central,
+            bus2=urban_central + " urban central heat",
+            carrier="urban central solid biomass CHP",
+            p_nom_extendable=True,
+            capital_cost=costs.at[key, "fixed"] * costs.at[key, "efficiency"],
+            marginal_cost=costs.at[key, "VOM"],
+            efficiency=costs.at[key, "efficiency"],
+            efficiency2=costs.at[key, "efficiency-heat"],
+            lifetime=costs.at[key, "lifetime"],
+        )
+
+        n.madd(
+            "Link",
+            urban_central + " urban central solid biomass CHP CC",
+            bus0=spatial.biomass.df.loc[urban_central, "nodes"].values,
+            bus1=urban_central,
+            bus2=urban_central + " urban central heat",
+            bus3="co2 atmosphere",
+            bus4=spatial.co2.df.loc[urban_central, "nodes"].values,
+            carrier="urban central solid biomass CHP CC",
+            p_nom_extendable=True,
+            capital_cost=costs.at[key, "fixed"] * costs.at[key, "efficiency"]
+            + costs.at["biomass CHP capture", "fixed"]
+            * costs.at["solid biomass", "CO2 intensity"],
+            marginal_cost=costs.at[key, "VOM"],
+            efficiency=costs.at[key, "efficiency"]
+            - costs.at["solid biomass", "CO2 intensity"]
+            * (
+                costs.at["biomass CHP capture", "electricity-input"]
+                + costs.at["biomass CHP capture", "compression-electricity-input"]
+            ),
+            efficiency2=costs.at[key, "efficiency-heat"]
+            + costs.at["solid biomass", "CO2 intensity"]
+            * (
+                costs.at["biomass CHP capture", "heat-output"]
+                + costs.at["biomass CHP capture", "compression-heat-output"]
+                - costs.at["biomass CHP capture", "heat-input"]
+            ),
+            efficiency3=-costs.at["solid biomass", "CO2 intensity"]
+            * costs.at["biomass CHP capture", "capture_rate"],
+            efficiency4=costs.at["solid biomass", "CO2 intensity"]
+            * costs.at["biomass CHP capture", "capture_rate"],
+            lifetime=costs.at[key, "lifetime"],
+        )
+
+
 
 def add_co2(n, costs):
     "add carbon carrier, it's networks and storage units"
