@@ -308,6 +308,7 @@ def add_biomass(n, costs):
 
     print("adding biomass")
 
+    # TODO get biomass potentials
     biomass_potentials = pd.read_csv(snakemake.input.biomass_potentials, index_col=0)
 
     if options["biomass_transport"]:
@@ -320,7 +321,7 @@ def add_biomass(n, costs):
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
 
-    n.add("Bus", "EU biogas", location="EU", carrier="biogas")
+    n.add("Bus", "Africa biogas", location="Africa", carrier="biogas")
 
     n.madd(
         "Bus",
@@ -331,8 +332,8 @@ def add_biomass(n, costs):
 
     n.add(
         "Store",
-        "EU biogas",
-        bus="EU biogas",
+        "Africa biogas",
+        bus="Africa biogas",
         carrier="biogas",
         e_nom=biomass_potentials["biogas"].sum(),
         marginal_cost=costs.at["biogas", "fuel"],
@@ -352,8 +353,8 @@ def add_biomass(n, costs):
     n.add(
         "Link",
         "biogas to gas",
-        bus0="EU biogas",
-        bus1="EU gas",
+        bus0="Africa biogas",
+        bus1="Africa gas",
         bus2="co2 atmosphere",
         carrier="biogas to gas",
         capital_cost=costs.loc["biogas upgrading", "fixed"],
@@ -364,6 +365,7 @@ def add_biomass(n, costs):
 
     if options["biomass_transport"]:
 
+        # TODO add biomass transport costs
         transport_costs = pd.read_csv(
             snakemake.input.biomass_transport_costs, index_col=0, squeeze=True
         )
