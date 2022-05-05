@@ -297,8 +297,8 @@ def define_spatial_biomass(nodes):
         spatial.biomass.industry = nodes + " solid biomass for industry"
         spatial.biomass.industry_cc = nodes + " solid biomass for industry CC"
     else:
-        spatial.biomass.nodes = ["EU solid biomass"]
-        spatial.biomass.locations = ["EU"]
+        spatial.biomass.nodes = ["Africa solid biomass"]
+        spatial.biomass.locations = ["Africa"]
         spatial.biomass.industry = ["solid biomass for industry"]
         spatial.biomass.industry_cc = ["solid biomass for industry CC"]
 
