@@ -1662,7 +1662,7 @@ if __name__ == "__main__":
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()
-    
+
     # Define spatial for biomass. TODO Move to function add_biomass?
     define_spatial_biomass(pop_layout.index)
 
