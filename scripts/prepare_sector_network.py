@@ -304,6 +304,7 @@ def define_spatial_biomass(nodes):
 
     spatial.biomass.df = pd.DataFrame(vars(spatial.biomass), index=nodes)
 
+
 def add_biomass(n, costs):
 
     print("adding biomass")
@@ -447,7 +448,6 @@ def add_biomass(n, costs):
             * costs.at["biomass CHP capture", "capture_rate"],
             lifetime=costs.at[key, "lifetime"],
         )
-
 
 
 def add_co2(n, costs):
