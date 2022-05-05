@@ -107,6 +107,9 @@ sector:
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
 
+  biomass_transport: false  # biomass transport between nodes
+
+
   land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
     # 2020: 0
     # 2030: 0.05
