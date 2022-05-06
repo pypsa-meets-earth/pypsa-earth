@@ -24,7 +24,6 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
-
 )
 from rasterio.mask import mask
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
@@ -134,7 +133,6 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
             three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-
         ]
 
         # create a subindex column that is useful
@@ -243,7 +241,6 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
     ]
     geodf_EEZ["ISO_TER1"] = geodf_EEZ["ISO_TER1"].map(
         lambda x: three_2_two_digits_country(x)
-
     )
     geodf_EEZ.reset_index(drop=True, inplace=True)
 
@@ -306,7 +303,7 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
 
 
 if WorldPop_method == False:
-  
+
     def download_WorldPop(
         country_code,
         year=2020,
@@ -342,7 +339,6 @@ if WorldPop_method == False:
         """
         if out_logging:
             _logger.info("Stage 3/4: Download WorldPop datasets")
-
 
         WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
         # Urls used to possibly download the file
@@ -397,7 +393,6 @@ else:
                         break
         if not loaded:
             _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
-
 
         WorldPop_urls = [
             f"https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}",
@@ -624,7 +619,6 @@ def _process_func_pop(c_code):
     )
 
     with rasterio.open(WorldPop_inputfile) as src:
-
 
         for i in country_rows.index:
             country_rows.loc[i, "pop"] = _sum_raster_over_mask(
