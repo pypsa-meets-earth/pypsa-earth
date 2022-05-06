@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.3.0
+version: 0.0.2
 tutorial: true
 
 logging:
@@ -54,16 +54,24 @@ clean_osm_data_options:
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
-  group_close_buses: true  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
+
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
+  group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 35000
 
 load_options:
-  weather_year: 2014
-  prediction_year: 2030
-  scale: 1
+  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+  scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 summary_dir: results
 
@@ -76,13 +84,10 @@ enable:
   # prepare_links_p_nom: false
   retrieve_databundle: true
   download_osm_data: true
-  # retrieve_cutout: true
-  # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
-  # custom_busmap: false
 
 electricity:
   voltages: [220., 300., 380.]
@@ -133,26 +138,13 @@ atlite:
     # module: era5
     africa-2013-era5-tutorial:
       module: era5
-      dx: 0.3
-      dy: 0.3
-      time: ["2013-03", "2013-03"]
-    # europe-2013-era5:
-    #   module: era5 # in priority order
-    #   x: [-12., 35.]
-    #   y: [33., 72]
-    #   dx: 0.3
-    #   dy: 0.3
-    #   time: ["2013", "2013"]
-    # europe-2013-sarah:
-    #   module: [sarah, era5] # in priority order
-    #   x: [-12., 45.]
-    #   y: [33., 65]
-    #   dx: 0.2
-    #   dy: 0.2
-    #   time: ["2013", "2013"]
-    #   sarah_interpolate: false
-    #   sarah_dir:
-    #   features: [influx, temperature]
+      dx: 0.3  # cutout resolution
+      dy: 0.3  # cutout resolution
+      # Below customization options are dealt in an automated way depending on
+      # the snapshots and the selected countries. See 'build_cutout.py'
+      # time: ["2013-01-01", "2014-01-01"]  # specify different weather year (~40 years available)
+      # x: [-12., 35.]  # manual set cutout range
+      # y: [33., 72]    # manual set cutout range
 
 renewable:
   onwind:
@@ -268,7 +260,7 @@ solving:
     track_iterations: false
     #nhours: 10
   solver:
-    name: highs
+    name: glpk
 
 
 plotting:

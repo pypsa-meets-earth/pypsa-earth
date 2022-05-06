@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.3.0
+
+version: 0.0.2
 tutorial: false
 
 logging:
@@ -15,7 +16,7 @@ scenario:
   clusters: [6]
   opts: [Co2L-3H]
 
-countries: ["africa"]
+countries: ["Africa"]
 # Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 summary_dir: results
@@ -55,22 +56,29 @@ build_shape_options:
   nprocesses: 5    # number of processes to be used in build_shapes
   worldpop_api: false
 
+
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
   tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true  # When "True", then line endings are added to the dataset of the substations
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 35000  # [V] minimum voltage in base network
 
 load_options:
-  weather_year: 2014  # Not active, but load scenarios available with different weather year (different renewable potentials)
-  prediction_year: 2030  # Not active, but load scenarios available with different prediction year (GDP, population)
+  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
-
 
 electricity:
   voltages: [220., 300., 380.]
@@ -121,7 +129,11 @@ atlite:
       module: era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
-      time: ["2013", "2013"]  # cutout weather year (~40 years available)
+      # Below customization options are dealt in an automated way depending on
+      # the snapshots and the selected countries. See 'build_cutout.py'
+      # time: ["2013-01-01", "2014-01-01"]  # specify different weather year (~40 years available)
+      # x: [-12., 35.]  # manual set cutout range
+      # y: [33., 72]    # manual set cutout range
 
 
 renewable:

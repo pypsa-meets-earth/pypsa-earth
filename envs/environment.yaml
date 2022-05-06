@@ -4,73 +4,72 @@
 
 name: pypsa-africa
 channels:
-  - conda-forge/label/shapely_dev  # Until shapely 1.8+ is out of alpha
-  - conda-forge
-  - bioconda
+- conda-forge
+- bioconda
 dependencies:
-  - python>=3.8
-  - pip
-  - mamba # esp for windows build
+- python>=3.8
+- pip
+- mamba   # esp for windows build
 
-  - pypsa>=0.17.1
-  - atlite>=0.2.4
-  - dask<=2021.3.1 # until https://github.com/dask/dask/issues/7583 is solved
+- pypsa>=0.17.1
+- atlite>=0.2.4
+- dask
   # - powerplantmatching>=0.4.8
 
   # Dependencies of the workflow itself
-  - xlrd
-  - openpyxl
-  - pycountry
-  - seaborn
-  - snakemake-minimal
-  - memory_profiler
-  - yaml
-  - pytables
-  - lxml
-  - numpy
-  - pandas <= 1.3.4
-  - geopandas
-  # - xarray # till the main is not in conda
-  - netcdf4
-  - networkx
-  - scipy
-  - shapely>=1.8a1
-  - pre-commit
-  - pyomo
-  - matplotlib
+- xlrd
+- openpyxl
+- pycountry
+- seaborn
+- snakemake-minimal
+- memory_profiler
+- yaml
+- pytables
+- lxml
+- numpy
+- pandas
+- geopandas
+- fiona <= 1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+- xarray
+- netcdf4
+- networkx
+- scipy
+- shapely>=1.8a1
+- pre-commit
+- pyomo
+- matplotlib
 
   # Keep in conda environment when calling ipython
-  - ipython
+- ipython
   # Jupyter notebook requirement
-  - ipykernel
-  - jupyterlab
+- ipykernel
+- jupyterlab
 
   # GIS dependencies:
-  - cartopy
-  - descartes
-  - rasterio
-  - rioxarray
-  - geoviews
-  - hvplot
+- cartopy
+- descartes
+- rasterio
+- rioxarray
+- geoviews
+- hvplot
 
   # PyPSA-Eur-Sec Dependencies
-  - geopy
-  - tqdm
-  - pytz
-  - country_converter
+- geopy
+- tqdm
+- pytz
+- country_converter
 
   # Cloud download
-  - googledrivedownloader
+- googledrivedownloader
 
-  # # Default solver for tests (moved to the CI)
-  # - glpk
-  # - ipopt  # <=3.11.1 for windows; <= 3.13.3 for linux
+# Default solver for tests (moved to the CI)
+- glpk
+- ipopt < 3.13.3
 
-  - pip:
-    - git+https://github.com/pydata/xarray@main # till the main is not in conda
-    - git+https://github.com/pypsa/pypsa.git#egg=pypsa
-    - git+https://github.com/davide-f/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
-    - vresutils==0.3.1
-    - tsam>=1.1.0
-    - esy-osm-pbf
-    - esy-osmfilter
+- pip:
+  # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
+  - git+https://github.com/davide-f/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
+  - vresutils>=0.3.1
+  - tsam>=1.1.0
+  - esy-osm-pbf
+  - esy-osmfilter

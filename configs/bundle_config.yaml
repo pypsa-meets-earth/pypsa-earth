@@ -15,126 +15,212 @@
 #     category: common/resources/data/cutouts  # category of data contained in the bundle:
 #     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
 #     urls:  # list of urls by source, e.g. zenodo or google
-#       zenodo: {zenodo url}
-#       google: {google url}
+#       zenodo: {zenodo url}  # key to download data from zenodo
+#       gdrive: {google url}  # key to download data from google drive
+#       protectedplanet: {url}  # key to download data from protected planet
+#       direct: {url}  # key to download data directly from a url; if unzip option is enabled data are unzipped
+#       post:  # key to download data using an url post request; if unzip option is enabled data are unzipped
+#         url: {url}
+#         [post arguments]
+#     [unzip: true/false]  # (optional, default false) used in direct download technique to automatically unzip files
+#     output: [...] # list of outputs of the bundle used in snakemake
+#     [disable_by_opt:]  # option to disable outputs from the bundle; it contains a dictionary of options, each one with
+#                        # each one with its output. When "all" is specified, the entire bundle is not executed
+#       [{option}: [outputs]/all]  # list of options and the outputs to remove, or "all" corresponding to ignore everything
+
+databundles:
+  # tutorial bundle specific for Nigeria and Benin only
+  bundle_data_tutorial:
+    countries: [NG, BJ]
+    tutorial: true
+    category: data
+    destination: "data"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016522/files/tutorial_data.zip?download=1
+      gdrive: https://drive.google.com/file/d/1Yd2iM892WFBRxh5NX22if6laRF1RxZKu/view?usp=sharing
+    output:
+    - data/costs.csv
+    - data/hydro_capacities.csv
+    - data/custom_powerplants.csv
+    - data/raw/eez/eez_v11.gpkg
+    - data/raw/gebco/GEBCO_2021_TID.nc
+    - data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+
+  # tutorial bundle specific for Nigeria and Benin only
+  bundle_resources_tutorial:
+    countries: [NG, BJ]
+    tutorial: true
+    category: resources
+    destination: "resources"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016001/files/tutorial_resources.zip?download=1
+      gdrive: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
+    output:
+    - resources/ssp2-2.6/2030/era5_2013/Africa.nc
+
+  # tutorial bundle specific for Nigeria and Benin only
+  bundle_cutouts_tutorial:
+    countries: [NG, BJ]
+    tutorial: true
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016015/files/tutorial_cutouts.zip?download=1
+      gdrive: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
+    output: [cutouts/africa-2013-era5-tutorial.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # data bundle containing the data of the data folder common to all regions of the world
+  bundle_data_earth:
+    countries: [Earth]
+    category: common
+    destination: "data"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
+      gdrive: https://drive.google.com/file/d/1fo-YsyU2LKkVeg5Ea0JbcEx-zQ3kJKW7/view?usp=sharing
+    output:
+    - data/costs.csv
+    - data/hydro_capacities.csv
+    - data/custom_powerplants.csv
+    - data/raw/eez/eez_v11.gpkg
+    - data/raw/gebco/GEBCO_2021_TID.nc
+    - data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
 
-# tutorial bundle specific for Nigeria and Benin only
-bundle_data_tutorial:
-  countries: [NG, BJ]
-  tutorial: true
-  category: data
-  destination: "data"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016522/files/tutorial_data.zip?download=1
-    google: https://drive.google.com/file/d/1Yd2iM892WFBRxh5NX22if6laRF1RxZKu/view?usp=sharing
+  # resources bundle containing the resources folder for africa only
+  bundle_resources_earth:
+    countries: [Earth]
+    category: resources
+    destination: "resources"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
+      gdrive: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
+    output:
+    - resources/ssp2-2.6/2030/era5_2013/Africa.nc
+    - resources/natura.tiff
 
-# tutorial bundle specific for Nigeria and Benin only
-bundle_resources_tutorial:
-  countries: [NG, BJ]
-  tutorial: true
-  category: resources
-  destination: "resources"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016001/files/tutorial_resources.zip?download=1
-    google: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
+  # data bundle of the data folder for the african continent
+  bundle_landcover_africa:
+    countries: [Africa]
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_africa.zip?download=1
+      gdrive: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# tutorial bundle specific for Nigeria and Benin only
-bundle_cutouts_tutorial:
-  countries: [NG, BJ]
-  tutorial: true
-  category: cutouts
-  destination: "cutouts"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016015/files/tutorial_cutouts.zip?download=1
-    google: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
+  # data bundle of the data folder for the african continent
+  bundle_landcover_asiapacific:
+    countries: [Asia, Oceania]
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_asiapacific.zip?download=1
+      gdrive: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# data bundle containing the data of the data folder common to all regions of the world
-bundle_data_world:
-  countries: [world]
-  category: common
-  destination: "data"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
-    google: https://drive.google.com/file/d/1fo-YsyU2LKkVeg5Ea0JbcEx-zQ3kJKW7/view?usp=sharing
+  # data bundle of the data folder for the african continent
+  bundle_landcover_latinamerica_caribbean:  # excludes north america
+    countries: [SouthAmerica, NorthAmerica]
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_latinamerica_caribbean.zip?download=1
+      gdrive: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# resources bundle containing the resources folder for africa only
-bundle_resources_world:
-  countries: [world]
-  category: resources
-  destination: "resources"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
-    google: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
+  # data bundle of the data folder for the african continent
+  bundle_landcover_westasia:
+    countries: [WAS]
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
+      gdrive: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# data bundle of the data folder for the african continent
-bundle_landcover_africa:
-  countries: [africa]
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_africa.zip?download=1
-    google: https://drive.google.com/file/d/1l6Xgr3PXyvgqWaXUbto9zvvMS_OgSjvG/view?usp=sharing
+  # data bundle of the data folder for europe
+  bundle_landcover_europe:
+    countries: [Europe]
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_europe.zip?download=1
+      gdrive: https://drive.google.com/file/d/1zQuKnZFp6ASYD_e-dbWbWXYg330E0occ/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# data bundle of the data folder for the african continent
-bundle_landcover_asiapacific:
-  countries: [asia, australia-oceania]
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_asiapacific.zip?download=1
-    google: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
+  # data bundle of the data folder for the poles
+  bundle_landcover_northamerica:
+    countries: [NorthAmerica]  # Greenland and antartica
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_northamerica.zip?download=1
+      gdrive: https://drive.google.com/file/d/1gu7PH08ZEpL4cBQa_fMUSq2m6LY1_UJo/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# data bundle of the data folder for the african continent
-bundle_landcover_latinamerica_caribbean:
-  countries: [latin_america, central_america]
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_latinamerica_caribbean.zip?download=1
-    google: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
+  # data bundle of the data folder for the poles
+  bundle_landcover_poles:
+    countries: [GL, ATA]  # Greenland and antartica
+    category: landcover
+    destination: "data/raw/landcover"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_polar.zip?download=1
+      gdrive: https://drive.google.com/file/d/1cUDcE6wpQVZNf3K9ffV6pNXfxq6sA65E/view?usp=sharing
+    output: [data/raw/landcover/*]
 
-# data bundle of the data folder for the african continent
-bundle_landcover_westasia:
-  countries: [WAS]
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
-    google: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
+  # # data bundle of the data folder for the african continent
+  # bundle_landcover_earth:
+  #   countries: [Earth]
+  #   category: landcover
+  #   destination: "data/raw/landcover"
+  #   urls:
+  #     direct: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_WDOECM_Mar2022_Public_all_shp.zip
+  #   output: [data/raw/landcover/*]
 
-# data bundle of the data folder for europe
-bundle_landcover_europe:
-  countries: [europe]
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_europe.zip?download=1
-    google: https://drive.google.com/file/d/1zQuKnZFp6ASYD_e-dbWbWXYg330E0occ/view?usp=sharing
+  # # data bundle of the data folder for the african continent
+  # bundle_landclassification:
+  #   countries: [Earth]
+  #   category: copernicus
+  #   destination: "data/raw/copernicus"
+  #   urls:
+  #     direct: https://zenodo.org/record/3939050/files/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+  #   output: [data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif]
 
-# data bundle of the data folder for the poles
-bundle_landcover_northamerica:
-  countries: [north_america]  # Greenland and antartica
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_northamerica.zip?download=1
-    google: https://drive.google.com/file/d/1gu7PH08ZEpL4cBQa_fMUSq2m6LY1_UJo/view?usp=sharing
+  # bundle_gebco:
+  #   countries: [Earth]
+  #   category: gebco
+  #   destination: "data/raw/gebco"
+  #   urls:
+  #     direct: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2021/zip/
+  #   unzip: True
+  #   output: [data/raw/gebco/GEBCO_2021_TID.nc]
 
-# data bundle of the data folder for the poles
-bundle_landcover_poles:
-  countries: [GL, ATA]  # Greenland and antartica
-  category: landcover
-  destination: "data/raw/landcover"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_polar.zip?download=1
-    google: https://drive.google.com/file/d/1cUDcE6wpQVZNf3K9ffV6pNXfxq6sA65E/view?usp=sharing
+  # bundle_eez:
+  #   countries: [Earth]
+  #   category: eez
+  #   destination: "data/raw/eez"
+  #   urls:
+  #     post:
+  #       url: https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip
+  #       name: NAME
+  #       organisation: ORGANISATION
+  #       email: youremail@email.com
+  #       country: Italy
+  #       user_category: academia
+  #       purpose_category: Research
+  #       agree: 1
+  #   output: [data/raw/gebco/GEBCO_2021_TID.nc]
 
-# cutouts bundle of the cutouts folder for the african continent
-bundle_cutouts_africa:
-  countries: [africa]
-  category: cutouts
-  destination: "cutouts"
-  urls:
-    zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
-    google: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
+  # cutouts bundle of the cutouts folder for the african continent
+  bundle_cutouts_africa:
+    countries: [Africa]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
+      gdrive: https://drive.google.com/file/d/1-Njs7BqG0YE5QwBHj0zgkdicb5IQvQCh/view
+    output: [cutouts/africa-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]

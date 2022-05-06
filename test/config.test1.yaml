@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.3.0
+
+version: 0.0.2
 tutorial: true
 
 logging:
@@ -28,6 +29,9 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
+retrieve_databundle:
+  show_progress: false  # Option to disable the progress bar in retrieve_databundle
+
 augmented_line_connection:
   add_to_snakefile: false
   connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
@@ -49,21 +53,30 @@ build_shape_options:
   nprocesses: 5    # number of processes to be used in build_shapes
   worldpop_api: false
 
+
 clean_osm_data_options:
   names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
-  group_close_buses: true  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
+
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
+  group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 35000
 
 load_options:
-  weather_year: 2014
-  prediction_year: 2030
-  scale: 1
+  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+  scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 summary_dir: results
 
@@ -80,7 +93,7 @@ enable:
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  build_cutout: true
+  build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
   # custom_busmap: false
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: MIT
@@ -61,8 +62,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import load_costs
-from add_electricity import update_transmission_costs
+from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -90,12 +90,13 @@ def add_emission_prices(n, emission_prices=None, exclude_co2=False):
         emission_prices = snakemake.config["costs"]["emission_prices"]
     if exclude_co2:
         emission_prices.pop("co2")
-    ep = (pd.Series(emission_prices).rename(lambda x: x + "_emissions") *
-          n.carriers.filter(like="_emissions")).sum(axis=1)
+    ep = (
+        pd.Series(emission_prices).rename(lambda x: x + "_emissions")
+        * n.carriers.filter(like="_emissions")
+    ).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
     n.generators["marginal_cost"] += gen_ep
-    su_ep = n.storage_units.carrier.map(
-        ep) / n.storage_units.efficiency_dispatch
+    su_ep = n.storage_units.carrier.map(ep) / n.storage_units.efficiency_dispatch
     n.storage_units["marginal_cost"] += su_ep
 
 
@@ -108,13 +109,19 @@ def set_line_s_max_pu(n):
 def set_transmission_limit(n, ll_type, factor, Nyears=1):
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
 
-    _lines_s_nom = (np.sqrt(3) * n.lines.type.map(n.line_types.i_nom) *
-                    n.lines.num_parallel * n.lines.bus0.map(n.buses.v_nom))
+    _lines_s_nom = (
+        np.sqrt(3)
+        * n.lines.type.map(n.line_types.i_nom)
+        * n.lines.num_parallel
+        * n.lines.bus0.map(n.buses.v_nom)
+    )
     lines_s_nom = n.lines.s_nom.where(n.lines.type == "", _lines_s_nom)
 
     col = "capital_cost" if ll_type == "c" else "length"
-    ref = (lines_s_nom @ n.lines[col] +
-           n.links.loc[links_dc_b, "p_nom"] @ n.links.loc[links_dc_b, col])
+    ref = (
+        lines_s_nom @ n.lines[col]
+        + n.links.loc[links_dc_b, "p_nom"] @ n.links.loc[links_dc_b, col]
+    )
 
     costs = load_costs(
         Nyears,
@@ -167,8 +174,9 @@ def apply_time_segmentation(n, segments):
     try:
         import tsam.timeseriesaggregation as tsam
     except:
-        raise ModuleNotFoundError("Optional dependency 'tsam' not found."
-                                  "Install via 'pip install tsam'")
+        raise ModuleNotFoundError(
+            "Optional dependency 'tsam' not found." "Install via 'pip install tsam'"
+        )
 
     p_max_pu_norm = n.generators_t.p_max_pu.max()
     p_max_pu = n.generators_t.p_max_pu / p_max_pu_norm
@@ -196,32 +204,29 @@ def apply_time_segmentation(n, segments):
 
     weightings = segmented.index.get_level_values("Segment Duration")
     offsets = np.insert(np.cumsum(weightings[:-1]), 0, 0)
-    snapshots = [
-        n.snapshots[0] + pd.Timedelta(f"{offset}h") for offset in offsets
-    ]
+    snapshots = [n.snapshots[0] + pd.Timedelta(f"{offset}h") for offset in offsets]
 
     n.set_snapshots(pd.DatetimeIndex(snapshots, name="name"))
-    n.snapshot_weightings = pd.Series(weightings,
-                                      index=snapshots,
-                                      name="weightings",
-                                      dtype="float64")
+    n.snapshot_weightings = pd.Series(
+        weightings, index=snapshots, name="weightings", dtype="float64"
+    )
 
     segmented.index = snapshots
-    n.generators_t.p_max_pu = segmented[
-        n.generators_t.p_max_pu.columns] * p_max_pu_norm
+    n.generators_t.p_max_pu = segmented[n.generators_t.p_max_pu.columns] * p_max_pu_norm
     n.loads_t.p_set = segmented[n.loads_t.p_set.columns] * load_norm
-    n.storage_units_t.inflow = segmented[
-        n.storage_units_t.inflow.columns] * inflow_norm
+    n.storage_units_t.inflow = segmented[n.storage_units_t.inflow.columns] * inflow_norm
 
     return n
 
 
 def enforce_autarky(n, only_crossborder=False):
     if only_crossborder:
-        lines_rm = n.lines.loc[n.lines.bus0.map(n.buses.country) !=
-                               n.lines.bus1.map(n.buses.country)].index
-        links_rm = n.links.loc[n.links.bus0.map(n.buses.country) !=
-                               n.links.bus1.map(n.buses.country)].index
+        lines_rm = n.lines.loc[
+            n.lines.bus0.map(n.buses.country) != n.lines.bus1.map(n.buses.country)
+        ].index
+        links_rm = n.links.loc[
+            n.links.bus0.map(n.buses.country) != n.links.bus1.map(n.buses.country)
+        ].index
     else:
         lines_rm = n.lines.index
         links_rm = n.links.loc[n.links.carrier == "DC"].index

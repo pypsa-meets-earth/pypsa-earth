@@ -6,9 +6,9 @@
 Welcome to the PyPSA meets Africa documentation!
 ================================================
 
-PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currenlty under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
+PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currently under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
 
-Watch our latest discusson with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
+Watch our latest discussion with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
 
 .. image:: img/africa_osm_map.png
     :width: 60%
@@ -18,24 +18,29 @@ Watch our latest discusson with African leaders about `Open Energy System Modell
 Get Involved
 ==============
 
-The PyPSA meets Africa team is currenlty running four types of meetings:
+The PyPSA meets Africa team is currently running four types of meetings:
 
 
 - `**Discord NEW! (Open)** <https://discord.gg/AnuJBk23FU>`_
+
   - Chat with the community, team up on features, exchange with developers, code in voice channels
 
 - **General code meeting (Open)**
 
-  - every month, Thursday 16-17:00 (UTC+0) `download .ics file <https://drive.google.com/file/d/1-vLnZhqGH8S2a9AfQtbPIbj7qNmVaxWx/view?usp=sharing>`_
+  - every month, Thursday 16-17:00 (UTC+0) `download .ics file <https://drive.google.com/file/d/1YY2-oJrBSOGd-mAZV7AmyVhOG3LcM1ry/view?usp=sharing>`_
   - updates on overall project and code blocks
   - meeting hosted on `Discord <https://discord.gg/AnuJBk23FU>`_; join us, we are waiting for you!
   - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
 
 - **Specific code meeting (by invitation)**
 
-  - current meetings: 1) Demand creation (WP1) 2) Data workflow updates (WP1-WP5) 3) Sector coupling model and 4) AI asset detection (WP6)
-  - every week Friday 1) 13-13:45 (UTC+0) 2) Thursday 13:30-14:00 (UTC+0) 3) Thursday 09:00-09:30 (UTC+0) and 4) Tuesday 15:30-16:30 (UTC+0)
-  - updates, demos, task distribution, weekly targets, Q&A
+  - meeting hosted on Discord
+  - join updates, demos, Q&A's, discussions and the coordination of each work package
+  
+    1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, `download .ics file <hhttps://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing>`__
+    2. AI asset detection meeting, every Tuesday 15:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing>`__
+    3. Sector coupling meeting, every Thursday 09:00 UTC+0, `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
+    4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, `download .ics file <https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing>`__
 
 - **Outreach meeting (by invitation)**
 
@@ -114,4 +119,3 @@ Documentation
    how_to_contribute
    talks_and_papers
    
-
