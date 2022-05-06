@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 version: 0.3.0
-tutorial: True
+tutorial: true
 
 logging:
   level: INFO
@@ -29,31 +29,32 @@ countries: ["NG", "BJ"]
   #["ZA"]  # South Africa
 
 augmented_line_connection:
-  add_to_snakefile: False
+  add_to_snakefile: false
   connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
   new_line_type: "HVDC"  # or "HVAC"
   min_expansion: 1  # [MW]
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
-  alternative_clustering: False
+  alternative_clustering: false
   distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
-  out_logging: True  # When true, logging is printed to console
+  out_logging: true  # When true, logging is printed to console
 
 # options for build_shapes
 build_shape_options:
-    gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
-    update_file: False  # When true, all the input files are downloaded again and replace the existing files
-    out_logging: True  # When true, logging is printed to console
-    year: 2020  # reference year used to derive shapes, info on population and info on GDP
-    nprocesses: 5  # number of processes to be used in build_shapes
+  gadm_layer_id: 1    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  update_file: false    # When true, all the input files are downloaded again and replace the existing files
+  out_logging: true    # When true, logging is printed to console
+  year: 2020    # reference year used to derive shapes, info on population and info on GDP
+  nprocesses: 5    # number of processes to be used in build_shapes
+  worldpop_api: false
 
 clean_osm_data_options:
-  names_by_shapes: True  # Set the country name based on the extended country shapes
+  names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
-  add_line_endings: True  # When true, the line endings are added to the dataset of the substations
-  group_close_buses: True  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
+  add_line_endings: true  # When true, the line endings are added to the dataset of the substations
+  group_close_buses: true  # When true, the dataset of buses is filtered to merge close nodes and guarantee the matching among line endings in the same bus by voltage
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations

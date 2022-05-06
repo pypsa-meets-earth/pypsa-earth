@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: : 2021 PyPSA-Africa authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -16,13 +17,6 @@ import rasterio
 import requests
 import rioxarray as rx
 import xarray as xr
-from rasterio.mask import mask
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon
-from shapely.geometry.base import BaseGeometry
-from shapely.ops import unary_union
-from shapely.validation import make_valid
-from tqdm import tqdm
-
 from _helpers import (
     _sets_path_to_root,
     _three_2_two_digits_country,
@@ -30,6 +24,12 @@ from _helpers import (
     _two_digits_2_name_country,
     configure_logging,
 )
+from rasterio.mask import mask
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.geometry.base import BaseGeometry
+from shapely.ops import unary_union
+from shapely.validation import make_valid
+from tqdm import tqdm
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
@@ -306,7 +306,6 @@ def download_WorldPop(
     update=False,
     out_logging=False,
     size_min=300,
-    api_method=True,
 ):
     """
     Download tiff file for each country code
@@ -334,72 +333,77 @@ def download_WorldPop(
         Name of the file
 
     """
-    if api_method:
+
+    if out_logging:
+        _logger.info("Stage 3/4: Download WorldPop datasets")
+
+    WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
+    # Urls used to possibly download the file
+    WorldPop_urls = [
+        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
+        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
+    ]
+    WorldPop_inputfile = os.path.join(
+        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
+
+    if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
-            _logger.info("Stage 3/4: Download WorldPop datasets")
+            _logger.warning(
+                f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
+            )
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
 
-        WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
-        # Request to get the file
+        loaded = False
+        for WorldPop_url in WorldPop_urls:
+            with requests.get(WorldPop_url, stream=True) as r:
+                with open(WorldPop_inputfile, "wb") as f:
+                    if float(r.headers["Content-length"]) > size_min:
+                        shutil.copyfileobj(r.raw, f)
+                        loaded = True
+                        break
+        if not loaded:
+            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
-        WorldPop_urls = [
-            f"https://www.worldpop.org/rest/data/pop/wpgp?iso3={_two_2_three_digits_country(country_code)}",
-        ]
-        WorldPop_inputfile = os.path.join(
-            os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
-        )  # Input filepath tif
+    return WorldPop_inputfile, WorldPop_filename
 
-        if not os.path.exists(WorldPop_inputfile) or update is True:
-            if out_logging:
-                _logger.warning(
-                    f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
-                )
-            #  create data/osm directory
-            os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
-            year_api = int(str(year)[2:])
-            loaded = False
-            for WorldPop_url in WorldPop_urls:
-                with requests.get(WorldPop_url, stream=True) as r:
-                    with open(WorldPop_inputfile, "wb") as f:
-                        if float(r.headers["Content-length"]) > size_min:
-                            shutil.copyfileobj(r.json()["data"][year_api]["files"], f)
-                            loaded = True
-                            break
-            if not loaded:
-                _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
-        else:
-            if out_logging:
-                _logger.info("Stage 3/4: Download WorldPop datasets")
 
-            WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
-            # Urls used to possibly download the file
-            WorldPop_urls = [
-                f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
-                f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{_two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
-            ]
-            WorldPop_inputfile = os.path.join(
-                os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
-            )  # Input filepath tif
+def download_WorldPop_API(
+    country_code, year=2020, update=False, out_logging=False, size_min=300
+):
 
-            if not os.path.exists(WorldPop_inputfile) or update is True:
-                if out_logging:
-                    _logger.warning(
-                        f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
-                    )
-                #  create data/osm directory
-                os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
+    if out_logging:
+        _logger.info("Stage 3/4: Download WorldPop datasets")
 
-                loaded = False
-                for WorldPop_url in WorldPop_urls:
-                    with requests.get(WorldPop_url, stream=True) as r:
-                        with open(WorldPop_inputfile, "wb") as f:
-                            if float(r.headers["Content-length"]) > size_min:
-                                shutil.copyfileobj(r.raw, f)
-                                loaded = True
-                                break
-                if not loaded:
-                    _logger.error(
-                        f"Stage 4/4: Impossible to download {WorldPop_filename}"
-                    )
+    WorldPop_filename = f"{_two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
+    # Request to get the file
+
+    WorldPop_urls = [
+        f"https://www.worldpop.org/rest/data/pop/wpgp?iso3={_two_2_three_digits_country(country_code)}",
+    ]
+    WorldPop_inputfile = os.path.join(
+        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
+
+    if not os.path.exists(WorldPop_inputfile) or update is True:
+        if out_logging:
+            _logger.warning(
+                f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
+            )
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
+        year_api = int(str(year)[2:])
+        loaded = False
+        for WorldPop_url in WorldPop_urls:
+            with requests.get(WorldPop_url, stream=True) as r:
+                with open(WorldPop_inputfile, "wb") as f:
+                    if float(r.headers["Content-length"]) > size_min:
+                        shutil.copyfileobj(r.json()["data"][year_api]["files"], f)
+                        loaded = True
+                        break
+        if not loaded:
+            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
