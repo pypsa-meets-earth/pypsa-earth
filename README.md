@@ -119,7 +119,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>hazemakhalek</b></sub>
         </a>
     </td>
     <td align="center">
@@ -226,7 +226,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/energyLS">
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
-            <sub><b>EnergyLS</b></sub>
+            <sub><b>energyLS</b></sub>
         </a>
     </td>
     <td align="center">
