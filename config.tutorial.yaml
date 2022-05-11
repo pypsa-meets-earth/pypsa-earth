@@ -47,7 +47,7 @@ build_shape_options:
   out_logging: true    # When true, logging is printed to console
   year: 2020    # reference year used to derive shapes, info on population and info on GDP
   nprocesses: 5    # number of processes to be used in build_shapes
-  worldpop_api: false
+  worldpop_method: "standard"
 
 clean_osm_data_options:
   names_by_shapes: true  # Set the country name based on the extended country shapes
