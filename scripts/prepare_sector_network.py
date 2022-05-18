@@ -1813,6 +1813,9 @@ if __name__ == "__main__":
     # Define spatial for biomass. TODO Move to function add_biomass?
     define_spatial_biomass(pop_layout.index)
 
+    # Add biomass (TODO currently only for debugging, not working yet)
+    add_biomass(n, costs)
+    
     # TODO define spatial (for biomass and co2)
 
     # TODO changes in case of myopic oversight
