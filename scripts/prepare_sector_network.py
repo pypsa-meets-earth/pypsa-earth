@@ -1815,7 +1815,7 @@ if __name__ == "__main__":
 
     # Add biomass (TODO currently only for debugging, not working yet)
     add_biomass(n, costs)
-    
+
     # TODO define spatial (for biomass and co2)
 
     # TODO changes in case of myopic oversight
