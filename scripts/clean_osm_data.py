@@ -288,7 +288,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df = pd.concat([df,r])
+                df = pd.concat([df, r])
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
@@ -759,7 +759,7 @@ if __name__ == "__main__":
             gpd.read_file(onshore_shape_path)
             .set_index("name")["geometry"]
             .set_crs(4326)
-        )   
+        )
 
     if os.stat(offshore_shape_path).st_size == 0:
         logger.info("No offshore file exist. Passing only onshore shape")
