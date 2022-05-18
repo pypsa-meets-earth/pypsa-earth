@@ -97,7 +97,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
 
-    bus_all = bus_s.append(bus_e).reset_index(drop=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
@@ -109,7 +109,7 @@ def add_line_endings_tosubstations(substations, lines):
     # TODO: this tag may be improved, maybe depending on voltage levels
     bus_all["tag_substation"] = "transmission"
 
-    buses = substations.append(bus_all).reset_index(drop=True)
+    buses = pd.concat([substations, bus_all], ignore_index=True)
 
     # Assign index to bus_id
     buses.loc[:, "bus_id"] = buses.index
@@ -288,7 +288,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df = df.append(r)
+                df = pd.concat([df,r])
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
