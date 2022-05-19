@@ -81,7 +81,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lat"] = bus_s["geometry"].y
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
 
-    bus_all = pd.append([bus_s, bus_e], ignore_index=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
     # Assign index to bus_id
     bus_all.loc[:, "bus_id"] = bus_all.index
     buses = bus_all
