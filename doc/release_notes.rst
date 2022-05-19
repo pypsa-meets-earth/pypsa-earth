@@ -19,7 +19,9 @@ Upcoming Release
 
 * General user experience improvements: `PR #326 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/326>`__
 
-* Fix minor validation notebook inaccuracy:  `PR #332 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/332>`__ 
+* Fix minor validation notebook inaccuracy:  `PR #332 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/332>`__
+
+* Make clean_osm_data script work with land-locked country: `PR #341 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/341>`_
 
 
 PyPSA-Africa 0.0.2 (6th April 2022)
