@@ -8,6 +8,7 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import reverse_geocode as rg
 from _helpers import configure_logging, save_to_geojson, to_csv_nafix
 
 logger = logging.getLogger(__name__)
@@ -97,7 +98,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
 
-    bus_all = bus_s.append(bus_e).reset_index(drop=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
@@ -109,7 +110,7 @@ def add_line_endings_tosubstations(substations, lines):
     # TODO: this tag may be improved, maybe depending on voltage levels
     bus_all["tag_substation"] = "transmission"
 
-    buses = substations.append(bus_all).reset_index(drop=True)
+    buses = pd.concat([substations, bus_all], ignore_index=True)
 
     # Assign index to bus_id
     buses.loc[:, "bus_id"] = buses.index
@@ -602,6 +603,23 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
     return merged_shapes
 
 
+def set_name_by_closestcity(df_all_generators, colname="name"):
+    """
+    Function to set the name column equal to the name of the closest city
+    """
+
+    # get cities name
+    list_cities = rg.search([g.coords[0] for g in df_all_generators.geometry])
+
+    # replace name
+    df_all_generators.loc[:, colname] = [
+        l['city'] + "_" + str(id) + " - " + c_code
+        for (l, c_code, id) in zip(list_cities, df_all_generators.country, df_all_generators.index)
+    ]
+
+    return df_all_generators
+
+
 def clean_data(
     input_files,
     output_files,
@@ -721,6 +739,9 @@ def clean_data(
     df_all_generators = set_countryname_by_shape(
         df_all_generators, ext_country_shapes, names_by_shapes=names_by_shapes
     )
+
+    # set name tag by closest city when the value is nan
+    df_all_generators = set_name_by_closestcity(df_all_generators)
 
     # save to csv
     to_csv_nafix(df_all_generators, output_files["generators_csv"])
