@@ -226,6 +226,22 @@ renewable:
     clip_min_inflow: 1.0
     extendable: true
 
+# TODO doublecheck energy carriers in PyPSA-Earth
+estimate_renewable_capacities:
+  # Renewable capacities are based on existing capacities reported by IRENA
+
+  # Reference year, any of 2000 to 2020
+  year: 2020
+  # Artificially limit maximum capacities to factor * (IRENA capacities),
+  # i.e. 110% of <years>'s capacities => expansion_limit: 1.1
+  # false: Use estimated renewable potentials determine by the workflow
+  expansion_limit: false
+  technology_mapping:
+    # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
+    Offshore: [offwind-ac, offwind-dc]
+    Onshore: [onwind]
+    PV: [solar]
+
 # TODO: Needs to be adjusted for Africa
 costs:
   year: 2030
