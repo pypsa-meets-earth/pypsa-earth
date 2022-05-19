@@ -769,6 +769,8 @@ if __name__ == "__main__":
     threshold_voltage = snakemake.config["clean_osm_data_options"]["threshold_voltage"]
     names_by_shapes = snakemake.config["clean_osm_data_options"]["names_by_shapes"]
     add_line_endings = snakemake.config["clean_osm_data_options"]["add_line_endings"]
+    offshore_shape_path = snakemake.input.offshore_shapes
+    onshore_shape_path = snakemake.input.country_shapes
 
     input_files = snakemake.input
     output_files = snakemake.output
@@ -780,20 +782,25 @@ if __name__ == "__main__":
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
         country_shapes = (
-            gpd.read_file(snakemake.input.country_shapes)
+            gpd.read_file(onshore_shape_path)
             .set_index("name")["geometry"]
             .set_crs(4326)
         )
+
+    if os.stat(offshore_shape_path).st_size == 0:
+        logger.info("No offshore file exist. Passing only onshore shape")
+        ext_country_shapes = country_shapes
+
+    else:
+        logger.info("Combining on- and offshore shape")
         offshore_shapes = (
-            gpd.read_file(snakemake.input.offshore_shapes)
+            gpd.read_file(offshore_shape_path)
             .set_index("name")["geometry"]
             .set_crs(4326)
         )
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes
         )
-    else:
-        ext_country_shapes = None
 
     clean_data(
         input_files,
