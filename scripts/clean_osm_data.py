@@ -278,6 +278,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
     """
     # TODO: split multiple cell probably needs fix
     n_rows = df.shape[0]
+    df_list = [df]
     for i in range(n_rows):
         sub = df[list_col].iloc[i]  # for each cables and voltage
         if sub.notnull().all() == True:  # check not both empty
@@ -289,7 +290,9 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df = df.append(r)
+                df_list.append(r)
+
+    df = pd.concat(df_list, ignore_index=True)
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
@@ -613,8 +616,10 @@ def set_name_by_closestcity(df_all_generators, colname="name"):
 
     # replace name
     df_all_generators.loc[:, colname] = [
-        l['city'] + "_" + str(id) + " - " + c_code
-        for (l, c_code, id) in zip(list_cities, df_all_generators.country, df_all_generators.index)
+        l["city"] + "_" + str(id) + " - " + c_code
+        for (l, c_code, id) in zip(
+            list_cities, df_all_generators.country, df_all_generators.index
+        )
     ]
 
     return df_all_generators
