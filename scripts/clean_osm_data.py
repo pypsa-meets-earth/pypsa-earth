@@ -97,7 +97,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
 
-    bus_all = bus_s.append(bus_e).reset_index(drop=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
@@ -109,7 +109,7 @@ def add_line_endings_tosubstations(substations, lines):
     # TODO: this tag may be improved, maybe depending on voltage levels
     bus_all["tag_substation"] = "transmission"
 
-    buses = substations.append(bus_all).reset_index(drop=True)
+    buses = pd.concat([substations, bus_all], ignore_index=True)
 
     # Assign index to bus_id
     buses.loc[:, "bus_id"] = buses.index
@@ -288,7 +288,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df = df.append(r)
+                df = pd.concat([df, r])
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
@@ -743,6 +743,8 @@ if __name__ == "__main__":
     threshold_voltage = snakemake.config["clean_osm_data_options"]["threshold_voltage"]
     names_by_shapes = snakemake.config["clean_osm_data_options"]["names_by_shapes"]
     add_line_endings = snakemake.config["clean_osm_data_options"]["add_line_endings"]
+    offshore_shape_path = snakemake.input.offshore_shapes
+    onshore_shape_path = snakemake.input.country_shapes
 
     input_files = snakemake.input
     output_files = snakemake.output
@@ -754,20 +756,25 @@ if __name__ == "__main__":
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
         country_shapes = (
-            gpd.read_file(snakemake.input.country_shapes)
+            gpd.read_file(onshore_shape_path)
             .set_index("name")["geometry"]
             .set_crs(4326)
         )
+
+    if os.stat(offshore_shape_path).st_size == 0:
+        logger.info("No offshore file exist. Passing only onshore shape")
+        ext_country_shapes = country_shapes
+
+    else:
+        logger.info("Combining on- and offshore shape")
         offshore_shapes = (
-            gpd.read_file(snakemake.input.offshore_shapes)
+            gpd.read_file(offshore_shape_path)
             .set_index("name")["geometry"]
             .set_crs(4326)
         )
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes
         )
-    else:
-        ext_country_shapes = None
 
     clean_data(
         input_files,
