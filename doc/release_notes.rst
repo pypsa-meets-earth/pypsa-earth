@@ -23,6 +23,8 @@ Upcoming Release
 
 * Make clean_osm_data script work with land-locked country: `PR #341 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/341>`_
 
+* Revise build_powerplants with new version of powerplantmatching: `PR #342 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/342>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
