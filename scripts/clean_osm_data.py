@@ -746,7 +746,7 @@ def clean_data(
     )
 
     # set name tag by closest city when the value is nan
-    df_all_generators = set_name_by_closestcity(df_all_generators)
+    # df_all_generators = set_name_by_closestcity(df_all_generators)
 
     # save to csv
     to_csv_nafix(df_all_generators, output_files["generators_csv"])
