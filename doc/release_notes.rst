@@ -21,6 +21,7 @@ Upcoming Release
 
 * Fix minor validation notebook inaccuracy:  `PR #332 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/332>`__ 
 
+* Add demand validation notebook for 2030 prediction `PR #344 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/344>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
