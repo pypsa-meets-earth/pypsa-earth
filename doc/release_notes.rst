@@ -23,6 +23,7 @@ Upcoming Release
 
 * Make clean_osm_data script work with land-locked country: `PR #341 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/341>`_
 
+* Add demand validation notebook for 2030 prediction `PR #344 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/344>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
