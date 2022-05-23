@@ -634,6 +634,7 @@ def clean_data(
     tag_substation="transmission",
     threshold_voltage=35000,
     add_line_endings=True,
+    generator_name_by_closest_city=False,
 ):
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"]).set_crs(epsg=4326, inplace=True)
@@ -746,7 +747,8 @@ def clean_data(
     )
 
     # set name tag by closest city when the value is nan
-    # df_all_generators = set_name_by_closestcity(df_all_generators)
+    if generator_name_by_closest_city:
+        df_all_generators = set_name_by_closestcity(df_all_generators)
 
     # save to csv
     to_csv_nafix(df_all_generators, output_files["generators_csv"])
@@ -769,6 +771,9 @@ if __name__ == "__main__":
     threshold_voltage = snakemake.config["clean_osm_data_options"]["threshold_voltage"]
     names_by_shapes = snakemake.config["clean_osm_data_options"]["names_by_shapes"]
     add_line_endings = snakemake.config["clean_osm_data_options"]["add_line_endings"]
+    generator_name_by_closest_city = snakemake.config["clean_osm_data_options"].get(
+        "generator_name_by_closest_city", False
+    )
     offshore_shape_path = snakemake.input.offshore_shapes
     onshore_shape_path = snakemake.input.country_shapes
 
@@ -811,4 +816,5 @@ if __name__ == "__main__":
         tag_substation=tag_substation,
         threshold_voltage=threshold_voltage,
         add_line_endings=add_line_endings,
+        generator_name_by_closest_city=generator_name_by_closest_city,
     )
