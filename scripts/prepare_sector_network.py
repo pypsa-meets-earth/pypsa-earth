@@ -1547,7 +1547,12 @@ if __name__ == "__main__":
 
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
-            "prepare_sector_network", simpl="", clusters="4", planning_horizons="2030"
+            "prepare_sector_network",
+            simpl="", 
+            clusters="44", 
+            ll="copt", 
+            opts="Co2L-720H", 
+            planning_horizons="2030"
         )
     # TODO add mock_snakemake func
 
