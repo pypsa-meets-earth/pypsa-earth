@@ -12,10 +12,10 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [10]
-  opts: [Co2L-24H]
+  clusters: [41]
+  opts: [Co2L-720H]
 
-countries: ["NG"]
+countries: ["MA"]
 
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
   # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
@@ -39,13 +39,13 @@ augmented_line_connection:
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
-  alternative_clustering: false
+  alternative_clustering: true
   distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
   out_logging: true  # When true, logging is printed to console
 
 # options for build_shapes
 build_shape_options:
-  gadm_layer_id: 1    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  gadm_layer_id: 2    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
   update_file: false    # When true, all the input files are downloaded again and replace the existing files
   out_logging: true    # When true, logging is printed to console
   year: 2020    # reference year used to derive shapes, info on population and info on GDP
