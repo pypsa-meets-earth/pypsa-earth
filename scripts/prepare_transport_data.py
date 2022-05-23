@@ -72,7 +72,7 @@ def prepare_transport_data(n):
     # # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     # solar_thermal = options['solar_cf_correction'] * solar_thermal / 1e3
 
-    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
+    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)#TODO change with real numbers
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
@@ -239,7 +239,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        snakemake = mock_snakemake("prepare_transport_data", simpl="", clusters="4")
+        snakemake = mock_snakemake("prepare_transport_data", simpl="", clusters="44")
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)

@@ -1557,11 +1557,13 @@ if __name__ == "__main__":
     # TODO add mock_snakemake func
 
     # TODO fetch from config
+    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
-    nodes = n.buses.index
+    nodes = pop_layout.index #TODO if you take nodes from the index of buses of n it's more than pop_layout
+                             #clustering of regions must be double checked.. refer to regions onshore
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 

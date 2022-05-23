@@ -146,8 +146,8 @@ sector:
 # snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
-  start: "2013-03-1"
-  end: "2013-03-8"
+  start: "2013-01-01"
+  end: "2014-01-01"
   closed: "left" # end is not inclusive
 
 # atlite:
