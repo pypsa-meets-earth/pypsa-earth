@@ -257,7 +257,7 @@ solving:
     track_iterations: false
     #nhours: 10
   solver:
-    name: highs
+    name: glpk
 
 
 plotting:
