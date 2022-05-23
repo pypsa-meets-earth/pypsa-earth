@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 version: 0.0.2
-tutorial: true
+tutorial: false
 
 logging:
   level: INFO
@@ -12,7 +12,7 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [41]
+  clusters: [44]
   opts: [Co2L-720H]
 
 countries: ["MA"]
@@ -59,7 +59,7 @@ clean_osm_data_options:
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  group_tolerance_buses: 8000  # [m] (default 500) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
 
@@ -82,8 +82,8 @@ snapshots:
 
 enable:
   # prepare_links_p_nom: false
-  retrieve_databundle: true
-  download_osm_data: true
+  retrieve_databundle: false
+  download_osm_data: false
   # retrieve_cutout: true
   # retrieve_natura_raster: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
@@ -103,7 +103,7 @@ electricity:
   extendable_carriers:
     Generator: []
     StorageUnit: [] # battery, H2
-    Store: [battery, H2]
+    Store: []
     Link: []
 
   conventional_carriers: [coal, OCGT, CCGT, oil]
@@ -141,7 +141,7 @@ atlite:
     # use 'base' to determine geographical bounds and time span from config
     # base:
     # module: era5
-    africa-2013-era5-tutorial:
+    africa-2013-era5:
       module: era5
       dx: 0.3
       dy: 0.3
@@ -166,7 +166,7 @@ atlite:
 
 renewable:
   onwind:
-    cutout: africa-2013-era5-tutorial
+    cutout: africa-2013-era5
     resource:
       method: wind
       turbine: Vestas_V112_3MW
@@ -183,7 +183,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: africa-2013-era5-tutorial
+    cutout: africa-2013-era5
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -197,7 +197,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: africa-2013-era5-tutorial
+    cutout: africa-2013-era5
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -213,7 +213,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: africa-2013-era5-tutorial
+    cutout: africa-2013-era5
     resource:
       method: pv
       panel: CSi
@@ -234,7 +234,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: africa-2013-era5-tutorial
+    cutout: africa-2013-era5
     resource:
       method: hydro
       hydrobasins: data/raw/hydrobasins/hybas_world_lev04_v1c.shp
