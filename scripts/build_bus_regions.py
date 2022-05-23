@@ -47,9 +47,11 @@ import geopandas as gpd
 import numpy
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, two_2_three_digits_country
 from shapely.geometry import Point, Polygon
 from vresutils.graph import voronoi_partition_pts
+
+# from scripts.build_shapes import gadm
 
 _logger = logging.getLogger(__name__)
 
@@ -147,31 +149,33 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
 def get_gadm_shape(onshore_locs, gadm_shapes):
     def locate_bus(coords):
+        point = Point(Point(coords["x"], coords["y"]))
+        gadm_shapes_country = gadm_shapes.filter(
+            like=two_2_three_digits_country(country), axis=0
+        )
+
         try:
-            return gadm_shapes[
-                gadm_shapes.contains(Point(coords["x"], coords["y"]))
-            ].item()
+            return gadm_shapes[gadm_shapes.contains(point)].item()
         except ValueError:
-            # return 'not_found'
-            gadm_shapes[
-                gadm_shapes.contains(Point(-9, 32))
-            ].item()  # TODO !!Fatal!! assigning not found to a random shape
+            return min(
+                gadm_shapes_country, key=(point.distance)
+            )  # TODO returns closest shape if the point was not inside one. Works well but will not catch an outlier bus.
 
     def get_id(coords):
+        point = Point(Point(coords["x"], coords["y"]))
+        gadm_shapes_country = gadm_shapes.filter(
+            like=two_2_three_digits_country(country), axis=0
+        )
+
         try:
-            return gadm_shapes[
-                gadm_shapes.contains(Point(coords["x"], coords["y"]))
-            ].index.item()
+            return gadm_shapes[gadm_shapes.contains(point)].index.item()
         except ValueError:
             # return 'not_found'
-            gadm_shapes[
-                gadm_shapes.contains(Point(-9, 32))
-            ].index.item()  # TODO !!Fatal!! assigning not found to a random shape
+            return gadm_shapes_country[
+                gadm_shapes_country.geometry
+                == min(gadm_shapes_country, key=(point.distance))
+            ].index.item()  # TODO returns closest shape if the point was not inside one.
 
-    sas = []
-    sas.append(onshore_locs[["x", "y"]].apply(locate_bus, axis=1).values)
-    ss = numpy.empty((len(sas),), "object")
-    ss[:] = sas
     regions = onshore_locs[["x", "y"]].apply(locate_bus, axis=1)
     ids = onshore_locs[["x", "y"]].apply(get_id, axis=1)
     return regions.values, ids.values
