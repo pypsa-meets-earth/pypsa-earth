@@ -305,7 +305,7 @@ def define_spatial(nodes):
 
     spatial.biomass.df = pd.DataFrame(vars(spatial.biomass), index=nodes)
 
-    #co2
+    # co2
 
     spatial.co2 = SimpleNamespace()
 
