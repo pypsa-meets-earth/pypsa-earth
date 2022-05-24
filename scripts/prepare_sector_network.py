@@ -282,6 +282,7 @@ def define_spatial(nodes):
     ----------
     nodes : list-like
     """
+
     global spatial
     global options
 
