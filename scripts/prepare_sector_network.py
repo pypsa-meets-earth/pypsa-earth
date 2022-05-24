@@ -274,7 +274,7 @@ def add_hydrogen(n, costs):
     )
 
 
-def define_spatial_biomass(nodes):
+def define_spatial(nodes):
     """
     Namespace for spatial
 
@@ -303,6 +303,25 @@ def define_spatial_biomass(nodes):
         spatial.biomass.industry_cc = ["solid biomass for industry CC"]
 
     spatial.biomass.df = pd.DataFrame(vars(spatial.biomass), index=nodes)
+
+    #co2
+
+    spatial.co2 = SimpleNamespace()
+
+    if options["co2_network"]:
+        spatial.co2.nodes = nodes + " co2 stored"
+        spatial.co2.locations = nodes
+        spatial.co2.vents = nodes + " co2 vent"
+        spatial.co2.x = (n.buses.loc[list(nodes)].x.values,)
+        spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
+    else:
+        spatial.co2.nodes = ["co2 stored"]
+        spatial.co2.locations = ["Africa"]
+        spatial.co2.vents = ["co2 vent"]
+        spatial.co2.x = (0,)
+        spatial.co2.y = 0
+
+    spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
 
 
 def add_biomass(n, costs):
@@ -454,24 +473,6 @@ def add_biomass(n, costs):
 
 def add_co2(n, costs):
     "add carbon carrier, it's networks and storage units"
-    spatial.nodes = nodes
-
-    spatial.co2 = SimpleNamespace()
-
-    if options["co2_network"]:
-        spatial.co2.nodes = nodes + " co2 stored"
-        spatial.co2.locations = nodes
-        spatial.co2.vents = nodes + " co2 vent"
-        spatial.co2.x = (n.buses.loc[list(nodes)].x.values,)
-        spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
-    else:
-        spatial.co2.nodes = ["co2 stored"]
-        spatial.co2.locations = ["Africa"]
-        spatial.co2.vents = ["co2 vent"]
-        spatial.co2.x = (0,)
-        spatial.co2.y = 0
-
-    spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
 
     # minus sign because opposite to how fossil fuels used:
     # CH4 burning puts CH4 down, atmosphere up
@@ -1807,8 +1808,8 @@ if __name__ == "__main__":
         snakemake.config["costs"]["lifetime"],
     )
 
-    # Define spatial for biomass. TODO Move to function add_biomass?
-    define_spatial_biomass(pop_layout.index)
+    # Define spatial for biomass and co2. They require the same spatial definition
+    define_spatial(pop_layout.index)
 
     # TODO logging
 
