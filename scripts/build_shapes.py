@@ -312,14 +312,11 @@ def download_WorldPop(
 ):
 
     """
-
     Download Worldpop using either the standard method or the API method.
-
         Parameters
         ----------
         worldpop_method: str
              worldpop_method = "API" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
-
         country_code : str
             Two letter country codes of the downloaded files.
             Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
@@ -329,9 +326,8 @@ def download_WorldPop(
             Update = true, forces re-download of files
         size_min : int
             Minimum size of each file to download
-
     """
-    if worldpop_method == "API":
+    if worldpop_method == "api":
         download_WorldPop_API(country_code, year, update, out_logging, size_min)
 
     elif worldpop_method == "standard":
@@ -359,10 +355,7 @@ def download_WorldPop_standard(
         Update = true, forces re-download of files
     size_min : int
         Minimum size of each file to download
-
-    api_method: bool
         api_method = true will use the API method to access the WorldPop dataset
-
     Returns
     -------
     WorldPop_inputfile : str
@@ -800,7 +793,7 @@ if __name__ == "__main__":
     year = snakemake.config["build_shape_options"]["year"]
     nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
     EEZ_gpkg = snakemake.input["eez"]
-    worldpop_method = snakemake.config["build_shape_options"]["worldpop_api"]
+    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
 
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
