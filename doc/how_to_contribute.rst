@@ -40,38 +40,15 @@ Join Us and Get Involved
 ========================
 
 Any person/ group is welcome to join us. Be it research leader, researcher, undergraduate, or industry professional.
-A simple way to explore this is to join our meeting.
-The PyPSA meets Africa team is currently running four types of meetings:
+A simple way to explore this is to join our meeting. All of them are **OPEN**.
 
-- **Discord (Open)**
+- `List of meetings and times <https://github.com/pypsa-meets-africa/pypsa-africa#get-involved>`_
+
+- **Discord**
   
   - Chat with the community, team up on features, exchange with developers, code in voice channels
   - `Discord invitation link <https://discord.gg/AnuJBk23FU>`_
 
-- **General code meeting (Open)**
-
-  - every second Thursday 16-17:00 (UK time) `download .ics <https://drive.google.com//uc?id=1Xre_N0SioLsehFoMuBS10J4xEWRc-lSW&export=download>`_
-  - join for project news and high-level code updates
-  - meeting on `Zoom <https://ed-ac-uk.zoom.us/j/89486720170>`_, password: energy101
-  - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
-  
-- **Specific code meeting (by invitation)**
-
-  - current meetings: 1) Demand creation (WP1) 2) AI asset detection (WP6) and 3) Data workflow updates (WP1-WP5)
-  - every week Friday 1) 13-13:45 2) 14-14:45 (UK time), 3) 15-16:00 (UK time)
-  - updates, demos, task distribution, weekly targets, Q&A
-
-- **Outreach meeting (by invitation)**
-
-  - every second week
-  - planning, discussing events, workshops, communication, community activities
-  
-- **Buddy talk (Open)**
-
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: `app.autobook.me/max-parzen/pypsa-meets-africa <https://app.autobook.me/max-parzen/pypsa-meets-africa>`_ (developed by @mnm-matin)
-  
 
 .. _code_wp:
 
