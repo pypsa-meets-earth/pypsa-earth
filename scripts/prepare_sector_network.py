@@ -1781,9 +1781,10 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network", simpl="", clusters="4", planning_horizons="2030"
         )
-    # TODO add mock_snakemake func
 
     # TODO fetch from config
+
+    options = snakemake.config["sector"]
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
@@ -1805,9 +1806,11 @@ if __name__ == "__main__":
         Nyears,
         snakemake.config["costs"]["lifetime"],
     )
-    # TODO logging
 
-    options = snakemake.config["sector"]
+    # Define spatial for biomass. TODO Move to function add_biomass?
+    define_spatial_biomass(pop_layout.index)
+
+    # TODO logging
 
     # Get the data required for land transport
     nodal_energy_totals = pd.read_csv(
@@ -1863,9 +1866,6 @@ if __name__ == "__main__":
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()
-
-    # Define spatial for biomass. TODO Move to function add_biomass?
-    define_spatial_biomass(pop_layout.index)
 
     # Add biomass (TODO currently only for debugging, not working yet)
     add_biomass(n, costs)
