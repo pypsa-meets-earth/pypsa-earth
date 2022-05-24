@@ -81,7 +81,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lat"] = bus_s["geometry"].y
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
 
-    bus_all = bus_s.append(bus_e).reset_index(drop=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
     # Assign index to bus_id
     bus_all.loc[:, "bus_id"] = bus_all.index
     buses = bus_all
@@ -468,7 +468,7 @@ def connect_stations_same_station_id(lines, buses):
     ]
 
     df_add_lines = gpd.GeoDataFrame(pd.concat(add_lines), columns=add_lines_columns)
-    lines.append(df_add_lines, ignore_index=True).reset_index(drop=True, inplace=True)
+    lines = pd.concat([lines, df_add_lines], ignore_index=True)
 
     return lines
 
@@ -544,7 +544,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     transformers = get_transformers(buses, lines)
 
     # append transformer lines
-    lines = lines.append(transformers)
+    lines = pd.concat([lines, transformers], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)

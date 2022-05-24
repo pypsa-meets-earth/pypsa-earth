@@ -25,6 +25,8 @@ Upcoming Release
 
 * Add demand validation notebook for 2030 prediction `PR #344 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/344>`_
 
+* Revise build_powerplants with new version of powerplantmatching: `PR #342 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/342>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
