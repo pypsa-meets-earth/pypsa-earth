@@ -27,6 +27,8 @@ Upcoming Release
 
 * Revise build_powerplants with new version of powerplantmatching: `PR #342 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/342>`_
 
+* Fix typo causing the wrong coordinate reference systems (CRS) to be used when determining available land types using CLC `PR #345 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/345>`__
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
