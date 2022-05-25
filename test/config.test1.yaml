@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+
 version: 0.0.2
 tutorial: true
 
@@ -50,6 +51,8 @@ build_shape_options:
   out_logging: true    # When true, logging is printed to console
   year: 2020    # reference year used to derive shapes, info on population and info on GDP
   nprocesses: 5    # number of processes to be used in build_shapes
+  worldpop_method: "standard" # "api" pulls from API 100mx100m raster."standard" pulls from web 1kmx1km raster.
+
 
 clean_osm_data_options:
   names_by_shapes: true  # Set the country name based on the extended country shapes
@@ -58,11 +61,13 @@ clean_osm_data_options:
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
 
+
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
   group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
