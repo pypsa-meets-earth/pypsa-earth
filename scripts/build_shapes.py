@@ -327,16 +327,14 @@ def download_WorldPop(
             Minimum size of each file to download
     """
     if worldpop_method == "api":
-        WorldPop_inputfile, WorldPop_filename = download_WorldPop_API(
+        return download_WorldPop_API(
             country_code, year, update, out_logging, size_min
         )
 
     elif worldpop_method == "standard":
-        WorldPop_inputfile, WorldPop_filename = download_WorldPop_standard(
+        return download_WorldPop_standard(
             country_code, year, update, out_logging, size_min
         )
-
-    return WorldPop_inputfile, WorldPop_filename
 
 
 def download_WorldPop_standard(
