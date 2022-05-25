@@ -8,6 +8,7 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import reverse_geocode as rg
 from _helpers import configure_logging, save_to_geojson, to_csv_nafix
 
 logger = logging.getLogger(__name__)
@@ -277,6 +278,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
     """
     # TODO: split multiple cell probably needs fix
     n_rows = df.shape[0]
+    df_list = [df]
     for i in range(n_rows):
         sub = df[list_col].iloc[i]  # for each cables and voltage
         if sub.notnull().all() == True:  # check not both empty
@@ -288,7 +290,9 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df = pd.concat([df, r])
+                df_list.append(r)
+
+    df = pd.concat(df_list, ignore_index=True)
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
@@ -602,6 +606,25 @@ def create_extended_country_shapes(country_shapes, offshore_shapes):
     return merged_shapes
 
 
+def set_name_by_closestcity(df_all_generators, colname="name"):
+    """
+    Function to set the name column equal to the name of the closest city
+    """
+
+    # get cities name
+    list_cities = rg.search([g.coords[0] for g in df_all_generators.geometry])
+
+    # replace name
+    df_all_generators.loc[:, colname] = [
+        l["city"] + "_" + str(id) + " - " + c_code
+        for (l, c_code, id) in zip(
+            list_cities, df_all_generators.country, df_all_generators.index
+        )
+    ]
+
+    return df_all_generators
+
+
 def clean_data(
     input_files,
     output_files,
@@ -611,6 +634,7 @@ def clean_data(
     tag_substation="transmission",
     threshold_voltage=35000,
     add_line_endings=True,
+    generator_name_method="OSM",
 ):
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"]).set_crs(epsg=4326, inplace=True)
@@ -722,6 +746,10 @@ def clean_data(
         df_all_generators, ext_country_shapes, names_by_shapes=names_by_shapes
     )
 
+    # set name tag by closest city when the value is nan
+    if generator_name_method == "closest_city":
+        df_all_generators = set_name_by_closestcity(df_all_generators)
+
     # save to csv
     to_csv_nafix(df_all_generators, output_files["generators_csv"])
 
@@ -743,6 +771,9 @@ if __name__ == "__main__":
     threshold_voltage = snakemake.config["clean_osm_data_options"]["threshold_voltage"]
     names_by_shapes = snakemake.config["clean_osm_data_options"]["names_by_shapes"]
     add_line_endings = snakemake.config["clean_osm_data_options"]["add_line_endings"]
+    generator_name_method = snakemake.config["clean_osm_data_options"].get(
+        "generator_name_method", "OSM"
+    )
     offshore_shape_path = snakemake.input.offshore_shapes
     onshore_shape_path = snakemake.input.country_shapes
 
@@ -785,4 +816,5 @@ if __name__ == "__main__":
         tag_substation=tag_substation,
         threshold_voltage=threshold_voltage,
         add_line_endings=add_line_endings,
+        generator_name_method=generator_name_method,
     )
