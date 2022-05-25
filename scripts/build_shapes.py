@@ -303,20 +303,19 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
 
 
 def download_WorldPop(
-    worldpop_method,
     country_code,
+    worldpop_method,
     year=2020,
     update=False,
     out_logging=False,
     size_min=300,
 ):
-
     """
     Download Worldpop using either the standard method or the API method.
         Parameters
         ----------
         worldpop_method: str
-             worldpop_method = "API" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
+             worldpop_method = "api" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
         country_code : str
             Two letter country codes of the downloaded files.
             Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
@@ -328,10 +327,16 @@ def download_WorldPop(
             Minimum size of each file to download
     """
     if worldpop_method == "api":
-        download_WorldPop_API(country_code, year, update, out_logging, size_min)
+        WorldPop_inputfile, WorldPop_filename = download_WorldPop_API(
+            country_code, year, update, out_logging, size_min
+        )
 
     elif worldpop_method == "standard":
-        download_WorldPop_standard(country_code, year, update, out_logging, size_min)
+        WorldPop_inputfile, WorldPop_filename = download_WorldPop_standard(
+            country_code, year, update, out_logging, size_min
+        )
+
+    return WorldPop_inputfile, WorldPop_filename
 
 
 def download_WorldPop_standard(
@@ -408,10 +413,20 @@ def download_WorldPop_API(
 
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
-
+    WorldPop_inputfile = os.path.join(
+        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
+    os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
+    year_api = int(str(year)[2:])
     loaded = False
-    for WorldPop_url in WorldPop_urls:
-        with requests.get(WorldPop_url, stream=True) as r:
+    WorldPop_api_urls = [
+        f"https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}",
+    ]
+    for WorldPop_api_url in WorldPop_api_urls:
+        with requests.get(WorldPop_api_url, stream=True) as r:
+            WorldPop_tif_url = r.json()["data"][year_api]["files"][0]
+
+        with requests.get(WorldPop_tif_url, stream=True) as r:
             with open(WorldPop_inputfile, "wb") as f:
                 if float(r.headers["Content-length"]) > size_min:
                     shutil.copyfileobj(r.raw, f)
@@ -419,32 +434,6 @@ def download_WorldPop_API(
                     break
     if not loaded:
         _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
-
-    WorldPop_urls = [
-        f"https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}",
-    ]
-    WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
-    )  # Input filepath tif
-
-    if not os.path.exists(WorldPop_inputfile) or update is True:
-        if out_logging:
-            _logger.warning(
-                f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
-            )
-        #  create data/osm directory
-        os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
-        year_api = int(str(year)[2:])
-        loaded = False
-        for WorldPop_url in WorldPop_urls:
-            with requests.get(WorldPop_url, stream=True) as r:
-                with open(WorldPop_inputfile, "wb") as f:
-                    if float(r.headers["Content-length"]) > size_min:
-                        shutil.copyfileobj(r.json()["data"][year_api]["files"], f)
-                        loaded = True
-                        break
-        if not loaded:
-            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -629,9 +618,9 @@ def add_gdp_data(
     #     df_gadm.loc[index, "gdp"] = gdp_by_geom
 
 
-def _init_process_pop(df_gadm_, year_):
-    global df_gadm, year
-    df_gadm, year = df_gadm_, year_
+def _init_process_pop(df_gadm_, year_, worldpop_method_):
+    global df_gadm, year, worldpop_method
+    df_gadm, year, worldpop_method = df_gadm_, year_, worldpop_method_
 
 
 def _process_func_pop(c_code):
@@ -641,7 +630,7 @@ def _process_func_pop(c_code):
 
     # get worldpop image
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-        c_code, year, False, False
+        c_code, worldpop_method, year, False, False
     )
 
     with rasterio.open(WorldPop_inputfile) as src:
@@ -657,6 +646,7 @@ def _process_func_pop(c_code):
 def add_population_data(
     df_gadm,
     country_codes,
+    worldpop_method,
     year=2020,
     update=False,
     out_logging=False,
@@ -701,7 +691,7 @@ def add_population_data(
 
                 # get worldpop image
                 WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-                    c_code, year, update, out_logging
+                    worldpop_method, c_code, year, update, out_logging
                 )
 
                 with rasterio.open(WorldPop_inputfile) as src:
@@ -714,7 +704,7 @@ def add_population_data(
 
         kwargs = {
             "initializer": _init_process_pop,
-            "initargs": (df_gadm, year),
+            "initargs": (df_gadm, year, worldpop_method),
             "processes": nprocesses,
         }
         with mp.get_context("spawn").Pool(**kwargs) as pool:
@@ -735,7 +725,13 @@ def add_population_data(
 
 
 def gadm(
-    countries, layer_id=2, update=False, out_logging=False, year=2020, nprocesses=None
+    worldpop_method,
+    countries,
+    layer_id=2,
+    update=False,
+    out_logging=False,
+    year=2020,
+    nprocesses=None,
 ):
 
     if out_logging:
@@ -756,7 +752,13 @@ def gadm(
 
     # add the population data to the dataset
     add_population_data(
-        df_gadm, countries, year, update, out_logging, nprocesses=nprocesses
+        df_gadm,
+        countries,
+        worldpop_method,
+        year,
+        update,
+        out_logging,
+        nprocesses=nprocesses,
     )
 
     # add the gdp data to the dataset
@@ -805,6 +807,12 @@ if __name__ == "__main__":
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
     gadm_shapes = gadm(
-        countries_list, layer_id, update, out_logging, year, nprocesses=nprocesses
+        worldpop_method,
+        countries_list,
+        layer_id,
+        update,
+        out_logging,
+        year,
+        nprocesses=nprocesses,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
