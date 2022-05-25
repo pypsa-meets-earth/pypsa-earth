@@ -54,6 +54,7 @@ clean_osm_data_options:
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
+  generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
 
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap

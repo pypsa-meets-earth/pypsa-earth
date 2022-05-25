@@ -70,7 +70,13 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
-from _helpers import configure_logging, read_csv_nafix, to_csv_nafix
+from _helpers import (
+    configure_logging,
+    country_name_2_two_digits,
+    read_csv_nafix,
+    to_csv_nafix,
+    two_digits_2_name_country,
+)
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
 
@@ -135,12 +141,14 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
             )
         )
         .assign(
-            Name=lambda df: "OSM_"
-            + df.Country.astype(str)
-            + "_"
-            + df.id.astype(str)
-            + "-"
-            + df.Name.astype(str),
+            Country=lambda df: df.Country.map(two_digits_2_name_country),
+            Name=lambda df: df.Name,
+            # Name=lambda df: "OSM_"
+            # + df.Country.astype(str)
+            # + "_"
+            # + df.id.astype(str)
+            # + "-"
+            # + df.Name.astype(str),
             Efficiency="",
             Duration="",
             Volume_Mm3="",
@@ -226,8 +234,9 @@ if __name__ == "__main__":
     csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
 
     n = pypsa.Network(snakemake.input.base_network)
-    countries = n.buses.country.unique()
-    config["target_countries"] = countries
+    countries_codes = n.buses.country.unique()
+    countries_names = list(map(two_digits_2_name_country, countries_codes))
+    config["target_countries"] = countries_names
 
     if "EXTERNAL_DATABASE" in config:
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
@@ -235,9 +244,9 @@ if __name__ == "__main__":
         )
 
     ppl = (
-        pm.powerplants(from_url=False, update_all=True, config=config)
-        .powerplant.fill_missing_decommyears()
-        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries')
+        pm.powerplants(from_url=False, update=True, config=config)
+        .powerplant.fill_missing_decommissioning_years()
+        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
         .replace({"Technology": {"Steam Turbine": "OCGT"}})
         .assign(
             Fueltype=lambda df: (
@@ -245,7 +254,8 @@ if __name__ == "__main__":
                     df.Fueltype != "Natural Gas",
                     df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
                 )
-            )
+            ),
+            Country=lambda df: df.Country.map(country_name_2_two_digits),
         )
     )
 
@@ -255,9 +265,9 @@ if __name__ == "__main__":
 
     ppl = add_custom_powerplants(ppl)  # add carriers from own powerplant files
 
-    cntries_without_ppl = [c for c in countries if c not in ppl.Country.unique()]
+    cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]
 
-    for c in countries:
+    for c in countries_codes:
         substation_i = n.buses.query("substation_lv and country == @c").index
         kdtree = KDTree(n.buses.loc[substation_i, ["x", "y"]].values)
         ppl_i = ppl.query("Country == @c").index
