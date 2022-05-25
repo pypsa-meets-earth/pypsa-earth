@@ -107,20 +107,25 @@ def add_oil(n, costs):
     # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
     # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
 
+
+    spatial.oil = SimpleNamespace()
+    spatial.oil.nodes = ["Africa oil"]
+    spatial.oil.locations = ["Africa"]
+    
     if "oil" not in n.carriers.index:
         n.add("Carrier", "oil")
 
-    if "Africa oil" not in n.buses.index:
+    # if "Africa oil" not in n.buses.index:
 
-        n.add("Bus", "Africa oil", location="Africa", carrier="oil")
+    #     n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
     if "Africa oil Store" not in n.stores.index:
 
         # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
         n.add(
             "Store",
-            "Africa oil Store",
-            bus="Africa oil",
+            [oil_bus + " Store" for oil_bus in spatial.oil.nodes],            
+            bus=spatial.oil.nodes,
             e_nom_extendable=True,
             e_cyclic=True,
             carrier="oil",
@@ -130,8 +135,8 @@ def add_oil(n, costs):
 
         n.add(
             "Generator",
-            "Africa oil",
-            bus="Africa oil",
+            spatial.oil.nodes,
+            bus=spatial.oil.nodes,
             p_nom_extendable=True,
             carrier="oil",
             marginal_cost=costs.at["oil", "fuel"],
@@ -148,7 +153,7 @@ def H2_liquid_fossil_conversions(n, costs):
         "Link",
         nodes + " Fischer-Tropsch",
         bus0=nodes + " H2",
-        bus1="Africa oil",
+        bus1=spatial.oil.nodes,
         bus2=spatial.co2.nodes,
         carrier="Fischer-Tropsch",
         efficiency=costs.at["Fischer-Tropsch", "efficiency"],
@@ -443,7 +448,7 @@ def add_aviation(n, cost):
         "Load",
         nodes,
         suffix=" kerosene for aviation",
-        bus="Africa oil",
+        bus=spatial.oil.nodes,
         carrier="kerosene for aviation",
         p_set=airports["p_set"],
     )
@@ -660,7 +665,7 @@ def add_shipping(n, costs):
             "Load",
             nodes,
             suffix=" shipping oil",
-            bus="Africa oil",
+            bus=spatial.oil.nodes,
             carrier="shipping oil",
             p_set=ports["p_set"],
         )
@@ -681,33 +686,32 @@ def add_shipping(n, costs):
             p_set=-co2,
         )
 
-    if "Africa oil" not in n.buses.index:
+    if "oil" not in n.buses.carrier.unique():
+        n.madd("Bus",
+            spatial.oil.nodes,
+            location=spatial.oil.locations,
+            carrier="oil"
+        )
+    if "oil" not in n.stores.carrier.unique():
 
-        n.add("Bus", "Africa oil", location="Africa", carrier="oil")
-
-    if "Africa oil Store" not in n.stores.index:
-
-        # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-        n.add(
-            "Store",
-            "Africa oil Store",
-            bus="Africa oil",
+        #could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+        n.madd("Store",
+            [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
+            bus=spatial.oil.nodes,
             e_nom_extendable=True,
             e_cyclic=True,
             carrier="oil",
         )
 
-    if "Africa oil" not in n.generators.index:
+    if "oil" not in n.generators.carrier.unique():
 
-        n.add(
-            "Generator",
-            "Africa oil",
-            bus="Africa oil",
+        n.madd("Generator",
+            spatial.oil.nodes,
+            bus=spatial.oil.nodes,
             p_nom_extendable=True,
             carrier="oil",
-            marginal_cost=costs.at["oil", "fuel"],
+            marginal_cost=costs.at["oil", 'fuel']
         )
-
 
 def add_industry(n, costs):
 
@@ -811,7 +815,7 @@ def add_industry(n, costs):
         "Load",
         nodes,
         suffix=" naphtha for industry",
-        bus="Africa oil",
+        bus=spatial.oil.nodes,
         carrier="naphtha for industry",
         p_set=demand_locations["naphta fraction"].apply(
             lambda frac: frac * 1e6 / 8760
@@ -1082,16 +1086,19 @@ def add_land_transport(n, costs):
 
     if ice_share > 0:
 
-        if "Africa oil" not in n.buses.index:
-            n.add("Bus", "Africa oil", location="Africa", carrier="oil")
-
+        if "oil" not in n.buses.carrier.unique():
+            n.madd("Bus",
+                spatial.oil.nodes,
+                location=spatial.oil.locations,
+                carrier="oil"
+            )
         ice_efficiency = options["transport_internal_combustion_efficiency"]
 
         n.madd(
             "Load",
             nodes,
             suffix=" land transport oil",
-            bus="Africa oil",
+            bus=spatial.oil.nodes,
             carrier="land transport oil",
             p_set=ice_share / ice_efficiency * transport[nodes],
         )

@@ -12,8 +12,8 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [44]
-  opts: [Co2L-720H]
+  clusters: [46]
+  opts: [Co2L1-72H]
 
 countries: ["MA"]
 
@@ -39,7 +39,7 @@ augmented_line_connection:
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
-  alternative_clustering: true
+  alternative_clustering: false
   distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
   out_logging: true  # When true, logging is printed to console
 
@@ -97,7 +97,7 @@ download_osm_data_nprocesses: 4  # (optional) number of threads used to download
 electricity:
   voltages: [220., 300., 380.]
   co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
-  co2base: 1.487e9
+  co2base: 1.487e8
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
 
   extendable_carriers:

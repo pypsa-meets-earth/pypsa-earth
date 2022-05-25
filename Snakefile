@@ -358,3 +358,19 @@ rule plot_summary:
         SDIR + "/benchmarks/plot_summary"
     script:
         "scripts/plot_summary.py"
+
+
+
+rule prepare_db:
+    input:
+        network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+    output:
+        db=RDIR + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.csv",
+    threads: 2
+    resources:
+        mem_mb=10000,
+    benchmark:
+        RDIR + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+    script:
+        "scripts/prepare_db.py"
+
