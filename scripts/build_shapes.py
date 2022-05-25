@@ -343,7 +343,7 @@ def download_WorldPop_standard(
     size_min=300,
 ):
     """
-    Download tiff file for each country code
+    Download tiff file for each country code using the standard method from worldpop datastore with 1kmx1km resolution.
 
     Parameters
     ----------
@@ -356,14 +356,12 @@ def download_WorldPop_standard(
         Update = true, forces re-download of files
     size_min : int
         Minimum size of each file to download
-        api_method = true will use the API method to access the WorldPop dataset
     Returns
     -------
     WorldPop_inputfile : str
         Path of the file
     WorldPop_filename : str
         Name of the file
-
     """
     if out_logging:
         _logger.info("Stage 3/4: Download WorldPop datasets")
@@ -403,7 +401,27 @@ def download_WorldPop_standard(
 def download_WorldPop_API(
     country_code, year=2020, update=False, out_logging=False, size_min=300
 ):
+    """
+    Download tiff file for each country code using the api method from worldpop API with 100mx100m resolution.
 
+    Parameters
+    ----------
+    country_code : str
+        Two letter country codes of the downloaded files.
+        Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+    year : int
+        Year of the data to download
+    update : bool
+        Update = true, forces re-download of files
+    size_min : int
+        Minimum size of each file to download
+    Returns
+    -------
+    WorldPop_inputfile : str
+        Path of the file
+    WorldPop_filename : str
+        Name of the file
+    """
     if out_logging:
         _logger.info("Stage 3/4: Download WorldPop datasets")
 
