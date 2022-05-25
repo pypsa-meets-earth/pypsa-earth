@@ -29,6 +29,9 @@ Upcoming Release
 
 * Fix typo causing the wrong coordinate reference systems (CRS) to be used when determining available land types using CLC `PR #345 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/345>`__
 
+* Add high resolution population raster via API: `PR #325 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/325>`__
+
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
@@ -65,6 +68,7 @@ PyPSA-Africa 0.0.2 (6th April 2022)
 * Solved the issue of "overpassing nodes" and restyling osm_build_network: `PR #294 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/294>`__
 
 * Revise deprecations in build_shape: `PR #315 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/315>`__
+
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
