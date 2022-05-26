@@ -55,7 +55,7 @@ jobs:
       id: cache
       with:
         path: ${{ matrix.prefix }}
-        key: ${{ matrix.label }}-conda-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+        key: ${{ matrix.label }}--conda-${{ hashFiles('../pypsa-africa/envs/environment.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
 
     - name: Update environment due to outdated or unavailable cache
       if: steps.cache.outputs.cache-hit != 'true'
