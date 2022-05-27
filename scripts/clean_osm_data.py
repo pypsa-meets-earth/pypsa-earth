@@ -390,7 +390,6 @@ def integrate_lines_df(df_all_lines):
     # Keep original frequency if it exists  and set a standard value 
     # NB The standard frequency value may be regional-dependent  
     if "tag_frequency" in df_all_lines.columns:
-        df_all_lines["raw_frequency"] = df_all_lines["tag_frequency"]
         df_all_lines.loc[df_all_lines["tag_frequency"].isna(), "tag_frequency"] = 50
     # Add frequency column
     else:            
