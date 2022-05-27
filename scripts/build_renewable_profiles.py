@@ -303,14 +303,14 @@ if __name__ == "__main__":
                 paths.copernicus,
                 codes=copernicus["grid_codes"],
                 invert=True,
-                crs="EPSG:4236",
+                crs="EPSG:4326",
             )
             if "distance" in copernicus and config["copernicus"]["distance"] > 0:
                 excluder.add_raster(
                     paths.copernicus,
                     codes=copernicus["distance_grid_codes"],
                     buffer=copernicus["distance"],
-                    crs="EPSG:4236",
+                    crs="EPSG:4326",
                 )
 
         if "max_depth" in config:
@@ -318,7 +318,9 @@ if __name__ == "__main__":
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
             func_depth = functools.partial(np.greater, -config["max_depth"])
-            excluder.add_raster(paths.gebco, codes=func_depth, crs=4236, nodata=-1000)
+            excluder.add_raster(
+                paths.gebco, codes=func_depth, crs="EPSG:4326", nodata=-1000
+            )
 
         if "min_shore_distance" in config:
             buffer = config["min_shore_distance"]

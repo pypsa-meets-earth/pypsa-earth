@@ -245,6 +245,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/Tomkourou">
+            <img src="https://avatars.githubusercontent.com/u/5240283?v=4" width="100;" alt="Tomkourou"/>
+            <br />
+            <sub><b>Thomas Kouroughli</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
             <br />
