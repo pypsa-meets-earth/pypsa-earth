@@ -161,7 +161,7 @@ continents = {
 
 world_iso = {
     "Africa": {
-       "DZ": "algeria",
+        "DZ": "algeria",
         "AO": "angola",
         "BJ": "benin",
         "BW": "botswana",
@@ -169,7 +169,7 @@ world_iso = {
         "BF": "burkina-faso",
         "BI": "burundi",
         "CM": "cameroon",
-       	// # canary-islands    # Island
+       	# "IC": "canary-islands"    # Island
         # "CV": "cape-verde", # Island
         "CF": "central-african-republic",
         "TD": "chad",
@@ -181,7 +181,7 @@ world_iso = {
         "GQ": "equatorial-guinea",
         "ER": "eritrea",
         "ET": "ethiopia",
-	    "TF": "french-southern-territories",
+        "TF": "french-southern-territories",
         "GA": "gabon",
         "GH": "ghana",
         "GW": "guinea-bissau",  # No Data
