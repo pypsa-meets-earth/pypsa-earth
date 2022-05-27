@@ -1,23 +1,26 @@
-# io config
+# ---------------------------------------------------------------------------- #
+#                                   IO Config                                  #
+# ---------------------------------------------------------------------------- #
 entsoe_token:
 google_api_key:
-opsd_vres_base_year: 2016
 
-hash: pypsa-africa
+# ---------------------------------------------------------------------------- #
+#                                Matching Config                               #
+# ---------------------------------------------------------------------------- #
 
 
 #matching config
 matching_sources:
-- CARMA
+# - CARMA  # deprecated as no more public
 - GEO
 - GPD
-- EXTERNAL_DATABASE
+# - EXTERNAL_DATABASE
 
 fully_included_sources:
-- CARMA
+# - CARMA  # deprecated as no more public
 - GEO
 - GPD
-- EXTERNAL_DATABASE
+# - EXTERNAL_DATABASE
 
 
 EXTERNAL_DATABASE:
@@ -33,6 +36,7 @@ remove_missing_coords: true
 matched_data_url:
 
 display_net_caps: true
+
 target_columns:
 - Name
 - Fueltype
@@ -47,48 +51,66 @@ target_columns:
 - StorageCapacity_MWh
 - DateIn
 - DateRetrofit
-- DateMothball
 - DateOut
 - lat
 - lon
-  # - File
 - EIC
 - projectID
 
 target_fueltypes:
-- Bioenergy
-- Geothermal
-- Hard Coal
-- Hydro
-- Lignite
-- Natural Gas
-- Nuclear
-- Oil
-- Other
-- Solar
-- Waste
-- Wind
-
+  # Provide a mapping of the keys to a list or a regex expression which are used for parsing.
+  # A list will be converted to a regex expression matching all words (case-insensitive)
+  # given by the list. An empty string results in a regex expression containing only the key.
+  # Parsed of representatives at the top may be overwritten by representatives further below.
+  Other: ".*"
+  Bioenergy: [biological, biogas, bioenergy, agricultural, wood, biomass]
+  Nuclear: [nuclear]
+  Natural Gas: [ccgt, gas, natural gas, ocgt, lng, combined cycle, fossil gas, mixed fossil fuels]
+  Hydro: [run-off, run off, run of river, run-of-river, ror, hydro, hydroelectric, wasserkraft]
+  Hard Coal: [coal, coke]
+  Lignite: [brown coal, lignite, peat]
+  Oil: [oil, diesel]
+  Geothermal: ""
+  Solar: ""
+  Waste: ""
+  Wind: ""
+  Battery: [Electro-chemical, battery]
 target_sets:
-- CHP
-- PP
-- Store
-
+  # Provide a mapping of the keys to a list or a regex expression which are used for parsing.
+  # A list will be converted to a regex expression matching all words (case-insensitive)
+  # given by the list. An empty string results in a regex expression containing only the key.
+  # Parsed of representatives at the top may be overwritten by representatives further below.
+  PP: ".*"
+  CHP: [heizkraftwerk, hkw, kwk, fhkw, gud, hp, bhkw, cogeneration, power and heat, heat and power, chp]
+  Store: [battery, storage, store]
 target_technologies:
-- CCGT
-- OCGT
-- Steam Turbine
-- Combustion Engine
-- Run-Of-River
-- Pumped Storage
-- Reservoir
-- Marine
-- Onshore
-- Offshore
-- PV
-- CSP
+  # Provide a mapping of the keys to a list or a regex expression which are used for parsing.
+  # A list will be converted to a regex expression matching all words (case-insensitive)
+  # given by the list. An empty string results in a regex expression containing only the key.
+  # Parsed of representatives at the top may be overwritten by representatives further below.
+  CCGT: [ccgt, gas, natural gas]
+  OCGT: [ocgt]
+  Steam Turbine: [steam, turbine]
+  Combustion Engine: [combustion engine]
+  Run-Of-River: [run-off, run off, run of river, run-of-river, ror]
+  Pumped Storage: [pumped hydro, pumped]
+  Reservoir: ""
+  Marine: ""
+  Onshore: ""
+  Offshore: ""
+  PV: [pv, photo-voltaic, photo voltaic]
+  CSP: ""
+clean_name:
+  remove_common_words: false # remove words which appear more that 20 times in all entries
+  remove_duplicated_words: true
+  replace:
+    " ": "[^a-zA-Z]" # non-alphabetical symbols
+    "": [I, II, III, IV, V, VI, VII, VIII, IX, X, XI, parque, grupo, station, power, plant, unit, kraftwerk, kw, hkw, nuclear, thermal, heizkraftwerk, eolico, project, hydroelectric, pumped, storage, france, austria, sweden, serbia, ukraine, switzerland, slovakia, croatia, poland, slovenia, portugal, bosnia, and, herzegovina, \w]
+    "ss": "ß"
 
-# heuristic config
+# ---------------------------------------------------------------------------- #
+#                               Heuristic Config                               #
+# ---------------------------------------------------------------------------- #
 fuel_to_lifetime:
   Bioenergy: 20
   Geothermal: 15
@@ -103,7 +125,9 @@ fuel_to_lifetime:
   Waste: 25
   Wind: 25
 
-# plotting config
+# ---------------------------------------------------------------------------- #
+#                                Plotting Config                               #
+# ---------------------------------------------------------------------------- #
 fuel_to_color:
   OCGT: darkorange
   Hydro: seagreen
@@ -118,12 +142,12 @@ fuel_to_color:
   Offshore: cornflowerblue
   Onshore: darkblue
   Wind: steelblue
-  Bioenergy: g
+  Bioenergy: forestgreen
   Natural Gas: red
   CCGT: red
-  Coal: k
+  Coal: black
   Hard Coal: dimgray
-  Oil: darkgreen
+  Oil: black
   Other: silver
   Waste: grey
   Geothermal: orange

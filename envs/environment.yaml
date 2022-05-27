@@ -29,7 +29,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-- fiona <= 1.18.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+- fiona <= 1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
 - xarray
 - netcdf4
 - networkx
@@ -38,6 +38,7 @@ dependencies:
 - pre-commit
 - pyomo
 - matplotlib
+- reverse-geocode
 
   # Keep in conda environment when calling ipython
 - ipython
@@ -62,13 +63,13 @@ dependencies:
   # Cloud download
 - googledrivedownloader
 
-  # # Default solver for tests (moved to the CI)
-  # - glpk
-  # - ipopt  # <=3.11.1 for windows; <= 3.13.3 for linux
+# Default solver for tests (moved to the CI)
+- glpk
+- ipopt < 3.13.3
 
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
-  - git+https://github.com/davide-f/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
+  - git+https://github.com/davide-f/powerplantmatching.git@new_pypsa_africa#egg=powerplantmatching
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf

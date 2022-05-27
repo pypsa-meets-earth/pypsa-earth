@@ -16,11 +16,13 @@ from scripts.add_electricity import get_load_paths_gegis
 
 HTTP = HTTPRemoteProvider()
 
-if not exists("config.yaml"):
-    copyfile("config.default.yaml", "config.yaml")
+if "config" not in globals() or not config:  # skip when used as sub-workflow
+    if not exists("config.yaml"):
+        copyfile("config.default.yaml", "config.yaml")
+
+    configfile: "config.yaml"
 
 
-configfile: "config.yaml"
 configfile: "configs/bundle_config.yaml"
 
 

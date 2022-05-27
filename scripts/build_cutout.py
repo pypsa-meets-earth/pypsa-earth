@@ -122,7 +122,7 @@ if __name__ == "__main__":
         offshore = gpd.read_file(snakemake.input.regions_offshore)
         regions = onshore.append(offshore)
         d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
-        cutout_params["bounds"] = regions.total_bounds + [d, d, d, d]
+        cutout_params["bounds"] = regions.total_bounds + [-d, -d, d, d]
     elif {"x", "y"}.issubset(cutout_params):
         cutout_params["x"] = slice(*cutout_params["x"])
         cutout_params["y"] = slice(*cutout_params["y"])
