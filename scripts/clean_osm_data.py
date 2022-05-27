@@ -202,6 +202,14 @@ def filter_links(df):
 
     return df    
 
+def filter_ac(df):
+
+    # convert frequency to int
+    df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
+
+    df = df[df.tag_frequency == 50]
+
+    return df          
 
 def finalize_substation_types(df_all_substations):
     """
