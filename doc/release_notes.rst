@@ -31,6 +31,8 @@ Upcoming Release
 
 * Add high resolution population raster via API: `PR #325 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/325>`__
 
+* Fix bounds of cutouts aka weather cells: `PR #347 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/347>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
