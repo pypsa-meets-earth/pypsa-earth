@@ -193,21 +193,12 @@ def filter_voltage(df, threshold_voltage=35000):
 
 def filter_links(df):
 
-    # Drop any row with N/A voltage
-    df = df.dropna(subset=["raw_frequency"])
-
-    # Convert frequency to float, if impossible, discard row
-    df["raw_frequency"] = (
-        df["raw_frequency"].apply(lambda x: pd.to_numeric(x, errors="coerce")).astype(float)
-    )
-    df = df.dropna(subset=["raw_frequency"])  # Drop any row with frequency = N/A
-
     # convert frequency to int
-    df.loc[:, "raw_frequency"] = df["raw_frequency"].astype(int)
+    df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
 
     # TODO Fix SettingWithCopyWarning, details via https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
     # keep only lines with zero frequency as the most useful indication of DC lines
-    df = df[df.raw_frequency == 0]
+    df = df[df.tag_frequency == 0]
 
     return df    
 
