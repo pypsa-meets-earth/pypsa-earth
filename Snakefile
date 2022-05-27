@@ -158,6 +158,7 @@ rule clean_osm_data:
         generators_csv="data/clean/africa_all_generators.csv",
         lines="data/clean/africa_all_lines.geojson",
         substations="data/clean/africa_all_substations.geojson",
+        links="data/clean/africa_all_lines.geojson",
     log:
         "logs/clean_osm_data.log",
     script:

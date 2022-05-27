@@ -714,6 +714,7 @@ def clean_data(
     df_links = filter_links(df_all_lines)
 
     save_to_geojson(df_all_lines, output_files["lines"])
+    save_to_geojson(df_links, output_files["links"])
 
     # ----------- SUBSTATIONS -----------
 
