@@ -191,7 +191,7 @@ def filter_voltage(df, threshold_voltage=35000):
 
     return df
 
-def filter_dc_lines(df):
+def filter_links(df):
 
     # Drop any row with N/A voltage
     df = df.dropna(subset=["raw_frequency"])
@@ -711,7 +711,7 @@ def clean_data(
         df_all_lines, ext_country_shapes, names_by_shapes=names_by_shapes
     )
 
-    df_dc_lines = filter_dc_lines(df_all_lines)
+    df_links = filter_links(df_all_lines)
 
     save_to_geojson(df_all_lines, output_files["lines"])
 
