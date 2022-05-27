@@ -29,9 +29,11 @@ Upcoming Release
 
 * Fix typo causing the wrong coordinate reference systems (CRS) to be used when determining available land types using CLC `PR #345 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/345>`__
 
-* Add high resolution population raster via API: `PR #325 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/325>`__
+* Add high resolution population raster via API: `PR #325 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/325>`_
 
 * Fix bounds of cutouts aka weather cells: `PR #347 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/347>`_
+
+* Add new countries and update iso code: `PR #330 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/330>`_
 
 
 PyPSA-Africa 0.0.2 (6th April 2022)
