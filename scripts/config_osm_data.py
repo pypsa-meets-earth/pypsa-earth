@@ -169,12 +169,12 @@ world_iso = {
         "BF": "burkina-faso",
         "BI": "burundi",
         "CM": "cameroon",
-       	# "IC": "canary-islands"    # Island
+        # "IC": "canary-islands"    # Island
         # "CV": "cape-verde", # Island
         "CF": "central-african-republic",
         "TD": "chad",
         # "KM": "comoros", # Island
-       	"CG": "congo-brazzaville",
+        "CG": "congo-brazzaville",
         "CD": "congo-democratic-republic",
         "DJ": "djibouti",
         "EG": "egypt",
@@ -196,15 +196,15 @@ world_iso = {
         "ML": "mali",
         "MR": "mauritania",
         # "MU": "mauritius", # Island
-	    "YT": "mayotte",
+        "YT": "mayotte",
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
         "NE": "niger",
         "NG": "nigeria",
-	    "RE": "reunion",
+        "RE": "reunion",
         "RW": "rwanda",
-       	# saint-helena-ascension-and-tristan-da-cunha # Islands
+        # saint-helena-ascension-and-tristan-da-cunha # Islands
         # "ST": "sao-tome-and-principe", # Island
         "SN": "senegal",
         "GM": "gambia",
@@ -434,7 +434,7 @@ world_iso = {
         "UY": "uruguay",
         "VE": "venezuela",
     },
-    #"Antarctica": {
+    # "Antarctica": {
     #   "AQ": "antarctica",
     #   "BV": "bouvet-island",
     #   "HM": "heard-island-and-mcdonald-island",
