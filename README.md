@@ -245,6 +245,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/Tomkourou">
+            <img src="https://avatars.githubusercontent.com/u/5240283?v=4" width="100;" alt="Tomkourou"/>
+            <br />
+            <sub><b>Thomas Kouroughli</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
             <br />
@@ -266,12 +273,20 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/HanaElattar">
+            <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
+            <br />
+            <sub><b>HanaElattar</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/squoilin">
             <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
             <br />
             <sub><b>Sylvain Quoilin</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>

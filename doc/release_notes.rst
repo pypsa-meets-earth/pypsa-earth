@@ -25,6 +25,17 @@ Upcoming Release
 
 * Add demand validation notebook for 2030 prediction `PR #344 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/344>`_
 
+* Revise build_powerplants with new version of powerplantmatching: `PR #342 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/342>`_
+
+* Fix typo causing the wrong coordinate reference systems (CRS) to be used when determining available land types using CLC `PR #345 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/345>`__
+
+* Add high resolution population raster via API: `PR #325 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/325>`_
+
+* Fix bounds of cutouts aka weather cells: `PR #347 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/347>`_
+
+* Add new countries and update iso code: `PR #330 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/330>`_
+
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
@@ -61,6 +72,7 @@ PyPSA-Africa 0.0.2 (6th April 2022)
 * Solved the issue of "overpassing nodes" and restyling osm_build_network: `PR #294 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/294>`__
 
 * Revise deprecations in build_shape: `PR #315 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/315>`__
+
 
 PyPSA-Africa 0.0.1 (24th December 2021)
 =====================================
