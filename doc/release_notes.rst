@@ -35,6 +35,8 @@ Upcoming Release
 
 * Add new countries and update iso code: `PR #330 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/330>`_
 
+* Fix solar pv slope and add correction factor for wake losses `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
