@@ -218,7 +218,7 @@ renewable:
       method: pv
       panel: CSi
       orientation:
-        slope: 35.
+        slope: 0.
         azimuth: 180.
     capacity_per_sqkm: 1.7 # ScholzPhd Tab 4.3.1: 170 MW/km^2
     # Determined by comparing uncorrected area-weighted full-load hours to those
