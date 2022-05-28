@@ -191,6 +191,7 @@ def filter_voltage(df, threshold_voltage=35000):
 
     return df
 
+
 def filter_links(df):
 
     # convert frequency to int
@@ -200,7 +201,8 @@ def filter_links(df):
     # keep only lines with zero frequency as the most useful indication of DC lines
     df = df[df.tag_frequency == 0]
 
-    return df    
+    return df
+
 
 def filter_ac(df):
 
@@ -209,7 +211,8 @@ def filter_ac(df):
 
     df = df[df.tag_frequency == 50]
 
-    return df          
+    return df
+
 
 def finalize_substation_types(df_all_substations):
     """
@@ -387,12 +390,12 @@ def integrate_lines_df(df_all_lines):
     if "tag_location" in df_all_lines:  # drop column if exist
         df_all_lines.drop(columns="tag_location", inplace=True)
 
-    # Keep original frequency if it exists  and set a standard value 
-    # NB The standard frequency value may be regional-dependent  
+    # Keep original frequency if it exists  and set a standard value
+    # NB The standard frequency value may be regional-dependent
     if "tag_frequency" in df_all_lines.columns:
         df_all_lines.loc[df_all_lines["tag_frequency"].isna(), "tag_frequency"] = 50
     # Add frequency column
-    else:            
+    else:
         df_all_lines["tag_frequency"] = 50
 
     df_all_lines = split_cells_multiple(df_all_lines)
