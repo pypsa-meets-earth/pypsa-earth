@@ -37,6 +37,8 @@ Upcoming Release
 
 * Fix solar pv slope and add correction factor for wake losses `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`
 
+* Add renewable potential notebook `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
