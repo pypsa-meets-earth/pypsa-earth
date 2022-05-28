@@ -171,7 +171,10 @@ renewable:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
     capacity_per_sqkm: 2
-    # correction_factor: 0.93
+    correction_factor: 0.8855
+    # proxy for wake losses
+    # from 10.1016/j.energy.2018.08.153
+    # until done more rigorously in #153
     copernicus:
       grid_codes: [80, 200]
     natura: true
@@ -187,7 +190,10 @@ renewable:
       turbine: NREL_ReferenceTurbine_5MW_offshore
     # ScholzPhd Tab 4.3.1: 10MW/km^2
     capacity_per_sqkm: 3
-    # correction_factor: 0.93
+    correction_factor: 0.8855
+    # proxy for wake losses
+    # from 10.1016/j.energy.2018.08.153
+    # until done more rigorously in #153
     copernicus:
       grid_codes: [80, 200]
     natura: true
@@ -202,7 +208,9 @@ renewable:
       method: pv
       panel: CSi
       orientation: #TODO: should be latitude optimal
-        slope: 35.
+        slope: 0.
+        # simplified as flat pv panel (slope=0).
+        # Need location dependend slope fix in future.
         azimuth: 180.
     capacity_per_sqkm: 1.7 # ScholzPhd Tab 4.3.1: 170 MW/km^2
     # Determined by comparing uncorrected area-weighted full-load hours to those
