@@ -116,7 +116,6 @@ if __name__ == "__main__":
     onshore_shapes = snakemake.input.onshore_shapes
     offshore_shapes = snakemake.input.offshore_shapes
 
-
     # If one of the parameters is there
     if {"x", "y", "bounds"}.isdisjoint(cutout_params):
         # Determine the bounds from bus regions with a buffer of two grid cells
