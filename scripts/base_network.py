@@ -384,6 +384,7 @@ def base_network():
 
     n.import_components_from_dataframe(buses, "Bus")
     n.import_components_from_dataframe(lines, "Line")
+    n.import_components_from_dataframe(links, "Link")
 
     _set_lines_s_nom_from_linetypes(n)
 
