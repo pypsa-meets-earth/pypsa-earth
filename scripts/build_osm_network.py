@@ -753,6 +753,7 @@ def built_network(inputs, outputs):
         lines, buses = merge_stations_lines_by_station_id_and_voltage(
             lines, buses, tol=tol
         )
+        # TODO Should be the frequency value kept when calling merge_stations_lines_by_station_id_and_voltage()?
         links, buses = merge_stations_lines_by_station_id_and_voltage(
             links, buses, tol=tol
         )
@@ -785,6 +786,7 @@ def built_network(inputs, outputs):
                 "lat": no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
                 "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
                 "station_id": [np.nan] * length,
+                # TODO Add flags from the links file
                 "dc": [False] * length,
                 "under_construction": [False] * length,
                 "tag_area": [0.0] * length,
