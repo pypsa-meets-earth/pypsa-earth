@@ -35,6 +35,14 @@ Upcoming Release
 
 * Add new countries and update iso code: `PR #330 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/330>`_
 
+* Fix solar pv slope and add correction factor for wake losses `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`_
+
+* Add renewable potential notebook `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`_
+
+* Make cutout workflow simpler `PR #352 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/352>`_
+
+* Add option to run workflow without pop and gdp raster `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================

@@ -181,7 +181,7 @@ world_iso = {
         "GQ": "equatorial-guinea",
         "ER": "eritrea",
         "ET": "ethiopia",
-        "TF": "french-southern-territories",
+        # "TF": "french-southern-territories",  # Island
         "GA": "gabon",
         "GH": "ghana",
         "GW": "guinea-bissau",  # No Data
@@ -196,13 +196,13 @@ world_iso = {
         "ML": "mali",
         "MR": "mauritania",
         # "MU": "mauritius", # Island
-        "YT": "mayotte",
+        # "YT": "mayotte",  # Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
         "NE": "niger",
         "NG": "nigeria",
-        "RE": "reunion",
+        # "RE": "reunion",  # Island
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
         # "ST": "sao-tome-and-principe", # Island
