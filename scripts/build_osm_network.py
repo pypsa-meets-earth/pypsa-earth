@@ -719,6 +719,7 @@ def built_network(inputs, outputs):
 
     substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
     lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
+    links = gpd.read_file(inputs["links"]).set_crs(epsg=4326, inplace=True)
     generators = read_geojson(inputs["generators"]).set_crs(epsg=4326, inplace=True)
 
     logger.info("Stage 2/5: Add line endings to the substation datasets")
@@ -798,6 +799,7 @@ def built_network(inputs, outputs):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
+    to_csv_nafix(links, outputs["links"])  # Generate CSV    
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):
