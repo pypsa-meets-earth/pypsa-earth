@@ -51,7 +51,8 @@ build_shape_options:
   out_logging: true    # When true, logging is printed to console
   year: 2020    # reference year used to derive shapes, info on population and info on GDP
   nprocesses: 5    # number of processes to be used in build_shapes
-  worldpop_method: "standard" # "api" pulls from API 100mx100m raster."standard" pulls from web 1kmx1km raster.
+  worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
+  gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
 
 
 clean_osm_data_options:
