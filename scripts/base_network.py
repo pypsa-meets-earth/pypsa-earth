@@ -180,6 +180,7 @@ def _load_lines_from_osm(buses):
 
     return lines
 
+
 def _load_links_from_osm(buses):
     links = (
         read_csv_nafix(
@@ -202,7 +203,7 @@ def _load_links_from_osm(buses):
     links = _rebase_voltage_to_config(links)  # rebase voltage to config inputs
     # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
 
-    links['carrier'] = 'DC'
+    links["carrier"] = "DC"
 
     return links
 
@@ -218,10 +219,12 @@ def _set_electrical_parameters_lines(lines):
 
     return lines
 
-def _set_electrical_parameters_links(links):
-    if links.empty: return links
 
-    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.)
+def _set_electrical_parameters_links(links):
+    if links.empty:
+        return links
+
+    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
@@ -243,7 +246,8 @@ def _set_electrical_parameters_links(links):
     # p_nom_unset = p_nom.drop(links.index[links.p_nom.notnull()], errors='ignore') if "p_nom" in links else p_nom
     # links.loc[p_nom_unset.index, "p_nom"] = p_nom_unset
 
-    return links   
+    return links
+
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers

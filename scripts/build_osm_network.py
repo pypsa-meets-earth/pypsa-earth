@@ -807,7 +807,7 @@ def built_network(inputs, outputs):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
-    to_csv_nafix(links, outputs["links"])  # Generate CSV    
+    to_csv_nafix(links, outputs["links"])  # Generate CSV
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):
