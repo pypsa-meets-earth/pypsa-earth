@@ -180,6 +180,32 @@ def _load_lines_from_osm(buses):
 
     return lines
 
+def _load_links_from_osm(buses):
+    links = (
+        read_csv_nafix(
+            snakemake.input.osm_links,
+            dtype=dict(
+                line_id="str",
+                bus0="str",
+                bus1="str",
+                underground="bool",
+                under_construction="bool",
+            ),
+        )
+        .set_index("line_id")
+        .rename(columns=dict(voltage="v_nom", circuits="num_parallel"))
+    )
+
+    links["length"] /= 1e3  # m to km conversion
+    links["v_nom"] /= 1e3  # V to kV conversion
+    links = links.loc[:, ~links.columns.str.contains("^Unnamed")]  # remove unnamed col
+    links = _rebase_voltage_to_config(links)  # rebase voltage to config inputs
+    # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
+
+    links['carrier'] = 'DC'
+
+    return links
+
 
 def _set_electrical_parameters_lines(lines):
     v_noms = snakemake.config["electricity"]["voltages"]
