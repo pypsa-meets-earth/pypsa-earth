@@ -726,7 +726,9 @@ def built_network(inputs, outputs):
 
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
+    links = line_endings_to_bus_conversion(links)
     buses = add_line_endings_tosubstations(substations, lines)
+    buses = add_line_endings_tosubstations(substations, links)
 
     # Address the overpassing line issue Step 3/5
     if snakemake.config.get("build_osm_network", {}).get(
@@ -738,6 +740,7 @@ def built_network(inputs, outputs):
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
         lines, buses = fix_overpassing_lines(lines, buses, tol=tol)
+        links, buses = fix_overpassing_lines(links, buses, tol=tol)
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
@@ -749,6 +752,9 @@ def built_network(inputs, outputs):
         )
         lines, buses = merge_stations_lines_by_station_id_and_voltage(
             lines, buses, tol=tol
+        )
+        links, buses = merge_stations_lines_by_station_id_and_voltage(
+            links, buses, tol=tol
         )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
