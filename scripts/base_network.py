@@ -346,6 +346,7 @@ def _rebase_voltage_to_config(component):
 def base_network():
     buses = _load_buses_from_osm().reset_index()
     lines = _load_lines_from_osm(buses)
+    links = _load_links_from_osm(buses)
     lines = _set_electrical_parameters_lines(lines)
 
     n = pypsa.Network()
