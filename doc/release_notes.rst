@@ -39,6 +39,8 @@ Upcoming Release
 
 * Add renewable potential notebook `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`
 
+* Make cutout workflow simpler `PR #352 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/352>`
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================

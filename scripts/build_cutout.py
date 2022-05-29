@@ -110,16 +110,17 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     cutout_params = snakemake.config["atlite"]["cutouts"][snakemake.wildcards.cutout]
-
     snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
     time = [snapshots[0], snapshots[-1]]
     cutout_params["time"] = slice(*cutout_params.get("time", time))
+    onshore_shapes = snakemake.input.onshore_shapes
+    offshore_shapes = snakemake.input.offshore_shapes
 
     # If one of the parameters is there
     if {"x", "y", "bounds"}.isdisjoint(cutout_params):
         # Determine the bounds from bus regions with a buffer of two grid cells
-        onshore = gpd.read_file(snakemake.input.regions_onshore)
-        offshore = gpd.read_file(snakemake.input.regions_offshore)
+        onshore = gpd.read_file(onshore_shapes)
+        offshore = gpd.read_file(offshore_shapes)
         regions = onshore.append(offshore)
         d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
         cutout_params["bounds"] = regions.total_bounds + [-d, -d, d, d]
