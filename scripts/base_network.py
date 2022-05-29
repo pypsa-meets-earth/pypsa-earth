@@ -382,6 +382,7 @@ def base_network():
     n.set_snapshots(pd.date_range(freq="h", **snakemake.config["snapshots"]))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
+    # TODO How to add converters?
     n.import_components_from_dataframe(buses, "Bus")
     n.import_components_from_dataframe(lines, "Line")
     n.import_components_from_dataframe(links, "Link")
