@@ -218,6 +218,32 @@ def _set_electrical_parameters_lines(lines):
 
     return lines
 
+def _set_electrical_parameters_links(links):
+    if links.empty: return links
+
+    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.)
+    links["p_max_pu"] = p_max_pu
+    links["p_min_pu"] = -p_max_pu
+
+    # TODO Include p_nom_max? (in case it's not inf)
+    # links_p_nom = pd.read_csv(links_p_nom)
+
+    # # filter links that are not in operation anymore
+    # removed_b = links_p_nom.Remarks.str.contains('Shut down|Replaced', na=False)
+    # links_p_nom = links_p_nom[~removed_b]
+
+    # # find closest link for all links in links_p_nom
+    # links_p_nom['j'] = _find_closest_links(links, links_p_nom)
+
+    # links_p_nom = links_p_nom.groupby(['j'],as_index=False).agg({'Power (MW)': 'sum'})
+
+    # p_nom = links_p_nom.dropna(subset=["j"]).set_index("j")["Power (MW)"]
+
+    # # Don't update p_nom if it's already set
+    # p_nom_unset = p_nom.drop(links.index[links.p_nom.notnull()], errors='ignore') if "p_nom" in links else p_nom
+    # links.loc[p_nom_unset.index, "p_nom"] = p_nom_unset
+
+    return links   
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
@@ -348,6 +374,7 @@ def base_network():
     lines = _load_lines_from_osm(buses)
     links = _load_links_from_osm(buses)
     lines = _set_electrical_parameters_lines(lines)
+    links = _set_electrical_parameters_links(links)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
