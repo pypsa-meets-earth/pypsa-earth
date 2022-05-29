@@ -740,6 +740,7 @@ def add_population_data(
 
 def gadm(
     worldpop_method,
+    gdp_method,
     countries,
     layer_id=2,
     update=False,
@@ -764,25 +765,27 @@ def gadm(
         inplace=True,
     )
 
-    # add the population data to the dataset
-    add_population_data(
-        df_gadm,
-        countries,
-        worldpop_method,
-        year,
-        update,
-        out_logging,
-        nprocesses=nprocesses,
-    )
+    if worldpop_method != False:
+        # add the population data to the dataset
+        add_population_data(
+            df_gadm,
+            countries,
+            worldpop_method,
+            year,
+            update,
+            out_logging,
+            nprocesses=nprocesses,
+        )
 
-    # add the gdp data to the dataset
-    add_gdp_data(
-        df_gadm,
-        year,
-        update,
-        out_logging,
-        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    )
+    if gdp_method != False:
+        # add the gdp data to the dataset
+        add_gdp_data(
+            df_gadm,
+            year,
+            update,
+            out_logging,
+            name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+        )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -810,6 +813,7 @@ if __name__ == "__main__":
     nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
     EEZ_gpkg = snakemake.input["eez"]
     worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
+    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
 
     country_shapes = countries(countries_list, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
@@ -822,6 +826,7 @@ if __name__ == "__main__":
 
     gadm_shapes = gadm(
         worldpop_method,
+        gdp_method,
         countries_list,
         layer_id,
         update,
