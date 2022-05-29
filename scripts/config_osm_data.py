@@ -181,7 +181,7 @@ world_iso = {
         "GQ": "equatorial-guinea",
         "ER": "eritrea",
         "ET": "ethiopia",
-        "TF": "french-southern-territories",
+        # "TF": "french-southern-territories",  # Island
         "GA": "gabon",
         "GH": "ghana",
         "GW": "guinea-bissau",  # No Data
