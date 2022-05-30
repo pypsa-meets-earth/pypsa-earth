@@ -213,7 +213,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
         sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
     default_crs = snakemake.config["crs"]["default_crs"]
-    metric_crs = snakemake.config["crs"]["metric_crs"]
+    metric_crs = "EPSG:3035"  # snakemake.config["crs"]["metric_crs"]  # BUG when 3857 is selected!!!
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
