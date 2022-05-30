@@ -223,7 +223,9 @@ def _set_countries_and_substations(n):
 
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
-        bus_locations, geometry=gpd.points_from_xy(bus_locations.x, bus_locations.y)
+        bus_locations,
+        geometry=gpd.points_from_xy(bus_locations.x, bus_locations.y),
+        crs=buses.crs,
     )
     # Check if bus is in shape
     offshore_b = bus_locations.within(offshore_shapes)
