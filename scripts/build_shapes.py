@@ -37,6 +37,8 @@ _logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-africa")
 
+EEZ_CRS = "EPSG:4326"
+
 
 def download_GADM(country_code, update=False, out_logging=False):
     """
@@ -94,7 +96,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
+def get_GADM_layer(country_list, layer_id, crs, update=False, outlogging=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
 
@@ -128,7 +130,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         )
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name).to_crs(crs)
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
@@ -143,7 +145,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         geodf_list.append(geodf_temp)
 
     geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
+    geodf_GADM.set_crs(crs)
 
     return geodf_GADM
 
@@ -167,14 +169,14 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(countries, update=False, out_logging=False):
+def countries(countries, crs, update=False, out_logging=False):
     "Create country shapes"
 
     if out_logging:
         _logger.info("Stage 1 of 4: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
-    df_countries = get_GADM_layer(countries, 0, update, out_logging)
+    df_countries = get_GADM_layer(countries, 0, crs, update, out_logging)
 
     # select and rename columns
     df_countries = df_countries[["GID_0", "geometry"]].copy()
@@ -218,7 +220,7 @@ def save_to_geojson(df, fn):
             pass
 
 
-def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
+def load_EEZ(countries_codes, crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
     The dataset shall be downloaded independently by the user (see guide) or
@@ -229,7 +231,7 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
             f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}"
         )
 
-    geodf_EEZ = gpd.read_file(EEZ_gpkg)
+    geodf_EEZ = gpd.read_file(EEZ_gpkg).to_crs(crs)
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
@@ -249,7 +251,7 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
+def eez(countries, crs, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     """
     Creates offshore shapes by
     - buffer smooth countryshape (=offset country shape)
@@ -262,7 +264,7 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
         _logger.info("Stage 2 of 4: Create offshore shapes")
 
     # load data
-    df_eez = load_EEZ(countries, EEZ_gpkg)
+    df_eez = load_EEZ(countries, crs, EEZ_gpkg)
 
     ret_df = df_eez[["name", "geometry"]]
     # create unique shape if country is described by multiple shapes
@@ -742,6 +744,7 @@ def gadm(
     worldpop_method,
     gdp_method,
     countries,
+    crs,
     layer_id=2,
     update=False,
     out_logging=False,
@@ -753,7 +756,7 @@ def gadm(
         _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, update)
+    df_gadm = get_GADM_layer(countries, layer_id, crs, update)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -814,11 +817,15 @@ if __name__ == "__main__":
     EEZ_gpkg = snakemake.input["eez"]
     worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
     gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
+    default_crs = snakemake.config["crs"]["default_crs"]
+    metric_crs = snakemake.config["crs"]["metric_crs"]
 
-    country_shapes = countries(countries_list, update, out_logging)
+    country_shapes = countries(countries_list, default_crs, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg, out_logging)
+    offshore_shapes = eez(
+        countries_list, default_crs, country_shapes, EEZ_gpkg, out_logging
+    )
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
@@ -828,6 +835,7 @@ if __name__ == "__main__":
         worldpop_method,
         gdp_method,
         countries_list,
+        default_crs,
         layer_id,
         update,
         out_logging,
