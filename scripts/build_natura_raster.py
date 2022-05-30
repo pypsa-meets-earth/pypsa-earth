@@ -90,7 +90,7 @@ def determine_cutout_xXyY(cutout_name, out_logging):
     if out_logging:
         _logger.info("Stage 1/5: Determine cutout boundaries")
     cutout = atlite.Cutout(cutout_name)
-    assert cutout.crs.to_epsg() == CUTOUT_CRS
+    assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
     return [x - dx / 2.0, X + dx / 2.0, y - dy / 2.0, Y + dy / 2.0]
