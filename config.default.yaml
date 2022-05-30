@@ -35,6 +35,11 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
+# definition of the Coordinate Reference Systems
+crs:
+  default_crs: EPSG:4326  # general geographic projection, not used for metric measures
+  metric_crs: EPSG:3085  # projection for metric measures only
+
 # download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 
 augmented_line_connection:

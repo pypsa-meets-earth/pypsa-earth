@@ -99,6 +99,11 @@ enable:
   build_natura_raster: true  # If True, then build_natura_raster can be run
   # custom_busmap: false
 
+# definition of the Coordinate Reference Systems
+crs:
+  default_crs: EPSG:4326  # general geographic projection, not used for metric measures
+  metric_crs: EPSG:3085  # projection for metric measures only
+
 download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
 
 electricity:
