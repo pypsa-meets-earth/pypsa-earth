@@ -166,8 +166,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # get crs
-    default_crs = snakemake.config["crs"]["default_crs"]
-    metric_crs = snakemake.config["crs"]["metric_crs"]
+    area_crs = snakemake.config["crs"]["area_crs"]
 
     out_logging = True
     inputs = snakemake.input
@@ -176,16 +175,12 @@ if __name__ == "__main__":
     xs, Xs, ys, Ys = zip(
         *(determine_cutout_xXyY(cutout, out_logging=out_logging) for cutout in cutouts)
     )
-    bounds = transform_bounds(
-        CUTOUT_CRS, metric_crs, min(xs), min(ys), max(Xs), max(Ys)
-    )
+    bounds = transform_bounds(CUTOUT_CRS, area_crs, min(xs), min(ys), max(Xs), max(Ys))
     transform, out_shape = get_transform_and_shape(
         bounds, res=100, out_logging=out_logging
     )
     # adjusted boundaries
-    shapes = unify_protected_shape_areas(
-        shapefiles, metric_crs, out_logging=out_logging
-    )
+    shapes = unify_protected_shape_areas(shapefiles, area_crs, out_logging=out_logging)
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
@@ -201,7 +196,7 @@ if __name__ == "__main__":
         dtype=rio.uint8,
         count=1,
         transform=transform,
-        crs=metric_crs,
+        crs=area_crs,
         compress="lzw",
         width=raster.shape[1],
         height=raster.shape[0],
