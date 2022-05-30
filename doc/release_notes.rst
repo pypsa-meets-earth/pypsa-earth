@@ -43,6 +43,8 @@ Upcoming Release
 
 * Add option to run workflow without pop and gdp raster `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
 
+* Harmonize CRSs by options `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
