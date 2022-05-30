@@ -226,7 +226,7 @@ if __name__ == "__main__":
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
     default_crs = snakemake.config["crs"]["default_crs"]
-    metric_crs = "EPSG:3035"  # snakemake.config["crs"]["metric_crs"]  # BUG when 3857 is selected!!!
+    metric_crs = snakemake.config["crs"]["metric_crs"]
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}

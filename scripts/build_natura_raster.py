@@ -201,7 +201,7 @@ if __name__ == "__main__":
         dtype=rio.uint8,
         count=1,
         transform=transform,
-        crs=3035,
+        crs=metric_crs,
         compress="lzw",
         width=raster.shape[1],
         height=raster.shape[0],
