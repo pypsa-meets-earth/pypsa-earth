@@ -299,7 +299,7 @@ rule build_renewable_profiles:
         + config["renewable"][w.technology]["cutout"]
         + ".nc",
     output:
-        profile="resources/profile_{technology}.nc",
+        profile="resources/renewable_profiles/profile_{technology}.nc",
     log:
         "logs/build_renewable_profile_{technology}.log",
     benchmark:
@@ -332,7 +332,7 @@ rule build_powerplants:
 rule add_electricity:
     input:
         **{
-            f"profile_{tech}": f"resources/profile_{tech}.nc"
+            f"profile_{tech}": f"resources/renewable_profiles/profile_{tech}.nc"
             for tech in config["renewable"]
         },
         base_network="networks/base.nc",
