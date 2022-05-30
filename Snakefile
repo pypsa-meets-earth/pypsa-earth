@@ -150,9 +150,9 @@ rule clean_osm_data:
         generators="resources/osm/raw/africa_all_raw_generators.geojson",
         lines="resources/osm/raw/africa_all_raw_lines.geojson",
         substations="resources/osm/raw/africa_all_raw_substations.geojson",
-        country_shapes="resources/country_shapes.geojson",
-        offshore_shapes="resources/offshore_shapes.geojson",
-        africa_shape="resources/africa_shape.geojson",
+        country_shapes="resources/shapes/country_shapes.geojson",
+        offshore_shapes="resources/shapes/offshore_shapes.geojson",
+        africa_shape="resources/shapes/africa_shape.geojson",
     output:
         generators="resources/osm/clean/africa_all_generators.geojson",
         generators_csv="resources/osm/clean/africa_all_generators.csv",
@@ -169,10 +169,10 @@ rule build_osm_network:
         generators="resources/osm/clean/africa_all_generators.geojson",
         lines="resources/osm/clean/africa_all_lines.geojson",
         substations="resources/osm/clean/africa_all_substations.geojson",
-        country_shapes="resources/country_shapes.geojson",
+        country_shapes="resources/shapes/country_shapes.geojson",
     output:
-        lines="data/base_network/africa_all_lines_build_network.csv",
-        substations="data/base_network/africa_all_buses_build_network.csv",
+        lines="resources/base_network/africa_all_lines_build_network.csv",
+        substations="resources/base_network/africa_all_buses_build_network.csv",
     log:
         "logs/build_osm_network.log",
     script:
@@ -188,10 +188,10 @@ rule build_shapes:
         # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
         eez="data/eez/eez_v11.gpkg",
     output:
-        country_shapes="resources/country_shapes.geojson",
-        offshore_shapes="resources/offshore_shapes.geojson",
-        africa_shape="resources/africa_shape.geojson",
-        gadm_shapes="resources/gadm_shapes.geojson",
+        country_shapes="resources/shapes/country_shapes.geojson",
+        offshore_shapes="resources/shapes/offshore_shapes.geojson",
+        africa_shape="resources/shapes/africa_shape.geojson",
+        gadm_shapes="resources/shapes/gadm_shapes.geojson",
     log:
         "logs/build_shapes.log",
     threads: 1
@@ -203,10 +203,10 @@ rule build_shapes:
 
 rule base_network:
     input:
-        osm_buses="data/base_network/africa_all_buses_build_network.csv",
-        osm_lines="data/base_network/africa_all_lines_build_network.csv",
-        country_shapes="resources/country_shapes.geojson",
-        offshore_shapes="resources/offshore_shapes.geojson",
+        osm_buses="resources/base_network/africa_all_buses_build_network.csv",
+        osm_lines="resources/base_network/africa_all_lines_build_network.csv",
+        country_shapes="resources/shapes/country_shapes.geojson",
+        offshore_shapes="resources/shapes/offshore_shapes.geojson",
         # osm_buses='data/osm/africa_all_buses_clean.csv',
         # osm_lines='data/osm/africa_all_lines_clean.csv',
         # eg_buses='data/entsoegridkit/buses.csv',
@@ -233,10 +233,10 @@ rule base_network:
 
 rule build_bus_regions:
     input:
-        country_shapes="resources/country_shapes.geojson",
-        offshore_shapes="resources/offshore_shapes.geojson",
+        country_shapes="resources/shapes/country_shapes.geojson",
+        offshore_shapes="resources/shapes/offshore_shapes.geojson",
         base_network="networks/base.nc",
-        gadm_shapes="resources/gadm_shapes.geojson",
+        gadm_shapes="resources/shapes/gadm_shapes.geojson",
     output:
         regions_onshore="resources/regions_onshore.geojson",
         regions_offshore="resources/regions_offshore.geojson",
@@ -253,8 +253,8 @@ if config["enable"].get("build_cutout", False):
 
     rule build_cutout:
         input:
-            onshore_shapes="resources/country_shapes.geojson",
-            offshore_shapes="resources/offshore_shapes.geojson",
+            onshore_shapes="resources/shapes/country_shapes.geojson",
+            offshore_shapes="resources/shapes/offshore_shapes.geojson",
         output:
             "cutouts/{cutout}.nc",
         log:
@@ -288,8 +288,8 @@ rule build_renewable_profiles:
         natura="resources/natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         gebco="data/gebco/GEBCO_2021_TID.nc",
-        country_shapes="resources/country_shapes.geojson",
-        offshore_shapes="resources/offshore_shapes.geojson",
+        country_shapes="resources/shapes/country_shapes.geojson",
+        offshore_shapes="resources/shapes/offshore_shapes.geojson",
         regions=lambda w: (
             "resources/regions_onshore.geojson"
             if w.technology in ("onwind", "solar", "hydro")
@@ -340,7 +340,7 @@ rule add_electricity:
         regions="resources/regions_onshore.geojson",
         powerplants="resources/powerplants.csv",
         load=load_data_paths,
-        gadm_shapes="resources/gadm_shapes.geojson",
+        gadm_shapes="resources/shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
     output:
         "networks/elec.nc",
@@ -382,7 +382,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
     rule cluster_network:
         input:
             network="networks/elec_s{simpl}.nc",
-            country_shapes="resources/country_shapes.geojson",
+            country_shapes="resources/shapes/country_shapes.geojson",
             regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
@@ -429,7 +429,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
     rule cluster_network:
         input:
             network="networks/elec_s{simpl}.nc",
-            country_shapes="resources/country_shapes.geojson",
+            country_shapes="resources/shapes/country_shapes.geojson",
             regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
@@ -572,7 +572,7 @@ rule plot_summary:
 rule plot_network:
     input:
         network="results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        africa_shape="resources/africa_shape.geojson",
+        africa_shape="resources/shapes/africa_shape.geojson",
         tech_costs=COSTS,
     output:
         only_map="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}.{ext}",
