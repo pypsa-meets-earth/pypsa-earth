@@ -244,7 +244,7 @@ renewable:
     cutout: africa-2013-era5-tutorial
     resource:
       method: hydro
-      hydrobasins: data/raw/hydrobasins/hybas_world_lev04_v1c.shp
+      hydrobasins: data/hydrobasins/hybas_world_lev04_v1c.shp
       # flowspeed: 1.0
       # weight_with_height: false
       # show_progress: true
