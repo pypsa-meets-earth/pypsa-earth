@@ -225,8 +225,8 @@ if __name__ == "__main__":
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
-    default_crs = snakemake.config["crs"]["default_crs"]
-    metric_crs = snakemake.config["crs"]["metric_crs"]
+    geo_crs = snakemake.config["crs"]["geo_crs"]
+    area_crs = snakemake.config["crs"]["area_crs"]
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -297,7 +297,7 @@ if __name__ == "__main__":
 
         capacity_per_sqkm = config["capacity_per_sqkm"]
 
-        excluder = atlite.ExclusionContainer(crs=metric_crs, res=100)
+        excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
         if "natura" in config and config["natura"]:
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
@@ -345,7 +345,7 @@ if __name__ == "__main__":
         else:
             availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
 
-        area = cutout.grid.to_crs(metric_crs).area / 1e6
+        area = cutout.grid.to_crs(area_crs).area / 1e6
         area = xr.DataArray(
             area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]
         )
