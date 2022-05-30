@@ -122,7 +122,7 @@ if config["enable"].get("retrieve_databundle", True):
     rule retrieve_databundle_light:
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand("{file}", file=datafiles_retrivedatabundle(config)),
-            directory("data/raw/landcover"),
+            directory("data/landcover"),
         log:
             "logs/retrieve_databundle.log",
         script:
@@ -133,11 +133,11 @@ if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
         output:
-            cables="data/raw/africa_all_raw_cables.geojson",
-            generators="data/raw/africa_all_raw_generators.geojson",
-            generators_csv="data/raw/africa_all_raw_generators.csv",
-            lines="data/raw/africa_all_raw_lines.geojson",
-            substations="data/raw/africa_all_raw_substations.geojson",
+            cables="resources/osm/raw/africa_all_raw_cables.geojson",
+            generators="resources/osm/raw/africa_all_raw_generators.geojson",
+            generators_csv="resources/osm/raw/africa_all_raw_generators.csv",
+            lines="resources/osm/raw/africa_all_raw_lines.geojson",
+            substations="resources/osm/raw/africa_all_raw_substations.geojson",
         log:
             "logs/download_osm_data.log",
         script:
@@ -146,18 +146,18 @@ if config["enable"].get("download_osm_data", True):
 
 rule clean_osm_data:
     input:
-        cables="data/raw/africa_all_raw_cables.geojson",
-        generators="data/raw/africa_all_raw_generators.geojson",
-        lines="data/raw/africa_all_raw_lines.geojson",
-        substations="data/raw/africa_all_raw_substations.geojson",
+        cables="resources/osm/raw/africa_all_raw_cables.geojson",
+        generators="resources/osm/raw/africa_all_raw_generators.geojson",
+        lines="resources/osm/raw/africa_all_raw_lines.geojson",
+        substations="resources/osm/raw/africa_all_raw_substations.geojson",
         country_shapes="resources/country_shapes.geojson",
         offshore_shapes="resources/offshore_shapes.geojson",
         africa_shape="resources/africa_shape.geojson",
     output:
-        generators="data/clean/africa_all_generators.geojson",
-        generators_csv="data/clean/africa_all_generators.csv",
-        lines="data/clean/africa_all_lines.geojson",
-        substations="data/clean/africa_all_substations.geojson",
+        generators="resources/osm/clean/africa_all_generators.geojson",
+        generators_csv="resources/osm/clean/africa_all_generators.csv",
+        lines="resources/osm/clean/africa_all_lines.geojson",
+        substations="resources/osm/clean/africa_all_substations.geojson",
     log:
         "logs/clean_osm_data.log",
     script:
@@ -166,9 +166,9 @@ rule clean_osm_data:
 
 rule build_osm_network:
     input:
-        generators="data/clean/africa_all_generators.geojson",
-        lines="data/clean/africa_all_lines.geojson",
-        substations="data/clean/africa_all_substations.geojson",
+        generators="resources/osm/clean/africa_all_generators.geojson",
+        lines="resources/osm/clean/africa_all_lines.geojson",
+        substations="resources/osm/clean/africa_all_substations.geojson",
         country_shapes="resources/country_shapes.geojson",
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
@@ -186,7 +186,7 @@ rule build_shapes:
         # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
         # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
         # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
-        eez="data/raw/eez/eez_v11.gpkg",
+        eez="data/eez/eez_v11.gpkg",
     output:
         country_shapes="resources/country_shapes.geojson",
         offshore_shapes="resources/offshore_shapes.geojson",
@@ -272,7 +272,7 @@ if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
         input:
-            shapefiles_land="data/raw/landcover",
+            shapefiles_land="data/landcover",
             cutouts=expand("cutouts/{cutouts}.nc", **config["atlite"]),
         output:
             "resources/natura.tiff",
@@ -286,8 +286,8 @@ rule build_renewable_profiles:
     input:
         base_network="networks/base.nc",
         natura="resources/natura.tiff",
-        copernicus="data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        gebco="data/raw/gebco/GEBCO_2021_TID.nc",
+        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+        gebco="data/gebco/GEBCO_2021_TID.nc",
         country_shapes="resources/country_shapes.geojson",
         offshore_shapes="resources/offshore_shapes.geojson",
         regions=lambda w: (
@@ -316,7 +316,7 @@ rule build_powerplants:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
-        osm_powerplants="data/clean/africa_all_generators.csv",
+        osm_powerplants="resources/osm/clean/africa_all_generators.csv",
     output:
         powerplants="resources/powerplants.csv",
         powerplants_osm2pm="resources/powerplants_osm2pm.csv",
