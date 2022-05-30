@@ -61,7 +61,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_inputfile_zip = os.path.join(
         os.getcwd(),
         "data",
-        "raw",
         "gadm",
         GADM_filename,
         GADM_filename + ".zip",
@@ -70,7 +69,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_inputfile_gpkg = os.path.join(
         os.getcwd(),
         "data",
-        "raw",
         "gadm",
         GADM_filename,
         GADM_filename + ".gpkg",
@@ -218,7 +216,7 @@ def save_to_geojson(df, fn):
             pass
 
 
-def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
+def load_EEZ(countries_codes, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
     The dataset shall be downloaded independently by the user (see guide) or
@@ -373,7 +371,7 @@ def download_WorldPop_standard(
         f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
     ]
     WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+        os.getcwd(), "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
@@ -428,7 +426,7 @@ def download_WorldPop_API(
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
     WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+        os.getcwd(), "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
     os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
     year_api = int(str(year)[2:])
@@ -465,13 +463,11 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = os.path.join(
-        os.getcwd(), "data", "raw", "GDP", name_file_nc
-    )  # Input filepath nc
+    GDP_nc = os.path.join(os.getcwd(), "data", "GDP", name_file_nc)  # Input filepath nc
 
     # path of the tif file
     GDP_tif = os.path.join(
-        os.getcwd(), "data", "raw", "GDP", name_file_tif
+        os.getcwd(), "data", "GDP", name_file_tif
     )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
@@ -517,7 +513,7 @@ def load_GDP(
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
     GDP_tif = os.path.join(
-        os.getcwd(), "data", "raw", "GDP", name_file_tif
+        os.getcwd(), "data", "GDP", name_file_tif
     )  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
