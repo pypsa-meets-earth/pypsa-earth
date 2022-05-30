@@ -102,7 +102,7 @@ def add_line_endings_tosubstations(substations, lines):
 
 
 # tol in m
-def set_substations_ids(buses, tol=2000):
+def set_substations_ids(buses, metric_crs, tol=2000):
     """
     Function to set substations ids to buses, accounting for location tolerance
 
@@ -120,7 +120,7 @@ def set_substations_ids(buses, tol=2000):
     buses["station_id"] = -1
 
     # create temporary series to execute distance calculations using m as reference distances
-    temp_bus_geom = buses.geometry.to_crs(epsg=3857)
+    temp_bus_geom = buses.geometry.to_crs(metric_crs)
 
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -172,7 +172,7 @@ def set_substations_ids(buses, tol=2000):
                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
 
 
-def set_lines_ids(lines, buses):
+def set_lines_ids(lines, buses, metric_crs):
     """
     Function to set line buses ids to the closest bus in the list
     """
@@ -188,8 +188,8 @@ def set_lines_ids(lines, buses):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    busesepsg = buses.to_crs(epsg=3857)
-    linesepsg = lines.to_crs(epsg=3857)
+    busesepsg = buses.to_crs(metric_crs)
+    linesepsg = lines.to_crs(metric_crs)
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
@@ -507,7 +507,9 @@ def set_lv_substations(buses):
 #       respect to a node
 
 
-def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
+def merge_stations_lines_by_station_id_and_voltage(
+    lines, buses, crs, metric_crs, tol=2000
+):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
@@ -517,7 +519,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     )
 
     # set substation ids
-    set_substations_ids(buses, tol=tol)
+    set_substations_ids(buses, metric_crs, tol=tol)
 
     logger.info("Stage 3b/4: Merge substations with the same id")
 
@@ -527,7 +529,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses)
+    lines, buses = set_lines_ids(lines, buses, metric_crs)
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
@@ -552,7 +554,7 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     return lines, buses
 
 
-def create_station_at_equal_bus_locations(lines, buses, tol=2000):
+def create_station_at_equal_bus_locations(lines, buses, crs, metric_crs, tol=2000):
     # V1. Create station_id at same bus location
     # - We saw that buses are not connected exactly at one point, they are
     #   usually connected to a substation "area" (analysed on maps)
@@ -571,10 +573,10 @@ def create_station_at_equal_bus_locations(lines, buses, tol=2000):
     bus_all = buses
 
     # set substation ids
-    set_substations_ids(buses, tol=tol)
+    set_substations_ids(buses, metric_crs, tol=tol)
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses)
+    lines, buses = set_lines_ids(lines, buses, metric_crs)
 
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
@@ -619,7 +621,7 @@ def _split_linestring_by_point(linestring, points):
     return list_linestrings
 
 
-def fix_overpassing_lines(lines, buses, tol=1):
+def fix_overpassing_lines(lines, buses, metric_crs, tol=1):
     """
     Function to avoid buses overpassing lines with no connection
     when the bus is within a given tolerance from the line
@@ -638,8 +640,8 @@ def fix_overpassing_lines(lines, buses, tol=1):
     lines_to_add = []  # list of lines to be added
     lines_to_split = []  # list of lines that have been splitted
 
-    lines_epsgmod = lines.to_crs(epsg=3857)
-    buses_epsgmod = buses.to_crs(epsg=3857)
+    lines_epsgmod = lines.to_crs(metric_crs)
+    buses_epsgmod = buses.to_crs(metric_crs)
 
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -700,7 +702,7 @@ def fix_overpassing_lines(lines, buses, tol=1):
     df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
 
     # update length
-    df_to_add["length"] = df_to_add.to_crs(epsg=3857).geometry.length
+    df_to_add["length"] = df_to_add.to_crs(metric_crs).geometry.length
 
     # update line endings
     df_to_add = line_endings_to_bus_conversion(df_to_add)
@@ -708,18 +710,21 @@ def fix_overpassing_lines(lines, buses, tol=1):
     # remove original lines
     lines.drop(lines_to_split, inplace=True)
 
-    lines = lines.append(df_to_add).reset_index(drop=True)
+    lines = gpd.GeoDataFrame(
+        pd.concat([lines, df_to_add], ignore_index=True).reset_index(drop=True),
+        crs=lines.crs,
+    )
 
     return lines, buses
 
 
-def built_network(inputs, outputs):
+def built_network(inputs, outputs, crs, metric_crs):
 
     logger.info("Stage 1/5: Read input data")
 
-    substations = gpd.read_file(inputs["substations"]).set_crs(epsg=4326, inplace=True)
-    lines = gpd.read_file(inputs["lines"]).set_crs(epsg=4326, inplace=True)
-    generators = read_geojson(inputs["generators"]).set_crs(epsg=4326, inplace=True)
+    substations = gpd.read_file(inputs["substations"])
+    lines = gpd.read_file(inputs["lines"])
+    generators = read_geojson(inputs["generators"])
 
     logger.info("Stage 2/5: Add line endings to the substation datasets")
 
@@ -736,7 +741,7 @@ def built_network(inputs, outputs):
         )
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
-        lines, buses = fix_overpassing_lines(lines, buses, tol=tol)
+        lines, buses = fix_overpassing_lines(lines, buses, metric_crs, tol=tol)
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
@@ -747,7 +752,7 @@ def built_network(inputs, outputs):
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
         lines, buses = merge_stations_lines_by_station_id_and_voltage(
-            lines, buses, tol=tol
+            lines, buses, crs, metric_crs, tol=tol
         )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
@@ -755,27 +760,23 @@ def built_network(inputs, outputs):
     logger.info("Stage 5/5: Add augmented substation to country with no data")
 
     country_shapes_fn = snakemake.input.country_shapes
-    country_shapes = (
-        gpd.read_file(country_shapes_fn).set_index("name")["geometry"].set_crs(4326)
-    )
+    country_shapes = gpd.read_file(country_shapes_fn).set_index("name")["geometry"]
     input = snakemake.config["countries"]
     country_list = input
     bus_country_list = buses["country"].unique().tolist()
 
     if len(bus_country_list) != len(country_list):
         no_data_countries = set(country_list).difference(set(bus_country_list))
-        no_data_countries_shape = (
-            country_shapes[country_shapes.index.isin(no_data_countries) == True]
-            .reset_index()
-            .set_crs(4326)
-        )
+        no_data_countries_shape = country_shapes[
+            country_shapes.index.isin(no_data_countries) == True
+        ].reset_index()
         length = len(no_data_countries)
         df = gpd.GeoDataFrame(
             {
                 "voltage": [220000] * length,
                 "country": no_data_countries_shape["name"],
-                "lon": no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.x,
-                "lat": no_data_countries_shape["geometry"].to_crs(epsg=4326).centroid.y,
+                "lon": no_data_countries_shape["geometry"].centroid.x,
+                "lat": no_data_countries_shape["geometry"].centroid.y,
                 "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
                 "station_id": [np.nan] * length,
                 "dc": [False] * length,
@@ -783,13 +784,14 @@ def built_network(inputs, outputs):
                 "tag_area": [0.0] * length,
                 "symbol": ["substation"] * length,
                 "tag_substation": ["transmission"] * length,
-                "geometry": no_data_countries_shape["geometry"]
-                .to_crs(epsg=4326)
-                .centroid,
+                "geometry": no_data_countries_shape["geometry"].to_crs(crs).centroid,
                 "substation_lv": [True] * length,
             }
         )
-        buses = pd.concat([buses, df], ignore_index=True).reset_index(drop=True)
+        buses = gpd.GeoDataFrame(
+            pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
+            crs=buses.crs,
+        )
 
     logger.info("Save outputs")
 
@@ -816,6 +818,10 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 
+    # load default crs
+    default_crs = snakemake.config["crs"]["default_crs"]
+    metric_crs = snakemake.config["crs"]["metric_crs"]
+
     sets_path_to_root("pypsa-africa")
 
-    built_network(snakemake.input, snakemake.output)
+    built_network(snakemake.input, snakemake.output, default_crs, metric_crs)
