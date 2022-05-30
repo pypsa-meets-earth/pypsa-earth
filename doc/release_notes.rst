@@ -43,6 +43,8 @@ Upcoming Release
 
 * Add option to run workflow without pop and gdp raster `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
 
+* Add latitude_optimal to get optimal solar orientation by default `Commit 1b2466b <https://github.com/pypsa-meets-africa/pypsa-africa/commit/de7d32be8807e4fc42486a60184f45680612fd46>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
