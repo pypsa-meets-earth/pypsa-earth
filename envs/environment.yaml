@@ -70,7 +70,7 @@ dependencies:
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
   - git+https://github.com/davide-f/powerplantmatching.git@new_pypsa_africa#egg=powerplantmatching
-  - git+https://github.com/jmhessel/google-drive-downloader@master  # google drive with fix for virus scan
+  - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf
