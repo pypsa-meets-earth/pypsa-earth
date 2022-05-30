@@ -24,7 +24,7 @@ summary_dir: results
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
-  closed: "left" # end is not inclusive
+  inclusive: "left" # end is not inclusive
 
 enable:
   retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
