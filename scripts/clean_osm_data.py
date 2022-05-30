@@ -352,7 +352,7 @@ dropped_circuits_tags = [
 ]
 
 
-def integrate_lines_df(df_all_lines, metric_crs):
+def integrate_lines_df(df_all_lines, distance_crs):
     """
     Function to add underground, under_construction, frequency and circuits
     """
@@ -448,7 +448,7 @@ def integrate_lines_df(df_all_lines, metric_crs):
             )
 
             # transfrom to metric crs to obtain length in m from coordinates
-            df_one_third_circuits_m = df_one_third_circuits.to_crs(metric_crs)
+            df_one_third_circuits_m = df_one_third_circuits.to_crs(distance_crs)
 
             length_from_crs = df_one_third_circuits_m.length
             df_one_third_circuits["length_crs"] = length_from_crs
@@ -624,14 +624,14 @@ def clean_data(
     input_files,
     output_files,
     africa_shape,
+    geo_crs,
+    distance_crs,
     ext_country_shapes=None,
     names_by_shapes=True,
     tag_substation="transmission",
     threshold_voltage=35000,
     add_line_endings=True,
     generator_name_method="OSM",
-    crs="EPSG:4326",
-    metric_crs="EPSG:3857",
 ):
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"])
@@ -657,7 +657,7 @@ def clean_data(
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
-    df_all_lines = integrate_lines_df(df_all_lines, metric_crs)
+    df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
 
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
@@ -765,8 +765,8 @@ if __name__ == "__main__":
     )
     offshore_shape_path = snakemake.input.offshore_shapes
     onshore_shape_path = snakemake.input.country_shapes
-    default_crs = snakemake.config["crs"]["default_crs"]
-    metric_crs = snakemake.config["crs"]["metric_crs"]
+    geo_crs = snakemake.config["crs"]["geo_crs"]
+    distance_crs = snakemake.config["crs"]["distance_crs"]
 
     input_files = snakemake.input
     output_files = snakemake.output
@@ -794,12 +794,12 @@ if __name__ == "__main__":
         input_files,
         output_files,
         africa_shape,
+        geo_crs,
+        distance_crs,
         ext_country_shapes=ext_country_shapes,
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,
         threshold_voltage=threshold_voltage,
         add_line_endings=add_line_endings,
         generator_name_method=generator_name_method,
-        crs=default_crs,
-        metric_crs=metric_crs,
     )
