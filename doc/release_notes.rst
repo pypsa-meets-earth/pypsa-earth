@@ -43,6 +43,8 @@ Upcoming Release
 
 * Add option to run workflow without pop and gdp raster `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
 
+* Restructure the package to ease readability and fix google drive downloading method `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
