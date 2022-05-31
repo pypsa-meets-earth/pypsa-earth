@@ -775,7 +775,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         if len(links) > 0:
             # TODO Should be the frequency value kept when calling merge_stations_lines_by_station_id_and_voltage()?
             links, buses = merge_stations_lines_by_station_id_and_voltage(
-                links, buses, tol=tol
+                links, buses, geo_crs, distance_crs,  tol=tol
             )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
