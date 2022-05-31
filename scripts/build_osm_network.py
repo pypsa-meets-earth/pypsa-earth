@@ -747,7 +747,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     buses = add_line_endings_tosubstations(substations, lines)
     # a links dataframe can be empty
     if len(links) > 0:
-        buses = add_line_endings_tosubstations(substations, links)
+        buses = add_line_endings_tosubstations(buses, links)
 
     # Address the overpassing line issue Step 3/5
     if snakemake.config.get("build_osm_network", {}).get(
