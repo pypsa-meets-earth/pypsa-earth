@@ -51,6 +51,8 @@ _logger.setLevel(logging.INFO)
 
 # logger.setLevel(logging.WARNING)
 
+OSM_CRS = "EPSG:4326"
+
 
 def getContinentCountry(code):
     """
@@ -321,7 +323,7 @@ def lonlat_lookup(df_way, Data):
     return lonlat_list
 
 
-def convert_ways_points(df_way, Data):
+def convert_ways_points(df_way, Data, geo_crs, distance_crs):
     """Convert Ways to Point Coordinates"""
     lonlat_list = lonlat_lookup(df_way, Data)
     way_polygon = list(
@@ -334,10 +336,7 @@ def convert_ways_points(df_way, Data):
         map(
             int,
             round(
-                gpd.GeoSeries(way_polygon)
-                .set_crs("EPSG:4326")
-                .to_crs("EPSG:3857")
-                .area,
+                gpd.GeoSeries(way_polygon).set_crs(geo_crs).to_crs(distance_crs).area,
                 -1,
             ),
         )
@@ -356,7 +355,7 @@ def convert_ways_points(df_way, Data):
     df_way.insert(0, "lonlat", lonlat_column)
 
 
-def convert_ways_lines(df_way, Data):
+def convert_ways_lines(df_way, Data, geo_crs, distance_crs):
     """Convert Ways to Line Coordinates"""
     lonlat_list = lonlat_lookup(df_way, Data)
     lonlat_column = lonlat_list
@@ -364,22 +363,22 @@ def convert_ways_lines(df_way, Data):
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
     length_column = (
-        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+        gpd.GeoSeries(way_linestring).set_crs(geo_crs).to_crs(distance_crs).length
     )
 
     df_way.insert(0, "Length", length_column)
 
 
-def convert_pd_to_gdf_nodes(df_way):
+def convert_pd_to_gdf_nodes(df_way, geo_crs):
     """Convert Points Pandas Dataframe to GeoPandas Dataframe"""
     gdf = gpd.GeoDataFrame(
-        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
-    )
+        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs=OSM_CRS
+    ).to_crs(geo_crs)
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
 
 
-def convert_pd_to_gdf_lines(df_way, simplified=False):
+def convert_pd_to_gdf_lines(df_way, geo_crs, simplified=False):
     """Convert Lines Pandas Dataframe to GeoPandas Dataframe"""
     if simplified is True:
         df_way["geometry"] = df_way["geometry"].apply(
@@ -387,8 +386,8 @@ def convert_pd_to_gdf_lines(df_way, simplified=False):
         )
 
     gdf = gpd.GeoDataFrame(
-        df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326"
-    )
+        df_way, geometry=[LineString(x) for x in df_way.lonlat], crs=OSM_CRS
+    ).to_crs(geo_crs)
     gdf.drop(columns=["lonlat"], inplace=True)
 
     return gdf
@@ -422,11 +421,8 @@ def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_di
         return iso_code
 
 
-def output_csv_geojson(
-    output_files, country_code, df_all_feature, columns_feature, feature
-):
+def output_csv_geojson(output_files, df_all_feature, columns_feature, feature, geo_crs):
     """Function to save the feature as csv and geojson"""
-    continent, country_name = getContinentCountry(country_code)
 
     # get path from snakemake; expected geojson
     path_file_geojson = output_files[feature + "s"]
@@ -451,7 +447,7 @@ def output_csv_geojson(
         # TODO: is it possible to have "geometry" without "lonlat"?
         else:
             # TODO: is it possible that nodes dataframe will also be empty?
-            gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
+            gdf_feature = convert_pd_to_gdf_lines(df_all_feature, geo_crs)
             gdf_feature.to_file(path_file_geojson, driver="GeoJSON")  # Generate GeoJson
             return None
 
@@ -482,9 +478,9 @@ def output_csv_geojson(
         return None
 
     if feature_category[feature] == "way":
-        gdf_feature = convert_pd_to_gdf_lines(df_all_feature)
+        gdf_feature = convert_pd_to_gdf_lines(df_all_feature, geo_crs)
     else:
-        gdf_feature = convert_pd_to_gdf_nodes(df_all_feature)
+        gdf_feature = convert_pd_to_gdf_nodes(df_all_feature, geo_crs)
 
     _logger.info("Writing GeoJSON file")
     gdf_feature.to_file(path_file_geojson, driver="GeoJSON")  # Generate GeoJson
@@ -540,6 +536,8 @@ def process_data(
     feature_list,
     country_list,
     output_files,
+    geo_crs,
+    distance_crs,
     iso_coding=True,
     update=False,
     verify=False,
@@ -574,7 +572,7 @@ def process_data(
 
             if feature_category[feature] == "way":
                 convert_ways_lines(
-                    df_way, Data
+                    df_way, Data, OSM_CRS, distance_crs
                 ) if not df_way.empty else _logger.warning(
                     f"Empty Way Dataframe for {feature} in {country_code}"
                 )
@@ -584,7 +582,9 @@ def process_data(
                     )
 
             if feature_category[feature] == "node":
-                convert_ways_points(df_way, Data) if not df_way.empty else None
+                convert_ways_points(
+                    df_way, Data, OSM_CRS, distance_crs
+                ) if not df_way.empty else None
 
             # Add Type Column
             df_node["Type"] = "Node"
@@ -602,10 +602,10 @@ def process_data(
 
         output_csv_geojson(
             output_files,
-            country_code,
             df_all_feature,
             feature_columns[feature],
             feature,
+            geo_crs=geo_crs,
         )
 
 
@@ -732,11 +732,17 @@ if __name__ == "__main__":
         "download_osm_data_nprocesses", 1
     )  # number of threads
 
+    # get the default and metric crs of the workflow
+    geo_crs = snakemake.config["crs"]["geo_crs"]
+    distance_crs = snakemake.config["crs"]["distance_crs"]
+
     # Set update # Verify = True checks local md5s and pre-filters data again
     process_data(
         feature_list,
         country_list,
         output_files,
+        geo_crs,
+        distance_crs,
         iso_coding=True,
         update=False,
         verify=False,

@@ -214,20 +214,18 @@ def _set_countries_and_substations(n):
     buses = n.buses
 
     countries = snakemake.config["countries"]
-    country_shapes = (
-        gpd.read_file(snakemake.input.country_shapes)
-        .set_index("name")["geometry"]
-        .set_crs(4326)
-    )
+    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
+        "geometry"
+    ]
     offshore_shapes = unary_union(
-        gpd.read_file(snakemake.input.offshore_shapes)["geometry"].set_crs(4326)
+        gpd.read_file(snakemake.input.offshore_shapes)["geometry"]
     )
 
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
         bus_locations,
         geometry=gpd.points_from_xy(bus_locations.x, bus_locations.y),
-        crs=4326,
+        crs=country_shapes.crs,  # the workflow sets the the same crs for buses and shapes
     )
     # Check if bus is in shape
     offshore_b = bus_locations.within(offshore_shapes)

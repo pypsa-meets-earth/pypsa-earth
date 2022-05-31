@@ -62,6 +62,8 @@ from rasterio.warp import transform_bounds
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
+CUTOUT_CRS = "EPSG:4326"
+
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     "Function to parse the list of paths to include shapes included in folders, if any"
@@ -88,7 +90,7 @@ def determine_cutout_xXyY(cutout_name, out_logging):
     if out_logging:
         _logger.info("Stage 1/5: Determine cutout boundaries")
     cutout = atlite.Cutout(cutout_name)
-    assert cutout.crs.to_epsg() == 4326
+    assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
     return [x - dx / 2.0, X + dx / 2.0, y - dy / 2.0, Y + dy / 2.0]
@@ -104,7 +106,7 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
-def unify_protected_shape_areas(inputs, out_logging):
+def unify_protected_shape_areas(inputs, area_crs, out_logging):
     """
     Iterates thorugh all snakemake rule inputs and unifies shapefiles (.shp) only.
 
@@ -113,7 +115,7 @@ def unify_protected_shape_areas(inputs, out_logging):
 
     Returns
     -------
-    unified_shape : GeoDataFrame with a unified "multishape" (crs=3035)
+    unified_shape : GeoDataFrame with a unified "multishape"
 
     """
     import pandas as pd
@@ -133,16 +135,14 @@ def unify_protected_shape_areas(inputs, out_logging):
     for i in shp_files:
         shape = gpd.GeoDataFrame(
             pd.concat([gpd.read_file(i) for i in shp_files])
-        ).to_crs(3035)
+        ).to_crs(area_crs)
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
 
-    # Create Geodataframe with crs(3035)
-    shape = gpd.GeoDataFrame(shape)
-    shape = shape.rename(columns={0: "geometry"}).set_geometry(
-        "geometry"
-    )  # .set_crs(3035)
+    # Create Geodataframe with crs
+    shape = gpd.GeoDataFrame(shape, crs=area_crs)
+    shape = shape.rename(columns={0: "geometry"}).set_geometry("geometry")
 
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
     if out_logging:
@@ -152,7 +152,7 @@ def unify_protected_shape_areas(inputs, out_logging):
         _logger.info(
             "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
         )
-    unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file]).set_crs(3035)
+    unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=area_crs)
 
     return unified_shape
 
@@ -165,6 +165,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_natura_raster")
     configure_logging(snakemake)
 
+    # get crs
+    area_crs = snakemake.config["crs"]["area_crs"]
+
     out_logging = True
     inputs = snakemake.input
     cutouts = inputs.cutouts
@@ -172,12 +175,12 @@ if __name__ == "__main__":
     xs, Xs, ys, Ys = zip(
         *(determine_cutout_xXyY(cutout, out_logging=out_logging) for cutout in cutouts)
     )
-    bounds = transform_bounds(4326, 3035, min(xs), min(ys), max(Xs), max(Ys))
+    bounds = transform_bounds(CUTOUT_CRS, area_crs, min(xs), min(ys), max(Xs), max(Ys))
     transform, out_shape = get_transform_and_shape(
         bounds, res=100, out_logging=out_logging
     )
     # adjusted boundaries
-    shapes = unify_protected_shape_areas(shapefiles, out_logging=out_logging)
+    shapes = unify_protected_shape_areas(shapefiles, area_crs, out_logging=out_logging)
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
@@ -193,7 +196,7 @@ if __name__ == "__main__":
         dtype=rio.uint8,
         count=1,
         transform=transform,
-        crs=3035,
+        crs=area_crs,
         compress="lzw",
         width=raster.shape[1],
         height=raster.shape[0],
