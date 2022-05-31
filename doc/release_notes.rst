@@ -47,6 +47,8 @@ Upcoming Release
 
 * Harmonize CRSs by options `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
 
+* Change default option for build_natura `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
