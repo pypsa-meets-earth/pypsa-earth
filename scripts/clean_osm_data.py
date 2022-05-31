@@ -374,7 +374,7 @@ dropped_circuits_tags = [
 ]
 
 
-def integrate_lines_df(df_all_lines):
+def integrate_lines_df(df_all_lines, distance_crs):
     """
     Function to add underground, under_construction, frequency and circuits
     """
@@ -474,10 +474,8 @@ def integrate_lines_df(df_all_lines):
                 }
             )
 
-            # transfrom to EPSG:4326 from EPSG:3857 to obtain length in m from coordinates
-            df_one_third_circuits_m = df_one_third_circuits.set_crs("EPSG:4326").to_crs(
-                "EPSG:3857"
-            )
+            # transfrom to metric crs to obtain length in m from coordinates
+            df_one_third_circuits_m = df_one_third_circuits.to_crs(distance_crs)
 
             length_from_crs = df_one_third_circuits_m.length
             df_one_third_circuits["length_crs"] = length_from_crs
@@ -614,21 +612,18 @@ def set_countryname_by_shape(
 def create_extended_country_shapes(country_shapes, offshore_shapes):
     """Obtain the extended country shape by merging on- and off-shore shapes"""
 
-    merged_shapes = (
-        gpd.GeoDataFrame(
-            {
-                "name": list(country_shapes.index),
-                "geometry": [
-                    c_geom.unary_union(offshore_shapes[c_code])
-                    if c_code in offshore_shapes
-                    else c_geom
-                    for c_code, c_geom in country_shapes.items()
-                ],
-            }
-        )
-        .set_index("name")["geometry"]
-        .set_crs(4326)
-    )
+    merged_shapes = gpd.GeoDataFrame(
+        {
+            "name": list(country_shapes.index),
+            "geometry": [
+                c_geom.unary_union(offshore_shapes[c_code])
+                if c_code in offshore_shapes
+                else c_geom
+                for c_code, c_geom in country_shapes.items()
+            ],
+        },
+        crs=country_shapes.crs,
+    ).set_index("name")["geometry"]
 
     return merged_shapes
 
@@ -656,6 +651,8 @@ def clean_data(
     input_files,
     output_files,
     africa_shape,
+    geo_crs,
+    distance_crs,
     ext_country_shapes=None,
     names_by_shapes=True,
     tag_substation="transmission",
@@ -664,7 +661,7 @@ def clean_data(
     generator_name_method="OSM",
 ):
     # Load raw data lines
-    df_lines = gpd.read_file(input_files["lines"]).set_crs(epsg=4326, inplace=True)
+    df_lines = gpd.read_file(input_files["lines"])
 
     # prepare lines dataframe and data types
     df_lines = prepare_lines_df(df_lines)
@@ -676,9 +673,7 @@ def clean_data(
     # load cables only if data are stored
     if os.path.getsize(input_files["cables"]) > 0:
         # Load raw data lines
-        df_cables = gpd.read_file(input_files["cables"]).set_crs(
-            epsg=4326, inplace=True
-        )
+        df_cables = gpd.read_file(input_files["cables"])
 
         # prepare cables dataframe and data types
         df_cables = prepare_lines_df(df_cables)
@@ -689,7 +684,7 @@ def clean_data(
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
-    df_all_lines = integrate_lines_df(df_all_lines)
+    df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
 
     # filter lines by voltage
     df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
@@ -705,7 +700,7 @@ def clean_data(
     # set unique line ids
     df_all_lines = set_unique_id(df_all_lines, "line_id")
 
-    df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry", crs="EPSG:4326")
+    df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
     # set the country name by the shape
     df_all_lines = set_countryname_by_shape(
@@ -720,9 +715,7 @@ def clean_data(
 
     # ----------- SUBSTATIONS -----------
 
-    df_all_substations = gpd.read_file(input_files["substations"]).set_crs(
-        epsg=4326, inplace=True
-    )
+    df_all_substations = gpd.read_file(input_files["substations"])
 
     # prepare dataset for substations
     df_all_substations = prepare_substation_df(df_all_substations)
@@ -749,9 +742,7 @@ def clean_data(
     df_all_substations = set_unique_id(df_all_substations, "bus_id")
 
     # save to geojson file
-    df_all_substations = gpd.GeoDataFrame(
-        df_all_substations, geometry="geometry", crs="EPSG:4326"
-    )
+    df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
 
     # set the country name by the shape
     df_all_substations = set_countryname_by_shape(
@@ -765,9 +756,7 @@ def clean_data(
 
     # ----------- GENERATORS -----------
 
-    df_all_generators = gpd.read_file(input_files["generators"]).set_crs(
-        epsg=4326, inplace=True
-    )
+    df_all_generators = gpd.read_file(input_files["generators"])
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
@@ -807,21 +796,17 @@ if __name__ == "__main__":
     )
     offshore_shape_path = snakemake.input.offshore_shapes
     onshore_shape_path = snakemake.input.country_shapes
+    geo_crs = snakemake.config["crs"]["geo_crs"]
+    distance_crs = snakemake.config["crs"]["distance_crs"]
 
     input_files = snakemake.input
     output_files = snakemake.output
 
-    africa_shape = (
-        gpd.read_file(snakemake.input.africa_shape).set_crs(4326)["geometry"].iloc[0]
-    )
+    africa_shape = gpd.read_file(snakemake.input.africa_shape)["geometry"].iloc[0]
 
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
-        country_shapes = (
-            gpd.read_file(onshore_shape_path)
-            .set_index("name")["geometry"]
-            .set_crs(4326)
-        )
+        country_shapes = gpd.read_file(onshore_shape_path).set_index("name")["geometry"]
 
     if os.stat(offshore_shape_path).st_size == 0:
         logger.info("No offshore file exist. Passing only onshore shape")
@@ -829,11 +814,9 @@ if __name__ == "__main__":
 
     else:
         logger.info("Combining on- and offshore shape")
-        offshore_shapes = (
-            gpd.read_file(offshore_shape_path)
-            .set_index("name")["geometry"]
-            .set_crs(4326)
-        )
+        offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
+            "geometry"
+        ]
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes
         )
@@ -842,6 +825,8 @@ if __name__ == "__main__":
         input_files,
         output_files,
         africa_shape,
+        geo_crs,
+        distance_crs,
         ext_country_shapes=ext_country_shapes,
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,
