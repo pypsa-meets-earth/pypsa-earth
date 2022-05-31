@@ -734,6 +734,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     substations = gpd.read_file(inputs["substations"])
     lines = gpd.read_file(inputs["lines"])
+    links = read_geojson(inputs["links"])    
     generators = read_geojson(inputs["generators"])
 
     logger.info("Stage 2/5: Add line endings to the substation datasets")
@@ -756,6 +757,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
         lines, buses = fix_overpassing_lines(lines, buses, distance_crs, tol=tol)
+        links, buses = fix_overpassing_lines(links, buses, distance_crs, tol=tol)
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
