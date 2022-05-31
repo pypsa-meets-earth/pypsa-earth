@@ -267,7 +267,7 @@ def merge_stations_same_station_id(
 
         # loop for every voltage level in the bus
         # The location of the buses is averaged; in the case of multiple voltage levels for the same station_id,
-        # each bus corresponding to a voltage level is located at a distanceregulated by delta_lon/delta_lat
+        # each bus corresponding to a voltage level is located at a distance regulated by delta_lon/delta_lat
         v_it = 0
         for v_name, bus_row in g_value.groupby(by=["voltage"]):
 
@@ -517,6 +517,7 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     """
 
+    # the links dataframe can be empty
     if len(lines) == 0:
         return lines, buses
 
