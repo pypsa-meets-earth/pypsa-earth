@@ -89,6 +89,7 @@ def add_line_endings_tosubstations(substations, lines):
         + 1
         + bus_s.index
     )
+    bus_s["dc"] = lines["tag_frequency"].eq(0)
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_e["geometry"] = lines.geometry.boundary.map(
@@ -97,6 +98,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x if p != None else None)
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
+    bus_s["dc"] = lines["tag_frequency"].eq(0)
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
