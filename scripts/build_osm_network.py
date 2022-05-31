@@ -512,6 +512,10 @@ def merge_stations_lines_by_station_id_and_voltage(lines, buses, tol=2000):
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
+
+    if len(lines) == 0:
+        return lines, buses
+
     logger.info(
         "Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol / 1000)
     )
@@ -635,6 +639,10 @@ def fix_overpassing_lines(lines, buses, tol=1):
         below which the line will be splitted
     """
 
+    # in case of @lines corresponding to links it may be an empty data frame
+    if len(lines) == 0:
+        return lines, buses
+
     lines_to_add = []  # list of lines to be added
     lines_to_split = []  # list of lines that have been splitted
 
@@ -728,7 +736,9 @@ def built_network(inputs, outputs):
     lines = line_endings_to_bus_conversion(lines)
     links = line_endings_to_bus_conversion(links)
     buses = add_line_endings_tosubstations(substations, lines)
-    buses = add_line_endings_tosubstations(substations, links)
+    # a links dataframe can be empty
+    if len(links) > 0:
+        buses = add_line_endings_tosubstations(substations, links)
 
     # Address the overpassing line issue Step 3/5
     if snakemake.config.get("build_osm_network", {}).get(
@@ -753,10 +763,11 @@ def built_network(inputs, outputs):
         lines, buses = merge_stations_lines_by_station_id_and_voltage(
             lines, buses, tol=tol
         )
-        # TODO Should be the frequency value kept when calling merge_stations_lines_by_station_id_and_voltage()?
-        links, buses = merge_stations_lines_by_station_id_and_voltage(
-            links, buses, tol=tol
-        )
+        if len(links) > 0:
+            # TODO Should be the frequency value kept when calling merge_stations_lines_by_station_id_and_voltage()?
+            links, buses = merge_stations_lines_by_station_id_and_voltage(
+                links, buses, tol=tol
+            )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
 
