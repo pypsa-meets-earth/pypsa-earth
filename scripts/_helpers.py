@@ -570,8 +570,11 @@ def read_csv_nafix(file, **kwargs):
 def to_csv_nafix(obj, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
-    return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
-
+    if len(obj) > 0:   
+        return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
+    else:
+        with open(path, "w") as fp:
+            pass
 
 def save_to_geojson(df, fn):
     if os.path.exists(fn):
