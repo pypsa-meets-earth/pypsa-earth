@@ -80,7 +80,7 @@ summary_dir: results
 snapshots:
   start: "2013-03-1"
   end: "2013-03-14"
-  closed: "left" # end is not inclusive
+  inclusive: "left" # end is not inclusive
 
 enable:
   # prepare_links_p_nom: false
@@ -90,6 +90,12 @@ enable:
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
+
+# definition of the Coordinate Reference Systems
+crs:
+  geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
+  distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
+  area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
 electricity:
   voltages: [220., 300., 380.]

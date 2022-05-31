@@ -24,7 +24,7 @@ summary_dir: results
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
-  closed: "left" # end is not inclusive
+  inclusive: "left" # end is not inclusive
 
 enable:
   retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
@@ -34,6 +34,12 @@ enable:
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+# definition of the Coordinate Reference Systems
+crs:
+  geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
+  distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
+  area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
 # download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 

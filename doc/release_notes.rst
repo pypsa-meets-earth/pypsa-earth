@@ -45,6 +45,8 @@ Upcoming Release
 
 * Add latitude_optimal to get optimal solar orientation by default `Commit 1b2466b <https://github.com/pypsa-meets-africa/pypsa-africa/commit/de7d32be8807e4fc42486a60184f45680612fd46>`_
 
+* Harmonize CRSs by options `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
+
 * Restructure the package to ease readability and fix google drive downloading method `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`_
 
 
