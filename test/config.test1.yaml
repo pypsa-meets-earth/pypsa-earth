@@ -88,16 +88,13 @@ snapshots:
   inclusive: "left" # end is not inclusive
 
 enable:
-  # prepare_links_p_nom: false
-  retrieve_databundle: true
-  download_osm_data: true
-  # retrieve_cutout: true
-  # retrieve_natura_raster: true
-  # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: false  # If True, than an exclusion raster will be build
   build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
-  # custom_busmap: false
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
 # definition of the Coordinate Reference Systems
 crs:
