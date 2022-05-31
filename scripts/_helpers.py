@@ -509,7 +509,7 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country):
+def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_words=[]):
     """
     Convert 2-digit country code to full name country:
 
@@ -517,6 +517,12 @@ def two_digits_2_name_country(two_code_country):
     ----------
     two_code_country: str
         2-digit country name
+    nocomma: bool (optional, default False)
+        When true, country names with comma are extended to remove the comma.
+        Example CD -> Congo, The Democratic Republic of -> The Democratic Republic of Congo
+    remove_start_words: list (optional, default empty)
+        When a sentence starts with any of the provided words, the beginning is removed.
+        e.g. The Democratic Republic of Congo -> Democratic Republic of Congo (remove_start_words=["The"])
 
     Returns
     ----------
@@ -527,6 +533,25 @@ def two_digits_2_name_country(two_code_country):
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
     full_name = get_country("name", alpha_2=two_code_country)
+
+    if nocomma:
+        # separate list by delim
+        splits = full_name.split(", ")
+
+        # reverse the order
+        splits.reverse()
+
+        # return the merged string
+        full_name = " ".join(splits)
+
+    # when list is non empty
+    if remove_start_words:
+        # loop over every provided word
+        for word in remove_start_words:
+            # when the full_name starts with the desired word, then remove it
+            if full_name.startswith(word):
+                full_name = full_name.replace(word, "", 1)
+
     return full_name
 
 
@@ -570,11 +595,12 @@ def read_csv_nafix(file, **kwargs):
 def to_csv_nafix(obj, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
-    if len(obj) > 0:   
+    if len(obj) > 0:
         return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
     else:
         with open(path, "w") as fp:
             pass
+
 
 def save_to_geojson(df, fn):
     if os.path.exists(fn):
