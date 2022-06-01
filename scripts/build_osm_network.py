@@ -33,7 +33,7 @@ def line_endings_to_bus_conversion(lines):
 
     return lines
 
-
+# TODO Seems to be not used?
 def create_bus_df_from_lines(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
@@ -424,6 +424,7 @@ def connect_stations_same_station_id(lines, buses):
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
+                        # TODO Verify
                         50,  # "tag_frequency"
                         buses_station_id.country.iloc[0],  # "country"
                         LineString(
@@ -804,7 +805,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
                 "lat": no_data_countries_shape["geometry"].centroid.y,
                 "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
                 "station_id": [np.nan] * length,
-                # TODO Add flags from the links file
+                # All lines for the countries with NA bus data are assumed to be AC
                 "dc": [False] * length,
                 "under_construction": [False] * length,
                 "tag_area": [0.0] * length,
