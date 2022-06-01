@@ -74,7 +74,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s["lon"] = bus_s["geometry"].x
     bus_s["lat"] = bus_s["geometry"].y
     bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
-    bus_s["dc"] = lines["tag_frequency"].eq(0)    
+    bus_s["dc"] = lines["tag_frequency"].eq(0)
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
     bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1])
@@ -776,7 +776,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         if len(links) > 0:
             # TODO Should be the frequency value kept when calling merge_stations_lines_by_station_id_and_voltage()?
             links, buses = merge_stations_lines_by_station_id_and_voltage(
-                links, buses, geo_crs, distance_crs,  tol=tol
+                links, buses, geo_crs, distance_crs, tol=tol
             )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
