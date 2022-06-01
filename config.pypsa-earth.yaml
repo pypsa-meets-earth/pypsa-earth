@@ -13,12 +13,6 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-<<<<<<< HEAD
-  clusters: [46]
-  opts: [Co2L1-72H]
-
-countries: ["MA"]
-=======
   clusters: [50]
   opts: [Co2L-72H]
 
@@ -26,7 +20,6 @@ countries: ["MA"]
 # Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 summary_dir: results
->>>>>>> origin/main
 
 snapshots:
   start: "2013-01-01"
@@ -95,7 +88,6 @@ load_options:
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
-<<<<<<< HEAD
 summary_dir: results
 
 snapshots:
@@ -121,23 +113,12 @@ electricity:
   voltages: [220., 300., 380.]
   co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
   co2base: 1.487e8
-=======
-electricity:
-  voltages: [220., 300., 380.]
-  co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 1.487e9  # European default, adjustment to Africa necessary
->>>>>>> origin/main
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
 
   extendable_carriers:
     Generator: []
-<<<<<<< HEAD
     StorageUnit: [] # battery, H2
     Store: []
-=======
-    StorageUnit: []
-    Store: [battery, H2]
->>>>>>> origin/main
     Link: []
 
   conventional_carriers: [coal, OCGT, CCGT, oil]
@@ -172,13 +153,7 @@ transformers:
 atlite:
   nprocesses: 4
   cutouts:
-<<<<<<< HEAD
-    # use 'base' to determine geographical bounds and time span from config
-    # base:
-    # module: era5
-=======
     # geographical bounds automatically determined from countries input
->>>>>>> origin/main
     africa-2013-era5:
       module: era5
       dx: 0.3  # cutout resolution
