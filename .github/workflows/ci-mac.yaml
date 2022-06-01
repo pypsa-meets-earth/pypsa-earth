@@ -40,6 +40,10 @@ jobs:
       run: |
         git clone https://github.com/pypsa-meets-africa/pypsa-africa ../pypsa-africa
 
+    - name: Copy environment file
+      run: |
+        cp ../pypsa-africa/envs/environment.yaml environment.yaml
+
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -53,11 +57,11 @@ jobs:
       id: cache
       with:
         path: ${{ matrix.prefix }}
-        key: ${{ matrix.label }}-conda-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+        key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
 
     - name: Update environment due to outdated or unavailable cache
       if: steps.cache.outputs.cache-hit != 'true'
-      run: mamba env update -n pypsa-africa -f ../pypsa-africa/envs/environment.yaml
+      run: mamba env update -n pypsa-africa -f environment.yaml
 
     - name: Test snakemake workflow
       run: |
