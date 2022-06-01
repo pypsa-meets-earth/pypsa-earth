@@ -107,11 +107,10 @@ def add_oil(n, costs):
     # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
     # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
 
-
     spatial.oil = SimpleNamespace()
     spatial.oil.nodes = ["Africa oil"]
     spatial.oil.locations = ["Africa"]
-    
+
     if "oil" not in n.carriers.index:
         n.add("Carrier", "oil")
 
@@ -124,7 +123,7 @@ def add_oil(n, costs):
         # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
         n.add(
             "Store",
-            [oil_bus + " Store" for oil_bus in spatial.oil.nodes],            
+            [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
             bus=spatial.oil.nodes,
             e_nom_extendable=True,
             e_cyclic=True,
@@ -687,15 +686,12 @@ def add_shipping(n, costs):
         )
 
     if "oil" not in n.buses.carrier.unique():
-        n.madd("Bus",
-            spatial.oil.nodes,
-            location=spatial.oil.locations,
-            carrier="oil"
-        )
+        n.madd("Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil")
     if "oil" not in n.stores.carrier.unique():
 
-        #could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-        n.madd("Store",
+        # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+        n.madd(
+            "Store",
             [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
             bus=spatial.oil.nodes,
             e_nom_extendable=True,
@@ -705,13 +701,15 @@ def add_shipping(n, costs):
 
     if "oil" not in n.generators.carrier.unique():
 
-        n.madd("Generator",
+        n.madd(
+            "Generator",
             spatial.oil.nodes,
             bus=spatial.oil.nodes,
             p_nom_extendable=True,
             carrier="oil",
-            marginal_cost=costs.at["oil", 'fuel']
+            marginal_cost=costs.at["oil", "fuel"],
         )
+
 
 def add_industry(n, costs):
 
@@ -1087,10 +1085,8 @@ def add_land_transport(n, costs):
     if ice_share > 0:
 
         if "oil" not in n.buses.carrier.unique():
-            n.madd("Bus",
-                spatial.oil.nodes,
-                location=spatial.oil.locations,
-                carrier="oil"
+            n.madd(
+                "Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil"
             )
         ice_efficiency = options["transport_internal_combustion_efficiency"]
 
@@ -1555,11 +1551,11 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
             "prepare_sector_network",
-            simpl="", 
-            clusters="46", 
-            ll="copt", 
-            opts="Co2L-72H", 
-            planning_horizons="2030"
+            simpl="",
+            clusters="46",
+            ll="copt",
+            opts="Co2L-72H",
+            planning_horizons="2030",
         )
     # TODO add mock_snakemake func
 
@@ -1569,8 +1565,10 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
-    nodes = n.buses[n.buses.carrier=='AC'].index #TODO if you take nodes from the index of buses of n it's more than pop_layout
-                             #clustering of regions must be double checked.. refer to regions onshore
+    nodes = n.buses[
+        n.buses.carrier == "AC"
+    ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
+    # clustering of regions must be double checked.. refer to regions onshore
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
@@ -1617,7 +1615,7 @@ if __name__ == "__main__":
     add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
-    #add_generation(n, costs)
+    # add_generation(n, costs)
 
     # Add_oil() adds oil carrier/bus.
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec

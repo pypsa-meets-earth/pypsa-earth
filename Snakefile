@@ -31,7 +31,8 @@ subworkflow pypsaearth:
 rule prepare_sector_networks:
     input:
         expand(
-            RDIR + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            RDIR
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
 
@@ -39,7 +40,8 @@ rule prepare_sector_networks:
 rule solve_all_networks:
     input:
         expand(
-            RDIR + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            RDIR
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
 
@@ -65,7 +67,8 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
         industry_demands="data/industry_demand_locations.csv",
     output:
-        RDIR + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     threads: 1
     resources:
         mem_mb=2000,
@@ -273,21 +276,29 @@ rule copy_config:
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
-        network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        network=RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
     output:
-        RDIR + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        RDIR
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     shadow:
         "shallow"
     log:
-        solver=RDIR + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log",
-        python=RDIR + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
-        memory=RDIR + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_memory.log",
+        solver=RDIR
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log",
+        python=RDIR
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
+        memory=RDIR
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_memory.log",
     threads: 4
     resources:
         mem_mb=config["solving"]["mem"],
     benchmark:
-        RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        (
+            RDIR
+            + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        )
     script:
         "scripts/solve_network.py"
 
@@ -296,12 +307,14 @@ rule make_summary:
     input:
         overrides="data/override_component_attrs",
         networks=expand(
-            RDIR + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            RDIR
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
         costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         plots=expand(
-            RDIR + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.pdf",
+            RDIR
+            + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.pdf",
             **config["scenario"]
         ),
     output:
@@ -332,14 +345,19 @@ rule make_summary:
 rule plot_network:
     input:
         overrides="data/override_component_attrs",
-        network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        network=RDIR
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     output:
-        map=RDIR + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.pdf",
+        map=RDIR
+        + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.pdf",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        (
+            RDIR
+            + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        )
     script:
         "scripts/plot_network.py"
 
@@ -362,17 +380,20 @@ rule plot_summary:
         "scripts/plot_summary.py"
 
 
-
 rule prepare_db:
     input:
-        network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        network=RDIR
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     output:
-        db=RDIR + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.csv",
+        db=RDIR
+        + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        (
+            RDIR
+            + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        )
     script:
         "scripts/prepare_db.py"
-

@@ -15,9 +15,9 @@ scenario:
   - 46
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
-  ll: 
+  ll:
   - "copt"
-  opts: 
+  opts:
   - "Co2L-72H"
 
 
