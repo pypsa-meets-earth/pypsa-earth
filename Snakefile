@@ -202,11 +202,7 @@ rule build_clustered_population_layouts:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-<<<<<<< HEAD
-        cutout="cutouts/africa-2013-era5.nc",
-=======
         cutout=pypsaearth("cutouts/africa-2013-era5.nc"),
->>>>>>> origin/main
     output:
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
     resources:
