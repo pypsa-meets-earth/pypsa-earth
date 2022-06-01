@@ -1556,9 +1556,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="", 
-            clusters="44", 
+            clusters="46", 
             ll="copt", 
-            opts="Co2L-720H", 
+            opts="Co2L-72H", 
             planning_horizons="2030"
         )
     # TODO add mock_snakemake func
@@ -1569,7 +1569,7 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
-    nodes = pop_layout.index #TODO if you take nodes from the index of buses of n it's more than pop_layout
+    nodes = n.buses[n.buses.carrier=='AC'].index #TODO if you take nodes from the index of buses of n it's more than pop_layout
                              #clustering of regions must be double checked.. refer to regions onshore
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
@@ -1617,7 +1617,7 @@ if __name__ == "__main__":
     add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
-    add_generation(n, costs)
+    #add_generation(n, costs)
 
     # Add_oil() adds oil carrier/bus.
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec

@@ -88,25 +88,6 @@ load_options:
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
-summary_dir: results
-
-snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
-  closed: "left" # end is not inclusive
-
-enable:
-  # prepare_links_p_nom: false
-  retrieve_databundle: false
-  download_osm_data: false
-  # retrieve_cutout: true
-  # retrieve_natura_raster: true
-  # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
-  # custom_busmap: false
-
 download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
 
 electricity:
@@ -121,7 +102,8 @@ electricity:
     Store: []
     Link: []
 
-  conventional_carriers: [coal, OCGT, CCGT, oil]
+  # conventional_carriers: [coal, OCGT, CCGT, oil]
+  conventional_carriers: []
 
   max_hours:
     battery: 6
@@ -323,7 +305,8 @@ plotting:
   energy_threshold: 50.
 
   vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
-  conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
+  # conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
+  conv_techs: []
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]
