@@ -589,7 +589,7 @@ def set_lv_substations(buses):
 
 
 def merge_stations_lines_by_station_id_and_voltage(
-    lines, buses, geo_crs, distance_crs, tol=2000
+    lines, links, buses, geo_crs, distance_crs, tol=2000
 ):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
@@ -616,12 +616,15 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses, distance_crs)
+    links, buses = set_lines_ids(links, buses, distance_crs)    
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
+    links.drop(links[links["bus0"] == links["bus1"]].index, inplace=True)
 
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
+    links = line_endings_to_bus_conversion(links)
 
     # set substation_lv
     set_lv_substations(buses)
@@ -630,14 +633,17 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
+    converters = get_converters(buses, lines)
 
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
+    links = pd.concat([links, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
+    links.reset_index(drop=True, inplace=True)
 
-    return lines, buses
+    return lines, links, buses
 
 
 def create_station_at_equal_bus_locations(
