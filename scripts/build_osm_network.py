@@ -597,8 +597,8 @@ def merge_stations_lines_by_station_id_and_voltage(
     """
 
     # the links dataframe can be empty
-    if len(lines) == 0:
-        return lines, buses
+    if len(links) == 0:
+        return links, buses
 
     logger.info(
         "Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol / 1000)
