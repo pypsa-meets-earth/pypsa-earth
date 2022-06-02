@@ -397,6 +397,83 @@ def get_transformers(buses, lines):
 
     return df_transformers
 
+def get_converters(buses, links):
+    """
+    Function to create fake converter links that connect buses of the same station_id at different voltage
+    At least one bus should belong to a DC link    
+    """
+
+    df_converters = []
+
+    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
+        by=["station_id"]
+    ):
+
+        # note: by construction there cannot be more that two buses with the same station_id and same voltage
+        n_voltages = len(g_value)
+
+        if (n_voltages > 1) & g_value["dc"].any():
+
+            for id in range(0, n_voltages - 1):
+                # when g_value has more than one node, it means that there are multiple voltages for the same bus
+                geom_trans = LineString(
+                    [g_value.geometry.iloc[id], g_value.geometry.iloc[id + 1]]
+                )
+
+                df_converters.append(
+                    [
+                        f"transf_{g_name}_{id}",  # "line_id"
+                        g_value["bus_id"].iloc[id],  # "bus0"
+                        g_value["bus_id"].iloc[id + 1],  # "bus1"
+                        g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
+                        1,  # "circuits"
+                        0.0,  # "length"
+                        False,  # "underground"
+                        False,  # "under_construction"
+                        "transmission",  # "tag_type"
+                        0,  # "tag_frequency"
+                        g_value.country.iloc[id],  # "country"
+                        geom_trans,  # "geometry"
+                        geom_trans.bounds,  # "bounds"
+                        g_value.geometry.iloc[id],  # "bus_0_coors"
+                        g_value.geometry.iloc[id + 1],  # "bus_1_coors"
+                        g_value.geometry.iloc[id].x,  # "bus0_lon"
+                        g_value.geometry.iloc[id].y,  # "bus0_lat"
+                        g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
+                        g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
+                    ]
+                )
+
+    # name of the columns
+    trasf_columns = [
+        "line_id",
+        "bus0",
+        "bus1",
+        "voltage",
+        "circuits",
+        "length",
+        "underground",
+        "under_construction",
+        "tag_type",
+        "tag_frequency",
+        "country",
+        "geometry",
+        "bounds",
+        "bus_0_coors",
+        "bus_1_coors",
+        "bus0_lon",
+        "bus0_lat",
+        "bus1_lon",
+        "bus1_lat",
+    ]
+
+    df_converters = gpd.GeoDataFrame(df_converters, columns=trasf_columns)
+    df_converters.set_index(links.index[-1] + df_converters.index + 1, inplace=True)
+    # update line endings
+    df_converters = line_endings_to_bus_conversion(df_converters)
+
+    return df_converters
+
 
 def connect_stations_same_station_id(lines, buses):
     """
