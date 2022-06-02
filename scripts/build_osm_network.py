@@ -587,7 +587,7 @@ def set_lv_substations(buses):
 #       There may be the need to split a line in several segments in the case the line is within tolerance with
 #       respect to a node
 
-
+# TODO Account for a possible empty links data file
 def merge_stations_lines_by_station_id_and_voltage(
     lines, links, buses, geo_crs, distance_crs, tol=2000
 ):
@@ -855,13 +855,9 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
-        lines, buses = merge_stations_lines_by_station_id_and_voltage(
-            lines, buses, geo_crs, distance_crs, tol=tol
-        )
         if len(links) > 0:
-            # TODO Should be the frequency value kept when calling merge_stations_lines_by_station_id_and_voltage()?
-            links, buses = merge_stations_lines_by_station_id_and_voltage(
-                links, buses, geo_crs, distance_crs, tol=tol
+            lines, links, buses = merge_stations_lines_by_station_id_and_voltage(
+                lines, links, buses, geo_crs, distance_crs, tol=tol
             )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
