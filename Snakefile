@@ -253,8 +253,8 @@ if config["enable"].get("build_cutout", False):
 
     rule build_cutout:
         input:
-            regions_onshore="resources/regions_onshore.geojson",
-            regions_offshore="resources/regions_offshore.geojson",
+            onshore_shapes="resources/country_shapes.geojson",
+            offshore_shapes="resources/offshore_shapes.geojson",
         output:
             "cutouts/{cutout}.nc",
         log:
