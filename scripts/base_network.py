@@ -412,5 +412,8 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = base_network()
+
+    _set_links_underwater_fraction(n)
+    
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
     n.export_to_netcdf(snakemake.output[0])
