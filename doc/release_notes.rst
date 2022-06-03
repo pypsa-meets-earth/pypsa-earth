@@ -55,6 +55,8 @@ Upcoming Release
 
 * Constrain rasterio version and add plotting dependencies `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
 
+* Change solar power density form 1.7 to 4.6 MW/km2 `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
