@@ -51,6 +51,10 @@ Upcoming Release
 
 * Change default option for build_natura `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
 
+* Add renewable potential validation notebook and update others `PR #363 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_
+
+* Constrain rasterio version and add plotting dependencies `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
