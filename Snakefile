@@ -10,6 +10,7 @@ SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
 
+CUTOUTS_PATH = ("cutouts/africa-2013-era5-tutorial.nc" if config["tutorial"] else "cutouts/africa-2013-era5.nc")
 
 wildcard_constraints:
     lv="[a-z0-9\.]+",
@@ -152,7 +153,7 @@ rule build_solar_thermal_profiles:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
         solar_thermal_urban="resources/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
@@ -169,7 +170,7 @@ rule build_population_layouts:
     input:
         nuts3_shapes=pypsaearth("resources/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
-        cutout=pypsaearth("cutouts/africa-2013-era5.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
@@ -202,7 +203,7 @@ rule build_clustered_population_layouts:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
     resources:
@@ -221,7 +222,7 @@ rule build_heat_demand:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
         heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
@@ -242,7 +243,7 @@ rule build_temperature_profiles:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
