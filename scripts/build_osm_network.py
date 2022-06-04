@@ -636,10 +636,12 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
-    converters = get_converters(buses, lines)
 
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
+
+    # converters = get_converters(buses, lines)    
+    # links = pd.concat([links, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
