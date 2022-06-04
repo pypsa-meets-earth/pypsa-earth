@@ -10,7 +10,12 @@ SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
 
-CUTOUTS_PATH = ("cutouts/africa-2013-era5-tutorial.nc" if config["tutorial"] else "cutouts/africa-2013-era5.nc")
+CUTOUTS_PATH = (
+    "cutouts/africa-2013-era5-tutorial.nc"
+    if config["tutorial"]
+    else "cutouts/africa-2013-era5.nc"
+)
+
 
 wildcard_constraints:
     lv="[a-z0-9\.]+",
