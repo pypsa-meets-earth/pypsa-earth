@@ -232,7 +232,8 @@ if __name__ == "__main__":
                     "geometry": onshore_geometry,
                     "country": country,
                     "shape_id": shape_id,
-                }
+                },
+                crs=country_shapes.crs,
             )
         )
 
@@ -260,7 +261,8 @@ if __name__ == "__main__":
                     "geometry": offshore_geometry,
                     "country": country,
                     "shape_id": shape_id,
-                }
+                },
+                crs=country_shapes.crs,
             )
             offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
             offshore_regions.append(offshore_regions_c)
