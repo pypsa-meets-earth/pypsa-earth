@@ -615,12 +615,12 @@ def merge_stations_lines_by_station_id_and_voltage(
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses, distance_crs)
     # the links dataframe can be empty
-    if len(links) > 0:    
-        links, buses = set_lines_ids(links, buses, distance_crs)    
+    if len(links) > 0:
+        links, buses = set_lines_ids(links, buses, distance_crs)
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
-    if len(links) > 0:  
+    if len(links) > 0:
         links.drop(links[links["bus0"] == links["bus1"]].index, inplace=True)
 
     # update line endings
@@ -628,7 +628,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     if len(links) > 0:
         links = line_endings_to_bus_conversion(links)
     else:
-        links = []    
+        links = []
 
     # set substation_lv
     set_lv_substations(buses)
@@ -641,7 +641,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
 
-    # converters = get_converters(buses, lines)    
+    # converters = get_converters(buses, lines)
     # links = pd.concat([links, converters], ignore_index=True)
 
     # reset index
