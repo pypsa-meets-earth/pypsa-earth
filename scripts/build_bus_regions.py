@@ -268,8 +268,15 @@ if __name__ == "__main__":
             offshore_regions.append(offshore_regions_c)
 
     save_to_geojson(
-        pd.concat(onshore_regions, ignore_index=True), snakemake.output.regions_onshore
+        gpd.GeoDataFrame(
+            pd.concat(onshore_regions, ignore_index=True),
+            crs=country_shapes.crs,
+        ),
+        snakemake.output.regions_onshore,
     )
     if len(offshore_regions) != 0:
-        offshore_regions = pd.concat(offshore_regions, ignore_index=True)
+        offshore_regions = gpd.GeoDataFrame(
+            pd.concat(offshore_regions, ignore_index=True),
+            crs=country_shapes.crs,
+        )
     save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
