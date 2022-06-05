@@ -263,18 +263,20 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins = gpd.read_file(resource["hydrobasins"])
-        hydrobasins = hydrobasins[
-            [
-                any(country_shapes.geometry.intersects(geom))
-                for geom in hydrobasins.geometry
-            ]
-        ]  # exclude hydrobasins shapes that do not intersect the countries of interest
-        resource["plants"] = regions.rename(columns={"x": "lon", "y": "lat"})[
+        # commented out as rivers may span across multiple countries
+        # hydrobasins = hydrobasins[
+        #     [
+        #         any(country_shapes.geometry.intersects(geom))
+        #         for geom in hydrobasins.geometry
+        #     ]
+        # ]  # exclude hydrobasins shapes that do not intersect the countries of interest
+        resource["plants"] = regions.rename(columns={"x": "lon", "y": "lat"}).loc[
             [
                 # select busbar whose location (p) belongs to at least one hydrobasin geometry
                 any(hydrobasins.geometry.intersects(p))
                 for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
-            ]
+            ],
+            ["lon", "lat"],
         ]  # TODO: filtering by presence of hydro generators should be the way to go
 
         # check if there are hydro powerplants
