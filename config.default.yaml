@@ -13,7 +13,7 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [6]
+  clusters: [55]
   opts: [Co2L-3H]
 
 countries: ["Africa"]
