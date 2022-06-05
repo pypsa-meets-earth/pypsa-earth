@@ -238,7 +238,7 @@ world_iso = {
         # "CX": "christmas island", # Island
         # "CC": "cocos (keeling) islands", # Island
         "CY": "cyprus",
-        "EG": "egypt",
+        # "EG": "egypt",  # leads to bug -> missing ssp file when executing ["Africa"]
         "GE": "georgia",
         "HK": "hong kong",
         "IN": "india",

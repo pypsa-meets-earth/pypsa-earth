@@ -35,17 +35,27 @@ Upcoming Release
 
 * Add new countries and update iso code: `PR #330 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/330>`_
 
-* Fix solar pv slope and add correction factor for wake losses `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`_
+* Fix solar pv slope and add correction factor for wake losses: `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`_
 
-* Add renewable potential notebook `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`_
+* Add renewable potential notebook: `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`_
 
-* Make cutout workflow simpler `PR #352 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/352>`_
+* Make cutout workflow simpler: `PR #352 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/352>`_
 
-* Add option to run workflow without pop and gdp raster `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
+* Add option to run workflow without pop and gdp raster: `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
 
-* Add latitude_optimal to get optimal solar orientation by default `Commit 1b2466b <https://github.com/pypsa-meets-africa/pypsa-africa/commit/de7d32be8807e4fc42486a60184f45680612fd46>`_
+* Add latitude_optimal to get optimal solar orientation by default: `Commit 1b2466b <https://github.com/pypsa-meets-africa/pypsa-africa/commit/de7d32be8807e4fc42486a60184f45680612fd46>`_
 
-* Harmonize CRSs by options `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
+* Harmonize CRSs by options: `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
+
+* Fix powerplantmatching problem for DRC and countries with multi-word name: `PR #359 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/359>`_
+
+* Change default option for build_natura `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
+
+* Add renewable potential validation notebook and update others `PR #363 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_ and `PR #369 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_
+
+* Constrain rasterio version and add plotting dependencies `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
+
+* Change solar power density form 1.7 to 4.6 MW/km2 `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
 
 
 PyPSA-Africa 0.0.2 (6th April 2022)
