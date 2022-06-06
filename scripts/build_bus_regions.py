@@ -190,6 +190,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     countries = snakemake.config["countries"]
+    area_crs = snakemake.config["crs"]["area_crs"]
 
     n = pypsa.Network(snakemake.input.base_network)
 
@@ -265,7 +266,7 @@ if __name__ == "__main__":
                 crs=country_shapes.crs,
             )
             offshore_regions_c = offshore_regions_c.loc[
-                offshore_regions_c.to_crs.area > 1e-2
+                offshore_regions_c.to_crs(area_crs).area > 1e-2
             ]
             offshore_regions.append(offshore_regions_c)
 
