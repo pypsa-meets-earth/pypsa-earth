@@ -29,7 +29,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-- fiona <= 1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+- fiona<=1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
 - xarray
 - netcdf4
 - networkx
@@ -38,6 +38,7 @@ dependencies:
 - pre-commit
 - pyomo
 - matplotlib
+- reverse-geocode
 
   # Keep in conda environment when calling ipython
 - ipython
@@ -48,10 +49,15 @@ dependencies:
   # GIS dependencies:
 - cartopy
 - descartes
-- rasterio
+- rasterio<=1.2.8  # until atlite is up to date https://github.com/PyPSA/atlite/issues/238
 - rioxarray
+
+ # Plotting
 - geoviews
 - hvplot
+- graphviz
+- contextily
+- graphviz
 
   # PyPSA-Eur-Sec Dependencies
 - geopy
@@ -68,7 +74,7 @@ dependencies:
 
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
-  - git+https://github.com/davide-f/powerplantmatching.git@pypsa-africa#egg=powerplantmatching
+  - git+https://github.com/davide-f/powerplantmatching.git@new_pypsa_africa#egg=powerplantmatching
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf

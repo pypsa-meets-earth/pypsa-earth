@@ -37,6 +37,8 @@ _logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-africa")
 
+EEZ_CRS = "EPSG:4326"
+
 
 def download_GADM(country_code, update=False, out_logging=False):
     """
@@ -94,7 +96,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
+def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
 
@@ -128,7 +130,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         )
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name).to_crs(geo_crs)
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
@@ -143,7 +145,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         geodf_list.append(geodf_temp)
 
     geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
+    geodf_GADM.set_crs(geo_crs)
 
     return geodf_GADM
 
@@ -167,14 +169,14 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(countries, update=False, out_logging=False):
+def countries(countries, geo_crs, update=False, out_logging=False):
     "Create country shapes"
 
     if out_logging:
         _logger.info("Stage 1 of 4: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
-    df_countries = get_GADM_layer(countries, 0, update, out_logging)
+    df_countries = get_GADM_layer(countries, 0, geo_crs, update, out_logging)
 
     # select and rename columns
     df_countries = df_countries[["GID_0", "geometry"]].copy()
@@ -218,7 +220,7 @@ def save_to_geojson(df, fn):
             pass
 
 
-def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
+def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
     The dataset shall be downloaded independently by the user (see guide) or
@@ -229,7 +231,7 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
             f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}"
         )
 
-    geodf_EEZ = gpd.read_file(EEZ_gpkg)
+    geodf_EEZ = gpd.read_file(EEZ_gpkg).to_crs(geo_crs)
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
@@ -249,7 +251,7 @@ def load_EEZ(countries_codes, EEZ_gpkg="./data/raw/eez/eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
+def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
     """
     Creates offshore shapes by
     - buffer smooth countryshape (=offset country shape)
@@ -262,7 +264,7 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
         _logger.info("Stage 2 of 4: Create offshore shapes")
 
     # load data
-    df_eez = load_EEZ(countries, EEZ_gpkg)
+    df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
 
     ret_df = df_eez[["name", "geometry"]]
     # create unique shape if country is described by multiple shapes
@@ -303,10 +305,47 @@ def eez(countries, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
 
 
 def download_WorldPop(
-    country_code, year=2020, update=False, out_logging=False, size_min=300
+    country_code,
+    worldpop_method,
+    year=2020,
+    update=False,
+    out_logging=False,
+    size_min=300,
 ):
     """
-    Download tiff file for each country code
+    Download Worldpop using either the standard method or the API method.
+        Parameters
+        ----------
+        worldpop_method: str
+             worldpop_method = "api" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
+        country_code : str
+            Two letter country codes of the downloaded files.
+            Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+        year : int
+            Year of the data to download
+        update : bool
+            Update = true, forces re-download of files
+        size_min : int
+            Minimum size of each file to download
+    """
+    if worldpop_method == "api":
+        return download_WorldPop_API(country_code, year, update, out_logging, size_min)
+
+    elif worldpop_method == "standard":
+        return download_WorldPop_standard(
+            country_code, year, update, out_logging, size_min
+        )
+
+
+def download_WorldPop_standard(
+    country_code,
+    year=2020,
+    update=False,
+    out_logging=False,
+    size_min=300,
+):
+    """
+    Download tiff file for each country code using the standard method from worldpop datastore with 1kmx1km resolution.
 
     Parameters
     ----------
@@ -319,14 +358,12 @@ def download_WorldPop(
         Update = true, forces re-download of files
     size_min : int
         Minimum size of each file to download
-
     Returns
     -------
     WorldPop_inputfile : str
         Path of the file
     WorldPop_filename : str
         Name of the file
-
     """
     if out_logging:
         _logger.info("Stage 3/4: Download WorldPop datasets")
@@ -359,6 +396,60 @@ def download_WorldPop(
                         break
         if not loaded:
             _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+
+    return WorldPop_inputfile, WorldPop_filename
+
+
+def download_WorldPop_API(
+    country_code, year=2020, update=False, out_logging=False, size_min=300
+):
+    """
+    Download tiff file for each country code using the api method from worldpop API with 100mx100m resolution.
+
+    Parameters
+    ----------
+    country_code : str
+        Two letter country codes of the downloaded files.
+        Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+    year : int
+        Year of the data to download
+    update : bool
+        Update = true, forces re-download of files
+    size_min : int
+        Minimum size of each file to download
+    Returns
+    -------
+    WorldPop_inputfile : str
+        Path of the file
+    WorldPop_filename : str
+        Name of the file
+    """
+    if out_logging:
+        _logger.info("Stage 3/4: Download WorldPop datasets")
+
+    WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
+    # Request to get the file
+    WorldPop_inputfile = os.path.join(
+        os.getcwd(), "data", "raw", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
+    os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
+    year_api = int(str(year)[2:])
+    loaded = False
+    WorldPop_api_urls = [
+        f"https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}",
+    ]
+    for WorldPop_api_url in WorldPop_api_urls:
+        with requests.get(WorldPop_api_url, stream=True) as r:
+            WorldPop_tif_url = r.json()["data"][year_api]["files"][0]
+
+        with requests.get(WorldPop_tif_url, stream=True) as r:
+            with open(WorldPop_inputfile, "wb") as f:
+                if float(r.headers["Content-length"]) > size_min:
+                    shutil.copyfileobj(r.raw, f)
+                    loaded = True
+                    break
+    if not loaded:
+        _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -543,9 +634,9 @@ def add_gdp_data(
     #     df_gadm.loc[index, "gdp"] = gdp_by_geom
 
 
-def _init_process_pop(df_gadm_, year_):
-    global df_gadm, year
-    df_gadm, year = df_gadm_, year_
+def _init_process_pop(df_gadm_, year_, worldpop_method_):
+    global df_gadm, year, worldpop_method
+    df_gadm, year, worldpop_method = df_gadm_, year_, worldpop_method_
 
 
 def _process_func_pop(c_code):
@@ -555,7 +646,7 @@ def _process_func_pop(c_code):
 
     # get worldpop image
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-        c_code, year, False, False
+        c_code, worldpop_method, year, False, False
     )
 
     with rasterio.open(WorldPop_inputfile) as src:
@@ -571,6 +662,7 @@ def _process_func_pop(c_code):
 def add_population_data(
     df_gadm,
     country_codes,
+    worldpop_method,
     year=2020,
     update=False,
     out_logging=False,
@@ -615,7 +707,7 @@ def add_population_data(
 
                 # get worldpop image
                 WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-                    c_code, year, update, out_logging
+                    worldpop_method, c_code, year, update, out_logging
                 )
 
                 with rasterio.open(WorldPop_inputfile) as src:
@@ -628,7 +720,7 @@ def add_population_data(
 
         kwargs = {
             "initializer": _init_process_pop,
-            "initargs": (df_gadm, year),
+            "initargs": (df_gadm, year, worldpop_method),
             "processes": nprocesses,
         }
         with mp.get_context("spawn").Pool(**kwargs) as pool:
@@ -649,14 +741,22 @@ def add_population_data(
 
 
 def gadm(
-    countries, layer_id=2, update=False, out_logging=False, year=2020, nprocesses=None
+    worldpop_method,
+    gdp_method,
+    countries,
+    geo_crs,
+    layer_id=2,
+    update=False,
+    out_logging=False,
+    year=2020,
+    nprocesses=None,
 ):
 
     if out_logging:
         _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, update)
+    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, update)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -668,19 +768,27 @@ def gadm(
         inplace=True,
     )
 
-    # add the population data to the dataset
-    add_population_data(
-        df_gadm, countries, year, update, out_logging, nprocesses=nprocesses
-    )
+    if worldpop_method != False:
+        # add the population data to the dataset
+        add_population_data(
+            df_gadm,
+            countries,
+            worldpop_method,
+            year,
+            update,
+            out_logging,
+            nprocesses=nprocesses,
+        )
 
-    # add the gdp data to the dataset
-    add_gdp_data(
-        df_gadm,
-        year,
-        update,
-        out_logging,
-        name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    )
+    if gdp_method != False:
+        # add the gdp data to the dataset
+        add_gdp_data(
+            df_gadm,
+            year,
+            update,
+            out_logging,
+            name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+        )
 
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
@@ -707,17 +815,31 @@ if __name__ == "__main__":
     year = snakemake.config["build_shape_options"]["year"]
     nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
     EEZ_gpkg = snakemake.input["eez"]
+    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
+    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
+    geo_crs = snakemake.config["crs"]["geo_crs"]
+    distance_crs = snakemake.config["crs"]["distance_crs"]
 
-    country_shapes = countries(countries_list, update, out_logging)
+    country_shapes = countries(countries_list, geo_crs, update, out_logging)
     save_to_geojson(country_shapes, out.country_shapes)
 
-    offshore_shapes = eez(countries_list, country_shapes, EEZ_gpkg, out_logging)
+    offshore_shapes = eez(
+        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
+    )
     save_to_geojson(offshore_shapes, out.offshore_shapes)
 
     africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
     gadm_shapes = gadm(
-        countries_list, layer_id, update, out_logging, year, nprocesses=nprocesses
+        worldpop_method,
+        gdp_method,
+        countries_list,
+        geo_crs,
+        layer_id,
+        update,
+        out_logging,
+        year,
+        nprocesses=nprocesses,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)

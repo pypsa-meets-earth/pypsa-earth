@@ -205,12 +205,15 @@ from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
+COPERNICUS_CRS = "EPSG:4326"
+GEBCO_CRS = "EPSG:4326"
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
         sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
@@ -222,6 +225,8 @@ if __name__ == "__main__":
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
+    geo_crs = snakemake.config["crs"]["geo_crs"]
+    area_crs = snakemake.config["crs"]["area_crs"]
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -292,7 +297,7 @@ if __name__ == "__main__":
 
         capacity_per_sqkm = config["capacity_per_sqkm"]
 
-        excluder = atlite.ExclusionContainer(crs=3035, res=100)
+        excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
         if "natura" in config and config["natura"]:
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
@@ -303,14 +308,14 @@ if __name__ == "__main__":
                 paths.copernicus,
                 codes=copernicus["grid_codes"],
                 invert=True,
-                crs="EPSG:4236",
+                crs=COPERNICUS_CRS,
             )
             if "distance" in copernicus and config["copernicus"]["distance"] > 0:
                 excluder.add_raster(
                     paths.copernicus,
                     codes=copernicus["distance_grid_codes"],
                     buffer=copernicus["distance"],
-                    crs="EPSG:4236",
+                    crs=COPERNICUS_CRS,
                 )
 
         if "max_depth" in config:
@@ -318,7 +323,9 @@ if __name__ == "__main__":
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
             func_depth = functools.partial(np.greater, -config["max_depth"])
-            excluder.add_raster(paths.gebco, codes=func_depth, crs=4236, nodata=-1000)
+            excluder.add_raster(
+                paths.gebco, codes=func_depth, crs=GEBCO_CRS, nodata=-1000
+            )
 
         if "min_shore_distance" in config:
             buffer = config["min_shore_distance"]
@@ -338,7 +345,7 @@ if __name__ == "__main__":
         else:
             availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
 
-        area = cutout.grid.to_crs(3035).area / 1e6
+        area = cutout.grid.to_crs(area_crs).area / 1e6
         area = xr.DataArray(
             area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]
         )

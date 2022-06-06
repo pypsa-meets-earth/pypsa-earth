@@ -34,7 +34,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
           <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
         <a/>
       </p>
-- **General code meeting (Open)**
+- **General initiative meeting (Open)**
   - every month Thursday 16-17:00 (UTC+0) <a href="https://drive.google.com/file/d/1YY2-oJrBSOGd-mAZV7AmyVhOG3LcM1ry/view?usp=sharing" >download .ics</a>
   - join for project news and high-level code updates
   - meeting hosted on Discord
@@ -46,7 +46,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
-    1. Demand creation and prediction meeting, every Wednesday 21:00 UTC+0, <a href="https://drive.google.com/file/d/1OBGBwSWeuYzhssb6tDxyAPIzz3uUhsnv/view?usp=sharing" >download .ics</a>
+    1. Demand creation and prediction meeting, on demand
     2. AI asset detection meeting, every Tuesday 15:30 UTC+0, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
     3. Sector coupling meeting, every Thursday 09:00 UTC+0, <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
     4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a> 
@@ -119,7 +119,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>hazemakhalek</b></sub>
+            <sub><b>Hazemakhalek</b></sub>
         </a>
     </td>
     <td align="center">
@@ -226,7 +226,7 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         <a href="https://github.com/energyLS">
             <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
             <br />
-            <sub><b>energyLS</b></sub>
+            <sub><b>EnergyLS</b></sub>
         </a>
     </td>
     <td align="center">
@@ -244,6 +244,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td></tr>
 <tr>
+    <td align="center">
+        <a href="https://github.com/Tomkourou">
+            <img src="https://avatars.githubusercontent.com/u/5240283?v=4" width="100;" alt="Tomkourou"/>
+            <br />
+            <sub><b>Thomas Kouroughli</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
@@ -266,12 +273,20 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/HanaElattar">
+            <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
+            <br />
+            <sub><b>HanaElattar</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/squoilin">
             <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
             <br />
             <sub><b>Sylvain Quoilin</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>

@@ -132,7 +132,12 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
-from _helpers import configure_logging, sets_path_to_root, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    sets_path_to_root,
+    two_2_three_digits_country,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
 from pypsa.networkclustering import (
@@ -306,26 +311,30 @@ def busmap_for_gadm_clusters(n, gadm_level):
 
     gdf = get_GADM_layer(country_list, gadm_level)
 
-    def locate_bus(coords):
+    def locate_bus(coords, co):
+
+        gdf_co = gdf[
+            gdf["GID_{}".format(gadm_level)].str.contains(
+                two_2_three_digits_country(co)
+            )
+        ]
+        point = Point(coords["x"], coords["y"])
+
         try:
-            return gdf[gdf.contains(Point(coords["x"], coords["y"]))][
-                "GID_{}".format(gadm_level)
-            ].item()
+            return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item()
+
         except ValueError:
-            return "not_found"
+            return gdf_co[
+                gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
+            ]["GID_{}".format(gadm_level)].item()
 
     buses = n.buses
-    buses["gadm_{}".format(gadm_level)] = buses[["x", "y"]].apply(locate_bus, axis=1)
+    buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
+        lambda bus: locate_bus(bus[["x", "y"]], bus["country"]), axis=1
+    )
     busmap = buses["gadm_{}".format(gadm_level)]
-    not_founds = busmap[busmap == "not_found"].index.tolist()
-    for not_found in not_founds:
-        for tech in ["solar", "onwind"]:
-            try:
-                n.remove("Generator", "{0} {1}".format(not_found, tech))
-            except:
-                pass
 
-    return n, busmap[busmap != "not_found"]
+    return n, busmap
 
 
 def busmap_for_n_clusters(
@@ -432,6 +441,7 @@ def clustering_for_n_clusters(
             )
 
     weighted_agg_gens = True
+
     clustering = get_clustering_from_busmap(
         n,
         busmap,
@@ -503,11 +513,11 @@ if __name__ == "__main__":
     focus_weights = snakemake.config.get("focus_weights", None)
     country_list = snakemake.config["countries"]
 
-    if alternative_clustering:
+    if alternative_clustering:  # TODO load all techs in both cases
         renewable_carriers = pd.Index(
             [
                 "solar",
-                "onwind",  # TODO load "solar" and "wind" from config
+                "onwind",
             ]
         )
     else:

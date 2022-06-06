@@ -1,18 +1,19 @@
 ,Unit,Values,Description
-cutout,--,"Should be a folder listed in the configuration ``atlite: cutouts:`` (e.g. 'europe-2013-era5') or reference an existing folder in the directory ``cutouts``. Source module can be ERA5 or SARAH-2.","Specifies the directory where the relevant weather data ist stored that is specified at ``atlite/cutouts`` configuration. Both ``sarah`` and ``era5`` work."
+cutout,--,Should be a folder listed in the configuration ``atlite: cutouts:`` (e.g. 'europe-2013-era5') or reference an existing folder in the directory ``cutouts``. Source module can be ERA5 or SARAH-2.,Specifies the directory where the relevant weather data ist stored that is specified at ``atlite/cutouts`` configuration. Both ``sarah`` and ``era5`` work.
 resource,,,
--- method,--,"Must be 'pv'","A superordinate technology type."
--- panel,--,"One of {'Csi', 'CdTe', 'KANENA'} as defined in `atlite <https://github.com/PyPSA/atlite/tree/master/atlite/resources/solarpanel>`__","Specifies the solar panel technology and its characteristic attributes."
--- orientation,,,
--- -- slope,°,"Realistically any angle in [0., 90.]","Specifies the tilt angle (or slope) of the solar panel. A slope of zero corresponds to the face of the panel aiming directly overhead. A positive tilt angle steers the panel towards the equator."
--- -- azimuth,°,"Any angle in [0., 360.]","Specifies the `azimuth <https://en.wikipedia.org/wiki/Azimuth>`_ orientation of the solar panel. South corresponds to 180.°."
-capacity_per_sqkm,:math:`MW/km^2`,float,"Allowable density of solar panel placement."
-correction_factor,--,float,"A correction factor for the capacity factor (availability) time series."
+-- method,--,Must be 'pv',A superordinate technology type.
+-- panel,--,"One of {'Csi', 'CdTe', 'KANENA'} as defined in `atlite <https://github.com/PyPSA/atlite/tree/master/atlite/resources/solarpanel>`__",Specifies the solar panel technology and its characteristic attributes.
+-- orientation,,"use either {latitude_optimal} or options such {slope: 0, azimuth: 180}",
+-- -- latitude_optimal,--,Atlite function which returns for every raster the optimal slope and azimuth,
+-- -- slope,°,"Realistically any angle in [0., 90.]",Specifies the tilt angle (or slope) of the solar panel. A slope of zero corresponds to the face of the panel aiming directly overhead. A positive tilt angle steers the panel towards the equator.
+-- -- azimuth,°,"Any angle in [0., 360.]",Specifies the `azimuth <https://en.wikipedia.org/wiki/Azimuth>`_ orientation of the solar panel. South corresponds to 180.°.
+capacity_per_sqkm,:math:`MW/km^2`,float,Allowable density of solar panel placement. Value relates to socio-technical acceptable density.
+correction_factor,--,float,A correction factor for the capacity factor (availability) time series.
 copernicus,,,
--- grid_codes,--,"Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement."
--- distance,m,"int","(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology."
--- distance_grid_codes,--,"(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies from which a distance of 'distance' metres is unavailable as a buffer area."
-natura,bool,"{true, false}","Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``."
-potential,--,"One of {'simple', 'conservative'}","Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`"
-clip_p_max_pu,p.u.,float,"To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero."
-keep_all_available_areas,bool,"{'true', 'false'}","Use all availabe weather cells for renewable profile and potential generation. The default ignores weather cells where only less than 1 MW can be installed."
+-- grid_codes,--,Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_,Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement.
+-- distance,m,int,(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology.
+-- distance_grid_codes,--,(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_,Specifies from which a distance of 'distance' metres is unavailable as a buffer area.
+natura,bool,"{true, false}",Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``.
+potential,--,"One of {'simple', 'conservative'}",Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`
+clip_p_max_pu,p.u.,float,To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.
+keep_all_available_areas,bool,"{'true', 'false'}",Use all availabe weather cells for renewable profile and potential generation. The default ignores weather cells where only less than 1 MW can be installed.
