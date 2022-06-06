@@ -712,6 +712,11 @@ def attach_OPSD_renewables(n):
         n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
+
+def estimate_renewable_capacities_irena(n, config):
+    
+    print('test')
+
 def estimate_renewable_capacities(n, tech_map=None):
     if tech_map is None:
         tech_map = snakemake.config["electricity"].get(
