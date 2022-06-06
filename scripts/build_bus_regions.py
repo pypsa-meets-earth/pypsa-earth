@@ -267,16 +267,21 @@ if __name__ == "__main__":
             offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
             offshore_regions.append(offshore_regions_c)
 
+    # create geodataframe and remove nan shapes
+    onshore_regions = gpd.GeoDataFrame(
+        pd.concat(onshore_regions, ignore_index=True),
+        crs=country_shapes.crs,
+    ).dropna(axis="index", subset=["geometry"])
+
     save_to_geojson(
-        gpd.GeoDataFrame(
-            pd.concat(onshore_regions, ignore_index=True),
-            crs=country_shapes.crs,
-        ),
+        onshore_regions,
         snakemake.output.regions_onshore,
     )
     if len(offshore_regions) != 0:
+        # create geodataframe and remove nan shapes
         offshore_regions = gpd.GeoDataFrame(
             pd.concat(offshore_regions, ignore_index=True),
             crs=country_shapes.crs,
-        )
+        ).dropna(axis="index", subset=["geometry"])
+
     save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
