@@ -57,6 +57,7 @@ Upcoming Release
 
 * Change solar power density form 1.7 to 4.6 MW/km2 `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
 
+* Bug fixing of unexpected float value in build_powerplants: `PR #372 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/372>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
