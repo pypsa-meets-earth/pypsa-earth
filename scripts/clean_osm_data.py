@@ -765,7 +765,10 @@ def clean_data(
 
     # set the country name by the shape
     df_all_generators = set_countryname_by_shape(
-        df_all_generators, ext_country_shapes, names_by_shapes=names_by_shapes
+        df_all_generators,
+        ext_country_shapes,
+        names_by_shapes=names_by_shapes,
+        col_country="Country",
     )
 
     # set name tag by closest city when the value is nan

@@ -51,6 +51,13 @@ Upcoming Release
 
 * Change default option for build_natura `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
 
+* Add renewable potential validation notebook and update others `PR #363 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_ and `PR #369 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_
+
+* Constrain rasterio version and add plotting dependencies `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
+
+* Change solar power density form 1.7 to 4.6 MW/km2 `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
+
+* Bug fixing of unexpected float value in build_powerplants: `PR #372 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/372>`_ and `PR #373 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/373>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
