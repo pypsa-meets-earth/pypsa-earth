@@ -264,7 +264,9 @@ if __name__ == "__main__":
                 },
                 crs=country_shapes.crs,
             )
-            offshore_regions_c = offshore_regions_c.loc[offshore_regions_c.area > 1e-2]
+            offshore_regions_c = offshore_regions_c.loc[
+                offshore_regions_c.to_crs.area > 1e-2
+            ]
             offshore_regions.append(offshore_regions_c)
 
     # create geodataframe and remove nan shapes
@@ -272,6 +274,9 @@ if __name__ == "__main__":
         pd.concat(onshore_regions, ignore_index=True),
         crs=country_shapes.crs,
     ).dropna(axis="index", subset=["geometry"])
+
+    # remove empty polygons
+    onshore_regions = onshore_regions[~onshore_regions.geometry.is_empty]
 
     save_to_geojson(
         onshore_regions,
@@ -283,5 +288,8 @@ if __name__ == "__main__":
             pd.concat(offshore_regions, ignore_index=True),
             crs=country_shapes.crs,
         ).dropna(axis="index", subset=["geometry"])
+
+        # remove empty polygons
+        offshore_regions = offshore_regions[~offshore_regions.geometry.is_empty]
 
     save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
