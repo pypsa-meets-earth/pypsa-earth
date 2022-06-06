@@ -127,7 +127,9 @@ def simplify_network_to_380(n, linetype):
     several_trafo_b = trafo_map.isin(trafo_map.index)
     trafo_map.loc[several_trafo_b] = trafo_map.loc[several_trafo_b].map(trafo_map)
     missing_buses_i = n.buses.index.difference(trafo_map.index)
-    trafo_map = trafo_map.append(pd.Series(missing_buses_i, missing_buses_i))
+    trafo_map = pd.concat(
+        [trafo_map, pd.Series(missing_buses_i, missing_buses_i)], ignore_index=True
+    )
 
     for c in n.one_port_components | n.branch_components:
         df = n.df(c)
