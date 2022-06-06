@@ -197,7 +197,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
 
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
-        columns=["tags.generator:method", "geometry", "Area", "country", "id"]
+        columns=["tags.generator:method", "geometry", "Area", "id"]
     )
 
     to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
