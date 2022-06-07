@@ -357,6 +357,7 @@ def get_transformers(buses, lines):
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
+                        # TODO fill by adjancent values if available
                         50,  # "tag_frequency"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
@@ -505,7 +506,7 @@ def connect_stations_same_station_id(lines, buses):
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
-                        # TODO Verify
+                        # TODO fill by adjancent values if available
                         50,  # "tag_frequency"
                         buses_station_id.country.iloc[0],  # "country"
                         LineString(
