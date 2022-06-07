@@ -856,7 +856,8 @@ if __name__ == "__main__":
     attach_extendable_generators(n, costs, ppl)
 
     # TODO: Feature to uncomment and debug
-    # estimate_renewable_capacities(n)
+    #estimate_renewable_capacities(n)
+    estimate_renewable_capacities_irena(n, snakemake.config)
     # attach_OPSD_renewables(n)
 
     update_p_nom_max(n)
