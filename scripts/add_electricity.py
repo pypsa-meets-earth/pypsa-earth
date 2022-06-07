@@ -714,39 +714,59 @@ def attach_OPSD_renewables(n):
 
 def estimate_renewable_capacities_irena(n, config):
 
-    if not config["electricity"].get("estimate_renewable_capacities"): return
-    
+    if not config["electricity"].get("estimate_renewable_capacities"):
+        return
+
     year = config["electricity"]["estimate_renewable_capacities"]["year"]
-    tech_map = config["electricity"]["estimate_renewable_capacities"]["technology_mapping"]
+    tech_map = config["electricity"]["estimate_renewable_capacities"][
+        "technology_mapping"
+    ]
     tech_keys = list(tech_map.keys())
     countries = config["countries"]
-    expansion_limit = config["electricity"]["estimate_renewable_capacities"]["expansion_limit"]
+    expansion_limit = config["electricity"]["estimate_renewable_capacities"][
+        "expansion_limit"
+    ]
 
-    if len(countries) == 0: return
-    if len(tech_map) == 0: return
+    if len(countries) == 0:
+        return
+    if len(tech_map) == 0:
+        return
 
     capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
-    capacities = capacities.query("Year == @year and Technology in @tech_keys and Country in @countries")
+    capacities = capacities.query(
+        "Year == @year and Technology in @tech_keys and Country in @countries"
+    )
     capacities = capacities.groupby(["Technology", "Country"]).Capacity.sum()
 
-    logger.info(f"Heuristics applied to distribute renewable capacities [MW] "
-                f"{capacities.groupby('Country').sum()}")
+    logger.info(
+        f"Heuristics applied to distribute renewable capacities [MW] "
+        f"{capacities.groupby('Country').sum()}"
+    )
 
     for ppm_technology, techs in tech_map.items():
-        tech_capacities = capacities.loc[ppm_technology].reindex(countries, fill_value=0.)
-        tech_i = n.generators.query('carrier in @techs').index
-        n.generators.loc[tech_i, 'p_nom'] = (
-            (n.generators_t.p_max_pu[tech_i].mean() *
-             n.generators.loc[tech_i, 'p_nom_max']) # maximal yearly generation
-             .groupby(n.generators.bus.map(n.buses.country))
-             .transform(lambda s: normed(s) * tech_capacities.at[s.name])
-             .where(lambda s: s>0.1, 0.))  # only capacities above 100kW
-        n.generators.loc[tech_i, 'p_nom_min'] = n.generators.loc[tech_i, 'p_nom']
+        tech_capacities = capacities.loc[ppm_technology].reindex(
+            countries, fill_value=0.0
+        )
+        tech_i = n.generators.query("carrier in @techs").index
+        n.generators.loc[tech_i, "p_nom"] = (
+            (
+                n.generators_t.p_max_pu[tech_i].mean()
+                * n.generators.loc[tech_i, "p_nom_max"]
+            )  # maximal yearly generation
+            .groupby(n.generators.bus.map(n.buses.country))
+            .transform(lambda s: normed(s) * tech_capacities.at[s.name])
+            .where(lambda s: s > 0.1, 0.0)
+        )  # only capacities above 100kW
+        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
 
         if expansion_limit:
             assert np.isscalar(expansion_limit)
-            logger.info(f"Reducing capacity expansion limit to {expansion_limit*100:.2f}% of installed capacity.")
-            n.generators.loc[tech_i, 'p_nom_max'] = float(expansion_limit) * n.generators.loc[tech_i, 'p_nom_min']
+            logger.info(
+                f"Reducing capacity expansion limit to {expansion_limit*100:.2f}% of installed capacity."
+            )
+            n.generators.loc[tech_i, "p_nom_max"] = (
+                float(expansion_limit) * n.generators.loc[tech_i, "p_nom_min"]
+            )
 
 
 def estimate_renewable_capacities(n, tech_map=None):
