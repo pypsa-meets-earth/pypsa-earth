@@ -77,14 +77,14 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s["lon"] = bus_s["geometry"].x
     bus_s["lat"] = bus_s["geometry"].y
     bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
-    bus_s["ac"] = is_ac
+    bus_s["dc"] = ~is_ac
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
     bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1])
     bus_e["lon"] = bus_s["geometry"].x
     bus_e["lat"] = bus_s["geometry"].y
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
-    bus_e["ac"] = is_ac
+    bus_e["dc"] = ~is_ac
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
     # Assign index to bus_id
