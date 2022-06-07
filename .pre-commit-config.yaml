@@ -58,7 +58,7 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.6.0
+  rev: 0.6.1
   hooks:
   - id: snakefmt
 
