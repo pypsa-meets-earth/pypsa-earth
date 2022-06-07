@@ -69,7 +69,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
-    is_dc = lines["tag_frequency"].eq(0)
+    is_ac = lines["tag_frequency"] != 0
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
@@ -77,14 +77,14 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s["lon"] = bus_s["geometry"].x
     bus_s["lat"] = bus_s["geometry"].y
     bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
-    bus_s["dc"] = is_dc
+    bus_s["ac"] = is_ac
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
     bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1])
     bus_e["lon"] = bus_s["geometry"].x
     bus_e["lat"] = bus_s["geometry"].y
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
-    bus_e["dc"] = is_dc
+    bus_e["ac"] = is_ac
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
     # Assign index to bus_id

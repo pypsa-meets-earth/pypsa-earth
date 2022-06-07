@@ -211,7 +211,7 @@ def filter_ac(df):
     # convert frequency to int
     df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
 
-    df = df[df.tag_frequency == 50]
+    df = df[df.tag_frequency != 0]
 
     return df
 
