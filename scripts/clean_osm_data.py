@@ -75,7 +75,9 @@ def prepare_substation_df(df_all_substations):
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns) 
+
+    is_ac = lines["tag_frequency"] != 0    
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
@@ -89,7 +91,7 @@ def add_line_endings_tosubstations(substations, lines):
         + 1
         + bus_s.index
     )
-    bus_s["dc"] = lines["tag_frequency"].eq(0)
+    bus_s["dc"] = ~is_ac
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_e["geometry"] = lines.geometry.boundary.map(
@@ -98,7 +100,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x if p != None else None)
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
-    bus_s["dc"] = lines["tag_frequency"].eq(0)
+    bus_s["dc"] = ~is_ac
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
