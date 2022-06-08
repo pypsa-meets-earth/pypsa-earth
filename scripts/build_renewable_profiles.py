@@ -213,7 +213,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
         sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
@@ -236,9 +236,7 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
     regions = gpd.read_file(paths.regions).set_index("name").rename_axis("bus")
-    regions_crs = regions.crs
-    # TODO: Check if NaN still needs to be dropped here
-    regions = regions.dropna(axis="index", subset=["geometry"])
+
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(
             regions.reset_index()
@@ -252,9 +250,9 @@ if __name__ == "__main__":
                     "bus": "first",
                 }
             )
-            .set_index("bus")
+            .set_index("bus"),
+            crs=regions.crs,
         )
-        regions.crs = regions_crs
 
     buses = regions.index
 
@@ -265,18 +263,20 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins = gpd.read_file(resource["hydrobasins"])
-        hydrobasins = hydrobasins[
-            [
-                any(country_shapes.geometry.intersects(geom))
-                for geom in hydrobasins.geometry
-            ]
-        ]  # exclude hydrobasins shapes that do not intersect the countries of interest
-        resource["plants"] = regions.rename(columns={"x": "lon", "y": "lat"})[
+        # commented out as rivers may span across multiple countries
+        # hydrobasins = hydrobasins[
+        #     [
+        #         any(country_shapes.geometry.intersects(geom))
+        #         for geom in hydrobasins.geometry
+        #     ]
+        # ]  # exclude hydrobasins shapes that do not intersect the countries of interest
+        resource["plants"] = regions.rename(columns={"x": "lon", "y": "lat"}).loc[
             [
                 # select busbar whose location (p) belongs to at least one hydrobasin geometry
                 any(hydrobasins.geometry.intersects(p))
                 for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
-            ]
+            ],
+            ["lon", "lat"],
         ]  # TODO: filtering by presence of hydro generators should be the way to go
 
         # check if there are hydro powerplants

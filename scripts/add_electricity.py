@@ -296,11 +296,7 @@ def attach_load(
         Now attached with load time series
     """
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
-    regions = (
-        gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
-    ).dropna(
-        axis="rows"
-    )  # TODO: check if dropna required here. NaN shapes exist?
+    regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
 
     load_paths = load_paths
     # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray

@@ -59,6 +59,10 @@ Upcoming Release
 
 * Bug fixing of unexpected float value in build_powerplants: `PR #372 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/372>`_ and `PR #373 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/373>`_
 
+* Revise hydro capacities, add hydro validation notebook and minor revisions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
+
+* Revise dropnan for regions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
