@@ -122,7 +122,7 @@ electricity:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
     year: 2020  # Available years for IRENA stats 2000 to 2020
     p_nom_min: 1  # any float, scales the minimum expansion from stats
-    p_nom_max: false,  # sets the expansion constraint, false, deactivate this option, float scales the p_nom_min factor accordingly 
+    p_nom_max: false  # sets the expansion constraint, false, deactivate this option, float scales the p_nom_min factor accordingly 
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
       #Offshore: [offwind-ac, offwind-dc]
