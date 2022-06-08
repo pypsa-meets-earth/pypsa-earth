@@ -301,16 +301,16 @@ def merge_stations_same_station_id(
                         lon_bus,
                         lat_bus,
                     ),  # "geometry"
-                    ]
+                ]
 
                 # increase counters
                 v_it += 1
-                n_buses += 1  
+                n_buses += 1
 
-                buses.clean = buses_clean.append(buses_dc) 
+                buses.clean = buses_clean.append(buses_dc)
 
                 lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
-                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)                                           
+                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
 
                 # add the bus
                 buses_ac = [
@@ -338,10 +338,10 @@ def merge_stations_same_station_id(
 
                 buses.clean = buses_clean.append(buses_ac)
 
-            else:   
+            else:
 
                 lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
-                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)                
+                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
 
                 # add the bus
                 buses_clean.append(
@@ -353,7 +353,9 @@ def merge_stations_same_station_id(
                         # bus_row["dc"].all(),  # "dc"
                         "|".join(bus_row["symbol"].unique()),  # "symbol"
                         bus_row["under_construction"].any(),  # "under_construction"
-                        "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
+                        "|".join(
+                            bus_row["tag_substation"].unique()
+                        ),  # "tag_substation"
                         bus_row["tag_area"].sum(),  # "tag_area"
                         lon_bus,  # "lon"
                         lat_bus,  # "lat"
@@ -364,7 +366,7 @@ def merge_stations_same_station_id(
                         ),  # "geometry"
                     ]
                 )
-    
+
                 # increase counters
                 v_it += 1
                 n_buses += 1
@@ -389,7 +391,8 @@ def merge_stations_same_station_id(
         crs=buses.crs, inplace=True
     )
 
-def get_ac_frequency(df, fr_col = "tag_frequency"):
+
+def get_ac_frequency(df, fr_col="tag_frequency"):
     """
     # Function to define a default frequency value. Attempts to find the most usual non-zero frequency across the dataframe; 50 Hz is assumed as a back-up value
     """
@@ -397,13 +400,16 @@ def get_ac_frequency(df, fr_col = "tag_frequency"):
     # Initialize a default frequency value
     ac_freq_default = 50
 
-    grid_freq_levels = df[fr_col].value_counts(sort = True, dropna = True)        
+    grid_freq_levels = df[fr_col].value_counts(sort=True, dropna=True)
     if not grid_freq_levels.empty:
         # AC lines frequency shouldn't be 0Hz
-        ac_freq_levels = grid_freq_levels.loc[grid_freq_levels.index.get_level_values(0) != "0"]
+        ac_freq_levels = grid_freq_levels.loc[
+            grid_freq_levels.index.get_level_values(0) != "0"
+        ]
         ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
 
-    return(ac_freq_default)    
+    return ac_freq_default
+
 
 def get_transformers(buses, lines):
     """
@@ -411,7 +417,7 @@ def get_transformers(buses, lines):
     """
 
     ac_freq = get_ac_frequency(lines)
-    df_transformers = []    
+    df_transformers = []
 
     for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
         by=["station_id"]
