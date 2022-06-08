@@ -773,7 +773,6 @@ def estimate_renewable_capacities_irena(n, config):
     if not config["electricity"].get("estimate_renewable_capacities"):
         return
 
-    # If stats is set to false, then apply greenfield run by returning
     stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
     if not stats:
         return
@@ -793,7 +792,6 @@ def estimate_renewable_capacities_irena(n, config):
     if len(tech_map) == 0:
         return
 
-    # Use the stats specified in config.yaml. currently only irena is implemented
     if stats == "irena":
         capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
     else:
@@ -812,7 +810,6 @@ def estimate_renewable_capacities_irena(n, config):
         f"{capacities.groupby('Country').sum()}"
     )
 
-    # ppm_technology includes "offshore", but "capacities" doesn't
     for ppm_technology, techs in tech_map.items():
 
         if ppm_technology not in capacities.index:
