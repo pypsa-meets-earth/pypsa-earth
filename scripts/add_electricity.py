@@ -712,9 +712,69 @@ def attach_OPSD_renewables(n):
         n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
+# def estimate_renewable_capacities_irena(n, config):
+
+#     if not config["electricity"].get("estimate_renewable_capacities"):
+#         return
+
+#     year = config["electricity"]["estimate_renewable_capacities"]["year"]
+#     tech_map = config["electricity"]["estimate_renewable_capacities"][
+#         "technology_mapping"
+#     ]
+#     tech_keys = list(tech_map.keys())
+#     countries = config["countries"]
+#     expansion_limit = config["electricity"]["estimate_renewable_capacities"][
+#         "expansion_limit"
+#     ]
+
+#     if len(countries) == 0:
+#         return
+#     if len(tech_map) == 0:
+#         return
+
+#     capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+#     capacities = capacities.query(
+#         "Year == @year and Technology in @tech_keys and Country in @countries"
+#     )
+#     capacities = capacities.groupby(["Technology", "Country"]).Capacity.sum()
+
+#     logger.info(
+#         f"Heuristics applied to distribute renewable capacities [MW] "
+#         f"{capacities.groupby('Country').sum()}"
+#     )
+
+#     for ppm_technology, techs in tech_map.items():
+#         tech_capacities = capacities.loc[ppm_technology].reindex(
+#             countries, fill_value=0.0
+#         )
+#         tech_i = n.generators.query("carrier in @techs").index
+#         n.generators.loc[tech_i, "p_nom"] = (
+#             (
+#                 n.generators_t.p_max_pu[tech_i].mean()
+#                 * n.generators.loc[tech_i, "p_nom_max"]
+#             )  # maximal yearly generation
+#             .groupby(n.generators.bus.map(n.buses.country))
+#             .transform(lambda s: normed(s) * tech_capacities.at[s.name])
+#             .where(lambda s: s > 0.1, 0.0)
+#         )  # only capacities above 100kW
+#         n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
+
+#         if expansion_limit:
+#             assert np.isscalar(expansion_limit)
+#             logger.info(
+#                 f"Reducing capacity expansion limit to {expansion_limit*100:.2f}% of installed capacity."
+#             )
+#             n.generators.loc[tech_i, "p_nom_max"] = (
+#                 float(expansion_limit) * n.generators.loc[tech_i, "p_nom_min"]
+#             )
+
 def estimate_renewable_capacities_irena(n, config):
 
     if not config["electricity"].get("estimate_renewable_capacities"):
+        return
+
+    # If stats is set to false, then apply greenfield run by returning
+    if not config["electricity"]["estimate_renewable_capacities"]["stats"]:
         return
 
     year = config["electricity"]["estimate_renewable_capacities"]["year"]
@@ -723,16 +783,29 @@ def estimate_renewable_capacities_irena(n, config):
     ]
     tech_keys = list(tech_map.keys())
     countries = config["countries"]
-    expansion_limit = config["electricity"]["estimate_renewable_capacities"][
-        "expansion_limit"
-    ]
+    # expansion_limit = config["electricity"]["estimate_renewable_capacities"][
+    #     "expansion_limit"
+    # ]
+    p_nom_max = config["electricity"]["estimate_renewable_capacities"]["p_nom_max"]
+    p_nom_min = config["electricity"]["estimate_renewable_capacities"]["p_nom_min"]
+
 
     if len(countries) == 0:
         return
     if len(tech_map) == 0:
         return
 
-    capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+    # Use the stats specified in config.yaml. currently only irena is implemented
+    stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
+    if stats == "irena":
+        capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+    else:
+    # TODO doublecheck if logger.info is applied correctly
+        logger.info(
+            f"Selected renewable capacity estimation statistics", stats, "is not available"
+        )
+        return
+
     capacities = capacities.query(
         "Year == @year and Technology in @tech_keys and Country in @countries"
     )
@@ -757,15 +830,17 @@ def estimate_renewable_capacities_irena(n, config):
             .transform(lambda s: normed(s) * tech_capacities.at[s.name])
             .where(lambda s: s > 0.1, 0.0)
         )  # only capacities above 100kW
-        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
+        # TODO doublecheck if scaling of p_nom_min works
+        # TODO does it make sense, to have a country-independent scaling factor?
+        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]*p_nom_min
 
-        if expansion_limit:
-            assert np.isscalar(expansion_limit)
+        if p_nom_max:
+            assert np.isscalar(p_nom_max)
             logger.info(
-                f"Reducing capacity expansion limit to {expansion_limit*100:.2f}% of installed capacity."
+                f"Reducing capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity."
             )
             n.generators.loc[tech_i, "p_nom_max"] = (
-                float(expansion_limit) * n.generators.loc[tech_i, "p_nom_min"]
+                float(p_nom_max) * n.generators.loc[tech_i, "p_nom_min"]
             )
 
 
