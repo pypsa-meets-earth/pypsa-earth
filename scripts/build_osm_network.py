@@ -410,7 +410,8 @@ def get_transformers(buses, lines):
     Function to create fake transformer lines that connect buses of the same station_id at different voltage
     """
 
-    df_transformers = []
+    ac_freq = get_ac_frequency(lines)
+    df_transformers = []    
 
     for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
         by=["station_id"]
@@ -439,7 +440,7 @@ def get_transformers(buses, lines):
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
                         # TODO fill by adjancent values if available
-                        50,  # "tag_frequency"
+                        ac_freq,  # "tag_frequency"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
                         geom_trans.bounds,  # "bounds"
@@ -565,7 +566,7 @@ def connect_stations_same_station_id(lines, buses):
     """
     Function to create fake links between substations with the same substation_id
     """
-
+    ac_freq = get_ac_frequency(lines)
     station_id_list = buses.station_id.unique()
 
     add_lines = []
@@ -588,7 +589,7 @@ def connect_stations_same_station_id(lines, buses):
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
                         # TODO fill by adjancent values if available
-                        50,  # "tag_frequency"
+                        ac_freq,  # "tag_frequency"
                         buses_station_id.country.iloc[0],  # "country"
                         LineString(
                             [
