@@ -398,6 +398,12 @@ def integrate_lines_df(df_all_lines, distance_crs):
     if "tag_frequency" in df_all_lines.columns:
         df_all_lines.loc[df_all_lines["tag_frequency"].isna(), "tag_frequency"] = 50
     # Add frequency column
+
+        grid_freq_levels = df_all_lines["tag_frequency"].value_counts(sort = True, dropna = True)        
+        if not grid_freq_levels.empty:
+            # AC lines frequency shouldn't be 0Hz
+            ac_freq_levels = grid_freq_levels.loc[grid_freq_levels.index.get_level_values(0) != "0"]
+            ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
     else:
         df_all_lines["tag_frequency"] = 50
 
