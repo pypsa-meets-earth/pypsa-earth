@@ -399,21 +399,27 @@ def integrate_lines_df(df_all_lines, distance_crs):
     # TODO Fill by adjancent value
 
     # Initialize a default frequency value
-    ac_freq_default = 50 
+    ac_freq_default = 50
 
     if "tag_frequency" in df_all_lines.columns:
 
-        grid_freq_levels = df_all_lines["tag_frequency"].value_counts(sort = True, dropna = True)        
+        grid_freq_levels = df_all_lines["tag_frequency"].value_counts(
+            sort=True, dropna=True
+        )
         if not grid_freq_levels.empty:
             # AC lines frequency shouldn't be 0Hz
-            ac_freq_levels = grid_freq_levels.loc[grid_freq_levels.index.get_level_values(0) != "0"]
+            ac_freq_levels = grid_freq_levels.loc[
+                grid_freq_levels.index.get_level_values(0) != "0"
+            ]
             ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
 
-        df_all_lines.loc[df_all_lines["tag_frequency"].isna(), "tag_frequency"] = ac_freq_default
-   
+        df_all_lines.loc[
+            df_all_lines["tag_frequency"].isna(), "tag_frequency"
+        ] = ac_freq_default
+
     # Add frequency column if not present in data
     else:
-        df_all_lines["tag_frequency"] = ac_freq_default   
+        df_all_lines["tag_frequency"] = ac_freq_default
 
     df_all_lines = split_cells_multiple(df_all_lines)
     # Add circuits information
