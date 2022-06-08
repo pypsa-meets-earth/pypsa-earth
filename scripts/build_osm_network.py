@@ -483,7 +483,8 @@ def get_converters(buses, links):
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
 
-        if (n_voltages > 1) & g_value["dc"].any():
+        # Assuming that a converter stations should have both AC and DC parts
+        if g_value["dc"].any() & ~g_value["dc"].all():
 
             for id in range(0, n_voltages - 1):
                 # when g_value has more than one node, it means that there are multiple voltages for the same bus
