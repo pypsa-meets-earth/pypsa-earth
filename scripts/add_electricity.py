@@ -774,7 +774,8 @@ def estimate_renewable_capacities_irena(n, config):
         return
 
     # If stats is set to false, then apply greenfield run by returning
-    if not config["electricity"]["estimate_renewable_capacities"]["stats"]:
+    stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
+    if not stats:
         return
 
     year = config["electricity"]["estimate_renewable_capacities"]["year"]
@@ -796,13 +797,11 @@ def estimate_renewable_capacities_irena(n, config):
         return
 
     # Use the stats specified in config.yaml. currently only irena is implemented
-    stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
     if stats == "irena":
         capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
     else:
-    # TODO doublecheck if logger.info is applied correctly
         logger.info(
-            f"Selected renewable capacity estimation statistics", stats, "is not available"
+            f"Selected renewable capacity estimation statistics {stats} is not available, applying greenfield scenario instead"
         )
         return
 
@@ -830,7 +829,6 @@ def estimate_renewable_capacities_irena(n, config):
             .transform(lambda s: normed(s) * tech_capacities.at[s.name])
             .where(lambda s: s > 0.1, 0.0)
         )  # only capacities above 100kW
-        # TODO doublecheck if scaling of p_nom_min works
         # TODO does it make sense, to have a country-independent scaling factor?
         n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]*p_nom_min
 
