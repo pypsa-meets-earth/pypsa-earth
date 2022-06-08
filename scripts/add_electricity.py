@@ -784,12 +784,9 @@ def estimate_renewable_capacities_irena(n, config):
     ]
     tech_keys = list(tech_map.keys())
     countries = config["countries"]
-    # expansion_limit = config["electricity"]["estimate_renewable_capacities"][
-    #     "expansion_limit"
-    # ]
+
     p_nom_max = config["electricity"]["estimate_renewable_capacities"]["p_nom_max"]
     p_nom_min = config["electricity"]["estimate_renewable_capacities"]["p_nom_min"]
-
 
     if len(countries) == 0:
         return
@@ -815,7 +812,13 @@ def estimate_renewable_capacities_irena(n, config):
         f"{capacities.groupby('Country').sum()}"
     )
 
+    # ppm_technology includes "offshore", but "capacities" doesn't
     for ppm_technology, techs in tech_map.items():
+
+        if ppm_technology not in capacities.index:
+            logger.info(f"technology {ppm_technology} is not provided by {stats} and therefore not estimated")
+            continue
+
         tech_capacities = capacities.loc[ppm_technology].reindex(
             countries, fill_value=0.0
         )
