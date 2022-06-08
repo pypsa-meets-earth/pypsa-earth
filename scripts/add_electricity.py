@@ -829,13 +829,19 @@ def estimate_renewable_capacities_irena(n, config):
             .transform(lambda s: normed(s) * tech_capacities.at[s.name])
             .where(lambda s: s > 0.1, 0.0)
         )  # only capacities above 100kW
-        # TODO does it make sense, to have a country-independent scaling factor?
-        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]*p_nom_min
+        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
+
+        if p_nom_min:
+            assert np.isscalar(p_nom_min)
+            logger.info(
+                f"Scaling capacity stats to {p_nom_min*100:.2f}% of installed capacity acquired from stats."
+            )
+            n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]*float(p_nom_min)
 
         if p_nom_max:
             assert np.isscalar(p_nom_max)
             logger.info(
-                f"Reducing capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity."
+                f"Scaling capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity acquired from stats."
             )
             n.generators.loc[tech_i, "p_nom_max"] = (
                 float(p_nom_max) * n.generators.loc[tech_i, "p_nom_min"]
