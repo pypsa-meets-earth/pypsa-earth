@@ -470,8 +470,7 @@ def get_transformers(buses, lines):
 
 def get_converters(buses, links):
     """
-    Function to create fake converter links that connect buses of the same station_id at different voltage
-    At least one bus should belong to a DC link
+    Function to create fake converter links that connect buses of the same station_id of different polarities
     """
 
     df_converters = []
