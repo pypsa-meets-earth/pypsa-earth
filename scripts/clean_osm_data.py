@@ -194,7 +194,7 @@ def filter_voltage(df, threshold_voltage=35000):
     return df
 
 
-def filter_links(df):
+def filter_dc(df):
 
     # convert frequency to int
     df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
@@ -722,8 +722,8 @@ def clean_data(
         df_all_lines, ext_country_shapes, names_by_shapes=names_by_shapes
     )
 
-    df_links = filter_links(df_all_lines)
     df_lines = filter_ac(df_all_lines)
+    df_links = filter_dc(df_all_lines)
 
     save_to_geojson(df_links, output_files["links"])
     save_to_geojson(df_lines, output_files["lines"])
