@@ -274,34 +274,100 @@ def merge_stations_same_station_id(
         v_it = 0
         for v_name, bus_row in g_value.groupby(by=["voltage"]):
 
-            lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
-            lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
+            # Converter stations connect AC and DC lines
+            if bus_row["dc"].any() & ~bus_row["dc"].all():
 
-            # add the bus
-            buses_clean.append(
-                [
+                bus_row_dc = bus_row[bus_row["dc"]]
+                bus_row_ac = bus_row[~bus_row["dc"]]
+
+                lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
+                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
+
+                # add the bus
+                buses_dc = [
                     n_buses,  # "bus_id"
                     g_name,  # "station_id"
                     v_name,  # "voltage"
-                    bus_row["dc"].any(),  # "dc"
-                    # bus_row["dc"].all(),  # "dc"
-                    "|".join(bus_row["symbol"].unique()),  # "symbol"
-                    bus_row["under_construction"].any(),  # "under_construction"
-                    "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
-                    bus_row["tag_area"].sum(),  # "tag_area"
+                    bus_row_dc["dc"].all(),  # "dc"
+                    # bus_row_dc["dc"].all(),  # "dc"
+                    "|".join(bus_row_dc["symbol"].unique()),  # "symbol"
+                    bus_row_dc["under_construction"].any(),  # "under_construction"
+                    "|".join(bus_row_dc["tag_substation"].unique()),  # "tag_substation"
+                    bus_row_dc["tag_area"].sum(),  # "tag_area"
                     lon_bus,  # "lon"
                     lat_bus,  # "lat"
-                    bus_row["country"].iloc[0],  # "country"
+                    bus_row_dc["country"].iloc[0],  # "country"
+                    Point(
+                        lon_bus,
+                        lat_bus,
+                    ),  # "geometry"
+                    ]
+
+                # increase counters
+                v_it += 1
+                n_buses += 1  
+
+                buses.clean = buses_clean.append(buses_dc) 
+
+                lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
+                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)                                           
+
+                # add the bus
+                buses_ac = [
+                    n_buses,  # "bus_id"
+                    g_name,  # "station_id"
+                    v_name,  # "voltage"
+                    bus_row_ac["dc"].all(),  # "dc"
+                    # bus_row_ac["dc"].all(),  # "dc"
+                    "|".join(bus_row_ac["symbol"].unique()),  # "symbol"
+                    bus_row_ac["under_construction"].any(),  # "under_construction"
+                    "|".join(bus_row_ac["tag_substation"].unique()),  # "tag_substation"
+                    bus_row_ac["tag_area"].sum(),  # "tag_area"
+                    lon_bus,  # "lon"
+                    lat_bus,  # "lat"
+                    bus_row_ac["country"].iloc[0],  # "country"
                     Point(
                         lon_bus,
                         lat_bus,
                     ),  # "geometry"
                 ]
-            )
 
-            # increase counters
-            v_it += 1
-            n_buses += 1
+                # increase counters
+                v_it += 1
+                n_buses += 1
+
+                buses.clean = buses_clean.append(buses_ac)
+
+            else:   
+
+                lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
+                lat_bus = np.round(station_point_y + v_it * delta_lat, precision)                
+
+                # add the bus
+                buses_clean.append(
+                    [
+                        n_buses,  # "bus_id"
+                        g_name,  # "station_id"
+                        v_name,  # "voltage"
+                        bus_row["dc"].all(),  # "dc"
+                        # bus_row["dc"].all(),  # "dc"
+                        "|".join(bus_row["symbol"].unique()),  # "symbol"
+                        bus_row["under_construction"].any(),  # "under_construction"
+                        "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
+                        bus_row["tag_area"].sum(),  # "tag_area"
+                        lon_bus,  # "lon"
+                        lat_bus,  # "lat"
+                        bus_row["country"].iloc[0],  # "country"
+                        Point(
+                            lon_bus,
+                            lat_bus,
+                        ),  # "geometry"
+                    ]
+                )
+    
+                # increase counters
+                v_it += 1
+                n_buses += 1
 
     # names of the columns
     buses_clean_columns = [
