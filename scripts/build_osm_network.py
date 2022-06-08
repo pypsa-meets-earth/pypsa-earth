@@ -389,6 +389,21 @@ def merge_stations_same_station_id(
         crs=buses.crs, inplace=True
     )
 
+def get_ac_frequency(df, fr_col = "tag_frequency"):
+    """
+    # Function to define a default frequency value. Attempts to find the most usual non-zero frequency across the dataframe; 50 Hz is assumed as a back-up value
+    """
+
+    # Initialize a default frequency value
+    ac_freq_default = 50
+
+    grid_freq_levels = df[fr_col].value_counts(sort = True, dropna = True)        
+    if not grid_freq_levels.empty:
+        # AC lines frequency shouldn't be 0Hz
+        ac_freq_levels = grid_freq_levels.loc[grid_freq_levels.index.get_level_values(0) != "0"]
+        ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
+
+    return(ac_freq_default)    
 
 def get_transformers(buses, lines):
     """
