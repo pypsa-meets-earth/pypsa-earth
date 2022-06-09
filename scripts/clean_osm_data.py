@@ -75,9 +75,9 @@ def prepare_substation_df(df_all_substations):
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns) 
+    bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
-    is_ac = lines["tag_frequency"] != 0    
+    is_ac = lines["tag_frequency"] != 0
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
