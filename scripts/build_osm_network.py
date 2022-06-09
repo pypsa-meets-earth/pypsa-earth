@@ -381,7 +381,6 @@ def get_transformers(buses, lines):
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
-                        # TODO fill by adjancent values if available
                         ac_freq,  # "tag_frequency"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
@@ -530,7 +529,6 @@ def connect_stations_same_station_id(lines, buses):
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
-                        # TODO fill by adjancent values if available
                         ac_freq,  # "tag_frequency"
                         buses_station_id.country.iloc[0],  # "country"
                         LineString(
@@ -616,7 +614,6 @@ def set_lv_substations(buses):
 #       There may be the need to split a line in several segments in the case the line is within tolerance with
 #       respect to a node
 
-# TODO Account for a possible empty links data file
 def merge_stations_lines_by_station_id_and_voltage(
     lines, buses, geo_crs, distance_crs, tol=2000
 ):
