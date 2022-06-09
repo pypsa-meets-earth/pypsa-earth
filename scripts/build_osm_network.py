@@ -682,7 +682,7 @@ def set_lv_substations(buses):
 
 # TODO Account for a possible empty links data file
 def merge_stations_lines_by_station_id_and_voltage(
-    lines, links, buses, geo_crs, distance_crs, tol=2000
+    lines, buses, geo_crs, distance_crs, tol=2000
 ):
     """
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
@@ -705,21 +705,11 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses, distance_crs)
-    # the links dataframe can be empty
-    if len(links) > 0:
-        links, buses = set_lines_ids(links, buses, distance_crs)
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
-    if len(links) > 0:
-        links.drop(links[links["bus0"] == links["bus1"]].index, inplace=True)
-
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
-    if len(links) > 0:
-        links = line_endings_to_bus_conversion(links)
-    else:
-        links = []
 
     # set substation_lv
     set_lv_substations(buses)
@@ -728,6 +718,9 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
+
+    links = lines[lines.tag_frequency == 0]
+    lines = lines[lines.tag_frequency != 0]    
 
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
@@ -956,7 +949,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
         lines, links, buses = merge_stations_lines_by_station_id_and_voltage(
-            lines, links, buses, geo_crs, distance_crs, tol=tol
+            lines, buses, geo_crs, distance_crs, tol=tol
         )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
