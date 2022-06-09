@@ -921,17 +921,20 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     substations = gpd.read_file(inputs["substations"])
     lines = gpd.read_file(inputs["lines"])
     links = read_geojson(inputs["links"])
+
+    # Join AC and DC lines for proper attributes management
+    # (stations ids should be set across the whole dataset)
+    lines = gpd.GeoDataFrame(
+        pd.concat([lines, links], ignore_index = True), crs = lines.crs
+    )
+
     generators = read_geojson(inputs["generators"])
 
     logger.info("Stage 2/5: Add line endings to the substation datasets")
 
     # Use lines and create bus/line df
     lines = line_endings_to_bus_conversion(lines)
-    links = line_endings_to_bus_conversion(links)
     buses = add_line_endings_tosubstations(substations, lines)
-    # a links dataframe can be empty
-    if len(links) > 0:
-        buses = add_line_endings_tosubstations(buses, links)
 
     # Address the overpassing line issue Step 3/5
     if snakemake.config.get("build_osm_network", {}).get(
@@ -943,7 +946,6 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
         lines, buses = fix_overpassing_lines(lines, buses, distance_crs, tol=tol)
-        links, buses = fix_overpassing_lines(links, buses, distance_crs, tol=tol)
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
