@@ -848,8 +848,9 @@ def estimate_renewable_capacities_irena(n, config):
             logger.info(
                 f"Scaling capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity acquired from stats."
             )
-            n.generators.loc[tech_i, "p_nom_max"] = n.generators.loc[tech_i, "p_nom_min"] * float(p_nom_max)
-            
+            n.generators.loc[tech_i, "p_nom_max"] = n.generators.loc[
+                tech_i, "p_nom_min"
+            ] * float(p_nom_max)
 
 
 def estimate_renewable_capacities(n, tech_map=None):
