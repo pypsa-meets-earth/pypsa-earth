@@ -768,6 +768,7 @@ def attach_OPSD_renewables(n):
 #                 float(expansion_limit) * n.generators.loc[tech_i, "p_nom_min"]
 #             )
 
+
 def estimate_renewable_capacities_irena(n, config):
 
     if not config["electricity"].get("estimate_renewable_capacities"):
@@ -813,7 +814,9 @@ def estimate_renewable_capacities_irena(n, config):
     for ppm_technology, techs in tech_map.items():
 
         if ppm_technology not in capacities.index:
-            logger.info(f"technology {ppm_technology} is not provided by {stats} and therefore not estimated")
+            logger.info(
+                f"technology {ppm_technology} is not provided by {stats} and therefore not estimated"
+            )
             continue
 
         tech_capacities = capacities.loc[ppm_technology].reindex(
@@ -836,7 +839,9 @@ def estimate_renewable_capacities_irena(n, config):
             logger.info(
                 f"Scaling capacity stats to {p_nom_min*100:.2f}% of installed capacity acquired from stats."
             )
-            n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]*float(p_nom_min)
+            n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[
+                tech_i, "p_nom"
+            ] * float(p_nom_min)
 
         if p_nom_max:
             assert np.isscalar(p_nom_max)
