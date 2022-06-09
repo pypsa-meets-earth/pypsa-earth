@@ -658,9 +658,9 @@ def merge_stations_lines_by_station_id_and_voltage(
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
 
-    converters = get_converters(buses, lines)
-    if len(links) > 0:
-        links = pd.concat([links, converters], ignore_index=True)
+    # converters = get_converters(buses, lines)
+    # if len(links) > 0:
+    #     links = pd.concat([links, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
