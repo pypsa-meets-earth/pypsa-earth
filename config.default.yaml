@@ -109,23 +109,13 @@ electricity:
   powerplants_filter:
 
   estimate_renewable_capacities:
-    # Renewable capacities are based on existing capacities reported by IRENA
-
-    # Reference year, any of 2000 to 2020
-    # year: 2020
-    # Artificially limit maximum capacities to factor * (IRENA capacities),
-    # i.e. 110% of <years>'s capacities => expansion_limit: 1.1
-    # false: Use estimated renewable potentials determine by the workflow
-    # expansion_limit: false
-
-    ## New config section
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
-    year: 2020  # Available years for IRENA stats 2000 to 2020
-    p_nom_min: 1  # any float, scales the minimum expansion from stats
-    p_nom_max: false  # sets the expansion constraint, false, deactivate this option, float scales the p_nom_min factor accordingly 
+    year: 2020  # Reference year, available years for IRENA stats are 2000 to 2020
+    p_nom_min: 1  # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
+    p_nom_max: 2  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly 
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
-      #Offshore: [offwind-ac, offwind-dc]
+      Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
 
