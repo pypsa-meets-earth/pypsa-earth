@@ -226,6 +226,7 @@ def load_powerplants(ppl_path):
     return (
         pd.read_csv(ppl_path, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
+        .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
         .drop(columns=["efficiency"])
         .replace({"carrier": carrier_dict})

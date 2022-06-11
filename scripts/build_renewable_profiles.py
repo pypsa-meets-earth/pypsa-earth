@@ -200,6 +200,7 @@ import pandas as pd
 import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, sets_path_to_root
+from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from shapely.geometry import LineString
 
@@ -266,6 +267,10 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins = gpd.read_file(resource["hydrobasins"])
+        ppls = load_powerplants(snakemake.input.powerplants)
+
+        hydro_ppls = ppls[ppls.carrier == "hydro"]
+
         # commented out as rivers may span across multiple countries
         # hydrobasins = hydrobasins[
         #     [
@@ -279,8 +284,19 @@ if __name__ == "__main__":
         ).loc[
             [
                 # select busbar whose location (p) belongs to at least one hydrobasin geometry
-                any(hydrobasins.geometry.intersects(p))
-                for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
+                # if extendable option is true, all buses are included
+                # otherwise only where hydro powerplants are available are considered
+                (
+                    (
+                        config.get("extendable", False)
+                        | (bus_id in hydro_ppls.bus.values)
+                    )
+                    & any(hydrobasins.geometry.intersects(p))
+                )
+                for (p, bus_id) in zip(
+                    gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
+                    regions.index,
+                )
             ],
             ["lon", "lat", "countries"],
         ]  # TODO: filtering by presence of hydro generators should be the way to go
