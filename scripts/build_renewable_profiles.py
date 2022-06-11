@@ -196,12 +196,12 @@ import time
 import atlite
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, sets_path_to_root
 from pypsa.geo import haversine
 from shapely.geometry import LineString
-from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
@@ -218,6 +218,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()
+    countries = snakemake.config["countries"]
     paths = snakemake.input
     nprocesses = snakemake.config["atlite"].get("nprocesses")
     noprogress = not snakemake.config["atlite"].get("show_progress", True)
@@ -225,6 +226,8 @@ if __name__ == "__main__":
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
+
+    # crs
     geo_crs = snakemake.config["crs"]["geo_crs"]
     area_crs = snakemake.config["crs"]["area_crs"]
 
@@ -270,14 +273,51 @@ if __name__ == "__main__":
         #         for geom in hydrobasins.geometry
         #     ]
         # ]  # exclude hydrobasins shapes that do not intersect the countries of interest
-        resource["plants"] = regions.rename(columns={"x": "lon", "y": "lat"}).loc[
+
+        resource["plants"] = regions.rename(
+            columns={"x": "lon", "y": "lat", "country": "countries"}
+        ).loc[
             [
                 # select busbar whose location (p) belongs to at least one hydrobasin geometry
                 any(hydrobasins.geometry.intersects(p))
                 for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
             ],
-            ["lon", "lat"],
+            ["lon", "lat", "countries"],
         ]  # TODO: filtering by presence of hydro generators should be the way to go
+
+        # check if normalization field belongs to the settings and it is not false
+        if ("normalization" in resource) & (resource["normalization"] is not bool):
+
+            normalization = resource.pop("normalization")
+
+            if normalization == "hydro_capacities":
+                hydro_stats = (
+                    pd.read_csv(
+                        snakemake.input.hydro_capacities,
+                        comment="#",
+                        na_values="-",
+                        index_col=0,
+                    )
+                    .rename({"Country": "countries"}, axis=1)
+                    .set_index("countries")
+                )
+                hydro_prod_by_country = hydro_stats[hydro_stats.index.isin(countries)][
+                    ["InflowHourlyAvg[GWh]"]
+                ].transpose()
+
+                year_start = 2000
+                year_end = 2020
+                range_years = range(year_start, year_end + 1)
+
+                normalize_using_yearly = pd.concat(
+                    [hydro_prod_by_country] * len(range_years), ignore_index=True
+                )
+                normalize_using_yearly.index = pd.Index(range_years)
+
+                resource["normalize_using_yearly"] = normalize_using_yearly
+            logger.info(f"Hydro normalization mode {normalization}")
+        else:
+            logger.info("No hydro normalization")
 
         # check if there are hydro powerplants
         if resource["plants"].empty:
