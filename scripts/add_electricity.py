@@ -215,9 +215,7 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
     return costs
 
 
-def load_powerplants(ppl_fn=None):
-    if ppl_fn is None:
-        ppl_fn = snakemake.input.powerplants
+def load_powerplants(ppl_path):
     carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
@@ -226,7 +224,7 @@ def load_powerplants(ppl_fn=None):
         "hard coal": "coal",
     }
     return (
-        pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
+        pd.read_csv(ppl_path, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
         .rename(columns=str.lower)
         .drop(columns=["efficiency"])
@@ -796,9 +794,10 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
+    ppl_path = snakemake.input.powerplants
 
     costs = load_costs(Nyears)
-    ppl = load_powerplants()
+    ppl = load_powerplants(ppl_path)
 
     attach_load(
         n,
