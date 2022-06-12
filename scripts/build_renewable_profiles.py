@@ -300,6 +300,10 @@ if __name__ == "__main__":
             ],
             ["lon", "lat", "countries"],
         ]  # TODO: filtering by presence of hydro generators should be the way to go
+        resource["plants"]["installed_hydro"] = [
+            True if (bus_id in hydro_ppls.bus.values) else False
+            for bus_id in resource["plants"].index
+        ]
 
         # check if normalization field belongs to the settings and it is not false
         if ("normalization" in resource) & (resource["normalization"] is not bool):
