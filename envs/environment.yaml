@@ -12,7 +12,7 @@ dependencies:
 - mamba   # esp for windows build
 
 - pypsa>=0.17.1
-- atlite>=0.2.4
+# - atlite>=0.2.4  # till https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
   # - powerplantmatching>=0.4.8
 
@@ -75,6 +75,7 @@ dependencies:
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
   - git+https://github.com/davide-f/powerplantmatching.git@new_pypsa_africa#egg=powerplantmatching
+  - git+https://github.com/davide-f/atlite.git@master
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf
