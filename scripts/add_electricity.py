@@ -744,6 +744,16 @@ def estimate_renewable_capacities_irena(n, config):
         )
         return
 
+    # Check if countries are in country list of stats
+    missing = list(set(countries).difference(capacities.Country.unique()))
+
+    if missing:
+        logger.info(
+            f"The countries {missing} are not provided in the stats and hence not scaled"
+        )
+    else:
+        pass
+
     capacities = capacities.query(
         "Year == @year and Technology in @tech_keys and Country in @countries"
     )
