@@ -127,7 +127,6 @@ electricity:
       Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
-      
 lines:
   types:
     220.: "Al/St 240/40 2-bundle 220.0"
