@@ -65,6 +65,7 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
         industry_demands="data/industry_demand_locations.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
+        biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv"
     output:
         RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     threads: 1
