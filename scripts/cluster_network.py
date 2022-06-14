@@ -308,8 +308,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
 
 def busmap_for_gadm_clusters(n, gadm_level):
-    
-    geo_crs = snakemake.config["crs"]["geo_crs"] # load default crs
+
+    geo_crs = snakemake.config["crs"]["geo_crs"]  # load default crs
     gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
 
     def locate_bus(coords, co):
