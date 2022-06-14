@@ -55,7 +55,7 @@ cluster_options:
   out_logging: true  # When "True", logging is printed to console
 
 build_shape_options:
-  gadm_layer_id: 1    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  gadm_layer_id: 2    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
   update_file: false    # When true, all the input files are downloaded again and replace the existing files
   out_logging: true    # When true, logging is printed to console
   year: 2020    # reference year used to derive shapes, info on population and info on GDP
@@ -73,7 +73,7 @@ clean_osm_data_options:  # osm = OpenStreetMap
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  group_tolerance_buses: 8000  # [m] (default 500) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
 
@@ -88,19 +88,22 @@ load_options:
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
+download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
+
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 1.487e9  # European default, adjustment to Africa necessary
+  co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
+  co2base: 1.487e8
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
 
   extendable_carriers:
     Generator: []
-    StorageUnit: []
-    Store: [battery, H2]
+    StorageUnit: [] # battery, H2
+    Store: []
     Link: []
 
-  conventional_carriers: [coal, OCGT, CCGT, oil]
+  # conventional_carriers: [coal, OCGT, CCGT, oil]
+  conventional_carriers: []
 
   max_hours:
     battery: 6
@@ -302,7 +305,8 @@ plotting:
   energy_threshold: 50.
 
   vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
-  conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
+  # conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
+  conv_techs: []
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]

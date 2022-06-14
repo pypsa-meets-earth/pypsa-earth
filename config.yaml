@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_4
+run: test_16_72H_2
 
 foresight: overnight
 
@@ -13,9 +13,15 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 50
+  - 46
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
+  ll:
+  - "copt"
+  opts:
+  - "Co2L-72H"
+
+
 
 costs:
   lifetime: 25 #default lifetime
@@ -126,7 +132,7 @@ sector:
   shipping_hydrogen_liquefaction: true
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: 1.0
-  gadm_level: 1
+  gadm_level: 2
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
@@ -141,8 +147,8 @@ sector:
 # snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
-  start: "2013-03-1"
-  end: "2013-03-8"
+  start: "2013-01-01"
+  end: "2014-01-01"
   closed: "left" # end is not inclusive
 
 # atlite:
