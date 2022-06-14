@@ -63,6 +63,9 @@ Upcoming Release
 
 * Revise dropnan for regions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
 
+* Fix bug in GADM clustering. Missing crs input. `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
+
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
