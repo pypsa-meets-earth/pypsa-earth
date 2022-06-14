@@ -10,9 +10,15 @@ SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
 
+CUTOUTS_PATH = (
+    "cutouts/africa-2013-era5-tutorial.nc"
+    if config["tutorial"]
+    else "cutouts/africa-2013-era5.nc"
+)
+
 
 wildcard_constraints:
-    lv="[a-z0-9\.]+",
+    ll="[a-z0-9\.]+",
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+m?|all",
     opts="[-+a-zA-Z0-9]*",
@@ -31,7 +37,8 @@ subworkflow pypsaearth:
 rule prepare_sector_networks:
     input:
         expand(
-            RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            RDIR
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
 
@@ -39,14 +46,15 @@ rule prepare_sector_networks:
 rule solve_all_networks:
     input:
         expand(
-            RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            RDIR
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
 
 
 rule prepare_sector_network:
     input:
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
+        network=pypsaearth("networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/nodal_energy_heat_totals_s{simpl}_{clusters}.csv",
@@ -67,14 +75,15 @@ rule prepare_sector_network:
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
     output:
-        RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     threads: 1
     resources:
         mem_mb=2000,
     benchmark:
         (
             RDIR
-            + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_{planning_horizons}"
+            + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
         )
     script:
         "scripts/prepare_sector_network.py"
@@ -154,7 +163,7 @@ rule build_solar_thermal_profiles:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5-tutorial.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
         solar_thermal_urban="resources/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
@@ -171,7 +180,7 @@ rule build_population_layouts:
     input:
         nuts3_shapes=pypsaearth("resources/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
-        cutout=pypsaearth("cutouts/africa-2013-era5-tutorial.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         pop_layout_total="resources/pop_layout_total.nc",
         pop_layout_urban="resources/pop_layout_urban.nc",
@@ -204,7 +213,7 @@ rule build_clustered_population_layouts:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5-tutorial.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
     resources:
@@ -223,7 +232,7 @@ rule build_heat_demand:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5-tutorial.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
         heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
@@ -244,7 +253,7 @@ rule build_temperature_profiles:
         regions_onshore=pypsaearth(
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        cutout=pypsaearth("cutouts/africa-2013-era5-tutorial.nc"),
+        cutout=pypsaearth(CUTOUTS_PATH),
     output:
         temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
@@ -275,21 +284,29 @@ rule copy_config:
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
-        network=RDIR + "/prenetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        network=RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
     output:
-        RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        RDIR
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     shadow:
         "shallow"
     log:
-        solver=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_solver.log",
-        python=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_python.log",
-        memory=RDIR + "/logs/elec_s{simpl}_{clusters}_{planning_horizons}_memory.log",
+        solver=RDIR
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log",
+        python=RDIR
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
+        memory=RDIR
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_memory.log",
     threads: 4
     resources:
         mem_mb=config["solving"]["mem"],
     benchmark:
-        RDIR + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_{planning_horizons}"
+        (
+            RDIR
+            + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        )
     script:
         "scripts/solve_network.py"
 
@@ -298,12 +315,14 @@ rule make_summary:
     input:
         overrides="data/override_component_attrs",
         networks=expand(
-            RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            RDIR
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
         costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         plots=expand(
-            RDIR + "/maps/elec_s{simpl}_{clusters}-costs-all_{planning_horizons}.pdf",
+            RDIR
+            + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.pdf",
             **config["scenario"]
         ),
     output:
@@ -334,14 +353,19 @@ rule make_summary:
 rule plot_network:
     input:
         overrides="data/override_component_attrs",
-        network=RDIR + "/postnetworks/elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        network=RDIR
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     output:
-        map=RDIR + "/maps/elec_s{simpl}_{clusters}-costs-all_{planning_horizons}.pdf",
+        map=RDIR
+        + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.pdf",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_{planning_horizons}"
+        (
+            RDIR
+            + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        )
     script:
         "scripts/plot_network.py"
 
@@ -362,3 +386,22 @@ rule plot_summary:
         SDIR + "/benchmarks/plot_summary"
     script:
         "scripts/plot_summary.py"
+
+
+rule prepare_db:
+    input:
+        network=RDIR
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+    output:
+        db=RDIR
+        + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}-costs-all_{planning_horizons}.csv",
+    threads: 2
+    resources:
+        mem_mb=10000,
+    benchmark:
+        (
+            RDIR
+            + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+        )
+    script:
+        "scripts/prepare_db.py"
