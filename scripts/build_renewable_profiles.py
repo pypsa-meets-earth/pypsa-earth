@@ -220,7 +220,7 @@ if __name__ == "__main__":
     pgb.streams.wrap_stderr()
     paths = snakemake.input
     nprocesses = snakemake.config["atlite"].get("nprocesses")
-    noprogress = not snakemake.config["atlite"].get("show_progress", True)
+    noprogress = not snakemake.config["atlite"].get("show_progress", False)
     config = snakemake.config["renewable"][snakemake.wildcards.technology]
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
