@@ -67,6 +67,7 @@ Upcoming Release
 
 * Fix bug in GADM clustering. Missing crs input. `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
 
+* Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
