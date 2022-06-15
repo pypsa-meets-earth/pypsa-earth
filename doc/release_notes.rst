@@ -13,6 +13,8 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Get renewable capacities from IRENA statistics `PR #343 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/343>`__
+
 * Bug fixing (script retrieve_databundle) and rule run_test to ease testing `PR #322 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/322>`__
 
 * Handling non-numerical entries in raw OSM data: `PR #287 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/287>`__
