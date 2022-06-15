@@ -1604,10 +1604,10 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-    heat_demand = pd.read_csv(snakemake.input.heat_demand, index_col=0, header=[0, 1])
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0)
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0)
-    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0)
+    heat_demand = pd.read_csv(snakemake.input.heat_demand, index_col=0, header=[0, 1]).reindex(index=n.snapshots)
+    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0).reindex(index=n.snapshots)
+    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0).reindex(index=n.snapshots)
+    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0).reindex(index=n.snapshots)
 
     district_heat_share = pd.read_csv(
         snakemake.input.district_heat_share, index_col=0
@@ -1639,7 +1639,7 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    # add_heat(n, costs)
+    add_heat(n, costs)
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()

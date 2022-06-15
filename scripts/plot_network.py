@@ -78,8 +78,8 @@ def plot_h2_infra(network):
 
     # assign_location(n)
 
-    bus_size_factor = 1e5
-    linewidth_factor = 1e4
+    bus_size_factor = 1e6
+    linewidth_factor = 1e5
     # MW below which not drawn
     line_lower_threshold = 1e1
     bus_color = "m"

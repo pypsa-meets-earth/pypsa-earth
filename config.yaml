@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_16_72H_2
+run: test_new_1406_lowcarbon_22
 
 foresight: overnight
 
@@ -13,13 +13,13 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 46
+  - 24
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
-  - "copt"
+  - "c1"
   opts:
-  - "Co2L-72H"
+  - "Co2L-144H"
 
 
 
