@@ -450,7 +450,7 @@ def get_converters(buses, links):
 
                 df_converters.append(
                     [
-                        f"transf_{g_name}_{id}",  # "line_id"
+                        f"convert_{g_name}_{id}",  # "line_id"
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
                         g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
