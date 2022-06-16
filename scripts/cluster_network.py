@@ -427,7 +427,7 @@ def clustering_for_n_clusters(
         raise AttributeError(
             f"potential_mode should be one of 'simple' or 'conservative' but is '{potential_mode}'"
         )
-    
+
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
             n, busmap = busmap_for_gadm_clusters(
@@ -494,6 +494,7 @@ def cluster_regions(busmaps, input=None, output=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="60"
@@ -569,7 +570,9 @@ if __name__ == "__main__":
         )
         custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
         if custom_busmap:
-            busmap = pd.read_csv(snakemake.input.custom_busmap, index_col=0, squeeze=True)
+            busmap = pd.read_csv(
+                snakemake.input.custom_busmap, index_col=0, squeeze=True
+            )
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
         clustering = clustering_for_n_clusters(
