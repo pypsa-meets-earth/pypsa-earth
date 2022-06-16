@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_new_1406_lowcarbon_22
+run: test_new_1406_lowcarbon_25
 
 foresight: overnight
 
@@ -54,6 +54,7 @@ solar_thermal:
     azimuth: 180.
 
 sector:
+  gas_network: false
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share
@@ -119,7 +120,7 @@ sector:
     # 2030: 0.05
     # 2040: 0.1
     # 2050: 0.15
-  land_transport_electric_share: 0. # 1 means all EVs  # This leads to problems when non-zero
+  land_transport_electric_share: 0.8 # 1 means all EVs  # This leads to problems when non-zero
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
