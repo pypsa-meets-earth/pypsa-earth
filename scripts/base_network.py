@@ -214,7 +214,6 @@ def _load_links_from_osm(buses):
     # links["carrier"] = "DC"
     links["carrier"] = "AC"
 
-
     return links
 
 
