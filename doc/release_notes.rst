@@ -69,6 +69,8 @@ Upcoming Release
 
 * Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`
 
+* Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
