@@ -449,10 +449,7 @@ def cluster(n, n_clusters, config):
     potential_mode = (
         consense(
             pd.Series(
-                [
-                    config["renewable"][tech]["potential"]
-                    for tech in renewable_carriers
-                ]
+                [config["renewable"][tech]["potential"] for tech in renewable_carriers]
             )
         )
         if len(renewable_carriers) > 0
@@ -494,7 +491,7 @@ if __name__ == "__main__":
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
-        busmaps.append(cluster_map)  #TODO: Uncomment and figure out purpose of busmap
+        busmaps.append(cluster_map)  # TODO: Uncomment and figure out purpose of busmap
     else:
         # TODO: Remove other unnecessary columns
         n.buses = n.buses.drop(
