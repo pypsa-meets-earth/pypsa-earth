@@ -121,7 +121,9 @@ def _load_buses_from_osm():
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
-    buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
+    # All carriers are temporary set to "AC" to avoid the mixed-carries problem
+    # buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
+    buses["carrier"] = "AC"
     buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
@@ -208,7 +210,10 @@ def _load_links_from_osm(buses):
     links = _rebase_voltage_to_config(links)  # rebase voltage to config inputs
     # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
 
-    links["carrier"] = "DC"
+    # All carriers are temporary set to "AC" to avoid the mixed-carries problem
+    # links["carrier"] = "DC"
+    links["carrier"] = "AC"
+
 
     return links
 
