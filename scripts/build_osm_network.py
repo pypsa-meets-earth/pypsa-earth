@@ -925,7 +925,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         )
 
     links = lines[lines.tag_frequency == 0]
-    lines = lines[lines.tag_frequency != 0]    
+    lines = lines[lines.tag_frequency != 0]
 
     logger.info("Save outputs")
 
