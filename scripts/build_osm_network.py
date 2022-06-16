@@ -198,10 +198,12 @@ def set_lines_ids(lines, buses, distance_crs):
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
-        row["dc"] = (row["tag_frequency"] == 0)
+        row["dc"] = row["tag_frequency"] == 0
 
         # select buses having the voltage level of the current line
-        buses_sel = busesepsg[(buses["voltage"] == row["voltage"]) & (buses["dc"] == row["dc"])]
+        buses_sel = busesepsg[
+            (buses["voltage"] == row["voltage"]) & (buses["dc"] == row["dc"])
+        ]
 
         # find the closest node of the bus0 of the line
         bus0_id = buses_sel.geometry.distance(row.geometry.boundary.geoms[0]).idxmin()
@@ -289,9 +291,7 @@ def merge_stations_same_station_id(
                     # bus_row["dc"].all(),  # "dc"
                     "|".join(bus_row["symbol"].unique()),  # "symbol"
                     bus_row["under_construction"].any(),  # "under_construction"
-                    "|".join(
-                        bus_row["tag_substation"].unique()
-                    ),  # "tag_substation"
+                    "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
                     bus_row["tag_area"].sum(),  # "tag_area"
                     lon_bus,  # "lon"
                     lat_bus,  # "lat"
@@ -614,6 +614,7 @@ def set_lv_substations(buses):
 #       There may be the need to split a line in several segments in the case the line is within tolerance with
 #       respect to a node
 
+
 def merge_stations_lines_by_station_id_and_voltage(
     lines, buses, geo_crs, distance_crs, tol=2000
 ):
@@ -653,7 +654,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     transformers = get_transformers(buses, lines)
 
     links = lines[lines.tag_frequency == 0]
-    lines = lines[lines.tag_frequency != 0]    
+    lines = lines[lines.tag_frequency != 0]
 
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
@@ -851,7 +852,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     # Join AC and DC lines for proper attributes management
     # (stations ids should be set across the whole dataset)
     lines = gpd.GeoDataFrame(
-        pd.concat([lines, links], ignore_index = True), crs = lines.crs
+        pd.concat([lines, links], ignore_index=True), crs=lines.crs
     )
 
     generators = read_geojson(inputs["generators"])
