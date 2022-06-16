@@ -652,23 +652,20 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
-
-    links = lines[lines.tag_frequency == 0]
-    lines = lines[lines.tag_frequency != 0]
-
     # append transformer lines
     lines = pd.concat([lines, transformers], ignore_index=True)
 
-    if len(links) > 0:
-        converters = get_converters(buses, links)
-        links = pd.concat([links, converters], ignore_index=True)
+    # get converters: currently modelled as lines connecting buses with different polarity
+    converters = get_converters(buses, lines)
+    # append fake converters
+    lines = pd.concat([lines, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
-    if len(links) > 0:
-        links.reset_index(drop=True, inplace=True)
+    # if len(links) > 0:
+    #     links.reset_index(drop=True, inplace=True)
 
-    return lines, links, buses
+    return lines, buses
 
 
 def create_station_at_equal_bus_locations(
@@ -882,7 +879,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
-        lines, links, buses = merge_stations_lines_by_station_id_and_voltage(
+        lines, buses = merge_stations_lines_by_station_id_and_voltage(
             lines, buses, geo_crs, distance_crs, tol=tol
         )
     else:
@@ -926,6 +923,9 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
             crs=buses.crs,
         )
+
+    links = lines[lines.tag_frequency == 0]
+    lines = lines[lines.tag_frequency != 0]    
 
     logger.info("Save outputs")
 
