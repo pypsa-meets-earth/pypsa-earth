@@ -430,6 +430,8 @@ def cluster(n, n_clusters, config):
     focus_weights = config.get("focus_weights", None)
     alternative_clustering = config["cluster_options"]["alternative_clustering"]
     gadm_layer_id = config["build_shape_options"]["gadm_layer_id"]
+    geo_crs = config["crs"]["geo_crs"]
+    country_list = config["countries"]
 
     renewable_carriers = pd.Index(
         [
@@ -460,6 +462,8 @@ def cluster(n, n_clusters, config):
         n_clusters,
         alternative_clustering,
         gadm_layer_id,
+        geo_crs,
+        country_list,
         custom_busmap=False,
         potential_mode=potential_mode,
         solver_name=config["solving"]["solver"]["name"],

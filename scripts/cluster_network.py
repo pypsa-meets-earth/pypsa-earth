@@ -307,9 +307,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     )
 
 
-def busmap_for_gadm_clusters(n, gadm_level):
-
-    geo_crs = snakemake.config["crs"]["geo_crs"]  # load default crs
+def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
+  # load default crs
     gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
 
     def locate_bus(coords, co):
@@ -409,6 +408,8 @@ def clustering_for_n_clusters(
     n_clusters,
     alternative_clustering,
     gadm_layer_id,
+    geo_crs,
+    country_list,
     custom_busmap=False,
     aggregate_carriers=None,
     line_length_factor=1.25,
@@ -431,7 +432,7 @@ def clustering_for_n_clusters(
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
             busmap = busmap_for_gadm_clusters(
-                n, gadm_layer_id
+                n, gadm_layer_id, geo_crs, country_list
             )
         else:
             busmap = busmap_for_n_clusters(
@@ -510,6 +511,7 @@ if __name__ == "__main__":
     gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
     focus_weights = snakemake.config.get("focus_weights", None)
     country_list = snakemake.config["countries"]
+    geo_crs = snakemake.config["crs"]["geo_crs"]
 
     if alternative_clustering:  # TODO load all techs in both cases
         renewable_carriers = pd.Index(
@@ -580,6 +582,8 @@ if __name__ == "__main__":
             n_clusters,
             alternative_clustering,
             gadm_layer_id,
+            geo_crs,
+            country_list,
             custom_busmap,
             aggregate_carriers,
             line_length_factor=line_length_factor,
