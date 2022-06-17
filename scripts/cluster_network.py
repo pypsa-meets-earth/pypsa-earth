@@ -307,9 +307,8 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     )
 
 
-def busmap_for_gadm_clusters(n, gadm_level):
+def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
 
-    geo_crs = snakemake.config["crs"]["geo_crs"]  # load default crs
     gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
 
     def locate_bus(coords, co):
@@ -335,7 +334,7 @@ def busmap_for_gadm_clusters(n, gadm_level):
     )
     busmap = buses["gadm_{}".format(gadm_level)]
 
-    return n, busmap
+    return busmap
 
 
 def busmap_for_n_clusters(
@@ -407,6 +406,10 @@ def busmap_for_n_clusters(
 def clustering_for_n_clusters(
     n,
     n_clusters,
+    alternative_clustering,
+    gadm_layer_id,
+    geo_crs,
+    country_list,
     custom_busmap=False,
     aggregate_carriers=None,
     line_length_factor=1.25,
@@ -426,28 +429,21 @@ def clustering_for_n_clusters(
             f"potential_mode should be one of 'simple' or 'conservative' but is '{potential_mode}'"
         )
 
-    if custom_busmap:
-        busmap = pd.read_csv(snakemake.input.custom_busmap, index_col=0, squeeze=True)
-        busmap.index = busmap.index.astype(str)
-        logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
-    else:
-
-        if snakemake.config["cluster_options"]["alternative_clustering"]:
-            n, busmap = busmap_for_gadm_clusters(
-                n, snakemake.config["build_shape_options"]["gadm_layer_id"]
-            )  # TODO make func only return busmap, and get level from config
+    if not isinstance(custom_busmap, pd.Series):
+        if alternative_clustering:
+            busmap = busmap_for_gadm_clusters(n, gadm_layer_id, geo_crs, country_list)
         else:
             busmap = busmap_for_n_clusters(
                 n, n_clusters, solver_name, focus_weights, algorithm
             )
-
-    weighted_agg_gens = True
+    else:
+        busmap = custom_busmap
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
         bus_strategies=dict(country=_make_consense("Bus", "country")),
-        aggregate_generators_weighted=weighted_agg_gens,
+        aggregate_generators_weighted=True,
         aggregate_generators_carriers=aggregate_carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
@@ -513,6 +509,7 @@ if __name__ == "__main__":
     gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
     focus_weights = snakemake.config.get("focus_weights", None)
     country_list = snakemake.config["countries"]
+    geo_crs = snakemake.config["crs"]["geo_crs"]
 
     if alternative_clustering:  # TODO load all techs in both cases
         renewable_carriers = pd.Index(
@@ -572,9 +569,19 @@ if __name__ == "__main__":
             )
         )
         custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
+        if custom_busmap:
+            busmap = pd.read_csv(
+                snakemake.input.custom_busmap, index_col=0, squeeze=True
+            )
+            busmap.index = busmap.index.astype(str)
+            logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
         clustering = clustering_for_n_clusters(
             n,
             n_clusters,
+            alternative_clustering,
+            gadm_layer_id,
+            geo_crs,
+            country_list,
             custom_busmap,
             aggregate_carriers,
             line_length_factor=line_length_factor,
