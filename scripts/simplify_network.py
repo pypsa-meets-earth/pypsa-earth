@@ -491,7 +491,7 @@ if __name__ == "__main__":
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
-        busmaps.append(cluster_map)  # TODO: Uncomment and figure out purpose of busmap
+        busmaps.append(cluster_map)
     else:
         # TODO: Remove other unnecessary columns
         n.buses = n.buses.drop(

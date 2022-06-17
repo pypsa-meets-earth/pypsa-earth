@@ -335,7 +335,7 @@ def busmap_for_gadm_clusters(n, gadm_level):
     )
     busmap = buses["gadm_{}".format(gadm_level)]
 
-    return n, busmap
+    return busmap
 
 
 def busmap_for_n_clusters(
@@ -430,9 +430,9 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
-            n, busmap = busmap_for_gadm_clusters(
+            busmap = busmap_for_gadm_clusters(
                 n, gadm_layer_id
-            )  # TODO make func only return busmap, and get level from config
+            )
         else:
             busmap = busmap_for_n_clusters(
                 n, n_clusters, solver_name, focus_weights, algorithm
