@@ -431,9 +431,7 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
-            busmap = busmap_for_gadm_clusters(
-                n, gadm_layer_id, geo_crs, country_list
-            )
+            busmap = busmap_for_gadm_clusters(n, gadm_layer_id, geo_crs, country_list)
         else:
             busmap = busmap_for_n_clusters(
                 n, n_clusters, solver_name, focus_weights, algorithm
