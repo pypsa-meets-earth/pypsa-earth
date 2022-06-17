@@ -308,7 +308,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
 
 def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
-  # load default crs
+    # load default crs
     gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
 
     def locate_bus(coords, co):
@@ -431,9 +431,7 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
-            busmap = busmap_for_gadm_clusters(
-                n, gadm_layer_id, geo_crs, country_list
-            )
+            busmap = busmap_for_gadm_clusters(n, gadm_layer_id, geo_crs, country_list)
         else:
             busmap = busmap_for_n_clusters(
                 n, n_clusters, solver_name, focus_weights, algorithm
