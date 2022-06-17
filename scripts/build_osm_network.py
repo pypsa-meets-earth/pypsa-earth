@@ -442,36 +442,43 @@ def get_converters(buses, links):
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
 
-        # Assuming that a converter stations should have both AC and DC parts
+        # A converter stations should have both AC and DC parts
         if g_value["dc"].any() & ~g_value["dc"].all():
 
-            for id in range(0, n_voltages - 1):
-                # when g_value has more than one node, it means that there are multiple voltages for the same bus
+            dc_voltage = g_value[g_value.dc]["voltage"].values
+
+            for u in dc_voltage:
+                id_0 = g_value[g_value["dc"] & g_value["voltage"].isin([u])].index[0]
+    
+                ac_voltages = g_value[~g_value.dc]["voltage"]
+                # A converter is added between a DC nodes and AC one with the closest voltage
+                id_1 = ac_voltages.sub(u).abs().idxmin()
+
                 geom_trans = LineString(
-                    [g_value.geometry.iloc[id], g_value.geometry.iloc[id + 1]]
+                    [g_value.geometry.loc[id_0], g_value.geometry.loc[id_1]]
                 )
 
                 df_converters.append(
                     [
-                        f"convert_{g_name}_{id}",  # "line_id"
-                        g_value["bus_id"].iloc[id],  # "bus0"
-                        g_value["bus_id"].iloc[id + 1],  # "bus1"
-                        g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
+                        f"convert_{g_name}_{id_0}",  # "line_id"
+                        g_value["bus_id"].loc[id_0],  # "bus0"
+                        g_value["bus_id"].loc[id_1],  # "bus1"
+                        g_value.voltage.loc[[id_0, id_1]].max(),  # "voltage"
                         1,  # "circuits"
                         0.0,  # "length"
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
                         0,  # "tag_frequency"
-                        g_value.country.iloc[id],  # "country"
+                        g_value.country.loc[id_0],  # "country"
                         geom_trans,  # "geometry"
                         geom_trans.bounds,  # "bounds"
-                        g_value.geometry.iloc[id],  # "bus_0_coors"
-                        g_value.geometry.iloc[id + 1],  # "bus_1_coors"
-                        g_value.geometry.iloc[id].x,  # "bus0_lon"
-                        g_value.geometry.iloc[id].y,  # "bus0_lat"
-                        g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
-                        g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
+                        g_value.geometry.loc[id_0],  # "bus_0_coors"
+                        g_value.geometry.loc[id_1],  # "bus_1_coors"
+                        g_value.geometry.loc[id_0].x,  # "bus0_lon"
+                        g_value.geometry.loc[id_0].y,  # "bus0_lat"
+                        g_value.geometry.loc[id_1].x,  # "bus1_lon"
+                        g_value.geometry.loc[id_1].y,  # "bus1_lat"
                     ]
                 )
 
