@@ -355,7 +355,6 @@ def get_transformers(buses, lines):
     ac_freq = get_ac_frequency(lines)
     df_transformers = []
 
-    
     # Transformers should be added between AC buses only
     buses_ac = buses[~buses["dc"]]
     for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(
@@ -449,7 +448,7 @@ def get_converters(buses, links):
 
             for u in dc_voltage:
                 id_0 = g_value[g_value["dc"] & g_value["voltage"].isin([u])].index[0]
-    
+
                 ac_voltages = g_value[~g_value.dc]["voltage"]
                 # A converter is added between a DC nodes and AC one with the closest voltage
                 id_1 = ac_voltages.sub(u).abs().idxmin()
@@ -935,7 +934,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         )
 
     links = lines[lines.tag_frequency == 0].reset_index(drop=True)
-    lines = lines[lines.tag_frequency != 0].reset_index(drop=True) 
+    lines = lines[lines.tag_frequency != 0].reset_index(drop=True)
 
     logger.info("Save outputs")
 
