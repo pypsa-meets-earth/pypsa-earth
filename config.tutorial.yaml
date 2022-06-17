@@ -28,53 +28,6 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
-augmented_line_connection:
-  add_to_snakefile: true
-  connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
-  new_line_type: "HVDC"  # or "HVAC"
-  min_expansion: 1  # [MW]
-
-# if True clusters to GADM shapes, if False Voronoi cells will be clustered
-cluster_options:
-  alternative_clustering: false
-  distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
-  out_logging: true  # When true, logging is printed to console
-
-# options for build_shapes
-build_shape_options:
-  gadm_layer_id: 1    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
-  update_file: false    # When true, all the input files are downloaded again and replace the existing files
-  out_logging: true    # When true, logging is printed to console
-  year: 2020    # reference year used to derive shapes, info on population and info on GDP
-  nprocesses: 5    # number of processes to be used in build_shapes
-  worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
-  gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
-
-clean_osm_data_options:
-  names_by_shapes: true  # Set the country name based on the extended country shapes
-  threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
-  tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
-  add_line_endings: true  # When true, the line endings are added to the dataset of the substations
-  generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
-
-
-build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
-  group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
-  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
-  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
-
-
-base_network:
-  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 35000
-
-load_options:
-  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
-  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
-  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
-  scale: 1  # scales all load time-series, i.e. 2 = doubles load
-
 summary_dir: results
 
 snapshots:
@@ -96,6 +49,53 @@ crs:
   geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
   distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
   area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+
+# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
+
+augmented_line_connection:
+  add_to_snakefile: true
+  connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: "HVDC"  # or "HVAC"
+  min_expansion: 1  # [MW]
+
+# if True clusters to GADM shapes, if False Voronoi cells will be clustered
+cluster_options:
+  alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
+  distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
+  out_logging: true  # When true, logging is printed to console
+
+# options for build_shapes
+build_shape_options:
+  gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  update_file: false  # When true, all the input files are downloaded again and replace the existing files
+  out_logging: true  # When true, logging is printed to console
+  year: 2020  # reference year used to derive shapes, info on population and info on GDP
+  nprocesses: 5  # number of processes to be used in build_shapes
+  worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
+  gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
+
+clean_osm_data_options:
+  names_by_shapes: true  # Set the country name based on the extended country shapes
+  threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
+  add_line_endings: true  # When true, the line endings are added to the dataset of the substations
+  generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
+  group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+
+base_network:
+  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 35000
+
+load_options:
+  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+  scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
   voltages: [220., 300., 380.]
