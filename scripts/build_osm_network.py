@@ -934,8 +934,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-    links = lines[lines.tag_frequency == 0]
-    lines = lines[lines.tag_frequency != 0]    
+    links = lines[lines.tag_frequency == 0].reset_index(drop=True)
+    lines = lines[lines.tag_frequency != 0].reset_index(drop=True) 
 
     logger.info("Save outputs")
 
