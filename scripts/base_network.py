@@ -378,12 +378,14 @@ def _rebase_voltage_to_config(component):
 
 def base_network():
     buses = _load_buses_from_osm().reset_index()
-    lines = _load_lines_from_osm(buses)
-    links = _load_links_from_osm(buses)
-    lines = _set_electrical_parameters_lines(lines)
-    # links = _set_electrical_parameters_links(links)
 
-    lines_ac_dc = pd.concat([lines, links], ignore_index=True)
+    lines = _load_lines_from_osm(buses)
+    lines_dc = _load_links_from_osm(buses)
+
+    lines = _set_electrical_parameters_lines(lines)   
+    lines_dc = _set_electrical_parameters_lines(lines_dc)
+
+    lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
