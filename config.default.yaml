@@ -235,7 +235,7 @@ renewable:
     resource:
       method: hydro
       hydrobasins: data/raw/hydrobasins/hybas_world_lev04_v1c.shp
-      flowspeed: 1.0
+      flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
       normalization: hydro_capacities # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data, false for no normalization
