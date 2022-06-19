@@ -383,7 +383,9 @@ def base_network():
     lines_dc = _load_links_from_osm(buses)
 
     lines = _set_electrical_parameters_lines(lines)
-    lines_dc = _set_electrical_parameters_lines(lines_dc)
+    # lines_dc can be empty
+    if len(lines_dc) > 0:
+        lines_dc = _set_electrical_parameters_lines(lines_dc)
 
     lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
 
