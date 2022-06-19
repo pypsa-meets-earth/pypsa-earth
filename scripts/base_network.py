@@ -383,12 +383,11 @@ def base_network():
     lines = _load_lines_from_osm(buses)
     lines_dc = _load_links_from_osm(buses)
 
-    lines = _set_electrical_parameters_lines(lines)
-    # lines_dc can be empty
-    if len(lines_dc) > 0:
-        lines_dc = _set_electrical_parameters_lines(lines_dc)
+    # TODO: Set appropriate electrical parameters for AC and DC lines once properly debugged
+    # lines = _set_electrical_parameters_lines(lines)
 
     lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
+    lines_ac_dc = _set_electrical_parameters_lines(lines_ac_dc)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
