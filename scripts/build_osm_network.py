@@ -761,10 +761,6 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         below which the line will be splitted
     """
 
-    # in case of @lines corresponding to links it may be an empty data frame
-    if len(lines) == 0:
-        return lines, buses
-
     lines_to_add = []  # list of lines to be added
     lines_to_split = []  # list of lines that have been splitted
 
