@@ -424,16 +424,20 @@ def remove_stubs(n):
     return n, busmap
 
 
-def cluster(n, n_clusters):
+def cluster(n, n_clusters, config):
     logger.info(f"Clustering to {n_clusters} buses")
 
-    focus_weights = snakemake.config.get("focus_weights", None)
+    focus_weights = config.get("focus_weights", None)
+    alternative_clustering = config["cluster_options"]["alternative_clustering"]
+    gadm_layer_id = config["build_shape_options"]["gadm_layer_id"]
+    geo_crs = config["crs"]["geo_crs"]
+    country_list = config["countries"]
 
     renewable_carriers = pd.Index(
         [
             tech
             for tech in n.generators.carrier.unique()
-            if tech.split("-", 2)[0] in snakemake.config["renewable"]
+            if tech.split("-", 2)[0] in config["renewable"]
         ]
     )
 
@@ -447,10 +451,7 @@ def cluster(n, n_clusters):
     potential_mode = (
         consense(
             pd.Series(
-                [
-                    snakemake.config["renewable"][tech]["potential"]
-                    for tech in renewable_carriers
-                ]
+                [config["renewable"][tech]["potential"] for tech in renewable_carriers]
             )
         )
         if len(renewable_carriers) > 0
@@ -459,9 +460,13 @@ def cluster(n, n_clusters):
     clustering = clustering_for_n_clusters(
         n,
         n_clusters,
+        alternative_clustering,
+        gadm_layer_id,
+        geo_crs,
+        country_list,
         custom_busmap=False,
         potential_mode=potential_mode,
-        solver_name=snakemake.config["solving"]["solver"]["name"],
+        solver_name=config["solving"]["solver"]["name"],
         focus_weights=focus_weights,
     )
 
@@ -489,8 +494,8 @@ if __name__ == "__main__":
     busmaps = [trafo_map, simplify_links_map, stub_map]
 
     if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl))
-        # busmaps.append(cluster_map)  #TODO: Uncomment and figure out purpose of busmap
+        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
+        busmaps.append(cluster_map)
     else:
         # TODO: Remove other unnecessary columns
         n.buses = n.buses.drop(
