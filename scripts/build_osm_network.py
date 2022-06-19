@@ -932,7 +932,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-    links = lines[lines.tag_frequency == 0].reset_index(drop=True)
+    converters = lines[lines.tag_frequency == 0].reset_index(drop=True)
     lines = lines[lines.tag_frequency != 0].reset_index(drop=True)
 
     logger.info("Save outputs")
@@ -942,7 +942,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
-    to_csv_nafix(links, outputs["links"])  # Generate CSV
+    to_csv_nafix(converters, outputs["converters"])  # Generate CSV
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):

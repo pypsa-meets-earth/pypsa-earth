@@ -186,13 +186,13 @@ def _load_lines_from_osm(buses):
 
 def _load_links_from_osm(buses):
     # the links file can be empty
-    if os.path.getsize(snakemake.input.osm_links) == 0:
+    if os.path.getsize(snakemake.input.osm_converters) == 0:
         links = pd.DataFrame()
         return links
 
     links = (
         read_csv_nafix(
-            snakemake.input.osm_links,
+            snakemake.input.osm_converters,
             dtype=dict(
                 line_id="str",
                 bus0="str",
