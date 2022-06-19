@@ -34,7 +34,6 @@ def line_endings_to_bus_conversion(lines):
     return lines
 
 
-# TODO Seems to be not used?
 def create_bus_df_from_lines(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
