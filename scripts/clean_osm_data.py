@@ -195,29 +195,6 @@ def filter_voltage(df, threshold_voltage=35000):
 
     return df
 
-
-def filter_dc(df):
-
-    # convert frequency to int
-    df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
-
-    # TODO Fix SettingWithCopyWarning, details via https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-    # keep only lines with zero frequency as the most useful indication of DC lines
-    df = df[df.tag_frequency == 0]
-
-    return df
-
-
-def filter_ac(df):
-
-    # convert frequency to int
-    df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
-
-    df = df[df.tag_frequency != 0]
-
-    return df
-
-
 def finalize_substation_types(df_all_substations):
     """
     Specify bus_id and voltage columns as integer
