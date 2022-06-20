@@ -218,10 +218,10 @@ def _load_transformers_from_osm(buses):
     transformers = (
         read_csv_nafix(
             snakemake.input.osm_transformers,
-            dtype=dict(transformer_id='str', bus0='str', bus1='str'),
+            dtype=dict(transformer_id="str", bus0="str", bus1="str"),
         )
-    .rename(columns=dict(line_id="transformer_id"))
-    .set_index("transformer_id")
+        .rename(columns=dict(line_id="transformer_id"))
+        .set_index("transformer_id")
     )
     # transformers = _remove_dangling_branches(transformers, buses)  # TODO: add dangling branch removal?
 
@@ -270,12 +270,12 @@ def _set_electrical_parameters_links(links):
 
 
 def _set_electrical_parameters_transformers(transformers):
-    config = snakemake.config['transformers']
+    config = snakemake.config["transformers"]
 
     ## Add transformer parameters
-    transformers["x"] = config.get('x', 0.1)
-    transformers["s_nom"] = config.get('s_nom', 2000)
-    transformers['type'] = config.get('type', '')
+    transformers["x"] = config.get("x", 0.1)
+    transformers["s_nom"] = config.get("s_nom", 2000)
+    transformers["type"] = config.get("type", "")
 
     return transformers
 
