@@ -251,7 +251,7 @@ renewable:
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
-      normalization: hydro_capacities # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data (coming), false for no normalization
+      normalization: eia # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data, false for no normalization
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
