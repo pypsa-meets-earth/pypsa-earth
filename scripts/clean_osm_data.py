@@ -730,11 +730,7 @@ def clean_data(
         df_all_lines, ext_country_shapes, names_by_shapes=names_by_shapes
     )
 
-    df_lines = filter_ac(df_all_lines)
-    df_links = filter_dc(df_all_lines)
-
-    save_to_geojson(df_links, output_files["links"])
-    save_to_geojson(df_lines, output_files["lines"])
+    save_to_geojson(df_all_lines, output_files["lines"])
 
     # ----------- SUBSTATIONS -----------
 

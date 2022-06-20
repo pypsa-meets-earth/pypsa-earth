@@ -848,14 +848,6 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     substations = gpd.read_file(inputs["substations"])
     lines = gpd.read_file(inputs["lines"])
-    links = read_geojson(inputs["links"])
-
-    # Join AC and DC lines for proper attributes management
-    # (stations ids should be set across the whole dataset)
-    lines = gpd.GeoDataFrame(
-        pd.concat([lines, links], ignore_index=True), crs=lines.crs
-    )
-
     generators = read_geojson(inputs["generators"])
 
     logger.info("Stage 2/5: Add line endings to the substation datasets")
