@@ -426,9 +426,9 @@ def get_transformers(buses, lines):
     return df_transformers
 
 
-def get_converters(buses, links):
+def get_converters(buses, lines):
     """
-    Function to create fake converter links that connect buses of the same station_id of different polarities
+    Function to create fake converter lines that connect buses of the same station_id of different polarities
     """
 
     df_converters = []
@@ -504,7 +504,7 @@ def get_converters(buses, links):
     ]
 
     df_converters = gpd.GeoDataFrame(df_converters, columns=trasf_columns)
-    df_converters.set_index(links.index[-1] + df_converters.index + 1, inplace=True)
+    df_converters.set_index(lines.index[-1] + df_converters.index + 1, inplace=True)
     # update line endings
     df_converters = line_endings_to_bus_conversion(df_converters)
 
