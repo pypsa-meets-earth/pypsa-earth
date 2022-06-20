@@ -194,6 +194,7 @@ import os
 import time
 
 import atlite
+import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -204,10 +205,32 @@ from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from shapely.geometry import LineString
 
+cc = coco.CountryConverter()
+
 logger = logging.getLogger(__name__)
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
+
+
+def get_eia_annual_hydro_generation(fn, countries):
+
+    # in billion kWh/a = TWh/a
+    df = pd.read_csv(fn, skiprows=2, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df.index = df.index.str.strip()
+
+    df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
+    df.loc["Serbia"] += df.loc["Kosovo"]
+    df = df.loc[~df.index.str.contains("Former")]
+    df.drop(["Europe", "Germany, West", "Germany, East"], inplace=True)
+
+    df.index = cc.convert(df.index, to="iso2")
+    df.index.name = "countries"
+
+    df = df.T[countries] * 1e6  # in MWh/a
+
+    return df
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -329,7 +352,13 @@ if __name__ == "__main__":
                 )
                 normalize_using_yearly.index = pd.Index(range_years)
 
-                resource["normalize_using_yearly"] = normalize_using_yearly
+            elif normalization == "eia":
+                path_eia_stats = snakemake.input.eia_hydro_generation
+                normalize_using_yearly = get_eia_annual_hydro_generation(
+                    path_eia_stats, countries
+                )
+
+            resource["normalize_using_yearly"] = normalize_using_yearly
             logger.info(f"Hydro normalization mode {normalization}")
         else:
             logger.info("No hydro normalization")
