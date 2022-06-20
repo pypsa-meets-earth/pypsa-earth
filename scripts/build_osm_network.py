@@ -920,8 +920,9 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-    converters = lines[lines.tag_frequency == 0].reset_index(drop=True)
-    lines = lines[lines.tag_frequency != 0].reset_index(drop=True)
+
+    converters = lines[lines.line_id.str.contains("convert")].reset_index(drop=True)
+    lines = lines[~lines.line_id.str.contains("convert")].reset_index(drop=True)
 
     logger.info("Save outputs")
 
