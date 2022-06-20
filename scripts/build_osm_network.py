@@ -377,7 +377,7 @@ def get_transformers(buses, lines):
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
                         g_value.voltage.iloc[id],  # "voltage_bus0"
-                        g_value.voltage.iloc[id+1],  # "voltage_bus0"
+                        g_value.voltage.iloc[id + 1],  # "voltage_bus0"
                         g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
                         1,  # "circuits"
                         0.0,  # "length"
