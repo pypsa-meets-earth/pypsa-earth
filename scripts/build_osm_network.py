@@ -68,7 +68,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
-    is_ac = lines["tag_frequency"] != 0
+    is_ac = lines["tag_frequency"].astype(float) != 0
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
