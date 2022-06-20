@@ -279,27 +279,22 @@ if __name__ == "__main__":
         #     ]
         # ]  # exclude hydrobasins shapes that do not intersect the countries of interest
 
+        # select busbar whose location (p) belongs to at least one hydrobasin geometry
+        # if extendable option is true, all buses are included
+        # otherwise only where hydro powerplants are available are considered
+        busbus_to_consider = [
+            (config.get("extendable", False) | (bus_id in hydro_ppls.bus.values))
+            & any(hydrobasins.geometry.intersects(p))
+            for (p, bus_id) in zip(
+                gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
+                regions.index,
+            )
+        ]
+
         resource["plants"] = regions.rename(
             columns={"x": "lon", "y": "lat", "country": "countries"}
-        ).loc[
-            [
-                # select busbar whose location (p) belongs to at least one hydrobasin geometry
-                # if extendable option is true, all buses are included
-                # otherwise only where hydro powerplants are available are considered
-                (
-                    (
-                        config.get("extendable", False)
-                        | (bus_id in hydro_ppls.bus.values)
-                    )
-                    & any(hydrobasins.geometry.intersects(p))
-                )
-                for (p, bus_id) in zip(
-                    gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
-                    regions.index,
-                )
-            ],
-            ["lon", "lat", "countries"],
-        ]  # TODO: filtering by presence of hydro generators should be the way to go
+        ).loc[busbus_to_consider, ["lon", "lat", "countries"]]
+
         resource["plants"]["installed_hydro"] = [
             True if (bus_id in hydro_ppls.bus.values) else False
             for bus_id in resource["plants"].index
