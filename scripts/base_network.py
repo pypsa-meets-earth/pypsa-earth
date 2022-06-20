@@ -214,6 +214,20 @@ def _load_links_from_osm(buses):
     return links
 
 
+def _load_transformers_from_osm(buses):
+    transformers = (
+        read_csv_nafix(
+            snakemake.input.osm_transformers,
+            dtype=dict(transformer_id='str', bus0='str', bus1='str'),
+        )
+    .rename(columns=dict(line_id="transformer_id"))
+    .set_index("transformer_id")
+    )
+    # transformers = _remove_dangling_branches(transformers, buses)  # TODO: add dangling branch removal?
+
+    return transformers
+
+
 def _set_electrical_parameters_lines(lines):
     v_noms = snakemake.config["electricity"]["voltages"]
     linetypes = snakemake.config["lines"]["types"]
@@ -253,6 +267,17 @@ def _set_electrical_parameters_links(links):
     # links.loc[p_nom_unset.index, "p_nom"] = p_nom_unset
 
     return links
+
+
+def _set_electrical_parameters_transformers(transformers):
+    config = snakemake.config['transformers']
+
+    ## Add transformer parameters
+    transformers["x"] = config.get('x', 0.1)
+    transformers["s_nom"] = config.get('s_nom', 2000)
+    transformers['type'] = config.get('type', '')
+
+    return transformers
 
 
 def _set_lines_s_nom_from_linetypes(n):
@@ -379,15 +404,16 @@ def _rebase_voltage_to_config(component):
 
 def base_network():
     buses = _load_buses_from_osm().reset_index()
-
     lines = _load_lines_from_osm(buses)
     lines_dc = _load_links_from_osm(buses)
+    transformers = _load_transformers_from_osm(buses)
 
     # TODO: Set appropriate electrical parameters for AC and DC lines once properly debugged
     # lines = _set_electrical_parameters_lines(lines)
 
     lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
     lines_ac_dc = _set_electrical_parameters_lines(lines_ac_dc)
+    transformers = _set_electrical_parameters_transformers(transformers)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
@@ -397,6 +423,7 @@ def base_network():
 
     n.import_components_from_dataframe(buses, "Bus")
     # n.import_components_from_dataframe(lines, "Line")
+    n.import_components_from_dataframe(transformers, "Transformer")
     # n.import_components_from_dataframe(links, "Link")
     # # TODO How to add converters? -> PyPSA-Eur approach:
     # n.import_components_from_dataframe(converters, "Link")
