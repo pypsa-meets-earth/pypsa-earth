@@ -195,6 +195,7 @@ def filter_voltage(df, threshold_voltage=35000):
 
     return df
 
+
 def finalize_substation_types(df_all_substations):
     """
     Specify bus_id and voltage columns as integer
