@@ -376,6 +376,8 @@ def get_transformers(buses, lines):
                         f"transf_{g_name}_{id}",  # "line_id"
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
+                        g_value.voltage.iloc[id],  # "voltage_bus0"
+                        g_value.voltage.iloc[id+1],  # "voltage_bus0"
                         g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
                         1,  # "circuits"
                         0.0,  # "length"
@@ -401,6 +403,8 @@ def get_transformers(buses, lines):
         "bus0",
         "bus1",
         "voltage",
+        "voltage_bus0",
+        "voltage_bus1",
         "circuits",
         "length",
         "underground",
