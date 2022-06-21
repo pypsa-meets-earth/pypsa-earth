@@ -378,22 +378,8 @@ def get_transformers(buses, lines):
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
                         g_value.voltage.iloc[id],  # "voltage_bus0"
                         g_value.voltage.iloc[id + 1],  # "voltage_bus0"
-                        g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
-                        1,  # "circuits"
-                        0.0,  # "length"
-                        False,  # "underground"
-                        False,  # "under_construction"
-                        "transmission",  # "tag_type"
-                        ac_freq,  # "tag_frequency"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
-                        geom_trans.bounds,  # "bounds"
-                        g_value.geometry.iloc[id],  # "bus_0_coors"
-                        g_value.geometry.iloc[id + 1],  # "bus_1_coors"
-                        g_value.geometry.iloc[id].x,  # "bus0_lon"
-                        g_value.geometry.iloc[id].y,  # "bus0_lat"
-                        g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
-                        g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
                     ]
                 )
 
@@ -402,24 +388,10 @@ def get_transformers(buses, lines):
         "line_id",
         "bus0",
         "bus1",
-        "voltage",
         "voltage_bus0",
         "voltage_bus1",
-        "circuits",
-        "length",
-        "underground",
-        "under_construction",
-        "tag_type",
-        "tag_frequency",
         "country",
         "geometry",
-        "bounds",
-        "bus_0_coors",
-        "bus_1_coors",
-        "bus0_lon",
-        "bus0_lat",
-        "bus1_lon",
-        "bus1_lat",
     ]
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
