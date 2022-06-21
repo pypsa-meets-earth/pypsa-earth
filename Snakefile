@@ -172,6 +172,7 @@ rule build_osm_network:
         country_shapes="resources/country_shapes.geojson",
     output:
         lines="data/base_network/africa_all_lines_build_network.csv",
+        converters="data/base_network/africa_all_converters_build_network.csv",
         substations="data/base_network/africa_all_buses_build_network.csv",
     log:
         "logs/build_osm_network.log",
@@ -205,6 +206,7 @@ rule base_network:
     input:
         osm_buses="data/base_network/africa_all_buses_build_network.csv",
         osm_lines="data/base_network/africa_all_lines_build_network.csv",
+        osm_converters="data/base_network/africa_all_converters_build_network.csv",
         country_shapes="resources/country_shapes.geojson",
         offshore_shapes="resources/offshore_shapes.geojson",
         # osm_buses='data/osm/africa_all_buses_clean.csv',

@@ -13,6 +13,8 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Identify DC lines but temporary transform them back into AC `PR #348 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/348>`__
+
 * Get renewable capacities from IRENA statistics `PR #343 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/343>`__
 
 * Bug fixing (script retrieve_databundle) and rule run_test to ease testing `PR #322 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/322>`__
