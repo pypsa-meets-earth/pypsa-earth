@@ -592,10 +592,15 @@ def read_csv_nafix(file, **kwargs):
     return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=[NA_VALUE])
 
 
-def to_csv_nafix(obj, path, **kwargs):
+def to_csv_nafix(df, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
-    return obj.to_csv(path, **kwargs, na_rep=NA_VALUE)
+    # if len(df) > 0:
+    if not df.empty:
+        return df.to_csv(path, **kwargs, na_rep=NA_VALUE)
+    else:
+        with open(path, "w") as fp:
+            pass
 
 
 def save_to_geojson(df, fn):
