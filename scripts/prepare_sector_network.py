@@ -22,37 +22,44 @@ from prepare_transport_data import prepare_transport_data
 spatial = SimpleNamespace()
 
 
-def add_carrier_buses(n, carriers):
+def add_carrier_buses(n, carrier, nodes=None):
     """
     Add buses to connect e.g. coal, nuclear and oil plants
     """
-    if isinstance(carriers, str):
-        carriers = [carriers]
 
-    for carrier in carriers:
+    if nodes is None:
+        nodes = vars(spatial)[carrier].nodes
+    location = vars(spatial)[carrier].locations
 
-        n.add("Carrier", carrier)
+    # skip if carrier already exists
+    if carrier in n.carriers.index:
+        return
 
-        n.add("Bus", "Africa " + carrier, location="Africa", carrier=carrier)
+    if not isinstance(nodes, pd.Index):
+        nodes = pd.Index(nodes)
 
-        # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
-        n.add(
-            "Store",
-            "Africa " + carrier + " Store",
-            bus="Africa " + carrier,
-            e_nom_extendable=True,
-            e_cyclic=True,
-            carrier=carrier,
-        )
+    n.add("Carrier", carrier)
 
-        n.add(
-            "Generator",
-            "Africa " + carrier,
-            bus="Africa " + carrier,
-            p_nom_extendable=True,
-            carrier=carrier,
-            marginal_cost=costs.at[carrier, "fuel"],
-        )
+    n.madd("Bus", nodes, location=location, carrier=carrier)
+
+    # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
+    n.madd(
+        "Store",
+        nodes + " Store",
+        bus=nodes,
+        e_nom_extendable=True,
+        e_cyclic=True,
+        carrier=carrier,
+    )
+
+    n.madd(
+        "Generator",
+        nodes,
+        bus=nodes,
+        p_nom_extendable=True,
+        carrier=carrier,
+        marginal_cost=costs.at[carrier, "fuel"],
+    )
 
 
 def add_generation(n, costs):
@@ -131,7 +138,6 @@ def add_oil(n, costs):
         )
 
     if "Africa oil" not in n.generators.index:
-
         n.add(
             "Generator",
             spatial.oil.nodes,
@@ -140,6 +146,32 @@ def add_oil(n, costs):
             carrier="oil",
             marginal_cost=costs.at["oil", "fuel"],
         )
+
+
+def add_gas(n, costs):
+
+    spatial.gas = SimpleNamespace()
+
+    if options["gas_network"]:
+        spatial.gas.nodes = nodes + " gas"
+        spatial.gas.locations = nodes
+        # spatial.gas.biogas = nodes + " biogas"
+        spatial.gas.industry = nodes + " gas for industry"
+        spatial.gas.industry_cc = nodes + " gas for industry CC"
+        # spatial.gas.biogas_to_gas = nodes + " biogas to gas"
+    else:
+        spatial.gas.nodes = ["Africa gas"]
+        spatial.gas.locations = ["Africa"]
+        # spatial.gas.biogas = ["Africa biogas"]
+        spatial.gas.industry = ["gas for industry"]
+        spatial.gas.industry_cc = ["gas for industry CC"]
+        # spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
+
+    spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=nodes)
+
+    gas_nodes = vars(spatial)["gas"].nodes
+
+    add_carrier_buses(n, "gas", gas_nodes)
 
 
 def H2_liquid_fossil_conversions(n, costs):
@@ -1579,7 +1611,7 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} gas boiler",
                 p_nom_extendable=True,
-                bus0="EU gas",
+                bus0="Africa gas",
                 bus1=nodes[name] + f" {name} heat",
                 bus2="co2 atmosphere",
                 carrier=name + " gas boiler",
@@ -1611,7 +1643,7 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP",
-                bus0="EU gas",
+                bus0="Africa gas",
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
                 bus3="co2 atmosphere",
@@ -1630,7 +1662,7 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP CC",
-                bus0="EU gas",
+                bus0="Africa gas",
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
                 bus3="co2 atmosphere",
@@ -1669,7 +1701,7 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} micro gas CHP",
                 p_nom_extendable=True,
-                bus0="EU gas",
+                bus0="Africa gas",
                 bus1=nodes[name],
                 bus2=nodes[name] + f" {name} heat",
                 bus3="co2 atmosphere",
@@ -1830,7 +1862,9 @@ if __name__ == "__main__":
     nodal_energy_totals = pd.read_csv(
         snakemake.input.nodal_energy_totals, index_col=0
     )  # where is nodal_energy_totals_4
-    transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
+    transport = (
+        pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True) * 0.75
+    )  # TODO remove factor
     avail_profile = pd.read_csv(
         snakemake.input.avail_profile, index_col=0, parse_dates=True
     )
@@ -1841,10 +1875,18 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-    heat_demand = pd.read_csv(snakemake.input.heat_demand, index_col=0, header=[0, 1])
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0)
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0)
-    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0)
+    heat_demand = pd.read_csv(
+        snakemake.input.heat_demand, index_col=0, header=[0, 1]
+    ).reindex(index=n.snapshots)
+    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0).reindex(
+        index=n.snapshots
+    )
+    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0).reindex(
+        index=n.snapshots
+    )
+    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0).reindex(
+        index=n.snapshots
+    )
 
     district_heat_share = pd.read_csv(
         snakemake.input.district_heat_share, index_col=0
@@ -1858,6 +1900,7 @@ if __name__ == "__main__":
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
     add_oil(n, costs)
 
+    add_gas(n, costs)
     add_hydrogen(n, costs)  # TODO add costs
 
     add_storage(n, costs)
@@ -1876,7 +1919,7 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    # add_heat(n, costs)
+    add_heat(n, costs)
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()

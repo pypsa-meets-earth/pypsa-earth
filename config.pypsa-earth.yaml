@@ -13,8 +13,8 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [50]
-  opts: [Co2L-72H]
+  clusters: [20]
+  opts: [Co2L1-144H]
 
 countries: ["MA"]
 # Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
@@ -92,8 +92,8 @@ download_osm_data_nprocesses: 4  # (optional) number of threads used to download
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
-  co2base: 1.487e8
+  co2limit: 6.2e+7 # 0.05 * 3.1e9*0.5
+  co2base: 1.487e1
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
 
   extendable_carriers:
