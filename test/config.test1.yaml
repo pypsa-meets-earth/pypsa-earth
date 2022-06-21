@@ -16,6 +16,10 @@ scenario:
   - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
+  ll:
+  - "copt"
+  opts:
+  - "Co2L-72H"
 
 costs:
   lifetime: 25 #default lifetime
@@ -107,6 +111,9 @@ sector:
   bev_availability: 0.5 #How many cars do smart charging
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
+
+  biomass_transport: true  # biomass transport between nodes
+
 
   land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
     # 2020: 0
