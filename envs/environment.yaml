@@ -6,6 +6,7 @@ name: pypsa-africa
 channels:
 - conda-forge
 - bioconda
+- gurobi
 dependencies:
 - python>=3.8
 - pip
@@ -71,6 +72,7 @@ dependencies:
 # Default solver for tests (moved to the CI)
 - glpk
 - ipopt < 3.13.3
+- gurobi
 
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
