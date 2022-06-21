@@ -216,7 +216,7 @@ GEBCO_CRS = "EPSG:4326"
 def get_eia_annual_hydro_generation(fn, countries):
 
     # in billion kWh/a = TWh/a
-    df = pd.read_csv(fn, skiprows=2, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
     df.index = df.index.str.strip()
 
     df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
@@ -339,9 +339,12 @@ if __name__ == "__main__":
                     .rename({"Country": "countries"}, axis=1)
                     .set_index("countries")
                 )
-                hydro_prod_by_country = hydro_stats[hydro_stats.index.isin(countries)][
-                    ["InflowHourlyAvg[GWh]"]
-                ].transpose() * 1e3  # change unit to MWh/y
+                hydro_prod_by_country = (
+                    hydro_stats[hydro_stats.index.isin(countries)][
+                        ["InflowHourlyAvg[GWh]"]
+                    ].transpose()
+                    * 1e3
+                )  # change unit to MWh/y
 
                 year_start = 2000
                 year_end = 2020
