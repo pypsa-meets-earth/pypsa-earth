@@ -157,7 +157,6 @@ rule clean_osm_data:
         generators="data/clean/africa_all_generators.geojson",
         generators_csv="data/clean/africa_all_generators.csv",
         lines="data/clean/africa_all_lines.geojson",
-        links="data/clean/africa_all_links.geojson",
         substations="data/clean/africa_all_substations.geojson",
     log:
         "logs/clean_osm_data.log",
@@ -169,7 +168,6 @@ rule build_osm_network:
     input:
         generators="data/clean/africa_all_generators.geojson",
         lines="data/clean/africa_all_lines.geojson",
-        links="data/clean/africa_all_links.geojson",
         substations="data/clean/africa_all_substations.geojson",
         country_shapes="resources/country_shapes.geojson",
     output:

@@ -196,28 +196,6 @@ def filter_voltage(df, threshold_voltage=35000):
     return df
 
 
-def filter_dc(df):
-
-    # convert frequency to int
-    df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
-
-    # TODO Fix SettingWithCopyWarning, details via https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-    # keep only lines with zero frequency as the most useful indication of DC lines
-    df = df[df.tag_frequency == 0]
-
-    return df
-
-
-def filter_ac(df):
-
-    # convert frequency to int
-    df.loc[:, "tag_frequency"] = df["tag_frequency"].astype(int)
-
-    df = df[df.tag_frequency != 0]
-
-    return df
-
-
 def finalize_substation_types(df_all_substations):
     """
     Specify bus_id and voltage columns as integer
@@ -730,11 +708,7 @@ def clean_data(
         df_all_lines, ext_country_shapes, names_by_shapes=names_by_shapes
     )
 
-    df_lines = filter_ac(df_all_lines)
-    df_links = filter_dc(df_all_lines)
-
-    save_to_geojson(df_links, output_files["links"])
-    save_to_geojson(df_lines, output_files["lines"])
+    save_to_geojson(df_all_lines, output_files["lines"])
 
     # ----------- SUBSTATIONS -----------
 
