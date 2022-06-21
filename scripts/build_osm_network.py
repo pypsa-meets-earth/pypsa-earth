@@ -376,22 +376,10 @@ def get_transformers(buses, lines):
                         f"transf_{g_name}_{id}",  # "line_id"
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
-                        g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
-                        1,  # "circuits"
-                        0.0,  # "length"
-                        False,  # "underground"
-                        False,  # "under_construction"
-                        "transmission",  # "tag_type"
-                        ac_freq,  # "tag_frequency"
+                        g_value.voltage.iloc[id],  # "voltage_bus0"
+                        g_value.voltage.iloc[id + 1],  # "voltage_bus0"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
-                        geom_trans.bounds,  # "bounds"
-                        g_value.geometry.iloc[id],  # "bus_0_coors"
-                        g_value.geometry.iloc[id + 1],  # "bus_1_coors"
-                        g_value.geometry.iloc[id].x,  # "bus0_lon"
-                        g_value.geometry.iloc[id].y,  # "bus0_lat"
-                        g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
-                        g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
                     ]
                 )
 
@@ -400,22 +388,10 @@ def get_transformers(buses, lines):
         "line_id",
         "bus0",
         "bus1",
-        "voltage",
-        "circuits",
-        "length",
-        "underground",
-        "under_construction",
-        "tag_type",
-        "tag_frequency",
+        "voltage_bus0",
+        "voltage_bus1",
         "country",
         "geometry",
-        "bounds",
-        "bus_0_coors",
-        "bus_1_coors",
-        "bus0_lon",
-        "bus0_lat",
-        "bus1_lon",
-        "bus1_lat",
     ]
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
@@ -656,12 +632,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     # set substation_lv
     set_lv_substations(buses)
 
-    logger.info("Stage 3d/4: Add transformers")
-
-    # get transformers: modelled as lines connecting buses with different voltage
-    transformers = get_transformers(buses, lines)
-    # append transformer lines
-    lines = pd.concat([lines, transformers], ignore_index=True)
+    logger.info("Stage 3d/4: Add converters to lines")
 
     # get converters: currently modelled as lines connecting buses with different polarity
     converters = get_converters(buses, lines)
@@ -922,6 +893,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     converters = lines[lines.line_id.str.contains("convert")].reset_index(drop=True)
     lines = lines[~lines.line_id.str.contains("convert")].reset_index(drop=True)
+    # get transformers: modelled as lines connecting buses with different voltage
+    transformers = get_transformers(buses, lines)
 
     logger.info("Save outputs")
 
@@ -931,6 +904,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
     to_csv_nafix(converters, outputs["converters"])  # Generate CSV
+    to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):

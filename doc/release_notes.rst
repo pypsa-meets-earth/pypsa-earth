@@ -73,7 +73,9 @@ Upcoming Release
 
 * Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`
 
-* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`  
+* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`
+
+* Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
