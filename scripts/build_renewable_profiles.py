@@ -339,9 +339,12 @@ if __name__ == "__main__":
                     .rename({"Country": "countries"}, axis=1)
                     .set_index("countries")
                 )
-                hydro_prod_by_country = hydro_stats[hydro_stats.index.isin(countries)][
-                    ["InflowHourlyAvg[GWh]"]
-                ].transpose() * 1e3  # change unit to MWh/y
+                hydro_prod_by_country = (
+                    hydro_stats[hydro_stats.index.isin(countries)][
+                        ["InflowHourlyAvg[GWh]"]
+                    ].transpose()
+                    * 1e3
+                )  # change unit to MWh/y
 
                 year_start = 2000
                 year_end = 2020
