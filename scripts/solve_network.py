@@ -10,6 +10,7 @@ from helpers import override_component_attrs
 from pypsa.linopf import ilopf, network_lopf
 from pypsa.linopt import define_constraints, get_var, linexpr
 from vresutils.benchmark import memory_logger
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
