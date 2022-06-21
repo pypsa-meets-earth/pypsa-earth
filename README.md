@@ -230,17 +230,17 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/restyled-commits">
-            <img src="https://avatars.githubusercontent.com/u/65077583?v=4" width="100;" alt="restyled-commits"/>
-            <br />
-            <sub><b>Restyled Commits</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/ekatef">
             <img src="https://avatars.githubusercontent.com/u/30229437?v=4" width="100;" alt="ekatef"/>
             <br />
             <sub><b>Ekaterina</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/restyled-commits">
+            <img src="https://avatars.githubusercontent.com/u/65077583?v=4" width="100;" alt="restyled-commits"/>
+            <br />
+            <sub><b>Restyled Commits</b></sub>
         </a>
     </td></tr>
 <tr>
@@ -266,6 +266,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/martacki">
+            <img src="https://avatars.githubusercontent.com/u/53824825?v=4" width="100;" alt="martacki"/>
+            <br />
+            <sub><b>Martha Frysztacki</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/EmreYorat">
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
@@ -278,15 +285,15 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>HanaElattar</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/squoilin">
             <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
             <br />
             <sub><b>Sylvain Quoilin</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>

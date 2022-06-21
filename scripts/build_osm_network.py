@@ -68,18 +68,22 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
+    is_ac = lines["tag_frequency"].astype(float) != 0
+
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
     bus_s["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[0])
     bus_s["lon"] = bus_s["geometry"].x
     bus_s["lat"] = bus_s["geometry"].y
     bus_s["bus_id"] = lines["line_id"].astype(str) + "_s"
+    bus_s["dc"] = ~is_ac
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
     bus_e["geometry"] = lines.geometry.boundary.map(lambda p: p.geoms[1])
     bus_e["lon"] = bus_s["geometry"].x
     bus_e["lat"] = bus_s["geometry"].y
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
+    bus_e["dc"] = ~is_ac
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
     # Assign index to bus_id
@@ -88,7 +92,7 @@ def add_line_endings_tosubstations(substations, lines):
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
-    bus_all["dc"] = False  # np.nan
+    # bus_all["dc"] = False  # np.nan
     # Assuming substations completed for installed lines
     bus_all["under_construction"] = False
     bus_all["tag_area"] = 0.0  # np.nan
@@ -193,8 +197,12 @@ def set_lines_ids(lines, buses, distance_crs):
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
+        row["dc"] = row["tag_frequency"] == 0
+
         # select buses having the voltage level of the current line
-        buses_sel = busesepsg[buses["voltage"] == row["voltage"]]
+        buses_sel = busesepsg[
+            (buses["voltage"] == row["voltage"]) & (buses["dc"] == row["dc"])
+        ]
 
         # find the closest node of the bus0 of the line
         bus0_id = buses_sel.geometry.distance(row.geometry.boundary.geoms[0]).idxmin()
@@ -265,9 +273,9 @@ def merge_stations_same_station_id(
 
         # loop for every voltage level in the bus
         # The location of the buses is averaged; in the case of multiple voltage levels for the same station_id,
-        # each bus corresponding to a voltage level is located at a distanceregulated by delta_lon/delta_lat
+        # each bus corresponding to a voltage level and each polatity is located at a distance regulated by delta_lon/delta_lat
         v_it = 0
-        for v_name, bus_row in g_value.groupby(by=["voltage"]):
+        for v_name, bus_row in g_value.groupby(by=["voltage", "dc"]):
 
             lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
             lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
@@ -277,8 +285,9 @@ def merge_stations_same_station_id(
                 [
                     n_buses,  # "bus_id"
                     g_name,  # "station_id"
-                    v_name,  # "voltage"
+                    v_name[0],  # "voltage"
                     bus_row["dc"].all(),  # "dc"
+                    # bus_row["dc"].all(),  # "dc"
                     "|".join(bus_row["symbol"].unique()),  # "symbol"
                     bus_row["under_construction"].any(),  # "under_construction"
                     "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
@@ -318,14 +327,36 @@ def merge_stations_same_station_id(
     )
 
 
+def get_ac_frequency(df, fr_col="tag_frequency"):
+    """
+    # Function to define a default frequency value. Attempts to find the most usual non-zero frequency across the dataframe; 50 Hz is assumed as a back-up value
+    """
+
+    # Initialize a default frequency value
+    ac_freq_default = 50
+
+    grid_freq_levels = df[fr_col].value_counts(sort=True, dropna=True)
+    if not grid_freq_levels.empty:
+        # AC lines frequency shouldn't be 0Hz
+        ac_freq_levels = grid_freq_levels.loc[
+            grid_freq_levels.index.get_level_values(0) != "0"
+        ]
+        ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
+
+    return ac_freq_default
+
+
 def get_transformers(buses, lines):
     """
     Function to create fake transformer lines that connect buses of the same station_id at different voltage
     """
 
+    ac_freq = get_ac_frequency(lines)
     df_transformers = []
 
-    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
+    # Transformers should be added between AC buses only
+    buses_ac = buses[~buses["dc"]]
+    for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(
         by=["station_id"]
     ):
 
@@ -345,22 +376,83 @@ def get_transformers(buses, lines):
                         f"transf_{g_name}_{id}",  # "line_id"
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
-                        g_value.voltage.iloc[[id, id + 1]].max(),  # "voltage"
+                        g_value.voltage.iloc[id],  # "voltage_bus0"
+                        g_value.voltage.iloc[id + 1],  # "voltage_bus0"
+                        g_value.country.iloc[id],  # "country"
+                        geom_trans,  # "geometry"
+                    ]
+                )
+
+    # name of the columns
+    trasf_columns = [
+        "line_id",
+        "bus0",
+        "bus1",
+        "voltage_bus0",
+        "voltage_bus1",
+        "country",
+        "geometry",
+    ]
+
+    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
+    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1, inplace=True)
+    # update line endings
+    df_transformers = line_endings_to_bus_conversion(df_transformers)
+
+    return df_transformers
+
+
+def get_converters(buses, lines):
+    """
+    Function to create fake converter lines that connect buses of the same station_id of different polarities
+    """
+
+    df_converters = []
+
+    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
+        by=["station_id"]
+    ):
+
+        # note: by construction there cannot be more that two buses with the same station_id and same voltage
+        n_voltages = len(g_value)
+
+        # A converter stations should have both AC and DC parts
+        if g_value["dc"].any() & ~g_value["dc"].all():
+
+            dc_voltage = g_value[g_value.dc]["voltage"].values
+
+            for u in dc_voltage:
+                id_0 = g_value[g_value["dc"] & g_value["voltage"].isin([u])].index[0]
+
+                ac_voltages = g_value[~g_value.dc]["voltage"]
+                # A converter is added between a DC nodes and AC one with the closest voltage
+                id_1 = ac_voltages.sub(u).abs().idxmin()
+
+                geom_trans = LineString(
+                    [g_value.geometry.loc[id_0], g_value.geometry.loc[id_1]]
+                )
+
+                df_converters.append(
+                    [
+                        f"convert_{g_name}_{id_0}",  # "line_id"
+                        g_value["bus_id"].loc[id_0],  # "bus0"
+                        g_value["bus_id"].loc[id_1],  # "bus1"
+                        g_value.voltage.loc[[id_0, id_1]].max(),  # "voltage"
                         1,  # "circuits"
                         0.0,  # "length"
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
-                        50,  # "tag_frequency"
-                        g_value.country.iloc[id],  # "country"
+                        0,  # "tag_frequency"
+                        g_value.country.loc[id_0],  # "country"
                         geom_trans,  # "geometry"
                         geom_trans.bounds,  # "bounds"
-                        g_value.geometry.iloc[id],  # "bus_0_coors"
-                        g_value.geometry.iloc[id + 1],  # "bus_1_coors"
-                        g_value.geometry.iloc[id].x,  # "bus0_lon"
-                        g_value.geometry.iloc[id].y,  # "bus0_lat"
-                        g_value.geometry.iloc[id + 1].x,  # "bus1_lon"
-                        g_value.geometry.iloc[id + 1].y,  # "bus1_lat"
+                        g_value.geometry.loc[id_0],  # "bus_0_coors"
+                        g_value.geometry.loc[id_1],  # "bus_1_coors"
+                        g_value.geometry.loc[id_0].x,  # "bus0_lon"
+                        g_value.geometry.loc[id_0].y,  # "bus0_lat"
+                        g_value.geometry.loc[id_1].x,  # "bus1_lon"
+                        g_value.geometry.loc[id_1].y,  # "bus1_lat"
                     ]
                 )
 
@@ -387,19 +479,19 @@ def get_transformers(buses, lines):
         "bus1_lat",
     ]
 
-    df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
-    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1, inplace=True)
+    df_converters = gpd.GeoDataFrame(df_converters, columns=trasf_columns)
+    df_converters.set_index(lines.index[-1] + df_converters.index + 1, inplace=True)
     # update line endings
-    df_transformers = line_endings_to_bus_conversion(df_transformers)
+    df_converters = line_endings_to_bus_conversion(df_converters)
 
-    return df_transformers
+    return df_converters
 
 
 def connect_stations_same_station_id(lines, buses):
     """
     Function to create fake links between substations with the same substation_id
     """
-
+    ac_freq = get_ac_frequency(lines)
     station_id_list = buses.station_id.unique()
 
     add_lines = []
@@ -421,7 +513,7 @@ def connect_stations_same_station_id(lines, buses):
                         False,  # "underground"
                         False,  # "under_construction"
                         "transmission",  # "tag_type"
-                        50,  # "tag_frequency"
+                        ac_freq,  # "tag_frequency"
                         buses_station_id.country.iloc[0],  # "country"
                         LineString(
                             [
@@ -514,6 +606,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     Function to merge close stations and adapt the line datasets to adhere to the merged dataset
 
     """
+
     logger.info(
         "Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol / 1000)
     )
@@ -533,23 +626,23 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
-
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
 
     # set substation_lv
     set_lv_substations(buses)
 
-    logger.info("Stage 3d/4: Add transformers")
+    logger.info("Stage 3d/4: Add converters to lines")
 
-    # get transformers: modelled as lines connecting buses with different voltage
-    transformers = get_transformers(buses, lines)
-
-    # append transformer lines
-    lines = pd.concat([lines, transformers], ignore_index=True)
+    # get converters: currently modelled as lines connecting buses with different polarity
+    converters = get_converters(buses, lines)
+    # append fake converters
+    lines = pd.concat([lines, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
+    # if len(links) > 0:
+    #     links.reset_index(drop=True, inplace=True)
 
     return lines, buses
 
@@ -781,6 +874,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
                 "lat": no_data_countries_shape["geometry"].centroid.y,
                 "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
                 "station_id": [np.nan] * length,
+                # All lines for the countries with NA bus data are assumed to be AC
                 "dc": [False] * length,
                 "under_construction": [False] * length,
                 "tag_area": [0.0] * length,
@@ -797,6 +891,11 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
+    converters = lines[lines.line_id.str.contains("convert")].reset_index(drop=True)
+    lines = lines[~lines.line_id.str.contains("convert")].reset_index(drop=True)
+    # get transformers: modelled as lines connecting buses with different voltage
+    transformers = get_transformers(buses, lines)
+
     logger.info("Save outputs")
 
     # create clean directory if not already exist
@@ -804,6 +903,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
+    to_csv_nafix(converters, outputs["converters"])  # Generate CSV
+    to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):

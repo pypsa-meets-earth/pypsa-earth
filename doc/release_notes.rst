@@ -13,6 +13,10 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Identify DC lines but temporary transform them back into AC `PR #348 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/348>`__
+
+* Get renewable capacities from IRENA statistics `PR #343 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/343>`__
+
 * Bug fixing (script retrieve_databundle) and rule run_test to ease testing `PR #322 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/322>`__
 
 * Handling non-numerical entries in raw OSM data: `PR #287 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/287>`__
@@ -62,6 +66,16 @@ Upcoming Release
 * Revise hydro capacities, add hydro validation notebook and minor revisions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
 
 * Revise dropnan for regions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
+
+* Fix bug in GADM clustering. Missing crs input. `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
+
+* Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`
+
+* Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`
+
+* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`
+
+* Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================

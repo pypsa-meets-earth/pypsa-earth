@@ -707,6 +707,100 @@ def attach_OPSD_renewables(n):
         n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
+def estimate_renewable_capacities_irena(n, config):
+
+    if not config["electricity"].get("estimate_renewable_capacities"):
+        return
+
+    stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
+    if not stats:
+        return
+
+    year = config["electricity"]["estimate_renewable_capacities"]["year"]
+    tech_map = config["electricity"]["estimate_renewable_capacities"][
+        "technology_mapping"
+    ]
+    tech_keys = list(tech_map.keys())
+    countries = config["countries"]
+
+    p_nom_max = config["electricity"]["estimate_renewable_capacities"]["p_nom_max"]
+    p_nom_min = config["electricity"]["estimate_renewable_capacities"]["p_nom_min"]
+
+    if len(countries) == 0:
+        return
+    if len(tech_map) == 0:
+        return
+
+    if stats == "irena":
+        capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+    else:
+        logger.info(
+            f"Selected renewable capacity estimation statistics {stats} is not available, applying greenfield scenario instead"
+        )
+        return
+
+    # Check if countries are in country list of stats
+    missing = list(set(countries).difference(capacities.Country.unique()))
+
+    if missing:
+        logger.info(
+            f"The countries {missing} are not provided in the stats and hence not scaled"
+        )
+    else:
+        pass
+
+    capacities = capacities.query(
+        "Year == @year and Technology in @tech_keys and Country in @countries"
+    )
+    capacities = capacities.groupby(["Technology", "Country"]).Capacity.sum()
+
+    logger.info(
+        f"Heuristics applied to distribute renewable capacities [MW] "
+        f"{capacities.groupby('Country').sum()}"
+    )
+
+    for ppm_technology, techs in tech_map.items():
+
+        if ppm_technology not in capacities.index:
+            logger.info(
+                f"technology {ppm_technology} is not provided by {stats} and therefore not estimated"
+            )
+            continue
+
+        tech_capacities = capacities.loc[ppm_technology].reindex(
+            countries, fill_value=0.0
+        )
+        tech_i = n.generators.query("carrier in @techs").index
+        n.generators.loc[tech_i, "p_nom"] = (
+            (
+                n.generators_t.p_max_pu[tech_i].mean()
+                * n.generators.loc[tech_i, "p_nom_max"]
+            )  # maximal yearly generation
+            .groupby(n.generators.bus.map(n.buses.country))
+            .transform(lambda s: normed(s) * tech_capacities.at[s.name])
+            .where(lambda s: s > 0.1, 0.0)
+        )  # only capacities above 100kW
+        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
+
+        if p_nom_min:
+            assert np.isscalar(p_nom_min)
+            logger.info(
+                f"Scaling capacity stats to {p_nom_min*100:.2f}% of installed capacity acquired from stats."
+            )
+            n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[
+                tech_i, "p_nom"
+            ] * float(p_nom_min)
+
+        if p_nom_max:
+            assert np.isscalar(p_nom_max)
+            logger.info(
+                f"Scaling capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity acquired from stats."
+            )
+            n.generators.loc[tech_i, "p_nom_max"] = n.generators.loc[
+                tech_i, "p_nom_min"
+            ] * float(p_nom_max)
+
+
 def estimate_renewable_capacities(n, tech_map=None):
     if tech_map is None:
         tech_map = snakemake.config["electricity"].get(
@@ -816,6 +910,7 @@ if __name__ == "__main__":
 
     # TODO: Feature to uncomment and debug
     # estimate_renewable_capacities(n)
+    estimate_renewable_capacities_irena(n, snakemake.config)
     # attach_OPSD_renewables(n)
 
     update_p_nom_max(n)
