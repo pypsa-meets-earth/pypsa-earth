@@ -9,6 +9,7 @@ run: test3
 
 foresight: overnight
 
+
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
@@ -17,9 +18,9 @@ scenario:
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
-  - "copt"
+  - "c1"
   opts:
-  - "Co2L-72H"
+  - "Co2L-144H"
 
 costs:
   lifetime: 25 #default lifetime
