@@ -68,7 +68,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
-    is_ac = lines["tag_frequency"] != 0
+    is_ac = lines["tag_frequency"].astype(float) != 0
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]]  # line start points
@@ -402,9 +402,9 @@ def get_transformers(buses, lines):
     return df_transformers
 
 
-def get_converters(buses, links):
+def get_converters(buses, lines):
     """
-    Function to create fake converter links that connect buses of the same station_id of different polarities
+    Function to create fake converter lines that connect buses of the same station_id of different polarities
     """
 
     df_converters = []
@@ -480,7 +480,7 @@ def get_converters(buses, links):
     ]
 
     df_converters = gpd.GeoDataFrame(df_converters, columns=trasf_columns)
-    df_converters.set_index(links.index[-1] + df_converters.index + 1, inplace=True)
+    df_converters.set_index(lines.index[-1] + df_converters.index + 1, inplace=True)
     # update line endings
     df_converters = line_endings_to_bus_conversion(df_converters)
 
@@ -819,14 +819,6 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     substations = gpd.read_file(inputs["substations"])
     lines = gpd.read_file(inputs["lines"])
-    links = read_geojson(inputs["links"])
-
-    # Join AC and DC lines for proper attributes management
-    # (stations ids should be set across the whole dataset)
-    lines = gpd.GeoDataFrame(
-        pd.concat([lines, links], ignore_index=True), crs=lines.crs
-    )
-
     generators = read_geojson(inputs["generators"])
 
     logger.info("Stage 2/5: Add line endings to the substation datasets")
@@ -899,8 +891,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-    converters = lines[lines.tag_frequency == 0].reset_index(drop=True)
-    lines = lines[lines.tag_frequency != 0].reset_index(drop=True)
+    converters = lines[lines.line_id.str.contains("convert")].reset_index(drop=True)
+    lines = lines[~lines.line_id.str.contains("convert")].reset_index(drop=True)
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
 
