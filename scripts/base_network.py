@@ -123,8 +123,8 @@ def _load_buses_from_osm():
     buses["v_nom"] /= 1e3
     # All carriers are temporary set to "AC" to avoid the mixed-carries problem
     # TODO: remove to enable HVDC buses and lines once properly debugged
-    # buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
-    buses["carrier"] = "AC"
+    buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
+    # buses["carrier"] = "AC"
     buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
