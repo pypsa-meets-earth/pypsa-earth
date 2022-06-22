@@ -213,22 +213,18 @@ def _load_links_from_osm(buses):
 
     return links
 
+
 def _load_converters_from_osm(buses):
-    converters = (
-        read_csv_nafix(
-        snakemake.input.osm_converters, 
-        dtype=dict(
-            converter_id='str',
-            bus0='str',
-            bus1='str')
-        )
-        .set_index('converter_id'))
+    converters = read_csv_nafix(
+        snakemake.input.osm_converters,
+        dtype=dict(converter_id="str", bus0="str", bus1="str"),
+    ).set_index("converter_id")
 
     # converters = _remove_dangling_branches(converters, buses)
 
-    converters['carrier'] = 'B2B'
+    converters["carrier"] = "B2B"
 
-    return converters    
+    return converters
 
 
 def _load_transformers_from_osm(buses):
