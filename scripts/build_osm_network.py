@@ -666,14 +666,14 @@ def merge_stations_lines_by_station_id_and_voltage(
     # get converters: currently modelled as lines connecting buses with different polarity
     converters = get_converters(buses, lines)
     # append fake converters
-    lines = pd.concat([lines, converters], ignore_index=True)
+    # lines = pd.concat([lines, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
     # if len(links) > 0:
     #     links.reset_index(drop=True, inplace=True)
 
-    return lines, buses
+    return lines, buses, converters
 
 
 def create_station_at_equal_bus_locations(
@@ -875,7 +875,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
-        lines, buses = merge_stations_lines_by_station_id_and_voltage(
+        lines, buses, converters = merge_stations_lines_by_station_id_and_voltage(
             lines, buses, geo_crs, distance_crs, tol=tol
         )
     else:
