@@ -452,7 +452,7 @@ def get_converters(buses, lines):
                 # A converter is added between a DC nodes and AC one with the closest voltage
                 id_1 = ac_voltages.sub(u).abs().idxmin()
 
-                geom_trans = LineString(
+                geom_conv = LineString(
                     [g_value.geometry.loc[id_0], g_value.geometry.loc[id_1]]
                 )
 
@@ -481,8 +481,8 @@ def get_converters(buses, lines):
                 )
 
     # name of the columns
-    trasf_columns = [
-        "line_id",
+    conv_columns = [
+        "converter_id",
         "bus0",
         "bus1",
         "voltage",
