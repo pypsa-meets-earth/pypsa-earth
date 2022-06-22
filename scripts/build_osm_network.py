@@ -461,18 +461,18 @@ def get_converters(buses, lines):
                         f"convert_{g_name}_{id_0}",  # "line_id"
                         g_value["bus_id"].loc[id_0],  # "bus0"
                         g_value["bus_id"].loc[id_1],  # "bus1"
-                        g_value.voltage.loc[[id_0, id_1]].max(),  # "voltage"
-                        1,  # "circuits"
-                        0.0,  # "length"
+                        # g_value.voltage.loc[[id_0, id_1]].max(),  # "voltage"
+                        # 1,  # "circuits"
+                        # 0.0,  # "length"
                         False,  # "underground"
                         False,  # "under_construction"
-                        "transmission",  # "tag_type"
-                        0,  # "tag_frequency"
+                        # "transmission",  # "tag_type"
+                        # 0,  # "tag_frequency"
                         g_value.country.loc[id_0],  # "country"
-                        geom_trans,  # "geometry"
-                        geom_trans.bounds,  # "bounds"
-                        g_value.geometry.loc[id_0],  # "bus_0_coors"
-                        g_value.geometry.loc[id_1],  # "bus_1_coors"
+                        # geom_conv,  # "geometry"
+                        # geom_conv.bounds,  # "bounds"
+                        # g_value.geometry.loc[id_0],  # "bus_0_coors"
+                        # g_value.geometry.loc[id_1],  # "bus_1_coors"
                         g_value.geometry.loc[id_0].x,  # "bus0_lon"
                         g_value.geometry.loc[id_0].y,  # "bus0_lat"
                         g_value.geometry.loc[id_1].x,  # "bus1_lon"
@@ -485,28 +485,28 @@ def get_converters(buses, lines):
         "converter_id",
         "bus0",
         "bus1",
-        "voltage",
-        "circuits",
-        "length",
+        # "voltage",
+        # "circuits",
+        # "length",
         "underground",
         "under_construction",
-        "tag_type",
-        "tag_frequency",
+        # "tag_type",
+        # "tag_frequency",
         "country",
-        "geometry",
-        "bounds",
-        "bus_0_coors",
-        "bus_1_coors",
+        # "geometry",
+        # "bounds",
+        # "bus_0_coors",
+        # "bus_1_coors",
         "bus0_lon",
         "bus0_lat",
         "bus1_lon",
         "bus1_lat",
     ]
 
-    df_converters = gpd.GeoDataFrame(df_converters, columns=trasf_columns)
-    df_converters.set_index(lines.index[-1] + df_converters.index + 1, inplace=True)
+    df_converters = gpd.GeoDataFrame(df_converters, columns=conv_columns).reset_index()
+    # df_converters.set_index(lines.index[-1] + df_converters.index + 1, inplace=True)
     # update line endings
-    df_converters = line_endings_to_bus_conversion(df_converters)
+    # df_converters = line_endings_to_bus_conversion(df_converters)
 
     return df_converters
 
