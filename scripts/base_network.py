@@ -437,13 +437,9 @@ def base_network():
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
     n.import_components_from_dataframe(buses, "Bus")
-    # n.import_components_from_dataframe(lines, "Line")
-    n.import_components_from_dataframe(transformers, "Transformer")
-    # n.import_components_from_dataframe(links, "Link")
-    # # TODO How to add converters? -> PyPSA-Eur approach:
-    # n.import_components_from_dataframe(converters, "Link")
-    # Load AC and DC lines as "Line" component to avoid problems with preprocessing links by the solver
     n.import_components_from_dataframe(lines, "Line")
+    n.import_components_from_dataframe(transformers, "Transformer")
+    # # TODO How to add converters? -> PyPSA-Eur approach:
     n.import_components_from_dataframe(converters, "Link")
 
     _set_lines_s_nom_from_linetypes(n)
