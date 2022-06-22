@@ -398,14 +398,11 @@ def base_network():
     buses = _load_buses_from_osm().reset_index()
 
     lines = _load_lines_from_osm(buses)
-    lines_dc = _load_links_from_osm(buses)
 
     # TODO: Set appropriate electrical parameters for AC and DC lines once properly debugged
     # lines = _set_electrical_parameters_lines(lines)
 
-    lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
-    lines_ac_dc = _set_electrical_parameters_lines(lines_ac_dc)
-
+    lines = _set_electrical_parameters_lines(lines)
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
 
@@ -418,7 +415,7 @@ def base_network():
     # # TODO How to add converters? -> PyPSA-Eur approach:
     # n.import_components_from_dataframe(converters, "Link")
     # Load AC and DC lines as "Line" component to avoid problems with preprocessing links by the solver
-    n.import_components_from_dataframe(lines_ac_dc, "Line")
+    n.import_components_from_dataframe(lines, "Line")
 
     _set_lines_s_nom_from_linetypes(n)
 
