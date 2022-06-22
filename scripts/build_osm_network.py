@@ -892,8 +892,6 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-    converters = lines[lines.line_id.str.contains("convert")].reset_index(drop=True)
-    lines = lines[~lines.line_id.str.contains("convert")].reset_index(drop=True)
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
 
