@@ -422,15 +422,12 @@ def _rebase_voltage_to_config(component):
 def base_network():
     buses = _load_buses_from_osm().reset_index()
     lines = _load_lines_from_osm(buses)
-    lines_dc = _load_links_from_osm(buses)
     transformers = _load_transformers_from_osm(buses)
     converters = _load_converters_from_osm(buses)
 
     # TODO: Set appropriate electrical parameters for AC and DC lines once properly debugged
     # lines = _set_electrical_parameters_lines(lines)
 
-    lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
-    lines_ac_dc = _set_electrical_parameters_lines(lines_ac_dc)
     transformers = _set_electrical_parameters_transformers(transformers)
 
     n = pypsa.Network()
@@ -448,7 +445,6 @@ def base_network():
     # Load AC and DC lines as "Line" component to avoid problems with preprocessing links by the solver
     n.import_components_from_dataframe(lines, "Line")
     n.import_components_from_dataframe(converters, "Link")
-    n.import_components_from_dataframe(lines_ac_dc, "Line")
 
     _set_lines_s_nom_from_linetypes(n)
 
