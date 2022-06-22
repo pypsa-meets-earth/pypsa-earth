@@ -846,6 +846,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
+        # TODO Move get_converters from the merging function
         lines, buses, converters = merge_stations_lines_by_station_id_and_voltage(
             lines, buses, geo_crs, distance_crs, tol=tol
         )
