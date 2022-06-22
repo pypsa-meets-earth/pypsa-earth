@@ -445,7 +445,7 @@ def get_converters(buses, lines):
                         # "transmission",  # "tag_type"
                         # 0,  # "tag_frequency"
                         g_value.country.loc[id_0],  # "country"
-                        # geom_conv,  # "geometry"
+                        geom_conv,  # "geometry"
                         # geom_conv.bounds,  # "bounds"
                         # g_value.geometry.loc[id_0],  # "bus_0_coors"
                         # g_value.geometry.loc[id_1],  # "bus_1_coors"
@@ -469,7 +469,7 @@ def get_converters(buses, lines):
         # "tag_type",
         # "tag_frequency",
         "country",
-        # "geometry",
+        "geometry",
         # "bounds",
         # "bus_0_coors",
         # "bus_1_coors",
