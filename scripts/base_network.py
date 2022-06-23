@@ -215,6 +215,11 @@ def _load_links_from_osm(buses):
 
 
 def _load_converters_from_osm(buses):
+    # the links file can be empty
+    if os.path.getsize(snakemake.input.osm_converters) == 0:
+        converters = pd.DataFrame()
+        return converters
+
     converters = read_csv_nafix(
         snakemake.input.osm_converters,
         dtype=dict(converter_id="str", bus0="str", bus1="str"),
