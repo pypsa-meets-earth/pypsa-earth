@@ -183,7 +183,7 @@ def _load_lines_from_osm(buses):
 
     return lines
 
-
+# TODO Seems to be not needed anymore
 def _load_links_from_osm(buses):
     # the links file can be empty
     if os.path.getsize(snakemake.input.osm_converters) == 0:
