@@ -200,7 +200,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, sets_path_to_root
+from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from shapely.geometry import LineString
@@ -216,7 +216,7 @@ GEBCO_CRS = "EPSG:4326"
 def get_eia_annual_hydro_generation(fn, countries):
 
     # in billion kWh/a = TWh/a
-    df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df = read_csv_nafix(fn, skiprows=1, index_col=1).iloc[1:, 1:]
     df.index = df.index.str.strip()
 
     df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
@@ -330,10 +330,9 @@ if __name__ == "__main__":
 
             if normalization == "hydro_capacities":
                 hydro_stats = (
-                    pd.read_csv(
+                    read_csv_nafix(
                         snakemake.input.hydro_capacities,
                         comment="#",
-                        na_values="-",
                         index_col=0,
                     )
                     .rename({"Country": "countries"}, axis=1)
