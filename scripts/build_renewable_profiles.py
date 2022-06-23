@@ -232,6 +232,36 @@ def get_eia_annual_hydro_generation(fn, countries):
     return df
 
 
+def get_hydro_capacity_annual_hydro_generation(
+    fn, countries, year_start=2000, year_end=2020
+):
+    hydro_stats = (
+        read_csv_nafix(
+            fn,
+            comment="#",
+            index_col=0,
+        )
+        .rename({"Country": "countries"}, axis=1)
+        .set_index("countries")
+    )
+    hydro_prod_by_country = (
+        hydro_stats[hydro_stats.index.isin(countries)][
+            ["InflowHourlyAvg[GWh]"]
+        ].transpose()
+        * 1e3
+        * 8760
+    )  # change unit to MWh/y
+
+    range_years = range(year_start, year_end + 1)
+
+    normalize_using_yearly = pd.concat(
+        [hydro_prod_by_country] * len(range_years), ignore_index=True
+    )
+    normalize_using_yearly.index = pd.Index(range_years)
+
+    return normalize_using_yearly
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -329,30 +359,10 @@ if __name__ == "__main__":
             normalization = resource.pop("normalization")
 
             if normalization == "hydro_capacities":
-                hydro_stats = (
-                    read_csv_nafix(
-                        snakemake.input.hydro_capacities,
-                        comment="#",
-                        index_col=0,
-                    )
-                    .rename({"Country": "countries"}, axis=1)
-                    .set_index("countries")
+                path_hydro_capacities = snakemake.input.hydro_capacities
+                normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
+                    path_hydro_capacities, countries
                 )
-                hydro_prod_by_country = (
-                    hydro_stats[hydro_stats.index.isin(countries)][
-                        ["InflowHourlyAvg[GWh]"]
-                    ].transpose()
-                    * 1e3
-                )  # change unit to MWh/y
-
-                year_start = 2000
-                year_end = 2020
-                range_years = range(year_start, year_end + 1)
-
-                normalize_using_yearly = pd.concat(
-                    [hydro_prod_by_country] * len(range_years), ignore_index=True
-                )
-                normalize_using_yearly.index = pd.Index(range_years)
 
             elif normalization == "eia":
                 path_eia_stats = snakemake.input.eia_hydro_generation
