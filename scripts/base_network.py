@@ -258,6 +258,7 @@ def _set_electrical_parameters_lines(lines):
 
     return lines
 
+
 def _set_electrical_parameters_dc_lines(lines):
     v_noms = snakemake.config["electricity"]["voltages"]
 
@@ -266,7 +267,8 @@ def _set_electrical_parameters_dc_lines(lines):
     lines["r"] = snakemake.config["lines"]["r"]
     lines["s_max_pu"] = snakemake.config["lines"]["s_max_pu"]
 
-    return lines    
+    return lines
+
 
 def _set_electrical_parameters_links(links):
     if links.empty:
@@ -446,7 +448,6 @@ def base_network():
     lines_dc.to_csv("lines_dc_to_network.csv")
 
     lines = pd.concat([lines_ac, lines_dc])
-
 
     transformers = _set_electrical_parameters_transformers(transformers)
 
