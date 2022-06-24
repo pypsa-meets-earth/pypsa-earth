@@ -257,6 +257,15 @@ def _set_electrical_parameters_lines(lines):
 
     return lines
 
+def _set_electrical_parameters_dc_lines(lines):
+    v_noms = snakemake.config["electricity"]["voltages"]
+
+    # According to PyPSA documentation "AC" is the only valid value for the "carrier" field
+    # A non-zero resistance value r should be set for DC lines in case of linear power flow
+    lines["r"] = snakemake.config["lines"]["r"]
+    lines["s_max_pu"] = snakemake.config["lines"]["s_max_pu"]
+
+    return lines    
 
 def _set_electrical_parameters_links(links):
     if links.empty:
