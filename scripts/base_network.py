@@ -426,8 +426,17 @@ def base_network():
     transformers = _load_transformers_from_osm(buses)
     converters = _load_converters_from_osm(buses)
 
-    # TODO: Set appropriate electrical parameters for AC and DC lines once properly debugged
-    # lines = _set_electrical_parameters_lines(lines)
+    lines_ac = lines[lines.tag_frequency != 0]
+    lines_dc = lines[lines.tag_frequency == 0]
+
+    lines_ac = _set_electrical_parameters_lines(lines_ac)
+    lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
+
+    lines_ac.to_csv("lines_ac_to_network.csv")
+    lines_dc.to_csv("lines_dc_to_network.csv")
+
+    lines = pd.concat([lines_ac, lines_dc])
+
 
     transformers = _set_electrical_parameters_transformers(transformers)
 
