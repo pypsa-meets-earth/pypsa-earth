@@ -308,6 +308,18 @@ def _set_electrical_parameters_transformers(transformers):
 
     return transformers
 
+def _set_electrical_parameters_converters(converters):
+    p_max_pu = snakemake.config['links'].get('p_max_pu', 1.)
+    converters['p_max_pu'] = p_max_pu
+    converters['p_min_pu'] = -p_max_pu
+
+    converters['p_nom'] = 2000 # [MW]?
+
+    # Converters are combined with links
+    converters['under_construction'] = False
+    converters['underground'] = False
+
+    return converters
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
@@ -446,6 +458,7 @@ def base_network():
     lines = pd.concat([lines_ac, lines_dc])
 
     transformers = _set_electrical_parameters_transformers(transformers)
+    converters = _set_electrical_parameters_converters(converters)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
