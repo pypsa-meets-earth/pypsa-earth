@@ -321,6 +321,10 @@ def _set_electrical_parameters_converters(converters):
 
     return converters
 
+# TODO Do we need such a cross-border function?
+# def _replace_b2b_converter_at_country_border_by_link(n):
+#     # Affects only the B2B converter in Lithuania at the Polish border at the moment
+
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
     n.lines["s_nom"] = (
