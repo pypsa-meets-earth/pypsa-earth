@@ -298,7 +298,6 @@ def _set_electrical_parameters_links(links):
 
     return links
 
-
 def _set_electrical_parameters_transformers(transformers):
     config = snakemake.config["transformers"]
 
@@ -444,9 +443,6 @@ def base_network():
     lines_ac = _set_electrical_parameters_lines(lines_ac)
     lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
 
-    lines_ac.to_csv("lines_ac_to_network.csv")
-    lines_dc.to_csv("lines_dc_to_network.csv")
-
     lines = pd.concat([lines_ac, lines_dc])
 
     transformers = _set_electrical_parameters_transformers(transformers)
@@ -460,7 +456,6 @@ def base_network():
     n.import_components_from_dataframe(buses, "Bus")
     n.import_components_from_dataframe(lines, "Line")
     n.import_components_from_dataframe(transformers, "Transformer")
-    # # TODO How to add converters? -> PyPSA-Eur approach:
     n.import_components_from_dataframe(converters, "Link")
 
     _set_lines_s_nom_from_linetypes(n)
