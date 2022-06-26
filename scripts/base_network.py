@@ -298,6 +298,7 @@ def _set_electrical_parameters_links(links):
 
     return links
 
+
 def _set_electrical_parameters_transformers(transformers):
     config = snakemake.config["transformers"]
 
@@ -308,22 +309,25 @@ def _set_electrical_parameters_transformers(transformers):
 
     return transformers
 
-def _set_electrical_parameters_converters(converters):
-    p_max_pu = snakemake.config['links'].get('p_max_pu', 1.)
-    converters['p_max_pu'] = p_max_pu
-    converters['p_min_pu'] = -p_max_pu
 
-    converters['p_nom'] = 2000 # [MW]?
+def _set_electrical_parameters_converters(converters):
+    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
+    converters["p_max_pu"] = p_max_pu
+    converters["p_min_pu"] = -p_max_pu
+
+    converters["p_nom"] = 2000  # [MW]?
 
     # Converters are combined with links
-    converters['under_construction'] = False
-    converters['underground'] = False
+    converters["under_construction"] = False
+    converters["underground"] = False
 
     return converters
+
 
 # TODO Do we need such a cross-border function?
 # def _replace_b2b_converter_at_country_border_by_link(n):
 #     # Affects only the B2B converter in Lithuania at the Polish border at the moment
+
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
