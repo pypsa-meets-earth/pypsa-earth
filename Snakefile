@@ -64,14 +64,14 @@ rule prepare_sector_network:
         nodal_transport_data="resources/nodal_transport_data_s{simpl}_{clusters}.csv",
         overrides="data/override_component_attrs",
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        airports="data/airports.csv",
+        industrial_demand="resources/industrial_energy_demand_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+	airports="data/airports.csv",
         ports="data/ports.csv",
         heat_demand="resources/heat/heat_demand_s{simpl}_{clusters}.csv",
         ashp_cop="resources/heat/ashp_cop_s{simpl}_{clusters}.csv",
         gshp_cop="resources/heat/gshp_cop_s{simpl}_{clusters}.csv",
         solar_thermal="resources/heat/solar_thermal_s{simpl}_{clusters}.csv",
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
-        industry_demands="data/industry_demand_locations.csv",
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
@@ -190,6 +190,56 @@ rule build_population_layouts:
     threads: 8
     script:
         "scripts/build_population_layouts.py"
+
+
+rule build_industrial_distribution_key:
+    input:
+        regions_onshore="data/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+        GID_industrial_database="data/morocco_cement_industry.csv", 
+    output:
+        industrial_distribution_key="resources/industrial_distribution_key_elec_s{simpl}_{clusters}.csv"
+    threads: 1
+    resources: mem_mb=1000
+    benchmark: "benchmarks/build_industrial_distribution_key/s{simpl}_{clusters}"
+    script: 'scripts/build_industrial_distribution_key.py'
+
+
+rule build_industrial_production_per_node:
+    input:
+        industrial_distribution_key="resources/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+        industrial_production_per_country_tomorrow="data/industrial_production_per_country_tomorrow_{planning_horizons}.csv"
+    output:
+        industrial_production_per_node="resources/industrial_production_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
+    threads: 1
+    resources: mem_mb=1000
+    benchmark: "benchmarks/build_industrial_production_per_node/s{simpl}_{clusters}_{planning_horizons}"
+    script: 'scripts/build_industrial_production_per_node.py'
+
+
+rule build_industrial_energy_demand_per_node:
+    input:
+        industry_sector_ratios="data/industry_sector_ratios.csv",
+        industrial_production_per_node="resources/industrial_production_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+        industrial_energy_demand_per_node_today="resources/industrial_energy_demand_today_elec_s{simpl}_{clusters}.csv"
+    output:
+        industrial_energy_demand_per_node="resources/industrial_energy_demand_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
+    threads: 1
+    resources: mem_mb=1000
+    benchmark: "benchmarks/build_industrial_energy_demand_per_node/s{simpl}_{clusters}_{planning_horizons}"
+    script: 'scripts/build_industrial_energy_demand_per_node.py'
+
+
+rule build_industrial_energy_demand_per_node_today:
+    input:
+        industrial_distribution_key="resources/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+        industrial_energy_demand_per_country_today="data/industrial_energy_demand_per_country_today.csv"
+    output:
+        industrial_energy_demand_per_node_today="resources/industrial_energy_demand_today_elec_s{simpl}_{clusters}.csv"
+    threads: 1
+    resources: mem_mb=1000
+    benchmark: "benchmarks/build_industrial_energy_demand_per_node_today/s{simpl}_{clusters}"
+    script: 'scripts/build_industrial_energy_demand_per_node_today.py'
 
 
 rule move_hardcoded_files_temp:
