@@ -1654,6 +1654,7 @@ if __name__ == "__main__":
     add_oil(n, costs)
 
     add_gas(n, costs)
+
     add_hydrogen(n, costs)  # TODO add costs
 
     add_storage(n, costs)
@@ -1673,6 +1674,10 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
     add_heat(n, costs)
+
+    if options["dac"]:
+        add_dac(n, costs)
+
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()
