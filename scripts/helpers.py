@@ -84,7 +84,7 @@ def mock_snakemake(rulename, **wildcards):
             snakefile = p
             break
     #workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
-    workflow = sm.Workflow(snakefile, overwrite_configfiles=[])
+    workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
     workflow.include(snakefile)
     workflow.global_resources = {}
     rule = workflow.get_rule(rulename)

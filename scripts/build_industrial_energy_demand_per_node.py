@@ -8,7 +8,7 @@ if __name__ == '__main__':
         snakemake = mock_snakemake(
             'build_industrial_energy_demand_per_node',
             simpl='',
-            clusters=48,
+            clusters=12,
             planning_horizons=2030
         )
         

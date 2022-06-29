@@ -67,7 +67,7 @@ if __name__ == "__main__":
         from helpers import mock_snakemake
         snakemake = mock_snakemake('build_industrial_production_per_node',
             simpl='',
-            clusters=48,
+            clusters=12,
             planning_horizons=2030
         )
     

@@ -194,7 +194,9 @@ rule build_population_layouts:
 
 rule build_industrial_distribution_key:
     input:
-        regions_onshore="data/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore=pypsaearth(
+            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         GID_industrial_database="data/morocco_cement_industry.csv", 
     output:

@@ -758,8 +758,8 @@ def add_industry(n, costs):
 
     nodes = pop_layout.index #TODO where to change country code? 2 letter country codes. 
 
-    industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
-        lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
+    # industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
+    #     lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
         
     industrial_demand.set_index('TWh/a (MtCO2/a)',inplace=True)
 
@@ -772,7 +772,7 @@ def add_industry(n, costs):
         bus="gas for industry",
         carrier="gas for industry",
         p_set=industrial_demand["methane"].apply(
-            lambda frac: frac * 1e6 / 8760 #TODO change for resolution 
+            lambda frac: frac / 8760 #TODO change for resolution 
         ),  
     )
 
@@ -817,7 +817,7 @@ def add_industry(n, costs):
         bus=nodes + " H2",
         carrier="H2 for industry",
         p_set=industrial_demand["hydrogen"].apply(
-            lambda frac: frac * 1e6 / 8760
+            lambda frac: frac / 8760
         ),  
     )
 
@@ -829,7 +829,7 @@ def add_industry(n, costs):
         bus="Africa oil",
         carrier="naphtha for industry",
         p_set=industrial_demand["naphtha"].apply(
-            lambda frac: frac * 1e6 / 8760
+            lambda frac: frac / 8760
         ),  
     )
 
@@ -904,7 +904,7 @@ def add_industry(n, costs):
         bus=nodes,
         carrier="industry electricity",
         p_set=industrial_demand["current electricity"].apply(
-            lambda frac: frac * 1e6 / 8760
+            lambda frac: frac / 8760
         ),  # TODO Multiply by demand and find true fraction
     )
 
@@ -1565,9 +1565,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="48",
-            ll="copt",
-            opts="Co2L-72H",
+            clusters="12",
+            ll="c1",
+            opts="Co2L-720H",
             planning_horizons="2030",
         )
     # TODO add mock_snakemake func
