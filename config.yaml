@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_new_1406_lowcarbon_26_3H
+run: test_glen_5
 
 foresight: overnight
 
@@ -13,13 +13,13 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 73
+  - 13
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
   - "c1"
   opts:
-  - "Co2L-3H"
+  - "Co2L-720H"
 
 
 
@@ -133,7 +133,7 @@ sector:
   shipping_hydrogen_liquefaction: true
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: 1.0
-  gadm_level: 2
+  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
