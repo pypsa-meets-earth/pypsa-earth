@@ -748,7 +748,7 @@ def add_industry(n, costs):
 
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
-    industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) * 1e6
+    industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) #* 1e6
 
     industrial_demand.reset_index(inplace=True)
 
