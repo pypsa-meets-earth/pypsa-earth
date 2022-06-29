@@ -233,7 +233,9 @@ def add_co2_sequestration_limit(n, sns):
     vars_final_co2_stored = get_var(n, "Store", "e").loc[sns[-1], co2_stores]
 
     lhs = linexpr((1, vars_final_co2_stored)).sum()
-    rhs = n.config["sector"].get("co2_sequestration_potential", 200) * 1e6      #TODO change 200 limit (Europe)
+    rhs = (
+        n.config["sector"].get("co2_sequestration_potential", 200) * 1e6
+    )  # TODO change 200 limit (Europe)
 
     name = "co2_sequestration_limit"
     define_constraints(
@@ -243,7 +245,7 @@ def add_co2_sequestration_limit(n, sns):
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
-    #add_co2_sequestration_limit(n, snapshots)
+    # add_co2_sequestration_limit(n, snapshots)
 
 
 def solve_network(n, config, opts="", **kwargs):
@@ -302,7 +304,7 @@ if __name__ == "__main__":
     tmpdir = snakemake.config["solving"].get("tmpdir")
     if tmpdir is not None:
         Path(tmpdir).mkdir(parents=True, exist_ok=True)
-        opts = snakemake.wildcards.opts.split('-')
+        opts = snakemake.wildcards.opts.split("-")
     solve_opts = snakemake.config["solving"]["options"]
 
     fn = getattr(snakemake.log, "memory", None)
@@ -315,8 +317,8 @@ if __name__ == "__main__":
 
         n = solve_network(
             n,
-            config=snakemake.config, 
-            opts=snakemake.wildcards.opts.split('-'),
+            config=snakemake.config,
+            opts=snakemake.wildcards.opts.split("-"),
             solver_dir=tmpdir,
             solver_logfile=snakemake.log.solver,
         )

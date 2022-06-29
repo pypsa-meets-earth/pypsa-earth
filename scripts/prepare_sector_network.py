@@ -41,14 +41,11 @@ def add_carrier_buses(n, carrier, nodes=None):
 
     n.add("Carrier", carrier)
 
-    n.madd("Bus",
-        nodes,
-        location=location,
-        carrier=carrier
-    )
+    n.madd("Bus", nodes, location=location, carrier=carrier)
 
-    #capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
-    n.madd("Store",
+    # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
+    n.madd(
+        "Store",
         nodes + " Store",
         bus=nodes,
         e_nom_extendable=True,
@@ -56,13 +53,15 @@ def add_carrier_buses(n, carrier, nodes=None):
         carrier=carrier,
     )
 
-    n.madd("Generator",
+    n.madd(
+        "Generator",
         nodes,
         bus=nodes,
         p_nom_extendable=True,
         carrier=carrier,
-        marginal_cost=costs.at[carrier, 'fuel']
+        marginal_cost=costs.at[carrier, "fuel"],
     )
+
 
 def add_generation(n, costs):
     """Adds conventional generation as specified in config
@@ -149,8 +148,9 @@ def add_oil(n, costs):
             marginal_cost=costs.at["oil", "fuel"],
         )
 
+
 def add_gas(n, costs):
-    
+
     spatial.gas = SimpleNamespace()
 
     if options["gas_network"]:
@@ -169,11 +169,11 @@ def add_gas(n, costs):
         # spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
 
     spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=nodes)
-    
-    
-    gas_nodes = vars(spatial)['gas'].nodes
 
-    add_carrier_buses(n, 'gas', gas_nodes)
+    gas_nodes = vars(spatial)["gas"].nodes
+
+    add_carrier_buses(n, "gas", gas_nodes)
+
 
 def H2_liquid_fossil_conversions(n, costs):
     """
@@ -748,7 +748,9 @@ def add_industry(n, costs):
 
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
-    industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0) #* 1e6
+    industrial_demand = pd.read_csv(
+        snakemake.input.industrial_demand, index_col=0
+    )  # * 1e6
 
     industrial_demand.reset_index(inplace=True)
 
@@ -756,12 +758,14 @@ def add_industry(n, costs):
 
     # CARRIER = FOSSIL GAS
 
-    nodes = pop_layout.index #TODO where to change country code? 2 letter country codes. 
+    nodes = (
+        pop_layout.index
+    )  # TODO where to change country code? 2 letter country codes.
 
     # industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
     #     lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
-        
-    industrial_demand.set_index('TWh/a (MtCO2/a)',inplace=True)
+
+    industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
     n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
 
@@ -772,8 +776,8 @@ def add_industry(n, costs):
         bus="gas for industry",
         carrier="gas for industry",
         p_set=industrial_demand["methane"].apply(
-            lambda frac: frac / 8760 #TODO change for resolution 
-        ),  
+            lambda frac: frac / 8760  # TODO change for resolution
+        ),
     )
 
     n.add(
@@ -809,16 +813,14 @@ def add_industry(n, costs):
     )
 
     #################################################### CARRIER = HYDROGEN
-    
+
     n.madd(
         "Load",
         nodes,
         suffix=" H2 for industry",
         bus=nodes + " H2",
         carrier="H2 for industry",
-        p_set=industrial_demand["hydrogen"].apply(
-            lambda frac: frac / 8760
-        ),  
+        p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
     )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -828,9 +830,7 @@ def add_industry(n, costs):
         suffix=" naphtha for industry",
         bus="Africa oil",
         carrier="naphtha for industry",
-        p_set=industrial_demand["naphtha"].apply(
-            lambda frac: frac / 8760
-        ),  
+        p_set=industrial_demand["naphtha"].apply(lambda frac: frac / 8760),
     )
 
     #     #NB: CO2 gets released again to atmosphere when plastics decay or kerosene is burned
@@ -845,7 +845,7 @@ def add_industry(n, costs):
         * costs.at["oil", "CO2 intensity"]
         - industrial_demand["process emission from feedstock"].sum() / 8760
     )
-    
+
     n.add(
         "Load",
         "industry oil emissions",
@@ -922,7 +922,7 @@ def add_industry(n, costs):
             industrial_demand["process emission from feedstock"]
             + industrial_demand["process emission"]
         )
-        / 8760,  
+        / 8760,
     )
 
     n.add(
@@ -1606,7 +1606,9 @@ if __name__ == "__main__":
     nodal_energy_totals = pd.read_csv(
         snakemake.input.nodal_energy_totals, index_col=0
     )  # where is nodal_energy_totals_4
-    transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True) * 0.75 #TODO remove factor
+    transport = (
+        pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True) * 0.75
+    )  # TODO remove factor
     avail_profile = pd.read_csv(
         snakemake.input.avail_profile, index_col=0, parse_dates=True
     )
@@ -1617,15 +1619,23 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-    heat_demand = pd.read_csv(snakemake.input.heat_demand, index_col=0, header=[0, 1]).reindex(index=n.snapshots)
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0).reindex(index=n.snapshots)
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0).reindex(index=n.snapshots)
-    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0).reindex(index=n.snapshots)
+    heat_demand = pd.read_csv(
+        snakemake.input.heat_demand, index_col=0, header=[0, 1]
+    ).reindex(index=n.snapshots)
+    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0).reindex(
+        index=n.snapshots
+    )
+    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0).reindex(
+        index=n.snapshots
+    )
+    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0).reindex(
+        index=n.snapshots
+    )
 
     district_heat_share = pd.read_csv(
         snakemake.input.district_heat_share, index_col=0
     ).iloc[:, 0]
-    
+
     add_co2(n, costs, nodes, options)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
