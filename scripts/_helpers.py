@@ -579,7 +579,7 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-NA_VALUES = ["NULL", " ", "--", "-"]
+NA_VALUES = ["NULL", "-"]
 
 
 def read_csv_nafix(file, **kwargs):

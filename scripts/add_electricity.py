@@ -224,7 +224,7 @@ def load_powerplants(ppl_path):
         "hard coal": "coal",
     }
     return (
-        read_csv_nafix(ppl_path, index_col=0, dtype={"bus": "str"})
+        pd.read_csv(ppl_path, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
         .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
