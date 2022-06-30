@@ -579,7 +579,7 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-NA_VALUES = ["NULL", "-"]
+NA_VALUES = ["NULL"]
 
 
 def read_csv_nafix(file, **kwargs):
@@ -597,7 +597,7 @@ def to_csv_nafix(df, path, **kwargs):
         del kwargs["na_rep"]
     # if len(df) > 0:
     if not df.empty:
-        return df.to_csv(path, **kwargs, na_rep=NA_VALUES[1])
+        return df.to_csv(path, **kwargs, na_rep=NA_VALUES[0])
     else:
         with open(path, "w") as fp:
             pass

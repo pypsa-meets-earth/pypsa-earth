@@ -236,9 +236,10 @@ def get_hydro_capacity_annual_hydro_generation(
     fn, countries, year_start=2000, year_end=2020
 ):
     hydro_stats = (
-        read_csv_nafix(
+        pd.read_csv(
             fn,
             comment="#",
+            na_values=["-"],
             index_col=0,
         )
         .rename({"Country": "countries"}, axis=1)
@@ -354,7 +355,7 @@ if __name__ == "__main__":
         ]
 
         # check if normalization field belongs to the settings and it is not false
-        if ("normalization" in resource) & (resource["normalization"] is not bool):
+        if ("normalization" in resource) & (type(resource["normalization"]) == str):
 
             normalization = resource.pop("normalization")
 
@@ -362,18 +363,21 @@ if __name__ == "__main__":
                 path_hydro_capacities = snakemake.input.hydro_capacities
                 normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
                     path_hydro_capacities, countries
-                )
+                ) * config.get("normalization_multiplier", 1.0)
 
             elif normalization == "eia":
                 path_eia_stats = snakemake.input.eia_hydro_generation
                 normalize_using_yearly = get_eia_annual_hydro_generation(
                     path_eia_stats, countries
-                )
+                ) * config.get("normalization_multiplier", 1.0)
 
             resource["normalize_using_yearly"] = normalize_using_yearly
             logger.info(f"Hydro normalization mode {normalization}")
         else:
             logger.info("No hydro normalization")
+
+            if "normalization" in resource:
+                resource.pop("normalization")
 
         # check if there are hydro powerplants
         if resource["plants"].empty:
