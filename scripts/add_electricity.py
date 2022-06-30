@@ -305,7 +305,7 @@ def attach_load(
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
     logger.info(f"Load data scaled with scalling factor {scale}.")
-    gegis_load['Electricity demand'] *= scale
+    gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes.loc[:, "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
