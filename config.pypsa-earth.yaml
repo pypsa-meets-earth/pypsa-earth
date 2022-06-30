@@ -50,7 +50,7 @@ augmented_line_connection:
   min_expansion: 1  # New created line expands by float/int input [MW]
 
 cluster_options:
-  alternative_clustering: false  # Cluster on "False" GADM shapes, "True" Voronoi cells
+  alternative_clustering: true  # Cluster on "False" GADM shapes, "True" Voronoi cells
   distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true  # When "True", logging is printed to console
 
