@@ -7,6 +7,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
+import re
 from helpers import (
     create_dummy_data,
     create_network_topology,
@@ -1581,7 +1582,26 @@ def add_heat(n, costs):
     #                 country=ct,
     #                 capital_cost=capital_cost[strength] * options['retrofitting']['cost_factor']
     #             )
-
+def average_every_nhours(n, offset):
+    #logger.info(f'Resampling the network to {offset}')
+    m = n.copy(with_time=False)
+    
+    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
+    m.set_snapshots(snapshot_weightings.index)
+    m.snapshot_weightings = snapshot_weightings
+    
+    for c in n.iterate_components():
+        pnl = getattr(m, c.list_name+"_t")
+        for k, df in c.pnl.items():
+            if not df.empty:
+                if c.list_name == "stores" and k == "e_max_pu":
+                    pnl[k] = df.resample(offset).min()
+                elif c.list_name == "stores" and k == "e_min_pu":
+                    pnl[k] = df.resample(offset).max()
+                else:
+                    pnl[k] = df.resample(offset).mean()
+    
+    return m
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1591,10 +1611,15 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
+<<<<<<< Updated upstream
             clusters="72",
+=======
+            clusters="53",
+>>>>>>> Stashed changes
             ll="c1",
-            opts="Co2L-720H",
+            opts="",
             planning_horizons="2030",
+            sopts = "Co2L-720H"
         )
     # TODO add mock_snakemake func
 
@@ -1691,7 +1716,21 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
     add_heat(n, costs)
+    
+    sopts = snakemake.wildcards.sopts.split('-')
+    
+    
+
+    for o in sopts:
+        m = re.match(r'^\d+h$', o, re.IGNORECASE)
+        if m is not None:
+            n = average_every_nhours(n, m.group(0))
+            break
+
+    
     n.export_to_netcdf(snakemake.output[0])
+
+
 
     # n.lopf()
     # TODO define spatial (for biomass and co2)

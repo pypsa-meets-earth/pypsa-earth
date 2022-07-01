@@ -22,7 +22,7 @@ wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+m?|all",
     opts="[-+a-zA-Z0-9]*",
-    sector_opts="[-+a-zA-Z0-9\.\s]*",
+    sopts="[-+a-zA-Z0-9\.\s]*",
 
 
 subworkflow pypsaearth:
@@ -38,7 +38,7 @@ rule prepare_sector_networks:
     input:
         expand(
             RDIR
-            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}.nc",
             **config["scenario"]
         ),
 
@@ -74,14 +74,14 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
     output:
         RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}.nc",
     threads: 1
     resources:
         mem_mb=2000,
     benchmark:
         (
             RDIR
-            + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}"
         )
     script:
         "scripts/prepare_sector_network.py"

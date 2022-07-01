@@ -13,7 +13,7 @@ logging:
 scenario:
   simpl: ['']
   ll: ['copt']
-  clusters: [20]
+  clusters: [203]
   opts: [Co2L1-144H]
 
 countries: ["MA"]
