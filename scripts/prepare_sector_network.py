@@ -1611,11 +1611,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-<<<<<<< Updated upstream
-            clusters="72",
-=======
             clusters="53",
->>>>>>> Stashed changes
             ll="c1",
             opts="",
             planning_horizons="2030",

@@ -5,11 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-<<<<<<< Updated upstream
-run: test_withoutstubs_5
-=======
 run: test_halfopts
->>>>>>> Stashed changes
 
 foresight: overnight
 
@@ -17,11 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-<<<<<<< Updated upstream
-  - 77
-=======
   - 54
->>>>>>> Stashed changes
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
