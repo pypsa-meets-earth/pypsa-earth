@@ -391,10 +391,11 @@ def busmap_by_stubs(network, matching_attrs=None):
     def attrs_match(u, v):
         return (
             matching_attrs is None
+            # TODO account for a group length of more than just one pair
             or (
                 network.buses.loc[u, matching_attrs]
                 == network.buses.loc[v, matching_attrs]
-            ).all()
+            )#.all() # leads to an error in case a single boolean
         )
 
     while True:
