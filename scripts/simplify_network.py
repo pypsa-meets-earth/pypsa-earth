@@ -395,7 +395,7 @@ def busmap_by_stubs(network, matching_attrs=None):
             or (
                 network.buses.loc[u, matching_attrs]
                 == network.buses.loc[v, matching_attrs]
-            )#.all() # leads to an error in case a single boolean
+            )  # .all() # leads to an error in case a single boolean
         )
 
     while True:
