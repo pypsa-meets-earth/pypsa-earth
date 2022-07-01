@@ -448,7 +448,7 @@ def add_co2(n, costs, nodes, options):
 def add_aviation(n, cost):
     # all_aviation = ["total international aviation", "total domestic aviation"]
 
-    airports = pd.read_csv(snakemake.input.airports, index_col=None, squeeze=True)
+    airports = pd.read_csv(snakemake.input.airports)
 
     gadm_level = options["gadm_level"]
 
@@ -466,9 +466,9 @@ def add_aviation(n, cost):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-
+    MA_jetfuel=1e7
     airports["p_set"] = airports["fraction"].apply(
-        lambda frac: frac * 1e6 / 8760 *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+        lambda frac: frac * MA_jetfuel / 8760  #TODO change the way pset is sampled here
                                                     #the current way leads to inaccuracies in the last timestep in case
                                                     #the timestep if 8760 is not divisble by it),
     )  # TODO use real data here

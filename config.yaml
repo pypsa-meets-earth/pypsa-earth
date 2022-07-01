@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_halfopts_ttt
+run: test_aviation
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 57
+  - 58
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -135,7 +135,7 @@ sector:
   shipping_hydrogen_liquefaction: true
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: 1.0
-  gadm_level: 1
+  gadm_level: 2
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
