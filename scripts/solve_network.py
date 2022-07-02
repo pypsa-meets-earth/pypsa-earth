@@ -83,10 +83,16 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from pypsa.linopf import (get_var, define_constraints, define_variables,
-                          linexpr, join_exprs, network_lopf, ilopf)
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-
+from pypsa.linopf import (
+    define_constraints,
+    define_variables,
+    get_var,
+    ilopf,
+    join_exprs,
+    linexpr,
+    network_lopf,
+)
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
@@ -253,20 +259,24 @@ def add_operational_reserve_margin_constraint(n, config):
     EPSILON_VRES = reserve_config["epsilon_vres"]
     CONTINGENCY = reserve_config["contingency"]
 
-    # Reserve Variables 
-    reserve = get_var(n, 'Generator', 'r')
+    # Reserve Variables
+    reserve = get_var(n, "Generator", "r")
     lhs = linexpr((1, reserve)).sum(1)
 
     # Share of extendable renewable capacities
-    ext_i = n.generators.query('p_nom_extendable').index
+    ext_i = n.generators.query("p_nom_extendable").index
     vres_i = n.generators_t.p_max_pu.columns
     if not ext_i.empty and not vres_i.empty:
         capacity_factor = n.generators_t.p_max_pu[vres_i.intersection(ext_i)]
-        renewable_capacity_variables = get_var(n, 'Generator', 'p_nom')[vres_i.intersection(ext_i)]
-        lhs += linexpr((-EPSILON_VRES * capacity_factor, renewable_capacity_variables)).sum(1)
+        renewable_capacity_variables = get_var(n, "Generator", "p_nom")[
+            vres_i.intersection(ext_i)
+        ]
+        lhs += linexpr(
+            (-EPSILON_VRES * capacity_factor, renewable_capacity_variables)
+        ).sum(1)
 
     # Total demand at t
-    demand =  n.loads_t.p.sum(1)
+    demand = n.loads_t.p.sum(1)
 
     # VRES potential of non extendable generators
     capacity_factor = n.generators_t.p_max_pu[vres_i.difference(ext_i)]
@@ -276,39 +286,41 @@ def add_operational_reserve_margin_constraint(n, config):
     # Right-hand-side
     rhs = EPSILON_LOAD * demand + EPSILON_VRES * potential + CONTINGENCY
 
-    define_constraints(n, lhs, '>=', rhs, "Reserve margin")
+    define_constraints(n, lhs, ">=", rhs, "Reserve margin")
 
 
 def update_capacity_constraint(n):
     gen_i = n.generators.index
-    ext_i = n.generators.query('p_nom_extendable').index
-    fix_i = n.generators.query('not p_nom_extendable').index
+    ext_i = n.generators.query("p_nom_extendable").index
+    fix_i = n.generators.query("not p_nom_extendable").index
 
-    dispatch = get_var(n, 'Generator', 'p')
-    reserve = get_var(n, 'Generator', 'r')
+    dispatch = get_var(n, "Generator", "p")
+    reserve = get_var(n, "Generator", "r")
 
     capacity_fixed = n.generators.p_nom[fix_i]
 
-    p_max_pu = get_as_dense(n, 'Generator', 'p_max_pu')
+    p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
 
     lhs = linexpr((1, dispatch), (1, reserve))
 
     if not ext_i.empty:
-        capacity_variable = get_var(n, 'Generator', 'p_nom')
-        lhs += linexpr((-p_max_pu[ext_i], capacity_variable)).reindex(columns=gen_i, fill_value='')
+        capacity_variable = get_var(n, "Generator", "p_nom")
+        lhs += linexpr((-p_max_pu[ext_i], capacity_variable)).reindex(
+            columns=gen_i, fill_value=""
+        )
 
     rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
 
-    define_constraints(n, lhs, '<=', rhs, 'Generators', 'updated_capacity_constraint')
+    define_constraints(n, lhs, "<=", rhs, "Generators", "updated_capacity_constraint")
 
 
 def add_operational_reserve_margin(n, sns, config):
     """
-    Build reserve margin constraints based on the formulation given in 
+    Build reserve margin constraints based on the formulation given in
     https://genxproject.github.io/GenX/dev/core/#Reserves.
     """
 
-    define_variables(n, 0, np.inf, 'Generator', 'r', axes=[sns, n.generators.index])
+    define_variables(n, 0, np.inf, "Generator", "r", axes=[sns, n.generators.index])
 
     add_operational_reserve_margin_constraint(n, config)
 
