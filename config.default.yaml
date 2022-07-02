@@ -96,7 +96,8 @@ electricity:
     activate: false
     epsilon_load: 0.02 # share of total load
     epsilon_vres: 0.02 # share of total renewable supply
-    contingency: 4000 # fixed capacity in MW
+    contingency: 0 # fixed capacity in MW
+
   extendable_carriers:
     Generator: []
     StorageUnit: []
