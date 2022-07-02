@@ -77,6 +77,8 @@ Upcoming Release
 
 * Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`
 
+* Add optional normalization of hydro inflows by hydro_capacities or eia stats `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
