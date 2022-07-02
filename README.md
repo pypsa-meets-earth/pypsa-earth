@@ -266,6 +266,13 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/AnasAlgarei">
+            <img src="https://avatars.githubusercontent.com/u/101210563?v=4" width="100;" alt="AnasAlgarei"/>
+            <br />
+            <sub><b>AnasAlgarei</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/martacki">
             <img src="https://avatars.githubusercontent.com/u/53824825?v=4" width="100;" alt="martacki"/>
             <br />
@@ -278,15 +285,15 @@ The documentation is available here: [documentation](https://pypsa-meets-africa.
             <br />
             <sub><b>EmreYorat</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/HanaElattar">
             <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
             <br />
             <sub><b>HanaElattar</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/squoilin">
             <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
