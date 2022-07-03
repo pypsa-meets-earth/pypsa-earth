@@ -460,6 +460,11 @@ def base_network():
     lines_ac = lines[lines.tag_frequency != 0]
     lines_dc = lines[lines.tag_frequency == 0]
 
+    # custom_linetypes = pd.read_csv("/Users/ekaterina/Documents/_github_/pypsa-africa/data/custom_line_types.csv",
+    #     index_col = 0)
+    # TODO Find a way to load a custom linetype. Currently the custom type definition seems to be ignored
+    # n.import_components_from_dataframe(custom_linetypes, "LineType")    
+
     lines_ac = _set_electrical_parameters_lines(lines_ac)
     lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
 
