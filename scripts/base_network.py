@@ -338,7 +338,12 @@ def _set_lines_s_nom_from_linetypes(n):
         * n.lines["v_nom"]
         * n.lines.num_parallel
     )
-
+    # Re-define s_nom for DC lines
+    n.lines.loc[n.lines["carrier"] == "DC", "s_nom"] = (
+        n.lines["type"].map(n.line_types.i_nom)
+        * n.lines["v_nom"]
+        * n.lines.num_parallel
+    )
 
 def _remove_dangling_branches(branches, buses):
     return pd.DataFrame(
