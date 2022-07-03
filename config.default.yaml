@@ -127,8 +127,6 @@ lines:
   s_nom_max: .inf
   length_factor: 1.25
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
-    # TODO check appropriate range
-  r_per_length: 0.1 #[Ohm per km]
 
 links:
   p_max_pu: 1.0
