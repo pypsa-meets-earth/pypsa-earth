@@ -255,8 +255,9 @@ def _set_electrical_parameters_lines(lines):
 
     return lines
 
+
 def _set_electrical_parameters_dc_lines(lines):
-    v_noms = snakemake.config["electricity"]["voltages"]    
+    v_noms = snakemake.config["electricity"]["voltages"]
     lines["carrier"] = "DC"
 
     lines["type"] = "DC_custom_linetype"
@@ -344,6 +345,7 @@ def _set_lines_s_nom_from_linetypes(n):
         * n.lines["v_nom"]
         * n.lines.num_parallel
     )
+
 
 def _remove_dangling_branches(branches, buses):
     return pd.DataFrame(
@@ -469,7 +471,7 @@ def base_network():
     # custom_linetypes = pd.read_csv("/Users/ekaterina/Documents/_github_/pypsa-africa/data/custom_line_types.csv",
     #     index_col = 0)
     # TODO Find a way to load a custom linetype. Currently the custom type definition seems to be ignored
-    # n.import_components_from_dataframe(custom_linetypes, "LineType")    
+    # n.import_components_from_dataframe(custom_linetypes, "LineType")
 
     lines_ac = _set_electrical_parameters_lines(lines_ac)
     lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
