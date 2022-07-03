@@ -416,7 +416,9 @@ def busmap_by_stubs(network, matching_attrs=None):
 def remove_stubs(n):
     logger.info("Removing stubs")
 
-    busmap = busmap_by_stubs(n, matching_attrs="carrier")  # ['country'])
+    # TODO Put back carrier matching after an issue with DC lines parameters will be resolved
+    # busmap = busmap_by_stubs(n, matching_attrs="carrier")  # ['country'])
+    busmap = busmap_by_stubs(n)
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap)
 
