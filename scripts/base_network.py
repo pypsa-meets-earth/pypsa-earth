@@ -255,7 +255,8 @@ def _set_electrical_parameters_lines(lines):
 
     return lines
 
-def _set_electrical_parameters_dc_lines(lines):    
+def _set_electrical_parameters_dc_lines(lines):
+    v_noms = snakemake.config["electricity"]["voltages"]    
     lines["carrier"] = "DC"
 
     lines["type"] = "DC_custom_linetype"
