@@ -1556,6 +1556,36 @@ def add_heat(n, costs):
     #                 capital_cost=capital_cost[strength] * options['retrofitting']['cost_factor']
     #             )
 
+def add_dac(n, costs):
+
+    heat_carriers = ["urban central heat", "services urban decentral heat"]
+    heat_buses = n.buses.index[n.buses.carrier.isin(heat_carriers)]
+    locations = n.buses.location[heat_buses]
+
+    efficiency2 = -(
+        costs.at["direct air capture", "electricity-input"]
+        + costs.at["direct air capture", "compression-electricity-input"]
+    )
+    efficiency3 = -(
+        costs.at["direct air capture", "heat-input"]
+        - costs.at["direct air capture", "compression-heat-output"]
+    )
+
+    n.madd(
+        "Link",
+        heat_buses.str.replace(" heat", " DAC"),
+        bus0="co2 atmosphere",
+        bus1=spatial.co2.df.loc[locations, "nodes"].values,
+        bus2=locations.values,
+        bus3=heat_buses,
+        carrier="DAC",
+        capital_cost=costs.at["direct air capture", "fixed"],
+        efficiency=1.0,
+        efficiency2=efficiency2,
+        efficiency3=efficiency3,
+        p_nom_extendable=True,
+        lifetime=costs.at["direct air capture", "lifetime"],
+    )
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1646,6 +1676,7 @@ if __name__ == "__main__":
     add_oil(n, costs)
 
     add_gas(n, costs)
+
     add_hydrogen(n, costs)  # TODO add costs
 
     add_storage(n, costs)
@@ -1665,6 +1696,10 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
     add_heat(n, costs)
+
+    if options["dac"]:
+        add_dac(n, costs)
+
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()
