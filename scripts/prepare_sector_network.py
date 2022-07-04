@@ -1582,6 +1582,7 @@ def add_heat(n, costs):
     #                 country=ct,
     #                 capital_cost=capital_cost[strength] * options['retrofitting']['cost_factor']
     #             )
+<<<<<<< HEAD
 def average_every_nhours(n, offset):
     #logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
@@ -1602,6 +1603,39 @@ def average_every_nhours(n, offset):
                     pnl[k] = df.resample(offset).mean()
     
     return m
+=======
+
+def add_dac(n, costs):
+
+    heat_carriers = ["urban central heat", "services urban decentral heat"]
+    heat_buses = n.buses.index[n.buses.carrier.isin(heat_carriers)]
+    locations = n.buses.location[heat_buses]
+
+    efficiency2 = -(
+        costs.at["direct air capture", "electricity-input"]
+        + costs.at["direct air capture", "compression-electricity-input"]
+    )
+    efficiency3 = -(
+        costs.at["direct air capture", "heat-input"]
+        - costs.at["direct air capture", "compression-heat-output"]
+    )
+
+    n.madd(
+        "Link",
+        heat_buses.str.replace(" heat", " DAC"),
+        bus0="co2 atmosphere",
+        bus1=spatial.co2.df.loc[locations, "nodes"].values,
+        bus2=locations.values,
+        bus3=heat_buses,
+        carrier="DAC",
+        capital_cost=costs.at["direct air capture", "fixed"],
+        efficiency=1.0,
+        efficiency2=efficiency2,
+        efficiency3=efficiency3,
+        p_nom_extendable=True,
+        lifetime=costs.at["direct air capture", "lifetime"],
+    )
+>>>>>>> origin/main
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1690,6 +1724,7 @@ if __name__ == "__main__":
     add_oil(n, costs)
 
     add_gas(n, costs)
+
     add_hydrogen(n, costs)  # TODO add costs
 
     add_storage(n, costs)
@@ -1709,6 +1744,7 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
     add_heat(n, costs)
+<<<<<<< HEAD
     
     sopts = snakemake.wildcards.sopts.split('-')
     
@@ -1721,6 +1757,12 @@ if __name__ == "__main__":
             break
 
     
+=======
+
+    if options["dac"]:
+        add_dac(n, costs)
+
+>>>>>>> origin/main
     n.export_to_netcdf(snakemake.output[0])
 
 

@@ -140,6 +140,7 @@ sector:
   marginal_cost_storage: 0
   methanation: true
   helmeth: true
+  dac: true
   SMR: true
   cc_fraction: 0.9
 
