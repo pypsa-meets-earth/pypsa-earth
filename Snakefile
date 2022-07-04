@@ -335,10 +335,6 @@ rule build_powerplants:
 
 rule add_electricity:
     input:
-        **{
-            f"profile_{tech}": f"resources/profile_{tech}.nc"
-            for tech in config["renewable"]
-        },
         base_network="networks/base.nc",
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
@@ -346,6 +342,9 @@ rule add_electricity:
         load=load_data_paths,
         gadm_shapes="resources/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
+        **{f"profile_{tech}": f"resources/profile_{tech}.nc"
+            for tech in config["renewable"]},
+        **{f"conventional_{carrier}_{attr}": fn for carrier, d in config.get('conventional', {None: {}}).items() for attr, fn in d.items() if str(fn).startswith("data/")},
     output:
         "networks/elec.nc",
     log:

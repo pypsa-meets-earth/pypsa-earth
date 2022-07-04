@@ -19,8 +19,6 @@ scenario:
 countries: ["Africa"]
 # Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
-summary_dir: results
-
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
@@ -98,19 +96,23 @@ electricity:
     epsilon_vres: 0.02 # share of total renewable supply
     contingency: 0 # fixed capacity in MW
 
-  extendable_carriers:
-    Generator: []
-    StorageUnit: []
-    Store: [battery, H2]
-    Link: []
-
-  conventional_carriers: [coal, OCGT, CCGT, oil]
-
   max_hours:
     battery: 6
     H2: 168
 
-  powerplants_filter:
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    StorageUnit: [] # battery, H2
+    Store: [battery, H2]
+    Link: [AC, DC]
+
+  # use pandas query strings here, e.g. Country not in ['Germany']
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
+  # use pandas query strings here, e.g. Country in ['Germany']
+  custom_powerplants: false 
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
