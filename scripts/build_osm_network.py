@@ -449,10 +449,14 @@ def get_converters(buses, lines):
                         # geom_conv.bounds,  # "bounds"
                         # g_value.geometry.loc[id_0],  # "bus_0_coors"
                         # g_value.geometry.loc[id_1],  # "bus_1_coors"
-                        g_value.geometry.loc[id_0].x,  # "bus0_lon"
-                        g_value.geometry.loc[id_0].y,  # "bus0_lat"
-                        g_value.geometry.loc[id_1].x,  # "bus1_lon"
-                        g_value.geometry.loc[id_1].y,  # "bus1_lat"
+
+                        # are mixed up with the third-bus specification
+                        # when executing additional_linkports()
+                        # which e.g. leads to `KeyError: 'efficiency0_lon'`
+                        # g_value.geometry.loc[id_0].x,  # "bus0_lon"
+                        # g_value.geometry.loc[id_0].y,  # "bus0_lat"
+                        # g_value.geometry.loc[id_1].x,  # "bus1_lon"
+                        # g_value.geometry.loc[id_1].y,  # "bus1_lat"
                     ]
                 )
 
@@ -473,10 +477,10 @@ def get_converters(buses, lines):
         # "bounds",
         # "bus_0_coors",
         # "bus_1_coors",
-        "bus0_lon",
-        "bus0_lat",
-        "bus1_lon",
-        "bus1_lat",
+        # "bus0_lon",
+        # "bus0_lat",
+        # "bus1_lon",
+        # "bus1_lat",
     ]
 
     df_converters = gpd.GeoDataFrame(df_converters, columns=conv_columns).reset_index()
