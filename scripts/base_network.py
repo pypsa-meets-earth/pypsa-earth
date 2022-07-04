@@ -121,6 +121,7 @@ def _load_buses_from_osm():
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
+    # TODO Check if lowercase is appropriate
     buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
     buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
     buses["x"] = buses["lon"]
