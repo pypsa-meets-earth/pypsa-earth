@@ -122,7 +122,7 @@ electricity:
   # use pandas query strings here, e.g. Country not in ['Germany']
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
   # use pandas query strings here, e.g. Country in ['Germany']
-  custom_powerplants: false 
+  custom_powerplants: false
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
