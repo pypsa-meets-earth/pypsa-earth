@@ -449,7 +449,6 @@ def get_converters(buses, lines):
                         # geom_conv.bounds,  # "bounds"
                         # g_value.geometry.loc[id_0],  # "bus_0_coors"
                         # g_value.geometry.loc[id_1],  # "bus_1_coors"
-
                         # are mixed up with the third-bus specification
                         # when executing additional_linkports()
                         # which e.g. leads to `KeyError: 'efficiency0_lon'`
