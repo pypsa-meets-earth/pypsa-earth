@@ -95,19 +95,14 @@ def add_gaslimit(n, gaslimit, Nyears=1.):
           constant=gaslimit * Nyears)
 
 
-def add_emission_prices(n, emission_prices=None, exclude_co2=False):
-    if emission_prices is None:
-        emission_prices = snakemake.config["costs"]["emission_prices"]
-    if exclude_co2:
-        emission_prices.pop("co2")
-    ep = (
-        pd.Series(emission_prices).rename(lambda x: x + "_emissions")
-        * n.carriers.filter(like="_emissions")
-    ).sum(axis=1)
+def add_emission_prices(n, emission_prices={'co2': 0.}, exclude_co2=False):
+    if exclude_co2: emission_prices.pop('co2')
+    ep = (pd.Series(emission_prices).rename(lambda x: x+'_emissions') *
+          n.carriers.filter(like='_emissions')).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
-    n.generators["marginal_cost"] += gen_ep
+    n.generators['marginal_cost'] += gen_ep
     su_ep = n.storage_units.carrier.map(ep) / n.storage_units.efficiency_dispatch
-    n.storage_units["marginal_cost"] += su_ep
+    n.storage_units['marginal_cost'] += su_ep
 
 
 def set_line_s_max_pu(n):
@@ -323,8 +318,16 @@ if __name__ == "__main__":
                     sel = c.df.carrier.str.contains(carrier)
                     c.df.loc[sel, attr] *= factor
 
-    if "Ep" in opts:
-        add_emission_prices(n)
+    for o in opts:
+        if 'Ep' in o:
+            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            if len(m) > 0:
+                logger.info("Setting emission prices according to wildcard value.")
+                add_emission_prices(n, dict(co2=float(m[0])))
+            else:
+                logger.info("Setting emission prices according to config value.")
+                add_emission_prices(n, snakemake.config['costs']['emission_prices'])
+            break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
     set_transmission_limit(n, ll_type, factor, Nyears)
