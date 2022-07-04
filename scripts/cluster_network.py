@@ -347,7 +347,7 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("random_state", 0)
 
     n.determine_network_topology()
-    n.lines.loc[:, "sub_network"] = "0"  # current fix
+    # n.lines.loc[:, "sub_network"] = "0"  # current fix
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(
