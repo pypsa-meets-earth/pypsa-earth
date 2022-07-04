@@ -529,8 +529,7 @@ if __name__ == "__main__":
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
-        aggregate_carriers = pd.Index(n.generators.carrier.unique()).difference(
-            renewable_carriers
+        aggregate_carriers = snakemake.config["electricity"].get("conventional_carriers")
         )
     else:
         n_clusters = int(snakemake.wildcards.clusters)
