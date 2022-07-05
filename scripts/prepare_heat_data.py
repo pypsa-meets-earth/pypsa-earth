@@ -91,10 +91,10 @@ def prepare_heat_data(n):
 
         heat_demand[f"{sector} {use}"] = (
             heat_demand_shape / heat_demand_shape.sum()
-        ).multiply(nodal_energy_totals[f"total {sector} {use}"]) #* 1e6
+        ).multiply(nodal_energy_totals[f"total {sector} {use}"]) * 1e6
         electric_heat_supply[f"{sector} {use}"] = (
             heat_demand_shape / heat_demand_shape.sum()
-        ).multiply(nodal_energy_totals[f"electricity {sector} {use}"]) #* 1e6
+        ).multiply(nodal_energy_totals[f"electricity {sector} {use}"]) * 1e6
 
     heat_demand = pd.concat(heat_demand, axis=1)
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)

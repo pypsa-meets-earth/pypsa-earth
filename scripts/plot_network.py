@@ -86,7 +86,6 @@ def plot_h2_infra(network):
     link_color = "c"
 
     n.links.loc[:, "p_nom_opt"] = n.links.loc[:, "p_nom_opt"]
-    n.links.loc["MAR.6.3_1 H2 Electrolysis", 'p_nom_opt'] = 5000
     # n.links.loc[n.links.carrier == "H2 Electrolysis"].p_nom_opt
 
     # Drop non-electric buses so they don't clutter the plot

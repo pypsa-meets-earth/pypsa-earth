@@ -834,7 +834,7 @@ def add_industry(n, costs):
         suffix=" H2 for industry",
         bus=nodes + " H2",
         carrier="H2 for industry",
-        p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760#*n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
+        p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760)#*n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
                                                     #the current way leads to inaccuracies in the last timestep in case
                                                     #the timestep if 8760 is not divisble by it),),
     )
@@ -846,7 +846,7 @@ def add_industry(n, costs):
         suffix=" naphtha for industry",
         bus="Africa oil",
         carrier="naphtha for industry",
-        p_set=industrial_demand["naphtha"].apply(lambda frac: frac / 8760#*n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
+        p_set=industrial_demand["naphtha"].apply(lambda frac: frac / 8760)#*n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
                                                     #the current way leads to inaccuracies in the last timestep in case
                                                     #the timestep if 8760 is not divisble by it),),
     )
@@ -1724,7 +1724,7 @@ if __name__ == "__main__":
 
     h2_hc_conversions(n, costs)
 
-    #add_industry(n, costs)
+    add_industry(n, costs)
 
     add_shipping(n, costs)
 
