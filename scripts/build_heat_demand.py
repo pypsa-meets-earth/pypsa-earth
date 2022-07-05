@@ -15,7 +15,7 @@ if __name__ == "__main__":
         from helpers import mock_snakemake, sets_path_to_root
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="4")
+        snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="900")
         sets_path_to_root("pypsa-earth-sec")
 
     time = pd.date_range(freq="h", **snakemake.config["snapshots"])
@@ -38,6 +38,8 @@ if __name__ == "__main__":
         stacked_pop = pop_layout.stack(spatial=("y", "x"))
         M = I.T.dot(np.diag(I.dot(stacked_pop)))
 
-        heat_demand = cutout.heat_demand(matrix=M.T, index=clustered_regions.index)
+        heat_demand = cutout.heat_demand(matrix=M.T, index=clustered_regions.index) 
 
         heat_demand.to_netcdf(snakemake.output[f"heat_demand_{area}"])
+        
+        
