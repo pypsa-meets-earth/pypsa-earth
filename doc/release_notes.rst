@@ -81,6 +81,7 @@ Upcoming Release
 
 * Add operational reserve margin according to PyPSA-Eur `PR #399 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/399>`
 
+* Add optional normalization of hydro inflows by hydro_capacities or eia stats `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
