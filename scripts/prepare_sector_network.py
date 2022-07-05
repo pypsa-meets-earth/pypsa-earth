@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import re
 from types import SimpleNamespace
 
 import numpy as np
@@ -8,6 +7,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
+import re
 from helpers import (
     create_dummy_data,
     create_network_topology,
@@ -312,7 +312,6 @@ def add_hydrogen(n, costs):
     )
 
 
-<<<<<<< HEAD
 def define_spatial(nodes):
     """
     Namespace for spatial
@@ -325,10 +324,6 @@ def define_spatial(nodes):
     global spatial
     global options
 
-=======
-def add_co2(n, costs, nodes, options):
-    "add carbon carrier, it's networks and storage units"
->>>>>>> origin/main
     spatial.nodes = nodes
 
     # biomass
@@ -1934,19 +1929,6 @@ if __name__ == "__main__":
     )
 
     heat_demand = pd.read_csv(
-<<<<<<< HEAD
-        snakemake.input.heat_demand, index_col=0, header=[0, 1]
-    ).reindex(index=n.snapshots)
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0).reindex(
-        index=n.snapshots
-    )
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0).reindex(
-        index=n.snapshots
-    )
-    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0).reindex(
-        index=n.snapshots
-    )
-=======
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
     )
     gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
@@ -1955,7 +1937,6 @@ if __name__ == "__main__":
     
     solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0, parse_dates=True)
     
->>>>>>> origin/main
 
     district_heat_share = pd.read_csv(
         snakemake.input.district_heat_share, index_col=0
