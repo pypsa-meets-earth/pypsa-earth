@@ -433,14 +433,13 @@ def attach_wind_and_solar(n, costs, input_profiles, technologies, extendable_car
 
 
 def attach_conventional_generators(n, costs, ppl, conventional_carriers, extendable_carriers, conventional_config, conventional_inputs):
-    carriers = snakemake.config["electricity"]["conventional_carriers"]
 
     carriers = set(conventional_carriers) | set(extendable_carriers['Generator'])
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     ppl = (ppl.query('carrier in @carriers').join(costs, on='carrier', rsuffix='_r')
            .rename(index=lambda s: 'C' + str(s)))
-    ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency_r)
+    ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
 
     logger.info('Adding {} generators with capacities [GW] \n{}'
                 .format(len(ppl), ppl.groupby('carrier').p_nom.sum().div(1e3).round(2)))
@@ -714,13 +713,10 @@ def estimate_renewable_capacities_irena(n, config):
 
     # Check if countries are in country list of stats
     missing = list(set(countries).difference(capacities.Country.unique()))
-
     if missing:
         logger.info(
             f"The countries {missing} are not provided in the stats and hence not scaled"
         )
-    else:
-        pass
 
     capacities = capacities.query(
         "Year == @year and Technology in @tech_keys and Country in @countries"
@@ -772,54 +768,6 @@ def estimate_renewable_capacities_irena(n, config):
             n.generators.loc[tech_i, "p_nom_max"] = n.generators.loc[
                 tech_i, "p_nom_min"
             ] * float(p_nom_max)
-
-    if tech_map is None:
-        tech_map = snakemake.config["electricity"].get(
-            "estimate_renewable_capacities_from_capacity_stats", {}
-        )
-
-    if len(tech_map) == 0:
-        return
-
-    capacities = (
-        pm.data.Capacity_stats()
-        .powerplant.convert_country_to_alpha2()[lambda df: df.Energy_Source_Level_2]
-        .set_index(["Fueltype", "Country"])
-        .sort_index()
-    )
-
-    countries = n.buses.country.unique()
-
-    if len(countries) == 0:
-        return
-
-    logger.info(
-        "heuristics applied to distribute renewable capacities [MW] \n{}".format(
-            capacities.query("Fueltype in @tech_map.keys() and Capacity >= 0.1")
-            .groupby("Country")
-            .agg({"Capacity": "sum"})
-        )
-    )
-
-    for ppm_fueltype, techs in tech_map.items():
-        tech_capacities = capacities.loc[ppm_fueltype, "Capacity"].reindex(
-            countries, fill_value=0.0
-        )
-        tech_i = n.generators.query("carrier in @techs")[
-            n.generators.query("carrier in @techs")
-            .bus.map(n.buses.country)
-            .isin(countries)
-        ].index
-        n.generators.loc[tech_i, "p_nom"] = (
-            (
-                n.generators_t.p_max_pu[tech_i].mean()
-                * n.generators.loc[tech_i, "p_nom_max"]
-            )  # maximal yearly generation
-            .groupby(n.generators.bus.map(n.buses.country))
-            .transform(lambda s: normed(s) * tech_capacities.at[s.name])
-            .where(lambda s: s > 0.1, 0.0)
-        )  # only capacities above 100kW
-        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
 
 
 def add_nice_carrier_names(n, config):
