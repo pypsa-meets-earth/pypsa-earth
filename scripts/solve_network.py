@@ -406,14 +406,12 @@ def solve_network(n, config, opts="", **kwargs):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake(
             "solve_network",
             network="elec",
             simpl="",
-            clusters="10",
+            clusters="20",
             ll="v0.3",
             opts="Co2L-24H",
         )
