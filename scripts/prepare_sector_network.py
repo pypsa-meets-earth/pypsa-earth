@@ -647,9 +647,10 @@ def add_shipping(n, costs):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-
+    MA_maritime=36.7*1e7*0.46
     ports["p_set"] = ports["fraction"].apply(
-        lambda frac: shipping_hydrogen_share * frac * 1e6 * efficiency / 8760 *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+        lambda frac: shipping_hydrogen_share * frac*MA_maritime * efficiency / 8760 *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+
                                                     #the current way leads to inaccuracies in the last timestep in case
                                                     #the timestep if 8760 is not divisble by it),
     )  # TODO use real data here
@@ -1582,7 +1583,6 @@ def add_heat(n, costs):
     #                 country=ct,
     #                 capital_cost=capital_cost[strength] * options['retrofitting']['cost_factor']
     #             )
-<<<<<<< HEAD
 def average_every_nhours(n, offset):
     #logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
@@ -1603,7 +1603,6 @@ def average_every_nhours(n, offset):
                     pnl[k] = df.resample(offset).mean()
     
     return m
-=======
 
 def add_dac(n, costs):
 
@@ -1635,7 +1634,6 @@ def add_dac(n, costs):
         p_nom_extendable=True,
         lifetime=costs.at["direct air capture", "lifetime"],
     )
->>>>>>> origin/main
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1744,7 +1742,6 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
     add_heat(n, costs)
-<<<<<<< HEAD
     
     sopts = snakemake.wildcards.sopts.split('-')
     
@@ -1757,12 +1754,10 @@ if __name__ == "__main__":
             break
 
     
-=======
 
     if options["dac"]:
         add_dac(n, costs)
 
->>>>>>> origin/main
     n.export_to_netcdf(snakemake.output[0])
 
 

@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_shipping_newshippingloadhigh__
+run: test_shipping_nTESTTEST
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 59668
+  - 907
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -132,7 +132,7 @@ sector:
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
   hydrogen_underground_storage: true
-  shipping_hydrogen_liquefaction: true
+  shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: 1.0
   gadm_level: 2
@@ -141,7 +141,7 @@ sector:
   methanation: true
   helmeth: true
   dac: true
-  SMR: true
+  SMR: false
   cc_fraction: 0.9
 
   conventional_generation: # generator : carrier
