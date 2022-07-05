@@ -559,6 +559,7 @@ def input_make_summary(w):
 rule make_summary:
     input:
         input_make_summary,
+        tech_costs=COSTS,
     output:
         directory(
             "results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}"
