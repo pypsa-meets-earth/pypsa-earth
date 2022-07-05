@@ -503,8 +503,15 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760
     linetype = snakemake.config["lines"]["types"][380.0]
-    technology_costs = load_costs(snakemake.input.tech_costs, snakemake.config['costs'], snakemake.config['electricity'], Nyears)
-    aggregation_strategies = snakemake.config["cluster_options"].get("aggregation_strategies", {})
+    technology_costs = load_costs(
+        snakemake.input.tech_costs,
+        snakemake.config["costs"],
+        snakemake.config["electricity"],
+        Nyears,
+    )
+    aggregation_strategies = snakemake.config["cluster_options"].get(
+        "aggregation_strategies", {}
+    )
     # translate str entries of aggregation_strategies to pd.Series functions:
     aggregation_strategies = {
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
