@@ -11,11 +11,10 @@ Relevant Settings
 
 .. code:: yaml
 
-    focus_weights:
+    clustering:
+        aggregation_strategies:
 
-    renewable: (keys)
-        {technology}:
-            potential:
+    focus_weights:
 
     solving:
         solver:
@@ -137,6 +136,7 @@ from _helpers import (
     sets_path_to_root,
     two_2_three_digits_country,
     update_p_nom_max,
+    get_aggregation_strategies,
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
@@ -413,21 +413,14 @@ def clustering_for_n_clusters(
     custom_busmap=False,
     aggregate_carriers=None,
     line_length_factor=1.25,
-    potential_mode="simple",
+    aggregation_strategies=dict(),
     solver_name="cbc",
     algorithm="kmeans",
     extended_link_costs=0,
     focus_weights=None,
 ):
 
-    if potential_mode == "simple":
-        p_nom_max_strategy = np.sum
-    elif potential_mode == "conservative":
-        p_nom_max_strategy = np.min
-    else:
-        raise AttributeError(
-            f"potential_mode should be one of 'simple' or 'conservative' but is '{potential_mode}'"
-        )
+    bus_strategies, generator_strategies = get_aggregation_strategies(aggregation_strategies)
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
@@ -442,12 +435,12 @@ def clustering_for_n_clusters(
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=dict(country=_make_consense("Bus", "country")),
+        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=aggregate_carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
-        generator_strategies={"p_nom_max": p_nom_max_strategy, "p_nom_min": np.sum},
+        generator_strategies=generator_strategies,
         scale_link_capital_costs=False,
     )
 
@@ -560,14 +553,12 @@ if __name__ == "__main__":
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
 
-        potential_mode = consense(
-            pd.Series(
-                [
-                    snakemake.config["renewable"][tech]["potential"]
-                    for tech in renewable_carriers
-                ]
-            )
-        )
+        aggregation_strategies = snakemake.config["clustering"].get("aggregation_strategies", {})
+        # translate str entries of aggregation_strategies to pd.Series functions:
+        aggregation_strategies = {
+            p: {k: getattr(pd.Series, v) for k,v in aggregation_strategies[p].items()}
+            for p in aggregation_strategies.keys()
+        }
         custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
         if custom_busmap:
             busmap = pd.read_csv(
@@ -585,14 +576,13 @@ if __name__ == "__main__":
             custom_busmap,
             aggregate_carriers,
             line_length_factor=line_length_factor,
-            potential_mode=potential_mode,
+            potential_mode=aggregation_strategies,
             solver_name=snakemake.config["solving"]["solver"]["name"],
             extended_link_costs=hvac_overhead_cost,
             focus_weights=focus_weights,
         )
 
-    update_p_nom_max(n)
-
+    update_p_nom_max(clustering.network)
     clustering.network.export_to_netcdf(snakemake.output.network)
     for attr in (
         "busmap",
