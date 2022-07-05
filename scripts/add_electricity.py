@@ -860,7 +860,7 @@ if __name__ == "__main__":
     scale = snakemake.config["load_options"]["scale"]
     costs = load_costs(Nyears)
     ppl = load_powerplants()
-        if "renewable_carriers" in snakemake.config['electricity']:    
+    if "renewable_carriers" in snakemake.config['electricity']:    
         renewable_carriers = set(snakemake.config['renewable'])
     else: 
         logger.warning("Missing key `renewable_carriers` under config entry `electricity`. "
