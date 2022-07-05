@@ -386,7 +386,9 @@ def update_transmission_costs(n, costs, length_factor, simple_hvdc_costs=False):
     n.links.loc[dc_b, "capital_cost"] = costs
 
 
-def attach_wind_and_solar(n, costs, input_profiles, technologies, extendable_carriers, line_length_factor=1):
+def attach_wind_and_solar(
+    n, costs, input_profiles, technologies, extendable_carriers, line_length_factor=1
+):
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
@@ -396,7 +398,8 @@ def attach_wind_and_solar(n, costs, input_profiles, technologies, extendable_car
 
         with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
 
-            if ds.indexes["bus"].empty: continue
+            if ds.indexes["bus"].empty:
+                continue
 
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
@@ -420,46 +423,66 @@ def attach_wind_and_solar(n, costs, input_profiles, technologies, extendable_car
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
-            n.madd("Generator", ds.indexes['bus'], ' ' + tech,
-                   bus=ds.indexes['bus'],
-                   carrier=tech,
-                   p_nom_extendable=tech in extendable_carriers['Generator'],
-                   p_nom_max=ds['p_nom_max'].to_pandas(),
-                   weight=ds['weight'].to_pandas(),
-                   marginal_cost=costs.at[suptech, 'marginal_cost'],
-                   capital_cost=capital_cost,
-                   efficiency=costs.at[suptech, 'efficiency'],
-                   p_max_pu=ds['profile'].transpose('time', 'bus').to_pandas())
+            n.madd(
+                "Generator",
+                ds.indexes["bus"],
+                " " + tech,
+                bus=ds.indexes["bus"],
+                carrier=tech,
+                p_nom_extendable=tech in extendable_carriers["Generator"],
+                p_nom_max=ds["p_nom_max"].to_pandas(),
+                weight=ds["weight"].to_pandas(),
+                marginal_cost=costs.at[suptech, "marginal_cost"],
+                capital_cost=capital_cost,
+                efficiency=costs.at[suptech, "efficiency"],
+                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
+            )
 
 
-def attach_conventional_generators(n, costs, ppl, conventional_carriers, extendable_carriers, conventional_config, conventional_inputs):
+def attach_conventional_generators(
+    n,
+    costs,
+    ppl,
+    conventional_carriers,
+    extendable_carriers,
+    conventional_config,
+    conventional_inputs,
+):
     carriers = snakemake.config["electricity"]["conventional_carriers"]
 
-    carriers = set(conventional_carriers) | set(extendable_carriers['Generator'])
+    carriers = set(conventional_carriers) | set(extendable_carriers["Generator"])
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    ppl = (ppl.query('carrier in @carriers').join(costs, on='carrier', rsuffix='_r')
-           .rename(index=lambda s: 'C' + str(s)))
+    ppl = (
+        ppl.query("carrier in @carriers")
+        .join(costs, on="carrier", rsuffix="_r")
+        .rename(index=lambda s: "C" + str(s))
+    )
     ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency_r)
 
-    logger.info('Adding {} generators with capacities [GW] \n{}'
-                .format(len(ppl), ppl.groupby('carrier').p_nom.sum().div(1e3).round(2)))
-
-    n.madd("Generator", ppl.index,
-           carrier=ppl.carrier,
-           bus=ppl.bus,
-           p_nom_min=ppl.p_nom.where(ppl.carrier.isin(conventional_carriers), 0),
-           p_nom=ppl.p_nom.where(ppl.carrier.isin(conventional_carriers), 0),
-           p_nom_extendable=ppl.carrier.isin(extendable_carriers['Generator']),
-           efficiency=ppl.efficiency,
-           marginal_cost=ppl.marginal_cost,
-           capital_cost=ppl.capital_cost,
-           build_year=ppl.datein.fillna(0).astype(int),
-           lifetime=(ppl.dateout - ppl.datein).fillna(np.inf),
+    logger.info(
+        "Adding {} generators with capacities [GW] \n{}".format(
+            len(ppl), ppl.groupby("carrier").p_nom.sum().div(1e3).round(2)
         )
+    )
+
+    n.madd(
+        "Generator",
+        ppl.index,
+        carrier=ppl.carrier,
+        bus=ppl.bus,
+        p_nom_min=ppl.p_nom.where(ppl.carrier.isin(conventional_carriers), 0),
+        p_nom=ppl.p_nom.where(ppl.carrier.isin(conventional_carriers), 0),
+        p_nom_extendable=ppl.carrier.isin(extendable_carriers["Generator"]),
+        efficiency=ppl.efficiency,
+        marginal_cost=ppl.marginal_cost,
+        capital_cost=ppl.capital_cost,
+        build_year=ppl.datein.fillna(0).astype(int),
+        lifetime=(ppl.dateout - ppl.datein).fillna(np.inf),
+    )
 
     for carrier in conventional_config:
-        
+
         # Generators with technology affected
         idx = n.generators.query("carrier == @carrier").index
 
@@ -472,7 +495,9 @@ def attach_conventional_generators(n, costs, ppl, conventional_carriers, extenda
                 # First map generator buses to countries; then map countries to p_max_pu
                 values = pd.read_csv(values, index_col=0).iloc[:, 0]
                 bus_values = n.buses.country.map(values)
-                n.generators[attr].update(n.generators.loc[idx].bus.map(bus_values).dropna())
+                n.generators[attr].update(
+                    n.generators.loc[idx].bus.map(bus_values).dropna()
+                )
             else:
                 # Single value affecting all generators of technology k indiscriminantely of country
                 n.generators.loc[idx, attr] = values
@@ -860,27 +885,48 @@ if __name__ == "__main__":
     scale = snakemake.config["load_options"]["scale"]
     costs = load_costs(Nyears)
     ppl = load_powerplants()
-    if "renewable_carriers" in snakemake.config['electricity']:    
-        renewable_carriers = set(snakemake.config['renewable'])
-    else: 
-        logger.warning("Missing key `renewable_carriers` under config entry `electricity`. "
-                       "In future versions, this will raise an error. "
-                       "Falling back to carriers listed under `renewable`.")
-        renewable_carriers = snakemake.config['renewable']
+    if "renewable_carriers" in snakemake.config["electricity"]:
+        renewable_carriers = set(snakemake.config["renewable"])
+    else:
+        logger.warning(
+            "Missing key `renewable_carriers` under config entry `electricity`. "
+            "In future versions, this will raise an error. "
+            "Falling back to carriers listed under `renewable`."
+        )
+        renewable_carriers = snakemake.config["renewable"]
 
-    extendable_carriers = snakemake.config['electricity']['extendable_carriers']
-    if not (set(renewable_carriers) & set(extendable_carriers['Generator'])):
-        logger.warning("No renewables found in config entry `extendable_carriers`. "
-                       "In future versions, these have to be explicitely listed. "
-                       "Falling back to all renewables.")
-    
+    extendable_carriers = snakemake.config["electricity"]["extendable_carriers"]
+    if not (set(renewable_carriers) & set(extendable_carriers["Generator"])):
+        logger.warning(
+            "No renewables found in config entry `extendable_carriers`. "
+            "In future versions, these have to be explicitely listed. "
+            "Falling back to all renewables."
+        )
+
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
 
     attach_load(n, load_paths, regions, admin_shapes, countries, scale)
-    update_transmission_costs(n, costs, snakemake.config['lines']['length_factor'])
-    conventional_inputs = {k: v for k, v in snakemake.input.items() if k.startswith("conventional_")}
-    attach_conventional_generators(n, costs, ppl, conventional_carriers, extendable_carriers, snakemake.config.get("conventional", {}), conventional_inputs)
-    attach_wind_and_solar(n, costs, snakemake.input, renewable_carriers, extendable_carriers, snakemake.config['lines']['length_factor'])
+    update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
+    conventional_inputs = {
+        k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
+    }
+    attach_conventional_generators(
+        n,
+        costs,
+        ppl,
+        conventional_carriers,
+        extendable_carriers,
+        snakemake.config.get("conventional", {}),
+        conventional_inputs,
+    )
+    attach_wind_and_solar(
+        n,
+        costs,
+        snakemake.input,
+        renewable_carriers,
+        extendable_carriers,
+        snakemake.config["lines"]["length_factor"],
+    )
     attach_hydro(n, costs, ppl)
 
     estimate_renewable_capacities_irena(n, snakemake.config)
