@@ -215,7 +215,7 @@ def _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, out
 
 
 def _aggregate_and_move_components(
-    n, busmap, output, connection_costs_to_bus, aggregate_one_ports={"Load", "StorageUnit"}, aggregation_strategies=dict()
+    n, busmap, connection_costs_to_bus, output, aggregate_one_ports={"Load", "StorageUnit"}, aggregation_strategies=dict()
 ):
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
@@ -477,7 +477,7 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760
     linetype = snakemake.config["lines"]["types"][380.0]
     technology_costs = load_costs(snakemake.input.tech_costs, snakemake.config['costs'], snakemake.config['electricity'], Nyears)
-    aggregation_strategies = snakemake.config["clustering"].get("aggregation_strategies", {})
+    aggregation_strategies = snakemake.config["cluster_options"].get("aggregation_strategies", {})
     # translate str entries of aggregation_strategies to pd.Series functions:
     aggregation_strategies = {
         p: {k: getattr(pd.Series, v) for k,v in aggregation_strategies[p].items()}
@@ -505,4 +505,3 @@ if __name__ == "__main__":
     busmap_s.to_csv(snakemake.output.busmap)
 
     cluster_regions(busmaps, snakemake.input, snakemake.output)
-    

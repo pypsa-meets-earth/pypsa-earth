@@ -99,11 +99,8 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
-from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
-from vresutils.costdata import annuity
-from vresutils.load import timeseries_opsd
 
 idx = pd.IndexSlice
 
@@ -112,6 +109,19 @@ logger = logging.getLogger(__name__)
 
 def normed(s):
     return s / s.sum()
+
+
+def calculate_annuity(n, r):
+    """
+    Calculate the annuity factor for an asset with lifetime n years and
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    """
+    if isinstance(r, pd.Series):
+        return pd.Series(1/n, index=r.index).where(r == 0, r/(1. - 1./(1.+r)**n))
+    elif r > 0:
+        return r / (1. - 1./(1.+r)**n)
+    else:
+        return 1 / n
 
 
 def _add_missing_carriers_from_costs(n, costs, carriers):
@@ -128,14 +138,10 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     n.import_components_from_dataframe(emissions, "Carrier")
 
 
-def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
-    if tech_costs is None:
-        tech_costs = snakemake.input.tech_costs
-
-    if config is None:
-        config = snakemake.config["costs"]
-
-    # set all asset costs and other parameters
+def load_costs(tech_costs, config, elec_config, Nyears=1):
+    """
+    set all asset costs and other parameters
+    """
     costs = pd.read_csv(tech_costs, index_col=list(range(3))).sort_index()
 
     # correct units to MW and EUR
@@ -163,7 +169,7 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
     )
 
     costs["capital_cost"] = (
-        (annuity(costs["lifetime"], costs["discount rate"]) + costs["FOM"] / 100.0)
+        (calculate_annuity(costs["lifetime"], costs["discount rate"]) + costs["FOM"] / 100.)
         * costs["investment"]
         * Nyears
     )
@@ -188,11 +194,9 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
+            dict(capital_cost=capital_cost, marginal_cost=0., co2_emissions=0.)
         )
 
-    if elec_config is None:
-        elec_config = snakemake.config["electricity"]
     max_hours = elec_config["max_hours"]
     costs.loc["battery"] = costs_for_storage(
         costs.loc["battery storage"],
@@ -215,9 +219,7 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
     return costs
 
 
-def load_powerplants(ppl_fn=None):
-    if ppl_fn is None:
-        ppl_fn = snakemake.input.powerplants
+def load_powerplants(ppl_fn):
     carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
@@ -830,8 +832,8 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
-    costs = load_costs(Nyears)
-    ppl = load_powerplants()
+    costs = load_costs(snakemake.input.tech_costs, snakemake.config['costs'], snakemake.config['electricity'], Nyears)
+    ppl = load_powerplants(snakemake.input.powerplants)
     if "renewable_carriers" in snakemake.config["electricity"]:
         renewable_carriers = set(snakemake.config["renewable"])
     else:
