@@ -366,8 +366,11 @@ def busmap_for_n_clusters(
         return nr
 
     def busmap_for_country(x):
+
+        # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
-            n_cluster_c = n_clusters[x.name]
+            # TODO Verify why n_clusters[x.name] is not working properly
+            n_cluster_c = n_clusters[x.country][0]
         else:
             n_cluster_c = n_clusters
 
