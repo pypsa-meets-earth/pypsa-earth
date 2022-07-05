@@ -386,7 +386,7 @@ def update_transmission_costs(n, costs, length_factor, simple_hvdc_costs=False):
     n.links.loc[dc_b, "capital_cost"] = costs
 
 
-def attach_wind_and_solar(n, costs, input_profiles, technologies, extendable_carriers, line_length_factor=1)
+def attach_wind_and_solar(n, costs, input_profiles, technologies, extendable_carriers, line_length_factor=1):
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
@@ -678,40 +678,6 @@ def attach_extendable_generators(n, costs, ppl):
                 "'{tech}' is not implemented, yet. "
                 "Only OCGT, CCGT and nuclear are allowed at the moment."
             )
-
-
-def attach_OPSD_renewables(n):
-
-    available = ["DE", "FR", "PL", "CH", "DK", "CZ", "SE", "GB"]
-    tech_map = {"Onshore": "onwind", "Offshore": "offwind", "Solar": "solar"}
-    countries = set(available) & set(n.buses.country)
-    techs = snakemake.config["electricity"].get("renewable_capacities_from_OPSD", [])
-    tech_map = {k: v for k, v in tech_map.items() if v in techs}
-
-    if not tech_map:
-        return
-
-    logger.info(
-        f'Using OPSD renewable capacities in {", ".join(countries)} '
-        f'for technologies {", ".join(tech_map.values())}.'
-    )
-
-    df = pd.concat([pm.data.OPSD_VRE_country(c) for c in countries])
-    technology_b = ~df.Technology.isin(["Onshore", "Offshore"])
-    df["Fueltype"] = df.Fueltype.where(technology_b, df.Technology)
-    df = df.query("Fueltype in @tech_map").powerplant.convert_country_to_alpha2()
-
-    for fueltype, carrier_like in tech_map.items():
-        gens = n.generators[lambda df: df.carrier.str.contains(carrier_like)]
-        buses = n.buses.loc[gens.bus.unique()]
-        gens_per_bus = gens.groupby("bus").p_nom.count()
-
-        caps = map_country_bus(df.query("Fueltype == @fueltype"), buses)
-        caps = caps.groupby(["bus"]).Capacity.sum()
-        caps = caps / gens_per_bus.reindex(caps.index, fill_value=1)
-
-        n.generators.p_nom.update(gens.bus.map(caps).dropna())
-        n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
 def estimate_renewable_capacities_irena(n, config):
