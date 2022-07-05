@@ -334,7 +334,7 @@ def get_aggregation_strategies(aggregation_strategies):
     bus_strategies = dict(country=_make_consense("Bus", "country"))
     bus_strategies.update(aggregation_strategies.get("buses", {}))
 
-    generator_strategies = {'build_year': lambda x: 0, 'lifetime': lambda x: np.inf}
+    generator_strategies = {"build_year": lambda x: 0, "lifetime": lambda x: np.inf}
     generator_strategies.update(aggregation_strategies.get("generators", {}))
 
     return bus_strategies, generator_strategies

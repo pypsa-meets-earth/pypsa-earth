@@ -133,10 +133,10 @@ import seaborn as sns
 import shapely
 from _helpers import (
     configure_logging,
+    get_aggregation_strategies,
     sets_path_to_root,
     two_2_three_digits_country,
     update_p_nom_max,
-    get_aggregation_strategies,
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
@@ -420,7 +420,9 @@ def clustering_for_n_clusters(
     focus_weights=None,
 ):
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(aggregation_strategies)
+    bus_strategies, generator_strategies = get_aggregation_strategies(
+        aggregation_strategies
+    )
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
@@ -553,10 +555,12 @@ if __name__ == "__main__":
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
 
-        aggregation_strategies = snakemake.config["clustering"].get("aggregation_strategies", {})
+        aggregation_strategies = snakemake.config["clustering"].get(
+            "aggregation_strategies", {}
+        )
         # translate str entries of aggregation_strategies to pd.Series functions:
         aggregation_strategies = {
-            p: {k: getattr(pd.Series, v) for k,v in aggregation_strategies[p].items()}
+            p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
             for p in aggregation_strategies.keys()
         }
         custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
