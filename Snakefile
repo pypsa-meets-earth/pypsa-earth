@@ -294,6 +294,9 @@ rule build_renewable_profiles:
         gebco="data/raw/gebco/GEBCO_2021_TID.nc",
         country_shapes="resources/country_shapes.geojson",
         offshore_shapes="resources/offshore_shapes.geojson",
+        hydro_capacities="data/hydro_capacities.csv",
+        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        powerplants="resources/powerplants.csv",
         regions=lambda w: (
             "resources/regions_onshore.geojson"
             if w.technology in ("onwind", "solar", "hydro")

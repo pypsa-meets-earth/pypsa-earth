@@ -276,13 +276,15 @@ renewable:
     resource:
       method: hydro
       hydrobasins: data/raw/hydrobasins/hybas_world_lev04_v1c.shp
-      # flowspeed: 1.0
+      flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
+      normalization: eia # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data, false for no normalization
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     clip_min_inflow: 1.0
+    normalization_multiplier: 1.1  # multiplier applied after the normalization of the hydro production
 
 # TODO: Needs to be adjusted for Africa
 costs:
