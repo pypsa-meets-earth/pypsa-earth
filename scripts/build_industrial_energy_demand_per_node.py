@@ -2,9 +2,11 @@
 """Build industrial energy demand per node."""
 
 from itertools import product
+
 import pandas as pd
 
 sector_mapping = {"Cement": "Cement"}
+
 
 def build_nodal_industrial_production():
 
@@ -36,7 +38,7 @@ def build_nodal_industrial_production():
             industrial_production.at[country, sector] * key
         )  # TODO need hypat
 
-    #nodal_production.to_csv(snakemake.output.industrial_production_per_node)
+    # nodal_production.to_csv(snakemake.output.industrial_production_per_node)
     return nodal_production
 
 
@@ -51,15 +53,15 @@ if __name__ == "__main__":
             planning_horizons=2030,
         )
 
-    #build_nodal_industrial_production()
+    # build_nodal_industrial_production()
 
     # import EU ratios df as csv
     fn = snakemake.input.industry_sector_ratios
     industry_sector_ratios = pd.read_csv(fn, index_col=0)
 
     # material demand per node and industry (kton/a)
-    #fn = snakemake.input.industrial_production_per_node
-    #nodal_production = pd.read_csv(fn, index_col=0)
+    # fn = snakemake.input.industrial_production_per_node
+    # nodal_production = pd.read_csv(fn, index_col=0)
     fn = build_nodal_industrial_production()
     nodal_production = pd.DataFrame(fn)
 

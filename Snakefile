@@ -72,6 +72,9 @@ rule prepare_sector_network:
         gshp_cop="resources/heat/gshp_cop_s{simpl}_{clusters}.csv",
         solar_thermal="resources/heat/solar_thermal_s{simpl}_{clusters}.csv",
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
+        industry_demands="data/industry_demand_locations.csv",
+        biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
+        biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}.nc",

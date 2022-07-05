@@ -21,6 +21,7 @@ gurobi.log
 /data/biomass*
 #/data/emobility/
 /data/raw/gadm
+/data/raw/biomass/morocco
 /data/eea*
 /data/jrc*
 /data/heating/
