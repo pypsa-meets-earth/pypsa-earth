@@ -570,7 +570,9 @@ if __name__ == "__main__":
             )
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
-        cluster_config = snakemake.config.get('cluster_options', {}).get('cluster_network', {})
+        cluster_config = snakemake.config.get("cluster_options", {}).get(
+            "cluster_network", {}
+        )
         clustering = clustering_for_n_clusters(
             n,
             n_clusters,
