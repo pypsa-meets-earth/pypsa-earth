@@ -542,10 +542,10 @@ if __name__ == "__main__":
         line_length_factor = snakemake.config["lines"]["length_factor"]
         Nyears = n.snapshot_weightings.objective.sum() / 8760
         hvac_overhead_cost = load_costs(
+            snakemake.input.tech_costs,
+            snakemake.config["costs"],
+            snakemake.config["electricity"],
             Nyears,
-            tech_costs=snakemake.input.tech_costs,
-            config=snakemake.config["costs"],
-            elec_config=snakemake.config["electricity"],
         ).at["HVAC overhead", "capital_cost"]
 
         def consense(x):
@@ -555,7 +555,7 @@ if __name__ == "__main__":
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
 
-        aggregation_strategies = snakemake.config["clustering"].get(
+        aggregation_strategies = snakemake.config["cluster_options"].get(
             "aggregation_strategies", {}
         )
         # translate str entries of aggregation_strategies to pd.Series functions:
@@ -570,6 +570,7 @@ if __name__ == "__main__":
             )
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
+        cluster_config = snakemake.config.get('cluster_options', {}).get('cluster_network', {})
         clustering = clustering_for_n_clusters(
             n,
             n_clusters,
@@ -579,8 +580,8 @@ if __name__ == "__main__":
             country_list,
             custom_busmap,
             aggregate_carriers,
-            line_length_factor=line_length_factor,
-            potential_mode=aggregation_strategies,
+            line_length_factor,
+            aggregation_strategies,
             solver_name=snakemake.config["solving"]["solver"]["name"],
             extended_link_costs=hvac_overhead_cost,
             focus_weights=focus_weights,
