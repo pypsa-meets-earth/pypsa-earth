@@ -85,24 +85,31 @@ def add_co2limit(n, Nyears=1.0, factor=None):
     )
 
 
-def add_gaslimit(n, gaslimit, Nyears=1.):
+def add_gaslimit(n, gaslimit, Nyears=1.0):
 
     sel = n.carriers.index.intersection(["OCGT", "CCGT", "CHP"])
-    n.carriers.loc[sel, "gas_usage"] = 1.
+    n.carriers.loc[sel, "gas_usage"] = 1.0
 
-    n.add("GlobalConstraint", "GasLimit",
-          carrier_attribute="gas_usage", sense="<=",
-          constant=gaslimit * Nyears)
+    n.add(
+        "GlobalConstraint",
+        "GasLimit",
+        carrier_attribute="gas_usage",
+        sense="<=",
+        constant=gaslimit * Nyears,
+    )
 
 
-def add_emission_prices(n, emission_prices={'co2': 0.}, exclude_co2=False):
-    if exclude_co2: emission_prices.pop('co2')
-    ep = (pd.Series(emission_prices).rename(lambda x: x+'_emissions') *
-          n.carriers.filter(like='_emissions')).sum(axis=1)
+def add_emission_prices(n, emission_prices={"co2": 0.0}, exclude_co2=False):
+    if exclude_co2:
+        emission_prices.pop("co2")
+    ep = (
+        pd.Series(emission_prices).rename(lambda x: x + "_emissions")
+        * n.carriers.filter(like="_emissions")
+    ).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
-    n.generators['marginal_cost'] += gen_ep
+    n.generators["marginal_cost"] += gen_ep
     su_ep = n.storage_units.carrier.map(ep) / n.storage_units.efficiency_dispatch
-    n.storage_units['marginal_cost'] += su_ep
+    n.storage_units["marginal_cost"] += su_ep
 
 
 def set_line_s_max_pu(n):
@@ -259,7 +266,12 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(snakemake.input.tech_costs, snakemake.config['costs'], snakemake.config['electricity'], Nyears)
+    costs = load_costs(
+        snakemake.input.tech_costs,
+        snakemake.config["costs"],
+        snakemake.config["electricity"],
+        Nyears,
+    )
 
     set_line_s_max_pu(n)
 
@@ -280,14 +292,14 @@ if __name__ == "__main__":
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
-                co2limit = float(m[0]) * snakemake.config['electricity']['co2base']
+                co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
                 add_co2limit(n, co2limit, Nyears)
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                add_co2limit(n, snakemake.config['electricity']['co2limit'], Nyears)
+                add_co2limit(n, snakemake.config["electricity"]["co2limit"], Nyears)
                 logger.info("Setting CO2 limit according to config value.")
             break
-    
+
     for o in opts:
         if "CH4L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
@@ -305,7 +317,11 @@ if __name__ == "__main__":
             if oo[0].startswith(tuple(suptechs)):
                 carrier = oo[0]
                 # handles only p_nom_max as stores and lines have no potentials
-                attr_lookup = {"p": "p_nom_max", "c": "capital_cost", "m": "marginal_cost"}
+                attr_lookup = {
+                    "p": "p_nom_max",
+                    "c": "capital_cost",
+                    "m": "marginal_cost",
+                }
                 attr = attr_lookup[oo[1][0]]
                 factor = float(oo[1][1:])
                 if carrier == "AC":  # lines do not have carrier
@@ -317,21 +333,24 @@ if __name__ == "__main__":
                         c.df.loc[sel, attr] *= factor
 
         for o in opts:
-            if 'Ep' in o:
+            if "Ep" in o:
                 m = re.findall("[0-9]*\.?[0-9]+$", o)
                 if len(m) > 0:
                     logger.info("Setting emission prices according to wildcard value.")
                     add_emission_prices(n, dict(co2=float(m[0])))
                 else:
                     logger.info("Setting emission prices according to config value.")
-                    add_emission_prices(n, snakemake.config['costs']['emission_prices'])
+                    add_emission_prices(n, snakemake.config["costs"]["emission_prices"])
                 break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
     set_transmission_limit(n, ll_type, factor, costs, Nyears)
 
-    set_line_nom_max(n, s_nom_max_set=snakemake.config["lines"].get("s_nom_max,", np.inf),
-                     p_nom_max_set=snakemake.config["links"].get("p_nom_max,", np.inf))
+    set_line_nom_max(
+        n,
+        s_nom_max_set=snakemake.config["lines"].get("s_nom_max,", np.inf),
+        p_nom_max_set=snakemake.config["links"].get("p_nom_max,", np.inf),
+    )
 
     if "ATK" in opts:
         enforce_autarky(n)
