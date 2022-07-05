@@ -78,15 +78,14 @@ def plot_h2_infra(network):
 
     # assign_location(n)
 
-    bus_size_factor = 1e6
-    linewidth_factor = 1e5
+    bus_size_factor = 1e5
+    linewidth_factor = 1e4
     # MW below which not drawn
     line_lower_threshold = 1e1
     bus_color = "m"
     link_color = "c"
 
     n.links.loc[:, "p_nom_opt"] = n.links.loc[:, "p_nom_opt"]
-
     # n.links.loc[n.links.carrier == "H2 Electrolysis"].p_nom_opt
 
     # Drop non-electric buses so they don't clutter the plot
@@ -130,9 +129,9 @@ def plot_h2_infra(network):
     )
 
     handles = make_legend_circles_for(
-        [50000, 10000], scale=bus_size_factor, facecolor=bus_color
+        [5000, 1000], scale=bus_size_factor, facecolor=bus_color
     )
-    labels = ["{} GW".format(s) for s in (50, 10)]
+    labels = ["{} GW".format(s) for s in (5, 1)]
     l2 = ax.legend(
         handles,
         labels,
@@ -148,7 +147,7 @@ def plot_h2_infra(network):
     handles = []
     labels = []
 
-    for s in (50, 10):
+    for s in (5, 1):
         handles.append(
             plt.Line2D([0], [0], color=link_color, linewidth=s * 1e3 / linewidth_factor)
         )
@@ -573,10 +572,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="59",
-            ll="copt",
-            opts="Co2L0-72H",
+            clusters="907",
+            ll="c1",
+            opts="Co2L",
             planning_horizons="2030",
+            sopts="720H"
         )
 
     n = pypsa.Network(snakemake.input.network)
