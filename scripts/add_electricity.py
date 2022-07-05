@@ -117,9 +117,11 @@ def calculate_annuity(n, r):
     discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
     """
     if isinstance(r, pd.Series):
-        return pd.Series(1/n, index=r.index).where(r == 0, r/(1. - 1./(1.+r)**n))
+        return pd.Series(1 / n, index=r.index).where(
+            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
+        )
     elif r > 0:
-        return r / (1. - 1./(1.+r)**n)
+        return r / (1.0 - 1.0 / (1.0 + r) ** n)
     else:
         return 1 / n
 
@@ -169,7 +171,10 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     )
 
     costs["capital_cost"] = (
-        (calculate_annuity(costs["lifetime"], costs["discount rate"]) + costs["FOM"] / 100.)
+        (
+            calculate_annuity(costs["lifetime"], costs["discount rate"])
+            + costs["FOM"] / 100.0
+        )
         * costs["investment"]
         * Nyears
     )
@@ -194,7 +199,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0., co2_emissions=0.)
+            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
         )
 
     max_hours = elec_config["max_hours"]
@@ -832,7 +837,12 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
-    costs = load_costs(snakemake.input.tech_costs, snakemake.config['costs'], snakemake.config['electricity'], Nyears)
+    costs = load_costs(
+        snakemake.input.tech_costs,
+        snakemake.config["costs"],
+        snakemake.config["electricity"],
+        Nyears,
+    )
     ppl = load_powerplants(snakemake.input.powerplants)
     if "renewable_carriers" in snakemake.config["electricity"]:
         renewable_carriers = set(snakemake.config["renewable"])
