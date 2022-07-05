@@ -89,11 +89,21 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import configure_logging, sets_path_to_root, update_p_nom_max, get_aggregation_strategies
+from _helpers import (
+    configure_logging,
+    get_aggregation_strategies,
+    sets_path_to_root,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
-from pypsa.networkclustering import busmap_by_stubs, aggregategenerators, aggregateoneport, get_clustering_from_busmap
+from pypsa.networkclustering import (
+    aggregategenerators,
+    aggregateoneport,
+    busmap_by_stubs,
+    get_clustering_from_busmap,
+)
 from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
@@ -141,7 +151,8 @@ def simplify_network_to_380(n, linetype):
 
 
 def _prepare_connection_costs_per_link(n, costs, config):
-    if n.links.empty: return {}
+    if n.links.empty:
+        return {}
 
     connection_costs_per_link = {}
 
@@ -215,7 +226,12 @@ def _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, out
 
 
 def _aggregate_and_move_components(
-    n, busmap, connection_costs_to_bus, output, aggregate_one_ports={"Load", "StorageUnit"}, aggregation_strategies=dict()
+    n,
+    busmap,
+    connection_costs_to_bus,
+    output,
+    aggregate_one_ports={"Load", "StorageUnit"},
+    aggregation_strategies=dict(),
 ):
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
@@ -295,7 +311,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, config)
     connection_costs_to_bus = pd.DataFrame(
-        0., index=n.buses.index, columns=list(connection_costs_per_link)
+        0.0, index=n.buses.index, columns=list(connection_costs_per_link)
     )
 
     for lbl in labels.value_counts().loc[lambda s: s > 2].index:
@@ -317,7 +333,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
             all_links = [i for _, i in sum(links, [])]
 
-            p_max_pu = snakemake.config["links"].get("p_max_pu", 1.)
+            p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
             lengths = n.links.loc[all_links, "length"]
             name = lengths.idxmax() + "+{}".format(len(links) - 1)
             params = dict(
@@ -354,8 +370,13 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     logger.debug("Collecting all components using the busmap")
 
-    _aggregate_and_move_components(n, busmap, connection_costs_to_bus, output,
-                                aggregation_strategies=aggregation_strategies)
+    _aggregate_and_move_components(
+        n,
+        busmap,
+        connection_costs_to_bus,
+        output,
+        aggregation_strategies=aggregation_strategies,
+    )
     return n, busmap
 
 
@@ -411,7 +432,13 @@ def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
 
-    _aggregate_and_move_components(n, busmap, connection_costs_to_bus, output, aggregation_strategies=aggregation_strategies)
+    _aggregate_and_move_components(
+        n,
+        busmap,
+        connection_costs_to_bus,
+        output,
+        aggregation_strategies=aggregation_strategies,
+    )
 
     return n, busmap
 
@@ -480,21 +507,30 @@ if __name__ == "__main__":
     aggregation_strategies = snakemake.config["cluster_options"].get("aggregation_strategies", {})
     # translate str entries of aggregation_strategies to pd.Series functions:
     aggregation_strategies = {
-        p: {k: getattr(pd.Series, v) for k,v in aggregation_strategies[p].items()}
+        p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
 
     n, trafo_map = simplify_network_to_380(n, linetype)
 
-    n, simplify_links_map = simplify_links(n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies)
+    n, simplify_links_map = simplify_links(
+        n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
+    )
 
-    n, stub_map = remove_stubs(n, technology_costs, snakemake.config, snakemake.output,
-                               aggregation_strategies=aggregation_strategies)
+    n, stub_map = remove_stubs(
+        n,
+        technology_costs,
+        snakemake.config,
+        snakemake.output,
+        aggregation_strategies=aggregation_strategies,
+    )
 
     busmaps = [trafo_map, simplify_links_map, stub_map]
 
     if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config, aggregation_strategies)
+        n, cluster_map = cluster(
+            n, int(snakemake.wildcards.simpl), snakemake.config, aggregation_strategies
+        )
         busmaps.append(cluster_map)
 
     update_p_nom_max(n)
