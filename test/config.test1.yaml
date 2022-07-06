@@ -133,9 +133,7 @@ electricity:
     Store: [battery, H2]
     Link: [AC, DC]
 
-  # use pandas query strings here, e.g. Country not in ['Germany']
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  # use pandas query strings here, e.g. Country in ['Germany']
   custom_powerplants: false
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
@@ -145,7 +143,7 @@ electricity:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
     year: 2020  # Reference year, available years for IRENA stats are 2000 to 2020
     p_nom_min: 1  # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
-    p_nom_max: 2  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
+    p_nom_max: false  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
       Offshore: [offwind-ac, offwind-dc]
