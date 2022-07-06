@@ -358,7 +358,7 @@ def attach_load(
     n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
 
 
-def update_transmission_costs(n, costs, length_factor, simple_hvdc_costs=False):
+def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
     n.lines["capital_cost"] = (
         n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
     )
