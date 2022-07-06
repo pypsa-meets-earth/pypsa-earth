@@ -345,8 +345,9 @@ if __name__ == "__main__":
     set_transmission_limit(n, ll_type, factor, costs, Nyears)
 
     set_line_nom_max(
-        n, s_nom_max_set=snakemake.config["lines"].get("s_nom_max,", np.inf),
-        p_nom_max_set=snakemake.config["links"].get("p_nom_max,", np.inf)
+        n,
+        s_nom_max_set=snakemake.config["lines"].get("s_nom_max,", np.inf),
+        p_nom_max_set=snakemake.config["links"].get("p_nom_max,", np.inf),
     )
 
     if "ATK" in opts:
