@@ -98,7 +98,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, getContinent, update_p_nom_max
+from _helpers import configure_logging, getContinent, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -215,9 +215,7 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
     return costs
 
 
-def load_powerplants(ppl_fn=None):
-    if ppl_fn is None:
-        ppl_fn = snakemake.input.powerplants
+def load_powerplants(ppl_path):
     carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
@@ -226,8 +224,9 @@ def load_powerplants(ppl_fn=None):
         "hard coal": "coal",
     }
     return (
-        pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
+        pd.read_csv(ppl_path, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
+        .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
         .drop(columns=["efficiency"])
         .replace({"carrier": carrier_dict})
@@ -552,7 +551,7 @@ def attach_hydro(n, costs, ppl):
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = pd.read_csv(
-            snakemake.input.hydro_capacities, comment="#", na_values="-", index_col=0
+            snakemake.input.hydro_capacities, comment="#", na_values=["-"], index_col=0
         )
         e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
         e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
@@ -890,9 +889,10 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
+    ppl_path = snakemake.input.powerplants
 
     costs = load_costs(Nyears)
-    ppl = load_powerplants()
+    ppl = load_powerplants(ppl_path)
 
     attach_load(
         n,
