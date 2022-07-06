@@ -290,8 +290,8 @@ rule build_renewable_profiles:
     input:
         base_network="networks/base.nc",
         natura="resources/natura.tiff",
-        copernicus="data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        gebco="data/raw/gebco/GEBCO_2021_TID.nc",
+        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+        gebco="data/gebco/GEBCO_2021_TID.nc",
         country_shapes="resources/shapes/country_shapes.geojson",
         offshore_shapes="resources/shapes/offshore_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
