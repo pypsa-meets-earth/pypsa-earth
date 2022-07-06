@@ -77,6 +77,8 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
+    is_ac = lines["tag_frequency"] != 0
+
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_s["geometry"] = lines.geometry.boundary.map(
@@ -89,6 +91,7 @@ def add_line_endings_tosubstations(substations, lines):
         + 1
         + bus_s.index
     )
+    bus_s["dc"] = ~is_ac
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_e["geometry"] = lines.geometry.boundary.map(
@@ -97,6 +100,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x if p != None else None)
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
+    bus_s["dc"] = ~is_ac
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
@@ -368,8 +372,32 @@ def integrate_lines_df(df_all_lines, distance_crs):
     if "tag_location" in df_all_lines:  # drop column if exist
         df_all_lines.drop(columns="tag_location", inplace=True)
 
-    # Add frequency column
-    df_all_lines["tag_frequency"] = 50
+    # Keep original frequency if it exists  and set a standard value
+    # NB The standard frequency value may be regional-dependent
+    # TODO Fill by adjancent value
+
+    # Initialize a default frequency value
+    ac_freq_default = 50
+
+    if "tag_frequency" in df_all_lines.columns:
+
+        grid_freq_levels = df_all_lines["tag_frequency"].value_counts(
+            sort=True, dropna=True
+        )
+        if not grid_freq_levels.empty:
+            # AC lines frequency shouldn't be 0Hz
+            ac_freq_levels = grid_freq_levels.loc[
+                grid_freq_levels.index.get_level_values(0) != "0"
+            ]
+            ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
+
+        df_all_lines.loc[
+            df_all_lines["tag_frequency"].isna(), "tag_frequency"
+        ] = ac_freq_default
+
+    # Add frequency column if not present in data
+    else:
+        df_all_lines["tag_frequency"] = ac_freq_default
 
     df_all_lines = split_cells_multiple(df_all_lines)
     # Add circuits information
@@ -732,7 +760,10 @@ def clean_data(
 
     # set the country name by the shape
     df_all_generators = set_countryname_by_shape(
-        df_all_generators, ext_country_shapes, names_by_shapes=names_by_shapes
+        df_all_generators,
+        ext_country_shapes,
+        names_by_shapes=names_by_shapes,
+        col_country="Country",
     )
 
     # set name tag by closest city when the value is nan

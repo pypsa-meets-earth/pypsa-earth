@@ -6,13 +6,14 @@ name: pypsa-africa
 channels:
 - conda-forge
 - bioconda
+- gurobi
 dependencies:
 - python>=3.8
 - pip
 - mamba   # esp for windows build
 
 - pypsa>=0.17.1
-- atlite>=0.2.4
+# - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
   # - powerplantmatching>=0.4.8
 
@@ -29,7 +30,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-- fiona <= 1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+- fiona<=1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
 - xarray
 - netcdf4
 - networkx
@@ -49,10 +50,15 @@ dependencies:
   # GIS dependencies:
 - cartopy
 - descartes
-- rasterio
+- rasterio<1.2.10  # until atlite is up to date https://github.com/PyPSA/atlite/issues/238
 - rioxarray
+
+ # Plotting
 - geoviews
 - hvplot
+- graphviz
+- contextily
+- graphviz
 
   # PyPSA-Eur-Sec Dependencies
 - geopy
@@ -66,11 +72,13 @@ dependencies:
 # Default solver for tests (moved to the CI)
 - glpk
 - ipopt < 3.13.3
+- gurobi
 
 - pip:
   # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
   - git+https://github.com/davide-f/powerplantmatching.git@new_pypsa_africa#egg=powerplantmatching
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
+  - git+https://github.com/davide-f/atlite.git@master
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf

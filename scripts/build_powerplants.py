@@ -82,6 +82,11 @@ from shapely import wkt
 
 logger = logging.getLogger(__name__)
 
+# Auxiliary function to adapt to the ppl format
+two_digits_2_nocomma_country_name = lambda x: two_digits_2_name_country(
+    x, nocomma=True, remove_start_words=["The ", "the "]
+)
+
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
@@ -141,7 +146,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
             )
         )
         .assign(
-            Country=lambda df: df.Country.map(two_digits_2_name_country),
+            Country=lambda df: df.Country.map(two_digits_2_nocomma_country_name),
             Name=lambda df: df.Name,
             # Name=lambda df: "OSM_"
             # + df.Country.astype(str)
@@ -192,7 +197,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
 
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
-        columns=["tags.generator:method", "geometry", "Area", "country", "id"]
+        columns=["tags.generator:method", "geometry", "Area", "id"]
     )
 
     to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
@@ -207,7 +212,7 @@ def add_custom_powerplants(ppl):
     custom_ppl_query = snakemake.config["electricity"]["custom_powerplants"]
     if not custom_ppl_query:
         return ppl
-    add_ppls = pd.read_csv(
+    add_ppls = read_csv_nafix(
         snakemake.input.custom_powerplants, index_col=0, dtype={"bus": "str"}
     )
     # if isinstance(custom_ppl_query, str):
@@ -235,7 +240,11 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
-    countries_names = list(map(two_digits_2_name_country, countries_codes))
+    countries_names = list(map(two_digits_2_nocomma_country_name, countries_codes))
+
+    # create code name mapping to be used as inverse function
+    country_mapping = dict(zip(countries_names, countries_codes))
+
     config["target_countries"] = countries_names
 
     if "EXTERNAL_DATABASE" in config:
@@ -255,7 +264,7 @@ if __name__ == "__main__":
                     df.Technology.replace("Steam Turbine", "OCGT").fillna("OCGT"),
                 )
             ),
-            Country=lambda df: df.Country.map(country_name_2_two_digits),
+            Country=lambda df: df.Country.map(lambda x: country_mapping[x]),
         )
     )
 

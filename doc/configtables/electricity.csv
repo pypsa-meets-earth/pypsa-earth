@@ -3,6 +3,11 @@ voltages,kV,"Any subset of {220., 300., 380.}",Voltage levels to consider when
 co2limit,:math:`t_{CO_2-eq}/a`,float,Cap on total annual system carbon dioxide emissions
 co2base,:math:`t_{CO_2-eq}/a`,float,Reference value of total annual system carbon dioxide emissions if relative emission reduction target is specified in ``{opts}`` wildcard.
 agg_p_nom_limits,file,path,Reference to ``.csv`` file specifying per carrier generator nominal capacity constraints for individual countries if ``'CCL'`` is in ``{opts}`` wildcard. Defaults to ``data/agg_p_nom_minmax.csv``.
+operational_reserve,,,
+-- activate,,true or false,
+-- epsilon_load,,"float, share of total load, between 0-1",
+-- epsilon_vres,,"float, share of total renewable supply, between 0-1",
+-- contingency,MW,"float, fixed contigency over optimization timeframe i.e. 5000 MW",
 extendable_carriers,,,
 -- Generator,--,"Any subset  of {'OCGT','CCGT'}",Places extendable conventional power plants (OCGT and/or CCGT) where gas power plants are located today without capacity limits.
 -- StorageUnit,--,"Any subset of {'battery','H2'}",Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity.
@@ -17,3 +22,12 @@ conventional_carriers,--,"Any subset of {nuclear, oil, OCGT, CCGT, coal, lignite
 renewable_capacities_from_OPSD,,"[solar, onwind, offwind]",List of carriers (offwind-ac and offwind-dc are included in offwind) whose capacities 'p_nom' are aligned to the `OPSD renewable power plant list <https://data.open-power-system-data.org/renewable_power_plants/>`_
 estimate_renewable_capacities_from_capacitiy_stats,,,
 "-- Fueltype [ppm], e.g. Wind",,"list of fueltypes strings in PyPSA-Eur, e.g. [onwind, offwind-ac, offwind-dc]",converts ppm Fueltype to PyPSA-EUR Fueltype
+estimate_renewable_capacities,,,
+-- stats,,'irena' or ``False``,"Defines which database to use, currently only ""irena"" is available. ``False`` enables greenfield expansion, 'irena' uses IRENA stats to add expansion limits"
+-- year,,Any year beetween 2000 and 2020,"Reference year, available years for IRENA stats are 2000 to 2020"
+-- p_nom_min,,float,"scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1"
+-- p_nom_max,,float or ``False``,"sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly"
+-- technology_mapping,,,Maps the technologies defined in ppm.data.Capacity_stats with the carriers in PyPSA-Earth/Africa
+-- -- Offshore,,"{'offwind-ac', 'offwind-dc'}",
+-- -- Onshore,,{'onwind'},
+-- -- PV,,{'solar'},

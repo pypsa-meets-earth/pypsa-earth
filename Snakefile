@@ -172,6 +172,8 @@ rule build_osm_network:
         country_shapes="resources/shapes/country_shapes.geojson",
     output:
         lines="resources/base_network/africa_all_lines_build_network.csv",
+        converters="resources/base_network/africa_all_converters_build_network.csv",
+        transformers="resources/base_network/africa_all_transformers_build_network.csv",
         substations="resources/base_network/africa_all_buses_build_network.csv",
     log:
         "logs/build_osm_network.log",
@@ -205,8 +207,10 @@ rule base_network:
     input:
         osm_buses="resources/base_network/africa_all_buses_build_network.csv",
         osm_lines="resources/base_network/africa_all_lines_build_network.csv",
-        country_shapes="resources/shapes/country_shapes.geojson",
-        offshore_shapes="resources/shapes/offshore_shapes.geojson",
+        osm_converters="resources/base_network/africa_all_converters_build_network.csv",
+        osm_transformers="resources/base_network/africa_all_transformers_build_network.csv",
+        country_shapes="resources/country_shapes.geojson",
+        offshore_shapes="resources/offshore_shapes.geojson",
         # osm_buses='data/osm/africa_all_buses_clean.csv',
         # osm_lines='data/osm/africa_all_lines_clean.csv',
         # eg_buses='data/entsoegridkit/buses.csv',
@@ -286,10 +290,13 @@ rule build_renewable_profiles:
     input:
         base_network="networks/base.nc",
         natura="resources/natura.tiff",
-        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        gebco="data/gebco/GEBCO_2021_TID.nc",
-        country_shapes="resources/shapes/country_shapes.geojson",
-        offshore_shapes="resources/shapes/offshore_shapes.geojson",
+        copernicus="data/raw/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+        gebco="data/raw/gebco/GEBCO_2021_TID.nc",
+        country_shapes="resources/country_shapes.geojson",
+        offshore_shapes="resources/offshore_shapes.geojson",
+        hydro_capacities="data/hydro_capacities.csv",
+        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        powerplants="resources/powerplants.csv",
         regions=lambda w: (
             "resources/bus_regions/regions_onshore.geojson"
             if w.technology in ("onwind", "solar", "hydro")

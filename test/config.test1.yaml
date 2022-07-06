@@ -29,8 +29,32 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
+summary_dir: results
+
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-8"
+  inclusive: "left" # end is not inclusive
+
+enable:
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: true  # If True, than an exclusion raster will be build
+  build_cutout: false
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+# definition of the Coordinate Reference Systems
+crs:
+  geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
+  distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
+  area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+
 retrieve_databundle:
   show_progress: false  # Option to disable the progress bar in retrieve_databundle
+
+download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
 
 augmented_line_connection:
   add_to_snakefile: false
@@ -40,20 +64,19 @@ augmented_line_connection:
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
-  alternative_clustering: false
+  alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
   out_logging: true  # When true, logging is printed to console
 
 # options for build_shapes
 build_shape_options:
-  gadm_layer_id: 1    # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
-  update_file: false    # When true, all the input files are downloaded again and replace the existing files
-  out_logging: true    # When true, logging is printed to console
-  year: 2020    # reference year used to derive shapes, info on population and info on GDP
-  nprocesses: 5    # number of processes to be used in build_shapes
+  gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  update_file: false # When true, all the input files are downloaded again and replace the existing files
+  out_logging: true  # When true, logging is printed to console
+  year: 2020  # reference year used to derive shapes, info on population and info on GDP
+  nprocesses: 5  # number of processes to be used in build_shapes
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
-
 
 clean_osm_data_options:
   names_by_shapes: true  # Set the country name based on the extended country shapes
@@ -62,13 +85,11 @@ clean_osm_data_options:
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
 
-
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
   group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
-
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
@@ -80,38 +101,17 @@ load_options:
   prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
-summary_dir: results
-
-snapshots:
-  start: "2013-03-1"
-  end: "2013-03-8"
-  inclusive: "left" # end is not inclusive
-
-enable:
-  # prepare_links_p_nom: false
-  retrieve_databundle: true
-  download_osm_data: true
-  # retrieve_cutout: true
-  # retrieve_natura_raster: true
-  # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
-  # custom_busmap: false
-
-# definition of the Coordinate Reference Systems
-crs:
-  geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
-  distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
-  area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
-
-download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
-
 electricity:
   voltages: [220., 300., 380.]
   co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
   co2base: 1.487e9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
+
+  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+    activate: true
+    epsilon_load: 0.02 # share of total load
+    epsilon_vres: 0.02 # share of total renewable supply
+    contingency: 0 # fixed capacity in MW
 
   extendable_carriers:
     Generator: []
@@ -126,6 +126,17 @@ electricity:
     H2: 168
 
   powerplants_filter:
+
+  estimate_renewable_capacities:
+    stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
+    year: 2020  # Reference year, available years for IRENA stats are 2000 to 2020
+    p_nom_min: 1  # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
+    p_nom_max: 2  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
+    technology_mapping:
+      # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
+      Offshore: [offwind-ac, offwind-dc]
+      Onshore: [onwind]
+      PV: [solar]
 
 lines:
   types:
@@ -233,7 +244,7 @@ renewable:
       orientation: latitude_optimal # will lead into optimal design
         # slope: 0.  # slope: 0 represent a flat panel
         # azimuth: 180.  # azimuth: 180 south orientation
-    capacity_per_sqkm: 1.7 # ScholzPhd Tab 4.3.1: 170 MW/km^2
+    capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
     # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
@@ -250,14 +261,16 @@ renewable:
     cutout: africa-2013-era5-tutorial
     resource:
       method: hydro
-      hydrobasins: data/hydrobasins/hybas_world_lev04_v1c.shp
-      # flowspeed: 1.0
+      hydrobasins: data/raw/hydrobasins/hybas_world_lev04_v1c.shp
+      flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
+      normalization: eia # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data, false for no normalization
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     clip_min_inflow: 1.0
+    normalization_multiplier: 1.1  # multiplier applied after the normalization of the hydro production
 
 # TODO: Needs to be adjusted for Africa
 costs:

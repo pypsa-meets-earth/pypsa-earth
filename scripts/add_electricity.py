@@ -98,7 +98,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, getContinent, update_p_nom_max
+from _helpers import configure_logging, getContinent, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -215,9 +215,7 @@ def load_costs(Nyears=1.0, tech_costs=None, config=None, elec_config=None):
     return costs
 
 
-def load_powerplants(ppl_fn=None):
-    if ppl_fn is None:
-        ppl_fn = snakemake.input.powerplants
+def load_powerplants(ppl_path):
     carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
@@ -226,8 +224,9 @@ def load_powerplants(ppl_fn=None):
         "hard coal": "coal",
     }
     return (
-        pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
+        pd.read_csv(ppl_path, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
+        .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
         .drop(columns=["efficiency"])
         .replace({"carrier": carrier_dict})
@@ -296,11 +295,7 @@ def attach_load(
         Now attached with load time series
     """
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
-    regions = (
-        gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
-    ).dropna(
-        axis="rows"
-    )  # TODO: check if dropna required here. NaN shapes exist?
+    regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
 
     load_paths = load_paths
     # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
@@ -309,7 +304,7 @@ def attach_load(
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
     logger.info(f"Load data scaled with scalling factor {scale}.")
-    gegis_load *= scale
+    gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes.loc[:, "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
@@ -556,7 +551,7 @@ def attach_hydro(n, costs, ppl):
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = pd.read_csv(
-            snakemake.input.hydro_capacities, comment="#", na_values="-", index_col=0
+            snakemake.input.hydro_capacities, comment="#", na_values=["-"], index_col=0
         )
         e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
         e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
@@ -712,6 +707,100 @@ def attach_OPSD_renewables(n):
         n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
+def estimate_renewable_capacities_irena(n, config):
+
+    if not config["electricity"].get("estimate_renewable_capacities"):
+        return
+
+    stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
+    if not stats:
+        return
+
+    year = config["electricity"]["estimate_renewable_capacities"]["year"]
+    tech_map = config["electricity"]["estimate_renewable_capacities"][
+        "technology_mapping"
+    ]
+    tech_keys = list(tech_map.keys())
+    countries = config["countries"]
+
+    p_nom_max = config["electricity"]["estimate_renewable_capacities"]["p_nom_max"]
+    p_nom_min = config["electricity"]["estimate_renewable_capacities"]["p_nom_min"]
+
+    if len(countries) == 0:
+        return
+    if len(tech_map) == 0:
+        return
+
+    if stats == "irena":
+        capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+    else:
+        logger.info(
+            f"Selected renewable capacity estimation statistics {stats} is not available, applying greenfield scenario instead"
+        )
+        return
+
+    # Check if countries are in country list of stats
+    missing = list(set(countries).difference(capacities.Country.unique()))
+
+    if missing:
+        logger.info(
+            f"The countries {missing} are not provided in the stats and hence not scaled"
+        )
+    else:
+        pass
+
+    capacities = capacities.query(
+        "Year == @year and Technology in @tech_keys and Country in @countries"
+    )
+    capacities = capacities.groupby(["Technology", "Country"]).Capacity.sum()
+
+    logger.info(
+        f"Heuristics applied to distribute renewable capacities [MW] "
+        f"{capacities.groupby('Country').sum()}"
+    )
+
+    for ppm_technology, techs in tech_map.items():
+
+        if ppm_technology not in capacities.index:
+            logger.info(
+                f"technology {ppm_technology} is not provided by {stats} and therefore not estimated"
+            )
+            continue
+
+        tech_capacities = capacities.loc[ppm_technology].reindex(
+            countries, fill_value=0.0
+        )
+        tech_i = n.generators.query("carrier in @techs").index
+        n.generators.loc[tech_i, "p_nom"] = (
+            (
+                n.generators_t.p_max_pu[tech_i].mean()
+                * n.generators.loc[tech_i, "p_nom_max"]
+            )  # maximal yearly generation
+            .groupby(n.generators.bus.map(n.buses.country))
+            .transform(lambda s: normed(s) * tech_capacities.at[s.name])
+            .where(lambda s: s > 0.1, 0.0)
+        )  # only capacities above 100kW
+        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
+
+        if p_nom_min:
+            assert np.isscalar(p_nom_min)
+            logger.info(
+                f"Scaling capacity stats to {p_nom_min*100:.2f}% of installed capacity acquired from stats."
+            )
+            n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[
+                tech_i, "p_nom"
+            ] * float(p_nom_min)
+
+        if p_nom_max:
+            assert np.isscalar(p_nom_max)
+            logger.info(
+                f"Scaling capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity acquired from stats."
+            )
+            n.generators.loc[tech_i, "p_nom_max"] = n.generators.loc[
+                tech_i, "p_nom_min"
+            ] * float(p_nom_max)
+
+
 def estimate_renewable_capacities(n, tech_map=None):
     if tech_map is None:
         tech_map = snakemake.config["electricity"].get(
@@ -800,9 +889,10 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
+    ppl_path = snakemake.input.powerplants
 
     costs = load_costs(Nyears)
-    ppl = load_powerplants()
+    ppl = load_powerplants(ppl_path)
 
     attach_load(
         n,
@@ -820,6 +910,7 @@ if __name__ == "__main__":
 
     # TODO: Feature to uncomment and debug
     # estimate_renewable_capacities(n)
+    estimate_renewable_capacities_irena(n, snakemake.config)
     # attach_OPSD_renewables(n)
 
     update_p_nom_max(n)

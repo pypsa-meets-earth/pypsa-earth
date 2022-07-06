@@ -13,6 +13,10 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Identify DC lines but temporary transform them back into AC `PR #348 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/348>`__
+
+* Get renewable capacities from IRENA statistics `PR #343 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/343>`__
+
 * Bug fixing (script retrieve_databundle) and rule run_test to ease testing `PR #322 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/322>`__
 
 * Handling non-numerical entries in raw OSM data: `PR #287 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/287>`__
@@ -35,20 +39,51 @@ Upcoming Release
 
 * Add new countries and update iso code: `PR #330 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/330>`_
 
-* Fix solar pv slope and add correction factor for wake losses `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`_
+* Fix solar pv slope and add correction factor for wake losses: `PR #335 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/350>`_
 
-* Add renewable potential notebook `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`_
+* Add renewable potential notebook: `PR #351 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/351>`_
 
-* Make cutout workflow simpler `PR #352 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/352>`_
+* Make cutout workflow simpler: `PR #352 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/352>`_
 
-* Add option to run workflow without pop and gdp raster `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
+* Add option to run workflow without pop and gdp raster: `PR #353 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/353>`_
 
-* Add latitude_optimal to get optimal solar orientation by default `Commit 1b2466b <https://github.com/pypsa-meets-africa/pypsa-africa/commit/de7d32be8807e4fc42486a60184f45680612fd46>`_
+* Add latitude_optimal to get optimal solar orientation by default: `Commit 1b2466b <https://github.com/pypsa-meets-africa/pypsa-africa/commit/de7d32be8807e4fc42486a60184f45680612fd46>`_
 
-* Harmonize CRSs by options `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
+* Harmonize CRSs by options: `PR #356 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/356>`_
+
+* Fix powerplantmatching problem for DRC and countries with multi-word name: `PR #359 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/359>`_
+
+* Change default option for build_natura `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
+
+* Add renewable potential validation notebook and update others `PR #363 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_ and `PR #369 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_
+
+* Constrain rasterio version and add plotting dependencies `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
+
+* Change solar power density form 1.7 to 4.6 MW/km2 `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
+
+* Bug fixing of unexpected float value in build_powerplants: `PR #372 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/372>`_ and `PR #373 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/373>`_
+
+* Revise hydro capacities, add hydro validation notebook and minor revisions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
+
+* Revise dropnan for regions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
+
+* Fix bug in GADM clustering. Missing crs input. `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
+
+* Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`
+
+* Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`
+
+* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`
+
+* Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`
+
+* Enable the use of a float value for the scale in load_options `PR #397 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/397>`
+
+* Add operational reserve margin according to PyPSA-Eur `PR #399 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/399>`
+
+* Add optional normalization of hydro inflows by hydro_capacities or eia stats `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`
 
 * Restructure the package to ease readability and fix google drive downloading method `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`_
-
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
