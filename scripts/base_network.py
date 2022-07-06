@@ -472,8 +472,6 @@ def base_network():
     lines_ac = _set_electrical_parameters_lines(lines_ac)
     lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
 
-    lines = pd.concat([lines_ac, lines_dc])
-
     transformers = _set_electrical_parameters_transformers(transformers)
     converters = _set_electrical_parameters_converters(converters)
 
@@ -484,17 +482,20 @@ def base_network():
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
     n.import_components_from_dataframe(buses, "Bus")
-    n.import_components_from_dataframe(lines, "Line")
 
-    # # TODO Implement as an option?
-    # lines_dc = _set_electrical_parameters_links(lines_dc)
-    # n.import_components_from_dataframe(lines_ac, "Line")
-    # # are mixed up with the third-bus specification
-    # # when executing additional_linkports()
-    # lines_dc.drop(
-    #     labels=["bus0_lon", "bus0_lat", "bus1_lon", "bus1_lat", "bus_0_coors", "bus_1_coors"],
-    #     axis=1, inplace=True)
-    # n.import_components_from_dataframe(lines_dc, "Link")
+    
+    if snakemake.config["electricity"]["hvdc_as_lines"]:
+        lines = pd.concat([lines_ac, lines_dc])
+        n.import_components_from_dataframe(lines, "Line")
+    else:
+        lines_dc = _set_electrical_parameters_links(lines_dc)
+        n.import_components_from_dataframe(lines_ac, "Line")
+        # are mixed up with the third-bus specification
+        # when executing additional_linkports()
+        lines_dc.drop(
+            labels=["bus0_lon", "bus0_lat", "bus1_lon", "bus1_lat", "bus_0_coors", "bus_1_coors"],
+            axis=1, inplace=True)
+        n.import_components_from_dataframe(lines_dc, "Link")
 
     n.import_components_from_dataframe(transformers, "Transformer")
     n.import_components_from_dataframe(converters, "Link")
