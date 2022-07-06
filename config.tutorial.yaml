@@ -102,6 +102,7 @@ electricity:
   co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
   co2base: 1.487e9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  hvdc_as_lines: true  
 
   operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
     activate: false
