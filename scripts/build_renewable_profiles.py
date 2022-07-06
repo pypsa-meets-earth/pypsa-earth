@@ -194,19 +194,74 @@ import os
 import time
 
 import atlite
+import country_converter as coco
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, sets_path_to_root
+from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
+from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from shapely.geometry import LineString
-from shapely.ops import unary_union
+
+cc = coco.CountryConverter()
 
 logger = logging.getLogger(__name__)
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
+
+
+def get_eia_annual_hydro_generation(fn, countries):
+
+    # in billion kWh/a = TWh/a
+    df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df.index = df.index.str.strip()
+
+    df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
+    df.loc["Serbia"] += df.loc["Kosovo"]
+    df = df.loc[~df.index.str.contains("Former")]
+    df.drop(["World", "Germany, West", "Germany, East"], inplace=True)
+
+    df.index = cc.convert(df.index, to="iso2")
+    df.index.name = "countries"
+
+    df = df.T[countries] * 1e6  # in MWh/a
+
+    return df
+
+
+def get_hydro_capacity_annual_hydro_generation(
+    fn, countries, year_start=2000, year_end=2020
+):
+    hydro_stats = (
+        pd.read_csv(
+            fn,
+            comment="#",
+            na_values=["-"],
+            index_col=0,
+        )
+        .rename({"Country": "countries"}, axis=1)
+        .set_index("countries")
+    )
+    hydro_prod_by_country = (
+        hydro_stats[hydro_stats.index.isin(countries)][
+            ["InflowHourlyAvg[GWh]"]
+        ].transpose()
+        * 1e3
+        * 8760
+    )  # change unit to MWh/y
+
+    range_years = range(year_start, year_end + 1)
+
+    normalize_using_yearly = pd.concat(
+        [hydro_prod_by_country] * len(range_years), ignore_index=True
+    )
+    normalize_using_yearly.index = pd.Index(range_years)
+
+    return normalize_using_yearly
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -218,6 +273,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()
+    countries = snakemake.config["countries"]
     paths = snakemake.input
     nprocesses = snakemake.config["atlite"].get("nprocesses")
     noprogress = not snakemake.config["atlite"].get("show_progress", False)
@@ -225,6 +281,8 @@ if __name__ == "__main__":
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
+
+    # crs
     geo_crs = snakemake.config["crs"]["geo_crs"]
     area_crs = snakemake.config["crs"]["area_crs"]
 
@@ -263,6 +321,10 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins = gpd.read_file(resource["hydrobasins"])
+        ppls = load_powerplants(snakemake.input.powerplants)
+
+        hydro_ppls = ppls[ppls.carrier == "hydro"]
+
         # commented out as rivers may span across multiple countries
         # hydrobasins = hydrobasins[
         #     [
@@ -270,14 +332,52 @@ if __name__ == "__main__":
         #         for geom in hydrobasins.geometry
         #     ]
         # ]  # exclude hydrobasins shapes that do not intersect the countries of interest
-        resource["plants"] = regions.rename(columns={"x": "lon", "y": "lat"}).loc[
-            [
-                # select busbar whose location (p) belongs to at least one hydrobasin geometry
-                any(hydrobasins.geometry.intersects(p))
-                for p in gpd.points_from_xy(regions.x, regions.y, crs=regions.crs)
-            ],
-            ["lon", "lat"],
-        ]  # TODO: filtering by presence of hydro generators should be the way to go
+
+        # select busbar whose location (p) belongs to at least one hydrobasin geometry
+        # if extendable option is true, all buses are included
+        # otherwise only where hydro powerplants are available are considered
+        busbus_to_consider = [
+            (config.get("extendable", False) | (bus_id in hydro_ppls.bus.values))
+            & any(hydrobasins.geometry.intersects(p))
+            for (p, bus_id) in zip(
+                gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
+                regions.index,
+            )
+        ]
+
+        resource["plants"] = regions.rename(
+            columns={"x": "lon", "y": "lat", "country": "countries"}
+        ).loc[busbus_to_consider, ["lon", "lat", "countries"]]
+
+        resource["plants"]["installed_hydro"] = [
+            True if (bus_id in hydro_ppls.bus.values) else False
+            for bus_id in resource["plants"].index
+        ]
+
+        # check if normalization field belongs to the settings and it is not false
+        if ("normalization" in resource) & (type(resource["normalization"]) == str):
+
+            normalization = resource.pop("normalization")
+
+            if normalization == "hydro_capacities":
+                path_hydro_capacities = snakemake.input.hydro_capacities
+                normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
+                    path_hydro_capacities, countries
+                ) * config.get("normalization_multiplier", 1.0)
+
+            elif normalization == "eia":
+                path_eia_stats = snakemake.input.eia_hydro_generation
+                normalize_using_yearly = get_eia_annual_hydro_generation(
+                    path_eia_stats, countries
+                ) * config.get("normalization_multiplier", 1.0)
+
+            resource["normalize_using_yearly"] = normalize_using_yearly
+            logger.info(f"Hydro normalization mode {normalization}")
+        else:
+            logger.info("No hydro normalization")
+
+            if "normalization" in resource:
+                resource.pop("normalization")
 
         # check if there are hydro powerplants
         if resource["plants"].empty:
