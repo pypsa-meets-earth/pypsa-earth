@@ -483,7 +483,6 @@ def base_network():
 
     n.import_components_from_dataframe(buses, "Bus")
 
-    
     if snakemake.config["electricity"]["hvdc_as_lines"]:
         lines = pd.concat([lines_ac, lines_dc])
         n.import_components_from_dataframe(lines, "Line")
@@ -493,8 +492,17 @@ def base_network():
         # are mixed up with the third-bus specification
         # when executing additional_linkports()
         lines_dc.drop(
-            labels=["bus0_lon", "bus0_lat", "bus1_lon", "bus1_lat", "bus_0_coors", "bus_1_coors"],
-            axis=1, inplace=True)
+            labels=[
+                "bus0_lon",
+                "bus0_lat",
+                "bus1_lon",
+                "bus1_lat",
+                "bus_0_coors",
+                "bus_1_coors",
+            ],
+            axis=1,
+            inplace=True,
+        )
         n.import_components_from_dataframe(lines_dc, "Link")
 
     n.import_components_from_dataframe(transformers, "Transformer")
