@@ -261,7 +261,7 @@ def _set_electrical_parameters_dc_lines(lines):
     v_noms = snakemake.config["electricity"]["voltages"]
     lines["carrier"] = "DC"
 
-    lines["type"] = "DC_custom_linetype"
+    lines["type"] = snakemake.config["lines"]["dc_type"]
 
     lines["s_max_pu"] = snakemake.config["lines"]["s_max_pu"]
 
