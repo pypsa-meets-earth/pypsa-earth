@@ -276,23 +276,7 @@ def _set_electrical_parameters_links(links):
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
-    # TODO Include p_nom_max? (in case it's not inf)
-    # links_p_nom = pd.read_csv(links_p_nom)
-
-    # # filter links that are not in operation anymore
-    # removed_b = links_p_nom.Remarks.str.contains('Shut down|Replaced', na=False)
-    # links_p_nom = links_p_nom[~removed_b]
-
-    # # find closest link for all links in links_p_nom
-    # links_p_nom['j'] = _find_closest_links(links, links_p_nom)
-
-    # links_p_nom = links_p_nom.groupby(['j'],as_index=False).agg({'Power (MW)': 'sum'})
-
-    # p_nom = links_p_nom.dropna(subset=["j"]).set_index("j")["Power (MW)"]
-
-    # # Don't update p_nom if it's already set
-    # p_nom_unset = p_nom.drop(links.index[links.p_nom.notnull()], errors='ignore') if "p_nom" in links else p_nom
-    # links.loc[p_nom_unset.index, "p_nom"] = p_nom_unset
+    # TODO Does it makes sence to access p_nom for groupping HVDC links like it's done in PyPSA-Eu?
 
     return links
 
@@ -464,9 +448,9 @@ def base_network():
     lines_ac = lines[lines.tag_frequency != 0]
     lines_dc = lines[lines.tag_frequency == 0]
 
+    # TODO Find a way to load a custom linetype. Currently the custom type definition seems to be ignored
     # custom_linetypes = pd.read_csv("/Users/ekaterina/Documents/_github_/pypsa-africa/data/custom_line_types.csv",
     #     index_col = 0)
-    # TODO Find a way to load a custom linetype. Currently the custom type definition seems to be ignored
     # n.import_components_from_dataframe(custom_linetypes, "LineType")
 
     lines_ac = _set_electrical_parameters_lines(lines_ac)
@@ -489,7 +473,7 @@ def base_network():
     else:
         lines_dc = _set_electrical_parameters_links(lines_dc)
         n.import_components_from_dataframe(lines_ac, "Line")
-        # are mixed up with the third-bus specification
+        # The columns which names starts with "bus" are mixed up with the third-bus specification
         # when executing additional_linkports()
         lines_dc.drop(
             labels=[
