@@ -13,6 +13,8 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Enable DC carrier in the network model and include converters into the model `PR #392 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/392>`__
+
 * Identify DC lines but temporary transform them back into AC `PR #348 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/348>`__
 
 * Get renewable capacities from IRENA statistics `PR #343 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/343>`__
