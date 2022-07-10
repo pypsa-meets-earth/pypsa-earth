@@ -416,9 +416,9 @@ def busmap_by_stubs(network, matching_attrs=None):
 def remove_stubs(n):
     logger.info("Removing stubs")
 
-    # TODO Put back carrier matching after an issue with DC lines parameters will be resolved
-    # busmap = busmap_by_stubs(n, matching_attrs="carrier")  # ['country'])
-    busmap = busmap_by_stubs(n)
+    # Setting matching_attrs="carrier" is needed to keep DC buses 
+    # in case HVDC lines are modeled as the Line component
+    busmap = busmap_by_stubs(n, matching_attrs="carrier")  # ['country'])
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap)
 
