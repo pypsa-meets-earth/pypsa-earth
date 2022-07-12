@@ -276,6 +276,8 @@ def _set_electrical_parameters_links(links):
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
+    links["carrier"] = "DC"
+
     # TODO Does it makes sence to access p_nom for groupping HVDC links like it's done in PyPSA-Eu?
 
     return links
