@@ -312,10 +312,6 @@ def add_hydrogen(n, costs):
     )
 
 
-<<<<<<< HEAD
-def add_co2(n, costs):
-    "add carbon carrier, it's networks and storage units"
-=======
 def define_spatial(nodes):
     """
     Namespace for spatial
@@ -328,7 +324,6 @@ def define_spatial(nodes):
     global spatial
     global options
 
->>>>>>> origin/main
     spatial.nodes = nodes
 
     # biomass
