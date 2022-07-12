@@ -445,8 +445,8 @@ def base_network():
     transformers = _load_transformers_from_osm(buses)
     converters = _load_converters_from_osm(buses)
 
-    lines_ac = lines[lines.tag_frequency != 0]
-    lines_dc = lines[lines.tag_frequency == 0]
+    lines_ac = lines[lines.tag_frequency.astype(float) != 0]
+    lines_dc = lines[lines.tag_frequency.astype(float) == 0]
 
     # TODO Find a way to load a custom linetype. Currently the custom type definition seems to be ignored
     # custom_linetypes = pd.read_csv("/Users/ekaterina/Documents/_github_/pypsa-africa/data/custom_line_types.csv",

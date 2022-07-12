@@ -197,7 +197,7 @@ def set_lines_ids(lines, buses, distance_crs):
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
-        row["dc"] = row["tag_frequency"] == 0
+        row["dc"] = float(row["tag_frequency"]) == 0
 
         # select buses having the voltage level of the current line
         buses_sel = busesepsg[
