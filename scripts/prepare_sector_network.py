@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 from types import SimpleNamespace
 
 import numpy as np
@@ -7,7 +8,6 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-import re
 from helpers import (
     create_dummy_data,
     create_network_topology,
@@ -2023,5 +2023,3 @@ if __name__ == "__main__":
     # TODO changes in case of myopic oversight
 
     # TODO add co2 tracking function
-
-
