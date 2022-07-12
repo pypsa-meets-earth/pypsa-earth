@@ -22,7 +22,6 @@ scenario:
   opts:
   - "Co2L-144H"
 
-
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
@@ -54,6 +53,7 @@ solar_thermal:
     azimuth: 180.
 
 sector:
+  gas_network: false
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share
@@ -113,6 +113,9 @@ sector:
   bev_availability: 0.5 #How many cars do smart charging
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
+
+  biomass_transport: true  # biomass transport between nodes
+
 
   land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
     # 2020: 0
