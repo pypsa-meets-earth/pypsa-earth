@@ -175,6 +175,14 @@ def weighting_for_country(n, x):
     l = normed(load.reindex(b_i, fill_value=0))
 
     w = g + l
+    # Avoid ZeroDivisionError: float division by zero for "NA"
+    # TODO Find a better way to resolve
+    if w.max() == 0:
+        logger.warning("Forcing non-zero values for generators and loads")
+        g = normed(gen.reindex(b_i, fill_value=0.1))
+        l = normed(load.reindex(b_i, fill_value=0.1))
+        w = g + l
+
     return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
