@@ -121,7 +121,6 @@ def _load_buses_from_osm():
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
-    # TODO Check if lowercase is appropriate
     buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
     buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
     buses["x"] = buses["lon"]
@@ -277,8 +276,6 @@ def _set_electrical_parameters_links(links):
     links["p_min_pu"] = -p_max_pu
 
     links["carrier"] = "DC"
-
-    # TODO Does it makes sence to access p_nom for groupping HVDC links like it's done in PyPSA-Eu?
 
     return links
 
