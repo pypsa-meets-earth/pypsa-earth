@@ -64,7 +64,7 @@ rule prepare_sector_network:
         nodal_transport_data="resources/nodal_transport_data_s{simpl}_{clusters}.csv",
         overrides="data/override_component_attrs",
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        industrial_demand="resources/industrial_energy_demand_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+        industrial_demand="resources/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         airports="data/airports.csv",
         ports="data/ports.csv",
         heat_demand="resources/heat/heat_demand_s{simpl}_{clusters}.csv",
@@ -72,7 +72,7 @@ rule prepare_sector_network:
         gshp_cop="resources/heat/gshp_cop_s{simpl}_{clusters}.csv",
         solar_thermal="resources/heat/solar_thermal_s{simpl}_{clusters}.csv",
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
-        industry_demands="data/industry_demand_locations.csv",
+        #industry_demands="data/industry_demand_locations.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
     output:
@@ -126,13 +126,12 @@ rule build_industry_demand: #Yes
         industrial_distribution_key="resources/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",    
         industrial_production_per_country_tomorrow="resources/industrial_production_per_country_tomorrow_{planning_horizons}.csv",
         industrial_production_per_country="resources/industrial_production_per_country.csv"
-        
     output:
-        industrial_energy_demand_per_node="resources/industrial_energy_demand_per_node_{planning_horizons}.csv"
+        industrial_energy_demand_per_node="resources/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
     threads: 1
     resources: mem_mb=1000
-    benchmark: "benchmarks/industrial_energy_demand_per_node_{planning_horizons}.csv"
-    script: 'scripts/test.py'
+    benchmark: "benchmarks/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
+    script: 'scripts/build_industry_demand.py'
     
 rule build_cop_profiles:
     input:
