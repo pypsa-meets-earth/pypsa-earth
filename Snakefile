@@ -137,8 +137,6 @@ rule prepare_heat_data:
         network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="resources/energy_totals.csv",
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        # This is probably still dummy data, investigate and use real data TODO
-        #temp_air_total="resources/temp_air_total_elec_s_4.nc",  # hardcoded wildcards temporary
         temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
         cop_soil_total="resources/cop_soil_total_elec_s{simpl}_{clusters}.nc",
         cop_air_total="resources/cop_air_total_elec_s{simpl}_{clusters}.nc",
@@ -201,7 +199,7 @@ rule build_industrial_distribution_key:
             "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        GID_industrial_database="data/morocco_cement_industry.csv",
+        industrial_database="data/morocco_cement_industry.csv",
     output:
         industrial_distribution_key="resources/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
     threads: 1

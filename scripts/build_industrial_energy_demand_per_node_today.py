@@ -12,14 +12,9 @@ sector_mapping = {
 }
 
 
-def build_nodal_industrial_energy_demand():
+def build_nodal_industrial_energy_demand(industrial_demand, keys):
 
-    fn = snakemake.input.industrial_energy_demand_per_country_today
-    industrial_demand = pd.read_csv(fn, header=[0, 1], index_col=0)
-
-    fn = snakemake.input.industrial_distribution_key
-    keys = pd.read_csv(fn, index_col=0)
-    keys["country"] = keys.index.str[:2]
+    dist_keys["country"] = keys.index.str[:2]                                   #TODO 2digit_3_digit adaptation needed
 
     nodal_demand = pd.DataFrame(
         0.0, dtype=float, index=keys.index, columns=industrial_demand.index
@@ -44,8 +39,7 @@ def build_nodal_industrial_energy_demand():
 
     nodal_demand.index.name = "TWh/a"
 
-    nodal_demand.to_csv(snakemake.output.industrial_energy_demand_per_node_today)
-
+    return nodal_demand
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -54,7 +48,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_energy_demand_per_node_today",
             simpl="",
-            clusters=48,
+            clusters=9077,
         )
+        
+    demand_path = snakemake.input.industrial_energy_demand_per_country_today
+    demand_ct_td = pd.read_csv(demand_path, header=[0, 1], index_col=0)
 
-    build_nodal_industrial_energy_demand()
+    keys_path = snakemake.input.industrial_distribution_key
+    dist_keys = pd.read_csv(keys_path, index_col=0)
+    
+    nodal_demand = build_nodal_industrial_energy_demand(demand_ct_td, dist_keys)
+    nodal_demand.to_csv(snakemake.output.industrial_energy_demand_per_node_today)
