@@ -389,12 +389,13 @@ def busmap_by_stubs(network, matching_attrs=None):
     G = network.graph()
 
     def attrs_match(u, v):
-        return (
-            matching_attrs is None
-            or (
-                all([network.buses.loc[u, matching_attrs]
-                    == network.buses.loc[v, matching_attrs]])
-                )
+        return matching_attrs is None or (
+            all(
+                [
+                    network.buses.loc[u, matching_attrs]
+                    == network.buses.loc[v, matching_attrs]
+                ]
+            )
         )
 
     while True:
