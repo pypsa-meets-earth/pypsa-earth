@@ -239,6 +239,7 @@ def get_hydro_capacity_annual_hydro_generation(
         pd.read_csv(
             fn,
             comment="#",
+            keep_default_na=False,
             na_values=["-"],
             index_col=0,
         )
