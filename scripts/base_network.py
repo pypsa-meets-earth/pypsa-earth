@@ -121,10 +121,7 @@ def _load_buses_from_osm():
 
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
-    # All carriers are temporary set to "AC" to avoid the mixed-carries problem
-    # TODO: remove to enable HVDC buses and lines once properly debugged
-    # buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
-    buses["carrier"] = "AC"
+    buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
     buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
@@ -184,6 +181,7 @@ def _load_lines_from_osm(buses):
     return lines
 
 
+# TODO Seems to be not needed anymore
 def _load_links_from_osm(buses):
     # the links file can be empty
     if os.path.getsize(snakemake.input.osm_converters) == 0:
@@ -214,6 +212,24 @@ def _load_links_from_osm(buses):
     return links
 
 
+def _load_converters_from_osm(buses):
+    # the links file can be empty
+    if os.path.getsize(snakemake.input.osm_converters) == 0:
+        converters = pd.DataFrame()
+        return converters
+
+    converters = read_csv_nafix(
+        snakemake.input.osm_converters,
+        dtype=dict(converter_id="str", bus0="str", bus1="str"),
+    ).set_index("converter_id")
+
+    # converters = _remove_dangling_branches(converters, buses)
+
+    converters["carrier"] = "B2B"
+
+    return converters
+
+
 def _load_transformers_from_osm(buses):
     transformers = (
         read_csv_nafix(
@@ -240,6 +256,17 @@ def _set_electrical_parameters_lines(lines):
     return lines
 
 
+def _set_electrical_parameters_dc_lines(lines):
+    v_noms = snakemake.config["electricity"]["voltages"]
+    lines["carrier"] = "DC"
+
+    lines["type"] = snakemake.config["lines"]["dc_type"]
+
+    lines["s_max_pu"] = snakemake.config["lines"]["s_max_pu"]
+
+    return lines
+
+
 def _set_electrical_parameters_links(links):
     if links.empty:
         return links
@@ -248,23 +275,7 @@ def _set_electrical_parameters_links(links):
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
-    # TODO Include p_nom_max? (in case it's not inf)
-    # links_p_nom = pd.read_csv(links_p_nom)
-
-    # # filter links that are not in operation anymore
-    # removed_b = links_p_nom.Remarks.str.contains('Shut down|Replaced', na=False)
-    # links_p_nom = links_p_nom[~removed_b]
-
-    # # find closest link for all links in links_p_nom
-    # links_p_nom['j'] = _find_closest_links(links, links_p_nom)
-
-    # links_p_nom = links_p_nom.groupby(['j'],as_index=False).agg({'Power (MW)': 'sum'})
-
-    # p_nom = links_p_nom.dropna(subset=["j"]).set_index("j")["Power (MW)"]
-
-    # # Don't update p_nom if it's already set
-    # p_nom_unset = p_nom.drop(links.index[links.p_nom.notnull()], errors='ignore') if "p_nom" in links else p_nom
-    # links.loc[p_nom_unset.index, "p_nom"] = p_nom_unset
+    links["carrier"] = "DC"
 
     return links
 
@@ -280,11 +291,31 @@ def _set_electrical_parameters_transformers(transformers):
     return transformers
 
 
+def _set_electrical_parameters_converters(converters):
+    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
+    converters["p_max_pu"] = p_max_pu
+    converters["p_min_pu"] = -p_max_pu
+
+    converters["p_nom"] = 2000  # [MW]?
+
+    # Converters are combined with links
+    converters["under_construction"] = False
+    converters["underground"] = False
+
+    return converters
+
+
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
     n.lines["s_nom"] = (
         np.sqrt(3)
         * n.lines["type"].map(n.line_types.i_nom)
+        * n.lines["v_nom"]
+        * n.lines.num_parallel
+    )
+    # Re-define s_nom for DC lines
+    n.lines.loc[n.lines["carrier"] == "DC", "s_nom"] = (
+        n.lines["type"].map(n.line_types.i_nom)
         * n.lines["v_nom"]
         * n.lines.num_parallel
     )
@@ -405,15 +436,17 @@ def _rebase_voltage_to_config(component):
 def base_network():
     buses = _load_buses_from_osm().reset_index()
     lines = _load_lines_from_osm(buses)
-    lines_dc = _load_links_from_osm(buses)
     transformers = _load_transformers_from_osm(buses)
+    converters = _load_converters_from_osm(buses)
 
-    # TODO: Set appropriate electrical parameters for AC and DC lines once properly debugged
-    # lines = _set_electrical_parameters_lines(lines)
+    lines_ac = lines[lines.tag_frequency.astype(float) != 0]
+    lines_dc = lines[lines.tag_frequency.astype(float) == 0]
 
-    lines_ac_dc = pd.concat([lines, lines_dc], ignore_index=True)
-    lines_ac_dc = _set_electrical_parameters_lines(lines_ac_dc)
+    lines_ac = _set_electrical_parameters_lines(lines_ac)
+    lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
+
     transformers = _set_electrical_parameters_transformers(transformers)
+    converters = _set_electrical_parameters_converters(converters)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
@@ -422,13 +455,31 @@ def base_network():
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
     n.import_components_from_dataframe(buses, "Bus")
-    # n.import_components_from_dataframe(lines, "Line")
+
+    if snakemake.config["electricity"]["hvdc_as_lines"]:
+        lines = pd.concat([lines_ac, lines_dc])
+        n.import_components_from_dataframe(lines, "Line")
+    else:
+        lines_dc = _set_electrical_parameters_links(lines_dc)
+        n.import_components_from_dataframe(lines_ac, "Line")
+        # The columns which names starts with "bus" are mixed up with the third-bus specification
+        # when executing additional_linkports()
+        lines_dc.drop(
+            labels=[
+                "bus0_lon",
+                "bus0_lat",
+                "bus1_lon",
+                "bus1_lat",
+                "bus_0_coors",
+                "bus_1_coors",
+            ],
+            axis=1,
+            inplace=True,
+        )
+        n.import_components_from_dataframe(lines_dc, "Link")
+
     n.import_components_from_dataframe(transformers, "Transformer")
-    # n.import_components_from_dataframe(links, "Link")
-    # # TODO How to add converters? -> PyPSA-Eur approach:
-    # n.import_components_from_dataframe(converters, "Link")
-    # Load AC and DC lines as "Line" component to avoid problems with preprocessing links by the solver
-    n.import_components_from_dataframe(lines_ac_dc, "Line")
+    n.import_components_from_dataframe(converters, "Link")
 
     _set_lines_s_nom_from_linetypes(n)
 
