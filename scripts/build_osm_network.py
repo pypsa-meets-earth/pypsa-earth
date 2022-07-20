@@ -197,7 +197,7 @@ def set_lines_ids(lines, buses, distance_crs):
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
 
-        row["dc"] = row["tag_frequency"] == 0
+        row["dc"] = float(row["tag_frequency"]) == 0
 
         # select buses having the voltage level of the current line
         buses_sel = busesepsg[
@@ -428,7 +428,7 @@ def get_converters(buses, lines):
                 # A converter is added between a DC nodes and AC one with the closest voltage
                 id_1 = ac_voltages.sub(u).abs().idxmin()
 
-                geom_trans = LineString(
+                geom_conv = LineString(
                     [g_value.geometry.loc[id_0], g_value.geometry.loc[id_1]]
                 )
 
@@ -437,52 +437,25 @@ def get_converters(buses, lines):
                         f"convert_{g_name}_{id_0}",  # "line_id"
                         g_value["bus_id"].loc[id_0],  # "bus0"
                         g_value["bus_id"].loc[id_1],  # "bus1"
-                        g_value.voltage.loc[[id_0, id_1]].max(),  # "voltage"
-                        1,  # "circuits"
-                        0.0,  # "length"
                         False,  # "underground"
                         False,  # "under_construction"
-                        "transmission",  # "tag_type"
-                        0,  # "tag_frequency"
                         g_value.country.loc[id_0],  # "country"
-                        geom_trans,  # "geometry"
-                        geom_trans.bounds,  # "bounds"
-                        g_value.geometry.loc[id_0],  # "bus_0_coors"
-                        g_value.geometry.loc[id_1],  # "bus_1_coors"
-                        g_value.geometry.loc[id_0].x,  # "bus0_lon"
-                        g_value.geometry.loc[id_0].y,  # "bus0_lat"
-                        g_value.geometry.loc[id_1].x,  # "bus1_lon"
-                        g_value.geometry.loc[id_1].y,  # "bus1_lat"
+                        geom_conv,  # "geometry"
                     ]
                 )
 
     # name of the columns
-    trasf_columns = [
-        "line_id",
+    conv_columns = [
+        "converter_id",
         "bus0",
         "bus1",
-        "voltage",
-        "circuits",
-        "length",
         "underground",
         "under_construction",
-        "tag_type",
-        "tag_frequency",
         "country",
         "geometry",
-        "bounds",
-        "bus_0_coors",
-        "bus_1_coors",
-        "bus0_lon",
-        "bus0_lat",
-        "bus1_lon",
-        "bus1_lat",
     ]
 
-    df_converters = gpd.GeoDataFrame(df_converters, columns=trasf_columns)
-    df_converters.set_index(lines.index[-1] + df_converters.index + 1, inplace=True)
-    # update line endings
-    df_converters = line_endings_to_bus_conversion(df_converters)
+    df_converters = gpd.GeoDataFrame(df_converters, columns=conv_columns).reset_index()
 
     return df_converters
 
@@ -634,10 +607,8 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     logger.info("Stage 3d/4: Add converters to lines")
 
-    # get converters: currently modelled as lines connecting buses with different polarity
-    converters = get_converters(buses, lines)
     # append fake converters
-    lines = pd.concat([lines, converters], ignore_index=True)
+    # lines = pd.concat([lines, converters], ignore_index=True)
 
     # reset index
     lines.reset_index(drop=True, inplace=True)
@@ -891,10 +862,11 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-    converters = lines[lines.line_id.str.contains("convert")].reset_index(drop=True)
-    lines = lines[~lines.line_id.str.contains("convert")].reset_index(drop=True)
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
+
+    # get converters: currently modelled as links connecting buses with different polarity
+    converters = get_converters(buses, lines)
 
     logger.info("Save outputs")
 
