@@ -1949,7 +1949,7 @@ if __name__ == "__main__":
     # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-
+    )
     # Ground-sourced heatpump coefficient of performance
     gshp_cop = pd.read_csv(
         snakemake.input.gshp_cop, index_col=0, parse_dates=True
