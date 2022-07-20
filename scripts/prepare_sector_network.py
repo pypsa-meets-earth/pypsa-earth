@@ -811,6 +811,8 @@ def h2_hc_conversions(n, costs):
 
 def add_shipping(n, costs):
 
+    ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+
     gadm_level = options["gadm_level"]
 
     efficiency = (
@@ -819,8 +821,6 @@ def add_shipping(n, costs):
 
     # check whether item depends on investment year
     shipping_hydrogen_share = get(options["shipping_hydrogen_share"], investment_year)
-
-    ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(port[["x", "y"]], port["country"], gadm_level), axis=1
@@ -950,9 +950,6 @@ def add_industry(n, costs):
 
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
-    industrial_demand = pd.read_csv(
-        snakemake.input.industrial_demand, index_col=0
-    )  # * 1e6
 
     industrial_demand.reset_index(inplace=True)
 
@@ -1931,23 +1928,25 @@ if __name__ == "__main__":
 
     # TODO logging
 
+    # nodal_energy_totals = pd.read_csv(
+    #     snakemake.input.nodal_energy_totals, index_col=0
+    # )
+
     # Get the data required for land transport
-    nodal_energy_totals = pd.read_csv(
-        snakemake.input.nodal_energy_totals, index_col=0
-    )  # where is nodal_energy_totals_4
-    transport = (
-        pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True) * 0.75
-    )  # TODO remove factor
+    # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
+    transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
+
     avail_profile = pd.read_csv(
         snakemake.input.avail_profile, index_col=0, parse_dates=True
     )
     dsm_profile = pd.read_csv(
         snakemake.input.dsm_profile, index_col=0, parse_dates=True
     )
-    nodal_transport_data = pd.read_csv(
+    nodal_transport_data = pd.read_csv(  # TODO Leon, This only includes no. of cars, change name to something descriptive?
         snakemake.input.nodal_transport_data, index_col=0
     )
 
+    # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
     )
@@ -1959,11 +1958,38 @@ if __name__ == "__main__":
         snakemake.input.solar_thermal, index_col=0, parse_dates=True
     )
 
-    district_heat_share = pd.read_csv(
-        snakemake.input.district_heat_share, index_col=0
-    ).iloc[:, 0]
+    # Ground-sourced heatpump coefficient of performance
+    gshp_cop = pd.read_csv(
+        snakemake.input.gshp_cop, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+    # TODO add option heat_dep_hp_cop to the config
 
-    add_co2(n, costs, nodes, options)  # TODO add costs
+    # Air-sourced heatpump coefficient of performance
+    ashp_cop = pd.read_csv(
+        snakemake.input.ashp_cop, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+
+    # Solar thermal availability profiles
+    solar_thermal = pd.read_csv(
+        snakemake.input.solar_thermal, index_col=0, parse_dates=True
+    )
+
+    # Share of district heating at each node
+    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
+
+    # Load data required for aviation and navigation
+    # TODO follow the same structure as land transport and heat
+
+    # Load industry demand data
+    industrial_demand = pd.read_csv(
+        snakemake.input.industrial_demand, index_col=0
+    )  # * 1e6
+
+    ##########################################################################
+    ############## Functions adding different carrires and sectors ###########
+    ##########################################################################
+
+    add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
     # add_generation(n, costs)
@@ -2017,9 +2043,3 @@ if __name__ == "__main__":
     # TODO changes in case of myopic oversight
 
     # TODO add co2 tracking function
-
-    # TODO add generation
-
-    # TODO add storage  HERE THE H2 CARRIER IS ADDED IN PYPSA-EUR-SEC
-
-    # TODO add options as in PyPSA-EUR-SEC
