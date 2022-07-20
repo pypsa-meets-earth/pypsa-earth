@@ -52,7 +52,7 @@ is provided in the
 The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
 Additionally, some extra constraints specified in :mod:`prepare_network` are added.
 
-Solving the network in multiple iterations is motivated through the dependence of transmission line capacities and impedances.
+Solving the network in multiple iterations is motivated through the dependence of transmission line capacities and impedances on values of corresponding flows.
 As lines are expanded their electrical parameters change, which renders the optimisation bilinear even if the power flow
 equations are linearized.
 To retain the computational advantage of continuous linear programming, a sequential linear programming technique

@@ -175,6 +175,7 @@ def weighting_for_country(n, x):
     l = normed(load.reindex(b_i, fill_value=0))
 
     w = g + l
+
     return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
@@ -347,7 +348,7 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("random_state", 0)
 
     n.determine_network_topology()
-    n.lines.loc[:, "sub_network"] = "0"  # current fix
+    # n.lines.loc[:, "sub_network"] = "0"  # current fix
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(
@@ -366,8 +367,10 @@ def busmap_for_n_clusters(
         return nr
 
     def busmap_for_country(x):
+
+        # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
-            n_cluster_c = n_clusters[x.name]
+            n_cluster_c = n_clusters[x.name[0]]
         else:
             n_cluster_c = n_clusters
 
@@ -393,8 +396,8 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            # ["country", "sub_network"], #TODO: 2. Add sub_networks (see previous TODO)
-            ["country"],
+            ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
+            # ["country"],
             group_keys=False,
         )
         .apply(busmap_for_country)

@@ -402,12 +402,13 @@ def busmap_by_stubs(network, matching_attrs=None):
     G = network.graph()
 
     def attrs_match(u, v):
-        return (
-            matching_attrs is None
-            or (
-                network.buses.loc[u, matching_attrs]
-                == network.buses.loc[v, matching_attrs]
-            ).all()
+        return matching_attrs is None or (
+            all(
+                [
+                    network.buses.loc[u, matching_attrs]
+                    == network.buses.loc[v, matching_attrs]
+                ]
+            )
         )
 
     while True:
@@ -428,7 +429,7 @@ def busmap_by_stubs(network, matching_attrs=None):
 def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
     logger.info("Removing stubs")
 
-    busmap = busmap_by_stubs(n)  # ['country'])
+    busmap = busmap_by_stubs(n)
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
 

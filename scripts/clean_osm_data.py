@@ -77,7 +77,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
     bus_e = gpd.GeoDataFrame(columns=substations.columns)
 
-    is_ac = lines["tag_frequency"] != 0
+    is_ac = lines["tag_frequency"].astype(float) != 0
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
@@ -389,7 +389,7 @@ def integrate_lines_df(df_all_lines, distance_crs):
             ac_freq_levels = grid_freq_levels.loc[
                 grid_freq_levels.index.get_level_values(0) != "0"
             ]
-            ac_freq_default = ac_freq_levels.index.get_level_values(0)[0]
+            ac_freq_default = float(ac_freq_levels.index.get_level_values(0)[0])
 
         df_all_lines.loc[
             df_all_lines["tag_frequency"].isna(), "tag_frequency"

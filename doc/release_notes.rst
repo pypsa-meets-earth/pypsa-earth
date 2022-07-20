@@ -69,19 +69,21 @@ Upcoming Release
 
 * Fix bug in GADM clustering. Missing crs input. `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
 
-* Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`
+* Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`_
 
-* Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`
+* Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`_
 
-* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`
+* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`_
 
-* Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`
+* Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`_
 
-* Enable the use of a float value for the scale in load_options `PR #397 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/397>`
+* Enable the use of a float value for the scale in load_options `PR #397 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/397>`_
 
-* Add operational reserve margin according to PyPSA-Eur `PR #399 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/399>`
+* Add operational reserve margin according to PyPSA-Eur `PR #399 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/399>`_
 
-* Add optional normalization of hydro inflows by hydro_capacities or eia stats `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`
+* Add optional normalization of hydro inflows by hydro_capacities or eia stats `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`_
+
+* Enable DC carrier in the network model and include converters into the model `PR #392 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/392>`_
 
 * Implement PyPSA-Eur improvements. Add gas limit constraints, add marginal cost sweeps wildcard, add and harmonize aggregation strategies, improve config usability by carrier clarifications, ease debugging by removing snakemake inputs from functions `PR #402 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/402>`
 
