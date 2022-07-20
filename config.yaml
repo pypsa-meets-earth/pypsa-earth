@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_industry
+run: test_shipping_lowccap_5
 
 foresight: overnight
 

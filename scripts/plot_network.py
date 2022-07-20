@@ -170,6 +170,7 @@ def plot_h2_infra(network):
     )
 
 
+
 def plot_transmission_topology(network):
 
     n = network.copy()
@@ -524,6 +525,7 @@ def plot_map(
     # plt.legend(handles=[red_patch])
 
     fig.savefig(snakemake.output.map, transparent=True, bbox_inches="tight")
+    fig.savefig(snakemake.output.map.replace('pdf', 'png'), transparent=True, bbox_inches="tight")
     # fig.savefig('plot_map.pdf', transparent=True,
     #         bbox_inches="tight")#, dpi=300)
 
@@ -572,7 +574,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="907",
+            clusters="5960",
             ll="c1",
             opts="Co2L",
             planning_horizons="2030",
@@ -582,6 +584,6 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     tech_colors = snakemake.config["plotting"]["tech_colors"]
-    plot_map(n, transmission=True)
+    plot_map(n, transmission=False)
     plot_transmission_topology(n)
     plot_h2_infra(n)
