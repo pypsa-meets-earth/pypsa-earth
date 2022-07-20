@@ -161,7 +161,7 @@ rule build_solar_thermal_profiles:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -197,7 +197,7 @@ rule build_population_layouts:
 rule build_industrial_distribution_key:
     input:
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         GID_industrial_database="data/morocco_cement_industry.csv",
@@ -261,7 +261,7 @@ rule build_clustered_population_layouts:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -280,7 +280,7 @@ rule build_heat_demand:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -301,7 +301,7 @@ rule build_temperature_profiles:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
