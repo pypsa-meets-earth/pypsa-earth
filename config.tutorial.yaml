@@ -128,7 +128,7 @@ electricity:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
-    Link: [AC, DC]
+    Link: []  # H2_pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
   custom_powerplants: false
