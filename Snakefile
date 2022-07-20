@@ -178,7 +178,7 @@ rule build_solar_thermal_profiles:
 
 rule build_population_layouts:
     input:
-        nuts3_shapes=pypsaearth("resources/gadm_shapes.geojson"),
+        nuts3_shapes=pypsaearth("resources/shapes/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
