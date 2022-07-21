@@ -47,16 +47,16 @@ databundles:
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
   # tutorial bundle specific for Nigeria and Benin only
-  bundle_resources_tutorial:
+  bundle_loadscenarios_tutorial:
     countries: [NG, BJ]
     tutorial: true
-    category: resources
-    destination: "resources"
+    category: loadscenarios
+    destination: "data"
     urls:
       zenodo: https://sandbox.zenodo.org/record/1016001/files/tutorial_resources.zip?download=1
       gdrive: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
     output:
-    - resources/ssp2-2.6/2030/era5_2013/Africa.nc
+    - data/ssp2-2.6/2030/era5_2013/Africa.nc
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial:
@@ -89,16 +89,16 @@ databundles:
 
 
   # resources bundle containing the resources folder for africa only
-  bundle_resources_earth:
+  bundle_loadscenarios_earth:
     countries: [Earth]
-    category: resources
-    destination: "resources"
+    category: loadscenarios
+    destination: "data"
     urls:
       zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
     output:
-    - resources/ssp2-2.6/2030/era5_2013/Africa.nc
-    - resources/natura.tiff
+    - data/ssp2-2.6/2030/era5_2013/Africa.nc
+    - data/natura.tiff
 
   # data bundle of the data folder for the african continent
   bundle_landcover_africa:
