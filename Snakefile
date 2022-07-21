@@ -342,6 +342,12 @@ rule add_electricity:
             f"profile_{tech}": f"resources/profile_{tech}.nc"
             for tech in config["renewable"]
         },
+        **{
+            f"conventional_{carrier}_{attr}": fn
+            for carrier, d in config.get("conventional", {None: {}}).items()
+            for attr, fn in d.items()
+            if str(fn).startswith("data/")
+        },
         base_network="networks/base.nc",
         tech_costs=COSTS,
         regions="resources/regions_onshore.geojson",
@@ -373,6 +379,7 @@ rule simplify_network:
         regions_onshore="resources/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/regions_offshore_elec_s{simpl}.geojson",
         busmap="resources/busmap_elec_s{simpl}.csv",
+        connection_costs="resources/connection_costs_s{simpl}.csv",
     log:
         "logs/simplify_network/elec_s{simpl}.log",
     benchmark:
@@ -555,6 +562,7 @@ def input_make_summary(w):
 rule make_summary:
     input:
         input_make_summary,
+        tech_costs=COSTS,
     output:
         directory(
             "results/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}"

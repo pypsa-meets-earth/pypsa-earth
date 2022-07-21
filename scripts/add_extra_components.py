@@ -237,10 +237,10 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = load_costs(
+        snakemake.input.tech_costs,
+        snakemake.config["costs"],
+        snakemake.config["electricity"],
         Nyears,
-        tech_costs=snakemake.input.tech_costs,
-        config=snakemake.config["costs"],
-        elec_config=snakemake.config["electricity"],
     )
 
     attach_storageunits(n, costs)
