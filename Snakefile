@@ -129,6 +129,15 @@ if config["enable"].get("retrieve_databundle", True):
             "scripts/retrieve_databundle_light.py"
 
 
+rule copy_loadscenarios:
+    input:
+        "data/ssp2-2.6/2030/era5_2013/Africa.nc",
+    output:
+        "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
+    run:
+        shell("cp -r data/ssp2-2.6 resources/ssp2-2.6")
+
+
 if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
