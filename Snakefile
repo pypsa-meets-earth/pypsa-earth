@@ -286,6 +286,17 @@ if config["enable"].get("build_natura_raster", False):
             "scripts/build_natura_raster.py"
 
 
+if not config["enable"].get("build_natura_raster", False):
+
+    rule copy_defaultnatura_tiff:
+        input:
+            "data/natura.tiff",
+        output:
+            "resources/natura.tiff",
+        run:
+            shell("cp {input} {output}")
+
+
 rule build_renewable_profiles:
     input:
         base_network="networks/base.nc",
