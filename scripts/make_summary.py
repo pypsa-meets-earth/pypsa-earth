@@ -513,10 +513,10 @@ def make_summaries(networks_dict, country="all"):
 
         Nyears = n.snapshot_weightings.objective.sum() / 8760.0
         costs = load_costs(
-            Nyears,
-            snakemake.input[0],
+            snakemake.input.tech_costs,
             snakemake.config["costs"],
             snakemake.config["electricity"],
+            Nyears,
         )
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
 
