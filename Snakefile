@@ -137,14 +137,7 @@ rule copy_loadscenarios:
     run:
         import shutil, os
 
-        try:
-            print(
-                shutil.copytree(
-                    "data/ssp2-2.6", "resources/ssp2-2.6", dirs_exist_ok=True
-                )
-            )
-        except Exception as e:
-            print(e)
+        shutil.copytree("data/ssp2-2.6", "resources/ssp2-2.6", dirs_exist_ok=True)
 
 
 if config["enable"].get("download_osm_data", True):
