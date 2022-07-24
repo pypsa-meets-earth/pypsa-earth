@@ -66,10 +66,10 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.sum().values[0] / 8760.0
     costs = load_costs(
-        Nyears,
         snakemake.input.tech_costs,
         snakemake.config["costs"],
         snakemake.config["electricity"],
+        Nyears,
     )
     options = snakemake.config["augmented_line_connection"]
     min_expansion_option = options.get("min_expansion")

@@ -37,8 +37,6 @@ _logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-africa")
 
-EEZ_CRS = "EPSG:4326"
-
 
 def download_GADM(country_code, update=False, out_logging=False):
     """
