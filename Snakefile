@@ -135,8 +135,16 @@ rule copy_loadscenarios:
     output:
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
     run:
-        shell("mkdir -p resources")
-        shell("cp -r data/ssp2-2.6/ resources/")
+        import shutil, os
+
+        try:
+            print(
+                shutil.copytree(
+                    "data/ssp2-2.6", "resources/ssp2-2.6", dirs_exist_ok=True
+                )
+            )
+        except Exception as e:
+            print(e)
 
 
 if config["enable"].get("download_osm_data", True):
@@ -304,7 +312,9 @@ if not config["enable"].get("build_natura_raster", False):
         output:
             "resources/natura.tiff",
         run:
-            shell("cp {input} {output}")
+            import shutil
+
+            shutil.copyfile(input[0], output[0])
 
 
 rule build_renewable_profiles:
