@@ -135,7 +135,8 @@ rule copy_loadscenarios:
     output:
         "resources/ssp2-2.6/2030/era5_2013/Africa.nc",
     run:
-        shell("cp -r data/ssp2-2.6/ resources/ssp2-2.6/")
+        shell("mkdir -p resources")
+        shell("cp -r data/ssp2-2.6/ resources/")
 
 
 if config["enable"].get("download_osm_data", True):
