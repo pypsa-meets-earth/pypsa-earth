@@ -29,7 +29,7 @@ configfile: "configs/bundle_config.yaml"
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
-load_data_paths = get_load_paths_gegis(config)
+load_data_paths = get_load_paths_gegis("data", config)
 COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 20)
 

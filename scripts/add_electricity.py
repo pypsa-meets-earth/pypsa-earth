@@ -242,7 +242,7 @@ def load_powerplants(ppl_fn):
     )
 
 
-def get_load_paths_gegis(config):
+def get_load_paths_gegis(ssp_parentfolder, config):
     """
     Creates load paths for the GEGIS outputs
 
@@ -262,7 +262,7 @@ def get_load_paths_gegis(config):
     load_paths = []
     for continent in region_load:
         load_path = os.path.join(
-            "data",
+            ssp_parentfolder,
             str(ssp),
             str(prediction_year),
             "era5_" + str(weather_year),
