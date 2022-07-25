@@ -262,7 +262,7 @@ def get_load_paths_gegis(config):
     load_paths = []
     for continent in region_load:
         load_path = os.path.join(
-            "resources",
+            "data",
             str(ssp),
             str(prediction_year),
             "era5_" + str(weather_year),
