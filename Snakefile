@@ -459,6 +459,15 @@ rule prepare_db:
 
 rule run_test:
     run:
-        shell("cp ../pypsa-africa/test/config.test1.yaml ./config.pypsa-earth.yaml")
+        import yaml
+
+        with open("../pypsa-africa/test/config.test1.yaml") as file:
+            config_pypsaearth = yaml.full_load(file)
+            config_pypsaearth["extendable_carriers"]["Store"] = []
+            config_pypsaearth["extendable_carriers"]["Link"] = []
+
+            with open("./config.pypsa-earth.yaml", "w") as wfile:
+                yaml.dump(config_pypsaearth, wfile)
+
         shell("cp test/config.test1.yaml config.yaml")
         shell("snakemake --cores all solve_all_networks --forceall")
