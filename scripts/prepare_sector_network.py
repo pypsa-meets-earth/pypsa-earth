@@ -951,7 +951,7 @@ def add_industry(n, costs):
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
 
-    industrial_demand.reset_index(inplace=True)
+    # industrial_demand.reset_index(inplace=True)
 
     # Add carrier Biomass
 
@@ -1018,7 +1018,7 @@ def add_industry(n, costs):
     # industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
     #     lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
 
-    industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+    # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
     n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
 
@@ -1887,11 +1887,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="53",
+            clusters="4",
             ll="c1",
-            opts="",
+            opts="Co2L-144H",
             planning_horizons="2030",
-            sopts="Co2L-720H",
+            sopts="7H",
         )
 
     # TODO fetch from config
