@@ -456,6 +456,7 @@ rule prepare_db:
     script:
         "scripts/prepare_db.py"
 
+
 rule run_test:
     run:
         shell("cp ../pypsa-africa/test/config.test1.yaml ./config.pypsa-earth.yaml")
