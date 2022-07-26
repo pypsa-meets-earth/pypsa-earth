@@ -92,7 +92,7 @@ def add_generation(n, costs):
         n.madd(
             "Link",
             nodes + " " + generator,
-            bus0="Africa " + carrier,
+            bus0=spatial.gas.nodes,
             bus1=nodes,
             bus2="co2 atmosphere",
             marginal_cost=costs.at[generator, "efficiency"]
