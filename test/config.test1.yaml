@@ -21,6 +21,8 @@ scenario:
   - "c1"
   opts:
   - "Co2L-144H"
+  sopts:
+  - "7H"
 
 costs:
   lifetime: 25 #default lifetime
@@ -140,6 +142,7 @@ sector:
   marginal_cost_storage: 0
   methanation: true
   helmeth: true
+  dac: true
   SMR: true
   cc_fraction: 0.9
 
