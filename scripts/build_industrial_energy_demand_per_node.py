@@ -2,6 +2,7 @@
 """Build industrial energy demand per node."""
 
 from itertools import product
+import os
 
 import pandas as pd
 
@@ -45,6 +46,7 @@ def build_nodal_industrial_production():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
             "build_industrial_energy_demand_per_node",
