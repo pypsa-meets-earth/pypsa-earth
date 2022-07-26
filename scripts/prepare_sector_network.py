@@ -1965,7 +1965,7 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    add_heat(n, costs)
+    #add_heat(n, costs)
     
     sopts = snakemake.wildcards.sopts.split('-')
     
@@ -1981,7 +1981,8 @@ if __name__ == "__main__":
 
     if options["dac"]:
         add_dac(n, costs)
-
+   # add_biomass(n, costs)
+    n.lines.s_nom*=0.3
     n.export_to_netcdf(snakemake.output[0])
 
 
@@ -1989,7 +1990,6 @@ if __name__ == "__main__":
     # n.lopf()
 
     # Add biomass (TODO currently only for debugging, not working yet)
-    add_biomass(n, costs)
 
     # TODO define spatial (for biomass and co2)
 

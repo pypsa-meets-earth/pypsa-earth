@@ -574,7 +574,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="5960",
+            clusters="111",
             ll="c1",
             opts="Co2L",
             planning_horizons="2030",

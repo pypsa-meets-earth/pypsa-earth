@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_shipping_lowccap_5
+run: v.0.0.1_test3H_6_(copy)
 
 foresight: overnight
 
@@ -13,15 +13,15 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 111
+  - 238
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
-  - "c1"
+  - "c1.0"
   opts:
   - "Co2L"
   sopts:
-  - "720H"
+  - "72H"
 
 countries: ['MA']
 
@@ -105,7 +105,7 @@ solar_thermal:
     azimuth: 180.
 
 sector:
-  gas_network: false
+  gas_network: true
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share
@@ -224,7 +224,7 @@ solving:
 
   solver:
     name: gurobi
-    threads: 4
+    threads: 25
     method: 2 # barrier
     crossover: 0
     BarConvTol: 1.e-6
@@ -429,3 +429,4 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
+    solid biomass for industry CC: green

@@ -372,7 +372,7 @@ rule solve_network:
         + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_python.log",
         memory=RDIR
         + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_memory.log",
-    threads: 4
+    threads: 25
     resources:
         mem_mb=config["solving"]["mem"],
     benchmark:

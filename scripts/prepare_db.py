@@ -33,10 +33,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_db",
             simpl="",
-            clusters="57",
-            ll="copt",
-            opts="Co2L5-72H",
+            clusters="118",
+            ll="c1",
+            opts="Co2L",
             planning_horizons="2030",
+            sopts="3H"
         )
 
     n0 = pypsa.Network(snakemake.input.network)
@@ -46,17 +47,17 @@ if __name__ == "__main__":
 
 #%%
 # def summary_h2(n, t):
-t = 24
+t = 3
 
 n = n0.copy()
 
 summary_index = (n0.buses.loc[n0.buses.carrier == "AC"].index).sort_values()
 
 nodes = n.buses.loc[n.buses.carrier == "AC"].index.tolist()
-gens = n.generators_t.p * t  # /1e3
-loads = n.loads_t.p * t  # /1e3
-stores = n.stores_t.p * t  # /1e3
-storage = n.storage_units_t.p * t  # /1e3
+gens = n.generators_t.p.rename_axis(None, axis=1) * t  # /1e3
+loads = n.loads_t.p.rename_axis(None, axis=1) * t  # /1e3
+stores = n.stores_t.p.rename_axis(None, axis=1) * t  # /1e3
+storage = n.storage_units_t.p.rename_axis(None, axis=1) * t  # /1e3
 
 pipelines_h2 = n.links_t.p0.filter(like="H2 pipeline")
 ac_lines = n.lines_t.p0.rename(columns=dict(n.lines.bus0 + " -> " + n.lines.bus1))
@@ -79,6 +80,7 @@ summary_elec = pd.DataFrame(index=n0.buses.loc[n0.buses.carrier == "AC"].index)
 
 db = pd.DataFrame(columns=["node_id", "carrier", "flow", "tech", "value"])
 
+names={'g': 'Generator'}
 
 def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario id
     global db
@@ -88,9 +90,9 @@ def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario 
     dbf = (
         dbf.stack()
         .reset_index(level=0)
-        .rename(columns={"name": "DateTime", 0: "value"})
+        .rename(columns={"snapshot": "DateTime", 0: "value"})
         .reset_index()
-        .rename(columns={"name": "node_id"})
+        .rename(columns={'index': "node_id"})
     )
     dbf.node_id = dbf.node_id.str.replace(" " + tech, "")
     # dbf.columns = ['node_id', 'value']
@@ -122,8 +124,8 @@ def add_gen(tech, carrier, reg=False):
 def add_load(tech, carrier):
     global db
     if tech == "ac":
-        ac_labels = loads.stack().reset_index(level=1).name
-        ac_labels = ac_labels[ac_labels.str.len() < 7].unique()
+        ac_labels = loads.stack().reset_index(level=1).level_1
+        ac_labels = ac_labels[ac_labels.str.len() < 11].unique()
         tech_col = loads.filter(ac_labels.tolist())
         # ac_labels = loads.reset_index()[loads.reset_index().name.str.len()<7].name.tolist() #TODO hard coded
         # tech_col = loads[ac_labels]
@@ -143,15 +145,15 @@ def add_load(tech, carrier):
 def add_conv(tech, carrier, p, ngv, reg=False):
     global db
     if p == 0:
-        links = n.links_t.p0 * t  # /1e3
+        links = n.links_t.p0.rename_axis(None, axis=1)* t  # /1e3
     elif p == 1:
-        links = n.links_t.p1 * t  # /1e3
+        links = n.links_t.p1.rename_axis(None, axis=1) * t  # /1e3
     elif p == 2:
-        links = n.links_t.p2 * t  # /1e3
+        links = n.links_t.p2.rename_axis(None, axis=1) * t  # /1e3
     elif p == 3:
-        links = n.links_t.p3 * t  # /1e3
+        links = n.links_t.p3.rename_axis(None, axis=1) * t  # /1e3
     else:
-        links = n.links_t.p4 * t  # /1e3
+        links = n.links_t.p4.rename_axis(None, axis=1) * t  # /1e3
 
     if tech == "battery charger" or tech == "battery discharger":
         drop_list = links.filter(like="home battery").columns.tolist()
@@ -282,8 +284,8 @@ add_conv("urban central resistive heater", "lv", 0, True)
 add_conv("home battery charger", "lv", 0, True)
 add_conv("home battery discharger", "lv", 1, False)
 
-add_load("ac", "lv")
-add_load("industry electricity", "lv")
+add_load("ac", "hv")
+add_load("industry electricity", "hv")
 
 add_gen("residential rural solar thermal collector", "heat")
 add_gen("services rural solar thermal collector", "heat")
@@ -334,7 +336,7 @@ db.reset_index(drop=True, inplace=True)
 round(db).to_csv(snakemake.output.db)
 yearly_agg = round(db.groupby([db.node_id, db.carrier, db.flow, db.tech]).sum() / 1e3)
 # yearly_agg.to_csv('summary_db.csv')
-yearly_agg.to_csv(snakemake.output.yr_agg)
+#yearly_agg.to_csv(snakemake.output.yr_agg)
 #%%
 def calc_energy_flow(carrier, node_id):
     agg = yearly_agg.reset_index()
