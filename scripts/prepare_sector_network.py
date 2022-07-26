@@ -84,9 +84,10 @@ def add_generation(n, costs):
     fallback = {"OCGT": "gas"}
     conventionals = options.get("conventional_generation", fallback)
 
-    add_carrier_buses(n, np.unique(list(conventionals.values())))
 
     for generator, carrier in conventionals.items():
+    
+        add_carrier_buses(n, carrier)
 
         n.madd(
             "Link",
@@ -1922,14 +1923,15 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
+    #TODO Fatal
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    )
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
+    ) /1000
+    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True) 
     
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True)
+    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True) 
     
-    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0, parse_dates=True)
+    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0, parse_dates=True) 
     
 
     district_heat_share = pd.read_csv(
@@ -1939,13 +1941,13 @@ if __name__ == "__main__":
     add_co2(n, costs)#, nodes, options)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
-    # add_generation(n, costs)
 
     # Add_oil() adds oil carrier/bus.
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
     add_oil(n, costs)
 
     add_gas(n, costs)
+    add_generation(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
@@ -1965,7 +1967,7 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    #add_heat(n, costs)
+    add_heat(n, costs)
     
     sopts = snakemake.wildcards.sopts.split('-')
     
@@ -1982,7 +1984,7 @@ if __name__ == "__main__":
     if options["dac"]:
         add_dac(n, costs)
    # add_biomass(n, costs)
-    n.lines.s_nom*=0.3
+    # n.lines.s_nom*=0.3
     n.export_to_netcdf(snakemake.output[0])
 
 

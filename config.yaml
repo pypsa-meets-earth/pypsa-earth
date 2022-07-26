@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: v.0.0.1_test3H_6_(copy)
+run: v.0.0.1_gasgen2_nochp_lowc3
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 238
+  - 252
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,7 +21,7 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "72H"
+  - "73H"
 
 countries: ['MA']
 
@@ -141,7 +141,7 @@ sector:
     central: 180
   boilers: true
   oil_boilers: false
-  chp: true
+  chp: false
   micro_chp: false
   solar_thermal: true
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py

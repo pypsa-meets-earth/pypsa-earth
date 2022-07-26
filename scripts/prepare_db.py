@@ -33,11 +33,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_db",
             simpl="",
-            clusters="118",
-            ll="c1",
+            clusters="252",
+            ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="3H"
+            sopts="73H"
         )
 
     n0 = pypsa.Network(snakemake.input.network)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
 #%%
 # def summary_h2(n, t):
-t = 3
+t = 73
 
 n = n0.copy()
 
