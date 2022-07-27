@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: v.0.0.1_fix_REs+_noexp #_highcap2_wsmr_icefleet
+run: v.0.0.1_fix_REs+_noexp_highcap2_wsmr_icefleet_nodaloil
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 266
+  - 267
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -106,6 +106,7 @@ solar_thermal:
 
 sector:
   gas_network: true
+  oil_network: true
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share

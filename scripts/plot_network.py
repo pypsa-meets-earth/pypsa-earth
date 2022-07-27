@@ -91,7 +91,7 @@ def plot_h2_infra(network):
     # Drop non-electric buses so they don't clutter the plot
     n.buses.drop(n.buses.index[n.buses.carrier != "AC"], inplace=True)
 
-    elec = n.links.index[n.links.carrier == "H2 Electrolysis"]
+    elec = n.links.index[n.links.carrier == "SMR"]
 
     bus_sizes = (
         n.links.loc[elec, "p_nom_opt"].groupby(n.links.loc[elec, "bus0"]).sum()
@@ -99,19 +99,19 @@ def plot_h2_infra(network):
     )
 
     # make a fake MultiIndex so that area is correct for legend
-    bus_sizes.index = pd.MultiIndex.from_product([bus_sizes.index, ["electrolysis"]])
+    bus_sizes.index = pd.MultiIndex.from_product([bus_sizes.index, ["SMR"]])
 
-    n.links.drop(n.links.index[n.links.carrier != "H2 pipeline"], inplace=True)
+    # n.links.drop(n.links.index[n.links.carrier != "H2 pipeline"], inplace=True)
 
-    link_widths = n.links.p_nom_opt / linewidth_factor
-    link_widths[n.links.p_nom_opt < line_lower_threshold] = 0.0
+    # link_widths = n.links.p_nom_opt / linewidth_factor
+    # link_widths[n.links.p_nom_opt < line_lower_threshold] = 0.0
 
-    n.links.bus0 = n.links.bus0.str.replace(" H2", "")
-    n.links.bus1 = n.links.bus1.str.replace(" H2", "")
+    # n.links.bus0 = n.links.bus0.str.replace(" H2", "")
+    # n.links.bus1 = n.links.bus1.str.replace(" H2", "")
 
-    print(link_widths.sort_values())
+    # print(link_widths.sort_values())
 
-    print(n.links[["bus0", "bus1"]])
+    # print(n.links[["bus0", "bus1"]])
 
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
 
@@ -120,8 +120,8 @@ def plot_h2_infra(network):
     n.plot(
         bus_sizes=bus_sizes,
         bus_colors={"electrolysis": bus_color},
-        link_colors=link_color,
-        link_widths=link_widths,
+        # link_colors=link_color,
+        # link_widths=link_widths,
         branch_components=["Link"],
         color_geomap={"ocean": "lightblue", "land": "oldlace"},
         ax=ax,
@@ -577,7 +577,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="264",
+            clusters="267",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",

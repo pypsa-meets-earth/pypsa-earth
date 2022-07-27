@@ -118,8 +118,13 @@ def add_oil(n, costs):
     # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
 
     spatial.oil = SimpleNamespace()
-    spatial.oil.nodes = ["Africa oil"]
-    spatial.oil.locations = ["Africa"]
+
+    if options["oil_network"]:
+        spatial.oil.nodes = nodes + " oil"
+        spatial.oil.locations = nodes
+    else:
+        spatial.oil.nodes = ["Africa oil"]
+        spatial.oil.locations = ["Africa"]
 
     if "oil" not in n.carriers.index:
         n.add("Carrier", "oil")
@@ -414,7 +419,7 @@ def add_biomass(n, costs):
         "Link",
         "biogas to gas",
         bus0="Africa biogas",
-        bus1="Africa gas",
+        bus1=spatial.gas.nodes,
         bus2="co2 atmosphere",
         carrier="biogas to gas",
         capital_cost=costs.loc["biogas upgrading", "fixed"],
@@ -742,7 +747,7 @@ def h2_hc_conversions(n, costs):
             spatial.nodes,
             suffix=" Sabatier",
             bus0=nodes + " H2",
-            bus1="Africa gas",
+            bus1=spatial.gas.nodes,
             bus2=spatial.co2.nodes,
             p_nom_extendable=True,
             carrier="Sabatier",
@@ -762,7 +767,7 @@ def h2_hc_conversions(n, costs):
             spatial.nodes,
             suffix=" helmeth",
             bus0=nodes,
-            bus1="Africa gas",
+            bus1=spatial.gas.nodes,
             bus2=spatial.co2.nodes,
             carrier="helmeth",
             p_nom_extendable=True,
@@ -779,7 +784,7 @@ def h2_hc_conversions(n, costs):
             "Link",
             spatial.nodes,
             suffix=" SMR CC",
-            bus0="Africa gas",
+            bus0=spatial.gas.nodes,
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             bus3=spatial.co2.nodes,
@@ -795,7 +800,7 @@ def h2_hc_conversions(n, costs):
         n.madd(
             "Link",
             nodes + " SMR",
-            bus0="Africa gas",
+            bus0=spatial.gas.nodes,
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             p_nom_extendable=True,
@@ -1008,7 +1013,7 @@ def add_industry(n, costs):
 
     #industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
-    n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
+    n.add("Bus", "gas for industry", location=spatial.gas.locations, carrier="gas for industry")
 
     n.madd(
         "Load",
@@ -1026,7 +1031,7 @@ def add_industry(n, costs):
     n.add(
         "Link",
         "gas for industry",
-        bus0="Africa gas",
+        bus0=spatial.gas.nodes,
         bus1="gas for industry",
         bus2="co2 atmosphere",
         carrier="gas for industry",
@@ -1039,7 +1044,7 @@ def add_industry(n, costs):
         "Link",
         spatial.co2.locations,
         suffix=" gas for industry CC",
-        bus0="Africa gas",
+        bus0=spatial.gas.nodes,
         bus1="gas for industry",
         bus2="co2 atmosphere",
         bus3=spatial.co2.nodes,
@@ -1608,7 +1613,7 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} gas boiler",
                 p_nom_extendable=True,
-                bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name] + f" {name} heat",
                 bus2="co2 atmosphere",
                 carrier=name + " gas boiler",
@@ -1640,7 +1645,7 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP",
-                bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
                 bus3="co2 atmosphere",
@@ -1659,7 +1664,7 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP CC",
-                bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
                 bus3="co2 atmosphere",
@@ -1698,7 +1703,7 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} micro gas CHP",
                 p_nom_extendable=True,
-                bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + f" {name} heat",
                 bus3="co2 atmosphere",
