@@ -79,9 +79,9 @@ def plot_h2_infra(network):
     # assign_location(n)
 
     bus_size_factor = 1e5
-    linewidth_factor = 1e4
+    linewidth_factor = 1e3
     # MW below which not drawn
-    line_lower_threshold = 1e1
+    line_lower_threshold = 1e2
     bus_color = "m"
     link_color = "c"
 
@@ -218,7 +218,7 @@ def plot_transmission_topology(network):
         [0],
         marker="_",
         color="darkblue",
-        label="Electricity Lines",
+        label="Existing Power Lines",
         markerfacecolor="w",
         markersize=16,
         lw=4,
@@ -229,7 +229,7 @@ def plot_transmission_topology(network):
         [0],
         marker="_",
         color="turquoise",
-        label="H2 Pipeline",
+        label="Allowed H2 Pipeline Routes",
         markerfacecolor="w",
         markersize=16,
         lw=4,
@@ -373,7 +373,7 @@ def plot_map(
         "generators",
         "stores",
     ],  # "storage_units"], #TODO uncomment after adding storage units
-    bus_size_factor=1.7e10,
+    bus_size_factor=2e10,
     transmission=False,
     geometry=True,
 ):
@@ -452,6 +452,9 @@ def plot_map(
     else:
         line_widths = (
             n.lines.s_nom_opt - n.lines.s_nom_min
+        )
+        line_widths = (
+            n.lines.s_nom_opt - n.lines.s_nom_opt 
         )  # TODO when we add wildcard lv
         link_widths = n.links.p_nom_opt - n.links.p_nom_min
         title = "Transmission reinforcement"
@@ -545,8 +548,8 @@ plot_labeles = {
 
 
 nice_names = {
-    # OCGT: "Gas",
-    # OCGT marginal: "Gas (marginal)",
+    "OCGT": "Gas",
+    "OCGT marginal": "Gas (marginal)",
     "offwind": "offshore wind",
     "onwind": "onshore wind",
     "battery": "Battery storage",
@@ -559,9 +562,9 @@ nice_names = {
 nice_names_n = {
     "offwind": "offshore\nwind",
     "onwind": "onshore\nwind",
-    # OCGT: "Gas"
+    "OCGT": "Gas",
     "H2": "Hydrogen\nstorage",
-    # OCGT marginal: "Gas (marginal)"
+    "OCGT marginal": "Gas (marginal)",
     "lines": "transmission\nlines",
     "ror": "run of river",
 }
@@ -574,11 +577,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="111",
-            ll="c1",
+            clusters="264",
+            ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="720H",
+            sopts="73H",
         )
 
     n = pypsa.Network(snakemake.input.network)

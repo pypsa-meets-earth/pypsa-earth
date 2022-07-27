@@ -33,7 +33,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_db",
             simpl="",
-            clusters="252",
+            clusters="261",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -251,8 +251,8 @@ add_store("battery", "hv", reg=True)
 add_store("battery storage", "hv")
 add_store("home battery", "hv")
 
-# add_storage('PHS', 'hv')#TODO commented out because there is no storage untis
-# add_storage('hydro', 'hv')
+add_storage('PHS', 'hv')#TODO commented out because there is no storage untis
+add_storage('hydro', 'hv')
 
 
 add_load("H2 for shipping", "h2")
@@ -270,19 +270,19 @@ add_store("H2", "h2", reg=True)
 add_store("H2 Store", "h2")
 
 
-add_gen("solar rooftop", "lv")
+add_gen("solar rooftop", "hv")
 
-add_conv("electricity distribution grid", "lv", 1, False)
-add_conv("BEV charger", "lv", 0, True)
-add_conv("V2G", "lv", 1, False)
-add_conv("residential rural ground heat pump", "lv", 0, True)
-add_conv("residential rural resistive heater", "lv", 0, True)
-add_conv("services rural ground heat pump", "lv", 0, True)
-add_conv("residential rural resistive heater", "lv", 0, True)
-add_conv("urban central air heat pump", "lv", 0, True)
-add_conv("urban central resistive heater", "lv", 0, True)
-add_conv("home battery charger", "lv", 0, True)
-add_conv("home battery discharger", "lv", 1, False)
+add_conv("electricity distribution grid", "hv", 1, False)
+add_conv("BEV charger", "hv", 0, True)
+add_conv("V2G", "hv", 1, False)
+add_conv("residential rural ground heat pump", "hv", 0, True)
+add_conv("residential rural resistive heater", "hv", 0, True)
+add_conv("services rural ground heat pump", "hv", 0, True)
+add_conv("residential rural resistive heater", "hv", 0, True)
+add_conv("urban central air heat pump", "hv", 0, True)
+add_conv("urban central resistive heater", "hv", 0, True)
+add_conv("home battery charger", "hv", 0, True)
+add_conv("home battery discharger", "hv", 1, False)
 
 add_load("ac", "hv")
 add_load("industry electricity", "hv")
@@ -342,7 +342,10 @@ def calc_energy_flow(carrier, node_id):
     agg = yearly_agg.reset_index()
     agg = agg[(agg.carrier == carrier)]
     agg.value = agg.value.apply(int)
-    agg = agg[agg.node_id.str.contains(node_id)].groupby("tech").sum().reset_index()
+    if node_id=='all':
+        agg = agg.groupby("tech").sum().reset_index()
+    else:
+        agg = agg[agg.node_id.str.contains(node_id)].groupby("tech").sum().reset_index()
     return agg
 
 
@@ -363,7 +366,7 @@ def energy_pie(carrier, node_id, sign):
         agg = agg[agg.node_id.str.contains(node_id)]
     agg = agg.groupby("tech").sum().reset_index()
     agg["pct"] = round(agg["value"] / agg.value.sum(), 3)
-    agg = agg[agg.pct > 0.0]
+    agg = agg[agg.pct > 0.009]
     if agg.pct.sum() < 1:
         agg = agg.append(
             pd.DataFrame([["other", 0, 1 - agg.pct.sum()]], columns=agg.columns)
@@ -381,7 +384,7 @@ def energy_pie(carrier, node_id, sign):
         "Yearly aggregate {0} of {1} at {2} node(s)\n".format(
             sign_dict[sign], carrier, node_id
         )
-        + "Value = {} TWh".format(round(agg.value.sum(), 1)),
+        + "Value = {} GWh".format(round(agg.value.sum(), 1)),
         bbox={"facecolor": "0.8", "pad": 5},
     )
     plt.show()

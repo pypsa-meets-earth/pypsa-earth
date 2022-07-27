@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: v.0.0.1_gasgen2_nochp_lowc3
+run: v.0.0.1_fix_REs+_noexp #_highcap2_wsmr_icefleet
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 252
+  - 266
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -169,12 +169,12 @@ sector:
   biomass_transport: true  # biomass transport between nodes
 
 
-  land_transport_fuel_cell_share: 0.15 # 1 means all FCEVs
+  land_transport_fuel_cell_share: 0.05 # 1 means all FCEVs
     # 2020: 0
     # 2030: 0.05
     # 2040: 0.1
     # 2050: 0.15
-  land_transport_electric_share: 0.8 # 1 means all EVs  # This leads to problems when non-zero
+  land_transport_electric_share: 0.15 # 1 means all EVs  # This leads to problems when non-zero
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
@@ -193,7 +193,7 @@ sector:
   methanation: true
   helmeth: true
   dac: true
-  SMR: false
+  SMR: true
   cc_fraction: 0.9
 
   conventional_generation: # generator : carrier
