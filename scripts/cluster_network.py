@@ -143,7 +143,6 @@ from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
 from pypsa.networkclustering import (
     _make_consense,
     busmap_by_kmeans,
-    busmap_by_spectral_clustering,
     get_clustering_from_busmap,
 )
 from shapely.geometry import Point
@@ -384,14 +383,10 @@ def busmap_for_n_clusters(
             return prefix + busmap_by_kmeans(
                 n, weight, n_cluster_c, buses_i=x.index, **algorithm_kwds
             )
-        elif algorithm == "spectral":
-            return prefix + busmap_by_spectral_clustering(
-                reduce_network(n, x), n_cluster_c, **algorithm_kwds
-            )
 
         else:
             raise ValueError(
-                f"`algorithm` must be one of 'kmeans', 'spectral' or 'louvain'. Is {algorithm}."
+                f"`algorithm` must be one of 'kmeans' or 'louvain'. Is {algorithm}."
             )
 
     return (
