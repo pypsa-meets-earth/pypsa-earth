@@ -49,7 +49,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
     1. Demand creation and prediction meeting, on demand
     2. AI asset detection meeting, every Tuesday 15:30 (UK time), <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
     3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
-    4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a> 
+    4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a>
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities
@@ -70,7 +70,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 ```bash
     .../pypsa-africa % conda env create -f envs/environment.yaml
 ```
-    For faster installation you might want to try mamba
+   For faster installation you might want to try mamba
 ```bash
     (base) conda install -c conda-forge mamba
     .../pypsa-africa % mamba env create -f envs/environment.yaml
