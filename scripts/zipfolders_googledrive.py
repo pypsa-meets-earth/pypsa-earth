@@ -8,13 +8,14 @@ Module to zip the desired folders to be stored in google drive, or equivalent
 import os
 import zipfile
 from os.path import basename
+from xml.etree.ElementInclude import include
 
 from _helpers import sets_path_to_root
 
 # Zip the files from given directory that matches the filter
 
 
-def zipFilesInDir(dirName, zipFileName, filter):
+def zipFilesInDir(dirName, zipFileName, filter, include_parent=True):
     # create a ZipFile object
     with zipfile.ZipFile(zipFileName, "w", compression=zipfile.ZIP_DEFLATED) as zipObj:
         # Iterate over all the files in directory
@@ -23,8 +24,17 @@ def zipFilesInDir(dirName, zipFileName, filter):
                 if filter(filename):
                     # create complete filepath of file in directory
                     filePath = os.path.join(folderName, filename)
+
+                    # path of the zip file
+                    if include_parent:
+                        filePathZip = filePath
+                    else:
+                        filePathZip = filePath.replace(
+                            dirName, ".", 1
+                        )  # remove first occurrence of the dirName
+
                     # Add file to zip
-                    zipObj.write(filePath, filePath)
+                    zipObj.write(filePath, filePathZip)
 
 
 if __name__ == "__main__":
@@ -34,6 +44,6 @@ if __name__ == "__main__":
     sets_path_to_root("pypsa-africa")
 
 # Execute zip function
-zipFilesInDir("./resources", "resources.zip", lambda x: True)
-zipFilesInDir("./data", "data.zip", lambda x: True)
-zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True)
+# zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
+zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
+# zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)
