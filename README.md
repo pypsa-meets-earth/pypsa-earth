@@ -35,23 +35,23 @@ There are multiple ways to get involved and learn more about our work. That's ho
         <a/>
       </p>
 - **General initiative meeting (Open)**
-  - every month Thursday 16-17:00 (UTC+0) <a href="https://drive.google.com/file/d/1YY2-oJrBSOGd-mAZV7AmyVhOG3LcM1ry/view?usp=sharing" >download .ics</a>
+  - every forth Thursday each month Thursday 16-17:00 (UK time) <a href="https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing" >download .ics</a>
   - join for project news and high-level code updates
   - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
-  - every Friday between 17-18:00 (UTC+0)
+  - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
   - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
-    2. AI asset detection meeting, every Tuesday 15:30 UTC+0, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
-    3. Sector coupling meeting, every Thursday 09:00 UTC+0, <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
-    4. Data workflow and architecture meeting, every Thursday 13:30 UTC+0, <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a> 
+    2. AI asset detection meeting, every Tuesday 15:30 (UK time), <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+    3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
+    4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a> 
 - **Outreach meeting (Open)**
-  - every second week, Tuesday 17:00 UTC+0
+  - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities
 - [**Google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
   - access to minutes, presentations, lists, documents (access to minutes)
