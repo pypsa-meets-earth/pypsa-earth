@@ -72,6 +72,7 @@ databundles:
     - data/costs.csv
     - data/hydro_capacities.csv
     - data/custom_powerplants.csv
+    - data/eia_hydro_annual_generation.csv
     - data/eez/eez_v11.gpkg
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
