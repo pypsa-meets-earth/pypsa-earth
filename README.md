@@ -70,9 +70,11 @@ There are multiple ways to get involved and learn more about our work. That's ho
 ```bash
     .../pypsa-africa % conda env create -f envs/environment.yaml
 ```
-   For faster installation you might want to try mamba
+   If the above takes longer than 30min, you might want to try mamba for faster installation:
+
 ```bash
     (base) conda install -c conda-forge mamba
+
     .../pypsa-africa % mamba env create -f envs/environment.yaml
 ```
 
