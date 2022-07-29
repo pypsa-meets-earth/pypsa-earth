@@ -564,6 +564,7 @@ def prepare_generators_df(df_all_generators):
 
     # rename columns
     df_all_generators = df_all_generators.rename(
+        # TODO fix column name for KG
         columns={
             "tags.generator:output:electricity": "power_output_MW",
             "tags.name": "name",
