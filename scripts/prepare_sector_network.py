@@ -116,6 +116,22 @@ def add_oil(n, costs):
     """
     # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
     # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
+    # spatial.gas = SimpleNamespace()
+
+    # if options["gas_network"]:
+    #     spatial.gas.nodes = nodes + " gas"
+    #     spatial.gas.locations = nodes
+    #     # spatial.gas.biogas = nodes + " biogas"
+    #     spatial.gas.industry = nodes + " gas for industry"
+    #     spatial.gas.industry_cc = nodes + " gas for industry CC"
+    #     # spatial.gas.biogas_to_gas = nodes + " biogas to gas"
+    # else:
+    #     spatial.gas.nodes = ["Africa gas"]
+    #     spatial.gas.locations = ["Africa"]
+    #     # spatial.gas.biogas = ["Africa biogas"]
+    #     spatial.gas.industry = ["gas for industry"]
+    #     spatial.gas.industry_cc = ["gas for industry CC"]
+    #     # spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
 
     spatial.oil = SimpleNamespace()
 
@@ -133,27 +149,27 @@ def add_oil(n, costs):
 
     #     n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
-    if "Africa oil Store" not in n.stores.index:
+    #if "Africa oil Store" not in n.stores.index:
 
-        # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-        n.add(
-            "Store",
-            [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
-            bus=spatial.oil.nodes,
-            e_nom_extendable=True,
-            e_cyclic=True,
-            carrier="oil",
-        )
+    # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+    n.add(
+        "Store",
+        [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
+        bus=spatial.oil.nodes,
+        e_nom_extendable=True,
+        e_cyclic=True,
+        carrier="oil",
+    )
 
-    if "Africa oil" not in n.generators.index:
-        n.add(
-            "Generator",
-            spatial.oil.nodes,
-            bus=spatial.oil.nodes,
-            p_nom_extendable=True,
-            carrier="oil",
-            marginal_cost=costs.at["oil", "fuel"],
-        )
+    #if "Africa oil" not in n.generators.index:
+    n.add(
+        "Generator",
+        spatial.oil.nodes,
+        bus=spatial.oil.nodes,
+        p_nom_extendable=True,
+        carrier="oil",
+        marginal_cost=costs.at["oil", "fuel"],
+    )
 
 
 def add_gas(n, costs):
@@ -419,7 +435,7 @@ def add_biomass(n, costs):
         "Link",
         "biogas to gas",
         bus0="Africa biogas",
-        bus1=spatial.gas.nodes,
+        bus1="Africa gas",
         bus2="co2 atmosphere",
         carrier="biogas to gas",
         capital_cost=costs.loc["biogas upgrading", "fixed"],
@@ -1013,26 +1029,32 @@ def add_industry(n, costs):
 
     #industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
-    n.add("Bus", "gas for industry", location=spatial.gas.locations, carrier="gas for industry")
+    #n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
+    n.add("Bus", spatial.gas.industry, location=spatial.gas.locations, carrier="gas for industry")
+
+    gas_demand = industrial_demand.loc[nodes, "methane"] / 8760.
+
+    if options["gas_network"]:
+        spatial_gas_demand = gas_demand.rename(index=lambda x: x + " gas for industry")
+    else:
+        spatial_gas_demand = gas_demand.sum()
 
     n.madd(
         "Load",
-        nodes,
-        suffix=" gas for industry",
-        bus="gas for industry",
+        spatial.gas.industry,
+        bus=spatial.gas.industry,
         carrier="gas for industry",
-        p_set=industrial_demand["methane"].apply(
-            lambda frac: frac / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-                                                    #the current way leads to inaccuracies in the last timestep in case
-                                                    #the timestep if 8760 is not divisble by it),  # TODO change for resolution
-        ),
-    )
+        p_set=spatial_gas_demand
+        )
+    
 
     n.add(
         "Link",
-        "gas for industry",
+        spatial.gas.industry,
+        #bus0="Africa gas",
         bus0=spatial.gas.nodes,
-        bus1="gas for industry",
+        #bus1="gas for industry",
+        bus1=spatial.gas.industry,
         bus2="co2 atmosphere",
         carrier="gas for industry",
         p_nom_extendable=True,
@@ -1042,10 +1064,11 @@ def add_industry(n, costs):
 
     n.madd(
         "Link",
-        spatial.co2.locations,
-        suffix=" gas for industry CC",
+        spatial.gas.industry_cc,
+        #suffix=" gas for industry CC",
+        #bus0="Africa gas",
         bus0=spatial.gas.nodes,
-        bus1="gas for industry",
+        bus1=spatial.gas.industry,
         bus2="co2 atmosphere",
         bus3=spatial.co2.nodes,
         carrier="gas for industry CC",
@@ -1078,7 +1101,7 @@ def add_industry(n, costs):
         "Load",
         nodes,
         suffix=" naphtha for industry",
-        bus="Africa oil",
+        bus=spatial.oil.nodes,
         carrier="naphtha for industry",
         p_set=industrial_demand["naphtha"].apply(lambda frac: frac / 8760)#*n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
                                                     #the current way leads to inaccuracies in the last timestep in case
@@ -1183,7 +1206,7 @@ def add_industry(n, costs):
         "process emissions",
         bus0="process emissions",
         bus1="co2 atmosphere",
-        carrier="process emission",
+        carrier="process emissions",
         p_nom_extendable=True,
         efficiency=1.0,
     )
@@ -1613,6 +1636,7 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} gas boiler",
                 p_nom_extendable=True,
+                #bus0="Africa gas",
                 bus0=spatial.gas.nodes,
                 bus1=nodes[name] + f" {name} heat",
                 bus2="co2 atmosphere",
@@ -1645,6 +1669,7 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP",
+                #bus0="Africa gas",
                 bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
@@ -1664,6 +1689,7 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP CC",
+                #bus0="Africa gas",
                 bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
@@ -1703,6 +1729,7 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} micro gas CHP",
                 p_nom_extendable=True,
+                #bus0="Africa gas",
                 bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + f" {name} heat",

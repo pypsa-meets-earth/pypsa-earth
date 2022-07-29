@@ -33,11 +33,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_db",
             simpl="",
-            clusters="261",
+            clusters="287",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="73H"
+            sopts="730H"
         )
 
     n0 = pypsa.Network(snakemake.input.network)
@@ -263,8 +263,8 @@ add_conv("H2 Electrolysis", "h2", 1, False)
 add_conv("H2 Fuel Cell", "h2", 0, True)
 add_conv("Fischer-Tropsch", "h2", 0, True)
 add_conv("Sabatier", "h2", 1, True)
-add_conv("SMR", "h2", 1, True, reg=True)
-add_conv("SMR CC", "h2", 1, True)
+add_conv("SMR", "h2", 1, False, reg=True)
+add_conv("SMR CC", "h2", 1, False)
 
 add_store("H2", "h2", reg=True)
 add_store("H2 Store", "h2")
@@ -366,12 +366,13 @@ def energy_pie(carrier, node_id, sign):
         agg = agg[agg.node_id.str.contains(node_id)]
     agg = agg.groupby("tech").sum().reset_index()
     agg["pct"] = round(agg["value"] / agg.value.sum(), 3)
-    agg = agg[agg.pct > 0.009]
     if agg.pct.sum() < 1:
         agg = agg.append(
             pd.DataFrame([["other", 0, 1 - agg.pct.sum()]], columns=agg.columns)
         )
-    fig1, ax1 = plt.subplots()
+    agg = agg[agg.pct > 0.009]
+
+    fig1, ax1 = plt.subplots()#figsize=(6, 4))
     ax1.pie(
         agg.pct,
         labels=agg.tech,
@@ -385,6 +386,8 @@ def energy_pie(carrier, node_id, sign):
             sign_dict[sign], carrier, node_id
         )
         + "Value = {} GWh".format(round(agg.value.sum(), 1)),
-        bbox={"facecolor": "0.8", "pad": 5},
+        #bbox={"facecolor": "0.8", "pad": 5},
     )
     plt.show()
+    fig1.savefig("Yearly_aggregate_{0}_of_{1}_at_{2}_node(s).png".format(
+                sign_dict[sign], carrier, node_id), dpi=100)

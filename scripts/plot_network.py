@@ -116,12 +116,107 @@ def plot_h2_infra(network):
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
 
     fig.set_size_inches(10.5, 9)
+    bus_sizes.index=bus_sizes.index.set_levels(bus_sizes.index.levels[0].str.replace(' gas', ''), level=0)
+    n.plot(
+        bus_sizes=bus_sizes,
+        bus_colors={"SMR": 'darkolivegreen'},
+        # link_colors=link_color,
+        # link_widths=link_widths,
+        branch_components=["Link"],
+        color_geomap={"ocean": "lightblue", "land": "oldlace"},
+        ax=ax,
+        boundaries=(-20, 0, 25, 40),
+    )
+
+    handles = make_legend_circles_for(
+        [5000, 1000], scale=bus_size_factor, facecolor='darkolivegreen'
+    )
+    labels = ["{} GW".format(s) for s in (5, 1)]
+    l2 = ax.legend(
+        handles,
+        labels,
+        loc="upper left",
+        bbox_to_anchor=(0.01, 1.01),
+        labelspacing=0.8,
+        framealpha=1.0,
+        title="SMR capacity",
+        handler_map=make_handler_map_to_scale_circles_as_in(ax),
+    )
+    ax.add_artist(l2)
+
+    handles = []
+    labels = []
+
+    for s in (5, 1):
+        handles.append(
+            plt.Line2D([0], [0], color=link_color, linewidth=s * 1e3 / linewidth_factor)
+        )
+        labels.append("{} GW".format(s))
+    l1_1 = ax.legend(
+        handles,
+        labels,
+        loc="upper left",
+        bbox_to_anchor=(0.32, 1.01),
+        framealpha=1,
+        labelspacing=0.8,
+        handletextpad=1.5,
+        title="H2 pipeline capacity",
+    )
+    ax.add_artist(l1_1)
+
+    # fig.savefig(snakemake.output.hydrogen, bbox_inches='tight', transparent=True,
+    fig.savefig(
+        snakemake.output.map.replace("-costs-all", "-h2_network"), bbox_inches="tight"
+    )
+def plot_h2_infra(network):
+    n = network.copy()
+
+    # assign_location(n)
+
+    bus_size_factor = 1e5
+    linewidth_factor = 1e3
+    # MW below which not drawn
+    line_lower_threshold = 1e2
+    bus_color = "m"
+    link_color = "c"
+
+    n.links.loc[:, "p_nom_opt"] = n.links.loc[:, "p_nom_opt"]
+    # n.links.loc[n.links.carrier == "H2 Electrolysis"].p_nom_opt
+
+    # Drop non-electric buses so they don't clutter the plot
+    n.buses.drop(n.buses.index[n.buses.carrier != "AC"], inplace=True)
+
+    elec = n.links.index[n.links.carrier == "H2 Electrolysis"]
+
+    bus_sizes = (
+        n.links.loc[elec, "p_nom_opt"].groupby(n.links.loc[elec, "bus0"]).sum()
+        / bus_size_factor
+    )
+
+    # make a fake MultiIndex so that area is correct for legend
+    bus_sizes.index = pd.MultiIndex.from_product([bus_sizes.index, ["electrolysis"]])
+
+    n.links.drop(n.links.index[n.links.carrier != "H2 pipeline"], inplace=True)
+
+    link_widths = n.links.p_nom_opt / linewidth_factor
+    link_widths[n.links.p_nom_opt < line_lower_threshold] = 0.0
+
+    n.links.bus0 = n.links.bus0.str.replace(" H2", "")
+    n.links.bus1 = n.links.bus1.str.replace(" H2", "")
+
+    print(link_widths.sort_values())
+
+    print(n.links[["bus0", "bus1"]])
+
+    fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
+
+    fig.set_size_inches(10.5, 9)
 
     n.plot(
         bus_sizes=bus_sizes,
         bus_colors={"electrolysis": bus_color},
-        # link_colors=link_color,
-        # link_widths=link_widths,
+        link_colors=link_color,
+        link_widths=link_widths,
         branch_components=["Link"],
         color_geomap={"ocean": "lightblue", "land": "oldlace"},
         ax=ax,
@@ -167,6 +262,103 @@ def plot_h2_infra(network):
     # fig.savefig(snakemake.output.hydrogen, bbox_inches='tight', transparent=True,
     fig.savefig(
         snakemake.output.map.replace("-costs-all", "-h2_network"), bbox_inches="tight"
+    )
+
+
+def plot_smr(network):
+    n = network.copy()
+
+    # assign_location(n)
+
+    bus_size_factor = 1e5
+    linewidth_factor = 1e3
+    # MW below which not drawn
+    line_lower_threshold = 1e2
+    bus_color = "m"
+    link_color = "c"
+
+    n.links.loc[:, "p_nom_opt"] = n.links.loc[:, "p_nom_opt"]
+    # n.links.loc[n.links.carrier == "H2 Electrolysis"].p_nom_opt
+
+    # Drop non-electric buses so they don't clutter the plot
+    n.buses.drop(n.buses.index[n.buses.carrier != "AC"], inplace=True)
+
+    elec = n.links.index[n.links.carrier == "SMR"]
+
+    bus_sizes = (
+        n.links.loc[elec, "p_nom_opt"].groupby(n.links.loc[elec, "bus0"]).sum()
+        / bus_size_factor
+    )
+
+    # make a fake MultiIndex so that area is correct for legend
+    bus_sizes.index = pd.MultiIndex.from_product([bus_sizes.index, ["SMR"]])
+
+    # n.links.drop(n.links.index[n.links.carrier != "H2 pipeline"], inplace=True)
+
+    # link_widths = n.links.p_nom_opt / linewidth_factor
+    # link_widths[n.links.p_nom_opt < line_lower_threshold] = 0.0
+
+    # n.links.bus0 = n.links.bus0.str.replace(" H2", "")
+    # n.links.bus1 = n.links.bus1.str.replace(" H2", "")
+
+    # print(link_widths.sort_values())
+
+    # print(n.links[["bus0", "bus1"]])
+
+    fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
+
+    fig.set_size_inches(10.5, 9)
+    bus_sizes.index=bus_sizes.index.set_levels(bus_sizes.index.levels[0].str.replace(' gas', ''), level=0)
+    n.plot(
+        bus_sizes=bus_sizes,
+        bus_colors={"SMR": 'darkolivegreen'},
+        # link_colors=link_color,
+        # link_widths=link_widths,
+        branch_components=["Link"],
+        color_geomap={"ocean": "lightblue", "land": "oldlace"},
+        ax=ax,
+        boundaries=(-20, 0, 25, 40),
+    )
+
+    handles = make_legend_circles_for(
+        [5000, 1000], scale=bus_size_factor, facecolor='darkolivegreen'
+    )
+    labels = ["{} GW".format(s) for s in (5, 1)]
+    l2 = ax.legend(
+        handles,
+        labels,
+        loc="upper left",
+        bbox_to_anchor=(0.01, 1.01),
+        labelspacing=0.8,
+        framealpha=1.0,
+        title="SMR capacity",
+        handler_map=make_handler_map_to_scale_circles_as_in(ax),
+    )
+    ax.add_artist(l2)
+
+    handles = []
+    labels = []
+
+    for s in (5, 1):
+        handles.append(
+            plt.Line2D([0], [0], color=link_color, linewidth=s * 1e3 / linewidth_factor)
+        )
+        labels.append("{} GW".format(s))
+    l1_1 = ax.legend(
+        handles,
+        labels,
+        loc="upper left",
+        bbox_to_anchor=(0.32, 1.01),
+        framealpha=1,
+        labelspacing=0.8,
+        handletextpad=1.5,
+        title="H2 pipeline capacity",
+    )
+    ax.add_artist(l1_1)
+
+    # fig.savefig(snakemake.output.hydrogen, bbox_inches='tight', transparent=True,
+    fig.savefig(
+        snakemake.output.map.replace("-costs-all", "-SMR"), bbox_inches="tight"
     )
 
 
@@ -577,7 +769,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="267",
+            clusters="270",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -589,4 +781,5 @@ if __name__ == "__main__":
     tech_colors = snakemake.config["plotting"]["tech_colors"]
     plot_map(n, transmission=False)
     plot_transmission_topology(n)
+    plot_smr(n)
     plot_h2_infra(n)

@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: v.0.0.1_fix_REs+_noexp_highcap2_wsmr_icefleet_nodaloil
+run: v.0.0.1_find_bug9
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 267
+  - 287
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,7 +21,7 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "73H"
+  - "730H"
 
 countries: ['MA']
 
