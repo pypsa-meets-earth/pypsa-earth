@@ -53,13 +53,13 @@ Upcoming Release
 
 * Fix powerplantmatching problem for DRC and countries with multi-word name: `PR #359 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/359>`_
 
-* Change default option for build_natura `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
+* Change default option for build_natura: `PR #360 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/360>`_
 
-* Add renewable potential validation notebook and update others `PR #363 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_ and `PR #369 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_
+* Add renewable potential validation notebook and update others: `PR #363 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_ and `PR #369 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/363>`_
 
-* Constrain rasterio version and add plotting dependencies `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
+* Constrain rasterio version and add plotting dependencies: `PR #365 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/365>`_
 
-* Change solar power density form 1.7 to 4.6 MW/km2 `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
+* Change solar power density form 1.7 to 4.6 MW/km2: `PR #364 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/364>`_
 
 * Bug fixing of unexpected float value in build_powerplants: `PR #372 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/372>`_ and `PR #373 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/373>`_
 
@@ -67,29 +67,31 @@ Upcoming Release
 
 * Revise dropnan for regions: `PR #366 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/366>`_
 
-* Fix bug in GADM clustering. Missing crs input. `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
+* Fix bug in GADM clustering. Missing crs input: `PR #379 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/379>`_
 
-* Optimise `availabilitymatrix` speed by factor 4-5. `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`_
+* Optimise `availabilitymatrix` speed by factor 4-5: `PR #380 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/380>`_
 
-* Fix bug in inline documentation for GADM and Voronoi clustering. `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`_
+* Fix bug in inline documentation for GADM and Voronoi clustering: `PR #384 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/384>`_
 
-* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`. `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`_
+* Fix simple clustering enabling the creation of networks such `regions_onshore_elec_s54_14.nc`: `PR #386 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/386>`_
 
-* Add transformer components which connect different voltage level lines `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`_
+* Add transformer components which connect different voltage level lines: `PR #389 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/389>`_
 
-* Enable the use of a float value for the scale in load_options `PR #397 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/397>`_
+* Enable the use of a float value for the scale in load_options: `PR #397 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/397>`_
 
-* Add operational reserve margin according to PyPSA-Eur `PR #399 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/399>`_
+* Add operational reserve margin according to PyPSA-Eur: `PR #399 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/399>`_
 
-* Add optional normalization of hydro inflows by hydro_capacities or eia stats `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`_
+* Add optional normalization of hydro inflows by hydro_capacities or eia stats: `PR #376 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/376>`_
 
-* Enable DC carrier in the network model and include converters into the model `PR #392 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/392>`_
+* Enable DC carrier in the network model and include converters into the model: `PR #392 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/392>`_
 
-* Implement PyPSA-Eur improvements. Add gas limit constraints, add marginal cost sweeps wildcard, add and harmonize aggregation strategies, improve config usability by carrier clarifications, ease debugging by removing snakemake inputs from functions `PR #402 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/402>`_
+* Implement PyPSA-Eur improvements. Add gas limit constraints, add marginal cost sweeps wildcard, add and harmonize aggregation strategies, improve config usability by carrier clarifications, ease debugging by removing snakemake inputs from functions: `PR #402 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/402>`_
 
-* Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_
+* Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos: `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_
 
-* Restructure the package to ease readability and fix google drive downloading method `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`_
+* Restructure the package to ease readability and fix google drive downloading method: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`__
+
+* Update config links to adhere to the new structure of the package: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
 
 
 PyPSA-Africa 0.0.2 (6th April 2022)
