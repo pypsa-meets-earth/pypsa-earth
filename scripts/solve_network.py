@@ -412,9 +412,9 @@ if __name__ == "__main__":
             "solve_network",
             network="elec",
             simpl="",
-            clusters="20",
-            ll="v0.3",
-            opts="Co2L-24H",
+            clusters="54",
+            ll="copt",
+            opts="Co2L-1H",
         )
     configure_logging(snakemake)
 
