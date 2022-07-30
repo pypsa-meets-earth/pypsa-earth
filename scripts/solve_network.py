@@ -52,7 +52,7 @@ is provided in the
 The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
 Additionally, some extra constraints specified in :mod:`prepare_network` are added.
 
-Solving the network in multiple iterations is motivated through the dependence of transmission line capacities and impedances.
+Solving the network in multiple iterations is motivated through the dependence of transmission line capacities and impedances on values of corresponding flows.
 As lines are expanded their electrical parameters change, which renders the optimisation bilinear even if the power flow
 equations are linearized.
 To retain the computational advantage of continuous linear programming, a sequential linear programming technique
@@ -104,9 +104,16 @@ def prepare_network(n, solve_opts):
         for df in (n.generators_t.p_max_pu, n.storage_units_t.inflow):
             df.where(df > solve_opts["clip_p_max_pu"], other=0.0, inplace=True)
 
-    if solve_opts.get("load_shedding"):
+    load_shedding = solve_opts.get("load_shedding")
+    if load_shedding:
         n.add("Carrier", "Load")
         buses_i = n.buses.query("carrier == 'AC'").index
+        if not np.isscalar(load_shedding):
+            load_shedding = 8e3  # Eur/kWh
+        # intersect between macroeconomic and surveybased
+        # willingness to pay
+        # http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
+        # 1e2 is practical relevant, 8e3 good for debugging
         n.madd(
             "Generator",
             buses_i,
@@ -114,10 +121,7 @@ def prepare_network(n, solve_opts):
             bus=buses_i,
             carrier="load",
             sign=1e-3,  # Adjust sign to measure p and p_nom in kW instead of MW
-            marginal_cost=8e3,  # Eur/kWh
-            # intersect between macroeconomic and surveybased
-            # willingness to pay
-            # http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full
+            marginal_cost=load_shedding,
             p_nom=1e9,  # kW
         )
 
@@ -404,12 +408,11 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake(
             "solve_network",
             network="elec",
             simpl="",
-            clusters="10",
+            clusters="20",
             ll="v0.3",
             opts="Co2L-24H",
         )

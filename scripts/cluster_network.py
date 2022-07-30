@@ -11,11 +11,10 @@ Relevant Settings
 
 .. code:: yaml
 
-    focus_weights:
+    clustering:
+        aggregation_strategies:
 
-    renewable: (keys)
-        {technology}:
-            potential:
+    focus_weights:
 
     solving:
         solver:
@@ -134,6 +133,7 @@ import seaborn as sns
 import shapely
 from _helpers import (
     configure_logging,
+    get_aggregation_strategies,
     sets_path_to_root,
     two_2_three_digits_country,
     update_p_nom_max,
@@ -143,7 +143,6 @@ from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
 from pypsa.networkclustering import (
     _make_consense,
     busmap_by_kmeans,
-    busmap_by_spectral_clustering,
     get_clustering_from_busmap,
 )
 from shapely.geometry import Point
@@ -175,6 +174,7 @@ def weighting_for_country(n, x):
     l = normed(load.reindex(b_i, fill_value=0))
 
     w = g + l
+
     return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
@@ -347,7 +347,7 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("random_state", 0)
 
     n.determine_network_topology()
-    n.lines.loc[:, "sub_network"] = "0"  # current fix
+    # n.lines.loc[:, "sub_network"] = "0"  # current fix
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(
@@ -366,8 +366,10 @@ def busmap_for_n_clusters(
         return nr
 
     def busmap_for_country(x):
+
+        # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
-            n_cluster_c = n_clusters[x.name]
+            n_cluster_c = n_clusters[x.name[0]]
         else:
             n_cluster_c = n_clusters
 
@@ -381,20 +383,16 @@ def busmap_for_n_clusters(
             return prefix + busmap_by_kmeans(
                 n, weight, n_cluster_c, buses_i=x.index, **algorithm_kwds
             )
-        elif algorithm == "spectral":
-            return prefix + busmap_by_spectral_clustering(
-                reduce_network(n, x), n_cluster_c, **algorithm_kwds
-            )
 
         else:
             raise ValueError(
-                f"`algorithm` must be one of 'kmeans', 'spectral' or 'louvain'. Is {algorithm}."
+                f"`algorithm` must be one of 'kmeans' or 'louvain'. Is {algorithm}."
             )
 
     return (
         n.buses.groupby(
-            # ["country", "sub_network"], #TODO: 2. Add sub_networks (see previous TODO)
-            ["country"],
+            ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
+            # ["country"],
             group_keys=False,
         )
         .apply(busmap_for_country)
@@ -413,21 +411,16 @@ def clustering_for_n_clusters(
     custom_busmap=False,
     aggregate_carriers=None,
     line_length_factor=1.25,
-    potential_mode="simple",
+    aggregation_strategies=dict(),
     solver_name="cbc",
     algorithm="kmeans",
     extended_link_costs=0,
     focus_weights=None,
 ):
 
-    if potential_mode == "simple":
-        p_nom_max_strategy = np.sum
-    elif potential_mode == "conservative":
-        p_nom_max_strategy = np.min
-    else:
-        raise AttributeError(
-            f"potential_mode should be one of 'simple' or 'conservative' but is '{potential_mode}'"
-        )
+    bus_strategies, generator_strategies = get_aggregation_strategies(
+        aggregation_strategies
+    )
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
@@ -442,12 +435,12 @@ def clustering_for_n_clusters(
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=dict(country=_make_consense("Bus", "country")),
+        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=aggregate_carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
-        generator_strategies={"p_nom_max": p_nom_max_strategy, "p_nom_min": np.sum},
+        generator_strategies=generator_strategies,
         scale_link_capital_costs=False,
     )
 
@@ -529,8 +522,8 @@ if __name__ == "__main__":
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
-        aggregate_carriers = pd.Index(n.generators.carrier.unique()).difference(
-            renewable_carriers
+        aggregate_carriers = snakemake.config["electricity"].get(
+            "conventional_carriers"
         )
     else:
         n_clusters = int(snakemake.wildcards.clusters)
@@ -547,10 +540,10 @@ if __name__ == "__main__":
         line_length_factor = snakemake.config["lines"]["length_factor"]
         Nyears = n.snapshot_weightings.objective.sum() / 8760
         hvac_overhead_cost = load_costs(
+            snakemake.input.tech_costs,
+            snakemake.config["costs"],
+            snakemake.config["electricity"],
             Nyears,
-            tech_costs=snakemake.input.tech_costs,
-            config=snakemake.config["costs"],
-            elec_config=snakemake.config["electricity"],
         ).at["HVAC overhead", "capital_cost"]
 
         def consense(x):
@@ -560,14 +553,14 @@ if __name__ == "__main__":
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
 
-        potential_mode = consense(
-            pd.Series(
-                [
-                    snakemake.config["renewable"][tech]["potential"]
-                    for tech in renewable_carriers
-                ]
-            )
+        aggregation_strategies = snakemake.config["cluster_options"].get(
+            "aggregation_strategies", {}
         )
+        # translate str entries of aggregation_strategies to pd.Series functions:
+        aggregation_strategies = {
+            p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
+            for p in aggregation_strategies.keys()
+        }
         custom_busmap = snakemake.config["enable"].get("custom_busmap", False)
         if custom_busmap:
             busmap = pd.read_csv(
@@ -575,6 +568,9 @@ if __name__ == "__main__":
             )
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
+        cluster_config = snakemake.config.get("cluster_options", {}).get(
+            "cluster_network", {}
+        )
         clustering = clustering_for_n_clusters(
             n,
             n_clusters,
@@ -584,15 +580,14 @@ if __name__ == "__main__":
             country_list,
             custom_busmap,
             aggregate_carriers,
-            line_length_factor=line_length_factor,
-            potential_mode=potential_mode,
+            line_length_factor,
+            aggregation_strategies,
             solver_name=snakemake.config["solving"]["solver"]["name"],
             extended_link_costs=hvac_overhead_cost,
             focus_weights=focus_weights,
         )
 
-    update_p_nom_max(n)
-
+    update_p_nom_max(clustering.network)
     clustering.network.export_to_netcdf(snakemake.output.network)
     for attr in (
         "busmap",

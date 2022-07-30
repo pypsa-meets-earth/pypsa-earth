@@ -214,7 +214,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
         gdd.download_file_from_google_drive(
             file_id=file_id,
             dest_path=file_path,
-            showsize=True,
+            showsize=not disable_progress,
             unzip=False,
         )
         with ZipFile(file_path, "r") as zipObj:

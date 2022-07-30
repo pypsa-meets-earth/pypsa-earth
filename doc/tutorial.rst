@@ -118,12 +118,12 @@ To do so, follow the following procedure:
 2. In ``config.yaml`` modify the option ``countries = ["AA", ..., "ZZ"]`` with the list
    of countries that you desire; 2-digit country codes are requested or region names.
 
-   For example, to investigate Nigeria, the following specification shall be applied in
+   For example, to investigate Nigeria and South Africa, the following specification shall be applied in
    the configuration file.
 
    .. code:: bash
 
-      countries = ["NG"]
+      countries = ["NG", "ZA"]
 
    The code also supports pre-set group of countries, such as africa. For example,
    the African region can be simulated using:
@@ -131,10 +131,29 @@ To do so, follow the following procedure:
    .. code:: bash
 
       countries = ["africa"]
-3. Then, the software is ready to be used on the selected countries
 
 Manual test of specific scripts
 -------------------------------
 
-The scripts in the ``scripts`` folder are build so that they can be easily run and tested
-even without the snakemake procedure. Therefore, to test the specific functionality of
+The python scripts in the ``scripts`` folder are build so that they can be easily run and tested
+even without the snakemake procedure. This assumes you have all inputs of the rule 
+available (see Snakefile). For instance, let us run the ``build_shapes.py``.
+Looking at the Snakefile or the `workflow <https://pypsa-meets-africa.readthedocs.io/en/latest/introduction.html#workflow>`_
+we need to run the ``retrieve_databundle_light.py`` manually or by snakemake:
+
+   .. code:: bash
+
+      snakemake --cores 1 retrieve_databundle_light
+
+Afterwards, you can manually run build_shapes.py or debug it.
+
+
+YouTube DevTutorials
+---------------------
+
+If some of the above sounds quite unfamiliar, you might want to start with YouTube videos.
+We recorded the following which help you with VScode, git, reading errors and fixing bugs:
+- `How to set-up Visual Studio Code for Windows [PyPSA-Africa][DevTutorial]<https://www.youtube.com/watch?v=9cFOcDxDz7o&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=1>`_
+- `Find a bug, create a fix, contribute a pull request [PyPSA-Africa] [DevTutorial]<https://www.youtube.com/watch?v=HBubZEpIeXk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=2>`_
+- `Land lock country bug - Understanding the bug [PyPSA-Africa][DevTutorial]<https://www.youtube.com/watch?v=zOQpV5bgPPk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=3>`_
+- `Land lock country bug - Fixing the bug [PyPSA-Africa][DevTutorial]<https://www.youtube.com/watch?v=6keiD6HvnmY&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=4>`_
