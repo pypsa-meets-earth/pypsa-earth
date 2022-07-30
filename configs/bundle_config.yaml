@@ -37,7 +37,7 @@ databundles:
     destination: "data"
     urls:
       # zenodo: https://sandbox.zenodo.org/record/1016522/files/tutorial_data.zip?download=1
-      gdrive: https://drive.google.com/file/d/1xAk5c1RTuv50Mhr9y1lapjRsDHh3epWB/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1iwtRY0iO5EKQucBGlEiBau3uBCQZJou3/view?usp=sharing
     output:
     - data/costs.csv
     - data/hydro_capacities.csv
@@ -45,17 +45,6 @@ databundles:
     - data/eez/eez_v11.gpkg
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-
-  # tutorial bundle specific for Nigeria and Benin only
-  bundle_loadscenarios_tutorial:
-    countries: [NG, BJ]
-    tutorial: true
-    category: loadscenarios
-    destination: "data"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1016001/files/tutorial_resources.zip?download=1
-      gdrive: https://drive.google.com/file/d/1WWVyXHA2E7aGcg_OC1lN8Pb2tA8DgfU0/view?usp=sharing
-    output:
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
 
   # tutorial bundle specific for Nigeria and Benin only
@@ -77,27 +66,28 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
-      gdrive: https://drive.google.com/file/d/1fo-YsyU2LKkVeg5Ea0JbcEx-zQ3kJKW7/view?usp=sharing
+      # zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
+      gdrive: https://drive.google.com/file/d/1MdZ4Eb80a2ntsBRBqWMC0Hodvu4e0jSm/view?usp=sharing
     output:
     - data/costs.csv
     - data/hydro_capacities.csv
     - data/custom_powerplants.csv
+    - data/eia_hydro_annual_generation.csv
     - data/eez/eez_v11.gpkg
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    - data/ssp2-2.6/2030/era5_2013/Africa.nc
 
 
   # resources bundle containing the resources folder for africa only
-  bundle_loadscenarios_earth:
+  bundle_natura_earth:
     countries: [Earth]
-    category: loadscenarios
+    category: natura
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
-      gdrive: https://drive.google.com/file/d/1abwx1FviogYUsnP27MrCzQf-3w-9IHDl/view?usp=sharing
+      # zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
+      gdrive: https://drive.google.com/file/d/1XkDG0ipLjXyrw__SauJlDOG1hZna1LTQ/view?usp=sharing
     output:
-    - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/natura.tiff
 
   # data bundle of the data folder for the african continent
