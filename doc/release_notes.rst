@@ -89,9 +89,11 @@ Upcoming Release
 
 * Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos: `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_
 
-* Restructure the package to ease readability and fix google drive downloading method: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`__
+* Restructure the package to ease readability and fix google drive downloading method: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`_
 
-* Update config links to adhere to the new structure of the package: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
+* Update config links to adhere to the new structure of the package: `PR #420 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
+
+* Improve and finalize capacity_validation notebook: `PR #406 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/406>`_
 
 
 PyPSA-Africa 0.0.2 (6th April 2022)
