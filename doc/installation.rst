@@ -90,6 +90,17 @@ The environment can be installed and activated using
     .../pypsa-africa % conda env create -f envs/environment.yaml
 
     .../pypsa-africa % conda activate pypsa-africa
+
+Sometimes the conda pypsa-africa installation can take more than one our
+(indicates some conflicts in the packages). In case a quick installation is necessary,
+you might also want to try out ``mamba``. It was observed to take around 5-15min to
+install all pypsa-africa dependencies with it.
+
+.. code::bash
+
+    ... conda install -c conda-forge mamba
+
+    .../pypsa-africa % mamba env create -f envs/environment.yaml
     
 To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ 
 and test if your jupyter lab works:
