@@ -483,6 +483,14 @@ def output_csv_geojson(output_files, df_all_feature, columns_feature, feature, g
         gdf_feature = convert_pd_to_gdf_nodes(df_all_feature, geo_crs)
 
     _logger.info("Writing GeoJSON file")
+    
+    
+    check_fields_for_generators = ['tags.generator:output:electricity']     
+    for field_to_add in check_fields_for_generators:
+        print(gdf_feature)
+        if field_to_add not in gdf_feature.columns.tolist():
+           gdf_feature[field_to_add]=None
+           print(gdf_feature)       
     gdf_feature.to_file(path_file_geojson, driver="GeoJSON")  # Generate GeoJson
 
 
