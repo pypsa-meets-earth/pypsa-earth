@@ -67,7 +67,9 @@ def prepare_heat_data(n):
         .reindex(index=n.snapshots, method="ffill")
     )
 
-    intraday_profiles = pd.read_csv(snakemake.input.heat_profile, index_col=0) #TODO GHALAT
+    intraday_profiles = pd.read_csv(
+        snakemake.input.heat_profile, index_col=0
+    )  # TODO GHALAT
 
     sectors = ["residential", "services"]
     uses = ["water", "space"]
@@ -91,10 +93,14 @@ def prepare_heat_data(n):
 
         heat_demand[f"{sector} {use}"] = (
             heat_demand_shape / heat_demand_shape.sum()
-        ).multiply(nodal_energy_totals[f"total {sector} {use}"]) * 1e6         #TODO v0.0.2
+        ).multiply(
+            nodal_energy_totals[f"total {sector} {use}"]
+        ) * 1e6  # TODO v0.0.2
         electric_heat_supply[f"{sector} {use}"] = (
             heat_demand_shape / heat_demand_shape.sum()
-        ).multiply(nodal_energy_totals[f"electricity {sector} {use}"]) * 1e6   #TODO v0.0.2
+        ).multiply(
+            nodal_energy_totals[f"electricity {sector} {use}"]
+        ) * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)

@@ -295,7 +295,7 @@ if __name__ == "__main__":
             ll="c1",
             opts="Co2L",
             planning_horizons="2030",
-            sopts = "720H"
+            sopts="720H",
         )
         sets_path_to_root("pypsa-earth-sec")
 
