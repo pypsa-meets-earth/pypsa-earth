@@ -77,7 +77,11 @@ if __name__ == "__main__":
     min_expansion_option = options.get("min_expansion")
     k_edge_option = options.get("connectivity_upgrade", 3)
     line_type_option = options.get("new_line_type", ["HVDC"])
+<<<<<<< HEAD
     min_DC_length = options.get("min_DC_length")
+=======
+    min_DC_length = 600  # [km]
+>>>>>>> 4592307003e3a37dcfa94625795a8dd8918d1cae
 
     # k_edge algorithm implementation
     G = nx.Graph()
@@ -95,12 +99,22 @@ if __name__ == "__main__":
     # find all complement edges, info on complement edges https://www.geeksforgeeks.org/complement-of-graph/
     complement_edges = pd.DataFrame(complement(G).edges, columns=["bus0", "bus1"])
     complement_edges["length"] = complement_edges.apply(haversine, axis=1)
-    complement_edges["interconnector"] = np.invert([(complement_edges.loc[x, "bus0"][0:2] == complement_edges.loc[x, "bus1"][0:2]) for x in complement_edges.index])
+    complement_edges["interconnector"] = np.invert(
+        [
+            (
+                complement_edges.loc[x, "bus0"][0:2]
+                == complement_edges.loc[x, "bus1"][0:2]
+            )
+            for x in complement_edges.index
+        ]
+    )
 
     # apply k_edge_augmentation weighted by length of complement edges
     # pick shortest lines per bus to fill k_edge condition (=degree of connectivity)
     k_edge = k_edge_option
-    augmentation = k_edge_augmentation(G, k_edge, avail=complement_edges[["bus0","bus1","length"]].values)
+    augmentation = k_edge_augmentation(
+        G, k_edge, avail=complement_edges[["bus0", "bus1", "length"]].values
+    )
     new_kedge_lines = pd.DataFrame(augmentation, columns=["bus0", "bus1"])
     new_kedge_lines["length"] = new_kedge_lines.apply(haversine, axis=1)
     new_kedge_lines.index = new_kedge_lines.apply(
@@ -109,18 +123,24 @@ if __name__ == "__main__":
 
     # random sampling for long lines above <min DC length [km]>, including min and max distance, excluding interconnectors
     intracountry_edges = complement_edges[~complement_edges["interconnector"]]
-    df = intracountry_edges[intracountry_edges["length"]>min_DC_length].sort_values(by=["length"])
-    random_sample = df.sample(frac=0.01, random_state=1)  # frac extract 1% of complement_edges as samples
+    df = intracountry_edges[intracountry_edges["length"] > min_DC_length].sort_values(
+        by=["length"]
+    )
+    random_sample = df.sample(
+        frac=0.01, random_state=1
+    )  # frac extract 1% of complement_edges as samples
     min_sample = df.head(1)
     max_sample = df.tail(1)
-    new_long_lines = pd.concat([min_sample, max_sample, random_sample]).drop_duplicates().dropna()
+    new_long_lines = (
+        pd.concat([min_sample, max_sample, random_sample]).drop_duplicates().dropna()
+    )
 
     #  add new lines to the network
     if "HVDC" in list(line_type_option):
         n.madd(
             "Link",
             new_long_lines.index,
-            suffix=' DC',
+            suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
             type=snakemake.config["lines"].get("dc_type"),
@@ -139,7 +159,7 @@ if __name__ == "__main__":
         n.madd(
             "Line",
             new_kedge_lines.index,
-            suffix=' AC',
+            suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
             type=snakemake.config["lines"]["types"].get(380),
