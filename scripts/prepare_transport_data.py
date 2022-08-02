@@ -61,16 +61,7 @@ def prepare_transport_data(n):
     function to prepare the data required for the (land) transport sector
     """
 
-    ##############
-    # Heating
-    ##############
 
-    # ashp_cop = xr.open_dataarray(snakemake.input.cop_air_total).to_pandas().reindex(index=n.snapshots)
-    # gshp_cop = xr.open_dataarray(snakemake.input.cop_soil_total).to_pandas().reindex(index=n.snapshots)
-
-    # solar_thermal = xr.open_dataarray(snakemake.input.solar_thermal_total).to_pandas().reindex(index=n.snapshots)
-    # # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
-    # solar_thermal = options['solar_cf_correction'] * solar_thermal / 1e3
 
     energy_totals = pd.read_csv(
         snakemake.input.energy_totals_name, index_col=0
@@ -82,50 +73,12 @@ def prepare_transport_data(n):
     # district_heat_share = nodal_energy_totals["district heat share"].round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
-    # # copy forward the daily average heat demand into each hour, so it can be multipled by the intraday profile
-    # daily_space_heat_demand = xr.open_dataarray(snakemake.input.heat_demand_total).to_pandas().reindex(index=n.snapshots, method="ffill")
-
-    # intraday_profiles = pd.read_csv(snakemake.input.heat_profile, index_col=0)
-
-    # sectors = ["residential", "services"]
-    # uses = ["water", "space"]
-
-    # heat_demand = {}
-    # electric_heat_supply = {}
-    # for sector, use in product(sectors, uses):
-    #     weekday = list(intraday_profiles[f"{sector} {use} weekday"])
-    #     weekend = list(intraday_profiles[f"{sector} {use} weekend"])
-    #     weekly_profile = weekday * 5 + weekend * 2
-    #     intraday_year_profile = generate_periodic_profiles(
-    #         daily_space_heat_demand.index.tz_localize("UTC"),
-    #         nodes=daily_space_heat_demand.columns,
-    #         weekly_profile=weekly_profile
-    #     )
-
-    #     if use == "space":
-    #         heat_demand_shape = daily_space_heat_demand * intraday_year_profile
-    #     else:
-    #         heat_demand_shape = intraday_year_profile
-
-    #     heat_demand[f"{sector} {use}"] = (heat_demand_shape/heat_demand_shape.sum()).multiply(nodal_energy_totals[f"total {sector} {use}"]) * 1e6
-    #     electric_heat_supply[f"{sector} {use}"] = (heat_demand_shape/heat_demand_shape.sum()).multiply(nodal_energy_totals[f"electricity {sector} {use}"]) * 1e6
-
-    # heat_demand = pd.concat(heat_demand, axis=1)
-    # electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
-
-    # # subtract from electricity load since heat demand already in heat_demand
-    # electric_nodes = n.loads.index[n.loads.carrier == "electricity"]
-    # n.loads_t.p_set[electric_nodes] = n.loads_t.p_set[electric_nodes] - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
-
-    ##############
-    # Transport
-    ##############
 
     # Get overall demand curve for all vehicles
 
     traffic = pd.read_csv(
-        snakemake.input.traffic_data_KFZ, skiprows=2, usecols=["count"], squeeze=True
-    )
+        snakemake.input.traffic_data_KFZ, skiprows=2, usecols=["count"]
+    ).squeeze("columns")
 
     # Generate profiles
     transport_shape = generate_periodic_profiles(
@@ -198,8 +151,7 @@ def prepare_transport_data(n):
     # derive plugged-in availability for PKW's (cars)
 
     traffic = pd.read_csv(
-        snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"], squeeze=True
-    )
+        snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"]).squeeze("columns")
 
     avail_max = options.get("bev_avail_max", 0.95)
     avail_mean = options.get("bev_avail_mean", 0.8)
@@ -241,7 +193,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        snakemake = mock_snakemake("prepare_transport_data", simpl="", clusters="44")
+        snakemake = mock_snakemake("prepare_transport_data", simpl="", clusters="111")
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)

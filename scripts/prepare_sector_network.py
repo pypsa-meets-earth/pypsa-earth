@@ -84,14 +84,15 @@ def add_generation(n, costs):
     fallback = {"OCGT": "gas"}
     conventionals = options.get("conventional_generation", fallback)
 
-    add_carrier_buses(n, np.unique(list(conventionals.values())))
 
     for generator, carrier in conventionals.items():
+    
+        add_carrier_buses(n, carrier)
 
         n.madd(
             "Link",
             nodes + " " + generator,
-            bus0="Africa " + carrier,
+            bus0=spatial.gas.nodes,
             bus1=nodes,
             bus2="co2 atmosphere",
             marginal_cost=costs.at[generator, "efficiency"]
@@ -115,10 +116,31 @@ def add_oil(n, costs):
     """
     # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
     # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
+    # spatial.gas = SimpleNamespace()
+
+    # if options["gas_network"]:
+    #     spatial.gas.nodes = nodes + " gas"
+    #     spatial.gas.locations = nodes
+    #     # spatial.gas.biogas = nodes + " biogas"
+    #     spatial.gas.industry = nodes + " gas for industry"
+    #     spatial.gas.industry_cc = nodes + " gas for industry CC"
+    #     # spatial.gas.biogas_to_gas = nodes + " biogas to gas"
+    # else:
+    #     spatial.gas.nodes = ["Africa gas"]
+    #     spatial.gas.locations = ["Africa"]
+    #     # spatial.gas.biogas = ["Africa biogas"]
+    #     spatial.gas.industry = ["gas for industry"]
+    #     spatial.gas.industry_cc = ["gas for industry CC"]
+    #     # spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
 
     spatial.oil = SimpleNamespace()
-    spatial.oil.nodes = ["Africa oil"]
-    spatial.oil.locations = ["Africa"]
+
+    if options["oil_network"]:
+        spatial.oil.nodes = nodes + " oil"
+        spatial.oil.locations = nodes
+    else:
+        spatial.oil.nodes = ["Africa oil"]
+        spatial.oil.locations = ["Africa"]
 
     if "oil" not in n.carriers.index:
         n.add("Carrier", "oil")
@@ -127,27 +149,27 @@ def add_oil(n, costs):
 
     #     n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
-    if "Africa oil Store" not in n.stores.index:
+    #if "Africa oil Store" not in n.stores.index:
 
-        # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-        n.add(
-            "Store",
-            [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
-            bus=spatial.oil.nodes,
-            e_nom_extendable=True,
-            e_cyclic=True,
-            carrier="oil",
-        )
+    # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
+    n.add(
+        "Store",
+        [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
+        bus=spatial.oil.nodes,
+        e_nom_extendable=True,
+        e_cyclic=True,
+        carrier="oil",
+    )
 
-    if "Africa oil" not in n.generators.index:
-        n.add(
-            "Generator",
-            spatial.oil.nodes,
-            bus=spatial.oil.nodes,
-            p_nom_extendable=True,
-            carrier="oil",
-            marginal_cost=costs.at["oil", "fuel"],
-        )
+    #if "Africa oil" not in n.generators.index:
+    n.add(
+        "Generator",
+        spatial.oil.nodes,
+        bus=spatial.oil.nodes,
+        p_nom_extendable=True,
+        carrier="oil",
+        marginal_cost=costs.at["oil", "fuel"],
+    )
 
 
 def add_gas(n, costs):
@@ -626,7 +648,9 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    # all_aviation = ["total international aviation", "total domestic aviation"]
+    
+    all_aviation = ["total international aviation", "total domestic aviation"]
+    MA_jetfuel=1e7
 
     airports = pd.read_csv(snakemake.input.airports)
 
@@ -646,7 +670,10 @@ def add_aviation(n, cost):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
+<<<<<<< HEAD
+=======
     MA_jetfuel = 1e7
+>>>>>>> origin/main
     airports["p_set"] = airports["fraction"].apply(
         lambda frac: frac
         * MA_jetfuel
@@ -671,15 +698,21 @@ def add_aviation(n, cost):
     )
 
     # co2_release = ["kerosene for aviation"]
+<<<<<<< HEAD
+    co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]#/ 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+                                                #the current way leads to inaccuracies in the last timestep in case
+                                                #the timestep if 8760 is not divisble by it
+=======
     co2 = (
         airports["p_set"].sum() * costs.at["oil", "CO2 intensity"] / 8760
     )  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
     # the current way leads to inaccuracies in the last timestep in case
     # the timestep if 8760 is not divisble by it
+>>>>>>> origin/main
 
     n.add(
         "Load",
-        "oil emissions",
+        "aviation oil emissions",
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
@@ -744,7 +777,7 @@ def h2_hc_conversions(n, costs):
             spatial.nodes,
             suffix=" Sabatier",
             bus0=nodes + " H2",
-            bus1="Africa gas",
+            bus1=spatial.gas.nodes,
             bus2=spatial.co2.nodes,
             p_nom_extendable=True,
             carrier="Sabatier",
@@ -764,7 +797,7 @@ def h2_hc_conversions(n, costs):
             spatial.nodes,
             suffix=" helmeth",
             bus0=nodes,
-            bus1="Africa gas",
+            bus1=spatial.gas.nodes,
             bus2=spatial.co2.nodes,
             carrier="helmeth",
             p_nom_extendable=True,
@@ -781,7 +814,7 @@ def h2_hc_conversions(n, costs):
             "Link",
             spatial.nodes,
             suffix=" SMR CC",
-            bus0="Africa gas",
+            bus0=spatial.gas.nodes,
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             bus3=spatial.co2.nodes,
@@ -797,7 +830,7 @@ def h2_hc_conversions(n, costs):
         n.madd(
             "Link",
             nodes + " SMR",
-            bus0="Africa gas",
+            bus0=spatial.gas.nodes,
             bus1=nodes + " H2",
             bus2="co2 atmosphere",
             p_nom_extendable=True,
@@ -814,6 +847,7 @@ def add_shipping(n, costs):
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
 
     gadm_level = options["gadm_level"]
+    MA_maritime=36.7 * 1e1 * 0.46 # TWh per year
 
     efficiency = (
         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
@@ -829,8 +863,13 @@ def add_shipping(n, costs):
     ports = ports.set_index("gadm_{}".format(gadm_level))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
-
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
+<<<<<<< HEAD
+    
+    ports["p_set"] = ports["fraction"].apply(
+        lambda frac: shipping_hydrogen_share * frac * MA_maritime * efficiency * 1e6/ 8760 
+        #TODO double check the use of efficiency
+=======
     MA_maritime = 36.7 * 1e7 * 0.46
     ports["p_set"] = ports["fraction"].apply(
         lambda frac: shipping_hydrogen_share
@@ -840,17 +879,17 @@ def add_shipping(n, costs):
         / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
         # the timestep if 8760 is not divisble by it),
+>>>>>>> origin/main
     )  # TODO use real data here
 
     ports = pd.concat([ports, ind])
 
     ports = ports[~ports.index.duplicated(keep="first")]
 
-    # TODO Where is MAR.7_1 ????? Only 13 nodes
 
     ports = ports.fillna(0)
 
-    if options["shipping_hydrogen_liquefaction"]:  # how to implement options?
+    if options["shipping_hydrogen_liquefaction"]:  
 
         n.madd("Bus", nodes, suffix=" H2 liquid", carrier="H2 liquid", location=nodes)
 
@@ -885,12 +924,18 @@ def add_shipping(n, costs):
         shipping_oil_share = 1 - shipping_hydrogen_share
 
         ports["p_set"] = ports["fraction"].apply(
+<<<<<<< HEAD
+            lambda frac: shipping_oil_share * frac * MA_maritime * 1e6 / 8760 #* n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+                                                    #the current way leads to inaccuracies in the last timestep in case
+                                                    #the timestep if 8760 is not divisble by it),
+=======
             lambda frac: shipping_oil_share
             * frac
             * 1e6
             / 8760  # * n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
             # the current way leads to inaccuracies in the last timestep in case
             # the timestep if 8760 is not divisble by it),
+>>>>>>> origin/main
         )
 
         n.madd(
@@ -905,10 +950,13 @@ def add_shipping(n, costs):
         co2 = (
             shipping_oil_share
             * ports["p_set"].sum()
+<<<<<<< HEAD
+=======
             * 1e6
             / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
             # the current way leads to inaccuracies in the last timestep in case
             # the timestep if 8760 is not divisble by it),
+>>>>>>> origin/main
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -951,7 +999,11 @@ def add_industry(n, costs):
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
 
+<<<<<<< HEAD
     # industrial_demand.reset_index(inplace=True)
+=======
+    #industrial_demand.reset_index(inplace=True)
+>>>>>>> validate_demand
 
     # Add carrier Biomass
 
@@ -1018,16 +1070,32 @@ def add_industry(n, costs):
     # industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
     #     lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
 
+<<<<<<< HEAD
     # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+=======
+    #industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
-    n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
+    #n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
+    n.add("Bus", spatial.gas.industry, location=spatial.gas.locations, carrier="gas for industry")
+>>>>>>> validate_demand
+
+    gas_demand = industrial_demand.loc[nodes, "methane"] / 8760.
+
+    if options["gas_network"]:
+        spatial_gas_demand = gas_demand.rename(index=lambda x: x + " gas for industry")
+    else:
+        spatial_gas_demand = gas_demand.sum()
 
     n.madd(
         "Load",
-        nodes,
-        suffix=" gas for industry",
-        bus="gas for industry",
+        spatial.gas.industry,
+        bus=spatial.gas.industry,
         carrier="gas for industry",
+<<<<<<< HEAD
+        p_set=spatial_gas_demand
+        )
+    
+=======
         p_set=industrial_demand["methane"].apply(
             lambda frac: frac
             / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
@@ -1035,12 +1103,15 @@ def add_industry(n, costs):
             # the timestep if 8760 is not divisble by it),  # TODO change for resolution
         ),
     )
+>>>>>>> origin/main
 
     n.add(
         "Link",
-        "gas for industry",
-        bus0="Africa gas",
-        bus1="gas for industry",
+        spatial.gas.industry,
+        #bus0="Africa gas",
+        bus0=spatial.gas.nodes,
+        #bus1="gas for industry",
+        bus1=spatial.gas.industry,
         bus2="co2 atmosphere",
         carrier="gas for industry",
         p_nom_extendable=True,
@@ -1050,10 +1121,11 @@ def add_industry(n, costs):
 
     n.madd(
         "Link",
-        spatial.co2.locations,
-        suffix=" gas for industry CC",
-        bus0="Africa gas",
-        bus1="gas for industry",
+        spatial.gas.industry_cc,
+        #suffix=" gas for industry CC",
+        #bus0="Africa gas",
+        bus0=spatial.gas.nodes,
+        bus1=spatial.gas.industry,
         bus2="co2 atmosphere",
         bus3=spatial.co2.nodes,
         carrier="gas for industry CC",
@@ -1088,7 +1160,7 @@ def add_industry(n, costs):
         "Load",
         nodes,
         suffix=" naphtha for industry",
-        bus="Africa oil",
+        bus=spatial.oil.nodes,
         carrier="naphtha for industry",
         p_set=industrial_demand["naphtha"].apply(
             lambda frac: frac / 8760
@@ -1196,7 +1268,7 @@ def add_industry(n, costs):
         "process emissions",
         bus0="process emissions",
         bus1="co2 atmosphere",
-        carrier="process emission",
+        carrier="process emissions",
         p_nom_extendable=True,
         efficiency=1.0,
     )
@@ -1626,7 +1698,8 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} gas boiler",
                 p_nom_extendable=True,
-                bus0="Africa gas",
+                #bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name] + f" {name} heat",
                 bus2="co2 atmosphere",
                 carrier=name + " gas boiler",
@@ -1658,7 +1731,8 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP",
-                bus0="Africa gas",
+                #bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
                 bus3="co2 atmosphere",
@@ -1677,7 +1751,8 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP CC",
-                bus0="Africa gas",
+                #bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
                 bus3="co2 atmosphere",
@@ -1716,7 +1791,8 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} micro gas CHP",
                 p_nom_extendable=True,
-                bus0="Africa gas",
+                #bus0="Africa gas",
+                bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + f" {name} heat",
                 bus3="co2 atmosphere",
@@ -1946,6 +2022,18 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
+<<<<<<< HEAD
+    #TODO Fatal
+    heat_demand = pd.read_csv(
+        snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
+    ) /1000
+    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True) 
+    
+    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True) 
+    
+    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0, parse_dates=True) 
+    
+=======
     # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
@@ -1976,21 +2064,26 @@ if __name__ == "__main__":
     industrial_demand = pd.read_csv(
         snakemake.input.industrial_demand, index_col=0
     )  # * 1e6
+>>>>>>> origin/main
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
 
+<<<<<<< HEAD
+    add_co2(n, costs)#, nodes, options)  # TODO add costs
+=======
     add_co2(n, costs)  # TODO add costs
+>>>>>>> origin/main
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
-    # add_generation(n, costs)
 
     # Add_oil() adds oil carrier/bus.
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
     add_oil(n, costs)
 
     add_gas(n, costs)
+    add_generation(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
@@ -2022,13 +2115,13 @@ if __name__ == "__main__":
 
     if options["dac"]:
         add_dac(n, costs)
-
+   # add_biomass(n, costs)
+    # n.lines.s_nom*=0.3
     n.export_to_netcdf(snakemake.output[0])
 
     # n.lopf()
 
     # Add biomass (TODO currently only for debugging, not working yet)
-    add_biomass(n, costs)
 
     # TODO define spatial (for biomass and co2)
 
