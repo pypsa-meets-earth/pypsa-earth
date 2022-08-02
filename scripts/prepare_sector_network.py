@@ -670,10 +670,6 @@ def add_aviation(n, cost):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-<<<<<<< HEAD
-=======
-    MA_jetfuel = 1e7
->>>>>>> origin/main
     airports["p_set"] = airports["fraction"].apply(
         lambda frac: frac
         * MA_jetfuel
@@ -698,17 +694,9 @@ def add_aviation(n, cost):
     )
 
     # co2_release = ["kerosene for aviation"]
-<<<<<<< HEAD
     co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]#/ 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
                                                 #the current way leads to inaccuracies in the last timestep in case
                                                 #the timestep if 8760 is not divisble by it
-=======
-    co2 = (
-        airports["p_set"].sum() * costs.at["oil", "CO2 intensity"] / 8760
-    )  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-    # the current way leads to inaccuracies in the last timestep in case
-    # the timestep if 8760 is not divisble by it
->>>>>>> origin/main
 
     n.add(
         "Load",
@@ -864,22 +852,10 @@ def add_shipping(n, costs):
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-<<<<<<< HEAD
     
     ports["p_set"] = ports["fraction"].apply(
         lambda frac: shipping_hydrogen_share * frac * MA_maritime * efficiency * 1e6/ 8760 
         #TODO double check the use of efficiency
-=======
-    MA_maritime = 36.7 * 1e7 * 0.46
-    ports["p_set"] = ports["fraction"].apply(
-        lambda frac: shipping_hydrogen_share
-        * frac
-        * MA_maritime
-        * efficiency
-        / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),
->>>>>>> origin/main
     )  # TODO use real data here
 
     ports = pd.concat([ports, ind])
@@ -924,18 +900,9 @@ def add_shipping(n, costs):
         shipping_oil_share = 1 - shipping_hydrogen_share
 
         ports["p_set"] = ports["fraction"].apply(
-<<<<<<< HEAD
             lambda frac: shipping_oil_share * frac * MA_maritime * 1e6 / 8760 #* n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
                                                     #the current way leads to inaccuracies in the last timestep in case
                                                     #the timestep if 8760 is not divisble by it),
-=======
-            lambda frac: shipping_oil_share
-            * frac
-            * 1e6
-            / 8760  # * n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
->>>>>>> origin/main
         )
 
         n.madd(
@@ -950,13 +917,6 @@ def add_shipping(n, costs):
         co2 = (
             shipping_oil_share
             * ports["p_set"].sum()
-<<<<<<< HEAD
-=======
-            * 1e6
-            / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
->>>>>>> origin/main
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -999,11 +959,7 @@ def add_industry(n, costs):
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
 
-<<<<<<< HEAD
-    # industrial_demand.reset_index(inplace=True)
-=======
     #industrial_demand.reset_index(inplace=True)
->>>>>>> validate_demand
 
     # Add carrier Biomass
 
@@ -1070,14 +1026,10 @@ def add_industry(n, costs):
     # industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
     #     lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
 
-<<<<<<< HEAD
-    # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
-=======
     #industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
     #n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
     n.add("Bus", spatial.gas.industry, location=spatial.gas.locations, carrier="gas for industry")
->>>>>>> validate_demand
 
     gas_demand = industrial_demand.loc[nodes, "methane"] / 8760.
 
@@ -1091,19 +1043,9 @@ def add_industry(n, costs):
         spatial.gas.industry,
         bus=spatial.gas.industry,
         carrier="gas for industry",
-<<<<<<< HEAD
         p_set=spatial_gas_demand
         )
     
-=======
-        p_set=industrial_demand["methane"].apply(
-            lambda frac: frac
-            / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),  # TODO change for resolution
-        ),
-    )
->>>>>>> origin/main
 
     n.add(
         "Link",
@@ -1963,11 +1905,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
+            clusters="53",
             ll="c1",
-            opts="Co2L-144H",
+            opts="",
             planning_horizons="2030",
-            sopts="7H",
+            sopts="Co2L-720H",
         )
 
     # TODO fetch from config
@@ -2022,7 +1964,6 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-<<<<<<< HEAD
     #TODO Fatal
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
@@ -2033,48 +1974,12 @@ if __name__ == "__main__":
     
     solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0, parse_dates=True) 
     
-=======
-    # Load data required for the heat sector
-    heat_demand = pd.read_csv(
-        snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    )
-    # Ground-sourced heatpump coefficient of performance
-    gshp_cop = pd.read_csv(
-        snakemake.input.gshp_cop, index_col=0, parse_dates=True
-    )  # only needed with heat dep. hp cop allowed from config
-    # TODO add option heat_dep_hp_cop to the config
-
-    # Air-sourced heatpump coefficient of performance
-    ashp_cop = pd.read_csv(
-        snakemake.input.ashp_cop, index_col=0, parse_dates=True
-    )  # only needed with heat dep. hp cop allowed from config
-
-    # Solar thermal availability profiles
-    solar_thermal = pd.read_csv(
-        snakemake.input.solar_thermal, index_col=0, parse_dates=True
-    )
-
-    # Share of district heating at each node
-    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
-
-    # Load data required for aviation and navigation
-    # TODO follow the same structure as land transport and heat
-
-    # Load industry demand data
-    industrial_demand = pd.read_csv(
-        snakemake.input.industrial_demand, index_col=0
-    )  # * 1e6
->>>>>>> origin/main
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
 
-<<<<<<< HEAD
     add_co2(n, costs)#, nodes, options)  # TODO add costs
-=======
-    add_co2(n, costs)  # TODO add costs
->>>>>>> origin/main
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
 
