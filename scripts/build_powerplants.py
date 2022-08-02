@@ -298,11 +298,13 @@ if __name__ == "__main__":
         gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
         country_list = snakemake.config["countries"]
         geo_crs = snakemake.config["crs"]["geo_crs"]
-        gdf = get_GADM_layer(country_list, gadm_layer_id, geo_crs)
+        # gdf = get_GADM_layer(country_list, gadm_layer_id, geo_crs)
+        # gdf = snakemake.input.gadm_shapes
+        gdf = gpd.read_file(snakemake.input.gadm_shapes)
         
         def locate_bus(coords, co):   
             gdf_co = gdf[
-                gdf["GID_{}".format(gadm_layer_id)].str.contains(
+                gdf["GADM_ID"].str.contains(
                     two_2_three_digits_country(co)
                     )
                 ]
@@ -310,7 +312,7 @@ if __name__ == "__main__":
             point = Point(coords["lon"], coords["lat"])
     
             # try:
-            return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_layer_id)].item()
+            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
 
         ppl['region_id'] =  ppl[["lon", "lat", "Country"]].apply(
         lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1)
