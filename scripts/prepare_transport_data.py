@@ -61,8 +61,6 @@ def prepare_transport_data(n):
     function to prepare the data required for the (land) transport sector
     """
 
-
-
     energy_totals = pd.read_csv(
         snakemake.input.energy_totals_name, index_col=0
     )  # TODO change with real numbers
@@ -72,7 +70,6 @@ def prepare_transport_data(n):
     # # district heat share not weighted by population
     # district_heat_share = nodal_energy_totals["district heat share"].round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
-
 
     # Get overall demand curve for all vehicles
 
@@ -151,7 +148,8 @@ def prepare_transport_data(n):
     # derive plugged-in availability for PKW's (cars)
 
     traffic = pd.read_csv(
-        snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"]).squeeze("columns")
+        snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"]
+    ).squeeze("columns")
 
     avail_max = options.get("bev_avail_max", 0.95)
     avail_mean = options.get("bev_avail_mean", 0.8)

@@ -116,10 +116,12 @@ def plot_h2_infra(network):
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
 
     fig.set_size_inches(10.5, 9)
-    bus_sizes.index=bus_sizes.index.set_levels(bus_sizes.index.levels[0].str.replace(' gas', ''), level=0)
+    bus_sizes.index = bus_sizes.index.set_levels(
+        bus_sizes.index.levels[0].str.replace(" gas", ""), level=0
+    )
     n.plot(
         bus_sizes=bus_sizes,
-        bus_colors={"SMR": 'darkolivegreen'},
+        bus_colors={"SMR": "darkolivegreen"},
         # link_colors=link_color,
         # link_widths=link_widths,
         branch_components=["Link"],
@@ -129,7 +131,7 @@ def plot_h2_infra(network):
     )
 
     handles = make_legend_circles_for(
-        [5000, 1000], scale=bus_size_factor, facecolor='darkolivegreen'
+        [5000, 1000], scale=bus_size_factor, facecolor="darkolivegreen"
     )
     labels = ["{} GW".format(s) for s in (5, 1)]
     l2 = ax.legend(
@@ -168,6 +170,8 @@ def plot_h2_infra(network):
     fig.savefig(
         snakemake.output.map.replace("-costs-all", "-h2_network"), bbox_inches="tight"
     )
+
+
 def plot_h2_infra(network):
     n = network.copy()
 
@@ -308,10 +312,12 @@ def plot_smr(network):
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
 
     fig.set_size_inches(10.5, 9)
-    bus_sizes.index=bus_sizes.index.set_levels(bus_sizes.index.levels[0].str.replace(' gas', ''), level=0)
+    bus_sizes.index = bus_sizes.index.set_levels(
+        bus_sizes.index.levels[0].str.replace(" gas", ""), level=0
+    )
     n.plot(
         bus_sizes=bus_sizes,
-        bus_colors={"SMR": 'darkolivegreen'},
+        bus_colors={"SMR": "darkolivegreen"},
         # link_colors=link_color,
         # link_widths=link_widths,
         branch_components=["Link"],
@@ -321,7 +327,7 @@ def plot_smr(network):
     )
 
     handles = make_legend_circles_for(
-        [5000, 1000], scale=bus_size_factor, facecolor='darkolivegreen'
+        [5000, 1000], scale=bus_size_factor, facecolor="darkolivegreen"
     )
     labels = ["{} GW".format(s) for s in (5, 1)]
     l2 = ax.legend(
@@ -357,10 +363,7 @@ def plot_smr(network):
     ax.add_artist(l1_1)
 
     # fig.savefig(snakemake.output.hydrogen, bbox_inches='tight', transparent=True,
-    fig.savefig(
-        snakemake.output.map.replace("-costs-all", "-SMR"), bbox_inches="tight"
-    )
-
+    fig.savefig(snakemake.output.map.replace("-costs-all", "-SMR"), bbox_inches="tight")
 
 
 def plot_transmission_topology(network):
@@ -642,11 +645,9 @@ def plot_map(
         line_lower_threshold = 0.0
         title = "Technologies"
     else:
+        line_widths = n.lines.s_nom_opt - n.lines.s_nom_min
         line_widths = (
-            n.lines.s_nom_opt - n.lines.s_nom_min
-        )
-        line_widths = (
-            n.lines.s_nom_opt - n.lines.s_nom_opt 
+            n.lines.s_nom_opt - n.lines.s_nom_opt
         )  # TODO when we add wildcard lv
         link_widths = n.links.p_nom_opt - n.links.p_nom_min
         title = "Transmission reinforcement"
@@ -720,7 +721,11 @@ def plot_map(
     # plt.legend(handles=[red_patch])
 
     fig.savefig(snakemake.output.map, transparent=True, bbox_inches="tight")
-    fig.savefig(snakemake.output.map.replace('pdf', 'png'), transparent=True, bbox_inches="tight")
+    fig.savefig(
+        snakemake.output.map.replace("pdf", "png"),
+        transparent=True,
+        bbox_inches="tight",
+    )
     # fig.savefig('plot_map.pdf', transparent=True,
     #         bbox_inches="tight")#, dpi=300)
 

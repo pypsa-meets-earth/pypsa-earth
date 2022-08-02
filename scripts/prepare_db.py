@@ -37,7 +37,7 @@ if __name__ == "__main__":
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="730H"
+            sopts="730H",
         )
 
     n0 = pypsa.Network(snakemake.input.network)
@@ -80,7 +80,8 @@ summary_elec = pd.DataFrame(index=n0.buses.loc[n0.buses.carrier == "AC"].index)
 
 db = pd.DataFrame(columns=["node_id", "carrier", "flow", "tech", "value"])
 
-names={'g': 'Generator'}
+names = {"g": "Generator"}
+
 
 def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario id
     global db
@@ -92,7 +93,7 @@ def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario 
         .reset_index(level=0)
         .rename(columns={"snapshot": "DateTime", 0: "value"})
         .reset_index()
-        .rename(columns={'index': "node_id"})
+        .rename(columns={"index": "node_id"})
     )
     dbf.node_id = dbf.node_id.str.replace(" " + tech, "")
     # dbf.columns = ['node_id', 'value']
@@ -145,7 +146,7 @@ def add_load(tech, carrier):
 def add_conv(tech, carrier, p, ngv, reg=False):
     global db
     if p == 0:
-        links = n.links_t.p0.rename_axis(None, axis=1)* t  # /1e3
+        links = n.links_t.p0.rename_axis(None, axis=1) * t  # /1e3
     elif p == 1:
         links = n.links_t.p1.rename_axis(None, axis=1) * t  # /1e3
     elif p == 2:
@@ -251,8 +252,8 @@ add_store("battery", "hv", reg=True)
 add_store("battery storage", "hv")
 add_store("home battery", "hv")
 
-add_storage('PHS', 'hv')#TODO commented out because there is no storage untis
-add_storage('hydro', 'hv')
+add_storage("PHS", "hv")  # TODO commented out because there is no storage untis
+add_storage("hydro", "hv")
 
 
 add_load("H2 for shipping", "h2")
@@ -336,13 +337,13 @@ db.reset_index(drop=True, inplace=True)
 round(db).to_csv(snakemake.output.db)
 yearly_agg = round(db.groupby([db.node_id, db.carrier, db.flow, db.tech]).sum() / 1e3)
 # yearly_agg.to_csv('summary_db.csv')
-#yearly_agg.to_csv(snakemake.output.yr_agg)
+# yearly_agg.to_csv(snakemake.output.yr_agg)
 #%%
 def calc_energy_flow(carrier, node_id):
     agg = yearly_agg.reset_index()
     agg = agg[(agg.carrier == carrier)]
     agg.value = agg.value.apply(int)
-    if node_id=='all':
+    if node_id == "all":
         agg = agg.groupby("tech").sum().reset_index()
     else:
         agg = agg[agg.node_id.str.contains(node_id)].groupby("tech").sum().reset_index()
@@ -372,7 +373,7 @@ def energy_pie(carrier, node_id, sign):
         )
     agg = agg[agg.pct > 0.009]
 
-    fig1, ax1 = plt.subplots()#figsize=(6, 4))
+    fig1, ax1 = plt.subplots()  # figsize=(6, 4))
     ax1.pie(
         agg.pct,
         labels=agg.tech,
@@ -386,8 +387,12 @@ def energy_pie(carrier, node_id, sign):
             sign_dict[sign], carrier, node_id
         )
         + "Value = {} GWh".format(round(agg.value.sum(), 1)),
-        #bbox={"facecolor": "0.8", "pad": 5},
+        # bbox={"facecolor": "0.8", "pad": 5},
     )
     plt.show()
-    fig1.savefig("Yearly_aggregate_{0}_of_{1}_at_{2}_node(s).png".format(
-                sign_dict[sign], carrier, node_id), dpi=100)
+    fig1.savefig(
+        "Yearly_aggregate_{0}_of_{1}_at_{2}_node(s).png".format(
+            sign_dict[sign], carrier, node_id
+        ),
+        dpi=100,
+    )

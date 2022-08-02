@@ -88,7 +88,9 @@ def build_nodal_distribution_key(
 ):  # returns percentage of co2 emissions
     """Build nodal distribution keys for each sector."""
 
-    sectors = industrial_database.Sector.unique()  # TODO add more than just cement to data
+    sectors = (
+        industrial_database.Sector.unique()
+    )  # TODO add more than just cement to data
 
     countries = regions.index.str[:2].unique()
 
@@ -103,8 +105,10 @@ def build_nodal_distribution_key(
 
         regions_ct = regions.index[regions.index.str.contains(country)]
 
-        facilities = industrial_database.query("country == @country and Sector == @sector")
-        #TODO adapt for facilities with production values not emissions
+        facilities = industrial_database.query(
+            "country == @country and Sector == @sector"
+        )
+        # TODO adapt for facilities with production values not emissions
         if not facilities.empty:
             emissions = facilities["Total CO2 emission"]
             if emissions.sum() == 0:
