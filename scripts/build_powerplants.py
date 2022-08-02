@@ -76,9 +76,12 @@ from _helpers import (
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
+    two_2_three_digits_country,
 )
+from build_shapes import get_GADM_layer
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
+from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
@@ -290,4 +293,28 @@ if __name__ == "__main__":
     if bus_null_b.any():
         logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
+
+    if snakemake.config['cluster_options']['alternative_clustering']:
+        gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+        country_list = snakemake.config["countries"]
+        geo_crs = snakemake.config["crs"]["geo_crs"]
+        gdf = get_GADM_layer(country_list, gadm_layer_id, geo_crs)
+        
+        def locate_bus(coords, co):   
+            gdf_co = gdf[
+                gdf["GID_{}".format(gadm_layer_id)].str.contains(
+                    two_2_three_digits_country(co)
+                    )
+                ]
+            
+            point = Point(coords["lon"], coords["lat"])
+    
+            # try:
+            return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_layer_id)].item()
+
+        ppl['region_id'] =  ppl[["lon", "lat", "Country"]].apply(
+        lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1)
+
+   
+   
     ppl.to_csv(snakemake.output.powerplants)
