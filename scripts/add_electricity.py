@@ -531,7 +531,7 @@ def attach_hydro(n, costs, ppl):
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
     if snakemake.config["cluster_options"]["alternative_clustering"]:
-        bus_id = ppl['region_id']
+        bus_id = ppl["region_id"]
     else:
         bus_id = ppl["bus"]
 
