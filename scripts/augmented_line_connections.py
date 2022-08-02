@@ -77,7 +77,7 @@ if __name__ == "__main__":
     min_expansion_option = options.get("min_expansion")
     k_edge_option = options.get("connectivity_upgrade", 3)
     line_type_option = options.get("new_line_type", ["HVDC"])
-    min_DC_length = 600  # [km] 
+    min_DC_length = options.get("min_DC_length")
 
     # k_edge algorithm implementation
     G = nx.Graph()
@@ -123,6 +123,7 @@ if __name__ == "__main__":
             suffix=' DC',
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
+            type=snakemake.config["lines"].get("dc_type"),
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
@@ -141,6 +142,7 @@ if __name__ == "__main__":
             suffix=' AC',
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
+            type=snakemake.config["lines"]["types"].get(380),
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,
@@ -153,4 +155,4 @@ if __name__ == "__main__":
 
         _set_links_underwater_fraction(n)
 
-n.export_to_netcdf(snakemake.output.network)
+    n.export_to_netcdf(snakemake.output.network)
