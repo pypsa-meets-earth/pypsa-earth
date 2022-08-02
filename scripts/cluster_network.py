@@ -177,9 +177,9 @@ def weighting_for_country(n, x):
 
     if w.max() == 0.0:
         logger.warning("Null weighting for buses of country {x.country.iloc[0]}")
-        return w.clip(lower=1.0).astype(int)
+        return w.astype(int)
     else:
-        return (w * (100.0 / (w.max()))).clip(lower=1.0).astype(int)
+        return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
 def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
