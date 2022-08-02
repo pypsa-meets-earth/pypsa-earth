@@ -20,7 +20,6 @@ from helpers import (
     two_2_three_digits_country,
 )
 
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -33,17 +32,19 @@ if __name__ == "__main__":
             ll="c1",
             opts="",
             planning_horizons="2030",
-            sopts = "Co2L-720H"
+            sopts="Co2L-720H",
         )
 
-    options=['solar', 'offwind', 'onwind', 'csp']
-    options=['solar']#, 'offwind', 'onwind', 'csp']
+    options = ["solar", "offwind", "onwind", "csp"]
+    options = ["solar"]  # , 'offwind', 'onwind', 'csp']
 
-    n = pypsa.Network("../results/v.0.0.1_find_bug6/prenetworks/elec_s_285_ec_lc1.0_Co2L_730H_2030.nc")
-    
+    n = pypsa.Network(
+        "../results/v.0.0.1_find_bug6/prenetworks/elec_s_285_ec_lc1.0_Co2L_730H_2030.nc"
+    )
+
     # for option in options:
-        
+
     #     if option in n.generators.carrier:
     #         gen_ind = n.generators[n.generators.carrier=='solar'].index
     #         n.generators[gen_ind]= custom_res['']
-    #     else 
+    #     else

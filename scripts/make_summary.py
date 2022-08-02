@@ -343,7 +343,9 @@ def calculate_supply(n, label, supply):
 
             for end in [col[3:] for col in c.df.columns if col[:3] == "bus"]:
                 print(c.name, end)
-                items = c.df.index[c.df["bus" + end].map(bus_map, na_action=False)]#.fillna(False)]
+                items = c.df.index[
+                    c.df["bus" + end].map(bus_map, na_action=False)
+                ]  # .fillna(False)]
 
                 if len(items) == 0:
                     continue
@@ -647,8 +649,7 @@ def make_summaries(networks_dict):
     ]
 
     columns = pd.MultiIndex.from_tuples(
-        networks_dict.keys(),
-        names=["cluster", "ll", "opt", "planning_horizon"]
+        networks_dict.keys(), names=["cluster", "ll", "opt", "planning_horizon"]
     )
 
     df = {}
@@ -660,7 +661,7 @@ def make_summaries(networks_dict):
         print(label, filename)
 
         overrides = override_component_attrs(snakemake.input.overrides)
-        n = pypsa.Network('../'+filename, override_component_attrs=overrides)
+        n = pypsa.Network("../" + filename, override_component_attrs=overrides)
 
         assign_carriers(n)
         assign_locations(n)
@@ -684,22 +685,24 @@ def to_csv(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        #os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        # os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         from helpers import mock_snakemake
 
         snakemake = mock_snakemake("make_summary")
 
     networks_dict = {
-        #(cluster, lv, opt+sector_opt, planning_horizon) :
-        (cluster, ll, opt+'-'+sopt,planning_horizon): snakemake.config["results_dir"]
+        # (cluster, lv, opt+sector_opt, planning_horizon) :
+        (cluster, ll, opt + "-" + sopt, planning_horizon): snakemake.config[
+            "results_dir"
+        ]
         + snakemake.config["run"]
         + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
         for simpl in snakemake.config["scenario"]["simpl"]
         for cluster in snakemake.config["scenario"]["clusters"]
-        for ll in snakemake.config['scenario']['ll'] 
-        for opt in snakemake.config['scenario']['opts'] \
-        for sopt in snakemake.config['scenario']['sopts'] \
+        for ll in snakemake.config["scenario"]["ll"]
+        for opt in snakemake.config["scenario"]["opts"]
+        for sopt in snakemake.config["scenario"]["sopts"]
         for planning_horizon in snakemake.config["scenario"]["planning_horizons"]
     }
 
