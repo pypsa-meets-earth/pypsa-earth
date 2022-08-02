@@ -77,11 +77,7 @@ if __name__ == "__main__":
     min_expansion_option = options.get("min_expansion")
     k_edge_option = options.get("connectivity_upgrade", 3)
     line_type_option = options.get("new_line_type", ["HVDC"])
-<<<<<<< HEAD
     min_DC_length = options.get("min_DC_length")
-=======
-    min_DC_length = 600  # [km]
->>>>>>> 4592307003e3a37dcfa94625795a8dd8918d1cae
 
     # k_edge algorithm implementation
     G = nx.Graph()
