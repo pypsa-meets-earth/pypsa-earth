@@ -175,7 +175,11 @@ def weighting_for_country(n, x):
 
     w = g + l
 
-    return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
+    if w.max() == 0.0:
+        logger.warning("Null weighting for buses of country {x.country.iloc[0]}")
+        return w.clip(lower=1.0).astype(int)
+    else:
+        return (w * (100.0 / (w.max()))).clip(lower=1.0).astype(int)
 
 
 def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
@@ -232,7 +236,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
         distribution_factor = G
 
-    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_networks"]
+    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_network"]
     N = n.buses.groupby(["country"]).size()
 
     assert (
@@ -489,7 +493,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="60"
+            "cluster_network", network="elec", simpl="", clusters="55"
         )
         sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
