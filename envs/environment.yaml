@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-name: pypsa-africa-new
+name: pypsa-africa
 channels:
 - conda-forge
 - bioconda
