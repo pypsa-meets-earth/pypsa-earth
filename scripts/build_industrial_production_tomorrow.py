@@ -108,7 +108,6 @@ if __name__ == "__main__":
         snakemake.input.industrial_production_per_country, index_col=0
     ).filter(config["countries"], axis=0)
 
-    production.at["MA", "Integrated steelworks"] = 1e5
     prod_tomorrow = industry_prod_tomorrow(production)
 
     prod_tomorrow.to_csv(

@@ -649,7 +649,10 @@ def add_co2(n, costs):
 def add_aviation(n, cost):
 
     all_aviation = ["total international aviation", "total domestic aviation"]
-    MA_jetfuel = 1e7
+
+    aviation_demand = (
+        energy_totals.loc[countries, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+    )
 
     airports = pd.read_csv(snakemake.input.airports)
 
@@ -671,7 +674,7 @@ def add_aviation(n, cost):
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
     airports["p_set"] = airports["fraction"].apply(
         lambda frac: frac
-        * MA_jetfuel
+        * aviation_demand
         / 8760  # TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
         # the timestep if 8760 is not divisble by it),
@@ -836,7 +839,12 @@ def add_shipping(n, costs):
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
 
     gadm_level = options["gadm_level"]
-    MA_maritime = 36.7 * 1e1 * 0.46  # TWh per year
+
+    all_navigation = ["total international navigation", "total domestic navigation"]
+
+    navigation_demand = (
+        energy_totals.loc[countries, all_navigation].sum(axis=1).sum() * 1e6 / 8760
+    )
 
     efficiency = (
         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
@@ -857,7 +865,7 @@ def add_shipping(n, costs):
     ports["p_set"] = ports["fraction"].apply(
         lambda frac: shipping_hydrogen_share
         * frac
-        * MA_maritime
+        * navigation_demand
         * efficiency
         * 1e6
         / 8760
@@ -907,7 +915,7 @@ def add_shipping(n, costs):
         ports["p_set"] = ports["fraction"].apply(
             lambda frac: shipping_oil_share
             * frac
-            * MA_maritime
+            * navigation_demand
             * 1e6
             / 8760  # * n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
             # the current way leads to inaccuracies in the last timestep in case
@@ -924,7 +932,13 @@ def add_shipping(n, costs):
         )
 
         co2 = (
-            shipping_oil_share * ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
+            shipping_oil_share
+            * ports["p_set"].sum()
+            * 1e6
+            / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+            # the current way leads to inaccuracies in the last timestep in case
+            # the timestep if 8760 is not divisble by it),
+            * costs.at["oil", "CO2 intensity"]
         )
 
         n.add(
@@ -1930,6 +1944,7 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    countries = list(n.buses.country.unique())
 
     nodes = n.buses[
         n.buses.carrier == "AC"
@@ -1960,7 +1975,7 @@ if __name__ == "__main__":
     # nodal_energy_totals = pd.read_csv(
     #     snakemake.input.nodal_energy_totals, index_col=0
     # )
-
+    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
     transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
@@ -1975,26 +1990,42 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-    # TODO Fatal
-    heat_demand = (
-        pd.read_csv(
-            snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-        )
-        / 1000
+    # Load data required for the heat sector
+    heat_demand = pd.read_csv(
+        snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
+    )
+    # Ground-sourced heatpump coefficient of performance
+    gshp_cop = pd.read_csv(
+        snakemake.input.gshp_cop, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+    # TODO add option heat_dep_hp_cop to the config
+
+    # Air-sourced heatpump coefficient of performance
+    ashp_cop = pd.read_csv(
+        snakemake.input.ashp_cop, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+
+    # Solar thermal availability profiles
+    solar_thermal = pd.read_csv(
+        snakemake.input.solar_thermal, index_col=0, parse_dates=True
     )
     gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
 
     ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True)
 
-    solar_thermal = pd.read_csv(
-        snakemake.input.solar_thermal, index_col=0, parse_dates=True
-    )
+    # Load data required for aviation and navigation
+    # TODO follow the same structure as land transport and heat
+
+    # Load industry demand data
+    industrial_demand = pd.read_csv(
+        snakemake.input.industrial_demand, index_col=0
+    )  # * 1e6
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
 
-    add_co2(n, costs)  # , nodes, options)  # TODO add costs
+    add_co2(n, costs)  # TODO add costs
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
 
