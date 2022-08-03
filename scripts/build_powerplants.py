@@ -298,12 +298,10 @@ if __name__ == "__main__":
         country_list = snakemake.config["countries"]
         geo_crs = snakemake.config["crs"]["geo_crs"]
 
-
         gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
         def locate_bus(coords, co):
             gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
-
 
             point = Point(coords["lon"], coords["lat"])
 
