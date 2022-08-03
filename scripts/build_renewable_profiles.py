@@ -307,7 +307,8 @@ if __name__ == "__main__":
                     "geometry": "first",
                     "bus": "first",
                 }
-            ).reset_index()
+            )
+            .reset_index()
             .set_index("bus"),
             crs=regions.crs,
         )
@@ -390,7 +391,7 @@ if __name__ == "__main__":
             inflow = correction_factor * func(capacity_factor=True, **resource)
             if snakemake.config["cluster_options"]["alternative_clustering"]:
                 inflow["plant"] = regions.shape_id.loc[inflow["plant"]].values
-                
+
             if "clip_min_inflow" in config:
                 inflow = inflow.where(inflow > config["clip_min_inflow"], 0)
 

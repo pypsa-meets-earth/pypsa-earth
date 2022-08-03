@@ -314,11 +314,7 @@ def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
 
     def locate_bus(coords, co):
 
-        gdf_co = gdf[
-            gdf["GADM_ID"].str.contains(
-                two_2_three_digits_country(co)
-            )
-        ]
+        gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
         point = Point(coords["x"], coords["y"])
 
         try:
