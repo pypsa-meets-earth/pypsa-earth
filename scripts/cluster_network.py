@@ -501,21 +501,14 @@ if __name__ == "__main__":
     country_list = snakemake.config["countries"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
 
-    if alternative_clustering:  # TODO load all techs in both cases
-        renewable_carriers = pd.Index(
-            [
-                "solar",
-                "onwind",
-            ]
-        )
-    else:
-        renewable_carriers = pd.Index(
-            [
-                tech
-                for tech in n.generators.carrier.unique()
-                if tech in snakemake.config["renewable"]
-            ]
-        )
+
+    renewable_carriers = pd.Index(
+        [
+            tech
+            for tech in n.generators.carrier.unique()
+            if tech in snakemake.config["renewable"]                    #TODO ror not cap
+        ]
+    )
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
