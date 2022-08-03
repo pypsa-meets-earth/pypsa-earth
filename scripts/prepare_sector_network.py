@@ -178,17 +178,17 @@ def add_gas(n, costs):
     if options["gas_network"]:
         spatial.gas.nodes = nodes + " gas"
         spatial.gas.locations = nodes
-        # spatial.gas.biogas = nodes + " biogas"
+        spatial.gas.biogas = nodes + " biogas"
         spatial.gas.industry = nodes + " gas for industry"
         spatial.gas.industry_cc = nodes + " gas for industry CC"
-        # spatial.gas.biogas_to_gas = nodes + " biogas to gas"
+        spatial.gas.biogas_to_gas = nodes + " biogas to gas"
     else:
         spatial.gas.nodes = ["Africa gas"]
         spatial.gas.locations = ["Africa"]
-        # spatial.gas.biogas = ["Africa biogas"]
+        spatial.gas.biogas = ["Africa biogas"]
         spatial.gas.industry = ["gas for industry"]
         spatial.gas.industry_cc = ["gas for industry CC"]
-        # spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
+        spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
 
     spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=nodes)
 
