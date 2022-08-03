@@ -176,8 +176,10 @@ def weighting_for_country(n, x):
     w = g + l
 
     if w.max() == 0.0:
-        logger.warning("Null weighting for buses of country {x.country.iloc[0]}")
-        return w.astype(int)
+        logger.warning(
+            f"Null weighting for buses of country {x.country.iloc[0]}: returned default uniform weighting"
+        )
+        return pd.Series(100, index=w.index)
     else:
         return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
@@ -373,11 +375,14 @@ def busmap_for_n_clusters(
 
         # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
-            n_cluster_c = n_clusters[x.name[0]]
+            if isinstance(x.name, tuple):
+                n_cluster_c = n_clusters[x.name[0]]
+                prefix = x.name[0] + x.name[1] + " "
+            else:
+                n_cluster_c = n_clusters[x.name]
+                prefix = x.name + " "
         else:
             n_cluster_c = n_clusters
-
-        prefix = x.name[0] + x.name[1] + " "
         logger.debug(f"Determining busmap for country {prefix[:-1]}")
         if len(x) == 1:
             return pd.Series(prefix + "0", index=x.index)
