@@ -60,31 +60,45 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 1. Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
 
-```bash
-    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
-```
+   ```bash
+      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+   ```
 
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
-```bash
-    .../pypsa-africa % conda env create -f envs/environment.yaml
-```
+   ```bash
+      .../pypsa-africa % conda env create -f envs/environment.yaml
+   ```
    For faster installation you might want to try mamba
-```bash
-    (base) conda install -c conda-forge mamba
-    .../pypsa-africa % mamba env create -f envs/environment.yaml
-```
+   ```bash
+      (base) conda install -c conda-forge mamba
+      .../pypsa-africa % mamba env create -f envs/environment.yaml
+   ```
 
 3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
 
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
-```bash
-    .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+   ```bash
+      .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+      .../pypsa-africa % jupyter lab
+   ```
 
-    .../pypsa-africa % jupyter lab
-```
+5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+   To verify the successfull installation the following code can be tested from bash:
+
+   ```bash
+      .../pypsa-africa % java -version
+   ```
+
+   The expected output should resemble the following:
+   
+   ```bash
+      java version "1.8.0_341"
+      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+   ```
 
 ## Test run on tutorial
 
