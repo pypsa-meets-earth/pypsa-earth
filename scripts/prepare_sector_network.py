@@ -650,7 +650,8 @@ def add_co2(n, costs):
 def add_aviation(n, cost):
     
     all_aviation = ["total international aviation", "total domestic aviation"]
-    MA_jetfuel=1e7
+    
+    aviation_demand = energy_totals.loc[countries, all_aviation].sum(axis=1).sum() * 1e6 / 8760
 
     airports = pd.read_csv(snakemake.input.airports)
 
@@ -670,13 +671,9 @@ def add_aviation(n, cost):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-<<<<<<< HEAD
-=======
-    MA_jetfuel = 1e7
->>>>>>> origin/main
     airports["p_set"] = airports["fraction"].apply(
         lambda frac: frac
-        * MA_jetfuel
+        * aviation_demand
         / 8760  # TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
         # the timestep if 8760 is not divisble by it),
@@ -698,17 +695,9 @@ def add_aviation(n, cost):
     )
 
     # co2_release = ["kerosene for aviation"]
-<<<<<<< HEAD
     co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]#/ 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
                                                 #the current way leads to inaccuracies in the last timestep in case
                                                 #the timestep if 8760 is not divisble by it
-=======
-    co2 = (
-        airports["p_set"].sum() * costs.at["oil", "CO2 intensity"] / 8760
-    )  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-    # the current way leads to inaccuracies in the last timestep in case
-    # the timestep if 8760 is not divisble by it
->>>>>>> origin/main
 
     n.add(
         "Load",
@@ -847,7 +836,11 @@ def add_shipping(n, costs):
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
 
     gadm_level = options["gadm_level"]
-    MA_maritime=36.7 * 1e1 * 0.46 # TWh per year
+    
+    all_navigation = ["total international navigation", "total domestic navigation"]
+
+    
+    navigation_demand = energy_totals.loc[countries, all_navigation].sum(axis=1).sum() * 1e6 / 8760
 
     efficiency = (
         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
@@ -864,22 +857,10 @@ def add_shipping(n, costs):
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-<<<<<<< HEAD
     
     ports["p_set"] = ports["fraction"].apply(
-        lambda frac: shipping_hydrogen_share * frac * MA_maritime * efficiency * 1e6/ 8760 
+        lambda frac: shipping_hydrogen_share * frac * navigation_demand * efficiency * 1e6/ 8760 
         #TODO double check the use of efficiency
-=======
-    MA_maritime = 36.7 * 1e7 * 0.46
-    ports["p_set"] = ports["fraction"].apply(
-        lambda frac: shipping_hydrogen_share
-        * frac
-        * MA_maritime
-        * efficiency
-        / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),
->>>>>>> origin/main
     )  # TODO use real data here
 
     ports = pd.concat([ports, ind])
@@ -924,18 +905,9 @@ def add_shipping(n, costs):
         shipping_oil_share = 1 - shipping_hydrogen_share
 
         ports["p_set"] = ports["fraction"].apply(
-<<<<<<< HEAD
-            lambda frac: shipping_oil_share * frac * MA_maritime * 1e6 / 8760 #* n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+            lambda frac: shipping_oil_share * frac * navigation_demand * 1e6 / 8760 #* n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
                                                     #the current way leads to inaccuracies in the last timestep in case
                                                     #the timestep if 8760 is not divisble by it),
-=======
-            lambda frac: shipping_oil_share
-            * frac
-            * 1e6
-            / 8760  # * n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
->>>>>>> origin/main
         )
 
         n.madd(
@@ -950,13 +922,10 @@ def add_shipping(n, costs):
         co2 = (
             shipping_oil_share
             * ports["p_set"].sum()
-<<<<<<< HEAD
-=======
             * 1e6
             / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
             # the current way leads to inaccuracies in the last timestep in case
             # the timestep if 8760 is not divisble by it),
->>>>>>> origin/main
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -1083,19 +1052,9 @@ def add_industry(n, costs):
         spatial.gas.industry,
         bus=spatial.gas.industry,
         carrier="gas for industry",
-<<<<<<< HEAD
         p_set=spatial_gas_demand
         )
     
-=======
-        p_set=industrial_demand["methane"].apply(
-            lambda frac: frac
-            / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),  # TODO change for resolution
-        ),
-    )
->>>>>>> origin/main
 
     n.add(
         "Link",
@@ -1969,6 +1928,7 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    countries = list(n.buses.country.unique())
 
     nodes = n.buses[
         n.buses.carrier == "AC"
@@ -1999,7 +1959,7 @@ if __name__ == "__main__":
     # nodal_energy_totals = pd.read_csv(
     #     snakemake.input.nodal_energy_totals, index_col=0
     # )
-
+    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
     transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
@@ -2014,18 +1974,6 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-<<<<<<< HEAD
-    #TODO Fatal
-    heat_demand = pd.read_csv(
-        snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    ) /1000
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True) 
-    
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True) 
-    
-    solar_thermal = pd.read_csv(snakemake.input.solar_thermal, index_col=0, parse_dates=True) 
-    
-=======
     # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
@@ -2056,17 +2004,12 @@ if __name__ == "__main__":
     industrial_demand = pd.read_csv(
         snakemake.input.industrial_demand, index_col=0
     )  # * 1e6
->>>>>>> origin/main
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
 
-<<<<<<< HEAD
-    add_co2(n, costs)#, nodes, options)  # TODO add costs
-=======
     add_co2(n, costs)  # TODO add costs
->>>>>>> origin/main
 
     # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
 

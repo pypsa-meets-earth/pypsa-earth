@@ -65,6 +65,7 @@ rule prepare_sector_network:
         overrides="data/override_component_attrs",
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         industrial_demand="resources/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+        energy_totals="resources/energy_totals.csv",
         airports="data/airports.csv",
         ports="data/ports.csv",
         heat_demand="resources/heat/heat_demand_s{simpl}_{clusters}.csv",

@@ -107,7 +107,6 @@ if __name__ == "__main__":
     production_tod = pd.read_csv(prod_tod_path, header=0, index_col=0).filter(
         snakemake.config["countries"], axis=0
     )
-    production_tod.at["MA", "Integrated steelworks"] = 1e5
 
     nodal_production_tod = country_to_nodal(production_tod, dist_keys)
     nodal_production_tod = nodal_production_tod.reindex(
