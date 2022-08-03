@@ -243,6 +243,7 @@ rule build_bus_regions:
         #gadm_shapes="resources/shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/shapes/gadm_shapes.geojson",
     output:
         regions_onshore="resources/bus_regions/regions_onshore.geojson",
@@ -343,6 +344,7 @@ rule build_powerplants:
         #gadm_shapes="resources/shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/shapes/gadm_shapes.geojson",
     output:
         powerplants="resources/powerplants.csv",
@@ -376,6 +378,7 @@ rule add_electricity:
         #gadm_shapes="resources/shapes/MAR2.geojson", 
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
     output:
@@ -425,6 +428,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             #gadm_shapes="resources/shapes/MAR2.geojson",
             #using this line instead of the following will test updated gadm shapes for MA.
             #To use: downlaod file from the google drive and place it in resources/shapes/
+            #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
             gadm_shapes="resources/shapes/gadm_shapes.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
