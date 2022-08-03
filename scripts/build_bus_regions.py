@@ -203,6 +203,7 @@ if __name__ == "__main__":
     gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")[
         "geometry"
     ]
+
     onshore_regions = []
     offshore_regions = []
 

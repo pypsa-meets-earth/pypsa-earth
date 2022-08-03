@@ -8,7 +8,6 @@ channels:
 - bioconda
 - gurobi
 dependencies:
-- python>=3.8
 - pip
 - mamba   # esp for windows build
 
