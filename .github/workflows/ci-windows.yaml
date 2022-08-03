@@ -66,9 +66,7 @@ jobs:
     - name: Test snakemake workflow
       run: |
         conda list
-        cp ../pypsa-africa/test/config.test1.yaml config.pypsa-earth.yaml
-        cp test/config.test1.yaml config.yaml
-        snakemake --cores all solve_all_networks
+        snakemake --cores all run_test
 
       # - name: Test plotting and summaries
       #   run: |

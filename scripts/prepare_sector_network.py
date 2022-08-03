@@ -2009,9 +2009,9 @@ if __name__ == "__main__":
     solar_thermal = pd.read_csv(
         snakemake.input.solar_thermal, index_col=0, parse_dates=True
     )
+    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
 
-    # Share of district heating at each node
-    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
+    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True)
 
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat

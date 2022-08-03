@@ -191,7 +191,7 @@ rule build_solar_thermal_profiles:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -208,7 +208,7 @@ rule build_solar_thermal_profiles:
 
 rule build_population_layouts:
     input:
-        nuts3_shapes=pypsaearth("resources/gadm_shapes.geojson"),
+        nuts3_shapes=pypsaearth("resources/shapes/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -227,7 +227,7 @@ rule build_population_layouts:
 rule build_industrial_distribution_key:  #YES
     input:
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
         industrial_database="data/morocco_cement_industry.csv",
@@ -291,7 +291,7 @@ rule build_clustered_population_layouts:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -310,7 +310,7 @@ rule build_heat_demand:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -331,7 +331,7 @@ rule build_temperature_profiles:
         pop_layout_urban="resources/pop_layout_urban.nc",
         pop_layout_rural="resources/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -485,3 +485,26 @@ rule prepare_db:
         )
     script:
         "scripts/prepare_db.py"
+
+
+rule run_test:
+    run:
+        import yaml
+
+        with open("../pypsa-africa/test/config.test1.yaml") as file:
+
+            config_pypsaearth = yaml.full_load(file)
+            config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
+            config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
+
+            with open("./config.pypsa-earth.yaml", "w") as wfile:
+                yaml.dump(config_pypsaearth, wfile)
+
+        shell("cp test/config.test1.yaml config.yaml")
+        shell("snakemake --cores all solve_all_networks --forceall")
+
+
+rule clean:
+    run:
+        shell("rm -r ../pypsa-africa/resources")
+        shell("rm -r ../pypsa-africa/networks")
