@@ -428,7 +428,7 @@ if __name__ == "__main__":
     with memory_logger(filename=fn, interval=30.0) as mem:
         n = pypsa.Network(snakemake.input[0])
         if snakemake.config["augmented_line_connection"].get("add_to_snakefile"):
-            n.lines.loc[n.lines.index.str.contains("new"),"s_nom_min"] = 1
+            n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = 1
         n = prepare_network(n, solve_opts)
         n = solve_network(
             n,
