@@ -501,12 +501,11 @@ if __name__ == "__main__":
     country_list = snakemake.config["countries"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
 
-
     renewable_carriers = pd.Index(
         [
             tech
             for tech in n.generators.carrier.unique()
-            if tech in snakemake.config["renewable"]                    #TODO ror not cap
+            if tech in snakemake.config["renewable"]  # TODO ror not cap
         ]
     )
 
