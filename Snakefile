@@ -241,6 +241,8 @@ rule build_bus_regions:
         offshore_shapes="resources/shapes/offshore_shapes.geojson",
         base_network="networks/base.nc",
         #gadm_shapes="resources/shapes/MAR2.geojson",
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/shapes/
         gadm_shapes="resources/shapes/gadm_shapes.geojson",
     output:
         regions_onshore="resources/bus_regions/regions_onshore.geojson",
@@ -339,6 +341,8 @@ rule build_powerplants:
         custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants="resources/osm/clean/africa_all_generators.csv",
         #gadm_shapes="resources/shapes/MAR2.geojson",
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/shapes/
         gadm_shapes="resources/shapes/gadm_shapes.geojson",
     output:
         powerplants="resources/powerplants.csv",
@@ -369,7 +373,9 @@ rule add_electricity:
         regions="resources/bus_regions/regions_onshore.geojson",
         powerplants="resources/powerplants.csv",
         load=load_data_paths,
-        #gadm_shapes="resources/shapes/MAR2.geojson",
+        #gadm_shapes="resources/shapes/MAR2.geojson", 
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/shapes/
         gadm_shapes="resources/shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
     output:
@@ -417,6 +423,8 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}.geojson",
             regions_offshore="resources/bus_regions/regions_offshore_elec_s{simpl}.geojson",
             #gadm_shapes="resources/shapes/MAR2.geojson",
+            #using this line instead of the following will test updated gadm shapes for MA.
+            #To use: downlaod file from the google drive and place it in resources/shapes/
             gadm_shapes="resources/shapes/gadm_shapes.geojson",
             # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
