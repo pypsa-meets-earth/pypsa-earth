@@ -268,7 +268,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
         sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
 
@@ -308,6 +308,7 @@ if __name__ == "__main__":
                     "bus": "first",
                 }
             )
+            .reset_index()
             .set_index("bus"),
             crs=regions.crs,
         )
@@ -388,6 +389,8 @@ if __name__ == "__main__":
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
+            if snakemake.config["cluster_options"]["alternative_clustering"]:
+                inflow["plant"] = regions.shape_id.loc[inflow["plant"]].values
 
             if "clip_min_inflow" in config:
                 inflow = inflow.where(inflow > config["clip_min_inflow"], 0)
@@ -440,11 +443,11 @@ if __name__ == "__main__":
             logger.info("Calculate landuse availabilities...")
             start = time.time()
             availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
+
             duration = time.time() - start
             logger.info(f"Completed availability calculation ({duration:2.2f}s)")
         else:
             availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
-
         area = cutout.grid.to_crs(area_crs).area / 1e6
         area = xr.DataArray(
             area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]

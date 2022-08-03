@@ -87,12 +87,15 @@ Upcoming Release
 
 * Implement PyPSA-Eur improvements. Add gas limit constraints, add marginal cost sweeps wildcard, add and harmonize aggregation strategies, improve config usability by carrier clarifications, ease debugging by removing snakemake inputs from functions: `PR #402 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/402>`_
 
-* Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos: `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_
+* Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_ and `PR #423 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/423>`_
 
 * Restructure the package to ease readability and fix google drive downloading method: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`__
 
 * Update config links to adhere to the new structure of the package: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
 
+* Fix hydro technology with the GADM clustering approach: `PR #428 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/428>`_
+
+* Adapt for a custom shapefile for MA as a first step towards generalizing the freature: `PR #429 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/429>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================

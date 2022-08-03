@@ -60,9 +60,9 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 1. Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
 
-```bash
-    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
-```
+   ```bash
+      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+   ```
 
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
@@ -82,11 +82,25 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
-```bash
-    .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+   ```bash
+      .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+      .../pypsa-africa % jupyter lab
+   ```
 
-    .../pypsa-africa % jupyter lab
-```
+5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+   To verify the successfull installation the following code can be tested from bash:
+
+   ```bash
+      .../pypsa-africa % java -version
+   ```
+
+   The expected output should resemble the following:
+   
+   ```bash
+      java version "1.8.0_341"
+      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+   ```
 
 ## Test run on tutorial
 

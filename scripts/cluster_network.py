@@ -309,24 +309,21 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
 def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
 
-    gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
+    # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
+    gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
     def locate_bus(coords, co):
 
-        gdf_co = gdf[
-            gdf["GID_{}".format(gadm_level)].str.contains(
-                two_2_three_digits_country(co)
-            )
-        ]
+        gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
         point = Point(coords["x"], coords["y"])
 
         try:
-            return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item()
+            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
 
         except ValueError:
             return gdf_co[
                 gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-            ]["GID_{}".format(gadm_level)].item()
+            ]["GADM_ID"].item()
 
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
@@ -504,21 +501,13 @@ if __name__ == "__main__":
     country_list = snakemake.config["countries"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
 
-    if alternative_clustering:  # TODO load all techs in both cases
-        renewable_carriers = pd.Index(
-            [
-                "solar",
-                "onwind",
-            ]
-        )
-    else:
-        renewable_carriers = pd.Index(
-            [
-                tech
-                for tech in n.generators.carrier.unique()
-                if tech in snakemake.config["renewable"]
-            ]
-        )
+    renewable_carriers = pd.Index(
+        [
+            tech
+            for tech in n.generators.carrier.unique()
+            if tech in snakemake.config["renewable"]  # TODO ror not cap
+        ]
+    )
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
