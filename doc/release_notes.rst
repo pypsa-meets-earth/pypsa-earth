@@ -93,6 +93,8 @@ Upcoming Release
 
 * Update config links to adhere to the new structure of the package: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
 
+* Fix hydro technology with the GADM clustering approach: `PR #428 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/428>`_
+
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
