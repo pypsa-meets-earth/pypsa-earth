@@ -12,7 +12,7 @@ logging:
 
 scenario:
   simpl: ['']
-  ll: ['copt']
+  ll: ['1.0']
   clusters: [203]
   opts: [Co2L1-144H]
 
@@ -90,7 +90,7 @@ download_osm_data_nprocesses: 4  # (optional) number of threads used to download
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 0.0e+2 # 0.05 * 3.1e9*0.5
+  co2limit: 4.0e+6 # 0.05 * 3.1e9*0.5
   co2base: 1.487e+8
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
