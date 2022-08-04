@@ -301,7 +301,7 @@ solving:
     track_iterations: false
     #nhours: 10
   solver:
-    name: glpk
+    name: cbc
 
 
 plotting:

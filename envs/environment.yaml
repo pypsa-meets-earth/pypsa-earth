@@ -70,7 +70,8 @@ dependencies:
 # - googledrivedownloader  # Commented until https://github.com/ndrplz/google-drive-downloader/pull/28 is merged: PR installed using pip
 
 # Default solver for tests (moved to the CI)
-- glpk
+# - glpk
+- cbc
 - ipopt < 3.13.3
 - gurobi
 
