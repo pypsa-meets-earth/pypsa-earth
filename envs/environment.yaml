@@ -71,7 +71,7 @@ dependencies:
 
 # Default solver for tests (moved to the CI)
 # - glpk
-- cbc
+- coincbc
 - ipopt < 3.13.3
 - gurobi
 
