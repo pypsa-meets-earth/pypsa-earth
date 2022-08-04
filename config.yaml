@@ -72,8 +72,7 @@ industry:
   MWh_CH4_per_tMeOH: 10.25 # DECHEMA (2017), Table 14, page 65
   hotmaps_locate_missing: false
   reference_year: 2015
-  
-  
+
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
@@ -375,7 +374,6 @@ plotting:
     agriculture electricity: '#222222'
     solid biomass for industry co2 from atmosphere: '#654321'
     solid biomass for industry co2 to stored: '#654321'
-    solid biomass for industry CC: '#654321'
     gas for industry co2 to atmosphere: '#654321'
     gas for industry co2 to stored: '#654321'
     Fischer-Tropsch: '#44DD33'
