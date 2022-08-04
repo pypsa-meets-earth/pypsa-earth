@@ -251,7 +251,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     Example
     -------
-    ["/resources/ssp2-2.6/2030/era5_2013/Africa.nc", "/resources/ssp2-2.6/2030/era5_2013/Africa.nc"]
+    ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
     """
     countries = config.get("countries")
     region_load = getContinent(countries)
