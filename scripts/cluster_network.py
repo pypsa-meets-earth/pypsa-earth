@@ -179,7 +179,7 @@ def weighting_for_country(n, x):
         logger.warning(
             f"Null weighting for buses of country {x.country.iloc[0]}: returned default uniform weighting"
         )
-        return pd.Series(100, index=w.index)
+        return pd.Series(1.0, index=w.index)
     else:
         return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
@@ -498,7 +498,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="55"
+            "cluster_network", network="elec", simpl="", clusters="60"
         )
         sets_path_to_root("pypsa-africa")
     configure_logging(snakemake)
