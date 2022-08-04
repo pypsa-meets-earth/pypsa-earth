@@ -401,7 +401,7 @@ def add_biomass(n, costs):
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
 
-    n.add("Bus", "Africa biogas", location="Africa", carrier="biogas")
+    n.madd("Bus", spatial.gas.biogas, location=spatial.biomass.locations, carrier="biogas")
 
     n.madd(
         "Bus",
@@ -410,10 +410,10 @@ def add_biomass(n, costs):
         carrier="solid biomass",
     )
 
-    n.add(
+    n.madd(
         "Store",
-        "Africa biogas",
-        bus="Africa biogas",
+        spatial.gas.biogas,
+        bus=spatial.gas.biogas,
         carrier="biogas",
         e_nom=biomass_potentials["biogas"].sum(),
         marginal_cost=costs.at["biogas", "fuel"],
@@ -430,11 +430,11 @@ def add_biomass(n, costs):
         e_initial=biomass_potentials_spatial["solid biomass"],
     )
 
-    n.add(
+    n.madd(
         "Link",
-        "biogas to gas",
-        bus0="Africa biogas",
-        bus1="Africa gas",
+        spatial.gas.biogas_to_gas,
+        bus0=spatial.gas.biogas, 
+        bus1=spatial.gas.nodes, 
         bus2="co2 atmosphere",
         carrier="biogas to gas",
         capital_cost=costs.loc["biogas upgrading", "fixed"],
