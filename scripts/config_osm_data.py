@@ -375,7 +375,7 @@ world_iso = {
         "VA": "vatican",
     },
     "NorthAmerica": {
-        "AI": "anguilla",
+        # "AI": "anguilla", #Island
         # "AG": "antigua-and-barbuda", # Islands
         # "AW": "aruba", # Islands
         # "BS": "bahamas", # Islands
@@ -574,6 +574,8 @@ iso_to_geofk_dict = {
     "PS": "IL-PL",  # Israel and Palestine are merged in OSM
     "IL": "IL-PL",  # Israel and Palestine are merged in OSM
     "SM": "IT",  # San-Marino is merged to Italy
+    "HT": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
+    "DO": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
 }
 
 # Cyprus and Georgia -> European domain
@@ -676,6 +678,7 @@ world_geofk = {
         "PH": "philippines",
         "LK": "sri-lanka",
         "SY": "syria",
+        "TL": "east-timor",
         "TW": "taiwan",
         "TJ": "tajikistan",
         "TH": "thailand",
@@ -792,6 +795,7 @@ world_geofk = {
         "NI": "nicaragua",
         "CR": "costa-rica",
         "PA": "panama",
+        "HT-DO": "haiti-and-domrep",
     },
     "europe/france": {
         "GF": "guyane",
