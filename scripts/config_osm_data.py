@@ -574,6 +574,7 @@ iso_to_geofk_dict = {
     "PS": "IL-PL",  # Israel and Palestine are merged in OSM
     "IL": "IL-PL",  # Israel and Palestine are merged in OSM
     "SM": "IT",  # San-Marino is merged to Italy
+    "VA": "IT",  # Vatican is merged to Italy
     "HT": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
     "DO": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
 }
