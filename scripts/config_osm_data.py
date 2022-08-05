@@ -760,6 +760,7 @@ world_geofk = {
         "UA": "ukraine",
         "GB": "great-britain",
         "TR": "turkey",
+        "XK": "kosovo",
     },
     "russia": {
         "RU": "russia",
