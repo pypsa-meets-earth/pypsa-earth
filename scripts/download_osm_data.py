@@ -62,6 +62,9 @@ def getContinentCountry(code):
         country = world_geofk[continent].get(code, 0)
         if country:
             return continent, country
+
+    _logger.info(f"Missing geofabrik reference for country code {code}")
+
     return continent, country
 
 
@@ -83,6 +86,7 @@ def download_pbf(country_code, update, verify, logging=True):
 
     """
     continent, country_name = getContinentCountry(country_code)
+
     # Filename for geofabrik
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
 
