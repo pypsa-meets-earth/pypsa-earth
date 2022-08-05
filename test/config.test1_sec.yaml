@@ -1,0 +1,402 @@
+# SPDX-FileCopyrightText: : 2021 The PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+
+version: 0.0.2
+tutorial: true
+
+logging:
+  level: INFO
+  format: "%(levelname)s:%(name)s:%(message)s"
+
+scenario:
+  simpl: ['']
+  ll: ['copt']
+  clusters: [10]
+  opts: [Co2L-24H]
+
+countries: ["MA"]
+
+  # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
+  # 'DJ', 'EG', 'GQ', 'ER', 'ET', 'GA', 'GH', 'GN', 'CI', 'KE', 'LS', 'LR', 'LY',
+  # 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW',
+  # 'SL', 'ZA', 'SS', 'SD', 'SZ', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW']  # list(AFRICA_CC)
+
+  #["NG"]  # Nigeria
+  #["NE"]  # Niger
+  #["SL"]  # Sierra Leone
+  #["MA"]  # Morroco
+  #["ZA"]  # South Africa
+
+summary_dir: results
+
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-8"
+  inclusive: "left" # end is not inclusive
+
+enable:
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: true  # If True, than an exclusion raster will be build
+  build_cutout: false
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+# definition of the Coordinate Reference Systems
+crs:
+  geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
+  distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
+  area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+
+retrieve_databundle:
+  show_progress: false  # Option to disable the progress bar in retrieve_databundle
+
+download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
+
+augmented_line_connection:
+  add_to_snakefile: false
+  connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: "HVDC"  # or "HVAC"
+  min_expansion: 1  # [MW]
+
+# if True clusters to GADM shapes, if False Voronoi cells will be clustered
+cluster_options:
+  alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
+  distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
+  out_logging: true  # When true, logging is printed to console
+  aggregation_strategies:
+    generators:
+      p_nom_max: sum # use "min" for more conservative assumptions
+      p_nom_min: sum
+      p_min_pu: mean
+      marginal_cost: mean
+      committable: any
+      ramp_limit_up: max
+      ramp_limit_down: max
+      efficiency: mean
+
+# options for build_shapes
+build_shape_options:
+  gadm_layer_id: 1  # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  update_file: false # When true, all the input files are downloaded again and replace the existing files
+  out_logging: true  # When true, logging is printed to console
+  year: 2020  # reference year used to derive shapes, info on population and info on GDP
+  nprocesses: 5  # number of processes to be used in build_shapes
+  worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
+  gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
+
+clean_osm_data_options:
+  names_by_shapes: true  # Set the country name based on the extended country shapes
+  threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
+  add_line_endings: true  # When true, the line endings are added to the dataset of the substations
+  generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
+
+build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
+  group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
+  overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+
+base_network:
+  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 35000
+
+load_options:
+  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+  scale: 1  # scales all load time-series, i.e. 2 = doubles load
+
+electricity:
+  voltages: [220., 300., 380.]
+  co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
+  co2base: 1.487e+9
+  agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
+
+  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+    activate: false
+    epsilon_load: 0.02 # share of total load
+    epsilon_vres: 0.02 # share of total renewable supply
+    contingency: 0 # fixed capacity in MW
+
+  max_hours:
+    battery: 6
+    H2: 168
+
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    StorageUnit: [] # battery, H2
+    Store: [battery, H2]
+    Link: [H2 pipeline]
+
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
+  custom_powerplants: false
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  estimate_renewable_capacities:
+    stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
+    year: 2020  # Reference year, available years for IRENA stats are 2000 to 2020
+    p_nom_min: 1  # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
+    p_nom_max: false  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
+    technology_mapping:
+      # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
+      Offshore: [offwind-ac, offwind-dc]
+      Onshore: [onwind]
+      PV: [solar]
+
+lines:
+  types:
+    220.: "Al/St 240/40 2-bundle 220.0"
+    300.: "Al/St 240/40 3-bundle 300.0"
+    380.: "Al/St 240/40 4-bundle 380.0"
+  dc_type: "DC_custom_linetype"
+  s_max_pu: 0.7
+  s_nom_max: .inf
+  length_factor: 1.25
+  under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+
+links:
+  p_max_pu: 1.0
+  p_nom_max: .inf
+  include_tyndp: true
+  under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+
+transformers:
+  x: 0.1
+  s_nom: 2000.
+  type: ""
+
+atlite:
+  nprocesses: 4
+  cutouts:
+    # use 'base' to determine geographical bounds and time span from config
+    # base:
+    # module: era5
+    africa-2013-era5-tutorial:
+      module: era5
+      dx: 0.3
+      dy: 0.3
+      time: ["2013-03-01", "2013-03-08"]
+    # europe-2013-era5:
+    #   module: era5 # in priority order
+    #   x: [-12., 35.]
+    #   y: [33., 72]
+    #   dx: 0.3
+    #   dy: 0.3
+    #   time: ["2013", "2013"]
+    # europe-2013-sarah:
+    #   module: [sarah, era5] # in priority order
+    #   x: [-12., 45.]
+    #   y: [33., 65]
+    #   dx: 0.2
+    #   dy: 0.2
+    #   time: ["2013", "2013"]
+    #   sarah_interpolate: false
+    #   sarah_dir:
+    #   features: [influx, temperature]
+
+renewable:
+  onwind:
+    cutout: africa-2013-era5-tutorial
+    resource:
+      method: wind
+      turbine: Vestas_V112_3MW
+    capacity_per_sqkm: 3 # ScholzPhd Tab 4.3.1: 10MW/km^2
+    # correction_factor: 0.93
+    copernicus:
+      # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
+      #  development of the REMix model and application for Europe. ( p.42 / p.28)
+      grid_codes: [20, 30, 40, 60, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
+      distance: 1000
+      distance_grid_codes: [50]
+    natura: true
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  offwind-ac:
+    cutout: africa-2013-era5-tutorial
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    capacity_per_sqkm: 3
+    # correction_factor: 0.93
+    copernicus:
+      grid_codes: [80, 200]
+    max_depth: 50
+    max_shore_distance: 30000
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  offwind-dc:
+    cutout: africa-2013-era5-tutorial
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    # ScholzPhd Tab 4.3.1: 10MW/km^2
+    capacity_per_sqkm: 3
+    # correction_factor: 0.93
+    copernicus:
+      grid_codes: [80, 200]
+    natura: true
+    max_depth: 50
+    min_shore_distance: 30000
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  solar:
+    cutout: africa-2013-era5-tutorial
+    resource:
+      method: pv
+      panel: CSi
+      orientation: latitude_optimal # will lead into optimal design
+        # slope: 0.  # slope: 0 represent a flat panel
+        # azimuth: 180.  # azimuth: 180 south orientation
+    capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
+    # Determined by comparing uncorrected area-weighted full-load hours to those
+    # published in Supplementary Data to
+    # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
+    # sector: The economic potential of photovoltaics and concentrating solar
+    # power." Applied Energy 135 (2014): 704-720.
+    correction_factor: 0.854337
+    copernicus:
+      grid_codes: [20, 30, 40, 50, 60, 90, 100]
+    natura: true
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+    extendable: true
+  hydro:
+    cutout: africa-2013-era5-tutorial
+    resource:
+      method: hydro
+      hydrobasins: data/hydrobasins/hybas_world_lev04_v1c.shp
+      flowspeed: 1.0  # m/s
+      # weight_with_height: false
+      # show_progress: true
+      normalization: eia # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data, false for no normalization
+    carriers: [ror, PHS, hydro]
+    PHS_max_hours: 6
+    hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
+    clip_min_inflow: 1.0
+    normalization_multiplier: 1.1  # multiplier applied after the normalization of the hydro production
+
+# TODO: Needs to be adjusted for Africa
+costs:
+  year: 2030
+  discountrate: 0.07 # From a Lion Hirth paper, also reflects average of Noothout et al 2016
+  USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  marginal_cost: # EUR/MWh
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    battery: 0.
+    battery inverter: 0.
+  emission_prices: # in currency per tonne emission, only used with the option Ep
+    co2: 0.
+
+
+solving:
+  options:
+    formulation: kirchhoff
+    load_shedding: true
+    noisy_costs: true
+    min_iterations: 4
+    max_iterations: 6
+    clip_p_max_pu: 0.01
+    skip_iterations: false
+    track_iterations: false
+    #nhours: 10
+  solver:
+    name: glpk
+
+
+plotting:
+  map:
+    figsize: [7, 7]
+    boundaries: [-10.2, 29, 35, 72]
+    p_nom:
+      bus_size_factor: 5.e+4
+      linewidth_factor: 3.e+3
+
+  costs_max: 800
+  costs_threshold: 1
+
+  energy_max: 15000.
+  energy_min: -10000.
+  energy_threshold: 50.
+
+  vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
+  conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
+  storage_techs: ["hydro+PHS", "battery", "H2"]
+  load_carriers: ["AC load"]
+  AC_carriers: ["AC line", "AC transformer"]
+  link_carriers: ["DC line", "Converter AC-DC"]
+  tech_colors:
+    "onwind": "#235ebc"
+    "onshore wind": "#235ebc"
+    "offwind": "#6895dd"
+    "offwind-ac": "#6895dd"
+    "offshore wind": "#6895dd"
+    "offshore wind ac": "#6895dd"
+    "offwind-dc": "#74c6f2"
+    "offshore wind dc": "#74c6f2"
+    "hydro": "#08ad97"
+    "hydro+PHS": "#08ad97"
+    "PHS": "#08ad97"
+    "hydro reservoir": "#08ad97"
+    "hydroelectricity": "#08ad97"
+    "ror": "#4adbc8"
+    "run of river": "#4adbc8"
+    "solar": "#f9d002"
+    "solar PV": "#f9d002"
+    "solar thermal": "#ffef60"
+    "biomass": "#0c6013"
+    "solid biomass": "#06540d"
+    "biogas": "#23932d"
+    "waste": "#68896b"
+    "geothermal": "#ba91b1"
+    "OCGT": "#d35050"
+    "gas": "#d35050"
+    "natural gas": "#d35050"
+    "CCGT": "#b20101"
+    "nuclear": "#ff9000"
+    "coal": "#707070"
+    "lignite": "#9e5a01"
+    "oil": "#262626"
+    "H2": "#ea048a"
+    "hydrogen storage": "#ea048a"
+    "battery": "#b8ea04"
+    "Electric load": "#f9d002"
+    "electricity": "#f9d002"
+    "lines": "#70af1d"
+    "transmission lines": "#70af1d"
+    "AC-AC": "#70af1d"
+    "AC line": "#70af1d"
+    "links": "#8a1caf"
+    "HVDC links": "#8a1caf"
+    "DC-DC": "#8a1caf"
+    "DC link": "#8a1caf"
+    "load": "#FF0000"
+  nice_names:
+    OCGT: "Open-Cycle Gas"
+    CCGT: "Combined-Cycle Gas"
+    offwind-ac: "Offshore Wind (AC)"
+    offwind-dc: "Offshore Wind (DC)"
+    onwind: "Onshore Wind"
+    solar: "Solar"
+    PHS: "Pumped Hydro Storage"
+    hydro: "Reservoir & Dam"
+    battery: "Battery Storage"
+    H2: "Hydrogen Storage"
+    lines: "Transmission Lines"
+    ror: "Run of River"
