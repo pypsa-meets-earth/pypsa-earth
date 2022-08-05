@@ -106,9 +106,7 @@ if __name__ == "__main__":
 
     production = pd.read_csv(
         snakemake.input.industrial_production_per_country, index_col=0
-    ).filter(
-        ["MA", "BJ", "NG"], axis=0
-    )  # .filter(config["countries"], axis=0)
+    ).filter(config["countries"], axis=0)
 
     prod_tomorrow = industry_prod_tomorrow(production)
 
