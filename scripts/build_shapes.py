@@ -364,12 +364,20 @@ def download_WorldPop_standard(
     if out_logging:
         _logger.info("Stage 3/4: Download WorldPop datasets")
 
-    WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
-    # Urls used to possibly download the file
-    WorldPop_urls = [
-        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
-        f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
-    ]
+    if country_code=="XK":
+        WorldPop_filename = f"srb_ppp_{year}_UNadj_constrained.tif"
+        WorldPop_urls = [
+            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/SRB/{WorldPop_filename}",
+            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/SRB/{WorldPop_filename}",
+        ]
+    else:
+        WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
+        # Urls used to possibly download the file
+        WorldPop_urls = [
+            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
+            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
+        ]
+    
     WorldPop_inputfile = os.path.join(
         os.getcwd(), "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
