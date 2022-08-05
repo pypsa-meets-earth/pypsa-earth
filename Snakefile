@@ -491,7 +491,7 @@ rule run_test:
     run:
         import yaml
 
-        with open("../pypsa-africa/test/config.test1.yaml") as file:
+        with open("../pypsa-africa/test/config.test1_sec.yaml") as file:
 
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
