@@ -97,6 +97,8 @@ Upcoming Release
 
 * Adapt for a custom shapefile for MA as a first step towards generalizing the freature: `PR #429 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/429>`_
 
+* Bug fixing to download global OSM and shape data: `PR #433 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/433>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
