@@ -380,6 +380,8 @@ def busmap_for_n_clusters(
                 prefix = x.name + " "
         else:
             n_cluster_c = n_clusters
+            prefix = x.name[0] + x.name[1] + " "
+
         logger.debug(f"Determining busmap for country {prefix[:-1]}")
         if len(x) == 1:
             return pd.Series(prefix + "0", index=x.index)
