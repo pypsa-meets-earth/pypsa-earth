@@ -67,14 +67,16 @@ There are multiple ways to get involved and learn more about our work. That's ho
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
-   ```bash
-      .../pypsa-africa % conda env create -f envs/environment.yaml
-   ```
-   For faster installation you might want to try mamba
-   ```bash
-      (base) conda install -c conda-forge mamba
-      .../pypsa-africa % mamba env create -f envs/environment.yaml
-   ```
+```bash
+    .../pypsa-africa % conda env create -f envs/environment.yaml
+```
+   If the above takes longer than 30min, you might want to try mamba for faster installation:
+
+```bash
+    (base) conda install -c conda-forge mamba
+
+    .../pypsa-africa % mamba env create -f envs/environment.yaml
+```
 
 3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
 
