@@ -99,7 +99,9 @@ Upcoming Release
 
 * Adapt for a custom shapefile for MA as a first step towards generalizing the feature: `PR #429 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/429>`_
 
-* Improve line augmentation for network expansion explorations. Use k-edge augmenation for AC lines and random sampling for long HVDC lines: `PR #427 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/427>`_  
+* Improve line augmentation for network expansion explorations. Use k-edge augmenation for AC lines and random sampling for long HVDC lines: `PR #427 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/427>`_
+
+* Fix minor bug in clustering about missing prefix assignment `PR #434 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/434>`
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
