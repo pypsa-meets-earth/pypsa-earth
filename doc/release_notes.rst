@@ -101,7 +101,9 @@ Upcoming Release
 
 * Improve line augmentation for network expansion explorations. Use k-edge augmenation for AC lines and random sampling for long HVDC lines: `PR #427 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/427>`_
 
-* Fix minor bug in clustering about missing prefix assignment `PR #434 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/434>`
+* Fix minor bug in clustering about missing prefix assignment `PR #434 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/434>`_
+
+* Fix major aggregation bug and adjust config: `PR #435 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/435>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
