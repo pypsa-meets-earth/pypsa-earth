@@ -57,10 +57,11 @@ retrieve_databundle:
 download_osm_data_nprocesses: 4  # (optional) number of threads used to download osm data
 
 augmented_line_connection:
-  add_to_snakefile: false
-  connectivity_upgrade: 3  # min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
-  new_line_type: "HVDC"  # or "HVAC"
-  min_expansion: 1  # [MW]
+  add_to_snakefile: true  # If True, includes this rule to the workflow
+  connectivity_upgrade: 2  # Min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: ["HVAC", "HVDC"]  # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
+  min_expansion: 1  # [MW] New created line expands by float/int input
+  min_DC_length: 600  # [km] Minimum line length of DC line
 
 # if True clusters to GADM shapes, if False Voronoi cells will be clustered
 cluster_options:
@@ -313,7 +314,7 @@ solving:
     min_iterations: 4
     max_iterations: 6
     clip_p_max_pu: 0.01
-    skip_iterations: false
+    skip_iterations: true
     track_iterations: false
     #nhours: 10
   solver:

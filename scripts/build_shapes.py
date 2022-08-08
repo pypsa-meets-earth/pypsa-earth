@@ -549,6 +549,7 @@ def _sum_raster_over_mask(shape, img):
         img, shape, all_touched=True, invert=False, nodata=0.0
     )
     # calculate total output in the selected geometry
+    out_image[np.isnan(out_image)] = 0
     out_sum = out_image.sum()
     # out_sum = out_image.sum()/2 + out_image_int.sum()/2
 
