@@ -53,8 +53,9 @@ cluster_options:
   distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true  # When "True", logging is printed to console
   aggregation_strategies:
-    generators:
-      p_nom_max: sum # use "min" for more conservative assumptions
+    generators:  # use "min" for more conservative assumptions
+      p_nom: sum
+      p_nom_max: sum
       p_nom_min: sum
       p_min_pu: mean
       marginal_cost: mean
@@ -100,7 +101,7 @@ electricity:
   co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9  # European default, adjustment to Africa necessary
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
-  hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
+  hvdc_as_lines: false  # should HVDC lines be modeled as `Line` or as `Link` component?
 
   operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
     activate: false
