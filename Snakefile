@@ -111,7 +111,7 @@ rule prepare_transport_data:
 
 rule build_industrial_production_per_country_tomorrow:  #YES
     input:
-        industrial_production_per_country="resources/industrial_production_per_country.csv",
+        industrial_production_per_country="data/industrial_production_per_country.csv",
     output:
         industrial_production_per_country_tomorrow="resources/industrial_production_per_country_tomorrow_{planning_horizons}.csv",
     threads: 1
@@ -128,7 +128,7 @@ rule build_industry_demand:  #Yes
         industry_sector_ratios="data/industry_sector_ratios.csv",
         industrial_distribution_key="resources/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         industrial_production_per_country_tomorrow="resources/industrial_production_per_country_tomorrow_{planning_horizons}.csv",
-        industrial_production_per_country="resources/industrial_production_per_country.csv",
+        industrial_production_per_country="data/industrial_production_per_country.csv",
     output:
         industrial_energy_demand_per_node="resources/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 1
