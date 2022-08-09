@@ -105,6 +105,8 @@ Upcoming Release
 
 * Fix major aggregation bug and adjust config: `PR #435 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/435>`_
 
+* Fix nan techtype and wrong tech for nuclear which improves the representation of existing powerplants `PR #436 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/436>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
