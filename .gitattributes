@@ -1,0 +1,2 @@
+# Fix language stats: https://github.com/github/linguist/issues/3316#issuecomment-263485606
+*.ipynb linguist-vendored
