@@ -307,6 +307,24 @@ costs:
     co2: 0.
 
 
+monte_carlo:
+  options:
+    add_to_snakefile: true
+    samples: 19    # number of optimizations
+    sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
+  pypsa_standard:
+      # User can add here flexibly more features for the Monte-Carlo sampling.
+      # Given as "key: value" format
+      # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
+      # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
+      # TODO: Support also probability inputs for Monte-Carlo e.g. [l_bound, u_bound, zeta, gamma, distribution_type]
+      # TODO: Support inputs to simulate outages biggest lines "lines.p_nom_opt.max(): [-3000MW 0MW]""
+      # TODO: Support inputs to simulate outages of biggest power plant "generators.p_nom.max()": [-1000MW 0MW]
+    loads_t.p_set: [0.9, 1.1]
+    generators_t.p_max_pu.loc[:, network.generators.carrier == "wind"]: [0.5, 1.2]
+    generators_t.p_max_pu.loc[:, network.generators.carrier == "solar"]: [0.5, 2]
+
+
 solving:
   options:
     formulation: kirchhoff

@@ -572,6 +572,36 @@ rule solve_network:
         "scripts/solve_network.py"
 
 
+if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+### NEED WORKS
+    rule monte_carlo:
+        input:
+            "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        output:
+            "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            **{
+                f"conventional_{carrier}_{attr}": fn
+                for carrier, d in config.get("conventional", {None: {}}).items()
+                for attr, fn in d.items()
+                if str(fn).startswith("data/")
+            },
+        log:
+            solver=normpath(
+                "logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+            ),
+            python="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+            memory="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
+        benchmark:
+            "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+        threads: 20
+        resources:
+            mem=memory,
+        shadow:
+            "shallow"
+        script:
+            "scripts/solve_network.py"
+
+
 def input_make_summary(w):
     # It's mildly hacky to include the separate costs input as first entry
     if w.ll.endswith("all"):
