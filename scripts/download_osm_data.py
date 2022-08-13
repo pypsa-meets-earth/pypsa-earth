@@ -501,7 +501,9 @@ def _process_func_pop(c_code):
     download_pbf(c_code, update, verify, logging=False)
 
 
-def parallel_download_pbf(country_list, nprocesses, update=False, verify=False, iso_coding=True):
+def parallel_download_pbf(
+    country_list, nprocesses, update=False, verify=False, iso_coding=True
+):
     """
     Function to download pbf data in parallel
 
