@@ -561,16 +561,16 @@ def prepare_generators_df(df_all_generators):
     """
     # reset index
     df_all_generators = df_all_generators.reset_index(drop=True)
-        
-    # rename columns    
-    
-    check_fields_for_generators = ['tags.generator:output:electricity']     
+
+    # rename columns
+
+    check_fields_for_generators = ["tags.generator:output:electricity"]
     for field_to_add in check_fields_for_generators:
-        #print(df_all_generators)
+        # print(df_all_generators)
         if field_to_add not in df_all_generators.columns.tolist():
-           df_all_generators[field_to_add]=None
-           print(df_all_generators)
-    
+            df_all_generators[field_to_add] = None
+            print(df_all_generators)
+
     df_all_generators = df_all_generators.rename(
         # TODO fix column name for KG
         columns={
@@ -766,7 +766,6 @@ def clean_data(
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
-    
 
     # set the country name by the shape
     df_all_generators = set_countryname_by_shape(
