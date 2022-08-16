@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "augmented_line_connections", network="elec", simpl="", clusters="10"
+            "augmented_line_connections", network="elec", simpl="", clusters="54"
         )
     configure_logging(snakemake)
 
@@ -71,10 +71,13 @@ if __name__ == "__main__":
         snakemake.config["electricity"],
         Nyears,
     )
+    # TODO: Implement below comment in future. Requires transformer consideration.
+    # component_type = {"False": "Line", "True":  "Link"}.get(snakemake.config["electricity"]["hvdc_as_lines"])
     options = snakemake.config["augmented_line_connection"]
     min_expansion_option = options.get("min_expansion")
     k_edge_option = options.get("connectivity_upgrade", 3)
-    line_type_option = options.get("new_line_type", "HVDC")
+    line_type_option = options.get("new_line_type", ["HVDC"])
+    min_DC_length = options.get("min_DC_length")
 
     # k_edge algorithm implementation
     G = nx.Graph()
@@ -89,48 +92,78 @@ if __name__ == "__main__":
     attrs = ["bus0", "bus1", "length"]
     G.add_weighted_edges_from(network_lines.loc[:, attrs].values)
 
-    # find all complement edges
+    # find all complement edges, info on complement edges https://www.geeksforgeeks.org/complement-of-graph/
     complement_edges = pd.DataFrame(complement(G).edges, columns=["bus0", "bus1"])
     complement_edges["length"] = complement_edges.apply(haversine, axis=1)
+    complement_edges["interconnector"] = np.invert(
+        [
+            (
+                complement_edges.loc[x, "bus0"][0:2]
+                == complement_edges.loc[x, "bus1"][0:2]
+            )
+            for x in complement_edges.index
+        ]
+    )
 
     # apply k_edge_augmentation weighted by length of complement edges
+    # pick shortest lines per bus to fill k_edge condition (=degree of connectivity)
     k_edge = k_edge_option
-    augmentation = k_edge_augmentation(G, k_edge, avail=complement_edges.values)
-    new_network_lines = pd.DataFrame(augmentation, columns=["bus0", "bus1"])
-    new_network_lines["length"] = new_network_lines.apply(haversine, axis=1)
-    new_network_lines.index = new_network_lines.apply(
+    augmentation = k_edge_augmentation(
+        G, k_edge, avail=complement_edges[["bus0", "bus1", "length"]].values
+    )
+    new_kedge_lines = pd.DataFrame(augmentation, columns=["bus0", "bus1"])
+    new_kedge_lines["length"] = new_kedge_lines.apply(haversine, axis=1)
+    new_kedge_lines.index = new_kedge_lines.apply(
         lambda x: f"lines new {x.bus0} <-> {x.bus1}", axis=1
     )
 
+    # random sampling for long lines above <min DC length [km]>, including min and max distance, excluding interconnectors
+    intracountry_edges = complement_edges[~complement_edges["interconnector"]]
+    df = intracountry_edges[intracountry_edges["length"] > min_DC_length].sort_values(
+        by=["length"]
+    )
+    random_sample = df.sample(
+        frac=0.01, random_state=1
+    )  # frac extract 1% of complement_edges as samples
+    min_sample = df.head(1)
+    max_sample = df.tail(1)
+    new_long_lines = (
+        pd.concat([min_sample, max_sample, random_sample]).drop_duplicates().dropna()
+    )
+
     #  add new lines to the network
-    if line_type_option == "HVDC":
+    if "HVDC" in list(line_type_option):
         n.madd(
             "Link",
-            new_network_lines.index,
-            bus0=new_network_lines.bus0,
-            bus1=new_network_lines.bus1,
+            new_long_lines.index,
+            suffix=" DC",
+            bus0=new_long_lines.bus0,
+            bus1=new_long_lines.bus1,
+            type=snakemake.config["lines"].get("dc_type"),
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
-            length=new_network_lines.length,
-            capital_cost=new_network_lines.length
+            length=new_long_lines.length,
+            capital_cost=new_long_lines.length
             * costs.at["HVDC overhead", "capital_cost"],
             carrier="DC",
             lifetime=costs.at["HVDC overhead", "lifetime"],
             underwater_fraction=0.0,
         )
 
-    if line_type_option == "HVAC":
+    if "HVAC" in list(line_type_option):
         n.madd(
             "Line",
-            new_network_lines.index,
-            bus0=new_network_lines.bus0,
-            bus1=new_network_lines.bus1,
+            new_kedge_lines.index,
+            suffix=" AC",
+            bus0=new_kedge_lines.bus0,
+            bus1=new_kedge_lines.bus1,
+            type=snakemake.config["lines"]["types"].get(380),
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,
-            length=new_network_lines.length,
-            capital_cost=new_network_lines.length
+            length=new_kedge_lines.length,
+            capital_cost=new_kedge_lines.length
             * costs.at["HVAC overhead", "capital_cost"],
             carrier="AC",
             lifetime=costs.at["HVAC overhead", "lifetime"],
@@ -138,4 +171,4 @@ if __name__ == "__main__":
 
         _set_links_underwater_fraction(n)
 
-n.export_to_netcdf(snakemake.output.network)
+    n.export_to_netcdf(snakemake.output.network)
