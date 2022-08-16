@@ -40,14 +40,13 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
+  - book a 30min meeting with Max to discuss anything you like
+  - booking link: [calendly.com/pypsa-meets-africa](https://calendly.com/pypsa-meets-africa/pypsa-meets-africa-exchange-30min)
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
-    2. AI asset detection meeting, every Tuesday 15:30 (UK time), <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+    2. AI asset detection meeting, on demand, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
     3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
     4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a>
 - **Outreach meeting (Open)**
@@ -67,14 +66,16 @@ There are multiple ways to get involved and learn more about our work. That's ho
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
-   ```bash
-      .../pypsa-africa % conda env create -f envs/environment.yaml
-   ```
-   For faster installation you might want to try mamba
-   ```bash
-      (base) conda install -c conda-forge mamba
-      .../pypsa-africa % mamba env create -f envs/environment.yaml
-   ```
+```bash
+    .../pypsa-africa % conda env create -f envs/environment.yaml
+```
+   If the above takes longer than 30min, you might want to try mamba for faster installation:
+
+```bash
+    (base) conda install -c conda-forge mamba
+
+    .../pypsa-africa % mamba env create -f envs/environment.yaml
+```
 
 3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
 
