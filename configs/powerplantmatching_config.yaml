@@ -14,12 +14,14 @@ matching_sources:
 # - CARMA  # deprecated as no more public
 - GEO
 - GPD
+# - GEM_GGPT  # to be enabled once GEM_GGPT is working
 # - EXTERNAL_DATABASE
 
 fully_included_sources:
 # - CARMA  # deprecated as no more public
 - GEO
 - GPD
+# - GEM_GGPT  # to be enabled once GEM_GGPT is working
 # - EXTERNAL_DATABASE
 
 

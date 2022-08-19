@@ -87,12 +87,25 @@ Upcoming Release
 
 * Implement PyPSA-Eur improvements. Add gas limit constraints, add marginal cost sweeps wildcard, add and harmonize aggregation strategies, improve config usability by carrier clarifications, ease debugging by removing snakemake inputs from functions: `PR #402 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/402>`_
 
-* Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos: `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_
+* Fix and add docs. Fix incomplete tutorial, recommend mamba for installation, add YouTube videos `PR #412 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/412>`_ and `PR #423 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/423>`_
 
-* Restructure the package to ease readability and fix google drive downloading method: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`__
+* Restructure the package to ease readability and fix google drive downloading method: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/355>`_
 
-* Update config links to adhere to the new structure of the package: `PR #355 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
+* Update config links to adhere to the new structure of the package: `PR #420 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
 
+* Improve and finalize capacity_validation notebook: `PR #406 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/406>`_
+
+* Fix hydro technology with the GADM clustering approach: `PR #428 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/428>`_
+
+* Adapt for a custom shapefile for MA as a first step towards generalizing the feature: `PR #429 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/429>`_
+
+* Improve line augmentation for network expansion explorations. Use k-edge augmenation for AC lines and random sampling for long HVDC lines: `PR #427 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/427>`_
+
+* Fix minor bug in clustering about missing prefix assignment `PR #434 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/434>`_
+
+* Fix major aggregation bug and adjust config: `PR #435 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/435>`_
+
+* Fix nan techtype and wrong tech for nuclear which improves the representation of existing powerplants `PR #436 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/436>`_
 
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================

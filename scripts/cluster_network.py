@@ -175,7 +175,13 @@ def weighting_for_country(n, x):
 
     w = g + l
 
-    return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
+    if w.max() == 0.0:
+        logger.warning(
+            f"Null weighting for buses of country {x.country.iloc[0]}: returned default uniform weighting"
+        )
+        return pd.Series(1.0, index=w.index)
+    else:
+        return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
 def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
@@ -232,7 +238,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
         distribution_factor = G
 
-    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_networks"]
+    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_network"]
     N = n.buses.groupby(["country"]).size()
 
     assert (
@@ -309,24 +315,21 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
 
 def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
 
-    gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
+    # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
+    gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
     def locate_bus(coords, co):
 
-        gdf_co = gdf[
-            gdf["GID_{}".format(gadm_level)].str.contains(
-                two_2_three_digits_country(co)
-            )
-        ]
+        gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
         point = Point(coords["x"], coords["y"])
 
         try:
-            return gdf_co[gdf_co.contains(point)]["GID_{}".format(gadm_level)].item()
+            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
 
         except ValueError:
             return gdf_co[
                 gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-            ]["GID_{}".format(gadm_level)].item()
+            ]["GADM_ID"].item()
 
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
@@ -369,11 +372,16 @@ def busmap_for_n_clusters(
 
         # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
-            n_cluster_c = n_clusters[x.name[0]]
+            if isinstance(x.name, tuple):
+                n_cluster_c = n_clusters[x.name[0]]
+                prefix = x.name[0] + x.name[1] + " "
+            else:
+                n_cluster_c = n_clusters[x.name]
+                prefix = x.name + " "
         else:
             n_cluster_c = n_clusters
+            prefix = x.name[0] + x.name[1] + " "
 
-        prefix = x.name[0] + x.name[1] + " "
         logger.debug(f"Determining busmap for country {prefix[:-1]}")
         if len(x) == 1:
             return pd.Series(prefix + "0", index=x.index)
@@ -504,21 +512,13 @@ if __name__ == "__main__":
     country_list = snakemake.config["countries"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
 
-    if alternative_clustering:  # TODO load all techs in both cases
-        renewable_carriers = pd.Index(
-            [
-                "solar",
-                "onwind",
-            ]
-        )
-    else:
-        renewable_carriers = pd.Index(
-            [
-                tech
-                for tech in n.generators.carrier.unique()
-                if tech in snakemake.config["renewable"]
-            ]
-        )
+    renewable_carriers = pd.Index(
+        [
+            tech
+            for tech in n.generators.carrier.unique()
+            if tech in snakemake.config["renewable"]  # TODO ror not cap
+        ]
+    )
 
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])

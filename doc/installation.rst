@@ -34,6 +34,8 @@ The complete list of software needed before installing PyPSA Africa is listed be
 - `Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
   and enable to coordinate the parallel software development between many developers.
   It is mandatory to `learn the git basics <https://git-scm.com/doc>`_.
+- `Java <https://www.oracle.com/java/technologies/downloads/>`_ **(recommendation)**: A Java distribution is needed for using `powerplantmatching` package.
+  To have a better user experience, please install the redistribution from the website according to your operating system.
 - `IDE Python` **(recommendation)**: in order to write python code, you need an Integrated Development Environment (IDE)
   that is a software used to write code. Any program can be used, however, we recommend `Visual Studio Code <https://code.visualstudio.com/>`_,
   which is freely available online.
@@ -112,15 +114,36 @@ and test if your jupyter lab works:
     .../pypsa-africa % jupyter lab
 
 .. note::
-  ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-africa,
-  thereby there is no need to install it manually.
-  The snakemake included in the conda environment pypsa-africa installed with the above-mentioned procedure can be executed with the following procedure:
+   Please, make sure to have properly installed java, from the  `official website <https://www.oracle.com/java/technologies/downloads/>`__ or equivalent.
 
-  .. code: bash
+   In linux only, that is possible through the following command.
 
-    .../pypsa-africa % .../pypsa-africa % conda activate pypsa-africa
+   .. code: bash
 
-    .../pypsa-africa % snakemake < any command here >
+     .../pypsa-africa % .../pypsa-africa % conda activate pypsa-africa
+
+     .../pypsa-africa % conda install -c conda-forge openjdk
+
+   To verify the successful installation, you can verify that by using the following code.
+   .. code: bash
+    .../pypsa-africa % java -version
+
+   The expected output should resemble the following text:
+   .. code: bash
+     java version "1.8.0_341"
+     Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+     Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+
+.. note::
+   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-africa,
+   thereby there is no need to install it manually.
+   The snakemake included in the conda environment pypsa-africa installed with the above-mentioned procedure can be executed with the following procedure:
+
+   .. code: bash
+
+     .../pypsa-africa % .../pypsa-africa % conda activate pypsa-africa
+
+     .../pypsa-africa % snakemake < any command here >
 
 
 Download data

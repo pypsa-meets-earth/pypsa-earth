@@ -40,14 +40,13 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - meeting hosted on Discord
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
-  - every Friday between 17-18:00 (UK time)
-  - book a 20min meeting with Max to discuss anything you like
-  - booking link: [app.autobook.me/max-parzen/pypsa-meets-africa](https://app.autobook.me/max-parzen/pypsa-meets-africa) (developed by @mnm-matin)
+  - book a 30min meeting with Max to discuss anything you like
+  - booking link: [calendly.com/pypsa-meets-africa](https://calendly.com/pypsa-meets-africa/pypsa-meets-africa-exchange-30min)
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
-    2. AI asset detection meeting, every Tuesday 15:30 (UK time), <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+    2. AI asset detection meeting, on demand, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
     3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
     4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a>
 - **Outreach meeting (Open)**
@@ -60,9 +59,9 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 1. Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
 
-```bash
-    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
-```
+   ```bash
+      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+   ```
 
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
@@ -70,9 +69,11 @@ There are multiple ways to get involved and learn more about our work. That's ho
 ```bash
     .../pypsa-africa % conda env create -f envs/environment.yaml
 ```
-   For faster installation you might want to try mamba
+   If the above takes longer than 30min, you might want to try mamba for faster installation:
+
 ```bash
     (base) conda install -c conda-forge mamba
+
     .../pypsa-africa % mamba env create -f envs/environment.yaml
 ```
 
@@ -80,11 +81,25 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
-```bash
-    .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+   ```bash
+      .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+      .../pypsa-africa % jupyter lab
+   ```
 
-    .../pypsa-africa % jupyter lab
-```
+5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+   To verify the successfull installation the following code can be tested from bash:
+
+   ```bash
+      .../pypsa-africa % java -version
+   ```
+
+   The expected output should resemble the following:
+   
+   ```bash
+      java version "1.8.0_341"
+      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+   ```
 
 ## Test run on tutorial
 
