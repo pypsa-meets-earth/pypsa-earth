@@ -186,7 +186,6 @@ if __name__ == "__main__":
         )
     lh_scaled = qmc.scale(lh, L_BOUNDS, U_BOUNDS)
 
-
     ### MONTE-CARLO MODIFICATIONS
     ###
     n = pypsa.Network(snakemake.input[0])
@@ -203,15 +202,10 @@ if __name__ == "__main__":
         logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
         j = j + 1
 
-
     ### EXPORT AND METADATA
     #
     latin_hypercube_dict = (
         pd.DataFrame(lh_scaled).rename_axis("Nruns").add_suffix("_feature")
     ).to_dict()
     n.meta.update(latin_hypercube_dict)
-    n.export_to_netcdf(
-        snakemake.output[0]
-    )
-
-
+    n.export_to_netcdf(snakemake.output[0])

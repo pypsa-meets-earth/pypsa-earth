@@ -28,7 +28,9 @@ configfile: "configs/bundle_config.yaml"
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
-config["scenario"]["unc"] = [f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
+config["scenario"]["unc"] = [
+    f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
+]
 
 load_data_paths = get_load_paths_gegis("data", config)
 COSTS = "data/costs.csv"
@@ -553,6 +555,7 @@ def memory(w):
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
+
     rule solve_network:
         input:
             "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -576,6 +579,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+
     rule monte_carlo:
         input:
             "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -591,14 +595,12 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         script:
             "scripts/monte_carlo.py"
 
-
     rule solve_monte:
         input:
             expand(
                 "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
                 **config["scenario"]
             ),
-
 
     rule solve_network:
         input:
@@ -620,7 +622,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             "shallow"
         script:
             "scripts/solve_network.py"
-
 
     rule solve_all_networks_monte:
         input:
