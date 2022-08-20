@@ -28,6 +28,7 @@ configfile: "configs/bundle_config.yaml"
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
+config["scenario"]["unc"] = [f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
 
 load_data_paths = get_load_paths_gegis("data", config)
 COSTS = "data/costs.csv"
@@ -39,6 +40,7 @@ wildcard_constraints:
     clusters="[0-9]+m?|all",
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
+    unc="[-+a-zA-Z0-9\.]*",
 
 
 rule run_test:
@@ -550,41 +552,12 @@ def memory(w):
         return int(factor * (10000 + 195 * int(w.clusters)))
 
 
-rule solve_network:
-    input:
-        "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-    output:
-        "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-    log:
-        solver=normpath(
-            "logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
-        ),
-        python="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
-        memory="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
-    benchmark:
-        "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
-    threads: 20
-    resources:
-        mem=memory,
-    shadow:
-        "shallow"
-    script:
-        "scripts/solve_network.py"
-
-
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
-### NEED WORKS
-    rule monte_carlo:
+if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
+    rule solve_network:
         input:
             "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-            **{
-                f"conventional_{carrier}_{attr}": fn
-                for carrier, d in config.get("conventional", {None: {}}).items()
-                for attr, fn in d.items()
-                if str(fn).startswith("data/")
-            },
         log:
             solver=normpath(
                 "logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
@@ -600,6 +573,61 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             "shallow"
         script:
             "scripts/solve_network.py"
+
+
+if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+    rule monte_carlo:
+        input:
+            "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        output:
+            "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+        log:
+            "logs/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
+        benchmark:
+            "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+        threads: 1
+        resources:
+            mem=4000,
+        script:
+            "scripts/monte_carlo.py"
+
+
+    rule solve_monte:
+        input:
+            expand(
+                "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                **config["scenario"]
+            ),
+
+
+    rule solve_network:
+        input:
+            "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+        output:
+            "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+        log:
+            solver=normpath(
+                "logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
+            ),
+            python="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_python.log",
+            memory="logs/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_memory.log",
+        benchmark:
+            "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+        threads: 20
+        resources:
+            mem=memory,
+        shadow:
+            "shallow"
+        script:
+            "scripts/solve_network.py"
+
+
+    rule solve_all_networks_monte:
+        input:
+            expand(
+                "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                **config["scenario"]
+            ),
 
 
 def input_make_summary(w):
