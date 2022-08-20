@@ -15,6 +15,7 @@ scenario:
   ll: ['copt']
   clusters: [10]
   opts: [Co2L-24H]
+  unc: # created in Snakefile
 
 countries: ["NG", "BJ"]
 
@@ -310,7 +311,7 @@ costs:
 monte_carlo:
   options:
     add_to_snakefile: true
-    samples: 19    # number of optimizations
+    samples: 7    # number of optimizations
     sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
   pypsa_standard:
       # User can add here flexibly more features for the Monte-Carlo sampling.

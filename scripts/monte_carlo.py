@@ -133,9 +133,10 @@ if __name__ == "__main__":
             "monte_carlo",
             network="elec",
             simpl="",
-            clusters="20",
-            ll="v0.3",
+            clusters="10",
+            ll="copt",
             opts="Co2L-24H",
+            unc="m0",
         )
     configure_logging(snakemake)
     config = snakemake.config
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     )  # only counts features when specified in config
     SAMPLES = MONTE_CARLO_OPTIONS.get(
         "samples"
-    )  # What is the optimal sampling? Probably depend on amount of features
+    )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
     SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
 
     ### SCENARIO CREATION / SAMPLING STRATEGY
@@ -169,58 +170,48 @@ if __name__ == "__main__":
         )
     if SAMPLING_STRATEGY == "scipy":
         lh = monte_carlo_sampling_scipy(
-            N_FEATURES, SAMPLES, centered=False, strength=2, optimization=None, seed=42
+            N_FEATURES,
+            SAMPLES,
+            centered=False,
+            strength=2,
+            optimization=None,
+            seed=42,
         )
     if SAMPLING_STRATEGY == "chaospy":
         lh = monte_carlo_sampling_chaospy(
-            N_FEATURES, SAMPLES, rule="latin_hypercube", seed=42
+            N_FEATURES,
+            SAMPLES,
+            rule="latin_hypercube",
+            seed=42,
         )
     lh_scaled = qmc.scale(lh, L_BOUNDS, U_BOUNDS)
 
-    ### SCENARIO ITERATION
+
+    ### MONTE-CARLO MODIFICATIONS
     ###
-    ### solve_network.py preparation
-    tmpdir = config["solving"].get("tmpdir")
-    if tmpdir is not None:
-        Path(tmpdir).mkdir(parents=True, exist_ok=True)
-    opts = snakemake.wildcards.opts.split("-")
-    solve_opts = config["solving"]["options"]
+    n = pypsa.Network(snakemake.input[0])
+    unc_wildcards = snakemake.wildcards[-1]
+    i = int(unc_wildcards[1:])
+    j = 0
+    for k, v in MONTE_CARLO_PYPSA_FEATURES.items():
+        # this loop sets in one scenario each "i" feature assumption
+        # k is the config input key "loads_t.p_set"
+        # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
+        # i, j interation number to pick values of experimental setup
+        # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh_scaled[0,0]
+        exec(f"n.{k} = n.{k} * {lh_scaled[i,j]}")
+        logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
+        j = j + 1
 
-    fn = getattr(snakemake.log, "memory", None)
-    with memory_logger(filename=fn, interval=30.0) as mem:
-        n = pypsa.Network(snakemake.input[0])
-        n = prepare_network(n, solve_opts)
 
-    ### monte-carlo part
-    Nruns = lh.shape[0]
-    for i in range(Nruns):
-        nm = n.copy()
-        j = 0
-        for k, v in MONTE_CARLO_PYPSA_FEATURES.items():
-            # this loop sets in one scenario each "i" feature assumption
-            # i is the config input key "loads_t.p_set"
-            # v is the lower and upper bound [0.8,1.3]
-            # j is the sample interation number
-            # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh[0,0] * (1.3-0.8)
-            exec(f"n.{k} = network.{k} * {lh_scaled[i,j]}")
-            logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
-            j = j + 1
+    ### EXPORT AND METADATA
+    #
+    latin_hypercube_dict = (
+        pd.DataFrame(lh_scaled).rename_axis("Nruns").add_suffix("_feature")
+    ).to_dict()
+    n.meta.update(latin_hypercube_dict)
+    n.export_to_netcdf(
+        snakemake.output[0]
+    )
 
-        # run optimization
-        nm = solve_network(
-            n,
-            config=config,
-            opts=opts,
-            solver_dir=tmpdir,
-            solver_logfile=snakemake.log.solver,
-        )
 
-        # create new object 'monte_carlo' to save settings for each run
-        nm.monte_carlo = (
-            pd.DataFrame(lh_scaled).rename_axis("Nruns").add_suffix("_feature")
-        )
-        nm.export_to_netcdf(
-            snakemake.output[0]
-        )  #### TODO... Create outputs & parallize
-
-        logger.info("Maximum memory usage: {}".format(mem.mem_usage))
