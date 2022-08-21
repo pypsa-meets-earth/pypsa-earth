@@ -107,6 +107,8 @@ Upcoming Release
 
 * Fix nan techtype and wrong tech for nuclear which improves the representation of existing powerplants `PR #436 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/436>`_
 
+* Add notebook to compare results by different solvers `PR #421 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/421>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
