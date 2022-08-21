@@ -426,7 +426,7 @@ def integrate_lines_df(df_all_lines, distance_crs):
         # there may be some non-known numerical issues
         not_resolved_cables = ~pd.to_numeric(
             df_all_lines["cables"], errors="coerce"
-        ).is_integer()
+        ).apply(float.is_integer)
         unknown_cables_tags = set(
             df_all_lines.loc[not_resolved_cables]["cables"].values
         )
@@ -523,7 +523,7 @@ def integrate_lines_df(df_all_lines, distance_crs):
         # there may be some non-known numerical issues
         not_resolved_circuits = ~pd.to_numeric(
             df_all_lines["circuits"], errors="coerce"
-        ).is_integer()
+        ).apply(float.is_integer)
         unknown_circuits_tags = set(
             df_all_lines.loc[not_resolved_circuits]["circuits"].values
         )
