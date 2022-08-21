@@ -61,11 +61,16 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: mamba env update -n pypsa-africa -f envs/environment.yaml
 
-    - name: Test snakemake workflow
+    - name: Test standard snakemake workflow
       run: |
         conda list
         cp test/config.test1.yaml config.yaml
         snakemake --cores all solve_all_networks
+
+    - name: Test monte-carlo snakemake workflow
+      run: |
+        cp test/config.test2.yaml confmonig.yaml
+        snakemake --cores all solve_all_networks_monte
 
       # - name: Test plotting and summaries
       #   run: |

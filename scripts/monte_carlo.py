@@ -4,29 +4,63 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # coding: utf-8
 """
-Guarantees that every bus has at least X-number of connections.
+Prepares network files with monte-carlo parameter sweeps for solving process.
 
 Relevant Settings
 -----------------
 
 .. code:: yaml
 
+    monte_carlo:
+    options:
+        add_to_snakefile:
+        samples:
+        sampling_strategy:
+    pypsa_standard:
+        <use dynamically the PyPSA object and define uncertainty ranges>
+        Examples...
+        loads_t.p_set: [0.9, 1.1]
+        generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
+        generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
 
 .. seealso::
-
+    Documentation of the configuration file ``config.yaml`` at :ref:`_monte_cf`
 
 Inputs
 ------
-
+- ``networks/elec_s_10_ec_lcopt_Co2L-24H.nc``
 
 Outputs
 -------
-
-
+- ``networks/elec_s_10_ec_lcopt_Co2L-24H_{unc}.nc``
+e.g.    networks/elec_s_10_ec_lcopt_Co2L-24H_m0.nc
+        networks/elec_s_10_ec_lcopt_Co2L-24H_m1.nc
+        ...
 
 Description
 -----------
+PyPSA-Earth is deterministic which means that a set of inputs give a set of outputs.
+Parameter sweeps can help to explore the uncertainty of the outputs cause by parameter changes.
+Many are familar with the classical "sensitvity analysis" that can be applied by varying the
+input of only one feature, while exploring its outputs changes. Here implemented is a
+"global sensitvity analysis" that can help to explore the multi-dimensional uncertainty space
+when more than one feature are changed at the same time. 
 
+To do so, the scripts is separated in two building blocks: One creates the experimental design,
+the other, modifies and outputs the network file. Building the experimental design is currently
+supported by the packages pyDOE2, chaospy and scipy. This should give users the freedom to
+explore alternative approaches. The orthogonal latin hypercube sampling is thereby found as most
+performant, hence, implemented here. Sampling the mutli-dimensional uncertainty space is relatively
+easy. It only requires two things: The number of *samples* (e.g. PyPSA networks) and *features* (e.g.
+load or solar timeseries). This results in an experimental design of the dimenson (samples X features).
+
+Additionally, upper and lower bounds *per feature* need to be provided such that the experimental
+design can be scaled accordingly. Currently the user can define uncertainty ranges e.g. bounds,
+for all PyPSA objects that are `int` or `float`. Boolean values could be used but require testing.
+The experimental design `lhs_scaled` (dimension: samplex X features) is then used to modify the PyPSA
+networks. Thereby, this script creates samples x amount of networks. The iterators comes from the
+wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
+0 to (total number of) SAMPLES. 
 """
 import logging
 import os
@@ -186,6 +220,7 @@ if __name__ == "__main__":
         )
     lh_scaled = qmc.scale(lh, L_BOUNDS, U_BOUNDS)
 
+
     ### MONTE-CARLO MODIFICATIONS
     ###
     n = pypsa.Network(snakemake.input[0])
@@ -202,10 +237,15 @@ if __name__ == "__main__":
         logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
         j = j + 1
 
+
     ### EXPORT AND METADATA
     #
     latin_hypercube_dict = (
         pd.DataFrame(lh_scaled).rename_axis("Nruns").add_suffix("_feature")
     ).to_dict()
     n.meta.update(latin_hypercube_dict)
-    n.export_to_netcdf(snakemake.output[0])
+    n.export_to_netcdf(
+        snakemake.output[0]
+    )
+
+
