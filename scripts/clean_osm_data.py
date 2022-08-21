@@ -820,9 +820,9 @@ if __name__ == "__main__":
             ext_country_shapes = create_extended_country_shapes(
                 country_shapes, offshore_shapes
             )
-    
+
     else:
-        ext_country_shapes=None
+        ext_country_shapes = None
 
     clean_data(
         input_files,
