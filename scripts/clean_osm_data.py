@@ -592,21 +592,19 @@ def find_first_overlap(geom, country_geoms, default_name):
 def set_countryname_by_shape(
     df,
     ext_country_shapes,
-    names_by_shapes=True,
     exclude_external=True,
     col_country="country",
 ):
     "Set the country name by the name shape"
-    if names_by_shapes:
-        df[col_country] = [
-            find_first_overlap(
-                row["geometry"],
-                ext_country_shapes,
-                None if exclude_external else row[col_country],
-            )
-            for id, row in df.iterrows()
-        ]
-        df.dropna(subset=[col_country], inplace=True)
+    df[col_country] = [
+        find_first_overlap(
+            row["geometry"],
+            ext_country_shapes,
+            None if exclude_external else row[col_country],
+        )
+        for id, row in df.iterrows()
+    ]
+    df.dropna(subset=[col_country], inplace=True)
     return df
 
 
@@ -704,9 +702,8 @@ def clean_data(
     df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
     # set the country name by the shape
-    df_all_lines = set_countryname_by_shape(
-        df_all_lines, ext_country_shapes, names_by_shapes=names_by_shapes
-    )
+    if names_by_shapes:
+        df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
 
     save_to_geojson(df_all_lines, output_files["lines"])
 
