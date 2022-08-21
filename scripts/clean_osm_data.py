@@ -424,9 +424,9 @@ def integrate_lines_df(df_all_lines, distance_crs):
         ] = "0"
 
         # there may be some non-known numerical issues
-        not_resolved_cables = pd.to_numeric(
+        not_resolved_cables = ~pd.to_numeric(
             df_all_lines["cables"], errors="coerce"
-        ).isna()
+        ).is_integer()
         unknown_cables_tags = set(
             df_all_lines.loc[not_resolved_cables]["cables"].values
         )
@@ -521,9 +521,9 @@ def integrate_lines_df(df_all_lines, distance_crs):
         )
 
         # there may be some non-known numerical issues
-        not_resolved_circuits = pd.to_numeric(
+        not_resolved_circuits = ~pd.to_numeric(
             df_all_lines["circuits"], errors="coerce"
-        ).isna()
+        ).is_integer()
         unknown_circuits_tags = set(
             df_all_lines.loc[not_resolved_circuits]["circuits"].values
         )
@@ -808,18 +808,21 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = gpd.read_file(onshore_shape_path).set_index("name")["geometry"]
 
-    if os.stat(offshore_shape_path).st_size == 0:
-        logger.info("No offshore file exist. Passing only onshore shape")
-        ext_country_shapes = country_shapes
+        if os.stat(offshore_shape_path).st_size == 0:
+            logger.info("No offshore file exist. Passing only onshore shape")
+            ext_country_shapes = country_shapes
 
+        else:
+            logger.info("Combining on- and offshore shape")
+            offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
+                "geometry"
+            ]
+            ext_country_shapes = create_extended_country_shapes(
+                country_shapes, offshore_shapes
+            )
+    
     else:
-        logger.info("Combining on- and offshore shape")
-        offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
-            "geometry"
-        ]
-        ext_country_shapes = create_extended_country_shapes(
-            country_shapes, offshore_shapes
-        )
+        ext_country_shapes=None
 
     clean_data(
         input_files,
