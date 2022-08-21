@@ -35,6 +35,8 @@ dependencies:
 - netcdf4
 - networkx
 - scipy
+- chaospy
+- pydoe2
 - shapely>=1.8a1
 - pre-commit
 - pyomo
@@ -71,7 +73,7 @@ dependencies:
 
 # Default solver for tests (required for CI)
 - glpk
-- ipopt < 3.13.3
+- ipopt<3.13.3
 - gurobi
 
 - pip:

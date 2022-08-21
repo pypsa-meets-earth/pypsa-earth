@@ -256,7 +256,7 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-after: scaling_factor:
-   :end-before: solving:
+   :end-before: monte_carlo:
 
 .. csv-table::
    :header-rows: 1
@@ -266,6 +266,24 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 .. note::
     To change cost assumptions in more detail (i.e. other than ``marginal_cost`` and ``capital_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
     You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
+
+.. _monte_cf:
+
+``monte_carlo``
+=============
+
+``options``
+-----------
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: monte_carlo:
+   :end-before:   solving:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/motne-carlo.csv
 
 .. _solving_cf:
 
