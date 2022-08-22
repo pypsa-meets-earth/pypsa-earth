@@ -67,7 +67,7 @@ jobs:
 
     - name: Test monte-carlo snakemake workflow
       run: |
-        cp test/config.test2.yaml confmonig.yaml
+        cp test/config.test2.yaml config.yaml
         snakemake --cores all solve_all_networks_monte
 
       # - name: Test plotting and summaries
