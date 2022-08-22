@@ -665,7 +665,7 @@ def clean_data(
 ):
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"])
-
+    
     # prepare lines dataframe and data types
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
@@ -742,12 +742,13 @@ def clean_data(
     # save to geojson file
     df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
 
-    # set the country name by the shape
-    df_all_substations = set_countryname_by_shape(
-        df_all_substations,
-        ext_country_shapes,
-        col_country="Country",
-    )
+    if names_by_shapes:
+        # set the country name by the shape
+        df_all_substations = set_countryname_by_shape(
+            df_all_substations,
+            ext_country_shapes,
+            col_country="Country",
+        )
 
     save_to_geojson(df_all_substations, output_files["substations"])
 
@@ -758,12 +759,14 @@ def clean_data(
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
 
-    # set the country name by the shape
-    df_all_generators = set_countryname_by_shape(
-        df_all_generators,
-        ext_country_shapes,
-        col_country="Country",
-    )
+
+    if names_by_shapes:
+        # set the country name by the shape
+        df_all_generators = set_countryname_by_shape(
+            df_all_generators,
+            ext_country_shapes,
+            col_country="Country",
+        )
 
     # set name tag by closest city when the value is nan
     if generator_name_method == "closest_city":
