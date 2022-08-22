@@ -665,7 +665,7 @@ def clean_data(
 ):
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"])
-    
+
     # prepare lines dataframe and data types
     df_lines = prepare_lines_df(df_lines)
     df_lines = finalize_lines_type(df_lines)
@@ -758,7 +758,6 @@ def clean_data(
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
-
 
     if names_by_shapes:
         # set the country name by the shape
