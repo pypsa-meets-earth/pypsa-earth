@@ -742,7 +742,6 @@ def clean_data(
     df_all_substations = set_countryname_by_shape(
         df_all_substations,
         ext_country_shapes,
-        names_by_shapes=names_by_shapes,
         col_country="Country",
     )
 
@@ -759,7 +758,6 @@ def clean_data(
     df_all_generators = set_countryname_by_shape(
         df_all_generators,
         ext_country_shapes,
-        names_by_shapes=names_by_shapes,
         col_country="Country",
     )
 
