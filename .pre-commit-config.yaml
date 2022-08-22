@@ -26,7 +26,7 @@ repos:
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
+  rev: v2.2.1
   hooks:
   - id: codespell
     args: ['--ignore-regex="\b[A-Z]+\b"'] # Ignore capital case words, e.g. country codes
