@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from itertools import dropwhile
 import os
 from types import SimpleNamespace
 
@@ -39,7 +40,7 @@ if __name__ == "__main__":
 
     techs = snakemake.config["custom_data"]["renewables"]
     years = snakemake.config["scenario"]["planning_horizons"]#['2030', '2050']  # , 'offwind', 'onwind', 'csp']
-    irs = snakemake.config["scenario"]["ir"]  # , 'offwind', 'onwind', 'csp']
+    drs = snakemake.config["costs"]["discountrate"]  # , 'offwind', 'onwind', 'csp']
 
     suff={'sopv': 'solar', 'csp': 'csp', 'pvr': 'rooftop pv'}
 
@@ -48,18 +49,18 @@ if __name__ == "__main__":
 
     m=n.copy()
     
-    def override_values(tech, year, scenario):
+    def override_values(tech, year, dr):
         buses=list(n.buses[n.buses.carrier=='AC'].index)
         
         # enertile_res_pot=pd.read_csv('postprocessed/{0}_{1}_{2}_potential.csv'.format(
         #     tech, year,scenario), index_col=0, parse_dates=True).filter(
         #         buses, axis=1)#.add_suffix(' ' + suff[tech])
         
-        enertile_res_pot = pd.read_csv(snakemake.input["custom_res_pot_{0}".format(tech)]
+        enertile_res_pot = pd.read_csv(snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)]
                            , index_col=0, parse_dates=True).filter(
                 buses, axis=1)
     
-        enertile_installable=pd.read_csv(snakemake.input["custom_res_ins_{0}".format(tech)]
+        enertile_installable=pd.read_csv(snakemake.input["custom_res_ins_{0}_{1}_{2}".format(tech, year, dr)]
                              , index_col=0).filter(buses, axis=0).reset_index()
         
         #enertile_installable.columns=['Generator', 'p_nom_max']
@@ -93,8 +94,8 @@ if __name__ == "__main__":
 
     for tech in techs:
         for year in years:
-            for ir in irs:
-                override_values(tech, year, ir)
+            for dr in drs:
+                override_values(tech, year, dr)
 
     n.export_to_netcdf(snakemake.output[0])    
 

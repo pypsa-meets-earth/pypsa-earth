@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_again_2
+run: test_again_7
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 1002
+  - 1007
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -22,10 +22,20 @@ scenario:
   - "Co2L"
   sopts:
   - "3H"
-  ir:
-  - "low"
+  discount_rate:
+  - costs['discountrate']
 
 countries: ['MA']
+
+custom_data:
+  renewables: ['csp', 'pvr', 'sopv']
+  
+costs:
+  lifetime: 25 #default lifetime
+  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
+  discountrate: [0.071, 0.086, 0.111]
+  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
+  USD2013_to_EUR2013: 0.7532
 
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
@@ -75,15 +85,7 @@ industry:
   hotmaps_locate_missing: false
   reference_year: 2015
   
-custom_data:
-  renewables: ['csp', 'pvr', 'sopv']
-  
-costs:
-  lifetime: 25 #default lifetime
-  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
-  discountrate: 0.07
-  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
-  USD2013_to_EUR2013: 0.7532
+
 
   # Marginal and capital costs can be overwritten
   # capital_cost:

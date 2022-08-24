@@ -1930,11 +1930,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="53",
-            ll="c1",
-            opts="",
+            clusters="1003",
+            ll="c1.0",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="Co2L-720H",
+            sopts="3H",   
+            discountrate=0.071
         )
 
     # TODO fetch from config
@@ -1962,7 +1963,7 @@ if __name__ == "__main__":
     costs = prepare_costs(
         snakemake.input.costs,
         snakemake.config["costs"]["USD2013_to_EUR2013"],
-        snakemake.config["costs"]["discountrate"],
+        eval(snakemake.wildcards.discountrate),
         Nyears,
         snakemake.config["costs"]["lifetime"],
     )
