@@ -24,7 +24,7 @@ scenario:
   sopts:
   - "7H"
 
-countries: ['MA']
+countries: ['NG', 'BJ']
 
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
