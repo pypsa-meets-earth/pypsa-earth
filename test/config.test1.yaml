@@ -105,7 +105,8 @@ solar_thermal:
     azimuth: 180.
 
 sector:
-  gas_network: false
+  gas_network: true
+  oil_network: true
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share
@@ -415,3 +416,4 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
+    solid biomass for industry CC: green
