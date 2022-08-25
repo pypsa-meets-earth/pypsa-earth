@@ -9,7 +9,6 @@ run: test3
 
 foresight: overnight
 
-
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
@@ -416,4 +415,3 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
-    solid biomass for industry CC: green
