@@ -14,44 +14,43 @@ from helpers import override_component_attrs, sets_path_to_root, mock_snakemake
 def override_values(tech, year, dr):
     buses=list(n.buses[n.buses.carrier=='AC'].index)
     
-    # enertile_res_pot=pd.read_csv('postprocessed/{0}_{1}_{2}_potential.csv'.format(
-    #     tech, year,scenario), index_col=0, parse_dates=True).filter(
-    #         buses, axis=1)#.add_suffix(' ' + suff[tech])
     
-    enertile_res_pot = pd.read_csv(snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)]
+    custom_res_t = pd.read_csv(snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)]
                        , index_col=0, parse_dates=True).filter(
             buses, axis=1)
 
-    enertile_installable=pd.read_csv(snakemake.input["custom_res_ins_{0}_{1}_{2}".format(tech, year, dr)]
+    custom_res=pd.read_csv(snakemake.input["custom_res_ins_{0}_{1}_{2}".format(tech, year, dr)]
                          , index_col=0).filter(buses, axis=0).reset_index()
     
-    #enertile_installable.columns=['Generator', 'p_nom_max']
-    enertile_installable.rename(columns={'region':'Generator', 'potstepsizeMW':'p_nom_max'}
-                                , inplace=True)
-    enertile_installable['Generator']=enertile_installable['Generator'].apply(lambda x: x+' '+suff[tech])#.rename('Generator')
-    enertile_installable = enertile_installable.set_index('Generator')
+    #custom_res.columns=['Generator', 'p_nom_max']
+    # custom_res.rename(columns={'region':'Generator', 'potstepsizeMW':'p_nom_max'}
+    #                             , inplace=True)
+    custom_res['Generator']=custom_res['Generator'].apply(lambda x: x+' '+tech)#.rename('Generator')
+    custom_res = custom_res.set_index('Generator')
     # def override_solar_techs(n, tech, respot, install):
     
     # tech_cols=n.generators_t.p_max_pu.filter(regex="solar$").columns 
-    if suff[tech] in n.generators.carrier.unique():
+    if tech.replace("-", " ") in n.generators.carrier.unique():
 
-        n.generators_t.p_max_pu.update(enertile_res_pot)
-        n.generators.update(pd.Series(enertile_installable['p_nom_max']))
+        n.generators_t.p_max_pu.update(custom_res_t)
+        n.generators.update(pd.Series(custom_res['p_nom_max']))
 
     else:
         n.madd(
             "Generator",
             buses,
-            " " + suff[tech],
+            " " + tech,
             bus=buses,
-            carrier=suff[tech],
+            carrier=tech,
             p_nom_extendable=True,
-            p_nom_max=enertile_installable["p_nom_max"].values,
+            p_nom_max=custom_res["p_nom_max"].values,
             #weight=ds["weight"].to_pandas(),
-            marginal_cost=enertile_installable['fixedomEuroPKW']*1000,
-            capital_cost=enertile_installable['investmentEuroPKW']*1000,
+            marginal_cost=custom_res['fixedomEuroPKW']*1000,
+            capital_cost=custom_res['investmentEuroPKW']*1000,
             efficiency=1.0,
-            p_max_pu=enertile_res_pot,
+            p_max_pu=custom_res_t,
+            lifetime=custom_res['lifetime'][0],
+            p_nom_min=custom_res['installedcapacity'].values
         )
 
 if __name__ == "__main__":
@@ -61,7 +60,7 @@ if __name__ == "__main__":
             snakemake = mock_snakemake(
                 "override_respot",
                 simpl="",
-                clusters="1008",
+                clusters="1004",
                 ll="c1.0",
                 opts="Co2L",
                 planning_horizons="2030",
@@ -75,19 +74,15 @@ if __name__ == "__main__":
         
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
-        years = snakemake.config["scenario"]["planning_horizons"]#['2030', '2050']  # , 'offwind', 'onwind', 'csp']
-        drs = snakemake.config["costs"]["discountrate"]  # , 'offwind', 'onwind', 'csp']
-    
-        suff={'sopv': 'solar', 'csp': 'csp', 'pvr': 'rooftop pv'}
-    
+        year = snakemake.wildcards["planning_horizons"]#['2030', '2050']  # , 'offwind', 'onwind', 'csp']
+        dr = snakemake.wildcards["discountrate"]  # , 'offwind', 'onwind', 'csp']
+       
        
         m=n.copy()
         
         
         for tech in techs:
-            for year in years:
-                for dr in drs:
-                    override_values(tech, year, dr)
+            override_values(tech, year, dr)
     
         n.export_to_netcdf(snakemake.output[0])    
     else:

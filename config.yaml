@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_again_8
+run: test_again_10
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 1008
+  - 1010
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -22,13 +22,12 @@ scenario:
   - "Co2L"
   sopts:
   - "3H"
-  discount_rate:
-  - costs['discountrate']
+  
 
 countries: ['MA']
 
 custom_data:
-  renewables: [] # ['csp', 'pvr', 'sopv']
+  renewables: [] # ['csp', 'rooftop-solar', 'solar']
   
 costs:
   lifetime: 25 #default lifetime
