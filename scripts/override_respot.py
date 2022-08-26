@@ -22,14 +22,10 @@ def override_values(tech, year, dr):
     custom_res=pd.read_csv(snakemake.input["custom_res_ins_{0}_{1}_{2}".format(tech, year, dr)]
                          , index_col=0).filter(buses, axis=0).reset_index()
     
-    #custom_res.columns=['Generator', 'p_nom_max']
-    # custom_res.rename(columns={'region':'Generator', 'potstepsizeMW':'p_nom_max'}
-    #                             , inplace=True)
-    custom_res['Generator']=custom_res['Generator'].apply(lambda x: x+' '+tech)#.rename('Generator')
+
+    custom_res['Generator']=custom_res['Generator'].apply(lambda x: x+' '+tech)
     custom_res = custom_res.set_index('Generator')
-    # def override_solar_techs(n, tech, respot, install):
     
-    # tech_cols=n.generators_t.p_max_pu.filter(regex="solar$").columns 
     if tech.replace("-", " ") in n.generators.carrier.unique():
 
         n.generators_t.p_max_pu.update(custom_res_t)
@@ -74,8 +70,8 @@ if __name__ == "__main__":
         
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
-        year = snakemake.wildcards["planning_horizons"]#['2030', '2050']  # , 'offwind', 'onwind', 'csp']
-        dr = snakemake.wildcards["discountrate"]  # , 'offwind', 'onwind', 'csp']
+        year = snakemake.wildcards["planning_horizons"]
+        dr = snakemake.wildcards["discountrate"]  
        
        
         m=n.copy()
@@ -89,11 +85,3 @@ if __name__ == "__main__":
         print("No RES potential techs to override...")
         n.export_to_netcdf(snakemake.output[0])    
 
-    # override_values(techs[1], years[0], irs[0])                
-                
-    # for option in options:
-
-    #     if option in n.generators.carrier:
-    #         gen_ind = n.generators[n.generators.carrier=='solar'].index
-    #         n.generators[gen_ind]= custom_res['']
-    #     else
