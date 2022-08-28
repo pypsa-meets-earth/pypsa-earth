@@ -109,6 +109,8 @@ Upcoming Release
 
 * Add notebook to compare results by different solvers `PR #421 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/421>`_
 
+* Fix overestimation of the network capacity by simplify network `PR #443 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/443>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
