@@ -26,7 +26,7 @@ repos:
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
+  rev: v2.2.1
   hooks:
   - id: codespell
     args: ['--ignore-regex="\b[A-Z]+\b"'] # Ignore capital case words, e.g. country codes
@@ -35,7 +35,7 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 22.3.0
+  rev: 22.6.0
   hooks:
   # Format Python files
   - id: black
@@ -44,14 +44,14 @@ repos:
 
 # Do YAML formatting (before the linter checks it for misses)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.3.0
+  rev: v2.4.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2', --preserve-quotes]
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.26.3
+  rev: v1.27.1
   hooks:
   - id: yamllint
     args: [--format, parsable, -c=.yamllint]
