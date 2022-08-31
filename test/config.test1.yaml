@@ -5,29 +5,34 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test3
+run: runname_test
 
 foresight: overnight
-
 
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 4
+  - 20
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
-  - "c1"
+  - "c1.0"
   opts:
-  - "Co2L-144H"
+  - "Co2L"
   sopts:
-  - "7H"
+  - "730H"
+
+
+countries: ['MA']
+
+custom_data:
+  renewables: [] # ['csp', 'rooftop-solar', 'solar']
 
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
-  discountrate: 0.07
+  discountrate: [0.071, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532
 

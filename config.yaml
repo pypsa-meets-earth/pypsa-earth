@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_again_10
+run: runname_test
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 1010
+  - 20
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,7 +21,7 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "3H"
+  - "730H"
   
 
 countries: ['MA']
@@ -35,6 +35,23 @@ costs:
   discountrate: [0.071, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532
+
+  # Marginal and capital costs can be overwritten
+  # capital_cost:
+  #   onwind: 500
+  marginal_cost:
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    battery: 0.
+
+  emission_prices: # only used with the option Ep (emission prices)
+    co2: 0.
+
+  lines:
+    length_factor: 1.25 #to estimate offwind connection costs
 
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
@@ -84,25 +101,6 @@ industry:
   hotmaps_locate_missing: false
   reference_year: 2015
   
-
-
-  # Marginal and capital costs can be overwritten
-  # capital_cost:
-  #   onwind: 500
-  marginal_cost:
-    solar: 0.01
-    onwind: 0.015
-    offwind: 0.015
-    hydro: 0.
-    H2: 0.
-    battery: 0.
-
-  emission_prices: # only used with the option Ep (emission prices)
-    co2: 0.
-
-  lines:
-    length_factor: 1.25 #to estimate offwind connection costs
-
 solar_thermal:
   clearsky_model: simple
   orientation:
