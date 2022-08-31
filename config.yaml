@@ -21,8 +21,10 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "730H"
-
+  - "3H"
+  demand:
+  - "NZ_2030"
+  
 
 countries: ['MA']
 
@@ -172,16 +174,21 @@ sector:
   biomass_transport: true  # biomass transport between nodes
 
 
-  land_transport_fuel_cell_share: 0.05 # 1 means all FCEVs
-    # 2020: 0
-    # 2030: 0.05
-    # 2040: 0.1
-    # 2050: 0.15
-  land_transport_electric_share: 0.15 # 1 means all EVs  # This leads to problems when non-zero
-    # 2020: 0
-    # 2030: 0.25
-    # 2040: 0.6
-    # 2050: 0.85
+  land_transport_fuel_cell_share: # 1 means all FCEVs HERE
+      BU_2030: 0.00
+      AP_2030: 0.004
+      NZ_2030: 0.02
+      BU_2030: 0.00
+      AP_2030: 0.06
+      NZ_2050: 0.28
+      
+  land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
+      BU_2030: 0.00
+      AP_2030: 0.075
+      NZ_2030: 0.13
+      BU_2030: 0.00
+      AP_2030: 0.42
+      NZ_2050: 0.68
 
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
@@ -189,7 +196,14 @@ sector:
   hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
-  shipping_hydrogen_share: 1.0
+  shipping_hydrogen_share:
+      BU_2030: 0.00
+      AP_2030: 0.00
+      NZ_2030: 0.10
+      BU_2030: 0.00
+      AP_2030: 0.25
+      NZ_2050: 0.36
+      
   gadm_level: 2
   h2_cavern: true
   marginal_cost_storage: 0

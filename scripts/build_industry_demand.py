@@ -11,31 +11,6 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
-# # map JRC/our sectors to hotmaps sector, where mapping exist
-# sector_mapping = {
-#     'Electric arc': 'Iron and steel',
-#     'Integrated steelworks': 'Iron and steel',
-#     'DRI + Electric arc': 'Iron and steel',
-#     'Ammonia': 'Chemical industry',
-#     'HVC': 'Chemical industry',
-#     'HVC (mechanical recycling)': 'Chemical industry',
-#     'HVC (chemical recycling)': 'Chemical industry',
-#     'Methanol': 'Chemical industry',
-#     'Chlorine': 'Chemical industry',
-#     'Other chemicals': 'Chemical industry',
-#     'Pharmaceutical products etc.': 'Chemical industry',
-#     'Cement': 'Cement',
-#     'Ceramics & other NMM': 'Non-metallic mineral products',
-#     'Glass production': 'Glass',
-#     'Pulp production': 'Paper and printing',
-#     'Paper production': 'Paper and printing',
-#     'Printing and media reproduction': 'Paper and printing',
-#     'Alumina production': 'Non-ferrous metals',
-#     'Aluminium - primary production': 'Non-ferrous metals',
-#     'Aluminium - secondary production': 'Non-ferrous metals',
-#     'Other non-ferrous metals': 'Non-ferrous metals',
-# }
-
 
 def country_to_nodal(industrial_production, keys):
 
