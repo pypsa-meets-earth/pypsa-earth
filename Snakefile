@@ -40,23 +40,28 @@ rule prepare_sector_networks:
         expand(
             RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
-            **config["scenario"], **config["costs"]
+            **config["scenario"],
+            **config["costs"]
         ),
+
 
 rule override_res_all_nets:
     input:
         expand(
             RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_updated.nc",
-            **config["scenario"], **config["costs"]
+            **config["scenario"],
+            **config["costs"]
         ),
+
 
 rule solve_all_networks:
     input:
         expand(
             RDIR
             + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_updated.nc",
-            **config["scenario"], **config["costs"]
+            **config["scenario"],
+            **config["costs"]
         ),
 
 
@@ -98,13 +103,8 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
-
 rule override_respot:
     input:
-        overrides="data/override_component_attrs",
-        network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
-        
         **{
             f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": f"resources/custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
             for tech in config["custom_data"]["renewables"]
@@ -117,12 +117,14 @@ rule override_respot:
             for discountrate in config["costs"]["discountrate"]
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
+        overrides="data/override_component_attrs",
+        network=RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_updated.nc",
     script:
         "scripts/override_respot.py"
-
 
 
 rule prepare_transport_data:
@@ -432,13 +434,15 @@ rule make_summary:
         networks=expand(
             RDIR
             + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_updated.nc",
-            **config["scenario"], **config["costs"]
+            **config["scenario"],
+            **config["costs"]
         ),
         costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         plots=expand(
             RDIR
             + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_updated.pdf",
-            **config["scenario"], **config["costs"]
+            **config["scenario"],
+            **config["costs"]
         ),
     output:
         nodal_costs=SDIR + "/csvs/nodal_costs.csv",
