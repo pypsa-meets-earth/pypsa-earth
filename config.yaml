@@ -21,13 +21,8 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-<<<<<<< HEAD
   - "730H"
   
-=======
-  - "3H"
-
->>>>>>> 9ed20f924a3668877f233fd5368766e81de6bc6a
 
 countries: ['MA']
 
@@ -104,28 +99,7 @@ industry:
   MWh_CH4_per_tMeOH: 10.25 # DECHEMA (2017), Table 14, page 65
   hotmaps_locate_missing: false
   reference_year: 2015
-<<<<<<< HEAD
   
-=======
-
-  # Marginal and capital costs can be overwritten
-  # capital_cost:
-  #   onwind: 500
-  marginal_cost:
-    solar: 0.01
-    onwind: 0.015
-    offwind: 0.015
-    hydro: 0.
-    H2: 0.
-    battery: 0.
-
-  emission_prices: # only used with the option Ep (emission prices)
-    co2: 0.
-
-  lines:
-    length_factor: 1.25 #to estimate offwind connection costs
-
->>>>>>> 9ed20f924a3668877f233fd5368766e81de6bc6a
 solar_thermal:
   clearsky_model: simple
   orientation:
