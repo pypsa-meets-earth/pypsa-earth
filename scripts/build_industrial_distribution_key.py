@@ -137,7 +137,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=9077,
+            clusters=1006,
         )
 
     options = snakemake.config["sector"]
@@ -145,8 +145,9 @@ if __name__ == "__main__":
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
 
-    # regions["name"] = regions["name"].apply(
-    # lambda name: three_2_two_digits_country(name[:3]) + name[3:])
+    if regions["name"][0][:3].isalpha():                                      #TODO clean later by changing all codes to 2 letters
+        regions["name"] = regions["name"].apply(
+        lambda name: three_2_two_digits_country(name[:3]) + name[3:])
 
     regions = regions.set_index("name")
 
