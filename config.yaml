@@ -22,7 +22,7 @@ scenario:
   - "Co2L"
   sopts:
   - "730H"
-  
+
 
 countries: ['MA']
 
@@ -99,7 +99,7 @@ industry:
   MWh_CH4_per_tMeOH: 10.25 # DECHEMA (2017), Table 14, page 65
   hotmaps_locate_missing: false
   reference_year: 2015
-  
+
 solar_thermal:
   clearsky_model: simple
   orientation:
