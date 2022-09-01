@@ -145,9 +145,12 @@ if __name__ == "__main__":
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
 
-    if regions["name"][0][:3].isalpha():                                      #TODO clean later by changing all codes to 2 letters
+    if regions["name"][0][
+        :3
+    ].isalpha():  # TODO clean later by changing all codes to 2 letters
         regions["name"] = regions["name"].apply(
-        lambda name: three_2_two_digits_country(name[:3]) + name[3:])
+            lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+        )
 
     regions = regions.set_index("name")
 
