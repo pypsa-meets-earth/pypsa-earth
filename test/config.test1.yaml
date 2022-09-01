@@ -24,7 +24,7 @@ scenario:
   - "730H"
 
 
-countries: ['MA']
+countries: ['NG', 'BJ']
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
