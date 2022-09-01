@@ -29,8 +29,6 @@ countries: ['MA']
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
 
-countries: ['NG', 'BJ']
-
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
     # 2020: 0.6
