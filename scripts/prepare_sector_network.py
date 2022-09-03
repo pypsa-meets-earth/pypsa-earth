@@ -144,6 +144,13 @@ def add_oil(n, costs):
     if "oil" not in n.carriers.index:
         n.add("Carrier", "oil")
 
+    n.madd(
+        "Bus",
+        spatial.oil.nodes,
+        location=spatial.oil.locations,
+        carrier="oil",
+    )
+
     # if "Africa oil" not in n.buses.index:
 
     #     n.add("Bus", "Africa oil", location="Africa", carrier="oil")
@@ -151,7 +158,7 @@ def add_oil(n, costs):
     # if "Africa oil Store" not in n.stores.index:
 
     # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-    n.add(
+    n.madd(
         "Store",
         [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
         bus=spatial.oil.nodes,
@@ -161,7 +168,7 @@ def add_oil(n, costs):
     )
 
     # if "Africa oil" not in n.generators.index:
-    n.add(
+    n.madd(
         "Generator",
         spatial.oil.nodes,
         bus=spatial.oil.nodes,
@@ -1052,7 +1059,7 @@ def add_industry(n, costs):
     # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
     # n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
-    n.add(
+    n.madd(
         "Bus",
         spatial.gas.industry,
         location=spatial.gas.locations,
@@ -1074,7 +1081,7 @@ def add_industry(n, costs):
         p_set=spatial_gas_demand,
     )
 
-    n.add(
+    n.madd(
         "Link",
         spatial.gas.industry,
         # bus0="Africa gas",
@@ -1932,12 +1939,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="1003",
+            clusters="21",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="3H",
-            discountrate=0.071,
+            sopts="730H",
+            discountrate='0.071',
         )
 
     # TODO fetch from config
@@ -2024,9 +2031,13 @@ if __name__ == "__main__":
 
     # Load industry demand data
     industrial_demand = pd.read_csv(
-        snakemake.input.industrial_demand, index_col=0
+        snakemake.input.industrial_demand
     )  # * 1e6
-
+    
+    industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
+        lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:])
+    
+    industrial_demand.set_index('TWh/a (MtCO2/a)', inplace=True)
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
@@ -2041,6 +2052,7 @@ if __name__ == "__main__":
 
     add_gas(n, costs)
     add_generation(n, costs)
+    add_biomass(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
@@ -2049,6 +2061,7 @@ if __name__ == "__main__":
     H2_liquid_fossil_conversions(n, costs)
 
     h2_hc_conversions(n, costs)
+    add_heat(n, costs)
 
     add_industry(n, costs)
 
@@ -2060,7 +2073,6 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
-    add_heat(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
 
@@ -2072,7 +2084,6 @@ if __name__ == "__main__":
 
     if options["dac"]:
         add_dac(n, costs)
-    # add_biomass(n, costs)
     # n.lines.s_nom*=0.3
     n.export_to_netcdf(snakemake.output[0])
 
