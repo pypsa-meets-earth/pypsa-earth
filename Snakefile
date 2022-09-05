@@ -67,7 +67,8 @@ rule solve_all_networks:
 
 rule prepare_sector_network:
     input:
-        network=RDIR+ "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_presec.nc",
+        network=RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_presec.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/nodal_energy_heat_totals_s{simpl}_{clusters}.csv",
@@ -119,7 +120,6 @@ rule override_respot:
         },
         overrides="data/override_component_attrs",
         network=pypsaearth("networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
-
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_presec.nc",
