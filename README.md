@@ -60,7 +60,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 1. Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
 
    ```bash
-      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+      .../some/path/without/spaces % git clone --depth 1 https://github.com/pypsa-meets-africa/pypsa-africa.git
    ```
 
 2. The python package requirements are curated in the `envs/environment.yaml` file.
