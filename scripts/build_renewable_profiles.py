@@ -191,11 +191,14 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 import functools
 import logging
 import os
+import pyproj
+import shapely
 import time
 
 import atlite
 import country_converter as coco
 import geopandas as gpd
+import rasterio as rio
 import numpy as np
 import pandas as pd
 import progressbar as pgb
@@ -203,7 +206,9 @@ import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
-from shapely.geometry import LineString
+from rasterio.warp import transform_bounds
+from shapely.geometry import box, LineString
+from shapely.ops import transform
 
 cc = coco.CountryConverter()
 
