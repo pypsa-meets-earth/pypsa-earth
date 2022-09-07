@@ -409,6 +409,16 @@ if __name__ == "__main__":
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
         if "natura" in config and config["natura"]:
+            nc_geom = box(*cutout.bounds)
+            natura = rio.open(paths.natura)
+            natura_orig_geom = shapely.wkt.loads(box(*natura.bounds).wkt)
+            natura_crs = pyproj.CRS(natura.crs)
+            
+            project = pyproj.Transformer.from_crs(natura_crs, geo_crs, always_xy=True).transform
+            natura_geom = transform(project, natura_orig_geom)
+            cutout_in_natura = natura_geom.contains(nc_geom)
+            if not cutout_in_natura:
+                logger.error(f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range: cutout:left={cutout.bounds[0]:2.2f}, bottom={cutout.bounds[1]:2.2f},right={cutout.bounds[2]:2.2f}, top={cutout.bounds[3]:2.2f}; 'natura.tiff':left={natura_geom.bounds[0]:2.2f}, bottom={natura_geom.bounds[1]:2.2f},right={natura_geom.bounds[2]:2.2f}, top={natura_geom.bounds[3]:2.2f}")           
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
         if "copernicus" in config and config["copernicus"]:
