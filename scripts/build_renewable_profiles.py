@@ -191,23 +191,23 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 import functools
 import logging
 import os
-import pyproj
-import shapely
 import time
 
 import atlite
 import country_converter as coco
 import geopandas as gpd
-import rasterio as rio
 import numpy as np
 import pandas as pd
 import progressbar as pgb
+import pyproj
+import rasterio as rio
+import shapely
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from rasterio.warp import transform_bounds
-from shapely.geometry import box, LineString
+from shapely.geometry import LineString, box
 from shapely.ops import transform
 
 cc = coco.CountryConverter()
@@ -413,13 +413,17 @@ if __name__ == "__main__":
             natura = rio.open(paths.natura)
             natura_orig_geom = shapely.wkt.loads(box(*natura.bounds).wkt)
             natura_crs = pyproj.CRS(natura.crs)
-            
-            project = pyproj.Transformer.from_crs(natura_crs, geo_crs, always_xy=True).transform
+
+            project = pyproj.Transformer.from_crs(
+                natura_crs, geo_crs, always_xy=True
+            ).transform
             natura_geom = transform(project, natura_orig_geom)
             cutout_in_natura = natura_geom.contains(nc_geom)
             if not cutout_in_natura:
-                # TODO Improve notification on natura.tiff coordinates 
-                logger.error(f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range: cutout:left={cutout.bounds[0]:2.2f}, bottom={cutout.bounds[1]:2.2f},right={cutout.bounds[2]:2.2f}, top={cutout.bounds[3]:2.2f}; 'natura.tiff':left={natura_geom.bounds[0]:2.2f}, bottom={natura_geom.bounds[1]:2.2f},right={natura_geom.bounds[2]:2.2f}, top={natura_geom.bounds[3]:2.2f}")           
+                # TODO Improve notification on natura.tiff coordinates
+                logger.error(
+                    f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range: cutout:left={cutout.bounds[0]:2.2f}, bottom={cutout.bounds[1]:2.2f},right={cutout.bounds[2]:2.2f}, top={cutout.bounds[3]:2.2f}; 'natura.tiff':left={natura_geom.bounds[0]:2.2f}, bottom={natura_geom.bounds[1]:2.2f},right={natura_geom.bounds[2]:2.2f}, top={natura_geom.bounds[3]:2.2f}"
+                )
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
         if "copernicus" in config and config["copernicus"]:
