@@ -11,8 +11,6 @@ import pytz
 import xarray as xr
 from helpers import mock_snakemake, override_component_attrs, sets_path_to_root
 
-# def annuity_factor(v):
-#     return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
 def override_values(tech, year, dr):
     buses = list(n.buses[n.buses.carrier == "AC"].index)
@@ -92,9 +90,3 @@ if __name__ == "__main__":
     else:
         print("No RES potential techs to override...")
         n.export_to_netcdf(snakemake.output[0])
-
-# Nyears = n.snapshot_weightings.generators.sum() / 8760
-
-# costs["fixed"] = [
-#     annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
-# ]
