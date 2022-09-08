@@ -1482,7 +1482,7 @@ def create_nodes_for_heat_sector():
     print(
         "The current district heating share compared to the maximum",
         f"possible is increased by a progress factor of\n{progress}",
-        "resulting in a district heating share of",#"\n{dist_fraction_node}", #TODO fix district heat share
+        "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
     )
 
     return nodes, dist_fraction_node, urban_fraction
@@ -2030,7 +2030,7 @@ if __name__ == "__main__":
     # TODO follow the same structure as land transport and heat
 
     # Load industry demand data
-    
+
     industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
     print(industrial_demand)
     if industrial_demand["TWh/a (MtCO2/a)"][0][3].isalpha():
