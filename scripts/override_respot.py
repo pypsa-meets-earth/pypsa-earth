@@ -11,6 +11,8 @@ import pytz
 import xarray as xr
 from helpers import mock_snakemake, override_component_attrs, sets_path_to_root
 
+# def annuity_factor(v):
+#     return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
 def override_values(tech, year, dr):
     buses = list(n.buses[n.buses.carrier == "AC"].index)
@@ -48,8 +50,8 @@ def override_values(tech, year, dr):
             p_nom_extendable=True,
             p_nom_max=custom_res["p_nom_max"].values,
             # weight=ds["weight"].to_pandas(),
-            marginal_cost=custom_res["fixedomEuroPKW"] * 1000,
-            capital_cost=custom_res["investmentEuroPKW"] * 1000,
+            marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
+            capital_cost=custom_res["annualcostEuroPMW"].values * 1000,
             efficiency=1.0,
             p_max_pu=custom_res_t,
             lifetime=custom_res["lifetime"][0],
@@ -90,3 +92,9 @@ if __name__ == "__main__":
     else:
         print("No RES potential techs to override...")
         n.export_to_netcdf(snakemake.output[0])
+
+# Nyears = n.snapshot_weightings.generators.sum() / 8760
+
+# costs["fixed"] = [
+#     annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
+# ]

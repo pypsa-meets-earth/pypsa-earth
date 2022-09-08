@@ -108,7 +108,7 @@ rule override_respot:
     input:
         **{
             f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": f"resources/custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
-            for tech in config["custom_data"]["renewables"]
+            for tech in config["custom_data"]["renewables"] 
             for discountrate in config["costs"]["discountrate"]
             for planning_horizons in config["scenario"]["planning_horizons"]
         },

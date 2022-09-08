@@ -1482,7 +1482,7 @@ def create_nodes_for_heat_sector():
     print(
         "The current district heating share compared to the maximum",
         f"possible is increased by a progress factor of\n{progress}",
-        f"resulting in a district heating share of\n{dist_fraction_node}",
+        "resulting in a district heating share of",#"\n{dist_fraction_node}", #TODO fix district heat share
     )
 
     return nodes, dist_fraction_node, urban_fraction
@@ -1939,7 +1939,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="21",
+            clusters="30",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -2030,13 +2030,17 @@ if __name__ == "__main__":
     # TODO follow the same structure as land transport and heat
 
     # Load industry demand data
-    industrial_demand = pd.read_csv(snakemake.input.industrial_demand, index_col=0)  # * 1e6
+    
+    industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
 
-    # industrial_demand["TWh/a (MtCO2/a)"] = industrial_demand["TWh/a (MtCO2/a)"].apply(
-    #     lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:]
-    # )
-
-    # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+    if industrial_demand["TWh/a (MtCO2/a)"][0][3].isalpha():
+        pass
+    else:
+        industrial_demand["TWh/a (MtCO2/a)"] = industrial_demand["TWh/a (MtCO2/a)"].apply(
+            lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:]
+        )
+    
+        industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
