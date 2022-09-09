@@ -93,7 +93,7 @@ Upcoming Release
 
 * Update config links to adhere to the new structure of the package: `PR #420 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/420>`_
 
-* Improve and finalize capacity_validation notebook: `PR #406 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/406>`_
+* Improve and finalize capacity_validation notebook: `PR #406 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/406>`_ and `PR #455 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/455>`_
 
 * Fix hydro technology with the GADM clustering approach: `PR #428 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/428>`_
 
