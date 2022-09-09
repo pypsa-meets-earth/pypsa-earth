@@ -62,7 +62,7 @@ def prepare_transport_data(n):
     """
 
     energy_totals = pd.read_csv(
-        snakemake.input.energy_totals_name, index_col=0
+        snakemake.input.energy_totals_name, index_col=0, delimiter=';'
     )  # TODO change with real numbers
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
@@ -191,12 +191,14 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        snakemake = mock_snakemake("prepare_transport_data", simpl="", clusters="111")
+        snakemake = mock_snakemake("prepare_transport_data", simpl="", 
+                       clusters="1010", demand='NZ', planning_horizons=2030)
+        
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)
 
-    # Get pop_layout
+    # Get population layout
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Add options
@@ -215,8 +217,15 @@ if __name__ == "__main__":
     ) = prepare_transport_data(n)
 
     # Save the generated output files to snakemake paths
-    nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
+
+    # Transport demand per node per timestep
     transport.to_csv(snakemake.output.transport)
+    
+    # Available share of the battery to be used by the grid
     avail_profile.to_csv(snakemake.output.avail_profile)
+    
+    # Restrictions on state of charge of EVs
     dsm_profile.to_csv(snakemake.output.dsm_profile)
+    
+    #Nodal data on number of cars
     nodal_transport_data.to_csv(snakemake.output.nodal_transport_data)
