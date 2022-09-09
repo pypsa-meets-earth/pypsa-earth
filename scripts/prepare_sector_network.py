@@ -2038,7 +2038,7 @@ if __name__ == "__main__":
             lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:]
         )
     
-        industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+    industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
