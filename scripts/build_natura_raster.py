@@ -44,6 +44,7 @@ Steps to retrieve the protected area data (as apparently no API is given for the
     - 2. Unzipp and rename the folder containing the .shp file to `protected_areas`
     - 3. Important! Don't delete the other files which come with the .shp file. They are required to build the shape.
     - 4. Move the file in such a way that the above path is given
+    # TODO Clarify what is meant by activate environment. The standard pypsa-africa seems to work perfectly
     - 5. Activate the environment of environment-max.yaml
     - 6. Ready to run the script
 
