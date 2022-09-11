@@ -48,6 +48,7 @@ Steps to retrieve the protected area data (as apparently no API is given for the
     - 5. Activate the environment of environment-max.yaml
     - 6. Ready to run the script
 
+# TODO Shapefiles are being listed recursivelly -> it could make sence to document it  
 Tip: The output file `natura.tiff` contains now the 100x100m rasters of protective areas. This operation can make the filesize of that TIFF quite large and leads to problems when trying to open. QGIS, an open source tool helps exploring the file.
 """
 import logging
