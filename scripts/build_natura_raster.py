@@ -105,7 +105,7 @@ def get_transform_and_shape(bounds, res, out_logging):
     right, top = [(b // res + 1) * res for b in bounds[2:]]
     # TODO Double check that there is no difference between lat and lon directions in terms of division operators
     # x: right-left, y: top-bottom
-    shape = int((right - left) // res), int((top - bottom) // res)    
+    shape = int((right - left) // res), int((top - bottom) // res)
     transform = rio.Affine(res, 0, left, 0, -res, top)
     return transform, shape
 
