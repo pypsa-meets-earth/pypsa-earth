@@ -568,11 +568,11 @@ def prepare_generators_df(df_all_generators):
     for field_to_add in check_fields_for_generators:
         #print(df_all_generators)
         if field_to_add not in df_all_generators.columns.tolist():
-           df_all_generators[field_to_add]=None
            print(df_all_generators)
     
     df_all_generators = df_all_generators.rename(
         # TODO fix column name for KG
+           df_all_generators[field_to_add] = ""
         columns={
             "tags.generator:output:electricity": "power_output_MW",
             "tags.name": "name",
