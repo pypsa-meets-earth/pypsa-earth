@@ -421,7 +421,7 @@ if __name__ == "__main__":
             cutout_in_natura = natura_geom.contains(nc_geom)
             if not cutout_in_natura:
                 # TODO Improve notification on natura.tiff coordinates
-                logger.error(
+                logger.warning(
                     f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range: cutout:left={cutout.bounds[0]:2.2f}, bottom={cutout.bounds[1]:2.2f},right={cutout.bounds[2]:2.2f}, top={cutout.bounds[3]:2.2f}; 'natura.tiff':left={natura_geom.bounds[0]:2.2f}, bottom={natura_geom.bounds[1]:2.2f},right={natura_geom.bounds[2]:2.2f}, top={natura_geom.bounds[3]:2.2f}"
                 )
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
