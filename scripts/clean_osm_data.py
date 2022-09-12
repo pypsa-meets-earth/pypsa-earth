@@ -564,7 +564,7 @@ def prepare_generators_df(df_all_generators):
         
     # rename columns    
     
-    check_fields_for_generators = ['tags.generator:output:electricity']     
+    check_fields_for_generators = ["tags.generator:output:electricity"]     
     for field_to_add in check_fields_for_generators:
         #print(df_all_generators)
         if field_to_add not in df_all_generators.columns.tolist():
