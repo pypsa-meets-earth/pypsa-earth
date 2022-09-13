@@ -35,13 +35,13 @@ def override_values(tech, year, dr):
 
     if tech.replace("-", " ") in n.generators.carrier.unique():
 
-        to_drop=n.generators[n.generators.carrier==tech].index
-        n.mremove('Generator', to_drop)
-    
+        to_drop = n.generators[n.generators.carrier == tech].index
+        n.mremove("Generator", to_drop)
+
     print(n.generators)
     print(n.generators)
     print(n.generators)
-    
+
     n.madd(
         "Generator",
         buses,
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    m=n.copy()
+    m = n.copy()
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
         year = snakemake.wildcards["planning_horizons"]
