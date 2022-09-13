@@ -2055,7 +2055,7 @@ if __name__ == "__main__":
 
     add_gas(n, costs)
     add_generation(n, costs)
-    #add_biomass(n, costs)
+    # add_biomass(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
