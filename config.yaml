@@ -5,15 +5,15 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: runname_test
+run: runname_test_res33
 
 foresight: overnight
 
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
-  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 20
+  clusters: # number of nodes in the network
+  - 933
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,17 +21,17 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "730H"
+  - "680H"
 
 
 countries: ['MA']
 
 custom_data:
-  renewables: [] #['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind-2', 'offwind', 'offwind-2']
+  renewables: ['solar','csp', 'rooftop-solar', 'solar','onwind', 'offwind', 'onwind2', 'offwind2']
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
-  discountrate: [0.069, 0.071, 0.111]
+  discountrate: [0.069]#, 0.071, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532
 
@@ -177,7 +177,7 @@ sector:
     # 2030: 0.05
     # 2040: 0.1
     # 2050: 0.15
-  land_transport_electric_share: 0.15 # 1 means all EVs  # This leads to problems when non-zero
+  land_transport_electric_share: 0.85 # 1 means all EVs  # This leads to problems when non-zero
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
@@ -304,8 +304,10 @@ plotting:
     process emissions CC: "gray"
     CO2 pipeline: "gray"
     onwind: "dodgerblue"
+    onwind2: "dodgerblue"
     onshore wind: "#235ebc"
     offwind: "#6895dd"
+    offwind2: "#6895dd"
     offshore wind: "#6895dd"
     offwind-ac: "c"
     offshore wind (AC): "#6895dd"
@@ -318,9 +320,11 @@ plotting:
     run of river: '#78AB46'
     hydroelectricity: 'blue'
     solar: "orange"
+    solar rooftop: "orange"
     solar PV: "#f9d002"
     solar thermal: coral
     solar rooftop: '#ffef60'
+    csp: "darkorange"
     OCGT: wheat
     OCGT marginal: sandybrown
     OCGT-heat: '#ee8340'
