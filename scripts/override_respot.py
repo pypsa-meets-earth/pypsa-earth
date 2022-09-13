@@ -35,26 +35,29 @@ def override_values(tech, year, dr):
 
     if tech.replace("-", " ") in n.generators.carrier.unique():
 
-        n.generators_t.p_max_pu.update(custom_res_t)
-        n.generators.update(pd.Series(custom_res["p_nom_max"]))
-
-    else:
-        n.madd(
-            "Generator",
-            buses,
-            " " + tech,
-            bus=buses,
-            carrier=tech,
-            p_nom_extendable=True,
-            p_nom_max=custom_res["p_nom_max"].values,
-            # weight=ds["weight"].to_pandas(),
-            marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
-            capital_cost=custom_res["annualcostEuroPMW"].values * 1000,
-            efficiency=1.0,
-            p_max_pu=custom_res_t,
-            lifetime=custom_res["lifetime"][0],
-            p_nom_min=custom_res["installedcapacity"].values,
-        )
+        to_drop=n.generators[n.generators.carrier==tech].index
+        n.mremove('Generator', to_drop)
+    
+    print(n.generators)
+    print(n.generators)
+    print(n.generators)
+    
+    n.madd(
+        "Generator",
+        buses,
+        " " + tech,
+        bus=buses,
+        carrier=tech,
+        p_nom_extendable=True,
+        p_nom_max=custom_res["p_nom_max"].values,
+        # weight=ds["weight"].to_pandas(),
+        marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
+        capital_cost=custom_res["annualcostEuroPMW"].values,
+        efficiency=1.0,
+        p_max_pu=custom_res_t,
+        lifetime=custom_res["lifetime"][0],
+        p_nom_min=custom_res["installedcapacity"].values,
+    )
 
 
 if __name__ == "__main__":
@@ -64,18 +67,18 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="1004",
+            clusters="931",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="3H",
-            discountrate=0.071,
+            sopts="73H",
+            discountrate=0.069,
         )
         sets_path_to_root("pypsa-earth-sec")
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-
+    m=n.copy()
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
         year = snakemake.wildcards["planning_horizons"]
