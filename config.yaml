@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: Runname_test
+run: runname_test
 
 foresight: overnight
 
@@ -23,7 +23,34 @@ scenario:
   sopts:
   - "730H"
 
+
 countries: ['MA']
+
+custom_data:
+  renewables: [] #['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind-2', 'offwind', 'offwind-2']
+costs:
+  lifetime: 25 #default lifetime
+  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
+  discountrate: [0.069] #, 0.071, 0.111]
+  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
+  USD2013_to_EUR2013: 0.7532
+
+  # Marginal and capital costs can be overwritten
+  # capital_cost:
+  #   onwind: 500
+  marginal_cost:
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    battery: 0.
+
+  emission_prices: # only used with the option Ep (emission prices)
+    co2: 0.
+
+  lines:
+    length_factor: 1.25 #to estimate offwind connection costs
 
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
@@ -72,30 +99,6 @@ industry:
   MWh_CH4_per_tMeOH: 10.25 # DECHEMA (2017), Table 14, page 65
   hotmaps_locate_missing: false
   reference_year: 2015
-
-costs:
-  lifetime: 25 #default lifetime
-  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
-  discountrate: 0.07
-  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
-  USD2013_to_EUR2013: 0.7532
-
-  # Marginal and capital costs can be overwritten
-  # capital_cost:
-  #   onwind: 500
-  marginal_cost:
-    solar: 0.01
-    onwind: 0.015
-    offwind: 0.015
-    hydro: 0.
-    H2: 0.
-    battery: 0.
-
-  emission_prices: # only used with the option Ep (emission prices)
-    co2: 0.
-
-  lines:
-    length_factor: 1.25 #to estimate offwind connection costs
 
 solar_thermal:
   clearsky_model: simple
@@ -301,8 +304,10 @@ plotting:
     process emissions CC: "gray"
     CO2 pipeline: "gray"
     onwind: "dodgerblue"
+    onwind2: "dodgerblue"
     onshore wind: "#235ebc"
     offwind: "#6895dd"
+    offwind2: "#6895dd"
     offshore wind: "#6895dd"
     offwind-ac: "c"
     offshore wind (AC): "#6895dd"
@@ -318,6 +323,7 @@ plotting:
     solar PV: "#f9d002"
     solar thermal: coral
     solar rooftop: '#ffef60'
+    csp: "darkorange"
     OCGT: wheat
     OCGT marginal: sandybrown
     OCGT-heat: '#ee8340'
