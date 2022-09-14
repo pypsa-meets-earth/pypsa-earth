@@ -5,15 +5,15 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: runname_test_res33
+run: runname_test
 
 foresight: overnight
 
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
-  clusters: # number of nodes in the network
-  - 933
+  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
+  - 20
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,13 +21,13 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "680H"
+  - "730H"
 
 
 countries: ['MA']
 
 custom_data:
-  renewables: ['solar','csp', 'rooftop-solar', 'solar','onwind', 'offwind', 'onwind2', 'offwind2']
+  renewables: [] #['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind-2', 'offwind', 'offwind-2']
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
@@ -177,7 +177,7 @@ sector:
     # 2030: 0.05
     # 2040: 0.1
     # 2050: 0.15
-  land_transport_electric_share: 0.85 # 1 means all EVs  # This leads to problems when non-zero
+  land_transport_electric_share: 0.15 # 1 means all EVs  # This leads to problems when non-zero
     # 2020: 0
     # 2030: 0.25
     # 2040: 0.6
@@ -320,7 +320,6 @@ plotting:
     run of river: '#78AB46'
     hydroelectricity: 'blue'
     solar: "orange"
-    solar rooftop: "orange"
     solar PV: "#f9d002"
     solar thermal: coral
     solar rooftop: '#ffef60'
