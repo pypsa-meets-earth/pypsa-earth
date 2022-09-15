@@ -1943,9 +1943,9 @@ if __name__ == "__main__":
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="3H",   
+            sopts="3H",
             discountrate=0.071,
-            demand='NZ'
+            demand="NZ",
         )
 
     # TODO fetch from config
