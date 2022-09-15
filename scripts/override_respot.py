@@ -51,7 +51,7 @@ def override_values(tech, year, dr):
         p_nom_extendable=True,
         p_nom_max=custom_res["p_nom_max"].values,
         # weight=ds["weight"].to_pandas(),
-        marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
+        # marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
         capital_cost=custom_res["annualcostEuroPMW"].values,
         efficiency=1.0,
         p_max_pu=custom_res_t,

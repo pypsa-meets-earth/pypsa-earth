@@ -786,5 +786,6 @@ if __name__ == "__main__":
     tech_colors = snakemake.config["plotting"]["tech_colors"]
     plot_map(n, transmission=False)
     plot_transmission_topology(n)
-    plot_smr(n)
+    if snakemake.config["sector"]["SMR"]:
+        plot_smr(n)
     plot_h2_infra(n)

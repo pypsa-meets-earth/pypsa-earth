@@ -860,7 +860,9 @@ def add_shipping(n, costs):
     )
 
     # check whether item depends on investment year
-    shipping_hydrogen_share = get(options["shipping_hydrogen_share"], investment_year)
+    shipping_hydrogen_share = get(
+        options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
+    )
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(port[["x", "y"]], port["country"], gadm_level), axis=1
@@ -1293,8 +1295,13 @@ def add_land_transport(n, costs):
 
     print("adding land transport")
 
-    fuel_cell_share = get(options["land_transport_fuel_cell_share"], investment_year)
-    electric_share = get(options["land_transport_electric_share"], investment_year)
+    fuel_cell_share = get(
+        options["land_transport_fuel_cell_share"],
+        demand_sc + "_" + str(investment_year),
+    )
+    electric_share = get(
+        options["land_transport_electric_share"], demand_sc + "_" + str(investment_year)
+    )
     ice_share = 1 - fuel_cell_share - electric_share
 
     print("FCEV share", fuel_cell_share)
@@ -1939,13 +1946,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="30",
+            clusters="105",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="3H",   
-            discountrate=0.071,
-            demand='NZ'
+            sopts="3H",
+            discountrate=0.069,
+            demand="NZ",
         )
 
     # TODO fetch from config
@@ -1967,7 +1974,7 @@ if __name__ == "__main__":
     # TODO fetch investment year from config
 
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
-
+    demand_sc = snakemake.wildcards.demand
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     costs = prepare_costs(

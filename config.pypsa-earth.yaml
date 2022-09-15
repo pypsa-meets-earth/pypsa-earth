@@ -96,7 +96,7 @@ load_options:
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 4.0e+6 # 0.05 * 3.1e9*0.5
+  co2limit: 4.0e+3 # 0.05 * 3.1e9*0.5
   co2base: 1.487e+8
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?

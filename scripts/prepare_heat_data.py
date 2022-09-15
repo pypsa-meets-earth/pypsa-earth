@@ -128,7 +128,13 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        snakemake = mock_snakemake("prepare_heat_data", simpl="", clusters="15")
+        snakemake = mock_snakemake(
+            "prepare_heat_data",
+            simpl="",
+            clusters="105",
+            planning_horizons=2030,
+            demand="NZ",
+        )
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)

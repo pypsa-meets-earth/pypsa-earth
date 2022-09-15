@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: runname_test
+run: runname_test_d12
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 20
+  - 112
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,15 +21,15 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "3H"
+  - "730H"
   demand:
-  - "NZ_2030"
+  - "NZ"
   
 
 countries: ['MA']
 
 custom_data:
-  renewables: [] #['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind-2', 'offwind', 'offwind-2']
+  renewables: ['csp', 'rooftop-solar', 'solar','onwind', 'onwind2', 'offwind', 'offwind2']
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
@@ -178,8 +178,8 @@ sector:
       BU_2030: 0.00
       AP_2030: 0.004
       NZ_2030: 0.02
-      BU_2030: 0.00
-      AP_2030: 0.06
+      BU_2050: 0.00
+      AP_2050: 0.06
       NZ_2050: 0.28
       
   land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
@@ -210,7 +210,7 @@ sector:
   methanation: true
   helmeth: true
   dac: true
-  SMR: true
+  SMR: false
   cc_fraction: 0.9
 
   conventional_generation: # generator : carrier
