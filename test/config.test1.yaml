@@ -23,7 +23,7 @@ scenario:
   sopts:
   - "7H"
   demand:
-  - "NZ"
+  - "DF"
 
 countries: ['NG', 'BJ']
 
