@@ -23,7 +23,7 @@ scenario:
   sopts:
   - "730H"
   demand:
-  - "DF"
+  - "NZ"
 
 
 countries: ['MA']
