@@ -137,7 +137,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=1006,
+            clusters=117,
+            demand="NZ",
+            planning_horizons=2030,
         )
 
     options = snakemake.config["sector"]

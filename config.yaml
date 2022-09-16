@@ -31,6 +31,7 @@ countries: ['MA']
 custom_data:
   renewables: ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
   elec_demand: true
+  industry_demand: true
 
 costs:
   lifetime: 25 #default lifetime

@@ -1201,12 +1201,25 @@ def add_industry(n, costs):
         ]
         if n.loads_t.p_set[loads_i].empty:
             continue
-        factor = (
-            1
-            - industrial_demand.loc[loads_i, "current electricity"].sum()
-            / n.loads_t.p_set[loads_i].sum().sum()
-        )
-        n.loads_t.p_set[loads_i] *= factor
+
+        if not snakemake.config["custom_data"]["elec_demand:"]:
+            # if electricity demand is provided by pypsa-earth, the electricty used
+            # in industry is included, and need to be removed from the default elec
+            # demand here, and added as "industry electricity"
+            factor = (
+                1
+                - industrial_demand.loc[loads_i, "current electricity"].sum()
+                / n.loads_t.p_set[loads_i].sum().sum()
+            )
+            n.loads_t.p_set[loads_i] *= factor
+            industrial_elec = industrial_demand["current electricity"].apply(
+                lambda frac: frac / 8760
+            )
+
+        else:
+            industrial_elec = industrial_demand["electricity"].apply(
+                lambda frac: frac / 8760
+            )
 
     n.madd(
         "Load",
@@ -1214,12 +1227,10 @@ def add_industry(n, costs):
         suffix=" industry electricity",
         bus=nodes,
         carrier="industry electricity",
-        p_set=industrial_demand["current electricity"].apply(
-            lambda frac: frac
-            / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
-        ),  # TODO Multiply by demand and find true fraction
+        p_set=industrial_elec  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+        # the current way leads to inaccuracies in the last timestep in case
+        # the timestep if 8760 is not divisble by it),
+        ,  # TODO Multiply by demand and find true fraction
     )
 
     n.add("Bus", "process emissions", location="Africa", carrier="process emissions")
