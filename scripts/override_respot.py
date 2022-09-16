@@ -13,7 +13,6 @@ from helpers import mock_snakemake, override_component_attrs, sets_path_to_root
 
 
 def override_values(tech, year, dr):
-    buses = list(n.buses[n.buses.carrier == "AC"].index)
 
     custom_res_t = pd.read_csv(
         snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)],
@@ -67,7 +66,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="931",
+            clusters="115",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -79,6 +78,8 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     m = n.copy()
+    buses = list(n.buses[n.buses.carrier == "AC"].index)
+
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
         year = snakemake.wildcards["planning_horizons"]
@@ -89,7 +90,11 @@ if __name__ == "__main__":
         for tech in techs:
             override_values(tech, year, dr)
 
-        n.export_to_netcdf(snakemake.output[0])
     else:
         print("No RES potential techs to override...")
-        n.export_to_netcdf(snakemake.output[0])
+
+    if snakemake.config["custom_data"]["elec_demand"]:
+        n.loads_t.p_set[buses] = (
+            n.loads_t.p_set[buses] / n.loads_t.p_set[buses].sum().sum()
+        ) * 1e7
+    n.export_to_netcdf(snakemake.output[0])
