@@ -424,7 +424,7 @@ if __name__ == "__main__":
             ).transform
             natura_geom = transform(project, natura_orig_geom)
             cutout_in_natura = natura_geom.contains(nc_geom)
-            
+
             if not cutout_in_natura:
                 # TODO Improve notification on natura.tiff coordinates
                 logger.warning(
