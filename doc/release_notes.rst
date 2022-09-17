@@ -118,6 +118,8 @@ PyPSA-Africa 0.1.0 (10th September 2022)
 
 * Fix overestimation of the network capacity by simplify network `PR #443 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/443>`_
 
+* Add checks for natura.tiff raster to ensure it's correspondance with the cutout `PR #454 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/454>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
