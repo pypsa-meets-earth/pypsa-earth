@@ -46,6 +46,7 @@ dependencies:
   # GIS dependencies:
 - cartopy
 - descartes
+- pyproj
 - rasterio
 - geoviews
 - hvplot
