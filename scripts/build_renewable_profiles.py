@@ -411,14 +411,20 @@ if __name__ == "__main__":
         if "natura" in config and config["natura"]:
             nc_geom = box(*cutout.bounds)
             natura = rio.open(paths.natura)
+
+            if not natura.crs == area_crs:
+                logger.warning(
+                    f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
+                )
+
             natura_orig_geom = shapely.wkt.loads(box(*natura.bounds).wkt)
             natura_crs = pyproj.CRS(natura.crs)
-
             project = pyproj.Transformer.from_crs(
                 natura_crs, geo_crs, always_xy=True
             ).transform
             natura_geom = transform(project, natura_orig_geom)
             cutout_in_natura = natura_geom.contains(nc_geom)
+            
             if not cutout_in_natura:
                 # TODO Improve notification on natura.tiff coordinates
                 logger.warning(
