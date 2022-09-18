@@ -43,10 +43,9 @@ Steps to retrieve the protected area data (as apparently no API is given for the
     - 1. Download the WPDA Dataset: World Database on Protected Areas. UNEP-WCMC and IUCN (2021), Protected Planet: The World Database on Protected Areas (WDPA) and World Database on Other Effective Area-based Conservation Measures (WD-OECM) [Online], August 2021, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
     - 2. Unzipp and rename the folder containing the .shp file to `./resources/landcover`
     - 3. Important! Don't delete the other files which come with the .shp file. They are required to build the shape.
-    - 4. Move the file in such a way that the above path is given
-    - 5. Ready to run the script
+    - 4. Ready to run the script
 
-# TODO Shapefiles are being listed recursivelly -> it could make sence to document it  
+The script will look for all the shapefiles in landcover folder itself and in all it's subfolders.
 Tip: The output file `natura.tiff` contains now the 100x100m rasters of protective areas. This operation can make the filesize of that TIFF quite large and leads to problems when trying to open. QGIS, an open source tool helps exploring the file.
 """
 import logging
