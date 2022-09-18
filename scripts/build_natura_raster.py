@@ -44,9 +44,7 @@ Steps to retrieve the protected area data (as apparently no API is given for the
     - 2. Unzipp and rename the folder containing the .shp file to `protected_areas`
     - 3. Important! Don't delete the other files which come with the .shp file. They are required to build the shape.
     - 4. Move the file in such a way that the above path is given
-    # TODO Clarify what is meant by activate environment. The standard pypsa-africa seems to work perfectly
-    - 5. Activate the environment of environment-max.yaml
-    - 6. Ready to run the script
+    - 5. Ready to run the script
 
 # TODO Shapefiles are being listed recursivelly -> it could make sence to document it  
 Tip: The output file `natura.tiff` contains now the 100x100m rasters of protective areas. This operation can make the filesize of that TIFF quite large and leads to problems when trying to open. QGIS, an open source tool helps exploring the file.
