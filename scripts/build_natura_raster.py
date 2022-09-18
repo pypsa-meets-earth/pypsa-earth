@@ -100,7 +100,6 @@ def get_transform_and_shape(bounds, res, out_logging):
         _logger.info("Stage 2/5: Get transform and shape")
     left, bottom = [(b // res) * res for b in bounds[:2]]
     right, top = [(b // res + 1) * res for b in bounds[2:]]
-    # TODO Double check that there is no difference between lat and lon directions in terms of division operators
     # x: right-left, y: top-bottom
     shape = int((right - left) // res), int((top - bottom) // res)
     transform = rio.Affine(res, 0, left, 0, -res, top)
@@ -185,6 +184,7 @@ if __name__ == "__main__":
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
+    # x for a columns number, y for a row number  
     raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
     raster = raster.astype(rio.uint8)
 
