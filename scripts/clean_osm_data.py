@@ -764,7 +764,6 @@ def clean_data(
 
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
-    
 
     # set the country name by the shape
     df_all_generators = set_countryname_by_shape(

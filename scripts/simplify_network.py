@@ -115,17 +115,20 @@ def simplify_network_to_380(n, linetype):
     """Simplify network to v_nom == 380"""
     logger.info("Mapping all network lines onto a single 380kV layer")
 
-    n.buses["v_nom"] = 380.0
     linetype_380 = linetype
     lines_v_nom_b = n.lines.v_nom != 380.0
     n.lines.loc[lines_v_nom_b, "num_parallel"] *= (
-        n.lines.loc[lines_v_nom_b, "v_nom"] / 380.0
-    ) ** 2
+        n.lines.loc[lines_v_nom_b, "type"].map(n.line_types.i_nom)
+        / n.line_types.loc[linetype_380, "i_nom"]
+        * n.lines.loc[lines_v_nom_b, "v_nom"]
+        / 380.0
+    )
     n.lines.loc[lines_v_nom_b, "v_nom"] = 380.0
     n.lines.loc[lines_v_nom_b, "type"] = linetype_380
+    n.buses["v_nom"] = 380.0
     n.lines.loc[lines_v_nom_b, "s_nom"] = (
         np.sqrt(3)
-        * n.lines["type"].map(n.line_types.i_nom)
+        * n.line_types.loc[linetype_380, "i_nom"]
         * n.lines.bus0.map(n.buses.v_nom)
         * n.lines.num_parallel
     )
