@@ -79,6 +79,7 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     m = n.copy()
     buses = list(n.buses[n.buses.carrier == "AC"].index)
+    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
 
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
@@ -96,5 +97,5 @@ if __name__ == "__main__":
     if snakemake.config["custom_data"]["elec_demand"]:
         n.loads_t.p_set[buses] = (
             n.loads_t.p_set[buses] / n.loads_t.p_set[buses].sum().sum()
-        ) * 1e7
+        ) * 2.2e7
     n.export_to_netcdf(snakemake.output[0])

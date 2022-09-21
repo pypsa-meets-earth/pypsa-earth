@@ -664,11 +664,17 @@ def add_aviation(n, cost):
     )
 
     airports = pd.read_csv(snakemake.input.airports)
+    airports = airports[airports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
 
     airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
-        lambda airport: locate_bus(airport[["x", "y"]], airport["country"], gadm_level),
+        lambda airport: locate_bus(
+            airport[["x", "y"]],
+            airport["country"],
+            gadm_level,
+            snakemake.input.shapes_path,
+        ),
         axis=1,
     )
 
@@ -846,6 +852,7 @@ def h2_hc_conversions(n, costs):
 def add_shipping(n, costs):
 
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+    ports = ports[ports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
 
@@ -865,7 +872,13 @@ def add_shipping(n, costs):
     )
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(port[["x", "y"]], port["country"], gadm_level), axis=1
+        lambda port: locate_bus(
+            port[["x", "y"]],
+            port["country"],
+            gadm_level,
+            snakemake.input["shapes_path"],
+        ),
+        axis=1,
     )
 
     ports = ports.set_index("gadm_{}".format(gadm_level))
@@ -995,59 +1008,59 @@ def add_industry(n, costs):
 
     # Add carrier Biomass
 
-    n.madd(
-        "Bus",
-        spatial.biomass.industry,
-        location=spatial.biomass.locations,
-        carrier="solid biomass for industry",
-    )
+    # n.madd(
+    #     "Bus",
+    #     spatial.biomass.industry,
+    #     location=spatial.biomass.locations,
+    #     carrier="solid biomass for industry",
+    # )
 
-    if options["biomass_transport"]:
-        p_set = (
-            industrial_demand.loc[spatial.biomass.locations, "solid biomass"].rename(
-                index=lambda x: x + " solid biomass for industry"
-            )
-            / 8760
-        )
-    else:
-        p_set = industrial_demand["solid biomass"].sum() / 8760
+    # if options["biomass_transport"]:
+    #     p_set = (
+    #         industrial_demand.loc[spatial.biomass.locations, "solid biomass"].rename(
+    #             index=lambda x: x + " solid biomass for industry"
+    #         )
+    #         / 8760
+    #     )
+    # else:
+    #     p_set = industrial_demand["solid biomass"].sum() / 8760
 
-    n.madd(
-        "Load",
-        spatial.biomass.industry,
-        bus=spatial.biomass.industry,
-        carrier="solid biomass for industry",
-        p_set=p_set,
-    )
+    # n.madd(
+    #     "Load",
+    #     spatial.biomass.industry,
+    #     bus=spatial.biomass.industry,
+    #     carrier="solid biomass for industry",
+    #     p_set=p_set,
+    # )
 
-    n.madd(
-        "Link",
-        spatial.biomass.industry,
-        bus0=spatial.biomass.nodes,
-        bus1=spatial.biomass.industry,
-        carrier="solid biomass for industry",
-        p_nom_extendable=True,
-        efficiency=1.0,
-    )
+    # n.madd(
+    #     "Link",
+    #     spatial.biomass.industry,
+    #     bus0=spatial.biomass.nodes,
+    #     bus1=spatial.biomass.industry,
+    #     carrier="solid biomass for industry",
+    #     p_nom_extendable=True,
+    #     efficiency=1.0,
+    # )
 
-    n.madd(
-        "Link",
-        spatial.biomass.industry_cc,
-        bus0=spatial.biomass.nodes,
-        bus1=spatial.biomass.industry,
-        bus2="co2 atmosphere",
-        bus3=spatial.co2.nodes,
-        carrier="solid biomass for industry CC",
-        p_nom_extendable=True,
-        capital_cost=costs.at["cement capture", "fixed"]
-        * costs.at["solid biomass", "CO2 intensity"],
-        efficiency=0.9,  # TODO: make config option
-        efficiency2=-costs.at["solid biomass", "CO2 intensity"]
-        * costs.at["cement capture", "capture_rate"],
-        efficiency3=costs.at["solid biomass", "CO2 intensity"]
-        * costs.at["cement capture", "capture_rate"],
-        lifetime=costs.at["cement capture", "lifetime"],
-    )
+    # n.madd(
+    #     "Link",
+    #     spatial.biomass.industry_cc,
+    #     bus0=spatial.biomass.nodes,
+    #     bus1=spatial.biomass.industry,
+    #     bus2="co2 atmosphere",
+    #     bus3=spatial.co2.nodes,
+    #     carrier="solid biomass for industry CC",
+    #     p_nom_extendable=True,
+    #     capital_cost=costs.at["cement capture", "fixed"]
+    #     * costs.at["solid biomass", "CO2 intensity"],
+    #     efficiency=0.9,  # TODO: make config option
+    #     efficiency2=-costs.at["solid biomass", "CO2 intensity"]
+    #     * costs.at["cement capture", "capture_rate"],
+    #     efficiency3=costs.at["solid biomass", "CO2 intensity"]
+    #     * costs.at["cement capture", "capture_rate"],
+    #     lifetime=costs.at["cement capture", "lifetime"],
+    # )
 
     # CARRIER = FOSSIL GAS
 
@@ -1068,7 +1081,7 @@ def add_industry(n, costs):
         carrier="gas for industry",
     )
 
-    gas_demand = industrial_demand.loc[nodes, "methane"] / 8760.0
+    gas_demand = industrial_demand.loc[nodes, "gas"] / 8760.0
 
     if options["gas_network"]:
         spatial_gas_demand = gas_demand.rename(index=lambda x: x + " gas for industry")
@@ -1140,7 +1153,7 @@ def add_industry(n, costs):
         suffix=" naphtha for industry",
         bus=spatial.oil.nodes,
         carrier="naphtha for industry",
-        p_set=industrial_demand["naphtha"].apply(
+        p_set=industrial_demand["oil"].apply(
             lambda frac: frac / 8760
         )  # *n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
@@ -1157,7 +1170,7 @@ def add_industry(n, costs):
     co2 = (
         n.loads.loc[nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
-        - industrial_demand["process emission from feedstock"].sum()
+        # - industrial_demand["process emission from feedstock"].sum()
         / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
         # the timestep if 8760 is not divisble by it),
@@ -1197,12 +1210,12 @@ def add_industry(n, costs):
         # TODO map onto n.bus.country
         # TODO make sure to check this one, should AC have carrier pf "electricity"?
         loads_i = n.loads.index[
-            (n.loads.index.str[:2] == ct) & (n.loads.carrier == "electricity")
+            (n.loads.index.str[:2] == ct) & (n.loads.carrier == "AC")
         ]
         if n.loads_t.p_set[loads_i].empty:
             continue
 
-        if not snakemake.config["custom_data"]["elec_demand:"]:
+        if not snakemake.config["custom_data"]["elec_demand"]:
             # if electricity demand is provided by pypsa-earth, the electricty used
             # in industry is included, and need to be removed from the default elec
             # demand here, and added as "industry electricity"
@@ -1244,8 +1257,8 @@ def add_industry(n, costs):
         bus="process emissions",
         carrier="process emissions",
         p_set=-(
-            industrial_demand["process emission from feedstock"]
-            + industrial_demand["process emission"]
+            #    industrial_demand["process emission from feedstock"]+
+            industrial_demand["process emission"]
         )
         / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
@@ -1957,11 +1970,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="105",
+            clusters="120",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="3H",
+            sopts="730H",
             discountrate=0.069,
             demand="NZ",
         )
@@ -1980,6 +1993,8 @@ if __name__ == "__main__":
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
 
+    n.loads.loc[nodes, "carrier"] = "AC"
+
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
     # TODO fetch investment year from config
@@ -1992,6 +2007,7 @@ if __name__ == "__main__":
         snakemake.input.costs,
         snakemake.config["costs"]["USD2013_to_EUR2013"],
         eval(snakemake.wildcards.discountrate),
+        # snakemake.wildcards.discountrate,
         Nyears,
         snakemake.config["costs"]["lifetime"],
     )

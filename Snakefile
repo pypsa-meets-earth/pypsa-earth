@@ -69,7 +69,7 @@ rule solve_all_networks:
 rule prepare_sector_network:
     input:
         network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_presec.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -90,6 +90,7 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
+        shapes_path="../pypsa-africa/resources/shapes/MAR2.geojson"
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -121,9 +122,11 @@ rule override_respot:
         },
         overrides="data/override_component_attrs",
         network=pypsaearth("networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+        energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
+
     output:
         RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_presec.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
     script:
         "scripts/override_respot.py"
 
@@ -155,6 +158,7 @@ if config["custom_data"].get("industry_demand", False) == True:
             ),
             clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="resources/custom_data/industrial_database.csv",
+            shapes_path="../pypsa-africa/resources/shapes/MAR2.geojson"
         output:
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
@@ -167,9 +171,11 @@ if config["custom_data"].get("industry_demand", False) == True:
             
     rule build_industry_demand:  #custom data
         input:
-            industry_sector_ratios="resources/industry/industry_sector_ratios_{demand}_{planning_horizons}.csv",
+            industry_sector_ratios="resources/custom_data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
-            industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            industrial_production_per_country_tomorrow="resources/custom_data/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+
         output:
             industrial_energy_demand_per_node="resources/industry/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         threads: 1
@@ -220,6 +226,7 @@ if config["custom_data"].get("industry_demand", False) == False:
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             industrial_production_per_country="data/industrial_production_per_country.csv",
+            costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         output:
             industrial_energy_demand_per_node="resources/industry/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         threads: 1

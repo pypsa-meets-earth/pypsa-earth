@@ -45,12 +45,22 @@ if __name__ == "__main__":
         from helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_industry_demand", simpl="", clusters=9077, planning_horizons="2030"
+            "build_industry_demand",
+            simpl="",
+            clusters=119,
+            planning_horizons="2030",
+            demand="NZ",
         )
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
     production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0)
+
+    if snakemake.config["custom_data"]["industry_demand"]:
+        production_tom.drop("Industry Machinery", axis=1, inplace=True)
+
+    # to_drop=production_tom.sum()[production_tom.sum()==0].index
+    # production_tom.drop(to_drop, axis=1, inplace=True)
 
     # Load distribution keys
     keys_path = snakemake.input.industrial_distribution_key
@@ -63,6 +73,10 @@ if __name__ == "__main__":
     industry_sector_ratios = pd.read_csv(
         snakemake.input.industry_sector_ratios, index_col=0
     )
+    if snakemake.config["custom_data"]["industry_demand"]:
+        industry_sector_ratios.drop(
+            "Industry Steel Casting Rolling Finishing", axis=1, inplace=True
+        )
 
     # final energy consumption per node and industry (TWh/a)
     nodal_df = nodal_production.dot(industry_sector_ratios.T)
