@@ -1975,7 +1975,7 @@ if __name__ == "__main__":
             opts="Co2L",
             planning_horizons="2030",
             sopts="730H",
-            discountrate=0.069,
+            discountrate="0.069",
             demand="NZ",
         )
 
@@ -2007,7 +2007,6 @@ if __name__ == "__main__":
         snakemake.input.costs,
         snakemake.config["costs"]["USD2013_to_EUR2013"],
         eval(snakemake.wildcards.discountrate),
-        # snakemake.wildcards.discountrate,
         Nyears,
         snakemake.config["costs"]["lifetime"],
     )

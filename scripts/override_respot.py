@@ -71,6 +71,7 @@ if __name__ == "__main__":
             opts="Co2L",
             planning_horizons="2030",
             sopts="73H",
+            demand="NZ",
             discountrate=0.069,
         )
         sets_path_to_root("pypsa-earth-sec")
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     m = n.copy()
     buses = list(n.buses[n.buses.carrier == "AC"].index)
     energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
-
+    countries = snakemake.config["countries"]
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
         year = snakemake.wildcards["planning_horizons"]
@@ -95,7 +96,12 @@ if __name__ == "__main__":
         print("No RES potential techs to override...")
 
     if snakemake.config["custom_data"]["elec_demand"]:
-        n.loads_t.p_set[buses] = (
-            n.loads_t.p_set[buses] / n.loads_t.p_set[buses].sum().sum()
-        ) * 2.2e7
+
+        for country in countries:
+
+            n.loads_t.p_set.filter(like=country)[buses] = (
+                n.loads_t.p_set.filter(like=country)[buses]
+                / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
+            ) * energy_totals.loc[country, "electricity residential"]
+
     n.export_to_netcdf(snakemake.output[0])
