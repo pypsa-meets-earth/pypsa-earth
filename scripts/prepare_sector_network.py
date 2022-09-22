@@ -1962,6 +1962,39 @@ def add_dac(n, costs):
     )
 
 
+def add_services(n, costs):
+
+    # TODO make compatible with more counties
+    profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
+
+    p_set_elec = (
+        profile_residential
+        * energy_totals.loc[countries, "services electricity"].sum()
+        * 1e6
+        / 8760
+    )
+
+    # p_set_biomass = profile_residential * energy_totals.loc[countries, "services biomass"].sum()* 1e6 / 8760
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services",
+        bus=nodes,
+        carrier="services electricity",
+        p_set=p_set_elec,
+    )
+
+    # n.madd(
+    #     "Load",
+    #     nodes,
+    #     suffix=" services",
+    #     bus=spatial.biomass.nodes,
+    #     carrier="services biomass",
+    #     p_set=p_set_biomass,
+    # )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -2110,6 +2143,8 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
+
+    add_services(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
 
