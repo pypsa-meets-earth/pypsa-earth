@@ -566,7 +566,11 @@ def prepare_generators_df(df_all_generators):
     # reset index
     df_all_generators = df_all_generators.reset_index(drop=True)
 
-    # rename columns
+    check_fields_for_generators = ["tags.generator:output:electricity"]
+    for field_to_add in check_fields_for_generators:
+        if field_to_add not in df_all_generators.columns.tolist():
+            df_all_generators[field_to_add] = ""
+
     df_all_generators = df_all_generators.rename(
         columns={
             "tags.generator:output:electricity": "power_output_MW",
