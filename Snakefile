@@ -204,7 +204,7 @@ rule build_shapes:
         "logs/build_shapes.log",
     threads: 1
     resources:
-        mem=500,
+        mem_mb=500,
     script:
         "scripts/build_shapes.py"
 
@@ -236,7 +236,7 @@ rule base_network:
         "benchmarks/base_network"
     threads: 1
     resources:
-        mem=500,
+        mem_mb=500,
     script:
         "scripts/base_network.py"
 
@@ -258,7 +258,7 @@ rule build_bus_regions:
         "logs/build_bus_regions.log",
     threads: 1
     resources:
-        mem=1000,
+        mem_mb=1000,
     script:
         "scripts/build_bus_regions.py"
 
@@ -277,7 +277,7 @@ if config["enable"].get("build_cutout", False):
             "benchmarks/build_cutout_{cutout}"
         threads: ATLITE_NPROCESSES
         resources:
-            mem=ATLITE_NPROCESSES * 1000,
+            mem_mb=ATLITE_NPROCESSES * 1000,
         script:
             "scripts/build_cutout.py"
 
@@ -336,7 +336,7 @@ rule build_renewable_profiles:
         "benchmarks/build_renewable_profiles_{technology}"
     threads: ATLITE_NPROCESSES
     resources:
-        mem=ATLITE_NPROCESSES * 5000,
+        mem_mb=ATLITE_NPROCESSES * 5000,
     script:
         "scripts/build_renewable_profiles.py"
 
@@ -359,7 +359,7 @@ rule build_powerplants:
         "logs/build_powerplants.log",
     threads: 1
     resources:
-        mem=500,
+        mem_mb=500,
     script:
         "scripts/build_powerplants.py"
 
@@ -395,7 +395,7 @@ rule add_electricity:
         "benchmarks/add_electricity"
     threads: 1
     resources:
-        mem=3000,
+        mem_mb=3000,
     script:
         "scripts/add_electricity.py"
 
@@ -418,7 +418,7 @@ rule simplify_network:
         "benchmarks/simplify_network/elec_s{simpl}"
     threads: 1
     resources:
-        mem=4000,
+        mem_mb=4000,
     script:
         "scripts/simplify_network.py"
 
@@ -452,7 +452,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
         threads: 1
         resources:
-            mem=3000,
+            mem_mb=3000,
         script:
             "scripts/cluster_network.py"
 
@@ -470,7 +470,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             "benchmarks/augmented_line_connections/elec_s{simpl}_{clusters}"
         threads: 1
         resources:
-            mem=3000,
+            mem_mb=3000,
         script:
             "scripts/augmented_line_connections.py"
 
@@ -504,7 +504,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             "benchmarks/cluster_network/elec_s{simpl}_{clusters}"
         threads: 1
         resources:
-            mem=3000,
+            mem_mb=3000,
         script:
             "scripts/cluster_network.py"
 
@@ -521,7 +521,7 @@ rule add_extra_components:
         "benchmarks/add_extra_components/elec_s{simpl}_{clusters}_ec"
     threads: 1
     resources:
-        mem=3000,
+        mem_mb=3000,
     script:
         "scripts/add_extra_components.py"
 
@@ -538,7 +538,7 @@ rule prepare_network:
         "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
     threads: 1
     resources:
-        mem=4000,
+        mem_mb=4000,
     script:
         "scripts/prepare_network.py"
 
@@ -598,7 +598,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
         threads: 1
         resources:
-            mem=4000,
+            mem_mb=4000,
         script:
             "scripts/monte_carlo.py"
 
@@ -624,7 +624,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
         threads: 20
         resources:
-            mem=memory,
+            mem_mb=memory,
         shadow:
             "shallow"
         script:
