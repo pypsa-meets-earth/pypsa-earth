@@ -424,9 +424,11 @@ def integrate_lines_df(df_all_lines, distance_crs):
         ] = "0"
 
         # there may be some non-known numerical issues
-        not_resolved_cables = pd.to_numeric(
-            df_all_lines["cables"], errors="coerce"
-        ).isna()
+        not_resolved_cables = (
+            ~pd.to_numeric(df_all_lines["cables"], errors="coerce")
+            .astype(float)
+            .apply(float.is_integer)
+        )
         unknown_cables_tags = set(
             df_all_lines.loc[not_resolved_cables]["cables"].values
         )
@@ -521,9 +523,11 @@ def integrate_lines_df(df_all_lines, distance_crs):
         )
 
         # there may be some non-known numerical issues
-        not_resolved_circuits = pd.to_numeric(
-            df_all_lines["circuits"], errors="coerce"
-        ).isna()
+        not_resolved_circuits = (
+            ~pd.to_numeric(df_all_lines["circuits"], errors="coerce")
+            .astype(float)
+            .apply(float.is_integer)
+        )
         unknown_circuits_tags = set(
             df_all_lines.loc[not_resolved_circuits]["circuits"].values
         )
@@ -562,7 +566,11 @@ def prepare_generators_df(df_all_generators):
     # reset index
     df_all_generators = df_all_generators.reset_index(drop=True)
 
-    # rename columns
+    check_fields_for_generators = ["tags.generator:output:electricity"]
+    for field_to_add in check_fields_for_generators:
+        if field_to_add not in df_all_generators.columns.tolist():
+            df_all_generators[field_to_add] = ""
+
     df_all_generators = df_all_generators.rename(
         columns={
             "tags.generator:output:electricity": "power_output_MW",
@@ -592,21 +600,19 @@ def find_first_overlap(geom, country_geoms, default_name):
 def set_countryname_by_shape(
     df,
     ext_country_shapes,
-    names_by_shapes=True,
     exclude_external=True,
     col_country="country",
 ):
     "Set the country name by the name shape"
-    if names_by_shapes:
-        df[col_country] = [
-            find_first_overlap(
-                row["geometry"],
-                ext_country_shapes,
-                None if exclude_external else row[col_country],
-            )
-            for id, row in df.iterrows()
-        ]
-        df.dropna(subset=[col_country], inplace=True)
+    df[col_country] = [
+        find_first_overlap(
+            row["geometry"],
+            ext_country_shapes,
+            None if exclude_external else row[col_country],
+        )
+        for id, row in df.iterrows()
+    ]
+    df.dropna(subset=[col_country], inplace=True)
     return df
 
 
@@ -704,9 +710,8 @@ def clean_data(
     df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
     # set the country name by the shape
-    df_all_lines = set_countryname_by_shape(
-        df_all_lines, ext_country_shapes, names_by_shapes=names_by_shapes
-    )
+    if names_by_shapes:
+        df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
 
     save_to_geojson(df_all_lines, output_files["lines"])
 
@@ -741,13 +746,13 @@ def clean_data(
     # save to geojson file
     df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
 
-    # set the country name by the shape
-    df_all_substations = set_countryname_by_shape(
-        df_all_substations,
-        ext_country_shapes,
-        names_by_shapes=names_by_shapes,
-        col_country="Country",
-    )
+    if names_by_shapes:
+        # set the country name by the shape
+        df_all_substations = set_countryname_by_shape(
+            df_all_substations,
+            ext_country_shapes,
+            col_country="Country",
+        )
 
     save_to_geojson(df_all_substations, output_files["substations"])
 
@@ -758,13 +763,13 @@ def clean_data(
     # prepare the generator dataset
     df_all_generators = prepare_generators_df(df_all_generators)
 
-    # set the country name by the shape
-    df_all_generators = set_countryname_by_shape(
-        df_all_generators,
-        ext_country_shapes,
-        names_by_shapes=names_by_shapes,
-        col_country="Country",
-    )
+    if names_by_shapes:
+        # set the country name by the shape
+        df_all_generators = set_countryname_by_shape(
+            df_all_generators,
+            ext_country_shapes,
+            col_country="Country",
+        )
 
     # set name tag by closest city when the value is nan
     if generator_name_method == "closest_city":
@@ -808,18 +813,21 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = gpd.read_file(onshore_shape_path).set_index("name")["geometry"]
 
-    if os.stat(offshore_shape_path).st_size == 0:
-        logger.info("No offshore file exist. Passing only onshore shape")
-        ext_country_shapes = country_shapes
+        if os.stat(offshore_shape_path).st_size == 0:
+            logger.info("No offshore file exist. Passing only onshore shape")
+            ext_country_shapes = country_shapes
+
+        else:
+            logger.info("Combining on- and offshore shape")
+            offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
+                "geometry"
+            ]
+            ext_country_shapes = create_extended_country_shapes(
+                country_shapes, offshore_shapes
+            )
 
     else:
-        logger.info("Combining on- and offshore shape")
-        offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
-            "geometry"
-        ]
-        ext_country_shapes = create_extended_country_shapes(
-            country_shapes, offshore_shapes
-        )
+        ext_country_shapes = None
 
     clean_data(
         input_files,
