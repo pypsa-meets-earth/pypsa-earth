@@ -501,6 +501,8 @@ def two_2_three_digits_country(two_code_country):
     """
     if two_code_country == "SN-GM":
         return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
+    if two_code_country == "XK":  # fix for kosovo
+        return "XKO"
 
     three_code_country = get_country("alpha_3", alpha_2=two_code_country)
     return three_code_country
@@ -549,6 +551,8 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     """
     if two_code_country == "SN-GM":
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
+    if two_code_country == "XK":
+        return "Kosovo"
 
     full_name = get_country("name", alpha_2=two_code_country)
 

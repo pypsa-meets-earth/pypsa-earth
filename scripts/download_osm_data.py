@@ -62,6 +62,9 @@ def getContinentCountry(code):
         country = world_geofk[continent].get(code, 0)
         if country:
             return continent, country
+
+    _logger.info(f"Missing geofabrik reference for country code {code}")
+
     return continent, country
 
 
@@ -83,6 +86,7 @@ def download_pbf(country_code, update, verify, logging=True):
 
     """
     continent, country_name = getContinentCountry(country_code)
+
     # Filename for geofabrik
     geofabrik_filename = f"{country_name}-latest.osm.pbf"
 
@@ -497,7 +501,9 @@ def _process_func_pop(c_code):
     download_pbf(c_code, update, verify, logging=False)
 
 
-def parallel_download_pbf(country_list, nprocesses, update=False, verify=False):
+def parallel_download_pbf(
+    country_list, nprocesses, update=False, verify=False, iso_coding=True
+):
     """
     Function to download pbf data in parallel
 
@@ -513,6 +519,12 @@ def parallel_download_pbf(country_list, nprocesses, update=False, verify=False):
         If true, checks the md5 of the file. Default: False
     """
 
+    country_list_geofk = []
+    for c_code in country_list:
+        c_code_geofk = convert_iso_to_geofk(c_code, iso_coding)
+        if c_code_geofk not in country_list_geofk:
+            country_list_geofk.append(c_code_geofk)
+
     # argument for the parallel processing
     kwargs = {
         "initializer": _init_process_pop,
@@ -523,10 +535,10 @@ def parallel_download_pbf(country_list, nprocesses, update=False, verify=False):
     # execute the parallel download with tqdm progressbar
     with mp.get_context("spawn").Pool(**kwargs) as pool:
         for _ in tqdm(
-            pool.imap(_process_func_pop, country_list),
+            pool.imap(_process_func_pop, country_list_geofk),
             ascii=False,
             unit=" countries",
-            total=len(country_list),
+            total=len(country_list_geofk),
             desc="Download pbf ",
         ):
             pass

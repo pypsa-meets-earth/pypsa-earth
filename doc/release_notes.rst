@@ -120,6 +120,8 @@ PyPSA-Africa 0.1.0 (10th September 2022)
 
 * Fix output electricity column in clean_data `PR #441 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/441>`_
 
+* Bug fixing to download global OSM and shape data: `PR #433 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/433>`_
+
 PyPSA-Africa 0.0.2 (6th April 2022)
 =====================================
 
