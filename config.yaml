@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: runname_test_127
+run: runname_test_kmeans_46
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 127
+  - 46
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -23,15 +23,17 @@ scenario:
   sopts:
   - "730H"
   demand:
-  - "NZ"
+  - "DF"
 
-
+clustering_options:
+    alternative_clustering: false
+    
 countries: ['MA']
 
 custom_data:
-  renewables: ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
-  elec_demand: true
-  industry_demand: true
+  renewables: [] #'csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
+  elec_demand: false
+  industry_demand: false
 
 costs:
   lifetime: 25 #default lifetime
@@ -184,6 +186,7 @@ sector:
     BU_2050: 0.00
     AP_2050: 0.06
     NZ_2050: 0.28
+    DF_2030: 0.05
 
   land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
     BU_2030: 0.00
@@ -192,6 +195,7 @@ sector:
     BU_2050: 0.00
     AP_2050: 0.42
     NZ_2050: 0.68
+    DF_2030: 0.15
 
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
@@ -203,9 +207,11 @@ sector:
     BU_2030: 0.00
     AP_2030: 0.00
     NZ_2030: 0.10
+    DF_2030: 0.10
     BU_2050: 0.00
     AP_2050: 0.25
     NZ_2050: 0.36
+    DF_2050: 0.36
 
   gadm_level: 2
   h2_cavern: true
