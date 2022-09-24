@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Africa authors
+  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -32,7 +32,7 @@ use `pre-commit <https://pre-commit.com/index.html>`_:
     * To manually run it: ``pre-commit run --all``
 
 Non code related.
-If you are interested in non-code related activities then have a look at the `project structure <https://pypsa-meets-africa.readthedocs.io/en/latest/project_structure_and_credits.html>`_ & click on the 'leader' position.
+If you are interested in non-code related activities then have a look at the `project structure <https://pypsa-meets-earth.readthedocs.io/en/latest/project_structure_and_credits.html>`_ & click on the 'leader' position.
 A pdf file will show up, introducing you to other activities in the roam of HR, finance to outreach.
 
 
@@ -42,7 +42,7 @@ Join Us and Get Involved
 Any person/ group is welcome to join us. Be it research leader, researcher, undergraduate, or industry professional.
 A simple way to explore this is to join our meeting. All of them are **OPEN**.
 
-- `List of meetings and times <https://github.com/pypsa-meets-africa/pypsa-africa#get-involved>`_
+- `List of meetings and times <https://github.com/pypsa-meets-earth/pypsa-earth#get-involved>`_
 
 - **Discord**
   
@@ -94,8 +94,8 @@ Essential developments
 - WP3. Set up Atlite for Africa to create renewable timeseries
 - WP3. Add different concentrated solar power (CSP) designs to Atlite
 - WP4. Adapt current Atlite land coverage constraint method for African continent. For instance, it may be forbidden to install power plants in protective areas such as national parks or to build wind plants in cities. Atlite can exclude this areas but might need to be adjusted for Africa. 
-- WP5. Support the creation of a network topology by applying `various methods <https://github.com/pypsa-meets-africa/pypsa-africa/discussions/15>`_
-- WP6. Contribute to the AI satellite image detection for energy asset recognition such `applied for detecting HV lines, substations <https://github.com/pypsa-meets-africa/pypsa-africa/discussions/13>`_ and power plants
+- WP5. Support the creation of a network topology by applying `various methods <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/15>`_
+- WP6. Contribute to the AI satellite image detection for energy asset recognition such `applied for detecting HV lines, substations <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/13>`_ and power plants
 
 
 .. _optional_prototype:

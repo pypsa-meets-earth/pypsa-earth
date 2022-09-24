@@ -499,7 +499,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="60"
         )
-        sets_path_to_root("pypsa-africa")
+        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

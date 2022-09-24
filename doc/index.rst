@@ -1,12 +1,12 @@
-.. PyPSA meets Africa documentation master file, created by
+.. PyPSA meets Earth documentation master file, created by
    sphinx-quickstart on Sat May 15 22:52:54 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the PyPSA meets Africa documentation!
+Welcome to the PyPSA meets Earth documentation!
 ================================================
 
-PyPSA meets Africa is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currently under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-africa.github.io/>`_. There you can also sign-up to our Newsletter. 
+PyPSA meets Earth is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currently under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-earth.github.io/>`_. There you can also sign-up to our Newsletter. 
 
 Watch our latest discussion with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
 
@@ -18,7 +18,7 @@ Watch our latest discussion with African leaders about `Open Energy System Model
 Get Involved
 ==============
 
-The PyPSA meets Africa team is currently running four types of meetings:
+The PyPSA meets Earth team is currently running four types of meetings:
 
 
 - `**Discord NEW! (Open)** <https://discord.gg/AnuJBk23FU>`_
@@ -51,7 +51,7 @@ The PyPSA meets Africa team is currently running four types of meetings:
 
   - every Friday between 17-18:00 (UK time)
   - book a 20min meeting with Max to discuss anything you like
-  - booking link: `app.autobook.me/max-parzen/pypsa-meets-africa <https://app.autobook.me/max-parzen/pypsa-meets-africa>`_ (developed by @mnm-matin)
+  - booking link: `app.autobook.me/max-parzen/pypsa-meets-earth <https://app.autobook.me/max-parzen/pypsa-meets-earth>`_ (developed by @mnm-matin)
 
 =============
 Documentation

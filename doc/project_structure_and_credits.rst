@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Africa authors
+  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -9,7 +9,7 @@
 Project structure and credits
 ##########################################
 
-PyPSA meets Africa is an open source initiative.
+PyPSA meets Earth is an open source initiative.
 We implemented a project structure to enhance collaboration and give people responsibilities.
 Therefore, the structure is not here to dictate, it is rather a structure that let people organise and think in different angles about the project.
 

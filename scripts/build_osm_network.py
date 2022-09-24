@@ -899,6 +899,6 @@ if __name__ == "__main__":
     geo_crs = snakemake.config["crs"]["geo_crs"]
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
-    sets_path_to_root("pypsa-africa")
+    sets_path_to_root("pypsa-earth")
 
     built_network(snakemake.input, snakemake.output, geo_crs, distance_crs)

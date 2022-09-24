@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Africa authors
+  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -9,7 +9,7 @@
 Introduction
 ##########################################
 
-PyPSA meets Africa aims at providing an open-source energy system model, named PyPSA-Africa, that describes the African energy system **by the end of 2021**.
+PyPSA meets Earth aims at providing an open-source energy system model, named PyPSA-Africa, that describes the African energy system **by the end of 2021**.
 
 .. raw:: html
 
@@ -45,19 +45,19 @@ In PyPSA Africa, six main work packages are in place to tackle the continent-wid
 - **WP5. Network and substation modelling**: drawing the model of the network to feed the PyPSA modeling suite
 - **WP6. Data creation and validation**: when data are scarce,
   by using high resolution maps we aim at filling the gaps and update the datasets. The AI detection is tackled in the package
-  `detect_energy <https://github.com/pypsa-meets-africa/detect_energy>`_
+  `detect_energy <https://github.com/pypsa-meets-earth/detect_energy>`_
 
 
 For more details, read our preliminary conference paper (more to come):
 
-- D. Kirli et al., "PyPSA meets Africa: Developing an open source electricity network model of the African continent," 2021 IEEE AFRICON, 2021, pp. 1-6, doi: `10.1109/AFRICON51333.2021.9570911 <https://doi.org/10.1109/AFRICON51333.2021.9570911>`_.
+- D. Kirli et al., "PyPSA meets Earth: Developing an open source electricity network model of the African continent," 2021 IEEE AFRICON, 2021, pp. 1-6, doi: `10.1109/AFRICON51333.2021.9570911 <https://doi.org/10.1109/AFRICON51333.2021.9570911>`_.
 
 Please use the following BibTeX: ::
 
     @INPROCEEDINGS{9570911,
         author={Kirli, Desen and Hampp, Johannes and van Greevenbroek, Koen and Grant, Rebecca and Mahmood, Matin and Parzen, Maximilian and Kiprakis, Aristides},
         booktitle={2021 IEEE AFRICON},
-        title={PyPSA meets Africa: Developing an open source electricity network model of the African continent},
+        title={PyPSA meets Earth: Developing an open source electricity network model of the African continent},
         year={2021},
         volume={},
         number={},
@@ -77,7 +77,7 @@ For example, by executing the following snakemake routine
 
 .. code:: bash
 
-    .../pypsa-africa % snakemake -j 1 networks/elec_s_128.nc
+    .../pypsa-earth % snakemake -j 1 networks/elec_s_128.nc
 
 the following workflow is automatically executed.
 
@@ -115,7 +115,7 @@ Licence
 
 PyPSA-Africa work is released under multiple licenses:
 
-* All original source code is licensed as free software under `GPL-3.0 License <https://github.com/pypsa-meets-africa/pypsa-africa/blob/main/LICENSE>`_.
+* All original source code is licensed as free software under `GPL-3.0 License <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/LICENSE>`_.
 * The documentation is licensed under `CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>`_.
 * Configuration files are mostly licensed under `CC0-1.0 <https://creativecommons.org/publicdomain/zero/1.0/>`_.
 * Data files are licensed under different licenses as noted below.

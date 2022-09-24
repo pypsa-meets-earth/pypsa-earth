@@ -731,8 +731,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("download_osm_data")
     configure_logging(snakemake)
 
-    # Required to set path to pypsa-africa
-    sets_path_to_root("pypsa-africa")
+    # Required to set path to pypsa-earth
+    sets_path_to_root("pypsa-earth")
 
     # ["substation", "generator", "line", "cable", "tower"]
     feature_list = ["substation", "generator", "line", "cable"]

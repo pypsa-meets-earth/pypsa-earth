@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2022 PyPSA-Earth
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-name: pypsa-africa
+name: pypsa-earth
 channels:
 - conda-forge
 - bioconda

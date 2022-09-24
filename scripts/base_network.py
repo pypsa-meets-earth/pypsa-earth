@@ -367,7 +367,7 @@ def _set_countries_and_substations(n):
 
         # Nearest country in path length defines country of still homeless buses
         # Work-around until commit 705119 lands in pypsa release
-        # pypsa-africa comment: Important to connect 'homeless' offshore assets
+        # pypsa-earth comment: Important to connect 'homeless' offshore assets
         # Otherwise
         n.transformers["length"] = 0.0
         graph = n.graph(weight="length")

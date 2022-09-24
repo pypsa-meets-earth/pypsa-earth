@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2022 PyPSA-Earth Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-name: pypsa-africa-docs
+name: pypsa-earth-docs
 channels:
 - conda-forge/label/shapely_dev
 - conda-forge

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2022 The PyPSA-meets-Africa Authors
+# SPDX-FileCopyrightText: : 2022 The PyPSA-Earth Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -26,7 +26,7 @@ jobs:
           # Matrix required to handle environment caching with Mambaforge
         - os: ubuntu-latest
           label: ubuntu-latest
-          prefix: /usr/share/miniconda3/envs/pypsa-africa
+          prefix: /usr/share/miniconda3/envs/pypsa-earth
 
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
@@ -47,7 +47,7 @@ jobs:
       with:
         miniforge-variant: Mambaforge
         miniforge-version: latest
-        activate-environment: pypsa-africa
+        activate-environment: pypsa-earth
         use-mamba: true
 
     - name: Create environment cache
@@ -59,7 +59,7 @@ jobs:
 
     - name: Update environment due to outdated or unavailable cache
       if: steps.cache.outputs.cache-hit != 'true'
-      run: mamba env update -n pypsa-africa -f envs/environment.yaml
+      run: mamba env update -n pypsa-earth -f envs/environment.yaml
 
     - name: Test standard snakemake workflow
       run: |

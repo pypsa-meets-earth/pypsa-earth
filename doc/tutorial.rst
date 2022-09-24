@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Africa authors
+  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -14,7 +14,7 @@ Tutorial
 Prerequisites and learning material
 ===================================
 
-PyPSA meets Africa builds on top of several open-source packages, which are here recalled together with recommended sources to learn them from scratch.
+PyPSA meets Earth builds on top of several open-source packages, which are here recalled together with recommended sources to learn them from scratch.
 
 .. _data_science_basics:
 
@@ -105,7 +105,7 @@ for the current configuration using a 6-bus equivalent of the region.
 
 .. code:: bash
 
-    .../pypsa-africa % snakemake -j 1 results/networks/elec_s_6_ec_l.nc
+    .../pypsa-earth % snakemake -j 1 results/networks/elec_s_6_ec_l.nc
 
 Change the country for the analysis
 -----------------------------------
@@ -138,7 +138,7 @@ Manual test of specific scripts
 The python scripts in the ``scripts`` folder are build so that they can be easily run and tested
 even without the snakemake procedure. This assumes you have all inputs of the rule 
 available (see Snakefile). For instance, let us run the ``build_shapes.py``.
-Looking at the Snakefile or the `workflow <https://pypsa-meets-africa.readthedocs.io/en/latest/introduction.html#workflow>`_
+Looking at the Snakefile or the `workflow <https://pypsa-meets-earth.readthedocs.io/en/latest/introduction.html#workflow>`_
 we need to run the ``retrieve_databundle_light.py`` manually or by snakemake:
 
    .. code:: bash

@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Africa authors
+  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
 
   SPDX-License-Identifier: CC-BY-4.0
 

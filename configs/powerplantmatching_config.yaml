@@ -28,7 +28,7 @@ fully_included_sources:
 EXTERNAL_DATABASE:
   reliability_score: 5
   store_locally: false
-  fn: /data/davidef/git/pypsa-africa/resources/powerplants_osm2pm.csv  # MODIFIED_BY_WORKFLOW
+  fn: /data/davidef/git/pypsa-earth/resources/powerplants_osm2pm.csv  # MODIFIED_BY_WORKFLOW
 
 
 parallel_duke_processes: false

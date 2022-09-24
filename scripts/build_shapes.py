@@ -35,7 +35,7 @@ from tqdm import tqdm
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
-sets_path_to_root("pypsa-africa")
+sets_path_to_root("pypsa-earth")
 
 
 def download_GADM(country_code, update=False, out_logging=False):
@@ -220,7 +220,7 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
     The dataset shall be downloaded independently by the user (see guide) or
-    together with pypsa-africa package.
+    together with pypsa-earth package.
     """
     if not os.path.exists(EEZ_gpkg):
         raise Exception(
@@ -461,7 +461,7 @@ def download_WorldPop_API(
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
     """
 
     if out_logging:
@@ -512,7 +512,7 @@ def load_GDP(
 ):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-africa package.
+    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
     """
 
     if out_logging:
@@ -806,7 +806,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_shapes")
-        sets_path_to_root("pypsa-africa")
+        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     out = snakemake.output

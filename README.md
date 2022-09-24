@@ -1,25 +1,25 @@
-# PyPSA meets Africa and PyPSA meets Earth
+# PyPSA meets Earth
 
 ## Development Status: **Stable and Active**
 
-[![Status Linux](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-linux.yaml)
-[![Status Mac](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-mac.yaml)
-[![Status Windows](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-africa/pypsa-africa/actions/workflows/ci-windows.yaml)
-[![Documentation Status](https://readthedocs.org/projects/pypsa-meets-africa/badge/?version=latest)](https://pypsa-meets-africa.readthedocs.io/en/latest/?badge=latest)
-![Size](https://img.shields.io/github/repo-size/pypsa-meets-africa/pypsa-africa)
+[![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml)
+[![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml)
+[![Status Windows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml)
+[![Documentation Status](https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest)](https://pypsa-meets-earth.readthedocs.io/en/latest/?badge=latest)
+![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-africa/pypsa-africa/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-africa/pypsa-africa/main)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-earth/pypsa-earth/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-earth/pypsa-earth/main)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
 
-PyPSA meets Africa is a free and open source software initiative aiming to develop a powerful energy system model for Africa. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
+PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth. The tool was first released end of 2022 and is heavily based on [PyPSA](https://pypsa.readthedocs.io/en/latest/) and [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/). In 2022 we will focus on Earth wide expansion. Stay tuned and join our mission - We look for users, co-developers and leaders!
 
-A short presentation about our project and its aims is given on our [website](https://pypsa-meets-africa.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
+A short presentation about our project and its aims is given on our [website](https://pypsa-meets-earth.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
 <p align="center">
-  <img src="doc/img/africa_osm_map.png" width="600">
+  <img src="https://github.com/pypsa-meets-earth/documentation/tree/main/doc/img/africa_osm_map.png" width="600">
 </p>
 
 ## Get involved
@@ -41,7 +41,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - book a 30min meeting with Max to discuss anything you like
-  - booking link: [calendly.com/pypsa-meets-africa](https://calendly.com/pypsa-meets-africa/pypsa-meets-africa-exchange-30min)
+  - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min)
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
@@ -57,24 +57,24 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 ## Installation
 
-1. Open your terminal at a location where you want to install pypsa-africa. Type the following in your terminal to download the package from GitHub:
+1. Open your terminal at a location where you want to install pypsa-earth. Type the following in your terminal to download the package from GitHub:
 
    ```bash
-      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
    ```
 
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
 ```bash
-    .../pypsa-africa % conda env create -f envs/environment.yaml
+    .../pypsa-earth % conda env create -f envs/environment.yaml
 ```
    If the above takes longer than 30min, you might want to try mamba for faster installation:
 
 ```bash
     (base) conda install -c conda-forge mamba
 
-    .../pypsa-africa % mamba env create -f envs/environment.yaml
+    .../pypsa-earth % mamba env create -f envs/environment.yaml
 ```
 
 3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
@@ -82,15 +82,15 @@ There are multiple ways to get involved and learn more about our work. That's ho
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
    ```bash
-      .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
-      .../pypsa-africa % jupyter lab
+      .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
+      .../pypsa-earth % jupyter lab
    ```
 
 5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
    To verify the successfull installation the following code can be tested from bash:
 
    ```bash
-      .../pypsa-africa % java -version
+      .../pypsa-earth % java -version
    ```
 
    The expected output should resemble the following:
@@ -103,8 +103,8 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 ## Test run on tutorial
 
-- In the folder open a terminal/command window to be located at this path `~/pypsa-africa/`
-- Activate the environment `conda activate pypsa-africa`
+- In the folder open a terminal/command window to be located at this path `~/pypsa-earth/`
+- Activate the environment `conda activate pypsa-earth`
 - Rename config.tutorial.yaml to config.yaml. For instance in Linux:
   ```bash
   mv config.tutorial.yaml config.yaml
@@ -117,16 +117,16 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 ## Training
 
-- We recently updated some [hackathon material](https://github.com/pypsa-meets-africa/pypsa-africa-hackathon) for PyPSA-Africa. The hackathon contains jupyter notebooks with exercises. After going through the 1 day theoretical and practical material you should have a suitable coding setup and feel confident about contributing.
+- We recently updated some [hackathon material](https://github.com/pypsa-meets-earth/documentation) for PyPSA-Earth. The hackathon contains jupyter notebooks with exercises. After going through the 1 day theoretical and practical material you should have a suitable coding setup and feel confident about contributing.
 - The get a general feeling about the PyPSA functionality, we further recommend going through the [PyPSA](https://github.com/PyPSA/PyPSA/tree/master/examples) and [Atlite](https://github.com/PyPSA/atlite/tree/master/examples) examples.
 
 ## Questions and Issues
 
-- We are happy to answer questions and help with issues **if they are public**. Through being public the wider community can benefit from the raised points. Some tips. **Bugs** and **feature requests** should be raised in the [**GitHub Issues**](https://github.com/pypsa-meets-africa/pypsa-africa/issues/new/choose). **General workflow** or **user questions** as well as discussion points should be posted at the [**GitHub Discussions**](https://github.com/pypsa-meets-africa/pypsa-africa/discussions/categories/q-a) tab. Happy coding.
+- We are happy to answer questions and help with issues **if they are public**. Through being public the wider community can benefit from the raised points. Some tips. **Bugs** and **feature requests** should be raised in the [**GitHub Issues**](https://github.com/pypsa-meets-earth/pypsa-earth/issues/new/choose). **General workflow** or **user questions** as well as discussion points should be posted at the [**GitHub Discussions**](https://github.com/pypsa-meets-earth/pypsa-earth/discussions/categories/q-a) tab. Happy coding.
 
 ## Documentation
 
-The documentation is available here: [documentation](https://pypsa-meets-africa.readthedocs.io/en/latest/index.html).
+The documentation is available here: [documentation](https://pypsa-meets-earth.readthedocs.io/en/latest/index.html).
 
 ## Collaborators
 

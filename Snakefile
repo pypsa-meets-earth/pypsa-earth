@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021-now PyPSA-Earth authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 

@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
-        sets_path_to_root("pypsa-africa")
+        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()

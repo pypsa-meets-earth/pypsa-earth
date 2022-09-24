@@ -523,7 +523,7 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
-    sets_path_to_root("pypsa-africa")
+    sets_path_to_root("pypsa-earth")
 
     rootpath = os.getcwd()
     tutorial = snakemake.config["tutorial"]
@@ -575,7 +575,7 @@ if __name__ == "__main__":
         to the acceptance of its multiple licenses.\n \
         The use of the code automatically implies that you accept all the licenses.\n \
         See our documentation for more information. \n \
-        Link: https://pypsa-meets-africa.readthedocs.io/en/latest/introduction.html#licence"
+        Link: https://pypsa-meets-earth.readthedocs.io/en/latest/introduction.html#licence"
     )
 
     # download the selected bundles

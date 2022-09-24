@@ -22,7 +22,7 @@ for p in sys.path:
 
 # -- Project information -----------------------------------------------------
 
-project = "PyPSA meets Africa"
+project = "PyPSA meets Earth"
 author = "Max Parzen"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
@@ -103,9 +103,9 @@ texinfo_documents = [
     (
         master_doc,
         "pypsa_meets_africa",
-        "pypsa-meets-africa Documentation",
+        "pypsa-meets-earth Documentation",
         author,
-        "pypsa-meets-africa",
+        "pypsa-meets-earth",
         "One line description of project.",
         "Miscellaneous",
     ),

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2021 The PyPSA-Africa Authors
+# SPDX-FileCopyrightText: : 2021 The PyPSA-Earth Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -17,7 +17,7 @@ scenario:
   opts: [Co2L-3H]
 
 countries: ["Africa"]
-# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
+# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 snapshots:
   start: "2013-01-01"

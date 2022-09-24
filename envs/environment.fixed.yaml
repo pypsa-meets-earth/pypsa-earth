@@ -1,4 +1,4 @@
-name: pypsa-africa
+name: pypsa-earth
 channels:
 - bioconda
 - gurobi
@@ -422,4 +422,4 @@ dependencies:
   - tsam==2.1.0
   - unidecode==1.3.4
   - vresutils==0.3.1
-prefix: /home/davidef/miniconda3/envs/pypsa-africa
+prefix: /home/davidef/miniconda3/envs/pypsa-earth

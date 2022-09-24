@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Africa authors
+  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -54,13 +54,13 @@ The complete list of software needed before installing PyPSA Africa is listed be
 .. note::
   Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Africa model.
   The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Africa experience is listed in the 
-  `Tutorial section <https://pypsa-meets-africa.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
+  `Tutorial section <https://pypsa-meets-earth.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
   Most of the dependencies needed will be automatically installed using the conda environments listed below
 
 Clone the Repository
 ====================
 
-First of all, clone the `PyPSA meets Africa repository <https://github.com/pypsa-meets-africa/pypsa-africa>`_ using the version control system ``git``.
+First of all, clone the `PyPSA meets Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
@@ -68,14 +68,14 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
     /some/other/path % cd /some/path/without/spaces
 
-    /some/path/without/spaces % git clone https://github.com/pypsa-meets-africa/pypsa-africa.git
+    /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
 
 .. _deps:
 
 Install Python Dependencies
 ===============================
 
-PyPSA meets Africa relies on a set of other Python packages to function.
+PyPSA meets Earth relies on a set of other Python packages to function.
 We recommend using the package manager and environment management system ``conda`` to install them.
 Make sure that ``conda`` is already installed on your system or install one of the following two distributions:
 
@@ -89,29 +89,29 @@ The environment can be installed and activated using
 
 .. code:: bash
 
-    .../pypsa-africa % conda env create -f envs/environment.yaml
+    .../pypsa-earth % conda env create -f envs/environment.yaml
 
-    .../pypsa-africa % conda activate pypsa-africa
+    .../pypsa-earth % conda activate pypsa-earth
 
-Sometimes the conda pypsa-africa installation can take more than one our
+Sometimes the conda pypsa-earth installation can take more than one our
 (indicates some conflicts in the packages). In case a quick installation is necessary,
 you might also want to try out ``mamba``. It was observed to take around 5-15min to
-install all pypsa-africa dependencies with it.
+install all pypsa-earth dependencies with it.
 
 .. code::bash
 
     ... conda install -c conda-forge mamba
 
-    .../pypsa-africa % mamba env create -f envs/environment.yaml
+    .../pypsa-earth % mamba env create -f envs/environment.yaml
     
 To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ 
 and test if your jupyter lab works:
     
 .. code:: bash
 
-    .../pypsa-africa % ipython kernel install --user --name=pypsa-africa
+    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
 
-    .../pypsa-africa % jupyter lab
+    .../pypsa-earth % jupyter lab
 
 .. note::
    Please, make sure to have properly installed java, from the  `official website <https://www.oracle.com/java/technologies/downloads/>`__ or equivalent.
@@ -120,13 +120,13 @@ and test if your jupyter lab works:
 
    .. code: bash
 
-     .../pypsa-africa % .../pypsa-africa % conda activate pypsa-africa
+     .../pypsa-earth % .../pypsa-earth % conda activate pypsa-earth
 
-     .../pypsa-africa % conda install -c conda-forge openjdk
+     .../pypsa-earth % conda install -c conda-forge openjdk
 
    To verify the successful installation, you can verify that by using the following code.
    .. code: bash
-    .../pypsa-africa % java -version
+    .../pypsa-earth % java -version
 
    The expected output should resemble the following text:
    .. code: bash
@@ -135,15 +135,15 @@ and test if your jupyter lab works:
      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
 
 .. note::
-   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-africa,
+   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth,
    thereby there is no need to install it manually.
-   The snakemake included in the conda environment pypsa-africa installed with the above-mentioned procedure can be executed with the following procedure:
+   The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
 
    .. code: bash
 
-     .../pypsa-africa % .../pypsa-africa % conda activate pypsa-africa
+     .../pypsa-earth % .../pypsa-earth % conda activate pypsa-earth
 
-     .../pypsa-africa % snakemake < any command here >
+     .../pypsa-earth % snakemake < any command here >
 
 
 Download data
@@ -163,9 +163,9 @@ The rule ``retrieve_databundle_light`` has been specifically developed to set up
 
    .. code:: bash
 
-     .../pypsa-africa % conda activate pypsa-africa
+     .../pypsa-earth % conda activate pypsa-earth
 
-     .../pypsa-africa % snakemake -j1 retrieve_databundle_light --force
+     .../pypsa-earth % snakemake -j1 retrieve_databundle_light --force
 
 5. In the file ``config.yaml`` set the option ``retrieve_databundle`` back to ``false`` and save the file:
    ``retrieve_databundle: false``
