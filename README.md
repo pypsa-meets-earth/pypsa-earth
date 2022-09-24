@@ -19,7 +19,7 @@ PyPSA meets Earth is a free and open source software initiative aiming to develo
 A short presentation about our project and its aims is given on our [website](https://pypsa-meets-earth.github.io/). There you can also sign-up to our Newsletter. Watch our latest discussion with African leaders about [Open Energy System Modelling in Africa: State of the Art and Future Opportunities](https://www.youtube.com/watch?v=E0V0T4U9nmQ). Let's work together for a better future.
 
 <p align="center">
-  <img src="https://github.com/pypsa-meets-earth/documentation/tree/main/doc/img/africa_osm_map.png" width="600">
+  <img src="https://github.com/pypsa-meets-earth/documentation/blob/main/doc/img/africa_osm_map.png?raw=true" width="600">
 </p>
 
 ## Get involved
