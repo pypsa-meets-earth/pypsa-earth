@@ -26,3 +26,5 @@ descartes
 esy-osm-pbf
 esy-osmfilter
 rioxarray
+
+gitpython
