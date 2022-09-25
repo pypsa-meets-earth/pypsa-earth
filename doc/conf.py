@@ -12,6 +12,8 @@
 import datetime
 import os
 import sys
+from git import Repo
+import shutil
 
 # sys.path.insert(0, os.path.abspath('scripts'))
 # sys.path.insert(0, os.path.abspath('../scripts'))
@@ -19,6 +21,10 @@ import sys
 sys.path.insert(0, os.path.abspath("../scripts"))
 for p in sys.path:
     print(p)
+
+print(Repo.clone_from("https://github.com/pypsa-meets-earth/documentation", "../../documentation"))
+print(shutil.copytree("../../documentation/doc/img/", "img/", symlinks=False, ignore=None, copy_function=shutil.copy2, ignore_dangling_symlinks=False, dirs_exist_ok=False))
+
 
 # -- Project information -----------------------------------------------------
 

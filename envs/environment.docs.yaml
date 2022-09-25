@@ -67,3 +67,4 @@ dependencies:
   - sphinx_rtd_theme
   - nbsphinx
   - nbsphinx_link
+  - gitpython
