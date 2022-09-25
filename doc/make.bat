@@ -1,8 +1,5 @@
 @ECHO OFF
 
-git clone https://github.com/pypsa-meets-earth/documentation ../..
-cp -r ../../documentation/doc/img/. ./img/
-
 pushd %~dp0
 
 REM Command file for Sphinx documentation
