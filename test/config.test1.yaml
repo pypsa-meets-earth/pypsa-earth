@@ -204,7 +204,7 @@ sector:
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
 
-# snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
+# snapshots are originally set in PyPSA-Earth/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
