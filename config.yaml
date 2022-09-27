@@ -26,8 +26,8 @@ scenario:
   - "DF"
 
 clustering_options:
-    alternative_clustering: false
-    
+  alternative_clustering: false
+
 countries: ['MA']
 
 custom_data:

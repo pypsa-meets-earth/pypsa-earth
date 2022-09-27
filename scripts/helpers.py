@@ -528,7 +528,7 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False)
     country_list = ["MA"]  # TODO connect with entire list of countries
     if not gadm_clustering:
         gdf = gpd.read_file(path_to_gadm)
-        col = 'name'
+        col = "name"
     else:
         if path_to_gadm:
             gdf = gpd.read_file(path_to_gadm)
@@ -538,13 +538,12 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False)
                 gdf["GADM_ID"] = gdf["GADM_ID"].apply(
                     lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                 )
-            col = 'GADM_ID'
+            col = "GADM_ID"
 
-        else:  
+        else:
             gdf = get_GADM_layer(country_list, gadm_level)
-            col = 'GID_{}'.format(gadm_level)
+            col = "GID_{}".format(gadm_level)
 
-        
         # gdf.set_index("GADM_ID", inplace=True)
     gdf_co = gdf[
         gdf[col].str.contains(co)
