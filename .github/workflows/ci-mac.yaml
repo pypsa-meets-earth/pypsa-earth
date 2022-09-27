@@ -24,7 +24,7 @@ jobs:
         include:
         - os: macos-latest
           label: macos-latest
-          prefix: /Users/runner/miniconda3/envs/pypsa-africa
+          prefix: /Users/runner/miniconda3/envs/pypsa-earth
 
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
@@ -38,18 +38,18 @@ jobs:
 
     - name: Clone pypsa-earth
       run: |
-        git clone https://github.com/pypsa-meets-africa/pypsa-africa ../pypsa-africa
+        git clone https://github.com/pypsa-meets-africa/pypsa-earth ../pypsa-earth
 
     - name: Copy environment file
       run: |
-        cp ../pypsa-africa/envs/environment.yaml environment.yaml
+        cp ../pypsa-earth/envs/environment.yaml environment.yaml
 
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
         miniforge-variant: Mambaforge
         miniforge-version: latest
-        activate-environment: pypsa-africa
+        activate-environment: pypsa-earth
         use-mamba: true
 
     - name: Create environment cache
@@ -61,7 +61,7 @@ jobs:
 
     - name: Update environment due to outdated or unavailable cache
       if: steps.cache.outputs.cache-hit != 'true'
-      run: mamba env update -n pypsa-africa -f environment.yaml
+      run: mamba env update -n pypsa-earth -f environment.yaml
 
     - name: Test snakemake workflow
       run: |
