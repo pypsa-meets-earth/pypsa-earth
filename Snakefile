@@ -110,9 +110,11 @@ rule add_endogenous_demand:
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
     output:
         RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_endogenous.nc", # TODO output file name must be adjusted and integrated in workflow
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_endogenous.nc",
+        # TODO output file name must be adjusted and integrated in workflow
     script:
         "scripts/add_endogenous_demand.py"
+
 
 rule override_respot:
     input:
