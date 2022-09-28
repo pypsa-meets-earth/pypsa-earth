@@ -27,15 +27,15 @@ PyPSA-Africa 0.1.0 (10th September 2022)
 
 * Handling non-numerical entries in raw OSM data: `PR #287 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/287>`__
 
-* General user experience improvements: `PR #326 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/326>`
+* General user experience improvements: `PR #326 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/326>`__
 
-* Fix minor validation notebook inaccuracy: `PR #332 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/332>`
+* Fix minor validation notebook inaccuracy: `PR #332 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/332>`__
 
-* Make clean_osm_data script work with land-locked country: `PR #341 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/341>`
+* Make clean_osm_data script work with land-locked country: `PR #341 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/341>`__
 
-* Add demand validation notebook for 2030 prediction: `PR #344 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/344>`
+* Add demand validation notebook for 2030 prediction: `PR #344 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/344>`__
 
-* Revise build_powerplants with new version of powerplantmatching: `PR #342 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/342>`
+* Revise build_powerplants with new version of powerplantmatching: `PR #342 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/342>`__
 
 * Fix typo causing the wrong coordinate reference systems (CRS) to be used when determining available land types using CLC `PR #345 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/345>`__
 
