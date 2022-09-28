@@ -104,7 +104,7 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
-rule add_endogenous_demand
+rule add_endogenous_demand:
     input:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
