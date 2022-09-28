@@ -292,7 +292,7 @@ costs:
 
 monte_carlo:
   options:
-    add_to_snakefile: true
+    add_to_snakefile: false
     samples: 7    # number of optimizations
     sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
   pypsa_standard:
