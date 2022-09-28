@@ -410,8 +410,8 @@ rule simplify_network:
         network="networks/elec_s{simpl}.nc",
         regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/bus_regions/regions_offshore_elec_s{simpl}.geojson",
-        busmap="resources/busmap_elec_s{simpl}.csv",
-        connection_costs="resources/connection_costs_s{simpl}.csv",
+        busmap="resources/bus_regions/busmap_elec_s{simpl}.csv",
+        connection_costs="resources/bus_regions/connection_costs_s{simpl}.csv",
     log:
         "logs/simplify_network/elec_s{simpl}.log",
     benchmark:
@@ -436,7 +436,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             #To use: downlaod file from the google drive and place it in resources/shapes/
             #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
             gadm_shapes="resources/shapes/gadm_shapes.geojson",
-            # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
+            # busmap=ancient('resources/bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
             tech_costs=COSTS,
@@ -444,8 +444,8 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             network="networks/elec_s{simpl}_{clusters}_pre_augmentation.nc",
             regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
             regions_offshore="resources/bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-            busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
-            linemap="resources/linemap_elec_s{simpl}_{clusters}.csv",
+            busmap="resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
+            linemap="resources/bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
         log:
             "logs/cluster_network/elec_s{simpl}_{clusters}.log",
         benchmark:
@@ -488,7 +488,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             #To use: downlaod file from the google drive and place it in resources/shapes/
             #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
             gadm_shapes="resources/shapes/gadm_shapes.geojson",
-            # busmap=ancient('resources/busmap_elec_s{simpl}.csv'),
+            # busmap=ancient('resources/bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
             tech_costs=COSTS,
@@ -496,8 +496,8 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             network="networks/elec_s{simpl}_{clusters}.nc",
             regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
             regions_offshore="resources/bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-            busmap="resources/busmap_elec_s{simpl}_{clusters}.csv",
-            linemap="resources/linemap_elec_s{simpl}_{clusters}.csv",
+            busmap="resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
+            linemap="resources/bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
         log:
             "logs/cluster_network/elec_s{simpl}_{clusters}.log",
         benchmark:
