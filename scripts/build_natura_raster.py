@@ -185,7 +185,8 @@ if __name__ == "__main__":
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
-    raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
+    # out_shape: n_rows, n_columns    
+    raster = ~geometry_mask(shapes.geometry, out_shape, transform)
     raster = raster.astype(rio.uint8)
 
     if out_logging:
