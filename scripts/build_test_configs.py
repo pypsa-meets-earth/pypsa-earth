@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    #Input paths
+    # Input paths
     fptutorial = Path(Path.cwd(), snakemake.input.tutorial)
     fp0 = Path(Path.cwd(), snakemake.input.test_standard)
     fp1 = Path(Path.cwd(), snakemake.input.test_custom)
@@ -57,13 +57,13 @@ if __name__ == "__main__":
     c = update(a, data2)
     d = update(a, data3)
 
-    #Output paths
+    # Output paths
     fp0 = Path(Path.cwd(), snakemake.output.test_standard)
     fp1 = Path(Path.cwd(), snakemake.output.test_custom)
     fp2 = Path(Path.cwd(), snakemake.output.test_monte_carlo)
     fp3 = Path(Path.cwd(), snakemake.output.test_landlock)
 
-    #Save files
+    # Save files
     yaml.dump(a, fp0)
     yaml.dump(b, fp1)
     yaml.dump(c, fp2)

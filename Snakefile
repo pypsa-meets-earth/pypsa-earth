@@ -695,4 +695,3 @@ rule create_test_configs:
         test_landlock="test/config.landlock_tmp.yaml",
     script:
         "scripts/build_test_configs.py"
-    
