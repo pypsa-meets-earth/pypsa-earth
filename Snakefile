@@ -683,7 +683,7 @@ rule plot_summary:
 
 rule create_test_configs:
     input:
-        tutorial="config.tutorial.yaml"
+        tutorial="config.tutorial.yaml",
         test_standard="test/config.standard.yaml",
         test_custom="test/config.custom.yaml",
         test_monte_carlo="test/config.monte_carlo.yaml",

@@ -63,7 +63,7 @@ jobs:
 
     - name: Create test configs
       run: |
-        snakemake --cores 4 create_test_configs
+        snakemake --cores all create_test_configs
 
     - name: Test standard workflow
       run: |

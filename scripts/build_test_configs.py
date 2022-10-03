@@ -29,17 +29,11 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     #Input paths
-    fpbase = Path(Path.cwd(), snakemake.tutorial)
-    fp0 = Path(Path.cwd(), snakemake.standard)
-    fp1 = Path(Path.cwd(), snakemake.custom)
-    fp2 = Path(Path.cwd(), snakemake.monte_carlo)
-    fp3 = Path(Path.cwd(), snakemake.landlock)
-
-    #Output paths
-    fp0 = Path(Path.cwd(), snakemake.standard)
-    fp1 = Path(Path.cwd(), snakemake.custom)
-    fp2 = Path(Path.cwd(), snakemake.monte_carlo)
-    fp3 = Path(Path.cwd(), snakemake.landlock)
+    fptutorial = Path(Path.cwd(), snakemake.input.tutorial)
+    fp0 = Path(Path.cwd(), snakemake.input.test_standard)
+    fp1 = Path(Path.cwd(), snakemake.input.test_custom)
+    fp2 = Path(Path.cwd(), snakemake.input.test_monte_carlo)
+    fp3 = Path(Path.cwd(), snakemake.input.test_landlock)
 
     #Load yaml files
     yaml = YAML()
@@ -59,6 +53,12 @@ if __name__ == "__main__":
     b = update(data_tutorial, data1)
     c = update(a, data2)
     d = update(a, data3)
+
+    #Output paths
+    fp0 = Path(Path.cwd(), snakemake.output.test_standard)
+    fp1 = Path(Path.cwd(), snakemake.output.test_custom)
+    fp2 = Path(Path.cwd(), snakemake.output.test_monte_carlo)
+    fp3 = Path(Path.cwd(), snakemake.output.test_landlock)
 
     #Save files
     yaml.dump(a, fp0)
