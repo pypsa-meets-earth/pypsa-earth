@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: : 2021-2022 The PyPSA-Earth Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+### ADDITIONAL TO STANDARD CHANGES OF CONFIG.TUTORIAL.YAML FOR TEST ###
+build_natura_raster: false
+
+augmented_line_connection:
+  add_to_snakefile: true  # If True, includes this rule to the workflow
+  new_line_type: ["HVAC", "HVDC"]  # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
+
+cluster_options:
+  alternative_clustering: true  # "False" use Voronoi shapes, "True" use GADM shapes
+
+electricity:
+  hvdc_as_lines: true  # should HVDC lines be modeled as `Line` or as `Link` component?
+
+  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+    activate: true
+
+  extendable_carriers:
+    Link: [H2 pipeline]

@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: : 2021-2022 The PyPSA-Earth Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+### ADDITIONAL TO STANDARD CHANGES OF CONFIG.TUTORIAL.YAML FOR TEST ###
+monte_carlo:
+  options:
+    add_to_snakefile: true

@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: : 2021-2022 The PyPSA-Earth Authors
+#
+# SPDX-License-Identifier: CC0-1.0s
+
+### CHANGES OF CONFIG.TUTORIAL.YAML FOR TEST ###
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-3"
+
+atlite:
+  cutouts:
+    africa-2013-era5-tutorial:
+      time: ["2013-03-01", "2013-03-03"]
+
+retrieve_databundle:  # required for nice CI test output
+  show_progress: false  # disable the progress bar in retrieve_databundle
+
+download_osm_data_nprocesses: 4  # number of threads used to download osm data
+
+electricity:
+  co2limit: 0
