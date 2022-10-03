@@ -38,10 +38,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    # - name: Add solver to environment
-    #   run: |
-    #     echo -e "- glpk\n- ipopt<3.13.3" >> envs/environment.yaml
-
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -61,15 +57,27 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: mamba env update -n pypsa-earth -f envs/environment.yaml
 
-    - name: Test standard snakemake workflow
+    - name: Conda list
       run: |
         conda list
-        cp test/config.test1.yaml config.yaml
+
+    - name: Create test configs
+      run: |
+        snakemake --cores 4 create_test_configs
+
+    - name: Test standard workflow
+      run: |
+        cp test/config.standard_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks
 
-    - name: Test monte-carlo snakemake workflow
+    - name: Test custom workflow
       run: |
-        cp test/config.test2.yaml config.yaml
+        cp test/config.custom_tmp.yaml config.yaml
+        snakemake --cores all solve_all_networks
+
+    - name: Test monte-carlo workflow
+      run: |
+        cp test/config.monte_carlo_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks_monte
 
       # - name: Test plotting and summaries
