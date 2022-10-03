@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
-# SPDX-FileCopyrightText: : 2021-2022 PyPSA-Africa, 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: : 2022 PyPSA-Earth, 2021-2022 PyPSA-Africa, 2017-2020 The PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -571,7 +571,7 @@ if __name__ == "__main__":
                 )
 
     logger.warning(
-        "DISCLAIMER LICENSES: the use of PyPSA-Africa is conditioned \
+        "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \
         to the acceptance of its multiple licenses.\n \
         The use of the code automatically implies that you accept all the licenses.\n \
         See our documentation for more information. \n \

@@ -12,7 +12,11 @@ Upcoming Release
 ================
 
 **New Features and major Changes**
+
+* Finalize package restructuring `PR #462 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/462>`__
+
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
+
 
 PyPSA-Africa 0.1.0 (10th September 2022)
 =====================================
