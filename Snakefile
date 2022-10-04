@@ -681,7 +681,7 @@ rule plot_summary:
         "scripts/plot_summary.py"
 
 
-rule create_test_configs:
+rule build_test_configs:
     input:
         tutorial="config.tutorial.yaml",
         test_standard="test/config.standard.yaml",
