@@ -29,6 +29,7 @@ def update(d, u):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_test_configs")
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     fp2 = Path(Path.cwd(), snakemake.output.test_monte_carlo)
     fp3 = Path(Path.cwd(), snakemake.output.test_landlock)
 
-    #Save files
+    # Save files
     yaml.dump(standard, fp0)
     yaml.dump(custom, fp1)
     yaml.dump(monte, fp2)
