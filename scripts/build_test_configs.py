@@ -10,6 +10,7 @@ The test/* config files have only key/value strings that are different from the 
 The below scripts 'updates' the test configs and adds all options of the tutorial config.
 """
 import collections.abc
+import copy
 import os
 from pathlib import Path
 
@@ -28,8 +29,8 @@ def update(d, u):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        snakemake = mock_snakemake("build_test_configs")
 
     #Input paths
     fptutorial = Path(Path.cwd(), snakemake.input.tutorial)
@@ -52,10 +53,10 @@ if __name__ == "__main__":
         data3 = yaml.load(fp)
 
     # Modify yamls
-    a = update(data_tutorial, data0)
-    b = update(data_tutorial, data1)
-    c = update(a, data2)
-    d = update(a, data3)
+    standard = update(copy.deepcopy(data_tutorial), data0)
+    custom = update(copy.deepcopy(data_tutorial), data1)
+    monte = update(copy.deepcopy(standard), data2)
+    landlock = update(copy.deepcopy(standard), data3)
 
     #Output paths
     fp0 = Path(Path.cwd(), snakemake.output.test_standard)
@@ -64,10 +65,10 @@ if __name__ == "__main__":
     fp3 = Path(Path.cwd(), snakemake.output.test_landlock)
 
     #Save files
-    yaml.dump(a, fp0)
-    yaml.dump(b, fp1)
-    yaml.dump(c, fp2)
-    yaml.dump(d, fp3)
+    yaml.dump(standard, fp0)
+    yaml.dump(custom, fp1)
+    yaml.dump(monte, fp2)
+    yaml.dump(landlock, fp3)
 
     # Manual output in terminal
     # import sys
