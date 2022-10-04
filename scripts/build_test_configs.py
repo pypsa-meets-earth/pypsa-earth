@@ -64,19 +64,11 @@ if __name__ == "__main__":
     fp2 = Path(Path.cwd(), snakemake.output.test_monte_carlo)
     fp3 = Path(Path.cwd(), snakemake.output.test_landlock)
 
-<<<<<<< HEAD
     #Save files
     yaml.dump(standard, fp0)
     yaml.dump(custom, fp1)
     yaml.dump(monte, fp2)
     yaml.dump(landlock, fp3)
-=======
-    # Save files
-    yaml.dump(a, fp0)
-    yaml.dump(b, fp1)
-    yaml.dump(c, fp2)
-    yaml.dump(d, fp3)
->>>>>>> 25ac688f8d759c50f76fba6b8d3f78de8562afe8
 
     # Manual output in terminal
     # import sys
