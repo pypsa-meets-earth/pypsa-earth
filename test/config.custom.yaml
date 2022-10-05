@@ -12,6 +12,11 @@ augmented_line_connection:
 cluster_options:
   alternative_clustering: true  # "False" use Voronoi shapes, "True" use GADM shapes
 
+hydro:
+  resource:
+    method: hydro
+    normalization: eia
+
 electricity:
   hvdc_as_lines: true  # should HVDC lines be modeled as `Line` or as `Link` component?
 
