@@ -240,7 +240,7 @@ def get_hydro_capacity_annual_hydro_generation(
             fn,
             comment="#",
             keep_default_na=False,
-            na_values=["-"],
+            na_values=["-",""],
             index_col=0,
         )
         .rename({"Country": "countries"}, axis=1)
