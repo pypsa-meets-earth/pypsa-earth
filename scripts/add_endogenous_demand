@@ -4,10 +4,12 @@ import os
 import pandas as pd
 
 
-
-
-
-
+# Proposed code structure:
+# read network (.nc-file)
+# add export bus
+# connect hydrogen buses (advanced: only ports, not all) to export bus
+# add store and connect to export bus
+# add load and connect to export bus
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
