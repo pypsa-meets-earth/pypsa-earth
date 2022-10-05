@@ -7,7 +7,7 @@ from helpers import override_component_attrs
 
 # Proposed code structure:
 # X read network (.nc-file)
-# add export bus
+# X add export bus
 # connect hydrogen buses (advanced: only ports, not all) to export bus
 # add store and connect to export bus
 # add load and connect to export bus
@@ -35,8 +35,12 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
     hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
-
     print(hydrogen_buses)
 
+    n.add(
+        "Bus",
+        "H2 export bus",
+        carrier = "H2",
+    )
 
     print("code done")
