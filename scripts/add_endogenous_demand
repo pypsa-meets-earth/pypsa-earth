@@ -2,14 +2,17 @@ from pathlib import Path
 import os
 
 import pandas as pd
-
+import pypsa
+from helpers import override_component_attrs
 
 # Proposed code structure:
-# read network (.nc-file)
+# X read network (.nc-file)
 # add export bus
 # connect hydrogen buses (advanced: only ports, not all) to export bus
 # add store and connect to export bus
 # add load and connect to export bus
+
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -19,10 +22,21 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_endogenous_demand",
             simpl="",
-            clusters="9077",
-            ll="c1",
+            clusters="20",
+            ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="720H",
+            sopts="730H",
+            discountrate=0.069,
         )
         sets_path_to_root("pypsa-earth-sec")
+    
+    overrides = override_component_attrs(snakemake.input.overrides)
+    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+
+    hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
+
+    print(hydrogen_buses)
+
+
+    print("code done")
