@@ -47,6 +47,3 @@ Currently the pre-build file is calculated for Africa.
 
 - electricity demand profiles
 data/ssp2-2.6/2030/era5_2013/Africa.nc
-
-
-
