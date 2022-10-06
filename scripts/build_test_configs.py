@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     # Modify yamls
     standard = update(copy.deepcopy(data_tutorial), data0)
-    custom = update(copy.deepcopy(data_tutorial), data1)
+    custom = update(copy.deepcopy(standard), data1)
     monte = update(copy.deepcopy(standard), data2)
     landlock = update(copy.deepcopy(standard), data3)
 
