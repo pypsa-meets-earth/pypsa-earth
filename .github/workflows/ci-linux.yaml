@@ -67,18 +67,18 @@ jobs:
 
     - name: Test standard workflow
       run: |
-        cp test/config.standard_tmp.yaml config.yaml
-        snakemake --cores all solve_all_networks
+        cp test/tmp/config.standard_tmp.yaml config.yaml
+        snakemake --cores all solve_all_networks --forceall
 
     - name: Test custom workflow
       run: |
-        cp test/config.custom_tmp.yaml config.yaml
-        snakemake --cores all solve_all_networks
+        cp test/tmp/config.custom_tmp.yaml config.yaml
+        snakemake --cores all solve_all_networks --forceall
 
     - name: Test monte-carlo workflow
       run: |
-        cp test/config.monte_carlo_tmp.yaml config.yaml
-        snakemake --cores all solve_all_networks_monte
+        cp test/tmp/config.monte_carlo_tmp.yaml config.yaml
+        snakemake --cores all solve_all_networks_monte --forceall
 
       # - name: Test plotting and summaries
       #   run: |

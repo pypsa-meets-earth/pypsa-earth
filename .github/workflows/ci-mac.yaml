@@ -69,7 +69,7 @@ jobs:
 
     - name: Test standard workflow
       run: |
-        cp test/config.standard_tmp.yaml config.yaml
+        cp test/tmp/config.standard_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks
 
       # - name: Test plotting and summaries
