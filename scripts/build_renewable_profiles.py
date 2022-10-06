@@ -338,14 +338,25 @@ if __name__ == "__main__":
         # select busbar whose location (p) belongs to at least one hydrobasin geometry
         # if extendable option is true, all buses are included
         # otherwise only where hydro powerplants are available are considered
-        busbus_to_consider = [
-            (config.get("extendable", False) | (bus_id in hydro_ppls.bus.values))
-            & any(hydrobasins.geometry.intersects(p))
-            for (p, bus_id) in zip(
-                gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
-                regions.index,
-            )
-        ]
+        if snakemake.config["cluster_options"]["alternative_clustering"]:
+            busbus_to_consider = [
+                (config.get("extendable", False) | (bus_id in hydro_ppls.region_id.values))
+                & any(hydrobasins.geometry.intersects(p))
+                for (p, bus_id) in zip(
+                    gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
+                    regions.shape_id,
+                )
+            ]
+        ### TODO: quickfix. above case and the below case should by unified
+        if snakemake.config["cluster_options"]["alternative_clustering"]==False:    
+            busbus_to_consider = [
+                (config.get("extendable", False) | (bus_id in hydro_ppls.bus_id.values))
+                & any(hydrobasins.geometry.intersects(p))
+                for (p, bus_id) in zip(
+                    gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
+                    regions.index,
+                )
+            ]
 
         resource["plants"] = regions.rename(
             columns={"x": "lon", "y": "lat", "country": "countries"}
