@@ -9,6 +9,14 @@
 How to start?
 ##########################################
 
-1. Minimal working example
+**1. Minimal working example**
+Does a tutorial case work good as a very first step?
 
-2. Running workflow for Africa
+**2. Get know the tools**
+Introduce hackaton materials
+
+**3. Running a workflow for Africa**
+Installations instructions + some explanations along the modeling chain
+
+**4. Usage examples**
+Introduce usage notebooks
