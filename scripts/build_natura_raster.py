@@ -58,6 +58,7 @@ import rasterio as rio
 from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
+import numpy as np
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
@@ -93,7 +94,13 @@ def determine_cutout_xXyY(cutout_name, out_logging):
     assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
-    return [x - dx / 2.0, X + dx / 2.0, y - dy / 2.0, Y + dy / 2.0]
+    cutout_xXyY = [
+        np.clip(x - dx / 2.0, -180, 180),
+        np.clip(X + dx / 2.0, -180, 180),
+        np.clip(y - dy / 2.0, -180, 180),
+        np.clip(Y + dy / 2.0, -180, 180),
+    ]
+    return cutout_xXyY
 
 
 def get_transform_and_shape(bounds, res, out_logging):
@@ -162,7 +169,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_natura_raster")
+        snakemake = mock_snakemake("build_natura_raster", cutouts=["cutouts/africa-2013-era5.nc"])
     configure_logging(snakemake)
 
     # get crs
