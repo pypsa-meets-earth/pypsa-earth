@@ -350,7 +350,7 @@ if __name__ == "__main__":
         ### TODO: quickfix. above case and the below case should by unified
         if snakemake.config["cluster_options"]["alternative_clustering"]==False:    
             busbus_to_consider = [
-                (config.get("extendable", False) | (bus_id in hydro_ppls.bus_id.values))
+                (config.get("extendable", False) | (bus_id in hydro_ppls.bus.values))
                 & any(hydrobasins.geometry.intersects(p))
                 for (p, bus_id) in zip(
                     gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
