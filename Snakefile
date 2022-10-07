@@ -29,9 +29,9 @@ wildcard_constraints:
 
 subworkflow pypsaearth:
     workdir:
-        "../pypsa-africa"
+        "../pypsa-earth"
     snakefile:
-        "../pypsa-africa/Snakefile"
+        "../pypsa-earth/Snakefile"
     configfile:
         "./config.pypsa-earth.yaml"
 
@@ -545,7 +545,7 @@ rule run_test:
     run:
         import yaml
 
-        with open("../pypsa-africa/test/config.test1.yaml") as file:
+        with open("../pypsa-earth/test/config.test1.yaml") as file:
 
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
@@ -560,5 +560,5 @@ rule run_test:
 
 rule clean:
     run:
-        shell("rm -r ../pypsa-africa/resources")
-        shell("rm -r ../pypsa-africa/networks")
+        shell("rm -r ../pypsa-earth/resources")
+        shell("rm -r ../pypsa-earth/networks")
