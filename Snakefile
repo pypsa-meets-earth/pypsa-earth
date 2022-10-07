@@ -55,14 +55,15 @@ rule clean:
 rule run_tests:
     run:
         import os
+
         shell("snakemake --cores all build_test_configs")
-        directory = 'test/tmp' # assign directory
-        for filename in os.scandir(directory): # iterate over files in that directory
+        directory = "test/tmp"  # assign directory
+        for filename in os.scandir(directory):  # iterate over files in that directory
             if filename.is_file():
                 print(filename.path)
                 shell("cp {filename.path} config.yaml")
                 shell("snakemake --cores all solve_all_networks --forceall")
-                # shell("rm -r config.yaml")
+        # shell("rm -r config.yaml")
         print("Tests are successful.")
 
 
