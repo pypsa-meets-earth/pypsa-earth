@@ -90,7 +90,9 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
-        shapes_path="../pypsa-africa/resources/shapes/MAR2.geojson"
+        shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
+        #shapes_path="../pypsa-africa/resources/shapes/MAR2.geojson"
+
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -171,7 +173,7 @@ if config["custom_data"].get("industry_demand", False) == True:
             
     rule build_industry_demand:  #custom data
         input:
-            industry_sector_ratios="resources/custom_data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
+            industry_sector_ratios="data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/custom_data/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
@@ -195,6 +197,7 @@ if config["custom_data"].get("industry_demand", False) == False:
             ),
             clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="data/industrial_database.csv",
+            shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
         output:
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
@@ -210,19 +213,19 @@ if config["custom_data"].get("industry_demand", False) == False:
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
         output:
-            industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}.csv",
+            industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
         benchmark:
-            "benchmarks/build_industrial_production_per_country_tomorrow_{planning_horizons}"
+            "benchmarks/build_industrial_production_per_country_tomorrow_{planning_horizons}_{demand}"
         script:
             "scripts/build_industrial_production_tomorrow.py"
     
     
     rule build_industry_demand:  #default data
         input:
-            industry_sector_ratios="resources/industry/industry_sector_ratios_{demand}_{planning_horizons}.csv",
+            industry_sector_ratios="data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             industrial_production_per_country="data/industrial_production_per_country.csv",
