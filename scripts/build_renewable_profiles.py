@@ -206,7 +206,7 @@ from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from rasterio.warp import transform_bounds
-from shapely.geometry import LineString, box
+from shapely.geometry import LineString, Polygon, box, shape
 from shapely.ops import transform
 from shapely.wkt import loads
 
@@ -419,11 +419,12 @@ if __name__ == "__main__":
 
             # Spatial extent of the natura.tiff raster should cover the entire cutout area to avoid data losses
             natura_orig_geom = loads(box(*natura.bounds).wkt)
-            natura_crs = pyproj.CRS(natura.crs)
-            project = pyproj.Transformer.from_crs(
-                natura_crs, geo_crs, always_xy=True
-            ).transform
-            natura_geom = transform(project, natura_orig_geom)
+            natura_gejson = rio.warp.transform_geom(
+                src_crs = natura.crs,
+                dst_crs = geo_crs,
+                geom = natura_orig_geom
+            )
+            natura_geom = shape(natura_gejson)
 
             nc_geom = box(*cutout.bounds)
             cutout_in_natura = natura_geom.contains(nc_geom)
