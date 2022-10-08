@@ -199,12 +199,16 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import progressbar as pgb
+import pyproj
 import rasterio as rio
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
-from shapely.geometry import LineString
+from rasterio.warp import transform_bounds
+from shapely.wkt import loads
+from shapely.geometry import box, LineString
+from shapely.ops import transform
 
 cc = coco.CountryConverter()
 
@@ -413,7 +417,7 @@ if __name__ == "__main__":
                     f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
                 )            
 
-            natura_orig_geom = shapely.wkt.loads(box(*natura.bounds).wkt)
+            natura_orig_geom = loads(box(*natura.bounds).wkt)
             natura_crs = pyproj.CRS(natura.crs)
             project = pyproj.Transformer.from_crs(
                 natura_crs, geo_crs, always_xy=True
