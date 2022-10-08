@@ -413,6 +413,17 @@ if __name__ == "__main__":
                     f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
                 )            
 
+            natura_orig_geom = shapely.wkt.loads(box(*natura.bounds).wkt)
+            natura_crs = pyproj.CRS(natura.crs)
+            project = pyproj.Transformer.from_crs(
+                natura_crs, geo_crs, always_xy=True
+            ).transform
+            natura_geom = transform(project, natura_orig_geom)
+            
+            nc_geom = box(*cutout.bounds)
+
+            cutout_in_natura = natura_geom.contains(nc_geom)               
+
         if "copernicus" in config and config["copernicus"]:
             copernicus = config["copernicus"]
             excluder.add_raster(
