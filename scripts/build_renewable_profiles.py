@@ -206,9 +206,9 @@ from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from rasterio.warp import transform_bounds
-from shapely.wkt import loads
-from shapely.geometry import box, LineString
+from shapely.geometry import LineString, box
 from shapely.ops import transform
+from shapely.wkt import loads
 
 cc = coco.CountryConverter()
 
@@ -415,7 +415,7 @@ if __name__ == "__main__":
             if not natura.crs == area_crs:
                 logger.warning(
                     f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
-                )            
+                )
 
             natura_orig_geom = loads(box(*natura.bounds).wkt)
             natura_crs = pyproj.CRS(natura.crs)
@@ -423,7 +423,7 @@ if __name__ == "__main__":
                 natura_crs, geo_crs, always_xy=True
             ).transform
             natura_geom = transform(project, natura_orig_geom)
-            
+
             nc_geom = box(*cutout.bounds)
 
             cutout_in_natura = natura_geom.contains(nc_geom)
@@ -431,7 +431,7 @@ if __name__ == "__main__":
             if not cutout_in_natura:
                 logger.warning(
                     f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range\n\r *  cutout: left={cutout.bounds[0]:2.1f}, bottom={cutout.bounds[1]:2.1f}, right={cutout.bounds[2]:2.1f}, top={cutout.bounds[3]:2.1f};\n\r * 'natura.tiff': left={natura_geom.bounds[0]:2.1f}, bottom={natura_geom.bounds[1]:2.1f},right={natura_geom.bounds[2]:2.1f}, top={natura_geom.bounds[3]:2.2f}"
-                )                          
+                )
 
         if "copernicus" in config and config["copernicus"]:
             copernicus = config["copernicus"]
