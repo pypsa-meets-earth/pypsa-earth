@@ -419,7 +419,7 @@ if __name__ == "__main__":
             # Spatial extent of the natura.tiff raster should cover the entire cutout area to avoid data losses
             natura_orig_geom = loads(box(*natura.bounds).wkt)
             natura_gejson = rio.warp.transform_geom(
-                src_crs = natura.crs, dst_crs = geo_crs, geom = natura_orig_geom
+                src_crs=natura.crs, dst_crs=geo_crs, geom=natura_orig_geom
             )
             natura_geom = shape(natura_gejson)
 
