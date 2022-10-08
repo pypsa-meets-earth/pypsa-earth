@@ -31,6 +31,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
+- pyproj
   # - xarray  # till the main is not in conda- xarray
 - netcdf4
 - networkx

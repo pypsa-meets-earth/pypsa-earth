@@ -30,6 +30,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
+- pyproj
 - fiona<=1.8.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
 - xarray
 - netcdf4
