@@ -417,6 +417,7 @@ if __name__ == "__main__":
                     f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
                 )
 
+            # Spatial extent of the natura.tiff raster should cover the entire cutout area to avoid data losses
             natura_orig_geom = loads(box(*natura.bounds).wkt)
             natura_crs = pyproj.CRS(natura.crs)
             project = pyproj.Transformer.from_crs(
@@ -425,7 +426,6 @@ if __name__ == "__main__":
             natura_geom = transform(project, natura_orig_geom)
 
             nc_geom = box(*cutout.bounds)
-
             cutout_in_natura = natura_geom.contains(nc_geom)
 
             if not cutout_in_natura:
