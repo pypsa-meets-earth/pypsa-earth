@@ -17,6 +17,8 @@ Upcoming Release
 
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
 
+* Add checks for natura.tiff raster to ensure it's correspondance with the cutout `PR #454 <https://github.com/pypsa-meets-africa/pypsa-africa/pull/464>`__
+
 
 PyPSA-Africa 0.1.0 (10th September 2022)
 =====================================
