@@ -199,7 +199,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import progressbar as pgb
-import pyproj
 import rasterio as rio
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
