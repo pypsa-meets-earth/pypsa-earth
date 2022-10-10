@@ -414,8 +414,10 @@ rule copy_config:
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
+        # network=RDIR
+        # + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
         network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_endogenous.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
     output:
         RDIR
