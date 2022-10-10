@@ -7,7 +7,7 @@ X add store and connect to export bus
 X (add load and connect to export bus) only required if the "store" option fails
 
 Possible improvements:
-- Select port buses automatically (with both voronoi and gadm clustering)
+- Select port buses automatically (with both voronoi and gadm clustering). Use data/ports.csv?
 """
 
 
