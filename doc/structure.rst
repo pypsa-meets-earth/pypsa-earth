@@ -37,13 +37,3 @@ a snakemake rule.
 .. image:: img/Flowchart_17_11_2021.png
     :width: 80%
     :align: center
-
-
-The list of rules is better detailed in the specific overview section, as follows:
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: Rule overview
-
-   rules_overview
