@@ -17,6 +17,7 @@ Upcoming Release
 
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
 
+* Revision of documenation `PR #471 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/471>`__
 
 PyPSA-Earth 0.1.0
 =================
