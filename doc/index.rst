@@ -106,6 +106,7 @@ Documentation
 
 **Project Info**
 
+* :doc:`release_notes`
 * :doc:`project_structure_and_credits`
 * :doc:`how_to_contribute`
 * :doc:`talks_and_papers`
@@ -115,6 +116,7 @@ Documentation
    :maxdepth: 2
    :caption: Project Info
 
+   release_notes
    project_structure_and_credits
    how_to_contribute
    talks_and_papers
