@@ -121,6 +121,7 @@ PyPSA-Africa work is released under multiple licenses:
 * Data files are licensed under different licenses as noted below.
 
 Licenses and urls of the data used in PyPSA-Africa:
+
 .. csv-table::
    :header-rows: 1
    :file: configtables/licenses.csv
