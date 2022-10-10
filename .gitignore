@@ -9,12 +9,14 @@
 *.log
 **/pbf
 *.pbf
+*.zip
 
 # Untracked files
 config.yaml
 dag.svg
 
 # Untracked folders (and files within)
+img/
 .snakemake/
 benchmarks/
 cutouts/
