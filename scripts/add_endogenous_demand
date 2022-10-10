@@ -17,7 +17,8 @@ import os
 import pandas as pd
 import pypsa
 from helpers import override_component_attrs
-
+import logging
+logger = logging.getLogger(__name__)
 
 def select_ports(n):
     """ This function selects ports, currently it's done manually (TODO improve)
@@ -52,13 +53,14 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
-    hydrogen_buses_ports =select_ports(n)
-
     n.add(
         "Bus",
         "H2 export bus",
         carrier = "H2",
     )
+
+    # get hydrogen export buses/ports
+    hydrogen_buses_ports =select_ports(n)
 
     n.madd(
         "Link",
@@ -68,8 +70,10 @@ if __name__ == "__main__":
         p_nom_extendable = True
     )
 
-    # Display export links
+    # log export links
+    logger.info("Added export links")
     export_links = n.links[n.links.index.str.contains("export")]
-    print(export_links)
+    logger.info(export_links)
+
 
     print("code done")
