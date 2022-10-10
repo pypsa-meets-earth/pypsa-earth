@@ -30,7 +30,7 @@ custom_data:
   renewables: [] #['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind-2', 'offwind', 'offwind-2']
 
 export:
-  export_h2: 10000000 # Export demand in MWh
+  export_h2: 10000000 # Yearly export demand in MWh
 
 costs:
   lifetime: 25 #default lifetime
