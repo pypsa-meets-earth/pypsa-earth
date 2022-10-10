@@ -27,18 +27,17 @@ Video
 Publications:
 --------------------
 
-- Parzen et al., "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663
-  Please use the following BibTeX: ::
-    @misc{pypsa-earth,
-      author = {Parzen, Maximilian and Abdel-Khalek, Hazem and Fedorova, Ekaterina and Mahmood, Matin and Frysztacki, Martha Maria and Hampp, Johannes and Franken, Lukas and Schumm, Leon and Neumann, Fabian and Poli, Davide and Kiprakis, Aristides and Fioriti, Davide},
-      keywords = {Physics and Society (physics.soc-ph), FOS: Physical sciences, FOS: Physical sciences},
-      title = {PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa},
-      publisher = {arXiv},
-      year = {2022},
-      copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}
-      url = {https://arxiv.org/abs/2209.04663},
-      doi = {10.48550/ARXIV.2209.04663},
-    }
+Parzen et al., "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663.
+Please use the following BibTeX: ::
+
+  @misc{PyPSAEarth,
+  author = {Parzen, Maximilian and Abdel-Khalek, Hazem and Fedorova, Ekaterina and Mahmood, Matin and Frysztacki, Martha Maria and Hampp, Johannes and Franken, Lukas and Schumm, Leon and Neumann, Fabian and Poli, Davide and Kiprakis, Aristides and Fioriti, Davide},
+  title = {PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa},
+  publisher = {arXiv},
+  year = {2022},
+  url = {https://arxiv.org/abs/2209.04663},
+  doi = {10.48550/ARXIV.2209.04663},
+  }
 
 .. _PyPSA_Eur:
 
@@ -53,9 +52,10 @@ PyPSA, PyPSA-Eur, PyPSA-Eur-Sec
 Publications:
 -------------
 
-`Full list of publications in the PyPSA ecosystem: <https://www.pypsa.org/publications/index.html>`_
+`Click here to see the full list of publications in the PyPSA ecosystem. <https://www.pypsa.org/publications/index.html>`_
 
 Selected list:
+
 - Brown et al. 2018 `"PyPSA: Python for Power System Analysis" <https://arxiv.org/pdf/1707.09913.pdf>`_
 - Hoersch et al. 2018 `"PyPSA-Eur: An Open Optimisation Model of the European Transmission System" <https://arxiv.org/abs/1806.01613>`_
 - Brown et al. 2018 `"Synergies of sector coupling and transmission reinforcement in a cost-optimised, highly renewable European energy system" <https://arxiv.org/abs/1801.05290>`_

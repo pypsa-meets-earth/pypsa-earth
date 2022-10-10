@@ -9,7 +9,7 @@
 Configuration
 ##########################################
 
-PyPSA Africa imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
+PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
 The options here described are collected in a ``config.yaml`` file located in the root directory.
 Users should copy the provided default configuration (``config.default.yaml``) and amend 
 their own modifications and assumptions in the user-specific configuration file (``config.yaml``); 
@@ -270,7 +270,7 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 .. _monte_cf:
 
 ``monte_carlo``
-=============
+===============
 
 ``options``
 -----------
@@ -283,7 +283,7 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 .. csv-table::
    :header-rows: 1
    :widths: 25,7,22,30
-   :file: configtables/motne-carlo.csv
+   :file: configtables/monte-carlo.csv
 
 .. _solving_cf:
 

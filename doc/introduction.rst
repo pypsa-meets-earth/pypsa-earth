@@ -9,14 +9,7 @@
 Introduction
 ##########################################
 
-PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution. It enables
-large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived
-from the European PyPSA-Eur model using new data and functions. It is suitable for operational as well as combined generation,
-storage and transmission expansion studies. In Q4/2022 and Q1/2023, it will be merged with a sector-coupled model
-
-*PyPSA meets Earth initiative* members are maintaining the *PyPSA-Earth* as well as many other tools.
-The `website <https://pypsa-meets-earth.github.io/>`_ provides more context of the initiative and associated project.
-A short video explaining the logic PyPSA-Eur similar to PyPSA-Earth:
+A short video explaining the logic of PyPSA-Eur which is similar to PyPSA-Earth:
 
 .. raw:: html
 
@@ -24,18 +17,17 @@ A short video explaining the logic PyPSA-Eur similar to PyPSA-Earth:
 
 For more details on PyPSA-Earth read our preliminary our milestone paper:
 
-- Parzen et al., "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663
-  Please use the following BibTeX: ::
-    @misc{pypsa-earth,
-      author = {Parzen, Maximilian and Abdel-Khalek, Hazem and Fedorova, Ekaterina and Mahmood, Matin and Frysztacki, Martha Maria and Hampp, Johannes and Franken, Lukas and Schumm, Leon and Neumann, Fabian and Poli, Davide and Kiprakis, Aristides and Fioriti, Davide},
-      keywords = {Physics and Society (physics.soc-ph), FOS: Physical sciences, FOS: Physical sciences},
-      title = {PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa},
-      publisher = {arXiv},
-      year = {2022},
-      copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}
-      url = {https://arxiv.org/abs/2209.04663},
-      doi = {10.48550/ARXIV.2209.04663},
-    }
+Parzen et al., "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663.
+Please use the following BibTeX: ::
+
+  @misc{PyPSAEarth,
+  author = {Parzen, Maximilian and Abdel-Khalek, Hazem and Fedorova, Ekaterina and Mahmood, Matin and Frysztacki, Martha Maria and Hampp, Johannes and Franken, Lukas and Schumm, Leon and Neumann, Fabian and Poli, Davide and Kiprakis, Aristides and Fioriti, Davide},
+  title = {PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa},
+  publisher = {arXiv},
+  year = {2022},
+  url = {https://arxiv.org/abs/2209.04663},
+  doi = {10.48550/ARXIV.2209.04663},
+  }
 
 
 Workflow
