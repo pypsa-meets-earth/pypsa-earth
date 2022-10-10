@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Proposed code structure:
 X read network (.nc-file)
@@ -11,23 +12,25 @@ Possible improvements:
 """
 
 
-from pathlib import Path
+import logging
 import os
+from pathlib import Path
 
 import pandas as pd
 import pypsa
 from helpers import override_component_attrs
-import logging
+
 logger = logging.getLogger(__name__)
 
+
 def select_ports(n):
-    """ This function selects ports, currently it's done manually (TODO improve)
-    """
+    """This function selects ports, currently it's done manually (TODO improve)"""
     hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
 
     hydrogen_buses_ports = hydrogen_buses.iloc[0:2]
 
     return hydrogen_buses_ports
+
 
 def add_export(n, hydrogen_buses_ports, export_h2):
 
@@ -35,17 +38,17 @@ def add_export(n, hydrogen_buses_ports, export_h2):
     n.add(
         "Bus",
         "H2 export bus",
-        carrier = "H2",
+        carrier="H2",
     )
 
     # add export links
     logger.info("Adding export links")
     n.madd(
         "Link",
-        names = hydrogen_buses_ports.index + " export",
+        names=hydrogen_buses_ports.index + " export",
         bus0=hydrogen_buses_ports.index,
         bus1="H2 export bus",
-        p_nom_extendable = True
+        p_nom_extendable=True,
     )
 
     export_links = n.links[n.links.index.str.contains("export")]
@@ -55,12 +58,12 @@ def add_export(n, hydrogen_buses_ports, export_h2):
     n.add(
         "Store",
         "H2 export store",
-        bus = "H2 export bus",
-        e_nom_extendable = True,
+        bus="H2 export bus",
+        e_nom_extendable=True,
         carrier="H2",
-        e_initial = 0,
-        marginal_cost = 0,
-        capital_cost = 0,    
+        e_initial=0,
+        marginal_cost=0,
+        capital_cost=0,
     )
 
     # add load
@@ -69,10 +72,11 @@ def add_export(n, hydrogen_buses_ports, export_h2):
         "H2 export load",
         bus="H2 export bus",
         carrier="H2",
-        p_set=export_h2 / 8760
+        p_set=export_h2 / 8760,
     )
 
     return
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -90,16 +94,18 @@ if __name__ == "__main__":
             discountrate=0.069,
         )
         sets_path_to_root("pypsa-earth-sec")
-    
+
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
     # get export demand
-    export_h2 = snakemake.config['export']['export_h2']
-    logger.info(f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh")
+    export_h2 = snakemake.config["export"]["export_h2"]
+    logger.info(
+        f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
+    )
 
     # get hydrogen export buses/ports
-    hydrogen_buses_ports =select_ports(n)
+    hydrogen_buses_ports = select_ports(n)
 
     # add export value and components to network
     add_export(n, hydrogen_buses_ports, export_h2)
