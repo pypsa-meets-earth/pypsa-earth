@@ -16,18 +16,30 @@ import sys
 
 from git import Repo
 
-# sys.path.insert(0, os.path.abspath('scripts'))
-# sys.path.insert(0, os.path.abspath('../scripts'))
-# sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath("../scripts"))
 for p in sys.path:
     print(p)
+
+print(
+    shutil.rmtree(
+        "../../documentation",
+        ignore_errors=True,
+    )
+)
 
 print(
     Repo.clone_from(
         "https://github.com/pypsa-meets-earth/documentation", "../../documentation"
     )
 )
+
+print(
+    shutil.rmtree(
+        "img/",
+        ignore_errors=True,
+    )
+)
+
 print(
     shutil.copytree(
         "../../documentation/doc/img/",
@@ -123,7 +135,7 @@ html_static_path = ["_static"]
 texinfo_documents = [
     (
         master_doc,
-        "pypsa_meets_africa",
+        "pypsa_meets_earth",
         "pypsa-meets-earth Documentation",
         author,
         "pypsa-meets-earth",
@@ -137,7 +149,7 @@ texinfo_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "pypsa_meets_africa", "pypsa_meets_africa Documentation", [author], 1)
+    (master_doc, "pypsa_meets_earth", "pypsa_meets_earth Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
