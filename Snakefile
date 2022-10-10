@@ -104,7 +104,7 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
-rule add_endogenous_demand:
+rule add_endogenous_export:
     input:
         overrides="data/override_component_attrs",
         network=RDIR
@@ -114,7 +114,7 @@ rule add_endogenous_demand:
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_endogenous.nc",
         # TODO output file name must be adjusted and integrated in workflow
     script:
-        "scripts/add_endogenous_demand.py"
+        "scripts/add_endogenous_export.py"
 
 
 rule override_respot:

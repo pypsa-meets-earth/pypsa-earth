@@ -80,7 +80,7 @@ if __name__ == "__main__":
         from helpers import mock_snakemake, sets_path_to_root
 
         snakemake = mock_snakemake(
-            "add_endogenous_demand",
+            "add_endogenous_export",
             simpl="",
             clusters="20",
             ll="c1.0",
