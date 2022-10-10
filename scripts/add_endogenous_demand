@@ -2,7 +2,7 @@
 Proposed code structure:
 X read network (.nc-file)
 X add export bus
-- connect hydrogen buses (advanced: only ports, not all) to export bus
+X connect hydrogen buses (advanced: only ports, not all) to export bus
 - add store and connect to export bus
 - (add load and connect to export bus) only required if the "store" option fails
 
@@ -75,5 +75,23 @@ if __name__ == "__main__":
     export_links = n.links[n.links.index.str.contains("export")]
     logger.info(export_links)
 
+    # get export demand
+    export_h2 = snakemake.config['export']['export_h2']
+    logger.info(f"The export demand is {export_h2/1e6} TWh")
+
+    # add store
+    n.add(
+        "Store",
+        "H2 export store",
+        bus = "H2 export bus",
+        e_nom_extendable = True,
+        e_initial = 0,
+        marginal_cost = 0,
+        capital_cost = 0,
+        
+
+
+    
+    )
 
     print("code done")
