@@ -1,3 +1,16 @@
+"""
+Proposed code structure:
+X read network (.nc-file)
+X add export bus
+- connect hydrogen buses (advanced: only ports, not all) to export bus
+- add store and connect to export bus
+- (add load and connect to export bus) only required if the "store" option fails
+
+Possible improvements:
+- Select port buses automatically (with both voronoi and gadm clustering)
+"""
+
+
 from pathlib import Path
 import os
 
@@ -5,13 +18,18 @@ import pandas as pd
 import pypsa
 from helpers import override_component_attrs
 
-# Proposed code structure:
-# X read network (.nc-file)
-# X add export bus
-# connect hydrogen buses (advanced: only ports, not all) to export bus
-# add store and connect to export bus
-# add load and connect to export bus
 
+def select_ports(n):
+    """ This function selects ports, currently it's done manually (TODO improve)
+    """
+
+    hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
+    print(hydrogen_buses)
+
+    hydrogen_buses_ports = hydrogen_buses.iloc[0:2]
+    print(hydrogen_buses_ports)
+
+    return hydrogen_buses_ports
 
 
 if __name__ == "__main__":
@@ -34,13 +52,24 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
-    hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
-    print(hydrogen_buses)
+    hydrogen_buses_ports =select_ports(n)
 
     n.add(
         "Bus",
         "H2 export bus",
         carrier = "H2",
     )
+
+    n.madd(
+        "Link",
+        names = hydrogen_buses_ports.index + " export",
+        bus0=hydrogen_buses_ports.index,
+        bus1="H2 export bus",
+        p_nom_extendable = True
+    )
+
+    # Display export links
+    export_links = n.links[n.links.index.str.contains("export")]
+    print(export_links)
 
     print("code done")
