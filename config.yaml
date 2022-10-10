@@ -28,6 +28,10 @@ countries: ['MA']
 
 custom_data:
   renewables: [] #['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind-2', 'offwind', 'offwind-2']
+
+export:
+  export_h2: 10000000 # Export demand in MWh
+
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
