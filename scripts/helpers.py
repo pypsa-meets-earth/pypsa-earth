@@ -545,8 +545,6 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None):
         ].item()  # filter gdf_co which contains point and returns the bus
 
     except ValueError:
-        return gdf_co[
-            gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-        ][
+        return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
             "GID_{}".format(gadm_level)
         ].item()  # looks for closest one shape=node

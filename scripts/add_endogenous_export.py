@@ -18,14 +18,13 @@ from pathlib import Path
 
 import pandas as pd
 import pypsa
-from helpers import (override_component_attrs, locate_bus)
+from helpers import locate_bus, override_component_attrs
 
 logger = logging.getLogger(__name__)
 
 
 def select_ports(n):
-    """This function selects the buses where ports are located
-    """
+    """This function selects the buses where ports are located"""
 
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
 
@@ -38,7 +37,7 @@ def select_ports(n):
 
     # Select the hydrogen buses based on nodes with ports
     hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
-    hydrogen_buses_ports.index.name = 'Bus'
+    hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
 
