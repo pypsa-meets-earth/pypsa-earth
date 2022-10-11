@@ -24,18 +24,21 @@ logger = logging.getLogger(__name__)
 
 
 def select_ports(n):
-    """This function selects ports, currently it's done manually (TODO improve)
-    
-    Information I do have: lat/lon of buses and of ports (data/ports.csv). Find closest match? How are the ports integrated in prepare_sector_network?
-    
+    """This function selects the buses where ports are located
     """
 
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
 
-    ### Old Code
-    hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
+    gadm_level = snakemake.config["sector"]["gadm_level"]
 
-    hydrogen_buses_ports = hydrogen_buses.iloc[0:2]
+    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
+        lambda port: locate_bus(port[["x", "y"]], port["country"], gadm_level), axis=1
+    )
+    ports = ports.set_index("gadm_{}".format(gadm_level))
+
+    # Select the hydrogen buses based on nodes with ports
+    hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
+    hydrogen_buses_ports.index.name = 'Bus'
 
     return hydrogen_buses_ports
 
