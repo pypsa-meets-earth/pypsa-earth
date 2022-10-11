@@ -62,7 +62,10 @@ Documentation
 * :doc:`how_to_docs`
 * :doc:`introduction`
 * :doc:`installation`
+* :doc:`how_to_start`
 * :doc:`tutorial`
+* :doc:`data_workflow`
+* :doc:`how_to_customize`
 
 .. toctree::
    :hidden:
@@ -71,7 +74,10 @@ Documentation
 
    introduction
    installation
+   how_to_start
    tutorial
+   data_workflow
+   how_to_customize
    how_to_docs
 
 **Configuration**
