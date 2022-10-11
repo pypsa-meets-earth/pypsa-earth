@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA-Africa Authors
+  SPDX-FileCopyrightText: 2021 The PyPSA-Earth Authors
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -17,13 +17,17 @@ Upcoming Release
 
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
 
+* Revision of documenation `PR #471 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/471>`__
+
 * Update natura tiff to global scale, revise default databundle description and remove old limitations to environment `PR #470 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/470>`__
 
 
-PyPSA-Africa 0.1.0 (10th September 2022)
-=====================================
+PyPSA-Earth 0.1.0
+=================
 
-**New Features and major Changes**
+Model rebranded from PyPSA-Africa to PyPSA-Earth. Model is part of the now called PyPSA meets Earth initiative which hosts mutliple projects.
+
+**New features and major changes (10th September 2022)**
 
 * Identify DC lines but temporary transform them back into AC `PR #348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/348>`__
 
@@ -127,10 +131,10 @@ PyPSA-Africa 0.1.0 (10th September 2022)
 
 * Bug fixing to download global OSM and shape data: `PR #433 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/433>`_
 
-PyPSA-Africa 0.0.2 (6th April 2022)
-=====================================
+PyPSA-Africa 0.0.2 
+==================
 
-**New Features and major Changes**
+**New features and major changes (6th April 2022)**
 
 * Plotting and summary features: `PR #211 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/211>`__ and `PR #214 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/214>`__
 
@@ -165,12 +169,12 @@ PyPSA-Africa 0.0.2 (6th April 2022)
 * Revise deprecations in build_shape: `PR #315 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/315>`__
 
 
-PyPSA-Africa 0.0.1 (24th December 2021)
-=====================================
+PyPSA-Africa 0.0.1 
+==================
 
 This is the first release of PyPSA-Africa which heavily builds on `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur>`__.
 
-**New Features and major Changes**
+**New features and major changes (24th December 2021)**
 
 * Include new data streams for Africa model
 
@@ -195,8 +199,8 @@ Release Process
 * Finalise release notes at ``doc/release_notes.rst``.
 
 * Update ``envs/environment.fixed.yaml`` via
-  ``conda env export -n pypsa-eur -f envs/environment.fixed.yaml --no-builds``
-  from an up-to-date `pypsa-eur` environment.
+  ``conda env export -n pypsa-earth -f envs/environment.fixed.yaml --no-builds``
+  from an up-to-date `pypsa-earth` environment.
 
 * Update version number in ``doc/conf.py`` and ``*config.*.yaml``.
 
@@ -211,4 +215,4 @@ Release Process
 
 * Upload pre-built networks to `zenodo data repository <https://doi.org/10.5281/zenodo.3601881>`_ with `CC BY 4.0 <https://creativecommons.org/licenses/by/4.0/>`_ license.
 
-* Send announcement on the `PyPSA-Africa Discord channel <https://discord.gg/AnuJBk23FU>`_.
+* Send announcement on the `PyPSA-Earth Discord channel <https://discord.gg/AnuJBk23FU>`_.

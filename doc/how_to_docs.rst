@@ -27,3 +27,23 @@ We found three important files/file groups for the documentation:
 3. `conf.py` with some useful information if something does not work.
 
 Please, if you have problems with the documentation create an issue and let us know
+
+Compile the documentation locally
+====================================
+
+The following commands allow you to create the documentation locally:
+
+.. code::bash
+
+    .../pypsa-earth (base) % conda install -c conda-forge mamba
+
+    .../pypsa-earth (base) % mamba env create -f envs/environment.docs.yaml
+
+    .../pypsa-earth (pypsa-earth-docs) % conda activate pypsa-earth-docs
+
+    .../pypsa-earth (pypsa-earth-docs) % cd doc
+
+    .../pypsa-earth/doc (pypsa-earth-docs) % make html
+
+This will create html files in `pypsa-earth/doc/_build/html`. VScode provides a so called Liveserver extension such that the html file can be
+opened locally on your computer.
