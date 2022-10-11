@@ -9,9 +9,9 @@
 Project structure and credits
 ##########################################
 
-PyPSA meets Earth is an open source initiative.
-We implemented a project structure to enhance collaboration and give people responsibilities.
-Therefore, the structure is not here to dictate, it is rather a structure that let people organise and think in different angles about the project.
+The PyPSA-Earth model is maintained by the members of the PyPSA meets Earth initiative.
+We implemented in the initiative a project structure to enhance collaboration and give people responsibilities.
+Therefore, the structure is not here to dictate, it is rather a structure that let people organise and think from different angles about the project.
 
 We all have the same goal. We want to create a long-term maintained, supported and steadily improving energy system model that is useful for industry and research. Every person helping towards achieving this goal is listed in the credits.
 
@@ -20,23 +20,26 @@ We all have the same goal. We want to create a long-term maintained, supported a
 Project structure
 ====================
 
-
 The structure might be adjusted in future:
 
 - Director (`Max Parzen <https://www.linkedin.com/in/maximilian-parzen-b047a1126/>`_)
 - `Co-Director <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EfjniQIxmfZIp8ih_WQuy-0BfCiOCLPKEvDZUuylp9xOhA?e=s7KRQy>`_ (`Davide Fioriti <https://www.linkedin.com/in/davide-fioriti-745693a5/>`_)
-- `Data and Workflow leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (temporary Davide and Max)
-- Demand leader (`Pierre McWhannel <https://www.linkedin.com/in/pierre-mcwhannel/>`_)
-- `AI leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
+- `PyPSA-Earth leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (temporary Davide and Max)
+- PyPSA-Earth-Sec leader (`Hazem Abdel-Khalek <https://www.linkedin.com/in/hazemakhalek/>`_ and `Leon Schumm <https://www.linkedin.com/in/leon-schumm-253b22201/>`_)
+- `AI and demand leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
 - `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
-- `Finance leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EbBuUGDNwrRBqmeT8xbQT3MBL1MOMkemCDXi7EMbzXEmHw?e=E3Cbc7>`_ (Not assigned)
-- Western Asia Coordinator (`Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
-
+- `Finance leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EbBuUGDNwrRBqmeT8xbQT3MBL1MOMkemCDXi7EMbzXEmHw?e=E3Cbc7>`_ (Currently not assigned)
+- Western Asia Coordinator (Emre Yorat and `Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
+- Central Asia (`Ekatarina Fedotova <https://www.linkedin.com/in/ekaterina-fedotova-ba8249234/>`)
 
 .. _credits:
 
 Credits
-===============================
+=============
+
+The list below is outdated (December 2022). For maintenance reasons,
+we refer the reader to the project website and GitHub repositories
+listed on the `PyPSA meets Earth team page <https://pypsa-meets-earth.github.io/team.html>`_.
 
 (sorted by continent, country, institution)
 

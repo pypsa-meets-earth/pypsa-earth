@@ -153,7 +153,7 @@ YouTube DevTutorials
 
 If some of the above sounds quite unfamiliar, you might want to start with YouTube videos.
 We recorded the following which help you with VScode, git, reading errors and fixing bugs:
-- `How to set-up Visual Studio Code for Windows [PyPSA-Africa][DevTutorial]<https://www.youtube.com/watch?v=9cFOcDxDz7o&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=1>`_
-- `Find a bug, create a fix, contribute a pull request [PyPSA-Africa] [DevTutorial]<https://www.youtube.com/watch?v=HBubZEpIeXk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=2>`_
-- `Land lock country bug - Understanding the bug [PyPSA-Africa][DevTutorial]<https://www.youtube.com/watch?v=zOQpV5bgPPk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=3>`_
-- `Land lock country bug - Fixing the bug [PyPSA-Africa][DevTutorial]<https://www.youtube.com/watch?v=6keiD6HvnmY&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=4>`_
+- `How to set-up Visual Studio Code for Windows [PyPSA-Earth][DevTutorial]<https://www.youtube.com/watch?v=9cFOcDxDz7o&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=1>`_
+- `Find a bug, create a fix, contribute a pull request [PyPSA-Earth] [DevTutorial]<https://www.youtube.com/watch?v=HBubZEpIeXk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=2>`_
+- `Land lock country bug - Understanding the bug [PyPSA-Earth][DevTutorial]<https://www.youtube.com/watch?v=zOQpV5bgPPk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=3>`_
+- `Land lock country bug - Fixing the bug [PyPSA-Earth][DevTutorial]<https://www.youtube.com/watch?v=6keiD6HvnmY&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=4>`_

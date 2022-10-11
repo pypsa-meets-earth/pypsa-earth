@@ -9,9 +9,9 @@
 The structure
 ##########################################
 
-The main workflow structure built within PyPSA Africa is as follows:
+The main workflow structure built within PyPSA-Earth is as follows:
 
-1. Download and filter data: first raw input data shall be downloaded. PyPSA Africa provides automated
+1. Download and filter data: first raw input data shall be downloaded. PyPSA-Earth provides automated
    procedures to successfully download all the needed data from scratch, such as OpenStreetMap data,
    specific potential of renewable sources, population, GDP, etc. Moreover, raw data shall be filtered to remove non-valid data and normalize the data
    gathered from multiple sources.

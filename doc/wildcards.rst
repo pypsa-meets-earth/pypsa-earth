@@ -9,7 +9,7 @@
 Wildcards
 #########
 
-It is easy to run PyPSA-Africa for multiple scenarios using the wildcards feature of ``snakemake``.
+It is easy to run PyPSA-Earth for multiple scenarios using the wildcards feature of ``snakemake``.
 Wildcards allow to generalise a rule to produce all files that follow a regular expression pattern
 which e.g. defines one particular scenario. One can think of a wildcard as a parameter that shows
 up in the input/output file names of the ``Snakefile`` and thereby determines which rules to run,
