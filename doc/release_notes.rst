@@ -17,6 +17,8 @@ Upcoming Release
 
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
 
+* Update natura tiff to global scale, revise default databundle description and remove old limitations to environment `PR #470 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/470>`__
+
 
 PyPSA-Africa 0.1.0 (10th September 2022)
 =====================================
