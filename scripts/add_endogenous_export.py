@@ -18,13 +18,21 @@ from pathlib import Path
 
 import pandas as pd
 import pypsa
-from helpers import override_component_attrs
+from helpers import (override_component_attrs, locate_bus)
 
 logger = logging.getLogger(__name__)
 
 
 def select_ports(n):
-    """This function selects ports, currently it's done manually (TODO improve)"""
+    """This function selects ports, currently it's done manually (TODO improve)
+    
+    Information I do have: lat/lon of buses and of ports (data/ports.csv). Find closest match? How are the ports integrated in prepare_sector_network?
+    
+    """
+
+    ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+
+    ### Old Code
     hydrogen_buses = n.buses[n.buses.index.str.contains("H2")]
 
     hydrogen_buses_ports = hydrogen_buses.iloc[0:2]
