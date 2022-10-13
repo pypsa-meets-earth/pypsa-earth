@@ -695,6 +695,20 @@ rule plot_summary:
         "scripts/plot_summary.py"
 
 
+rule plot_network:
+    input:
+        network="results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        africa_shape="resources/shapes/africa_shape.geojson",
+        tech_costs=COSTS,
+    output:
+        only_map="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}.{ext}",
+        ext="results/plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_ext.{ext}",
+    log:
+        "logs/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
+    script:
+        "scripts/plot_network.py"
+
+
 rule build_test_configs:
     input:
         base_config="config.tutorial.yaml",
