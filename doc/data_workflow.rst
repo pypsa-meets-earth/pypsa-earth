@@ -51,3 +51,22 @@ Currently the pre-build file is calculated for Africa.
 
 - electricity demand profiles
 data/ssp2-2.6/2030/era5_2013/Africa.nc
+Data validation tips
+===================================
+
+The following validation points are worth keeping in mind when building your energy model:
+
+1. Check the [power grid](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb):
+    - overall lines length;
+    - general grid topology;
+    - ensure that the general structure of the grid model is appropriate, playing with `tol` values and augmentation options if needed.
+ 
+2. Compare the [installed capacity](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb) values 
+
+3. Validate the [power demand](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb) values and profile.
+
+4. Check that [hydro](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb), [solar and wind](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb) potentials have reasonable values
+
+5. Simulate the actual [energy mix](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb). Look for detailed explanations in https://arxiv.org/abs/2209.04663, section 5.1.
+
+Data availability and quality usually is the biggest concern. Some useful hints on the real-world validation example can be found in the [Nigeria validation](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb) notebook.
