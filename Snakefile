@@ -697,15 +697,19 @@ rule plot_summary:
 
 rule build_test_configs:
     input:
-        tutorial="config.tutorial.yaml",
-        test_standard="test/config.standard.yaml",
-        test_custom="test/config.custom.yaml",
-        test_monte_carlo="test/config.monte_carlo.yaml",
-        test_landlock="test/config.landlock.yaml",
+        base_config="config.tutorial.yaml",
+        update_file_list=[
+            "test/config.standard.yaml",
+            "test/config.custom.yaml",
+            "test/config.monte_carlo.yaml",
+            "test/config.landlock.yaml",
+        ]
     output:
-        test_standard="test/tmp/config.standard_tmp.yaml",
-        test_custom="test/tmp/config.custom_tmp.yaml",
-        test_monte_carlo="test/tmp/config.monte_carlo_tmp.yaml",
-        test_landlock="test/tmp/config.landlock_tmp.yaml",
+        tmp_test_configs=[
+            "test/tmp/config.standard_tmp.yaml",
+            "test/tmp/config.custom_tmp.yaml",
+            "test/tmp/config.monte_carlo_tmp.yaml",
+            "test/tmp/config.landlock_tmp.yaml",
+        ]
     script:
         "scripts/build_test_configs.py"

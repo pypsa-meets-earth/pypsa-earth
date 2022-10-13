@@ -34,42 +34,32 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_test_configs")
 
     # Input paths
-    fptutorial = Path(Path.cwd(), snakemake.input.tutorial)
-    fp0 = Path(Path.cwd(), snakemake.input.test_standard)
-    fp1 = Path(Path.cwd(), snakemake.input.test_custom)
-    fp2 = Path(Path.cwd(), snakemake.input.test_monte_carlo)
-    fp3 = Path(Path.cwd(), snakemake.input.test_landlock)
+    fp_baseconfig = Path(Path.cwd(), snakemake.input.base_config)
+    fp_update_file_list = [Path(Path.cwd(), i) for i in snakemake.input.update_file_list]
 
     # Load yaml files
     yaml = YAML()
-    with open(fptutorial) as fp:
-        data_tutorial = yaml.load(fp)
-    with open(fp0) as fp:
-        data0 = yaml.load(fp)
-    with open(fp1) as fp:
-        data1 = yaml.load(fp)
-    with open(fp2) as fp:
-        data2 = yaml.load(fp)
-    with open(fp3) as fp:
-        data3 = yaml.load(fp)
+    with open(fp_baseconfig) as fp:
+        baseconfig = yaml.load(fp)
+    
+    with open(fp_update_file_list[0]) as fp:
+        base_update = yaml.load(fp_update_file_list[0])
+        base_test_config = update(copy.deepcopy(baseconfig), base_update)
+        fp = Path(Path.cwd(), snakemake.output.tmp_test_configs[0])
+        yaml.dump(base_test_config, fp)
 
-    # Modify yamls
-    standard = update(copy.deepcopy(data_tutorial), data0)
-    custom = update(copy.deepcopy(standard), data1)
-    monte = update(copy.deepcopy(standard), data2)
-    landlock = update(copy.deepcopy(standard), data3)
+    for c in fp_update_file_list[1:]:
+        # Load update yaml
+        with open(c) as fp:
+            update_config = yaml.load(fp)
+        # create updated yaml
+        test_config = update(copy.deepcopy(base_test_config), update_config)
+        # Output path
+        list_no = fp_update_file_list.index(c)
+        fp = Path(Path.cwd(), snakemake.output[list_no])
+        # Save file
+        yaml.dump(test_config, fp)
 
-    # Output paths
-    fp0 = Path(Path.cwd(), snakemake.output.test_standard)
-    fp1 = Path(Path.cwd(), snakemake.output.test_custom)
-    fp2 = Path(Path.cwd(), snakemake.output.test_monte_carlo)
-    fp3 = Path(Path.cwd(), snakemake.output.test_landlock)
-
-    # Save files
-    yaml.dump(standard, fp0)
-    yaml.dump(custom, fp1)
-    yaml.dump(monte, fp2)
-    yaml.dump(landlock, fp3)
 
     # Manual output in terminal
     # import sys
