@@ -19,6 +19,8 @@ Upcoming Release
 
 * Revision of documenation `PR #471 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/471>`__
 
+* Move to new GADM version `PR #478 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/478>`__
+
 PyPSA-Earth 0.1.0
 =================
 

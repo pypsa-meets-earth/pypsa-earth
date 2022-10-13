@@ -55,16 +55,8 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     """
 
-    GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
-    GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
-
-    GADM_inputfile_zip = os.path.join(
-        os.getcwd(),
-        "data",
-        "gadm",
-        GADM_filename,
-        GADM_filename + ".zip",
-    )  # Input filepath zip
+    GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
+    GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
         os.getcwd(),
@@ -77,17 +69,14 @@ def download_GADM(country_code, update=False, out_logging=False):
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
             _logger.warning(
-                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
+                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
-        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
+        os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
 
         with requests.get(GADM_url, stream=True) as r:
-            with open(GADM_inputfile_zip, "wb") as f:
+            with open(GADM_inputfile_gpkg, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
-
-        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
-            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
 
     return GADM_inputfile_gpkg, GADM_filename
 
@@ -113,20 +102,17 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
         # download file gpkg
         file_gpkg, name_file = download_GADM(country_code, update, outlogging)
 
-        # get layers of a geopackage
+        # # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
 
-        # get layer name
+        # # get layer name
         if layer_id < 0 | layer_id >= len(list_layers):
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
         code_layer = np.mod(layer_id, len(list_layers))
-        layer_name = (
-            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
-        )
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name).to_crs(geo_crs)
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_id).to_crs(geo_crs)
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
