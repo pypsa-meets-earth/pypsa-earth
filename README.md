@@ -289,6 +289,13 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/DeniseGiub">
+            <img src="https://avatars.githubusercontent.com/u/113139589?v=4" width="100;" alt="DeniseGiub"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
@@ -301,15 +308,15 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
             <br />
             <sub><b>AnasAlgarei</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/EmreYorat">
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
             <sub><b>EmreYorat</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/HanaElattar">
             <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
