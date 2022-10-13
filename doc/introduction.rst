@@ -73,7 +73,7 @@ The content in this package is organized in folders as described below; for more
 - ``envs``: Stores the conda environment files to successfully run the workflow.
 
 
-Licence
+License
 =======
 
 PyPSA-Earth work is released under multiple licenses:

@@ -24,4 +24,4 @@ Copernicis API is needed
 **4. Build a natura.tiff raster**
 Is used to account for landuse restrictions on the protected and reserved nature areas
 There is a pre-built one which is currently valid for Africa
-It can be vizualized
+It can be visualized
