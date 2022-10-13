@@ -11,6 +11,11 @@ Data used by the model
 
 PyPSA-Earth has the flexible scope when a modeling domain can be selected from the whole Earth to any subregion. The modeling workflow includes data management workflow which is focused on open data collection, modification, prediction and validation. The developed data processing approaches aimed to provide model-ready data with temporal and spatial resolution as high as it's needed by a specific modeling task.
 
+.. _data_management_strategy:
+
+Data management strategy
+===================================
+
 Here we'll look into architecture of the data workflow while practical hand-ons are given in the Tutorial section.
 
 **1. Grid topology data**
@@ -51,6 +56,9 @@ Currently the pre-build file is calculated for Africa.
 
 - electricity demand profiles
 data/ssp2-2.6/2030/era5_2013/Africa.nc
+
+.. _data_validation_tips:
+
 Data validation tips
 ===================================
 
