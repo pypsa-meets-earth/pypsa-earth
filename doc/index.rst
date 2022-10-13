@@ -3,12 +3,61 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the PyPSA meets Earth documentation!
+Welcome to the PyPSA-Earth documentation!
 ================================================
 
-PyPSA meets Earth is a free and open source software project aiming to develop a powerful energy system model for Africa and beyond. The tool is currently under development and will be heavily based on `PyPSA <https://pypsa.readthedocs.io/en/latest/>`_ and `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/>`_. A short presentation about our project and its aims is given on our `website <https://pypsa-meets-earth.github.io/>`_. There you can also sign-up to our Newsletter. 
 
-Watch our latest discussion with African leaders about `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_. Let's work together for a better future.
+.. image:: https://img.shields.io/github/v/release/pypsa-meets-earth/pypsa-earth?include_prereleases
+    :alt: GitHub release (latest by date including pre-releases)
+
+.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg
+    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+
+.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg
+    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+
+.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg
+    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+
+.. image:: https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest
+    :target: https://pypsa-meets-earth.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
+.. image:: https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth
+    :alt: GitHub repo size
+
+.. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
+    :target: https://www.gnu.org/licenses/gpl-3.0
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: Code style Black
+
+.. image:: https://results.pre-commit.ci/badge/github/pypsa-meets-earth/pypsa-earth/main.svg
+    :target: https://results.pre-commit.ci/latest/github/pypsa-meets-earth/pypsa-earth/main
+    :alt: Pre-commit CI-status
+
+.. image:: https://img.shields.io/discord/911692131440148490?logo=discord
+    :target: https://discord.gg/AnuJBk23FU
+    :alt: Discord
+
+.. image:: https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white
+    :target: https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz
+    :alt: Google Drive
+
+*Motivation*. Closed-source models are the current standard for most policy and industry decisions. However, open models have proven to be
+competitive alternatives that promote science, robust technical analysis, collaboration and transparent policy decision making.
+Yet, two issues slow the adoption: open models are often designed with limited geographic scope, hindering synergies to collaborate,
+or are based on low spatially resolved data, limiting their utility.
+
+*PyPSA-Earth* is the first open-source global energy system model with data in high spatial and temporal resolution. It enables
+large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived
+from the European PyPSA-Eur model using new data and functions. It is suitable for operational as well as combined generation,
+storage and transmission expansion studies. We work hard to extend the PyPSA-Earth model by end of this year to include sector-coupling,
+myopic and perfect pathway expansion capabilities.
+
+*PyPSA meets Earth initiative* members are maintaining the *PyPSA-Earth* repository as well as many other tools.
+The `website <https://pypsa-meets-earth.github.io/>`_ provides more context of the initiative and the associated projects. 
 
 .. image:: img/africa_osm_map.png
     :width: 60%
@@ -112,6 +161,7 @@ Documentation
 
 **Project Info**
 
+* :doc:`release_notes`
 * :doc:`project_structure_and_credits`
 * :doc:`how_to_contribute`
 * :doc:`talks_and_papers`
@@ -121,6 +171,7 @@ Documentation
    :maxdepth: 2
    :caption: Project Info
 
+   release_notes
    project_structure_and_credits
    how_to_contribute
    talks_and_papers
