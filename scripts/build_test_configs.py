@@ -35,13 +35,15 @@ if __name__ == "__main__":
 
     # Input paths
     fp_baseconfig = Path(Path.cwd(), snakemake.input.base_config)
-    fp_update_file_list = [Path(Path.cwd(), i) for i in snakemake.input.update_file_list]
+    fp_update_file_list = [
+        Path(Path.cwd(), i) for i in snakemake.input.update_file_list
+    ]
 
     # Load yaml files
     yaml = YAML()
     with open(fp_baseconfig) as fp:
         baseconfig = yaml.load(fp)
-    
+
     with open(fp_update_file_list[0]) as fp:
         base_update = yaml.load(fp_update_file_list[0])
         base_test_config = update(copy.deepcopy(baseconfig), base_update)
@@ -59,7 +61,6 @@ if __name__ == "__main__":
         fp = Path(Path.cwd(), snakemake.output[list_no])
         # Save file
         yaml.dump(test_config, fp)
-
 
     # Manual output in terminal
     # import sys
