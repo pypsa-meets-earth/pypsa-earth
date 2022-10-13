@@ -3,7 +3,7 @@
 
   SPDX-License-Identifier: CC-BY-4.0
 
-.. _structure:
+.. _data_workflow:
 
 ##########################################
 Data used by the model

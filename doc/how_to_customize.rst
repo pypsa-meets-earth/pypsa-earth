@@ -3,7 +3,7 @@
 
   SPDX-License-Identifier: CC-BY-4.0
 
-.. _how_to_docs:
+.. _how_to_customize:
 
 ##########################################
 How to customize?
