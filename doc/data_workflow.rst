@@ -6,8 +6,12 @@
 .. _structure:
 
 ##########################################
-The data worflow
+Data used by the model
 ##########################################
+
+PyPSA-Earth has the flexible scope when a modeling domain can be selected from the whole Earth to any subregion. The modeling workflow includes data management workflow which is focused on open data collection, modification, prediction and validation. The developed data processing approaches aimed to provide model-ready data with temporal and spatial resolution as high as it's needed by a specific modeling task.
+
+Here we'll look into architecture of the data workflow while practical hand-ons are given in the Tutorial section.
 
 **1. Grid topology data**
 OpenStreetMap (OSM) data are being retrieved from the OSM server to be used to build the power grid topology model.
