@@ -55,8 +55,8 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     """
 
-    GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
-    GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
+    GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
+    GADM_url = f"https://biogeo.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}_gpkg.zip"
 
     GADM_inputfile_zip = os.path.join(
         os.getcwd(),
