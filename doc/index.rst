@@ -73,10 +73,10 @@ Documentation
    :caption: Getting Started
 
    introduction
+   data_workflow
    installation
    how_to_start
    tutorial
-   data_workflow
    how_to_customize
    how_to_docs
 
