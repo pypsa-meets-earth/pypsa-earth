@@ -717,13 +717,13 @@ rule build_test_configs:
             "test/config.custom.yaml",
             "test/config.monte_carlo.yaml",
             "test/config.landlock.yaml",
-        ]
+        ],
     output:
         tmp_test_configs=[
             "test/tmp/config.standard_tmp.yaml",
             "test/tmp/config.custom_tmp.yaml",
             "test/tmp/config.monte_carlo_tmp.yaml",
             "test/tmp/config.landlock_tmp.yaml",
-        ]
+        ],
     script:
         "scripts/build_test_configs.py"
