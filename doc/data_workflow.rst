@@ -78,3 +78,19 @@ The following validation points are worth keeping in mind when building your ene
 5. Simulate the actual [energy mix](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb). Look for detailed explanations in https://arxiv.org/abs/2209.04663, section 5.1.
 
 Data availability and quality usually is the biggest concern. Some useful hints on the real-world validation example can be found in the [Nigeria validation](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb) notebook.
+
+License
+=======
+
+* Data files are licensed under different licenses as noted below.
+
+Licenses and urls of the data used in PyPSA-Earth:
+
+.. csv-table::
+   :header-rows: 1
+   :file: configtables/licenses.csv
+
+
+* *BY: Attribute Source*
+* *NC: Non-Commercial Use Only*
+* *SA: Share Alike*
