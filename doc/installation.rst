@@ -12,25 +12,25 @@ Installation
 The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the
 directory in which the commands following the ``%`` should be entered.
 
-System Requirements
+System requirements
 ===================
 
-Building the model with the scripts in this repository runs on a normal computer.
-The entire energy model is relatively heavy and it easily requires > 40Gb of available memory in the disk (HHD/SSD);
-the exact space requirements depend on the specific models under interest.
+Building the model with the scripts in this repository runs on a normal computer e.g. 8-16GBRAM.
+Depending of the region of interest, different amounts of Gb storage (HHD/SSD) are required.
+Africa requires about 40Gb, the world 250Gb, a single country between 1-10Gb.
+We have also prepared a tutorial which should be below 10Gb.
 
 
 Software requirements
 =====================
 
-The complete list of software needed before installing PyPSA Africa is listed below.
+The complete list of software needed before installing PyPSA Earth is listed below.
 
 - `Python 3 <https://www.python.org/>`_ **(mandatory)**: Python is used as our main programming language, thus its knowledge is mandatory.
   To refresh the knowledge, there are plenty of online courses free-of-charge, e.g. `CSDojo playlist <https://www.youtube.com/c/CSDojo/playlists>`_.
   Useful content to watch refer to numpy, pandas
 - `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ **(mandatory)**: in order to use packages in python,
-  it is highly recommended to use a conda package manager, such as `Anaconda <https://docs.anaconda.com/>`_ or
-  `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ (**recommended**). There are many things you can do wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a crystal clear explanation of conda (**excellent read**).  
+  it is highly recommended to use a conda package manager, such as `Anaconda. <https://docs.anaconda.com/>`_ There are many things you can do wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a crystal clear explanation of conda (**excellent read**).  
 - `Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
   and enable to coordinate the parallel software development between many developers.
   It is mandatory to `learn the git basics <https://git-scm.com/doc>`_.
@@ -52,16 +52,16 @@ The complete list of software needed before installing PyPSA Africa is listed be
  
 
 .. note::
-  Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Africa model.
-  The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Africa experience is listed in the 
+  Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Earth model.
+  The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Earth experience is listed in the 
   `Tutorial section <https://pypsa-meets-earth.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
   Most of the dependencies needed will be automatically installed using the conda environments listed below
 
-Clone the Repository
+Clone the repository
 ====================
 
-First of all, clone the `PyPSA meets Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth>`_ using the version control system ``git``.
-The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
+First of all, clone the `PyPSA Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth>`_ using the version control system ``git``.
+The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces.
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
 .. code:: bash
@@ -72,64 +72,67 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
 .. _deps:
 
-Install Python Dependencies
+Install python dependencies
 ===============================
 
-PyPSA meets Earth relies on a set of other Python packages to function.
+PyPSA Earth relies on a set of other Python packages to function.
 We recommend using the package manager and environment management system ``conda`` to install them.
 Make sure that ``conda`` is already installed on your system or install one of the following two distributions:
-
-- `miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ (recommended), which is a mini version of `Anaconda <https://www.anaconda.com/>`__  
+ 
 - `Anaconda <https://www.anaconda.com/>`__
 
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
 The python package requirements are curated in the envs/environment.yaml file.
-The environment can be installed and activated using
+We install only `mamba` in the conda base environment to accelerate the installation.
+**Please keep the base environment always clean, meaning don't install anything there!**
+The environment can be installed in about 5-15min (reported by users) and activated using
 
 .. code:: bash
 
-    .../pypsa-earth % conda env create -f envs/environment.yaml
+    .../pypsa-earth (base) % conda install -c conda-forge mamba
 
-    .../pypsa-earth % conda activate pypsa-earth
+    .../pypsa-earth (base) % mamba env create -f envs/environment.yaml
 
-Sometimes the conda pypsa-earth installation can take more than one our
-(indicates some conflicts in the packages). In case a quick installation is necessary,
-you might also want to try out ``mamba``. It was observed to take around 5-15min to
-install all pypsa-earth dependencies with it.
+    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+
+In case mamba did not work for you, you might want to try the traditional conda installation
 
 .. code::bash
 
-    ... conda install -c conda-forge mamba
+    .../pypsa-earth (base) % conda env create -f envs/environment.yaml
 
-    .../pypsa-earth % mamba env create -f envs/environment.yaml
+    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+
+or use miniconda instead.
     
 To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ 
 and test if your jupyter lab works:
     
 .. code:: bash
 
-    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
+    .../pypsa-earth (pypsa-earth) % ipython kernel install --user --name=pypsa-earth
 
-    .../pypsa-earth % jupyter lab
+    .../pypsa-earth (pypsa-earth) % jupyter lab
 
 .. note::
-   Please, make sure to have properly installed java, from the  `official website <https://www.oracle.com/java/technologies/downloads/>`__ or equivalent.
+  Please, make sure to have properly installed java, from the  `official website <https://www.oracle.com/java/technologies/downloads/>`__ or equivalent.
 
-   In linux only, that is possible through the following command.
+In linux only, that is possible through the following command.
 
-   .. code: bash
+.. code:: bash
 
-     .../pypsa-earth % .../pypsa-earth % conda activate pypsa-earth
+    .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
 
-     .../pypsa-earth % conda install -c conda-forge openjdk
+To verify the successful installation, you can verify that by using the following code.
 
-   To verify the successful installation, you can verify that by using the following code.
-   .. code: bash
-    .../pypsa-earth % java -version
+.. code:: bash
+     
+    .../pypsa-earth (pypsa-earth) % java -version
 
-   The expected output should resemble the following text:
-   .. code: bash
+The expected output should resemble the following text:
+
+.. code:: bash
      java version "1.8.0_341"
      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
@@ -137,19 +140,20 @@ and test if your jupyter lab works:
 .. note::
    ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth,
    thereby there is no need to install it manually.
-   The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
 
-   .. code: bash
+The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
 
-     .../pypsa-earth % .../pypsa-earth % conda activate pypsa-earth
+.. code:: bash
 
-     .../pypsa-earth % snakemake < any command here >
+    .../pypsa-earth (pypsa-earth) % .../pypsa-earth % conda activate pypsa-earth
+
+    .../pypsa-earth (pypsa-earth) % snakemake < any command here >
 
 
 Download data
 =============
 
-The entire distribution, including the data for the whole Africa, is very heavy (>40Gb) and it involves a large number of files.
+The entire distribution, including the data for most parts on Earth, is very heavy (>40Gb for Africa) and it involves a large number of files.
 To simplify the installation of the github folder, the main source code is available in the Github folder, whereas the data are stored in cloud.
 The rule ``retrieve_databundle_light`` has been specifically developed to set up the raw data, and the procedure below guides in setting up the needed data.
 
@@ -163,9 +167,9 @@ The rule ``retrieve_databundle_light`` has been specifically developed to set up
 
    .. code:: bash
 
-     .../pypsa-earth % conda activate pypsa-earth
+     .../pypsa-earth (base) % conda activate pypsa-earth
 
-     .../pypsa-earth % snakemake -j1 retrieve_databundle_light --force
+     .../pypsa-earth (pypsa-earth) % snakemake -j1 retrieve_databundle_light --force
 
 5. In the file ``config.yaml`` set the option ``retrieve_databundle`` back to ``false`` and save the file:
    ``retrieve_databundle: false``
