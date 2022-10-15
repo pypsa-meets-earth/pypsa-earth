@@ -240,7 +240,7 @@ world_iso = {
         "CY": "cyprus",
         # "EG": "egypt",  # leads to bug -> missing ssp file when executing ["Africa"]
         "GE": "georgia",
-        "HK": "hong kong",
+        # "HK": "hong kong",  # no more with gadm 4.1
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
@@ -255,7 +255,7 @@ world_iso = {
         "KG": "kyrgyzstan",
         "LA": "lao-people's-democratic-republic",
         "LB": "lebanon",
-        "MO": "macao",
+        # "MO": "macao",  # no more with gadm 4.1
         "MY": "malaysia",
         "SG": "singapore",
         "BN": "brunei",
@@ -508,7 +508,7 @@ continent_regions = {
         "YE",
     ],
     # FAR EASTREN AISIAN REGION
-    "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN", "HK", "MO"],
+    "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN"],  # , "HK", "MO"],
     # SOUTHEASTREN AISIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
     # CENTRAL AISIAN REGION
@@ -560,8 +560,8 @@ iso_to_geofk_dict = {
     "EH": "MA",  # Western Sahara -> Morocco
     "SN": "SNGM",  # Senegal -> Senegal-Gambia
     "GM": "SNGM",  # Gambia -> Senegal-Gambia
-    "HK": "CN",  # Hong Kong  -> China
-    "MO": "CN",  # Macao  -> China
+    # "HK": "CN",  # Hong Kong  -> China  # no more with gadm 4.1
+    # "MO": "CN",  # Macao  -> China  # no more with gadm 4.1
     "SG": "MY-SG-BN",  # Singapore -> Malaysia-Singapore-Brunei
     "BN": "MY-SG-BN",  # Brunei -> Malaysia-Singapore-Brunei
     "MY": "MY-SG-BN",  # Malaysia -> Malaysia-Singapore-Brunei
