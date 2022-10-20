@@ -13,7 +13,7 @@ scenario:
   simpl: ['']
   ll: ['copt']
   clusters: [6]
-  opts: [Co2L-24H]
+  opts: [Co2L-4H]
 
 countries: ["NG", "BJ"]
 
@@ -32,7 +32,7 @@ summary_dir: results
 
 snapshots:
   start: "2013-03-1"
-  end: "2013-03-14"
+  end: "2013-03-7"
   inclusive: "left" # end is not inclusive
 
 enable:
@@ -42,7 +42,7 @@ enable:
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
+  build_natura_raster: false  # If True, then build_natura_raster can be run
 
 # definition of the Coordinate Reference Systems
 crs:
@@ -50,7 +50,11 @@ crs:
   distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
   area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
-# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
+# CI relevant
+retrieve_databundle: # required for nice CI test output
+  show_progress: false # disable progress bar in retrieve_databundle
+# test
+
 
 augmented_line_connection:
   add_to_snakefile: false  # If True, includes this rule to the workflow
@@ -111,7 +115,7 @@ load_options:
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 7.75e+7 # 0.05 * 3.1e9*0.5
+  co2limit: 0
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: false  # should HVDC lines be modeled as `Line` or as `Link` component?
@@ -182,7 +186,7 @@ atlite:
       dy: 0.3  # cutout resolution
       # Below customization options are dealt in an automated way depending on
       # the snapshots and the selected countries. See 'build_cutout.py'
-      # time: ["2013-01-01", "2014-01-01"]  # specify different weather year (~40 years available)
+      time: ["2013-03-01", "2013-03-07"]  # specify different weather year (~40 years available)
       # x: [-12., 35.]  # manual set cutout range
       # y: [33., 72]    # manual set cutout range
 

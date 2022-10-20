@@ -30,6 +30,7 @@ networks/
 resources/
 scripts/temp
 scripts/test.py
+test/tmp/
 
 # Untrack some Jupyter changes
 .ipynb_checkpoints

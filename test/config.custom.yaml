@@ -2,8 +2,11 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-### ADDITIONAL TO STANDARD CHANGES OF CONFIG.TUTORIAL.YAML FOR TEST ###
-build_natura_raster: false
+### CHANGES TO CONFIG.TUTORIAL.YAML ###
+enable:
+  build_natura_raster: true
+
+download_osm_data_nprocesses: 4
 
 augmented_line_connection:
   add_to_snakefile: true  # If True, includes this rule to the workflow

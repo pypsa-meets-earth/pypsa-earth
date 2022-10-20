@@ -42,20 +42,14 @@ if __name__ == "__main__":
     # Load yaml files
     yaml = YAML()
     with open(fp_baseconfig) as fp:
-        baseconfig = yaml.load(fp)
+        base_config = yaml.load(fp)
 
-    with open(fp_update_file_list[0]) as fp:
-        base_update = yaml.load(fp_update_file_list[0])
-        base_test_config = update(copy.deepcopy(baseconfig), base_update)
-        fp = Path(Path.cwd(), snakemake.output.tmp_test_configs[0])
-        yaml.dump(base_test_config, fp)
-
-    for c in fp_update_file_list[1:]:
+    for c in fp_update_file_list:
         # Load update yaml
         with open(c) as fp:
             update_config = yaml.load(fp)
         # create updated yaml
-        test_config = update(copy.deepcopy(base_test_config), update_config)
+        test_config = update(copy.deepcopy(base_config), update_config)
         # Output path
         list_no = fp_update_file_list.index(c)
         fp = Path(Path.cwd(), snakemake.output[list_no])

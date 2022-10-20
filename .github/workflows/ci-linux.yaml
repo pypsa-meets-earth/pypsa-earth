@@ -65,9 +65,9 @@ jobs:
       run: |
         snakemake --cores all build_test_configs
 
-    - name: Test standard workflow
+    - name: Test tutorial workflow
       run: |
-        cp test/tmp/config.standard_tmp.yaml config.yaml
+        cp config.tutorial.yaml config.yaml
         snakemake --cores all solve_all_networks --forceall
 
     - name: Test custom workflow
