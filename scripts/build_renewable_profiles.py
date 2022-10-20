@@ -294,13 +294,15 @@ if __name__ == "__main__":
         logger.info(f"correction_factor is set as {correction_factor}")
 
     cutout = atlite.Cutout(paths["cutout"])
-    regions = gpd.read_file(paths.regions) #.set_index("name").rename_axis("bus")
+    regions = gpd.read_file(paths.regions)  # .set_index("name").rename_axis("bus")
 
-    assert not regions.empty, (f"List of regions in {snakemake.input.regions} is empty, please "
-                               "disable the corresponding renewable technology")
-                               
+    assert not regions.empty, (
+        f"List of regions in {snakemake.input.regions} is empty, please "
+        "disable the corresponding renewable technology"
+    )
+
     # do not pull up, set_index does not work if geo dataframe is empty
-    regions = regions.set_index('name').rename_axis('bus')
+    regions = regions.set_index("name").rename_axis("bus")
 
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(

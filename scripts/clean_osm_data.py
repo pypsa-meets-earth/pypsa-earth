@@ -818,18 +818,20 @@ if __name__ == "__main__":
         #     ext_country_shapes = country_shapes
 
         # else:
-        #logger.info("Combining on- and offshore shape")
+        # logger.info("Combining on- and offshore shape")
         # offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
         # "geometry"
         # ]
 
-        offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes) #set_index("name")["geometry"]
-        offshore_shapes = offshore_shapes.reindex(columns=['name', 'geometry']).set_index('name')['geometry']
-    
-
+        offshore_shapes = gpd.read_file(
+            snakemake.input.offshore_shapes
+        )  # set_index("name")["geometry"]
+        offshore_shapes = offshore_shapes.reindex(
+            columns=["name", "geometry"]
+        ).set_index("name")["geometry"]
 
         ext_country_shapes = create_extended_country_shapes(
-        country_shapes, offshore_shapes
+            country_shapes, offshore_shapes
         )
 
     else:

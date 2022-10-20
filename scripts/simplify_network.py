@@ -256,10 +256,6 @@ def _aggregate_and_move_components(
         p: {k: getattr(pd.Series, k, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
- 
-
-
-
 
     replace_components(n, "Generator", generators, generators_pnl)
 

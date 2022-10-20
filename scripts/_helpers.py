@@ -9,7 +9,8 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-REGION_COLS = ['geometry', 'name', 'x', 'y', 'country']
+REGION_COLS = ["geometry", "name", "x", "y", "country"]
+
 
 def sets_path_to_root(root_directory_name):
     """

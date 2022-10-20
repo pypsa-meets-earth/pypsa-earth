@@ -822,9 +822,10 @@ if __name__ == "__main__":
     # africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
     # save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
 
-    africa_shape = gpd.GeoDataFrame(geometry=[country_cover(country_shapes, offshore_shapes.geometry)])
+    africa_shape = gpd.GeoDataFrame(
+        geometry=[country_cover(country_shapes, offshore_shapes.geometry)]
+    )
     africa_shape.reset_index().to_file(snakemake.output.africa_shape)
-
 
     gadm_shapes = gadm(
         worldpop_method,
