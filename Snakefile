@@ -47,10 +47,24 @@ wildcard_constraints:
     unc="[-+a-zA-Z0-9\.]*",
 
 
-rule run_test:
+rule clean:
     run:
-        shell("cp test/config.test1.yaml config.yaml")
-        shell("snakemake --cores all solve_all_networks --forceall")
+        shell("snakemake -j 1 solve_all_networks --delete-all-output")
+
+
+rule run_tests:
+    run:
+        import os
+
+        shell("snakemake --cores all build_test_configs")
+        directory = "test/tmp"  # assign directory
+        for filename in os.scandir(directory):  # iterate over files in that directory
+            if filename.is_file():
+                print(filename.path)
+                shell("cp {filename.path} config.yaml")
+                shell("snakemake --cores all solve_all_networks --forceall")
+        # shell("rm -r config.yaml")
+        print("Tests are successful.")
 
 
 rule solve_all_networks:
@@ -693,3 +707,21 @@ rule plot_network:
         "logs/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
     script:
         "scripts/plot_network.py"
+
+
+rule build_test_configs:
+    input:
+        base_config="config.tutorial.yaml",
+        update_file_list=[
+            "test/config.custom.yaml",
+            "test/config.monte_carlo.yaml",
+            "test/config.landlock.yaml",
+        ],
+    output:
+        tmp_test_configs=[
+            "test/tmp/config.custom_tmp.yaml",
+            "test/tmp/config.monte_carlo_tmp.yaml",
+            "test/tmp/config.landlock_tmp.yaml",
+        ],
+    script:
+        "scripts/build_test_configs.py"
