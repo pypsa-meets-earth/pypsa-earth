@@ -28,6 +28,8 @@ What is cutout
 Atlite approach is used 
 Copernicis API is needed
 
+Be careful when setting cutout coordinates and generally when `build_cutout` flag is on.
+
 **4. Build a natura.tiff raster**
 Is used to account for landuse restrictions on the protected and reserved nature areas
 There is a pre-built one which is currently valid for Africa
