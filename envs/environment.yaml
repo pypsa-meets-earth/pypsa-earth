@@ -24,7 +24,7 @@ dependencies:
 - seaborn
 - snakemake-minimal
 - memory_profiler
-- yaml
+- ruamel.yaml
 - pytables
 - lxml
 - numpy
