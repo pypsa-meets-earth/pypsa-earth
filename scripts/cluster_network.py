@@ -137,6 +137,7 @@ from _helpers import (
     sets_path_to_root,
     two_2_three_digits_country,
     update_p_nom_max,
+    REGION_COLS
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
@@ -482,14 +483,21 @@ def cluster_regions(busmaps, input=None, output=None):
     busmap = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
 
     for which in ("regions_onshore", "regions_offshore"):
-        regions = gpd.read_file(getattr(input, which)).set_index("name")
-        geom_c = (
-            regions.geometry.groupby(busmap).apply(list).apply(shapely.ops.unary_union)
-        )
-        regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
-        regions_c.index.name = "name"
-        save_to_geojson(regions_c, getattr(output, which))
 
+        #regions = gpd.read_file(getattr(input, which)).set_index("name")
+        regions = gpd.read_file(getattr(input, which))
+        regions = regions.reindex(columns=REGION_COLS).set_index('name')
+        aggfunc = dict(x="mean", y="mean", country="first")
+        regions_c = regions.dissolve(busmap, aggfunc=aggfunc)
+
+        # geom_c = (
+        #     regions.geometry.groupby(busmap).apply(list).apply(shapely.ops.unary_union)
+        # )
+        # regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
+        regions_c.index.name = "name"
+        #save_to_geojson(regions_c, getattr(output, which))
+        regions_c = regions_c.reset_index()
+        regions_c.to_file(getattr(output, which))
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

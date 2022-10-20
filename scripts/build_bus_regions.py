@@ -197,9 +197,14 @@ if __name__ == "__main__":
     country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
         "geometry"
     ]
-    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes).set_index("name")[
-        "geometry"
-    ]
+    # offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes).set_index("name")[
+    #     "geometry"
+    # ]
+
+    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes) #set_index("name")["geometry"]
+    offshore_shapes = offshore_shapes.reindex(columns=['name', 'geometry']).set_index('name')['geometry']
+
+
     gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")[
         "geometry"
     ]
@@ -293,4 +298,9 @@ if __name__ == "__main__":
         # remove empty polygons
         offshore_regions = offshore_regions[~offshore_regions.geometry.is_empty]
 
-    save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
+    #save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
+    #pd.concat(onshore_regions, ignore_index=True).to_file(snakemake.output.regions_onshore)
+    if offshore_regions:
+        pd.concat(offshore_regions, ignore_index=True).to_file(snakemake.output.regions_offshore)
+    else:
+        offshore_shapes.to_frame().to_file(snakemake.output.regions_offshore)

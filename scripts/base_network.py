@@ -152,7 +152,7 @@ def _set_links_underwater_fraction(n):
         offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
         links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
         n.links["underwater_fraction"] = (
-            links.intersection(offshore_shape).length / links.length
+        links.intersection(offshore_shape).length / links.length
         )
 
 
@@ -327,17 +327,23 @@ def _remove_dangling_branches(branches, buses):
     )
 
 
+
 def _set_countries_and_substations(n):
-
-    buses = n.buses
-
+    
     countries = snakemake.config["countries"]
     country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
-        "geometry"
+       "geometry"
     ]
+    
     offshore_shapes = unary_union(
         gpd.read_file(snakemake.input.offshore_shapes)["geometry"]
     )
+
+    # reindexing necessary for supporting empty geo-dataframes
+    # offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes)
+    # offshore_shapes = offshore_shapes.reindex(columns=['name', 'geometry']).set_index('name')['geometry']
+    
+    buses = n.buses
 
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
@@ -399,6 +405,9 @@ def _set_countries_and_substations(n):
         )
 
     return buses
+
+def new_func():
+    global offshore_shapes
 
 
 def _rebase_voltage_to_config(component):

@@ -810,15 +810,21 @@ if __name__ == "__main__":
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
     country_shapes = countries(countries_list, geo_crs, update, out_logging)
-    save_to_geojson(country_shapes, out.country_shapes)
+    # save_to_geojson(country_shapes, out.country_shapes)
+    country_shapes.reset_index().to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
     )
-    save_to_geojson(offshore_shapes, out.offshore_shapes)
+    # save_to_geojson(offshore_shapes, out.offshore_shapes)
+    offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
 
-    africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
-    save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
+    # africa_shape = country_cover(country_shapes, offshore_shapes, out_logging)
+    # save_to_geojson(gpd.GeoSeries(africa_shape), out.africa_shape)
+
+    africa_shape = gpd.GeoDataFrame(geometry=[country_cover(country_shapes, offshore_shapes.geometry)])
+    africa_shape.reset_index().to_file(snakemake.output.africa_shape)
+
 
     gadm_shapes = gadm(
         worldpop_method,
@@ -832,3 +838,4 @@ if __name__ == "__main__":
         nprocesses=nprocesses,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
+    # nuts3_shapes.reset_index().to_file(snakemake.output.nuts3_shapes)
