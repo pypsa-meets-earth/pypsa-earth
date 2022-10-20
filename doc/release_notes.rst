@@ -13,6 +13,8 @@ Upcoming Release
 
 **New Features and major Changes**
 
+* Landlock countries fix `PR 481 # <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__
+
 * Finalize package restructuring `PR #462 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/462>`__
 
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
