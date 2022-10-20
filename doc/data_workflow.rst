@@ -47,8 +47,20 @@ Currently we are using the following resources.
 
 **osm** are raw [OpenStreetMap](https://www.openstreetmap.org/) data. Are being loaded behind the scene when running the `download_osm_data` rule.
 
+The raw OSM data in [.pbf](https://wiki.openstreetmap.org/wiki/PBF_Format) format are stored in the folder `/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
+
+The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
+
 - *economical*
-costs.csv
+
+**costs.csv**
+csv file containing the defaulf costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adajustments may be needed. 
+
+**gadm** it contains data of the shapes of administrative zones by country (e.g. regions, districts, provinces, ...), depending on the level of resolution desired by the configuration file. The data in this folder are automatically populated by the build_shapes rule that download such data from the gadm website
+
+**GDP** raster dataset of the Gross Domestic Product (GDP) by arcs of the world, as available from DRYAD
+
+**WorldPop** raster dataset of the population by arc as automatically by build_shapes rule from WorldPop
 
 - *technological*
 **custom_powerplants.csv**
