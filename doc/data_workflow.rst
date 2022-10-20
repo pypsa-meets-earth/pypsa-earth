@@ -34,7 +34,8 @@ There are a number GIS data which allow to build a realistic model. Currently we
 TODO Add credits, links and license informations
 
 - *environmental*
-GEBCO_2021_TID.nc
+
+**GEBCO** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. These data are used in the `build_renewable_profiles` rule. [GEBCO](https://www.gebco.net/) stands for General Bathymetric Chart of the Oceans. It's curated by a non-profit making organisation which relies largely on the voluntary contributions of an enthusiastic international team of geoscientists and hydrographers.
 eez_v11.gpkg
 copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 landcover
