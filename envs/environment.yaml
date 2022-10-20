@@ -51,7 +51,7 @@ dependencies:
   # GIS dependencies:
 - cartopy
 - descartes
-- rasterio<1.2.10  # until atlite is up to date https://github.com/PyPSA/atlite/issues/238
+- rasterio!=1.2.10
 - rioxarray
 
  # Plotting
