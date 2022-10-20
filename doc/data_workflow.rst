@@ -29,9 +29,9 @@ Currently we relay on ERA5 <link> data and `atlite` to process them.
 Explain what is cutout and how it's used by generate_renewable_profiles
 
 **3. General data**
-There are a number GIS data which allow to build a realistic model. Currently we are using the following resources.
+There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `./data/` folder.
 
-TODO Add credits, links and license informations
+Currently we are using the following resources.
 
 - *environmental*
 
@@ -44,8 +44,9 @@ landcover
 costs.csv
 
 - *technological*
-custom_powerplants.csv
-eia_hydro_annual_generation.csv
+**custom_powerplants.csv**
+**eia_hydro_annual_generation.csv**
+**hydro_capacities.csv**
 
 **4. Pre-calculated datasets**
 There are some datasets which were prepared to ensure smooth run of the model. However, they may (and in some cases) must be replaced by custom ones. 
