@@ -139,10 +139,10 @@ def unify_protected_shape_areas(inputs, area_crs, out_logging):
         _logger.info(
             "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
         )
-    for i in shp_files:
-        shape = gpd.GeoDataFrame(
-            pd.concat([gpd.read_file(i) for i in shp_files])
-        ).to_crs(area_crs)
+
+    shape = gpd.GeoDataFrame(pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(
+        area_crs
+    )
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
