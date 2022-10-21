@@ -31,10 +31,20 @@ Mostly these data are global and should be loaded only once when installing the 
 
 **3. Build the custom cutout**
 What is cutout
+
+Cutouts are spatio-temporal subsets of the European weather data from the ECMWF ERA5 reanalysis dataset and the CMSAF SARAH-2 solar surface radiation dataset for the year 2013. They have been prepared by and are for use with the atlite tool. You can either generate them yourself using the build_cutouts rule or retrieve them directly from zenodo through the rule retrieve_cutout. The Tutorial uses a smaller cutout than required for the full model (30 MB), which is also automatically downloaded.
+
+cutout, which means that environmental and weather data is added to geospatial boundaries by matching various datasets (ERA5 reanalysis data [55], SARAH-2 satellite data [56], and GEBCO bathymetry [57]),
+
 Atlite approach is used 
 Copernicis API is needed
 
+In particular, it's better to set the  as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model.
+
 Be careful when setting cutout coordinates and generally when `build_cutout` flag is on.
+
+Cutout extend is set by country boundaries
+Be aware that expilic specification of the cutout coordinates will overwrite the country-deriven specifications
 
 **4. Build a natura.tiff raster**
 Is used to account for landuse restrictions on the protected and reserved nature areas
