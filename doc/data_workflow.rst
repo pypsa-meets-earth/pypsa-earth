@@ -29,7 +29,7 @@ Currently we relay on ERA5 <link> data and `atlite` to process them.
 Explain what is cutout and how it's used by generate_renewable_profiles
 
 **3. General data**
-There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `./data/` folder.
+There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `./pypsa-earth/data/` folder.
 
 Currently we are using the following resources.
 
@@ -47,7 +47,7 @@ Currently we are using the following resources.
 
 **osm** are raw [OpenStreetMap](https://www.openstreetmap.org/) data. Are being loaded behind the scene when running the `download_osm_data` rule.
 
-The raw OSM data in [.pbf](https://wiki.openstreetmap.org/wiki/PBF_Format) format are stored in the folder `/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
+The raw OSM data in [.pbf](https://wiki.openstreetmap.org/wiki/PBF_Format) format are stored in the folder `./pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `./pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
 The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
 
