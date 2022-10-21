@@ -95,10 +95,10 @@ def determine_cutout_xXyY(cutout_name, out_logging):
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
     cutout_xXyY = [
-        np.clip(x - dx / 2.0, -180, 180),
-        np.clip(X + dx / 2.0, -180, 180),
-        np.clip(y - dy / 2.0, -90, 90),
-        np.clip(Y + dy / 2.0, -90, 90),
+        x - dx / 2.0,
+        X + dx / 2.0,
+        y - dy / 2.0,
+        Y + dy / 2.0,
     ]
     return cutout_xXyY
 
