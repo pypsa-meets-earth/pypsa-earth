@@ -24,8 +24,10 @@ It could be helpful to keep in mind the following points:
 3) the cutout time dimension, the weather year used for demand modeling and the actual snapshot should match.
 
 **2. Load all the common data**
-The `retrieve_databundle` rule makes the job.
-Caution: mind the flags in the config
+
+PyPSA-Earth relies on a number of datasets introduced in the (:ref:`_data_workflow`) and (:ref:`_introduction#License`). Automated data retrival is implemented by the retrieve* rules (:ref:`rules_overview/download_and_filter/retrieve`).
+
+Mostly these data are global and should be loaded only once when installing the model. The exception is the cutout which requires of about ~200 Gb in it's global version. The cutout which is supplied with the model could be loaded by running `retrieve_databundle_light` rule, corresponds to Africa. If you are interested in other part of the world a custom cutout should be built. 
 
 **3. Build the custom cutout**
 What is cutout
