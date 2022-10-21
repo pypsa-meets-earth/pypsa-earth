@@ -48,5 +48,7 @@ Be aware that expilic specification of the cutout coordinates will overwrite the
 
 **4. Build a natura.tiff raster**
 Is used to account for landuse restrictions on the protected and reserved nature areas
-There is a pre-built one which is currently valid for Africa
-It can be visualized
+There is a pre-built one which is currently valid for Africa, global `natura.tiff` raster is under development.
+
+Converts vectordata or known as shapefiles (i.e. used for geopandas/shapely) to our cutout rasters. The Protected Planet Data on protected areas is aggregated to all cutout regions.
+
