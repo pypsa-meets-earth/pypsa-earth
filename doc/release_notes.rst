@@ -21,9 +21,11 @@ Upcoming Release
 
 * Add new config test design. It is now easy and light to test multiple configs `PR #466 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/466>`__
 
-* Revision of documenation `PR #471 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/471>`__
+* Revision of documenation `PR #471 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/471>`__, `PR #482 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/482>`__
 
 * Move to new GADM version `PR #478 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/478>`__
+
+* Update natura tiff to global scale, revise default databundle description and remove old limitations to environment `PR #470 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/470>`__
 
 PyPSA-Earth 0.1.0
 =================
