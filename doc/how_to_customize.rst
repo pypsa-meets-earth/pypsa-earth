@@ -9,6 +9,8 @@
 How to customize?
 ##########################################
 
+PyPSA-Earth can be tailored to represent any part of the world quite easily. The following procedure may be recommended.
+
 **1. Adjust the config**
 The main parameters needed to customize the modeling process are defined in the configuration file `config.yaml`. Depending on the particular problem you are working on it could make sense to change a bit config settings. In particular, it's better to set the  as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model.
 
