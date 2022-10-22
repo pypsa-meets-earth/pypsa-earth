@@ -30,14 +30,18 @@ PyPSA-Earth relies on a number of datasets introduced in the (:ref:`_data_workfl
 Mostly these data are global and should be loaded only once when installing the model. The exception is the cutout which requires of about ~200 Gb in it's global version. The cutout which is supplied with the model could be loaded by running `retrieve_databundle_light` rule, corresponds to Africa. If you are interested in other part of the world a custom cutout should be built. 
 
 **3. Build the custom cutout**
-What is cutout
+The cutout is the main concept of climate data management in PyPSA ecosystem instroduced in (`atlite`)[https://atlite.readthedocs.io/en/latest/] package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since
+such datasets are typically global and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing concepts are contained in (JOSS paper)[https://joss.theoj.org/papers/10.21105/joss.03294].
 
-Cutouts are spatio-temporal subsets of the European weather data from the ECMWF ERA5 reanalysis dataset and the CMSAF SARAH-2 solar surface radiation dataset for the year 2013. They have been prepared by and are for use with the atlite tool. You can either generate them yourself using the build_cutouts rule or retrieve them directly from zenodo through the rule retrieve_cutout. The Tutorial uses a smaller cutout than required for the full model (30 MB), which is also automatically downloaded.
+The pre-built cutout for Africa is available for 2013 year and can be loaded directly from zenodo through the rule `retrieve_cutout`. There is also a smaller cutout for Africa built for a two-weeks time span; it is automatically downloaded when retrieving common data with `retrieve_databundle_light`.
 
-cutout, which means that environmental and weather data is added to geospatial boundaries by matching various datasets (ERA5 reanalysis data [55], SARAH-2 satellite data [56], and GEBCO bathymetry [57]),
+In case you are interested in other parts of the world you can generate a cutout yourself using the `build_cutouts` rule. To run it you will need to 
+1) be registred on  the `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_; 
+2) install ``cdsapi`` package  (can be installed with `pip`);
+3) setup your CDS API key as described `on their website <https://cds.climate.copernicus.eu/api-how-to>`_.
 
-Atlite approach is used 
-Copernicis API is needed
+These steps are requred to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
+
 
 In particular, it's better to set the  as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model.
 
