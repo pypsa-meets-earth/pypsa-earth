@@ -166,10 +166,10 @@ atlite:
       module: era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
-      # Below customization options are dealt in an automated way depending on
-      # the snapshots and the selected countries. See 'build_cutout.py'
-      # time: ["2013-01-01", "2014-01-01"]  # specify different weather year (~40 years available)
-      # x: [-12., 35.]  # manual set cutout range
+      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
 
 

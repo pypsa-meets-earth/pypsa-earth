@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: : 2021-2022 The PyPSA-Earth Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+### CHANGES TO CONFIG.TUTORIAL.YAML ###
+countries: ["BW"]

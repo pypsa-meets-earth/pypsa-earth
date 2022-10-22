@@ -55,7 +55,7 @@ print(
 
 # -- Project information -----------------------------------------------------
 
-project = "PyPSA meets Earth"
+project = "PyPSA-Earth"
 author = "Max Parzen"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
@@ -135,10 +135,10 @@ html_static_path = ["_static"]
 texinfo_documents = [
     (
         master_doc,
-        "pypsa_meets_earth",
-        "pypsa-meets-earth Documentation",
+        "pypsa_earth",
+        "pypsa-earth Documentation",
         author,
-        "pypsa-meets-earth",
+        "pypsa-earth",
         "One line description of project.",
         "Miscellaneous",
     ),
@@ -149,7 +149,7 @@ texinfo_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "pypsa_meets_earth", "pypsa_meets_earth Documentation", [author], 1)
+    (master_doc, "pypsa_earth", "pypsa_earth Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.

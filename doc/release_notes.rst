@@ -17,9 +17,17 @@ Upcoming Release
 
 * Fix made in config.default and config.tutorial changing Monte-Carlo from true to false `PR #463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/463>`__
 
-* Revision of documenation `PR #471 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/471>`__
 
+* Move to new GADM version `PR #478 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/478>`__
 
+* Update natura tiff to global scale, revise default databundle description and remove old limitations to environment `PR #470 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/470>`__
+
+PyPSA-Earth 0.1.0
+=================
+
+Model rebranded from PyPSA-Africa to PyPSA-Earth. Model is part of the now called PyPSA meets Earth initiative which hosts mutliple projects.
+
+**New features and major changes (10th September 2022)**
 
 * Identify DC lines but temporary transform them back into AC `PR #348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/348>`__
 
