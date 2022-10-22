@@ -49,8 +49,7 @@ There is also option to set the cutout extent specifying `x` and `y` values dire
 The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
 
 **4. Build a natura.tiff raster**
-Is used to account for landuse restrictions on the protected and reserved nature areas
-There is a pre-built one which is currently valid for Africa, global `natura.tiff` raster is under development.
+A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
 
-Converts vectordata or known as shapefiles (i.e. used for geopandas/shapely) to our cutout rasters. The Protected Planet Data on protected areas is aggregated to all cutout regions.
+A pre-built `natura.tiff` is loaded along with other data needed to run a model whith `retrieve_databundle_light` rule. Currently this  valid for Africa, global `natura.tiff` raster is under development. You may generate the `natura.tiff` for a region of interest using `build_natura_raster` rule which aggregates data on protected areas along the cutout extent.
 
