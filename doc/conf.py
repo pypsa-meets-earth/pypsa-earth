@@ -55,7 +55,7 @@ print(
 
 # -- Project information -----------------------------------------------------
 
-project = "PyPSA Earth"
+project = "PyPSA-Earth"
 author = "Max Parzen"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
