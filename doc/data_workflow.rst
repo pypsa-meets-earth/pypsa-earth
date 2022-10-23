@@ -22,8 +22,9 @@ Here we'll look into architecture of the data workflow while practical hand-ons 
 OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The OSM data are being loaded by `download_osm_data` and cleaned by `clean_osm_data` rules, respectively.
 
 **2. Climate data**
-Currently we relay on ERA5 <link> data and `atlite` to process them.
-Explain what is cutout and how it's used by generate_renewable_profiles
+The climate data processing is provided by `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. It extracts all the required whether and climate data to generate the time series of renewable potential by g`enerate_renewable_profiles` rule.
+
+The main data source on climate variables is `ERA5 reanalysis <https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.3803>`_.
 
 **3. General data**
 There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `./pypsa-earth/data/` folder.
