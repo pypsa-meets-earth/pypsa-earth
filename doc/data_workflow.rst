@@ -27,7 +27,7 @@ The climate data processing is provided by `atlite <https://atlite.readthedocs.i
 The main data source on climate variables is `ERA5 reanalysis <https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.3803>`_.
 
 **3. General data**
-There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `./pypsa-earth/data/` folder.
+There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `pypsa-earth/data/` folder.
 
 Currently we are using the following resources.
 
