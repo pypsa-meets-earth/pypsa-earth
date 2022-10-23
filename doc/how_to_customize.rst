@@ -37,7 +37,7 @@ The pre-built cutout for Africa is available for 2013 year and can be loaded dir
 
 In case you are interested in other parts of the world you can generate a cutout yourself using the `build_cutouts` rule. To run it you will need to 
 1) be registred on  the `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_; 
-2) install ``cdsapi`` package  (can be installed with `pip`);
+2) install `cdsapi` package  (can be installed with `pip`);
 3) setup your CDS API key as described `on their website <https://cds.climate.copernicus.eu/api-how-to>`_.
 
 These steps are requred to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
