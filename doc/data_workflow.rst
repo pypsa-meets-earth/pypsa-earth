@@ -37,15 +37,15 @@ Currently we are using the following resources.
 
 **eez** is the dataset of the Exclusive Economic Zones (EEZ) available from Marine Regions. This file is used in the rule build_shapes to identify the marine region by country and provide shapes of the maritime regions to be possibly used to estimate off-shore renewable potential, for example.
 
-**gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. These data are used in the `build_renewable_profiles` rule. [GEBCO](https://www.gebco.net/) stands for General Bathymetric Chart of the Oceans. It's curated by a non-profit making organisation which relies largely on the voluntary contributions of an enthusiastic international team of geoscientists and hydrographers.
+**gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.gebco.net/>`_ stands for General Bathymetric Chart of the Oceans. It's curated by a non-profit making organisation which relies largely on the voluntary contributions of an enthusiastic international team of geoscientists and hydrographers.
 
 **hydrobasins** datasets on watershed boundaries and basins, as available from HydroBASINS. These data are used to estimate the hydropower generation in the `build_renewable_profiles` rule.
 
 **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. Currently are used to generate a `natura.tiff` raster. Will be deprecated once the global `natura.tiff` will be available.
 
-**osm** are raw [OpenStreetMap](https://www.openstreetmap.org/) data. Are being loaded behind the scene when running the `download_osm_data` rule.
+**osm** are raw `OpenStreetMap <https://www.openstreetmap.org/>`_ data. They are being loaded when running the `download_osm_data` rule.
 
-The raw OSM data in [.pbf](https://wiki.openstreetmap.org/wiki/PBF_Format) format are stored in the folder `./pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `./pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
+The raw **OSM** data in `pbf <https://wiki.openstreetmap.org/wiki/PBF_Format>`_ format are stored in the folder `pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
 The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
 
@@ -54,27 +54,30 @@ The cleaned OSM network data that are the output of the `osm_data_cleaning` rule
 **costs.csv**
 csv file containing the defaulf costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adajustments may be needed. 
 
-**gadm** it contains data of the shapes of administrative zones by country (e.g. regions, districts, provinces, ...), depending on the level of resolution desired by the configuration file. The data in this folder are automatically populated by the build_shapes rule that download such data from the gadm website
+**gadm** foldr contains data of the shapes of administrative zones by country (e.g. regions, districts, provinces, ...), depending on the level of resolution desired by the configuration file. The data in this folder are automatically populated by the `build_shapes` rule that download such data from the gadm website.
 
-**GDP** raster dataset of the Gross Domestic Product (GDP) by arcs of the world, as available from DRYAD
+**GDP** raster dataset of the Gross Domestic Product (GDP) by arcs of the world, as available from `DRYAD <https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0>`_.
 
 **WorldPop** raster dataset of the population by arc as automatically by build_shapes rule from WorldPop
 
 - *technological*
-**custom_powerplants.csv**
-**eia_hydro_annual_generation.csv**
+
+**eia_hydro_annual_generation.csv** contains data on total energy production of existing plants as reported per country by the open US Energy Information Administration `EIA platforms <https://www.eia.gov/international/data/world>`_. Is used to calibrate the runoff time series are obtained from the global reanalysis data.
+
 **hydro_capacities.csv**
+TODO Add a source along with a brif description
 
 **4. Pre-calculated datasets**
 There are some datasets which were prepared to ensure smooth run of the model. However, they may (and in some cases) must be replaced by custom ones. 
 
-- geo-spatial data on location of protected and reserved areas
+**natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as mask the exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model. 
 
-natura.tiff
-Currently the pre-build file is calculated for Africa. 
+Currently the pre-build file is calculated for Africa, global `natura.tiff` raster is under development. 
 
-- electricity demand profiles
-data/ssp2-2.6/2030/era5_2013/Africa.nc
+- **electricity demand profiles**
+The model currently provides globally hourly demand loads corresponding to Shared Socioeconomic Pathways `SSP <http://dx.doi.org/https://doi.org/10.1016/j.gloenvcha.2016.05.009>`_ for 2030, 2040, 2050 and 2100 and weather conditions years of 2011, 2013 and 2018. The demand time series were modeled by `synde package <https://github.com/euronion/synde>`_  which implements a workflow management system to extract the demand data created with the open source Global-Energy GIS `GEGIS <http://dx.doi.org/10.1016/j.esr.2020.100606>`_ package. GEGIS produces hourly demand time series by applying machine learning methods using as predictors temperature profiles, population, GDP.
+
+Pre-calculated data on electricity demand should be placed in data/{ssp_scenario_id}/{ssp_year}/era5_2013/{continent_name}.nc folder (e.g. data/ssp2-2.6/2030/era5_2013/Africa.nc)
 
 .. .. _data_validation_tips:
 
