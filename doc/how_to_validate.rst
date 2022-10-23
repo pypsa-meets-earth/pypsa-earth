@@ -9,7 +9,7 @@
 How to validate?
 ##########################################
 
-Data workflow is PyPSA-Earth allods to extract all the data needed to build your energy model from global open data sources. However, data availability for many parts of the world is still quite limited and it's essencial to validate the data included into the model. Usually the best sources to compare with are regional data hubs along with harmonized datasets of international organisations such as 
+Data workflow is PyPSA-Earth allows to extract all the data needed to build your energy model from global open data sources. However, data availability for many parts of the world is still quite limited and it's essential to validate the data included into the model. Usually the best sources to compare with are regional data hubs along with harmonized datasets of international organisations such as 
 - `World Bank <https://energydata.info/>`_;
 - International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/IRENASTAT__Power%20Capacity%20and%20Generation/ELECCAP_2022_cycle2.px/>`_;
 - International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_
