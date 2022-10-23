@@ -19,10 +19,7 @@ Data management strategy
 Here we'll look into architecture of the data workflow while practical hand-ons are given in the Tutorial section.
 
 **1. Grid topology data**
-OpenStreetMap (OSM) data are being retrieved from the OSM server to be used to build the power grid topology model.
-It's possible to check and validate OSM-extracted data directly:
-- Snakemake scripts
-- validation notebooks
+OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The OSM data are being loaded by `download_osm_data` and cleaned by `clean_osm_data` rules, respectively.
 
 **2. Climate data**
 Currently we relay on ERA5 <link> data and `atlite` to process them.
