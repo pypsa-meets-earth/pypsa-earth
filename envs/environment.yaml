@@ -30,7 +30,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-- fiona
+- fiona!=1.8.22
 - xarray
 - netcdf4
 - networkx
@@ -51,7 +51,7 @@ dependencies:
   # GIS dependencies:
 - cartopy
 - descartes
-- rasterio>1.2.10
+- rasterio!=1.2.10
 - rioxarray
 
  # Plotting
