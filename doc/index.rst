@@ -20,7 +20,7 @@ Welcome to the PyPSA-Earth documentation!
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
 
 .. image:: https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest
-    :target: https://pypsa-meets-earth.readthedocs.io/en/latest/?badge=latest
+    :target: https://pypsa-earth.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth
