@@ -115,6 +115,7 @@ Documentation
 * :doc:`tutorial`
 * :doc:`data_workflow`
 * :doc:`how_to_customize`
+* :doc:`how_to_validate`
 
 .. toctree::
    :hidden:
@@ -127,6 +128,7 @@ Documentation
    how_to_start
    tutorial
    how_to_customize
+   how_to_validate
    how_to_docs
 
 **Configuration**
