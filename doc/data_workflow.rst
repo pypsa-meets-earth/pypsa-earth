@@ -79,9 +79,6 @@ csv file containing the defaulf costs of the technologies along with their typic
 
 **eia_hydro_annual_generation.csv** contains data on total energy production of existing plants as reported per country by the open US Energy Information Administration `EIA platforms <https://www.eia.gov/international/data/world>`_. Is used to calibrate the runoff time series are obtained from the global reanalysis data.
 
-**hydro_capacities.csv**
-TODO Add a source along with a brif description
-
 **4. Pre-calculated datasets**
 There are some datasets which were prepared to ensure smooth run of the model. However, they may (and in some cases) must be replaced by custom ones. 
 
