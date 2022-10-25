@@ -45,24 +45,27 @@ Currently we are using the following resources.
 
 - *environmental*
 
-**copernicus** contains the raw data on the land covering as available from the Copernicus database. It is used in the build_renewable_profiles rule to quantify what are the land regions available for the installation of renewable resources, e.g. renewable assets may not be installed on arable land
+**copernicus** contains the raw data on the land covering as available from the Copernicus database. 
 
-**eez** is the dataset of the Exclusive Economic Zones (EEZ) available from Marine Regions. This file is used in the rule build_shapes to identify the marine region by country and provide shapes of the maritime regions to be possibly used to estimate off-shore renewable potential, for example.
 .. image:: img/copernicus.png
     :width: 20%
     :align: left
 
-**gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.gebco.net/>`_ stands for General Bathymetric Chart of the Oceans. It's curated by a non-profit making organisation which relies largely on the voluntary contributions of an enthusiastic international team of geoscientists and hydrographers.
+It is used in the build_renewable_profiles rule to quantify what are the land regions available for the installation of renewable resources, e.g. renewable assets may not be installed on arable land
 
-**hydrobasins** datasets on watershed boundaries and basins, as available from HydroBASINS. These data are used to estimate the hydropower generation in the `build_renewable_profiles` rule.
+**eez** is the dataset of the Exclusive Economic Zones (EEZ) available from Marine Regions. This file is used in the rule build_shapes to identify the marine region by country and provide shapes of the maritime regions to be possibly used to estimate off-shore renewable potential, for example.
 
-**landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. Currently are used to generate a `natura.tiff` raster. Will be deprecated once the global `natura.tiff` will be available.
+**gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. 
 
 .. image:: img/gebco_2021_grid_image.jpg
     :width: 50%
     :align: left
 
+These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.gebco.net/>`_ stands for General Bathymetric Chart of the Oceans. It's curated by a non-profit making organisation which relies largely on the voluntary contributions of an enthusiastic international team of geoscientists and hydrographers.
 
+**hydrobasins** datasets on watershed boundaries and basins, as available from HydroBASINS. These data are used to estimate the hydropower generation in the `build_renewable_profiles` rule.
+
+**landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. Currently are used to generate a `natura.tiff` raster. Will be deprecated once the global `natura.tiff` will be available.
 
 - *economical*
 
