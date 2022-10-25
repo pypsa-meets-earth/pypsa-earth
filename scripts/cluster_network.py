@@ -489,16 +489,9 @@ def cluster_regions(busmaps, input=None, output=None):
         regions = regions.reindex(columns=REGION_COLS).set_index("name")
         aggfunc = dict(x="mean", y="mean", country="first")
         regions_c = regions.dissolve(busmap, aggfunc=aggfunc)
-
-        # geom_c = (
-        #     regions.geometry.groupby(busmap).apply(list).apply(shapely.ops.unary_union)
-        # )
-        # regions_c = gpd.GeoDataFrame(dict(geometry=geom_c))
         regions_c.index.name = "name"
-        # save_to_geojson(regions_c, getattr(output, which))
         regions_c = regions_c.reset_index()
         regions_c.to_file(getattr(output, which))
-
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
