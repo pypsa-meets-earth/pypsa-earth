@@ -674,7 +674,8 @@ def add_aviation(n, cost):
             airport["country"],
             gadm_level,
             snakemake.input.shapes_path,
-            snakemake.config["clustering_options"]["alternative_clustering"]        ),
+            snakemake.config["clustering_options"]["alternative_clustering"],
+        ),
         axis=1,
     )
 
@@ -877,7 +878,7 @@ def add_shipping(n, costs):
             port["country"],
             gadm_level,
             snakemake.input["shapes_path"],
-            snakemake.config["clustering_options"]["alternative_clustering"]
+            snakemake.config["clustering_options"]["alternative_clustering"],
         ),
         axis=1,
     )

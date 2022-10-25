@@ -534,7 +534,7 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False)
             gdf = gpd.read_file(path_to_gadm)
             if "GADM_ID" in gdf.columns:
                 col = "GADM_ID"
-           
+
                 if gdf[col][0][
                     :3
                 ].isalpha():  # TODO clean later by changing all codes to 2 letters
