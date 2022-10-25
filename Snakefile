@@ -530,7 +530,7 @@ rule run_test:
     run:
         import yaml
 
-        with open("../pypsa-earth/test/config.test1.yaml") as file:
+        with open("../pypsa-earth/config.tutorial.yaml") as file:
 
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
