@@ -25,6 +25,8 @@ Upcoming Release
 
 * Update natura tiff to global scale, revise default databundle description and remove old limitations to environment `PR #470 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/470>`__
 
+* Moved from pycountry to country_converter `PR #493 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/493>`__
+
 PyPSA-Earth 0.1.0
 =================
 
