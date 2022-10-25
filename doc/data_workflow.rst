@@ -21,8 +21,16 @@ Here we'll look into architecture of the data workflow while practical hand-ons 
 **1. Grid topology data**
 OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The OSM data are being loaded by `download_osm_data` and cleaned by `clean_osm_data` rules, respectively.
 
+.. image:: img/africa_osm_map.jpeg
+    :width: 15%
+    :align: left
+
 **2. Climate data**
 The climate data processing is provided by `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. It extracts all the required whether and climate data to generate the time series of renewable potential by g`enerate_renewable_profiles` rule.
+
+.. image:: img/era5.png
+    :width: 15%
+    :align: left
 
 The main data source on climate variables is `ERA5 reanalysis <https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.3803>`_.
 
@@ -36,6 +44,9 @@ Currently we are using the following resources.
 **copernicus** contains the raw data on the land covering as available from the Copernicus database. It is used in the build_renewable_profiles rule to quantify what are the land regions available for the installation of renewable resources, e.g. renewable assets may not be installed on arable land
 
 **eez** is the dataset of the Exclusive Economic Zones (EEZ) available from Marine Regions. This file is used in the rule build_shapes to identify the marine region by country and provide shapes of the maritime regions to be possibly used to estimate off-shore renewable potential, for example.
+.. image:: img/copernicus.png
+    :width: 20%
+    :align: left
 
 **gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.gebco.net/>`_ stands for General Bathymetric Chart of the Oceans. It's curated by a non-profit making organisation which relies largely on the voluntary contributions of an enthusiastic international team of geoscientists and hydrographers.
 
@@ -44,6 +55,9 @@ Currently we are using the following resources.
 **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. Currently are used to generate a `natura.tiff` raster. Will be deprecated once the global `natura.tiff` will be available.
 
 **osm** are raw `OpenStreetMap <https://www.openstreetmap.org/>`_ data. They are being loaded when running the `download_osm_data` rule.
+.. image:: img/gebco_2021_grid_image.jpg
+    :width: 50%
+    :align: left
 
 The raw **OSM** data in `pbf <https://wiki.openstreetmap.org/wiki/PBF_Format>`_ format are stored in the folder `pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
