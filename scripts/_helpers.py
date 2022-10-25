@@ -486,7 +486,7 @@ def three_2_two_digits_country(three_code_country):
     if three_code_country == "SEN-GMB":
         return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
 
-    two_code_country = coco.convert(two_code_country, to="ISO2")
+    two_code_country = coco.convert(three_code_country, to="ISO2")
     return two_code_country
 
 
