@@ -183,19 +183,21 @@ sector:
     BU_2030: 0.00
     AP_2030: 0.004
     NZ_2030: 0.02
+    DF_2030: 0.01
     BU_2050: 0.00
     AP_2050: 0.06
     NZ_2050: 0.28
-    DF_2030: 0.05
+    DF_2050: 0.05
 
   land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
     BU_2030: 0.00
     AP_2030: 0.075
     NZ_2030: 0.13
+    DF_2030: 0.01
     BU_2050: 0.00
     AP_2050: 0.42
     NZ_2050: 0.68
-    DF_2030: 0.15
+    DF_2050: 0.15
 
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
