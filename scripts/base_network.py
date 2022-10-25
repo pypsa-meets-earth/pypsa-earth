@@ -400,6 +400,7 @@ def _set_countries_and_substations(n):
 
     return buses
 
+
 def _rebase_voltage_to_config(component):
     """
     Rebase the voltage of components to the config.yaml input

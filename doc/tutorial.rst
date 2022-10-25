@@ -138,7 +138,7 @@ Manual test of specific scripts
 The python scripts in the ``scripts`` folder are build so that they can be easily run and tested
 even without the snakemake procedure. This assumes you have all inputs of the rule 
 available (see Snakefile). For instance, let us run the ``build_shapes.py``.
-Looking at the Snakefile or the `workflow <https://pypsa-meets-earth.readthedocs.io/en/latest/introduction.html#workflow>`_
+Looking at the Snakefile or the `workflow <https://pypsa-earth.readthedocs.io/en/latest/introduction.html#workflow>`_
 we need to run the ``retrieve_databundle_light.py`` manually or by snakemake:
 
    .. code:: bash

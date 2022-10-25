@@ -9,7 +9,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import reverse_geocode as rg
-from _helpers import configure_logging, save_to_geojson, to_csv_nafix, REGION_COLS
+from _helpers import REGION_COLS, configure_logging, save_to_geojson, to_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -813,11 +813,11 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = gpd.read_file(onshore_shape_path).set_index("name")["geometry"]
 
-        offshore_shapes = gpd.read_file(
-            snakemake.input.offshore_shapes
-        ) 
+        offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes)
 
-        offshore_shapes = offshore_shapes.reindex(columns=REGION_COLS).set_index('name')['geometry']
+        offshore_shapes = offshore_shapes.reindex(columns=REGION_COLS).set_index(
+            "name"
+        )["geometry"]
 
         ext_country_shapes = create_extended_country_shapes(
             country_shapes, offshore_shapes

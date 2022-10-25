@@ -493,6 +493,7 @@ def cluster_regions(busmaps, input=None, output=None):
         regions_c = regions_c.reset_index()
         regions_c.to_file(getattr(output, which))
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
