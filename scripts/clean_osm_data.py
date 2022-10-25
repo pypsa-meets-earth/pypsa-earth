@@ -813,16 +813,6 @@ if __name__ == "__main__":
     if names_by_shapes:
         country_shapes = gpd.read_file(onshore_shape_path).set_index("name")["geometry"]
 
-        # if os.stat(offshore_shape_path).st_size == 0:
-        #     logger.info("No offshore file exist. Passing only onshore shape")
-        #     ext_country_shapes = country_shapes
-
-        # else:
-        # logger.info("Combining on- and offshore shape")
-        # offshore_shapes = gpd.read_file(offshore_shape_path).set_index("name")[
-        # "geometry"
-        # ]
-
         offshore_shapes = gpd.read_file(
             snakemake.input.offshore_shapes
         )  # set_index("name")["geometry"]
