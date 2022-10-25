@@ -40,7 +40,7 @@ jobs:
 
     - name: Clone pypsa-earth
       run: |
-        git clone https://github.com/pypsa-meets-africa/pypsa-earth ../pypsa-earth
+        git clone https://github.com/pypsa-meets-earth/pypsa-earth ../pypsa-earth
 
     - name: Copy environment file
       run: |
