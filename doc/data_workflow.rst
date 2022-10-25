@@ -30,7 +30,7 @@ The raw OSM data are being loaded when running the `download_osm_data` rule and 
 The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
 
 **2. Climate data**
-The climate data processing is provided by `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. It extracts all the required whether and climate data to generate the time series of renewable potential by g`enerate_renewable_profiles` rule.
+The climate data processing is provided by `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. It extracts all the required whether and climate data to generate the time series of renewable potential by `generate_renewable_profiles` rule.
 
 .. image:: img/era5.png
     :width: 15%
