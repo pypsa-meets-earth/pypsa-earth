@@ -19,11 +19,15 @@ Data management strategy
 Here we'll look into architecture of the data workflow while practical hand-ons are given in the Tutorial section.
 
 **1. Grid topology data**
-OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The OSM data are being loaded by `download_osm_data` and cleaned by `clean_osm_data` rules, respectively.
+OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references.
 
 .. image:: img/africa_osm_map.jpeg
     :width: 15%
     :align: left
+
+The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
+
+The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
 
 **2. Climate data**
 The climate data processing is provided by `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. It extracts all the required whether and climate data to generate the time series of renewable potential by g`enerate_renewable_profiles` rule.
@@ -54,14 +58,11 @@ Currently we are using the following resources.
 
 **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. Currently are used to generate a `natura.tiff` raster. Will be deprecated once the global `natura.tiff` will be available.
 
-**osm** are raw `OpenStreetMap <https://www.openstreetmap.org/>`_ data. They are being loaded when running the `download_osm_data` rule.
 .. image:: img/gebco_2021_grid_image.jpg
     :width: 50%
     :align: left
 
-The raw **OSM** data in `pbf <https://wiki.openstreetmap.org/wiki/PBF_Format>`_ format are stored in the folder `pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
-The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
 
 - *economical*
 
