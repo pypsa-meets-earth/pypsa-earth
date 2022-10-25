@@ -535,6 +535,7 @@ rule run_test:
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
+            config_pypsaearth["electricity"]["co2limit"] = 7.75e+7
 
             with open("./config.pypsa-earth.yaml", "w") as wfile:
                 yaml.dump(config_pypsaearth, wfile)
