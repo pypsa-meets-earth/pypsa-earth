@@ -47,7 +47,7 @@ import geopandas as gpd
 import numpy
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, two_2_three_digits_country
+from _helpers import configure_logging, two_2_three_digits_country, REGION_COLS
 from shapely.geometry import Point, Polygon
 from vresutils.graph import voronoi_partition_pts
 
@@ -201,10 +201,8 @@ if __name__ == "__main__":
     offshore_shapes = gpd.read_file(
         snakemake.input.offshore_shapes
     )  
-    
-    offshore_shapes = offshore_shapes.reindex(columns=["name", "geometry"]).set_index(
-        "name"
-    )["geometry"]
+
+    offshore_shapes = offshore_shapes.reindex(columns=REGION_COLS).set_index('name')['geometry']
 
     gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")[
         "geometry"
