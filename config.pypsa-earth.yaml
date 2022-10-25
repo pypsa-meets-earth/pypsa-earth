@@ -17,7 +17,7 @@ scenario:
   opts: [Co2L1-144H]
 
 countries: ["MA"]
-# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-africa.readthedocs.io/en/latest/configuration.html#top-level-configuration
+# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 snapshots:
   start: "2013-01-01"
