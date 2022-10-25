@@ -27,7 +27,7 @@ It could be helpful to keep in mind the following points:
 
 PyPSA-Earth relies on a number of datasets introduced in the :ref:`_data_workflow` and :ref:`_introduction#License`. Automated data retrieval is implemented by the retrieve* rules :ref:`rules_overview/download_and_filter/retrieve`.
 
-Mostly these data are global and should be loaded only once when installing the model. The exception is the cutout which requires of about ~200 Gb in it's global version. The cutout which is supplied with the model could be loaded by running `retrieve_databundle_light` rule, corresponds to Africa. If you are interested in other part of the world a custom cutout should be built. 
+Mostly these data are global and should be loaded only once when installing the model. The exception is the cutout which requires of about ~200 Gb in it's global version. The cutout which is supplied with the model could be loaded by running `retrieve_databundle_light` rule, corresponds to Africa. If you are interested in other part of the world a custom cutout should be built. However, in the future we plan to provide a general default global climate inputs.
 
 **3. Build the custom cutout**
 The cutout is the main concept of climate data management in PyPSA ecosystem introduced in `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since
