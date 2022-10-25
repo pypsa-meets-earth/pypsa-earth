@@ -5,7 +5,7 @@
 [![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml)
 [![Status Windows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml)
-[![Documentation Status](https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest)](https://pypsa-meets-earth.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -16,7 +16,7 @@
 
 **PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution.** It enables large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions. It is suitable for operational as well as combined generation, storage and transmission expansion studies. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. The data includes electricity demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
 
-The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-meets-earth.readthedocs.io/en/latest/index.html) provides additional information. 
+The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information. 
 
 PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth. We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
@@ -129,7 +129,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 ## Documentation
 
-The documentation is available here: [documentation](https://pypsa-meets-earth.readthedocs.io/en/latest/index.html).
+The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
 
 ## Collaborators
 

@@ -54,7 +54,7 @@ The complete list of software needed before installing PyPSA Earth is listed bel
 .. note::
   Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Earth model.
   The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Earth experience is listed in the 
-  `Tutorial section <https://pypsa-meets-earth.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
+  `Tutorial section <https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
   Most of the dependencies needed will be automatically installed using the conda environments listed below
 
 Clone the repository
