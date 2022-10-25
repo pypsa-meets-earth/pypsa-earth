@@ -339,7 +339,6 @@ def _set_countries_and_substations(n):
     )
 
     buses = n.buses
-
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
         bus_locations,
