@@ -197,13 +197,11 @@ if __name__ == "__main__":
     country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
         "geometry"
     ]
-    # offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes).set_index("name")[
-    #     "geometry"
-    # ]
 
     offshore_shapes = gpd.read_file(
         snakemake.input.offshore_shapes
-    )  # set_index("name")["geometry"]
+    )  
+    
     offshore_shapes = offshore_shapes.reindex(columns=["name", "geometry"]).set_index(
         "name"
     )["geometry"]
