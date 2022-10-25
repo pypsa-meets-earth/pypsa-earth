@@ -111,9 +111,8 @@ Documentation
 * :doc:`how_to_docs`
 * :doc:`introduction`
 * :doc:`installation`
-* :doc:`how_to_start`
-* :doc:`tutorial`
 * :doc:`data_workflow`
+* :doc:`tutorial`
 * :doc:`how_to_customize`
 * :doc:`how_to_validate`
 
