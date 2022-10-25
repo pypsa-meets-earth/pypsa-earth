@@ -338,10 +338,6 @@ def _set_countries_and_substations(n):
         gpd.read_file(snakemake.input.offshore_shapes)["geometry"]
     )
 
-    # reindexing necessary for supporting empty geo-dataframes
-    # offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes)
-    # offshore_shapes = offshore_shapes.reindex(columns=['name', 'geometry']).set_index('name')['geometry']
-
     buses = n.buses
 
     bus_locations = buses
