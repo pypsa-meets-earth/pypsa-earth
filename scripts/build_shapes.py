@@ -811,7 +811,7 @@ if __name__ == "__main__":
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
     country_shapes = countries(countries_list, geo_crs, update, out_logging)
-  
+
     country_shapes.reset_index().to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
