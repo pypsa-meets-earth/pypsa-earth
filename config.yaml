@@ -60,7 +60,7 @@ costs:
     length_factor: 1.25 #to estimate offwind connection costs
 
 industry:
-  St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
+  St_primary_fraction: 0.90 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
     # 2020: 0.6
     # 2025: 0.55
     # 2030: 0.5
