@@ -113,7 +113,7 @@ Documentation
 * :doc:`installation`
 * :doc:`data_workflow`
 * :doc:`tutorial`
-* :doc:`how_to_customize`
+* :doc:`how_to_fit_to_territory`
 * :doc:`how_to_validate`
 
 .. toctree::
