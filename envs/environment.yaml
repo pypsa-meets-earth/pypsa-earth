@@ -30,7 +30,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas>=0.11.0
-- fiona!=1.8.22
+- fiona
 - xarray
 - netcdf4
 - networkx
