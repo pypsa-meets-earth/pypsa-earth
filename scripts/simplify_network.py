@@ -253,7 +253,7 @@ def _aggregate_and_move_components(
     )
 
     aggregation_strategies = {
-        p: {k: getattr(pd.Series, k, v) for k, v in aggregation_strategies[p].items()}
+        p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
 
