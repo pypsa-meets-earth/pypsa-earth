@@ -93,25 +93,4 @@ Currently the pre-build file is calculated for Africa, global `natura.tiff` rast
 The model currently provides globally hourly demand loads corresponding to Shared Socioeconomic Pathways `SSP <http://dx.doi.org/https://doi.org/10.1016/j.gloenvcha.2016.05.009>`_ for 2030, 2040, 2050 and 2100 and weather conditions years of 2011, 2013 and 2018. The demand time series were modeled by `synde package <https://github.com/euronion/synde>`_  which implements a workflow management system to extract the demand data created with the open source Global-Energy GIS `GEGIS <http://dx.doi.org/10.1016/j.esr.2020.100606>`_ package. GEGIS produces hourly demand time series by applying machine learning methods using as predictors temperature profiles, population, GDP.
 
 Pre-calculated data on electricity demand should be placed in data/{ssp_scenario_id}/{ssp_year}/era5_2013/{continent_name}.nc folder (e.g. data/ssp2-2.6/2030/era5_2013/Africa.nc)
-
-.. .. _data_validation_tips:
-
-.. Data validation tips
-.. ===================================
-
-.. The following validation points are worth keeping in mind when building your energy model:
-
-.. 1. Check the [power grid](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb):
-..     - overall lines length;
-..     - general grid topology;
-..     - ensure that the general structure of the grid model is appropriate, playing with `tol` values and augmentation options if needed.
- 
-.. 2. Compare the [installed capacity](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb) values 
-
-.. 3. Validate the [power demand](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb) values and profile.
-
-.. 4. Check that [hydro](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb), [solar and wind](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb) potentials have reasonable values
-
-.. 5. Simulate the actual [energy mix](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb). Look for detailed explanations in https://arxiv.org/abs/2209.04663, section 5.1.
-
-.. Data availability and quality usually is the biggest concern. Some useful hints on the real-world validation example can be found in the [Nigeria validation](https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb) notebook.
+Pre-calculated data on electricity demand should be placed in data/{ssp_scenario_id}/{ssp_year}/era5_2013/{continent_name}.nc folder (e.g. data/ssp2-2.6/2030/era5_2013/Africa.nc)
