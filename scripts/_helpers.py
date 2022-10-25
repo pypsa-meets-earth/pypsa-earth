@@ -5,10 +5,10 @@
 import os
 from pathlib import Path
 
+import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import country_converter as coco
 
 
 def sets_path_to_root(root_directory_name):
