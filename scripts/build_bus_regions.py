@@ -297,8 +297,6 @@ if __name__ == "__main__":
         # remove empty polygons
         offshore_regions = offshore_regions[~offshore_regions.geometry.is_empty]
 
-    # save_to_geojson(offshore_regions, snakemake.output.regions_offshore)
-    # pd.concat(onshore_regions, ignore_index=True).to_file(snakemake.output.regions_onshore)
     if offshore_regions:
         pd.concat(offshore_regions, ignore_index=True).to_file(
             snakemake.output.regions_offshore
