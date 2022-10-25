@@ -12,7 +12,7 @@ How to customize?
 PyPSA-Earth can be tailored to represent any part of the world quite easily. The following procedure may be recommended.
 
 **1. Adjust the config**
-The main parameters needed to customize the modeling process are defined in the configuration file `config.yaml`. The configuration settings should be adjusted according to a particular problem you are intended to model. The main regional-dependent parameters are:
+The main parameters needed to customize the inputs for your national-specific data are defined in the configuration file `config.yaml`. The configuration settings should be adjusted according to a particular problem you are intended to model. The main regional-dependent parameters are:
 - `countries` parameter which defines a set of the countries to be included into the model;
 - `cutouts` and `cutout` parameters which refer to a name of the climate data archive (so called *cutout*) to be used for calculation of the renewable potential.
 
