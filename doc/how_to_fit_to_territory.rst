@@ -6,7 +6,7 @@
 .. _how_to_customize:
 
 ##########################################
-How to customize?
+How to use PyPSA-Earth for your energy problem?
 ##########################################
 
 PyPSA-Earth can be tailored to represent any part of the world quite easily. The following procedure may be recommended.
