@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: runname_test_kmeans_46
+run: runname_test_new_gadm4
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 46
+  - 114
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -23,17 +23,17 @@ scenario:
   sopts:
   - "730H"
   demand:
-  - "DF"
+  - "NZ"
 
 clustering_options:
-  alternative_clustering: false
+  alternative_clustering: true
 
 countries: ['MA']
 
 custom_data:
-  renewables: [] #'csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
-  elec_demand: false
-  industry_demand: false
+  renewables: ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
+  elec_demand: true
+  industry_demand: true
 
 costs:
   lifetime: 25 #default lifetime

@@ -84,8 +84,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=25,
-            demand="DF",
+            clusters=113,
+            demand="NZ",
             planning_horizons=2030,
         )
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         )
 
     geo_locs = pd.read_csv(
-        snakemake.input.industrial_database, sep=",", header=0, index_col=0
+        snakemake.input.industrial_database, sep=",", header=0#, index_col=0
     )
 
     gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]

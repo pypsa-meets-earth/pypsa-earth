@@ -532,14 +532,15 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False)
     else:
         if path_to_gadm:
             gdf = gpd.read_file(path_to_gadm)
-            if gdf["GADM_ID"][0][
-                :3
-            ].isalpha():  # TODO clean later by changing all codes to 2 letters
-                gdf["GADM_ID"] = gdf["GADM_ID"].apply(
-                    lambda name: three_2_two_digits_country(name[:3]) + name[3:]
-                )
-            col = "GADM_ID"
-
+            if "GADM_ID" in gdf.columns:
+                col = "GADM_ID"
+           
+                if gdf[col][0][
+                    :3
+                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                    gdf[col] = gdf[col].apply(
+                        lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                    )
         else:
             gdf = get_GADM_layer(country_list, gadm_level)
             col = "GID_{}".format(gadm_level)

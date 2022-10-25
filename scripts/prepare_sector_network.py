@@ -674,7 +674,7 @@ def add_aviation(n, cost):
             airport["country"],
             gadm_level,
             snakemake.input.shapes_path,
-        ),
+            snakemake.config["clustering_options"]["alternative_clustering"]        ),
         axis=1,
     )
 
@@ -877,6 +877,7 @@ def add_shipping(n, costs):
             port["country"],
             gadm_level,
             snakemake.input["shapes_path"],
+            snakemake.config["clustering_options"]["alternative_clustering"]
         ),
         axis=1,
     )
@@ -1970,7 +1971,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="120",
+            clusters="114",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
