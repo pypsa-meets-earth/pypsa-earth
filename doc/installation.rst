@@ -89,13 +89,8 @@ The complete list of software needed before installing PyPSA Earth is listed bel
 - `Java <https://www.oracle.com/java/technologies/downloads/>`_ **(mandatory)**: A Java distribution is needed for using `powerplantmatching` package.
   To have a better user experience, please install the redistribution from the website according to your operating system.
 - `IDE Python` **(recommendation)**: in order to write python code, you need an Integrated Development Environment (IDE)
-  that is a software used to write code. Any program can be used, however, we recommend `Visual Studio Code <https://code.visualstudio.com/>`_,
-  which is freely available online.
-  Other alternatives are also viable if you are familiar with them, such as `PyCharm <https://www.jetbrains.com/pycharm/>`_,
-  however we recommend Visual Studio Code also given its easy to use interface with Git.
-  *Note*: if you decide to use Visual Studio Code, check out the tutorial about how to use 
-  `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`__ and `Github <https://code.visualstudio.com/docs/editor/github>`__ 
-  in Visual Studio Code
+  that is a software used to write code. We recommend `Visual Studio Code <https://code.visualstudio.com/>`_, which is freely available online and provides an easy to use interface with Git. Obviously, any alternatives like `PyCharm <https://www.jetbrains.com/pycharm/>`_ or `Sublime <https://www.sublimetext.com/>`_ will work as well.
+
 - `Solver` **(mandatory)**: an optimization solver is needed to solve the mathematical problem that is build with the automated workflow.
   With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC <https://projects.coin-or.org/Cbc>`_ ,
   `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
