@@ -247,15 +247,9 @@ def _aggregate_and_move_components(
     _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, output)
 
     _, generator_strategies = get_aggregation_strategies(aggregation_strategies)
-    n.generators["weight"] = np.nan
     generators, generators_pnl = aggregategenerators(
         n, busmap, custom_strategies=generator_strategies
     )
-
-    aggregation_strategies = {
-        p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
-        for p in aggregation_strategies.keys()
-    }
 
     replace_components(n, "Generator", generators, generators_pnl)
 
