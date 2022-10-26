@@ -12,6 +12,58 @@ Installation
 The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the
 directory in which the commands following the ``%`` should be entered.
 
+
+Clone the Repository
+====================
+
+First of all, clone the `PyPSA-Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth/>`_ using the version control system ``git``.
+The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
+If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
+
+.. code:: bash
+
+    /some/other/path % cd /some/path/without/spaces
+
+    /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
+
+
+.. _deps:
+
+Install Python Dependencies
+===============================
+
+PyPSA-Earth relies on a set of other Python packages to function.
+We recommend using the package manager and environment management system ``conda`` to install them.
+Install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ that includes only ``conda`` and its dependencies or make sure ``conda`` is already installed on your system with `conda -V`.
+For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
+
+The python package requirements are curated in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file.
+The environment can be installed and activated using
+
+.. code:: bash
+
+    .../pypsa-earth % conda env create -f envs/environment.yaml
+
+    .../pypsa-earth % conda activate pypsa-earth
+
+Note that activation is local to the currently open shell!
+After opening a new terminal window, one needs to reissue the second command!
+
+.. note::
+    If you have troubles with a slow ``conda`` installation, we recommend to install
+    `mamba <https://github.com/QuantStack/mamba>`_ as a fast drop-in replacement via
+
+    .. code:: bash
+
+        conda install -c conda-forge mamba
+
+    and then install the environment with
+
+    .. code:: bash
+
+        mamba env create -f envs/environment.yaml
+
+
 System requirements
 ===================
 
@@ -34,7 +86,7 @@ The complete list of software needed before installing PyPSA Earth is listed bel
 - `Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
   and enable to coordinate the parallel software development between many developers.
   It is mandatory to `learn the git basics <https://git-scm.com/doc>`_.
-- `Java <https://www.oracle.com/java/technologies/downloads/>`_ **(recommendation)**: A Java distribution is needed for using `powerplantmatching` package.
+- `Java <https://www.oracle.com/java/technologies/downloads/>`_ **(mandatory)**: A Java distribution is needed for using `powerplantmatching` package.
   To have a better user experience, please install the redistribution from the website according to your operating system.
 - `IDE Python` **(recommendation)**: in order to write python code, you need an Integrated Development Environment (IDE)
   that is a software used to write code. Any program can be used, however, we recommend `Visual Studio Code <https://code.visualstudio.com/>`_,
