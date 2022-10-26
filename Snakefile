@@ -90,8 +90,10 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
-        #shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
-        shapes_path="../pypsa-earth/resources/shapes/MAR2.geojson",
+        shapes_path=pypsaearth(
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
+        #shapes_path="../pypsa-earth/resources/shapes/MAR2.geojson",
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
