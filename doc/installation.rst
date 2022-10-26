@@ -63,6 +63,23 @@ After opening a new terminal window, one needs to reissue the second command!
 
         mamba env create -f envs/environment.yaml
 
+Check Java installation 
+===============================       
+
+Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+To verify the successfull installation the following code can be tested from bash:
+
+   ```bash
+      .../pypsa-earth % java -version
+   ```
+
+   The expected output should resemble the following:
+   
+   ```bash
+      java version "1.8.0_341"
+      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+   ```   
 
 System requirements
 ===================
