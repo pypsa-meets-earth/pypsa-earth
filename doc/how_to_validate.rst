@@ -11,27 +11,54 @@ How to validate?
 
 .. TODO add a list of actions needed to do the validation
 
-Data workflow is PyPSA-Earth allows to extract all the data needed to build your energy model from global open data sources. The following validation points are worth keeping in mind when validating your energy model:
+Data workflow is PyPSA-Earth allows to extract all the data needed to build your energy model from global open data sources. An example of the validation procedure is avaible in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook. Public information on the power system of Nigeria are compared to those obtained from the PyPSA-Earth model.
 
-1. Check the `power grid <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb>`_:
-    - overall lines length;
-    - general grid topology;
-    - ensure that the general structure of the grid model is appropriate, playing with `tol` values and augmentation options if needed.
+Simulation procedure
+===================================
+
+It may be recommended to check the following quantities the validation:
+
+#. inputs used by the pypsa-model:
+
+    #. network characteristics;
+
+    #. substations;
+
+    #. installed generation by type;
+
+#. outputs of the simulation:
+
+    #. demand;
+
+    #. energy mix.
+
+Data sources
+===================================
  
-2. Compare the `installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ values 
+Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exaustive list of helpful sources:
 
-3. Validate the `power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
+* `World Bank <https://energydata.info/>`_;
 
-4. Check that `hydro <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb>`_, `solar and wind <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb>`_ potentials have reasonable values
+* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/IRENASTAT__Power%20Capacity%20and%20Generation/ELECCAP_2022_cycle2.px/>`_;
 
-5. Simulate the actual `energy mix <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_. Look for detailed explanations in https://arxiv.org/abs/2209.04663, section 5.1.
+* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
 
-Data availability and quality usually is the biggest concern. Some useful hints on the real-world validation example can be found in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook.
+* `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy;
 
-Data availability for many parts of the world is still quite limited and it's essential to validate the data included into the model. Usually the best sources to compare with are regional data hubs along with harmonized datasets of international organisations such as: 
-- `World Bank <https://energydata.info/>`_;
-- International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/IRENASTAT__Power%20Capacity%20and%20Generation/ELECCAP_2022_cycle2.px/>`_;
-- International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_
-- `BP Statistical Review of World Energy <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_;
-- International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
-- `Ember <https://ember-climate.org/data/data-explorer/>`_.
+* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
+
+* `Ember <https://ember-climate.org/data/data-explorer/>`_ Data Explorer.
+
+
+Advanced validation examples
+===================================
+
+The following validation notebooks are worth a look when validating your energy model:
+
+1. A detailed `network validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb>`_.
+ 
+2. Analys of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
+
+3. Validation of `the power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
+
+4. Validation of `hydro <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb>`_, `solar and wind <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb>`_ potentials.
