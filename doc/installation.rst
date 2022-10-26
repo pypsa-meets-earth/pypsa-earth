@@ -29,8 +29,11 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
 .. _deps:
 
-Install Python Dependencies
+Install Dependencies
 ===============================
+
+Python Dependencies
+--------------------------------
 
 PyPSA-Earth relies on a set of other Python packages to function.
 We recommend using the package manager and environment management system ``conda`` to install them.
@@ -63,8 +66,8 @@ After opening a new terminal window, one needs to reissue the second command!
 
         mamba env create -f envs/environment.yaml
 
-Check Java installation 
-===============================       
+Java Installation 
+--------------------------------       
 
 Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
 To verify the successfull installation the following code can be tested from bash:
