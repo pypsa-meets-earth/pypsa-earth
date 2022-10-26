@@ -46,6 +46,8 @@ databundles:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
+    - data/hydrobasins/hybas_world_lev04_v1c.shp
+    - data/hydrobasins/hybas_world_lev05_v1c.shp
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial:
@@ -77,6 +79,9 @@ databundles:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
+    - data/hydrobasins/hybas_world_lev04_v1c.shp
+    - data/hydrobasins/hybas_world_lev05_v1c.shp
+    - data/hydrobasins/hybas_world_lev06_v1c.shp
 
 
   # resources bundle containing the resources folder for africa only
@@ -107,7 +112,7 @@ databundles:
     destination: "data/landcover"
     urls:
       zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_asiapacific.zip?download=1
-      gdrive: https://drive.google.com/file/d/1-bevGdoAltJ1useZAS9PqEMDJQLyBEn8/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1HZGpxZdTB2Ai_VN_8SPivCdgt3oz0wkX/view?usp=sharing
     output: [data/landcover/*]
 
   # data bundle of the data folder for the african continent
@@ -117,7 +122,7 @@ databundles:
     destination: "data/landcover"
     urls:
       zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_latinamerica_caribbean.zip?download=1
-      gdrive: https://drive.google.com/file/d/16GiEqdUcX0juGHaAxk5q9XlgUl2T7eVf/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1lmBFPTHyzVmSx9qgrGh8D6uHiSyGaH_F/view?usp=sharing
     output: [data/landcover/*]
 
   # data bundle of the data folder for the african continent
@@ -127,7 +132,7 @@ databundles:
     destination: "data/landcover"
     urls:
       zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
-      gdrive: https://drive.google.com/file/d/1QDFn-USxTEToFrST8Iazj9Cz_mcXEwiP/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1s9JRWJaeet4syInGap6FyqDBJIR80UHr/view?usp=sharing
     output: [data/landcover/*]
 
   # data bundle of the data folder for europe

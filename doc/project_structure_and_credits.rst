@@ -30,7 +30,7 @@ The structure might be adjusted in future:
 - `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
 - `Finance leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EbBuUGDNwrRBqmeT8xbQT3MBL1MOMkemCDXi7EMbzXEmHw?e=E3Cbc7>`_ (Currently not assigned)
 - Western Asia Coordinator (Emre Yorat and `Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
-- Central Asia (`Ekatarina Fedotova <https://www.linkedin.com/in/ekaterina-fedotova-ba8249234/>`)
+- Central Asia (`Ekatarina Fedotova <https://www.linkedin.com/in/ekaterina-fedotova-ba8249234/>`_)
 
 .. _credits:
 

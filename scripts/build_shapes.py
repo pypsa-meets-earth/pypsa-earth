@@ -106,13 +106,14 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
         list_layers = fiona.listlayers(file_gpkg)
 
         # # get layer name
-        if layer_id < 0 | layer_id >= len(list_layers):
+        if (layer_id < 0) | (layer_id >= len(list_layers)):
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
-        code_layer = np.mod(layer_id, len(list_layers))
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_id).to_crs(geo_crs)
+        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
+            geo_crs
+        )
 
         # convert country name representation of the main country (GID_0 column)
         geodf_temp["GID_0"] = [
@@ -121,7 +122,7 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
 
         # append geodataframes
         geodf_list.append(geodf_temp)
