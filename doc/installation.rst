@@ -49,13 +49,6 @@ The complete list of software needed before installing PyPSA Earth is listed bel
   `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
   to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
   (both commercial licenses with free academic options) can also be used. A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
- 
-
-.. note::
-  Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Earth model.
-  The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Earth experience is listed in the 
-  `Tutorial section <https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
-  Most of the dependencies needed will be automatically installed using the conda environments listed below
 
 Clone the repository
 ====================
