@@ -513,7 +513,12 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 
 
 def locate_bus(
-    coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False, col="name"
+    coords,
+    co,
+    gadm_level,
+    path_to_gadm=None,
+    gadm_clustering=False,
+    col="name",
 ):
     """
     Function to locate the right node for a coordinate set
@@ -527,9 +532,6 @@ def locate_bus(
         code of the countries where the coordinates are
 
     """
-    country_list = snakemake.config[
-        "countries"
-    ]  # TODO connect with entire list of countries
     col = "name"
     if not gadm_clustering:
         gdf = gpd.read_file(path_to_gadm)
@@ -546,7 +548,7 @@ def locate_bus(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf = get_GADM_layer(country_list, gadm_level)
+            gdf = get_GADM_layer(co, gadm_level)
             col = "GID_{}".format(gadm_level)
 
         # gdf.set_index("GADM_ID", inplace=True)
