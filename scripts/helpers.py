@@ -527,10 +527,12 @@ def locate_bus(
         code of the countries where the coordinates are
 
     """
-    country_list = ["MA"]  # TODO connect with entire list of countries
+    country_list = snakemake.config[
+        "countries"
+    ]  # TODO connect with entire list of countries
+    col = "name"
     if not gadm_clustering:
         gdf = gpd.read_file(path_to_gadm)
-        col = "name"
     else:
         if path_to_gadm:
             gdf = gpd.read_file(path_to_gadm)
