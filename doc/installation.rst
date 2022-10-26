@@ -116,20 +116,7 @@ The complete list of software needed before installing PyPSA Earth is listed bel
   to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
   (both commercial licenses with free academic options) can also be used. A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
-Clone the repository
-====================
-
-First of all, clone the `PyPSA Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth>`_ using the version control system ``git``.
-The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces.
-If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
-
-.. code:: bash
-
-    /some/other/path % cd /some/path/without/spaces
-
-    /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
-
-.. _deps:
+.. _deps2:
 
 Install python dependencies
 ===============================
