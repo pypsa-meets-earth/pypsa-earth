@@ -512,7 +512,9 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
     return geodf_GADM
 
 
-def locate_bus(coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False):
+def locate_bus(
+    coords, co, gadm_level, path_to_gadm=None, gadm_clustering=False, col="name"
+):
     """
     Function to locate the right node for a coordinate set
     input coords of point
