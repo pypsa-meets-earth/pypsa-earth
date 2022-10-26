@@ -11,14 +11,14 @@ How to validate?
 
 .. TODO add a list of actions needed to do the validation
 
-Data workflow is PyPSA-Earth allows to extract all the data needed to build your energy model from global open data sources. An example of the validation procedure is avaible in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook. Public information on the power system of Nigeria are compared to those obtained from the PyPSA-Earth model.
+Data workflow is PyPSA-Earth allows to extract all the data needed to build your energy model from global open data sources. An example of the validation procedure is available in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook. Public information on the power system of Nigeria are compared to those obtained from the PyPSA-Earth model.
 
 Simulation procedure
 ===================================
 
 It may be recommended to check the following quantities the validation:
 
-#. inputs used by the pypsa-model:
+#. inputs used by the model:
 
     #. network characteristics;
 
@@ -35,7 +35,7 @@ It may be recommended to check the following quantities the validation:
 Data sources
 ===================================
  
-Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exaustive list of helpful sources:
+Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exhaustive list of helpful sources:
 
 * `World Bank <https://energydata.info/>`_;
 

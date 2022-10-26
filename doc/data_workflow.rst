@@ -73,7 +73,7 @@ These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.
 Economical
 ------------------------------------
 
-* **costs.csv** file contains the defaulf costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adajustments may be needed. 
+* **costs.csv** file contains the default costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adjustments may be needed. 
 
 * **gadm** folder contains data of the shapes of administrative zones by country (e.g. regions, districts, provinces, ...), depending on the level of resolution desired by the configuration file. The data in this folder are automatically populated by the `build_shapes` rule that download such data from the gadm website.
 
