@@ -3,7 +3,7 @@
 
   SPDX-License-Identifier: CC-BY-4.0
 
-.. _how_to_customize:
+.. _how_to_fit:
 
 ##########################################
 How to use PyPSA-Earth for your energy problem?
