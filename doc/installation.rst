@@ -74,7 +74,7 @@ Verify or install a java redistribution from the `official website <https://www.
 
     .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
 
-To verify the successfull installation the following code can be tested from bash:
+To verify the successful installation the following code can be tested from bash:
 
   .. code:: bash
 

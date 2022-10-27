@@ -33,7 +33,7 @@ You may check if ``conda`` is already installed on your system with `conda -V`. 
 
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
-We recommend to install `mamba <https://github.com/QuantStack/mamba>`_ in `conda` base enviromnent as that makes dependencies management much faster. 
+We recommend to install `mamba <https://github.com/QuantStack/mamba>`_ in `conda` base environment as that makes dependencies management much faster. 
 
 There are many things which could go wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a crystal clear explanation of conda (**excellent read**).
  
