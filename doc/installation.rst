@@ -145,32 +145,30 @@ The environment can be installed in about 5-15min (reported by users) and activa
     .../pypsa-earth (base) % conda install -c conda-forge mamba
 
     .../pypsa-earth (base) % mamba env create -f envs/environment.yaml
+Solver Installation 
+---------------------------------
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+An optimization solver is needed to solve the mathematical problem that is build with the automated workflow.
+With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as 
 
-In case mamba did not work for you, you might want to try the traditional conda installation
+* `CBC <https://projects.coin-or.org/Cbc>`_; 
 
-.. code::bash
+* `GLPK <https://www.gnu.org/software/glpk/>`_;
 
-    .../pypsa-earth (base) % conda env create -f envs/environment.yaml
+* `WinGLPK <http://winglpk.sourceforge.net/>`_; 
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+* `HiGHS <https://github.com/ERGO-Code/HiGHS>`_.
 
-or use miniconda instead.
-    
-To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ 
-and test if your jupyter lab works:
-    
-.. code:: bash
+To further improve performances, commercial solvers like 
 
-    .../pypsa-earth (pypsa-earth) % ipython kernel install --user --name=pypsa-earth
+* `Gurobi <http://www.gurobi.com/>`_;
 
-    .../pypsa-earth (pypsa-earth) % jupyter lab
+* `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
+  
+(both commercial licenses with free academic options) can also be used. 
 
-.. note::
-  Please, make sure to have properly installed java, from the  `official website <https://www.oracle.com/java/technologies/downloads/>`__ or equivalent.
+A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
-In linux only, that is possible through the following command.
 
 .. code:: bash
 
