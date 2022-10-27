@@ -7,7 +7,7 @@
 
 
 ##########################################
-Getting started
+Software hints
 ##########################################
 
 Software requirements
