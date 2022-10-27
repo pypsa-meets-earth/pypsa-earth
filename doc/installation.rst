@@ -36,35 +36,36 @@ Python Dependencies
 --------------------------------
 
 PyPSA-Earth relies on a set of other Python packages to function.
-We recommend using the package manager and environment management system ``conda`` to install them.
-Install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ that includes only ``conda`` and its dependencies or make sure ``conda`` is already installed on your system with `conda -V`.
-For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
 The python package requirements are curated in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file.
-The environment can be installed and activated using
+
+
+The python package requirements are curated in the envs/environment.yaml file.
+We install only `mamba` in the conda base environment to accelerate the installation.
+**Please keep the base environment always clean, meaning don't install anything there!**
+The environment can be installed in about 5-15 minutes and activated like this:
 
 .. code:: bash
 
-    .../pypsa-earth % conda env create -f envs/environment.yaml
+    .../pypsa-earth (base) % conda install -c conda-forge mamba
 
-    .../pypsa-earth % conda activate pypsa-earth
+    .../pypsa-earth (base) % mamba env create -f envs/environment.yaml
 
-Note that activation is local to the currently open shell!
-After opening a new terminal window, one needs to reissue the second command!
+    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-.. note::
-    If you have troubles with a slow ``conda`` installation, we recommend to install
-    `mamba <https://github.com/QuantStack/mamba>`_ as a fast drop-in replacement via
+Note please that activation is local to the currently open shell. Every time you 
+open a new terminal window `pypsa-earth` environment shold be activated again to supply the workflow with all the dependencies it needs.    
 
-    .. code:: bash
+In case mamba did not work for you, you might want to try conda instead:
 
-      (base) conda install -c conda-forge mamba
+.. code:: bash
 
-    and then install the environment with
+    .../pypsa-earth (base) % conda env create -f envs/environment.yaml
 
-    .. code:: bash
+    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-      .../pypsa-earth % mamba env create -f envs/environment.yaml
+
+For more information on conda installations you can look into :ref:`software_hints`.
 
 Java Installation 
 --------------------------------       
