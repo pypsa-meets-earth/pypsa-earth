@@ -199,11 +199,15 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import progressbar as pgb
+import rasterio as rio
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
-from shapely.geometry import LineString
+from rasterio.warp import transform_bounds
+from shapely.geometry import LineString, Polygon, box, shape
+from shapely.ops import transform
+from shapely.wkt import loads
 
 cc = coco.CountryConverter()
 
@@ -419,6 +423,27 @@ if __name__ == "__main__":
 
         if "natura" in config and config["natura"]:
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
+
+            natura = rio.open(paths.natura)
+            if not natura.crs == area_crs:
+                logger.warning(
+                    f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
+                )
+
+            # Spatial extent of the natura.tiff raster should cover the entire cutout area to avoid data losses
+            natura_orig_geom = loads(box(*natura.bounds).wkt)
+            natura_gejson = rio.warp.transform_geom(
+                src_crs=natura.crs, dst_crs=geo_crs, geom=natura_orig_geom
+            )
+            natura_geom = shape(natura_gejson)
+
+            nc_geom = box(*cutout.bounds)
+            cutout_in_natura = natura_geom.contains(nc_geom)
+
+            if not cutout_in_natura:
+                logger.warning(
+                    f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range\n\r *  cutout: left={cutout.bounds[0]:2.1f}, bottom={cutout.bounds[1]:2.1f}, right={cutout.bounds[2]:2.1f}, top={cutout.bounds[3]:2.1f};\n\r * 'natura.tiff': left={natura_geom.bounds[0]:2.1f}, bottom={natura_geom.bounds[1]:2.1f},right={natura_geom.bounds[2]:2.1f}, top={natura_geom.bounds[3]:2.2f}"
+                )
 
         if "copernicus" in config and config["copernicus"]:
             copernicus = config["copernicus"]

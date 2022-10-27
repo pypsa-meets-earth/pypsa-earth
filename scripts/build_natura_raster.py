@@ -21,7 +21,7 @@ Relevant Settings
 Inputs
 ------
 
-- ``data/raw/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-points.shp``: `WDPA <https://en.wikipedia.org/wiki/Natura_2000>`_ World Database for Protected Areas.
+- ``data/landcover/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-points.shp``: `WDPA <https://en.wikipedia.org/wiki/Natura_2000>`_ World Database for Protected Areas.
 
     .. image:: ../img/natura.png
         :scale: 33 %
@@ -41,7 +41,7 @@ Maybe not so obvious is the cutout input. An example is this `africa-2013-era5.n
 
 Steps to retrieve the protected area data (as apparently no API is given for the WDPA data):
     - 1. Download the WPDA Dataset: World Database on Protected Areas. UNEP-WCMC and IUCN (2021), Protected Planet: The World Database on Protected Areas (WDPA) and World Database on Other Effective Area-based Conservation Measures (WD-OECM) [Online], August 2021, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
-    - 2. Unzipp and rename the folder containing the .shp file to `protected_areas`
+    - 2. Unzipp and rename the folder containing the .shp file to `./resources/landcover`
     - 3. Important! Don't delete the other files which come with the .shp file. They are required to build the shape.
     - 4. Move the file in such a way that the above path is given
     - 5. Activate the environment of environment-max.yaml
@@ -108,7 +108,8 @@ def get_transform_and_shape(bounds, res, out_logging):
         _logger.info("Stage 2/5: Get transform and shape")
     left, bottom = [(b // res) * res for b in bounds[:2]]
     right, top = [(b // res + 1) * res for b in bounds[2:]]
-    shape = int((top - bottom) // res), int((right - left) / res)
+    # "latitude, longitude" coordinates order
+    shape = int((top - bottom) // res), int((right - left) // res)
     transform = rio.Affine(res, 0, left, 0, -res, top)
     return transform, shape
 
@@ -193,7 +194,8 @@ if __name__ == "__main__":
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
-    raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
+    # out_shape: n_rows, n_columns
+    raster = ~geometry_mask(shapes.geometry, out_shape, transform)
     raster = raster.astype(rio.uint8)
 
     if out_logging:
