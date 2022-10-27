@@ -15,12 +15,15 @@ The installation procedure installs PyPSA-Earth model with all the dependencies 
 Tutorial run
 ------------------------------
 
-The entire distribution, including the data for most parts on Earth, is very heavy (>40Gb for Africa) and it involves a large number of files. To simplify the installation of the github folder, the main source code is available in the Github folder, whereas the data are stored in cloud.
+The entire distribution, including the data for most parts on Earth, is very heavy (e.g. for Africa it is >40Gb) and it involves a large number of files. To facilitate model testing, a lightweight data starter kit was developed. You can use it by setting `tutorial: true` `retrieve_databundle: true` in the configuration file `config.yaml` placed in the project folder `pypsa-earth`. 
 
-`tutorial` flag in the `config.yaml`
+After doing so, you just need run the model with the following command:
 
 .. code:: bash
-    snakemake -j 1 `solve_all_networks`
+
+    snakemake -j 1 solve_all_networks
+
+.. TODO Explain settings of the tutorial case
 
 Working run
 ------------------------------    
