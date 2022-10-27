@@ -7,7 +7,7 @@
 
 
 ##########################################
-How to run the model
+How to run your model
 ##########################################
 
 Data are needed to run a model.
