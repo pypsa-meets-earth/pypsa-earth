@@ -10,9 +10,7 @@
 How to run your model
 ##########################################
 
-Data are needed to run a model.
-
-Data workflow management is one of the core PyPSA-Earth features.
+The installation procedure installs PyPSA-Earth model with all the dependencies needed to build it. The next step is to introduce the data needed to model a region of your interest. Flexible data management is the core feature of PyPSA-Earth model which relies on customizable data extraction and preparation scripts with global coverage.
 
 Tutorial run
 ------------------------------
