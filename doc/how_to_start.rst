@@ -46,7 +46,7 @@ Please, note that around **20 Gb zipped files will be downloaded**. It's worth t
 Snakemake
 ===========================
 
-- Snakemake
+Snakemake is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur. Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
 
 .. note::
   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth, thereby there is no need to install it manually.
@@ -56,5 +56,8 @@ The snakemake included in the conda environment pypsa-earth installed with the a
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) % snakemake < any command here >  
+
+Starting with essential usability features, the implemented Snakemake procedure allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
+
 
 .. TODO Add Snakemake tutorial links    
