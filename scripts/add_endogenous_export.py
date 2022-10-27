@@ -31,9 +31,19 @@ def select_ports(n):
     gadm_level = snakemake.config["sector"]["gadm_level"]
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(port[["x", "y"]], port["country"], gadm_level), axis=1
+        lambda port: locate_bus(
+            port[["x", "y"]],
+            port["country"],
+            gadm_level,
+            snakemake.input["shapes_path"],
+            snakemake.config["clustering_options"]["alternative_clustering"],
+        ),
+    axis=1,
     )
+    
     ports = ports.set_index("gadm_{}".format(gadm_level))
+
+
 
     # Select the hydrogen buses based on nodes with ports
     hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
