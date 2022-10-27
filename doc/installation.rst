@@ -9,8 +9,7 @@
 Installation
 ##########################################
 
-The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the
-directory in which the commands following the ``%`` should be entered.
+The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the directory in which the commands following the ``%`` should be entered.
 
 
 Clone the Repository
@@ -25,7 +24,6 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
     /some/other/path % cd /some/path/without/spaces
 
     /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
-
 
 .. _deps:
 
@@ -54,7 +52,7 @@ The environment can be installed in about 5-15 minutes and activated like this:
     .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
 Note please that activation is local to the currently open shell. Every time you 
-open a new terminal window `pypsa-earth` environment shold be activated again to supply the workflow with all the dependencies it needs.    
+open a new terminal window `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.    
 
 In case mamba did not work for you, you might want to try conda instead:
 
@@ -126,7 +124,7 @@ Before first use, create a ``config.yaml`` by copying the example.
 
 It makes sense to regularly check their own ``config.yaml`` against changes in the ``config.default.yaml`` when pulling a new version from the remote repository.
 
-Install Jupiter Lab
+Install Jupyter Lab
 ================================
 
 We use jupyter notebooks to share examples on how to use the model and analyse the results. To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
