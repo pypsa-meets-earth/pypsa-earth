@@ -19,7 +19,7 @@ scenario:
   ll:
   - "c1"
   opts:
-  - "Co2L-144H"
+  - "Co2L_144H"
   sopts:
   - "7H"
 
@@ -211,8 +211,8 @@ sector:
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
-  end: "2013-03-8"
-  closed: "left" # end is not inclusive
+  end: "2013-03-7"
+  inclusive: "left" # end is not inclusive
 
 # atlite:
 #   cutout: ./cutouts/africa-2013-era5.nc
