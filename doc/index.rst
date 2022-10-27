@@ -89,7 +89,7 @@ The PyPSA meets Earth team is currently running four types of meetings:
     1. Demand creation and prediction meeting, on demand basis
     2. AI asset detection meeting, every Tuesday 15:30 (UK time), `download .ics file <https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing>`__
     3. Sector coupling meeting, every Thursday 09:00 (UK time), `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
-    4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), `download .ics file <https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing>`__
+    4. Data workflow and architecture meeting, every Thursday 16:00 (UK time), `download .ics file <https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing>`__
 
 - **Outreach meeting (by invitation)**
 
