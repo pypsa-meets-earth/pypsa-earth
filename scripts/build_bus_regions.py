@@ -297,14 +297,11 @@ if __name__ == "__main__":
         # remove empty polygons
         offshore_regions = offshore_regions[~offshore_regions.geometry.is_empty]
 
-    if offshore_regions:
+    if not offshore_regions.empty:
         # if a offshore_regions exists excute below
-        pd.concat(offshore_regions, ignore_index=True).to_file(
+        pd.concat([offshore_regions], ignore_index=True).to_file(
             snakemake.output.regions_offshore
         )
     else:
         # if no offshore_regions exist save an empty offshore_shape
         offshore_shapes.to_frame().to_file(snakemake.output.regions_offshore)
-    
-
-
