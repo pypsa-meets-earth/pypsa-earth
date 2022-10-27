@@ -58,13 +58,13 @@ After opening a new terminal window, one needs to reissue the second command!
 
     .. code:: bash
 
-        conda install -c conda-forge mamba
+      (base) conda install -c conda-forge mamba
 
     and then install the environment with
 
     .. code:: bash
 
-        mamba env create -f envs/environment.yaml
+      .../pypsa-earth % mamba env create -f envs/environment.yaml
 
 Java Installation 
 --------------------------------       
