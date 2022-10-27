@@ -126,12 +126,12 @@ Before first use, create a ``config.yaml`` by copying the example.
 
 It makes sense to regularly check their own ``config.yaml`` against changes in the ``config.default.yaml`` when pulling a new version from the remote repository.
 
+Install Jupiter Lab
+================================
 
-The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
+We use jupyter notebooks to share examples on how to use the model and analyse the results. To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % .../pypsa-earth % conda activate pypsa-earth
-
-    .../pypsa-earth (pypsa-earth) % snakemake < any command here >
-
+    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
+    .../pypsa-earth % jupyter lab
