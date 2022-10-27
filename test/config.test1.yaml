@@ -29,6 +29,9 @@ countries: ['NG', 'BJ']
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
 
+export:
+  export_h2: 10000000 # Yearly export demand in MWh
+
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
     # 2020: 0.6
