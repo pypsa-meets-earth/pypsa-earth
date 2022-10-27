@@ -26,18 +26,22 @@ After doing so, you just need run the model with the following command:
 .. TODO Explain settings of the tutorial case
 
 Working run
-------------------------------    
+------------------------------
 
-`clean` to avoid data conflicts (it's a good idea to repeat it when the underlying data are changed)
-
-`retrieve_databundle: true`
-
-Execute the following code on the shell to download initial files. Please, note that around **20Gb zipped files will be downloaded**, make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed.
+After playing with the tutorial model, it's important to clean-up data in your model folder to avoid data conflicts. You may use the `clean` rule for making so:
 
 .. code:: bash
-    snakemake -j 1 `solve_all_networks`
 
-`retrieve_databundle: false` to avoid data loss 
+    snakemake -j 1 clean
+
+Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed.
+
+It's recommended to set `retrieve_databundle: true` when building the model first time to download the common data files needed. The load will start automatically when running the model with:
+
+.. code:: bash
+    snakemake -j 1 solve_all_networks
+
+Please, note that around **20 Gb zipped files will be downloaded**. It's worth to make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed. It's advicable to set `retrieve_databundle: false` after the first model run when all the needed data will be successfully extracted to avoid data loss.
 
 Snakemake
 ===========================
