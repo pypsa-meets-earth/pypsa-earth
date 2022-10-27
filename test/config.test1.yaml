@@ -19,9 +19,9 @@ scenario:
   ll:
   - "c1"
   opts:
-  - "Co2L_144H"
+  - "Co2L"
   sopts:
-  - "7H"
+  - "144H"
   demand:
   - "DF"
 
