@@ -18,7 +18,7 @@ The complete list of software needed before installing PyPSA Earth is listed bel
 Python
 -----------------------------------
 
-- `Python 3 <https://www.python.org/>`_ **(mandatory)**: Python is used as our main programming language, thus its knowledge is mandatory.
+`Python 3 <https://www.python.org/>`_ is used as our main programming language, thus its knowledge is mandatory.
 
 .. TODO Add installation instructions
 
@@ -40,7 +40,7 @@ There are many things which could go wrong with conda. `This article <https://to
 Git
 -----------------------------------
 
-`Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development and enable to coordinate the parallel software development between many developers.
+`Git <https://git-scm.com/>`__ is a free open source system aimed at tracking changes in the code development and enable to coordinate the parallel software development between many developers.
 
 It is highly recommended to `learn the git basics <https://git-scm.com/doc>`_.
 
@@ -57,7 +57,7 @@ It is highly recommended to `learn the git basics <https://git-scm.com/doc>`_.
 Integrated Development Environment
 -----------------------------------
 
-`IDE Python` **(recommendation)**: in order to write and debug python code, you need an Integrated Development Environment (IDE) that is a software used to write code. We recommend `Visual Studio Code <https://code.visualstudio.com/>`_, which is freely available online and provides an easy to use interface with Git. Obviously, any alternatives like `PyCharm <https://www.jetbrains.com/pycharm/>`_ or `Sublime <https://www.sublimetext.com/>`_ will work as well.
+In order to write and debug python code, you need an Integrated Development Environment (IDE) that is a software used to write code. We recommend `Visual Studio Code <https://code.visualstudio.com/>`_, which is freely available online and provides an easy to use interface with Git. Obviously, any alternatives like `PyCharm <https://www.jetbrains.com/pycharm/>`_ or `Sublime <https://www.sublimetext.com/>`_ will work as well.
 
 
 System requirements
