@@ -68,9 +68,14 @@ In case mamba did not work for you, you might want to try conda instead:
 For more information on conda installations you can look into :ref:`software_hints`.
 
 Java Installation 
---------------------------------       
+---------------------------------
 
-Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+Verify or install a java redistribution from the `official website <https://www.oracle.com/java/technologies/downloads/>`_ or equivalent. In Linux and Mac OS that is possible through the following command.
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
+
 To verify the successfull installation the following code can be tested from bash:
 
   .. code:: bash
