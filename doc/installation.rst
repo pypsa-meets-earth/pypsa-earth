@@ -74,7 +74,7 @@ To verify the successfull installation the following code can be tested from bas
 
   .. code:: bash
 
-      .../pypsa-earth % java -version
+    .../pypsa-earth % java -version
 
    The expected output should resemble the following:
    
