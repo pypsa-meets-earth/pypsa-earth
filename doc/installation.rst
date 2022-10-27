@@ -113,27 +113,19 @@ To further improve performances, commercial solvers like
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
+Set Configuration File
+================================
+
+PyPSA-Earth has several configuration options that must be specified in a ``config.yaml`` file located in the root directory. An example configuration ``config.default.yaml`` is maintained in the repository. More details on the configuration options are in :ref:`config`.
+
+Before first use, create a ``config.yaml`` by copying the example.
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
+    .../pypsa-earth % cp config.default.yaml config.yaml
 
-To verify the successful installation, you can verify that by using the following code.
+It makes sense to regularly check their own ``config.yaml`` against changes in the ``config.default.yaml`` when pulling a new version from the remote repository.
 
-.. code:: bash
-     
-    .../pypsa-earth (pypsa-earth) % java -version
-
-The expected output should resemble the following text:
-
-.. code:: bash
-     java version "1.8.0_341"
-     Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
-     Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
-
-.. note::
-   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth,
-   thereby there is no need to install it manually.
 
 The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
 
@@ -143,29 +135,3 @@ The snakemake included in the conda environment pypsa-earth installed with the a
 
     .../pypsa-earth (pypsa-earth) % snakemake < any command here >
 
-
-Download data
-=============
-
-The entire distribution, including the data for most parts on Earth, is very heavy (>40Gb for Africa) and it involves a large number of files.
-To simplify the installation of the github folder, the main source code is available in the Github folder, whereas the data are stored in cloud.
-The rule ``retrieve_databundle_light`` has been specifically developed to set up the raw data, and the procedure below guides in setting up the needed data.
-
-1. Duplicate the file ``config.default.yaml`` and rename the copy as ``config.yaml``
-2. Open file ``config.yaml`` using any text editor
-3. Make sure that the option ``retrieve_databundle`` is set ``true``
-   ``retrieve_databundle: true``
-
-4. Execute the following code on the shell to download initial files. Please, note that around **20Gb zipped files will be downloaded**, 
-   so make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed.
-
-   .. code:: bash
-
-     .../pypsa-earth (base) % conda activate pypsa-earth
-
-     .../pypsa-earth (pypsa-earth) % snakemake -j1 retrieve_databundle_light --force
-
-5. In the file ``config.yaml`` set the option ``retrieve_databundle`` back to ``false`` and save the file:
-   ``retrieve_databundle: false``
-
-Once these tasks have been completed, the package is ready to use.
