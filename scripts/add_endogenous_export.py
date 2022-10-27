@@ -38,12 +38,10 @@ def select_ports(n):
             snakemake.input["shapes_path"],
             snakemake.config["clustering_options"]["alternative_clustering"],
         ),
-    axis=1,
+        axis=1,
     )
-    
+
     ports = ports.set_index("gadm_{}".format(gadm_level))
-
-
 
     # Select the hydrogen buses based on nodes with ports
     hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
