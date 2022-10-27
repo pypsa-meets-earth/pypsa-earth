@@ -19,7 +19,7 @@ scenario:
   ll:
   - "c1"
   opts:
-  - "Co2L_144H"
+  - "Co2L-144H"
   sopts:
   - "7H"
 
