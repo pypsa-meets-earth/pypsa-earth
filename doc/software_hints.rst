@@ -10,7 +10,7 @@
 Software hints
 ##########################################
 
-Software requirements
+Tools we are using
 =====================
 
 The complete list of software needed before installing PyPSA Earth is listed below.
