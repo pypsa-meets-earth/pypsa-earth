@@ -9,7 +9,7 @@
 How to use PyPSA-Earth for your energy problem?
 ##########################################
 
-PyPSA-Earth mostly relies on the :ref:`global datasets <data_workflow>`_ and can be tailored to represent any part of the world in a few steps. The following procedure is recommended.
+PyPSA-Earth mostly relies on the :ref:`global datasets <data_workflow>` and can be tailored to represent any part of the world in a few steps. The following procedure is recommended.
 
 1. Adjust the model configuration
 =========================================
