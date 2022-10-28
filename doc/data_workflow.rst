@@ -22,7 +22,7 @@ OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build pow
     :height: 150 px
     :align: center
 
-The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and writen as a geojsons in the folder `pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
+The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `pypsa-earth/data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and written as a geojsons in the folder `pypsa-earth/data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
 The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
 
