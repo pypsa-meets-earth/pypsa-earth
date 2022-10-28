@@ -142,9 +142,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
             "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
         )
 
-    shape = gpd.GeoDataFrame(pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(
-        natura_crs
-    )
     list_shapes = []
     for i in shp_files:
         shp = gpd.read_file(i)
