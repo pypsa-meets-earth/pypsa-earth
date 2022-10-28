@@ -64,6 +64,7 @@ _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
 CUTOUT_CRS = "EPSG:4326"
+NATURA_CRS = "EPSG:4236"
 
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
@@ -113,7 +114,7 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
-def unify_protected_shape_areas(inputs, area_crs, out_logging):
+def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     """
     Iterates thorugh all snakemake rule inputs and unifies shapefiles (.shp) only.
 
@@ -142,7 +143,7 @@ def unify_protected_shape_areas(inputs, area_crs, out_logging):
         )
 
     shape = gpd.GeoDataFrame(pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(
-        area_crs
+        natura_crs
     )
     list_shapes = []
     for i in shp_files:
@@ -154,13 +155,13 @@ def unify_protected_shape_areas(inputs, area_crs, out_logging):
             axis=1,
         )
         list_shapes.append(shp)
-    shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(area_crs)
+    shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(natura_crs)
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
 
     # Create Geodataframe with crs
-    shape = gpd.GeoDataFrame(shape, crs=area_crs)
+    shape = gpd.GeoDataFrame(shape, crs=natura_crs)
     shape = shape.rename(columns={0: "geometry"}).set_geometry("geometry")
 
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
@@ -171,7 +172,7 @@ def unify_protected_shape_areas(inputs, area_crs, out_logging):
         _logger.info(
             "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
         )
-    unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=area_crs)
+    unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=natura_crs)
 
     return unified_shape
 
@@ -187,7 +188,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # get crs
-    area_crs = snakemake.config["crs"]["area_crs"]
+    natura_crs = NATURA_CRS
 
     out_logging = True
     inputs = snakemake.input
@@ -196,12 +197,16 @@ if __name__ == "__main__":
     xs, Xs, ys, Ys = zip(
         *(determine_cutout_xXyY(cutout, out_logging=out_logging) for cutout in cutouts)
     )
-    bounds = transform_bounds(CUTOUT_CRS, area_crs, min(xs), min(ys), max(Xs), max(Ys))
+    bounds = transform_bounds(
+        CUTOUT_CRS, natura_crs, min(xs), min(ys), max(Xs), max(Ys)
+    )
     transform, out_shape = get_transform_and_shape(
         bounds, res=100, out_logging=out_logging
     )
     # adjusted boundaries
-    shapes = unify_protected_shape_areas(shapefiles, area_crs, out_logging=out_logging)
+    shapes = unify_protected_shape_areas(
+        shapefiles, natura_crs, out_logging=out_logging
+    )
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
@@ -217,7 +222,7 @@ if __name__ == "__main__":
         dtype=rio.uint8,
         count=1,
         transform=transform,
-        crs=area_crs,
+        crs=natura_crs,
         compress="lzw",
         width=raster.shape[1],
         height=raster.shape[0],
