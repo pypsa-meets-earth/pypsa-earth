@@ -30,14 +30,7 @@ It could be helpful to keep in mind the following points:
 
 3. the cutout time dimension, the weather year used for demand modeling and the actual snapshot should match.
 
-2. Load all the common data
-=========================================
-
-PyPSA-Earth relies on a number of datasets introduced in the :ref:`data workflow <data_workflow>`. Automated data retrieval is implemented by the :ref:`retrieve rules <data>`.
-
-Mostly these data are global and should be loaded only once when installing the model. The exception is the cutout which requires of about ~200 Gb in it's global version. The cutout which is supplied with the model could be loaded by running `retrieve_databundle_light` rule, corresponds to Africa. If you are interested in other part of the world a custom cutout should be built. In the future we plan to provide a general default global climate inputs.
-
-3. Build the custom cutout
+2. Build the custom cutout
 =========================================
 
 The cutout is the main concept of climate data management in PyPSA ecosystem introduced in `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since such datasets are typically global and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing concepts are contained in `JOSS paper <https://joss.theoj.org/papers/10.21105/joss.03294>`_.
@@ -63,7 +56,7 @@ There is also option to set the cutout extent specifying `x` and `y` values dire
 
 The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
 
-4. Build a natura.tiff raster
+3. Build a natura.tiff raster
 =========================================
 
 A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
