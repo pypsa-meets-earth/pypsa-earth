@@ -14,9 +14,7 @@ Not all data dependencies are shipped with the git repository. Instead we provid
 
 - :mod:`retrieve` enables a simplified approach to download the main databundle of raw data
 - :mod:`build_shapes` automatically downloads administrative country shapes from the
-  `GADM dataset <https://gadm.org/>`_ and generates GeoJSON files with shapes of the countries,
-  exclusive economic zones and administrative zones at the desired resolution
-  (e.g. region, district, etc.).
+  `GADM dataset <https://gadm.org/>`_ and generates GeoJSON files with shapes of the countries, exclusive economic zones and administrative zones at the desired resolution (e.g. region, district, etc.).
 
 Index:
 
