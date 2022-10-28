@@ -9,7 +9,9 @@
 Data used by the model
 ##########################################
 
-To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the `Tutorial <tutorial>`_ section.
+To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the :ref:`Tutorial <tutorial>` section.
+
+Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart of that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
 
 1. Grid topology data
 ===================================
