@@ -9,7 +9,7 @@
 How to use PyPSA-Earth for your energy problem?
 ##########################################
 
-PyPSA-Earth can be tailored to represent any part of the world quite easily. The following procedure may be recommended.
+PyPSA-Earth can be tailored to represent any part of the world quite easily. The following procedure is recommended.
 
 1. Adjust the model configuration
 =========================================
