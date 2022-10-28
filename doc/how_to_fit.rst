@@ -42,6 +42,9 @@ Mostly these data are global and should be loaded only once when installing the 
 
 The cutout is the main concept of climate data management in PyPSA ecosystem introduced in `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since such datasets are typically global and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing concepts are contained in `JOSS paper <https://joss.theoj.org/papers/10.21105/joss.03294>`_.
 
+.. note::
+    Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
+
 The pre-built cutout for Africa is available for 2013 year and can be loaded directly from zenodo through the rule `retrieve_cutout`. There is also a smaller cutout for Africa built for a two-weeks time span; it is automatically downloaded when retrieving common data with `retrieve_databundle_light`.
 
 In case you are interested in other parts of the world you can generate a cutout yourself using the `build_cutouts` rule. To run it you will need to 
@@ -64,5 +67,8 @@ The `build_cutout` flag should be set `true` to generate the cutout. After the c
 =========================================
 
 A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
+
+.. note::
+    Skip this recommendation if the region of your interest is within Africa
 
 A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. Currently this raster is valid for Africa, global `natura.tiff` raster is under development. You may generate the `natura.tiff` for a region of interest using `build_natura_raster` rule which aggregates data on protected areas along the cutout extent.
