@@ -66,11 +66,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="115",
+            clusters="113",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="73H",
+            sopts="730H",
             demand="NZ",
             discountrate=0.069,
         )

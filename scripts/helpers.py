@@ -512,7 +512,14 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
     return geodf_GADM
 
 
-def locate_bus(coords, co, gadm_level, path_to_gadm=None):
+def locate_bus(
+    coords,
+    co,
+    gadm_level,
+    path_to_gadm=None,
+    gadm_clustering=False,
+    col="name",
+):
     """
     Function to locate the right node for a coordinate set
     input coords of point
@@ -525,21 +532,28 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None):
         code of the countries where the coordinates are
 
     """
-    country_list = ["MA"]  # TODO connect with entire list of countries
-    if not path_to_gadm:
-        gdf = get_GADM_layer(country_list, gadm_level)
-        # column =
-    else:
+    col = "name"
+    if not gadm_clustering:
         gdf = gpd.read_file(path_to_gadm)
-        if gdf["GADM_ID"][0][
-            :3
-        ].isalpha():  # TODO clean later by changing all codes to 2 letters
-            gdf["GADM_ID"] = gdf["GADM_ID"].apply(
-                lambda name: three_2_two_digits_country(name[:3]) + name[3:]
-            )
+    else:
+        if path_to_gadm:
+            gdf = gpd.read_file(path_to_gadm)
+            if "GADM_ID" in gdf.columns:
+                col = "GADM_ID"
+
+                if gdf[col][0][
+                    :3
+                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                    gdf[col] = gdf[col].apply(
+                        lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                    )
+        else:
+            gdf = get_GADM_layer(co, gadm_level)
+            col = "GID_{}".format(gadm_level)
+
         # gdf.set_index("GADM_ID", inplace=True)
     gdf_co = gdf[
-        gdf.GADM_ID.str.contains(co)
+        gdf[col].str.contains(co)
     ]  # geodataframe of entire continent - output of prev function {} are placeholders
     # in strings - conditional formatting
     # insert any variable into that place using .format - extract string and filter for those containing co (MA)
@@ -547,10 +561,10 @@ def locate_bus(coords, co, gadm_level, path_to_gadm=None):
 
     try:
         return gdf_co[gdf_co.contains(point)][
-            "GADM_ID"
+            col
         ].item()  # filter gdf_co which contains point and returns the bus
 
     except ValueError:
         return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
-            "GADM_ID"
+            col
         ].item()  # looks for closest one shape=node
