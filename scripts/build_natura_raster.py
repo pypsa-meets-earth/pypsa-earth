@@ -51,6 +51,7 @@ Tip: The output file `natura.tiff` contains now the 100x100m rasters of protecti
 """
 import logging
 import os
+from tkinter import E
 
 import atlite
 import geopandas as gpd
@@ -145,13 +146,16 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     list_shapes = []
     for i in shp_files:
         shp = gpd.read_file(i)
-        shp.geometry = shp.apply(
-            lambda row: make_valid(row.geometry)
-            if not row.geometry.is_valid
-            else row.geometry,
-            axis=1,
-        )
-        list_shapes.append(shp)
+        try:
+            shp.geometry = shp.apply(
+                lambda row: make_valid(row.geometry)
+                if not row.geometry.is_valid
+                else row.geometry,
+                axis=1,
+            )
+            list_shapes.append(shp)
+        except:
+            _logger.warn(f"Error reading file {i}")
     shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(natura_crs)
 
     # Removes shapely geometry with null values. Returns geoseries.
