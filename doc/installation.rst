@@ -95,9 +95,7 @@ With the goal of supporting completely open source initiative, we focus on relyi
 
 * `CBC <https://projects.coin-or.org/Cbc>`_; 
 
-* `GLPK <https://www.gnu.org/software/glpk/>`_;
-
-* `WinGLPK <http://winglpk.sourceforge.net/>`_; 
+* `GLPK <https://www.gnu.org/software/glpk/>`_ and `WinGLPK <http://winglpk.sourceforge.net/>`_ (is included into pypsa-earth environment and installed automatically during environment creation); 
 
 * `HiGHS <https://github.com/ERGO-Code/HiGHS>`_.
 
