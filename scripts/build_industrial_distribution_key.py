@@ -21,10 +21,14 @@ def map_industry_to_buses(df):
     Only cement not steel - proof of concept.
     Change hotmaps to more descriptive name, etc.
     """
-
+    df = df[df.country.isin(snakemake.config["countries"])]
     df["gadm_{}".format(gadm_level)] = df[["x", "y", "country"]].apply(
         lambda site: locate_bus(
-            site[["x", "y"]].astype("float"), site["country"], gadm_level, shapes_path
+            site[["x", "y"]].astype("float"),
+            site["country"],
+            gadm_level,
+            shapes_path,
+            gadm_clustering,
         ),
         axis=1,
     )
@@ -80,7 +84,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=117,
+            clusters=4,
             demand="NZ",
             planning_horizons=2030,
         )
@@ -98,8 +102,10 @@ if __name__ == "__main__":
         )
 
     geo_locs = pd.read_csv(
-        snakemake.input.industrial_database, sep=",", header=0, index_col=0
+        snakemake.input.industrial_database, sep=",", header=0  # , index_col=0
     )
+
+    gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
 
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]
 

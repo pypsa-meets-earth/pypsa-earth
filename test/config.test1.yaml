@@ -19,16 +19,45 @@ scenario:
   ll:
   - "c1"
   opts:
-  - "Co2L-144H"
+  - "Co2L"
   sopts:
-  - "7H"
+  - "144H"
   demand:
   - "DF"
+
+clustering_options:
+  alternative_clustering: true
 
 countries: ['NG', 'BJ']
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
+  elec_demand: false
+  industry_demand: false
+
+costs:
+  lifetime: 25 #default lifetime
+  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
+  discountrate: [0.071] #, 0.086, 0.111]
+  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
+  USD2013_to_EUR2013: 0.7532
+
+  # Marginal and capital costs can be overwritten
+  # capital_cost:
+  #   onwind: 500
+  marginal_cost:
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    battery: 0.
+
+  emission_prices: # only used with the option Ep (emission prices)
+    co2: 0.
+
+  lines:
+    length_factor: 1.25 #to estimate offwind connection costs
 
 industry:
   St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
@@ -77,30 +106,6 @@ industry:
   MWh_CH4_per_tMeOH: 10.25 # DECHEMA (2017), Table 14, page 65
   hotmaps_locate_missing: false
   reference_year: 2015
-
-costs:
-  lifetime: 25 #default lifetime
-  # From a Lion Hirth paper, also reflects average of Noothout et al 2016
-  discountrate: [0.071, 0.086, 0.111]
-  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
-  USD2013_to_EUR2013: 0.7532
-
-  # Marginal and capital costs can be overwritten
-  # capital_cost:
-  #   onwind: 500
-  marginal_cost:
-    solar: 0.01
-    onwind: 0.015
-    offwind: 0.015
-    hydro: 0.
-    H2: 0.
-    battery: 0.
-
-  emission_prices: # only used with the option Ep (emission prices)
-    co2: 0.
-
-  lines:
-    length_factor: 1.25 #to estimate offwind connection costs
 
 solar_thermal:
   clearsky_model: simple
@@ -194,12 +199,11 @@ sector:
     NZ_2050: 0.68
     DF_2050: 0.011
 
-
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
   hydrogen_underground_storage: true
-  shipping_hydrogen_liquefaction: true
+  shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: #1.0
     BU_2030: 0.00
@@ -224,12 +228,11 @@ sector:
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
 
-# snapshots are originally set in PyPSA-Africa/config.yaml but used again by PyPSA-Earth-Sec
+# snapshots are originally set in PyPSA-Earth/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
-  # arguments to pd.date_range
   start: "2013-03-1"
-  end: "2013-03-8"
-  closed: "left" # end is not inclusive
+  end: "2013-03-7"
+  inclusive: "left" # end is not inclusive
 
 # atlite:
 #   cutout: ./cutouts/africa-2013-era5.nc
@@ -247,7 +250,7 @@ solving:
     max_iterations: 6
 
   solver:
-    name: glpk
+    name: cbc
 
   mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
 

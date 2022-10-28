@@ -1,0 +1,23 @@
+country,y,x,technology,capacity,unit,quality,location,Source
+MA,33.592793,-7.475613,Industry Steel Secondary EAF,1000,Kt/yr,actual,"Ahl Moughlam, Tit Mellil",Tracker Map - Global Energy Monitor
+MA,33.136529,-8.603555,Industry Steel Secondary EAF,800,Kt/yr,actual,"El Jadida, Jorf Lasfar",Tracker Map - Global Energy Monitor
+MA,33.603593,-7.640174,Industry Steel Secondary EAF,800,Kt/yr,actual,Casablanca,Tracker Map - Global Energy Monitor
+MA,30.218836,-9.157324,Industry NMM Cement,2200,Kt/yr,actual,Chtouka-Aït Baha,Cement Plants located in Morocco (cemnet.com)
+MA,31.585034,-8.502796,Industry NMM Cement,1400,Kt/yr,actual,Mzoudia,"Our History| Cements from Morocco (cimentsdumaroc.com), https://www.cemnet.com/global-cement-report/country/morocco"
+MA,32.550023,-9.10011,Industry NMM Cement,1000,Kt/yr,actual,Safi,Marrakech factory| Cements from Morocco (cimentsdumaroc.com)
+MA,32.584623,-6.148034,Industry NMM Cement,1600,Kt/yr,actual,Beni Mellal,Cimat - NOS SITES
+MA,32.990162,-7.145939,Industry NMM Cement,1600,Kt/yr,actual,Ben Ahmed,Cimat - NOS SITES
+MA,33.05424,-7.533158,Industry NMM Cement,1700,Kt/yr,actual,Settat,"Moroccos Settat cement plant ranked as second most efficient in LafargeHolcim Group - Cement industry news from Global Cement, https://www.archyde.com/lafargeholcim-morocco-settat-cement-plant-stands-out-on-a-global-scale/"
+MA,33.36865,-7.748368,Industry NMM Cement,3000,Kt/yr,actual,Bouskoura,Communiqué de presse Lafarge / Lafarge press release (holcim.com)
+MA,33.891323,-6.946778,Industry NMM Cement,1200,Kt/yr,actual,Temara,Company Votorantim Cimentos Morocco History
+MA,33.909977,-5.495519,Industry NMM Cement,1800,Kt/yr,actual,Meknes,GID cement database
+MA,33.944215,-5.117161,Industry NMM Cement,1900,Kt/yr,actual,Fes,GID cement database
+MA,34.59326,-2.349346,Industry NMM Cement,1300,Kt/yr,actual,Oujda,GID cement database
+MA,36.602102,-5.43119,Industry NMM Cement,2500,Kt/yr,actual,Tétouan,GID cement database
+MA,27.093082,-13.133753,Industry NMM Cement,500,Kt/yr,actual,Laâyoune,Our History| Cements from Morocco (cimentsdumaroc.com)
+MA,27.180683,-13.394904,Industry NMM Cement,500,Kt/yr,actual,Laâyoune,anouar-undated.pdf (wsrw.org)
+MA,27.896842,-12.893876,Industry NMM Cement,300,Kt/yr,actual,Tarfaya,CEMOS CIMENT S.A | Society
+MA,33.157731,-8.605763,Industry NMM Cement,450,Kt/yr,actual,El Jadida,Jorf Lasfar shredding centre | Cements from Morocco (cimentsdumaroc.com)
+MA,35.656333,-5.915386,Industry NMM Cement,500,Kt/yr,actual,Tangier,
+NG,9.164421,-9.191386,Industry NMM Cement,500,Kt/yr,actual,test,
+BJ,9.164421,-2.032412,Industry NMM Cement,400,Kt/yr,actual,test,
