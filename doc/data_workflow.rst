@@ -9,7 +9,6 @@
 Data used by the model
 ##########################################
 
-PyPSA-Earth has the flexible scope when a modeling domain can be selected from the whole Earth to any subregion. The modeling workflow includes data management workflow which is focused on open data collection, modification, prediction and validation. The developed data processing approaches aimed to provide model-ready data with temporal and spatial resolution as high as it's needed by a specific modeling task.
 
 .. _data_management_strategy:
 
@@ -17,6 +16,7 @@ Data management strategy
 ===================================
 
 Here we'll look into architecture of the data workflow while practical hand-ons are given in the Tutorial section.
+To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the `Tutorial <tutorial>`_ section.
 
 1. Grid topology data
 ===================================
