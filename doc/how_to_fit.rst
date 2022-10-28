@@ -40,7 +40,7 @@ The cutout is the main concept of climate data management in PyPSA ecosystem int
 
 The pre-built cutout for Africa is available for 2013 year and can be loaded directly from zenodo through the rule `retrieve_cutout`. There is also a smaller cutout for Africa built for a two-weeks time span; it is automatically downloaded when retrieving common data with `retrieve_databundle_light`.
 
-In case you are interested in other parts of the world you can generate a cutout yourself using the `build_cutouts` rule. To run it you will need to 
+In case you are interested in other parts of the world you have to generate a cutout yourself using the `build_cutouts` rule. To run it you will need to: 
 
 1. be registered on  the `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_;
 
