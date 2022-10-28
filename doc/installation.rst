@@ -125,7 +125,7 @@ It makes sense to regularly check their own ``config.yaml`` against changes in t
 Install Jupyter Lab
 ================================
 
-We use jupyter notebooks to share examples on how to use the model and analyse the results. To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
+We use Jupyter notebooks to share examples on how to use the model and analyse the results. VSCode supports working with Jupyter Notebooks natively. In case you are using different IDE and don't have Jupyter notebooks pre-installed you can install jupyter lab (new jupyter notebooks) with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
 
 .. code:: bash
 
