@@ -95,10 +95,10 @@ def determine_cutout_xXyY(cutout_name, out_logging):
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
     cutout_xXyY = [
-        x - dx / 2.0,
-        X + dx / 2.0,
-        y - dy / 2.0,
-        Y + dy / 2.0,
+        np.clip(x - dx / 2.0, -179.99, 179.99),
+        np.clip(X + dx / 2.0, -179.99, 179.99),
+        np.clip(y - dy / 2.0, -89.99, 89.99),
+        np.clip(Y + dy / 2.0, -89.99, 89.99),
     ]
     return cutout_xXyY
 
@@ -127,6 +127,7 @@ def unify_protected_shape_areas(inputs, area_crs, out_logging):
     """
     import pandas as pd
     from shapely.ops import unary_union
+    from shapely.validation import make_valid
 
     if out_logging:
         _logger.info("Stage 3/5: Unify protected shape area.")
@@ -143,6 +144,17 @@ def unify_protected_shape_areas(inputs, area_crs, out_logging):
     shape = gpd.GeoDataFrame(pd.concat([gpd.read_file(i) for i in shp_files])).to_crs(
         area_crs
     )
+    list_shapes = []
+    for i in shp_files:
+        shp = gpd.read_file(i)
+        shp.geometry = shp.apply(
+            lambda row: make_valid(row.geometry)
+            if not row.geometry.is_valid
+            else row.geometry,
+            axis=1,
+        )
+        list_shapes.append(shp)
+    shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(area_crs)
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
