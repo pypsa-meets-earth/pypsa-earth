@@ -9,13 +9,6 @@
 Data used by the model
 ##########################################
 
-
-.. _data_management_strategy:
-
-Data management strategy
-===================================
-
-Here we'll look into architecture of the data workflow while practical hand-ons are given in the Tutorial section.
 To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the `Tutorial <tutorial>`_ section.
 
 1. Grid topology data
