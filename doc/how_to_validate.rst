@@ -32,7 +32,7 @@ It may be recommended to check the following quantities the validation:
 
     #. energy mix.
 
-Data sources
+Where to look for reference data
 ===================================
  
 Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exhaustive list of helpful sources:
