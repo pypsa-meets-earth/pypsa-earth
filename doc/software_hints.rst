@@ -27,7 +27,7 @@ To refresh your knowledge, you may use plenty of online courses free-of-charge, 
 Conda
 -----------------------------------
 
-`conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ In order to use packages in python, it is highly recommended to use a conda package manager, such as `Anaconda <https://docs.anaconda.com/>`_ 
+In order to use packages in python, it is highly recommended to use a `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ package manager, such as `Anaconda <https://docs.anaconda.com/>`_ 
 
 You may check if ``conda`` is already installed on your system with `conda -V`. In case it's not we recommend to install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ and includes only ``conda`` and its dependencies. 
 
