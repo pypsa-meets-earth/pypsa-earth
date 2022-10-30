@@ -60,11 +60,11 @@ Snakemake is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur.
 .. note::
   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth, thereby there is no need to install it manually.
 
-The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
+The snakemake included in the conda environment pypsa-earth can be used to execute any custom rule with the following command:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake < any command here >  
+    .../pypsa-earth (pypsa-earth) % snakemake < your custom rule >  
 
 Starting with essential usability features, the implemented PyPSA-Earth `Snakemake procedure <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile>`_ that allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
 
