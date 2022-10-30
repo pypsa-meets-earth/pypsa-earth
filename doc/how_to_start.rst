@@ -27,7 +27,7 @@ After doing so, you just need run the modeling workflow with the following comma
 
 .. code:: bash
 
-    snakemake -j 1 solve_all_networks
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks
 
 .. TODO Explain settings of the tutorial case
 
@@ -38,14 +38,15 @@ After playing with the tutorial model, it's important to clean-up data in your m
 
 .. code:: bash
 
-    snakemake -j 1 clean
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean
 
 Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed.
 
 It's recommended to set `retrieve_databundle: true` when building the model first time to download the common data files needed. The load will start automatically when running the model with:
 
 .. code:: bash
-    snakemake -j 1 solve_all_networks
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks
 
 Please, note that around **20 Gb zipped files will be downloaded**. It's worth to make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed. It's advisable to set `retrieve_databundle: false` after the first model run when all the needed data will be successfully extracted to avoid data loss.
 
