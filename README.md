@@ -49,9 +49,9 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
-    2. AI asset detection meeting, on demand, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+    2. AI asset detection meeting, on demand
     3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
-    4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a>
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >download .ics</a>
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities
