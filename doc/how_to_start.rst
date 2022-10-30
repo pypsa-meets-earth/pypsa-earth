@@ -10,7 +10,7 @@
 How to run your model
 ##########################################
 
-The installation procedure installs PyPSA-Earth model with all the dependencies needed to build it. The next step is to introduce the data needed to model a region of your interest. Flexible data management is the core feature of PyPSA-Earth model which relies on customizable data extraction and preparation scripts with global coverage.
+The installation procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it. To properly model any region of the Earth, PyPSA-Earth needs to download and fetch different datasets. This section explains how to perform this data management.
 
 Tutorial run
 ------------------------------
