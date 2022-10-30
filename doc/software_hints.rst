@@ -13,7 +13,7 @@ Software hints
 Tools we are using
 =====================
 
-The complete list of software needed before installing PyPSA Earth is listed below.
+The complete list of software needed for work with PyPSA Earth is listed below.
 
 Python
 -----------------------------------
@@ -22,7 +22,7 @@ Python
 
 .. TODO Add installation instructions
 
-To refresh the knowledge, there are plenty of online courses free-of-charge, e.g. `CSDojo playlist <https://www.youtube.com/c/CSDojo/playlists>`_. Useful content to watch refer to numpy, pandas
+To refresh your knowledge, you may use plenty of online courses free-of-charge, e.g. `CSDojo playlist <https://www.youtube.com/c/CSDojo/playlists>`_. Useful content to watch refer to numpy and pandas.
 
 Conda
 -----------------------------------
