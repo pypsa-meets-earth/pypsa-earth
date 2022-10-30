@@ -15,9 +15,15 @@ The installation procedure installs PyPSA-Earth model with all the software depe
 Tutorial run
 ------------------------------
 
-The entire distribution, including the data for most parts on Earth, is very heavy (e.g. for Africa it is >40Gb) and it involves a large number of files. To facilitate model testing, a lightweight data starter kit was developed. You can use it by setting `tutorial: true` `retrieve_databundle: true` in the configuration file `config.yaml` placed in the project folder `pypsa-earth`. 
+The whole global data kit is very heavy (e.g. for Africa it is >40Gb) and involves a large number of files. To facilitate model testing, a lightweight data starter kit was developed. You can use it by setting in the configuration file `config.yaml` (placed in the project folder `pypsa-earth`) the following flags:
 
-After doing so, you just need run the model with the following command:
+.. code:: yaml
+
+    tutorial: true
+    ...
+    retrieve_databundle: true
+
+After doing so, you just need run the modeling workflow with the following command:
 
 .. code:: bash
 
