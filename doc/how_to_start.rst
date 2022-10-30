@@ -66,7 +66,7 @@ The snakemake included in the conda environment pypsa-earth installed with the a
 
     .../pypsa-earth (pypsa-earth) % snakemake < any command here >  
 
-Starting with essential usability features, the implemented Snakemake procedure allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
+Starting with essential usability features, the implemented PyPSA-Earth `Snakemake procedure <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile>`_ that allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
 
 
 .. TODO Add Snakemake tutorial links    
