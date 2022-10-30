@@ -31,6 +31,8 @@ After doing so, you just need run the modeling workflow with the following comma
 
 .. TODO Explain settings of the tutorial case
 
+This command will trigger loading of the whole dataset needed to build the model for a tutorial case that is simulation of power systems in Nigeria and Benin. Note please that data loading and model building will take a while (about 20..50 minutes).
+
 Working run
 ------------------------------
 
