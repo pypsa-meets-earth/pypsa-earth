@@ -63,4 +63,4 @@ In order to write and debug python code, you need an Integrated Development Envi
 System requirements
 ===================
 
-Building the model with the scripts in this repository runs on a normal computer e.g. 8-16GBRAM. Depending of the region of interest, different amounts of Gb storage (HHD/SSD) are required. Africa requires about 40Gb, the world 250Gb, a single country between 1-10Gb. We have also prepared a tutorial which should be below 10Gb.
+Building the model with the scripts in this repository runs on a normal computer with 8-16 GB RAM. Depending of the region of interest, different amounts of storage (HHD/SSD) are required. Model of Africa requires about 40 Gb, the world 250 Gb, a single country between 1-10 Gb. We have also prepared a tutorial which should be below 10Gb.
