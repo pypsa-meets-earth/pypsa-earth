@@ -19,9 +19,9 @@ scenario:
   ll:
   - "c1"
   opts:
-  - "Co2L-144H"
+  - "Co2L"
   sopts:
-  - "7H"
+  - "144H"
 
 clustering_options:
   alternative_clustering: true
