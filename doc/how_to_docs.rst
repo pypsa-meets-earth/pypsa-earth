@@ -31,14 +31,20 @@ Please, if you have problems with the documentation create an issue and let us k
 Compile the documentation locally
 ====================================
 
-The following commands allow you to create the documentation locally:
+To create the documentation locally, you need sphinx. It may be installed using specification form `doc/environment.docs.yaml` like is was done when creating `pypsa-earth` environment:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+    .../pypsa-earth % mamba env create -f envs/environment.yaml
 
-    .../pypsa-earth (pypsa-earth) % cd doc
+    .../pypsa-earth % conda activate pypsa-earth-docs    
 
-    .../pypsa-earth/doc (pypsa-earth) % make html
+Then the following commands allow you to create the documentation locally:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth-docs) % cd doc
+
+    .../pypsa-earth/doc (pypsa-earth-docs) % make html
 
 This will create html files in `pypsa-earth/doc/_build/html`. VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
