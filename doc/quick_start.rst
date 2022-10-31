@@ -45,6 +45,13 @@ After configuration set-up, you just need run the modeling workflow with the fol
 
 This command will trigger loading of the whole dataset needed to build the model for a tutorial case if both `tutorial` and `retrieve_databundle` flags are on. The tutorial model will run simulation of power systems in Nigeria and Benin. Note please that data load will need about 1.6Gb and model building will take a while (about 20..50 minutes).
 
+Before to actually run the workflow you may check how it will look by using `dryrun` Snakemake option:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks --dryrun
+
+
 How to analyse the solved networks?
 ------------------------------
 
