@@ -15,7 +15,7 @@ The installation procedure installs PyPSA-Earth model with all the software depe
 Build the tutorial model
 ------------------------------
 
-The whole global data kit is very heavy (e.g. for Africa it is >40Gb) and involves a large number of files. To facilitate model testing, a lightweight tutorial kit was developed. You can use it by using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`). To do that, you may want to do a reserve copy of your current configuration file and then overwrite it by a tutorial configuration:
+A tutorial data kit was developed to facilitate exploring the model. You can use it by using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`). To do that, you may want to do a reserve copy of your current configuration file and then overwrite it by a tutorial configuration:
 
 .. code:: bash
 
