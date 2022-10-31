@@ -23,6 +23,8 @@ scenario:
   sopts:
   - "7H"
 
+clustering_options:
+  alternative_clustering: true
 
 countries: ['NG', 'BJ']
 
