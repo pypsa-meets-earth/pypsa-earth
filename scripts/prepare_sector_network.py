@@ -664,6 +664,7 @@ def add_aviation(n, cost):
     )
 
     airports = pd.read_csv(snakemake.input.airports)
+    airports = airports[airports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
 
@@ -1952,11 +1953,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="30",
-            ll="c1.0",
+            clusters="4",
+            ll="c1",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="730H",
+            sopts="144H",
             discountrate="0.071",
         )
 
