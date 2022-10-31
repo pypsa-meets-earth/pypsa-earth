@@ -38,7 +38,7 @@ PyPSA-Earth relies on a set of other Python packages to function.
 The python package requirements are curated in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file. We install only `mamba` in the conda base environment to accelerate the installation.
 **Please keep the base environment always clean, meaning don't install anything there!** It will allow to ensure compatibility of all the packages needed to work with PyPSA-Earth model.
 
-The environment can be installed in about 5-15 minutes and activated like this:
+The environment can be installed and activated like this:
 
 .. code:: bash
 
@@ -48,7 +48,7 @@ The environment can be installed in about 5-15 minutes and activated like this:
 
     .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-Note please that activation is local to the currently open shell. Every time you 
+Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you 
 open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.    
 
 In case mamba did not work for you, you might want to try conda instead:
