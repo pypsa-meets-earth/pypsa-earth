@@ -33,17 +33,12 @@ Compile the documentation locally
 
 The following commands allow you to create the documentation locally:
 
-.. code::bash
+.. code:: bash
 
-    .../pypsa-earth (base) % conda install -c conda-forge mamba
+    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-    .../pypsa-earth (base) % mamba env create -f envs/environment.docs.yaml
+    .../pypsa-earth (pypsa-earth) % cd doc
 
-    .../pypsa-earth (pypsa-earth-docs) % conda activate pypsa-earth-docs
+    .../pypsa-earth/doc (pypsa-earth) % make html
 
-    .../pypsa-earth (pypsa-earth-docs) % cd doc
-
-    .../pypsa-earth/doc (pypsa-earth-docs) % make html
-
-This will create html files in `pypsa-earth/doc/_build/html`. VScode provides a so called Liveserver extension such that the html file can be
-opened locally on your computer.
+This will create html files in `pypsa-earth/doc/_build/html`. VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
