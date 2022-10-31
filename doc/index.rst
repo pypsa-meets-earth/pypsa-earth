@@ -112,7 +112,6 @@ Documentation
 * :doc:`introduction`
 * :doc:`installation`
 * :doc:`software_hints`
-* :doc:`quick_start`
 * :doc:`tutorial`
 
 .. toctree::
@@ -124,7 +123,6 @@ Documentation
    installation
    software_hints
    quick_start
-   tutorial
    how_to_docs
 
 **Configuration**
