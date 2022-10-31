@@ -35,6 +35,8 @@ For instructions for your operating system follow the ``conda`` `installation gu
 
 We recommend to install `mamba <https://github.com/QuantStack/mamba>`_ in `conda` base environment as that makes dependencies management much faster. 
 
+Useful hints on installing Anaconda and setting up Ubuntu terminal with VSCode in Windows is available `here <https://gist.github.com/kauffmanes/5e74916617f9993bc3479f401dfec7da>`_.
+
 There are many things which could go wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a crystal clear explanation of conda (**excellent read**).
  
 Git
@@ -53,6 +55,14 @@ It is highly recommended to `learn the git basics <https://git-scm.com/doc>`_.
 
 .. `Java <https://www.oracle.com/java/technologies/downloads/>` is needed for using `powerplantmatching` package. To have a better user experience, please install the redistribution from the website according to your operating system.
 
+Solvers
+-----------------------------------
+
+Useful instructions of installation and setup:
+
+* `HiGHS solver <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_;
+
+* `Gurobi solver <https://www.youtube.com/watch?v=yNmeG6Wom1o>`_.
  
 Integrated Development Environment
 -----------------------------------
