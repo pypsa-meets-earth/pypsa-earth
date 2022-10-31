@@ -89,6 +89,9 @@ rule prepare_sector_network:
         district_heat_share="resources/heat/district_heat_share_s{simpl}_{clusters}.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
+        shapes_path=pypsaearth(
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
@@ -104,7 +107,7 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
-rule add_endogenous_export:
+rule add_export:
     input:
         overrides="data/override_component_attrs",
         ports="data/ports.csv",
@@ -115,10 +118,10 @@ rule add_endogenous_export:
         ),
     output:
         RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_endogenous.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
         # TODO output file name must be adjusted and integrated in workflow
     script:
-        "scripts/add_endogenous_export.py"
+        "scripts/add_export.py"
 
 
 rule override_respot:
@@ -425,7 +428,7 @@ rule solve_network:
         # network=RDIR
         # + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
         network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_endogenous.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
     output:
         RDIR

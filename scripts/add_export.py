@@ -27,6 +27,7 @@ def select_ports(n):
     """This function selects the buses where ports are located"""
 
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+    ports = ports[ports.country.isin(countries)]
 
     gadm_level = snakemake.config["sector"]["gadm_level"]
 
@@ -115,6 +116,7 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    countries = list(n.buses.country.unique())
 
     # get export demand
     export_h2 = snakemake.config["export"]["export_h2"]
