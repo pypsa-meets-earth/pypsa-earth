@@ -7,12 +7,12 @@
 
 
 ##########################################
-How to run your model
+How to start with modeling
 ##########################################
 
 The installation procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it. To properly model any region of the Earth, PyPSA-Earth needs to download and fetch different datasets. This section explains how to perform this data management.
 
-Tutorial run
+Build the tutorial model
 ------------------------------
 
 The whole global data kit is very heavy (e.g. for Africa it is >40Gb) and involves a large number of files. To facilitate model testing, a lightweight tutorial kit was developed. You can use it by using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`). To do that, you may want to do a reserve copy of your current configuration file and then overwrite it by a tutorial configuration:
@@ -32,6 +32,9 @@ In the configuration file `config.yaml` there is a flag `retrieve_databundle` wh
     ...
     retrieve_databundle: true
 
+How to run the model?
+------------------------------
+
 After configuration set-up, you just need run the modeling workflow with the following command:
 
 .. code:: bash
@@ -42,7 +45,7 @@ After configuration set-up, you just need run the modeling workflow with the fol
 
 This command will trigger loading of the whole dataset needed to build the model for a tutorial case that is simulation of power systems in Nigeria and Benin. Note please that data loading and model building will take a while (about 20..50 minutes).
 
-Working run
+How to analyse the solved networks?
 ------------------------------
 
 After playing with the tutorial model, it's important to clean-up data in your model folder to avoid data conflicts. You may use the `clean` rule for making so:
