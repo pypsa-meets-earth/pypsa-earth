@@ -122,7 +122,7 @@ Documentation
    introduction
    installation
    software_hints
-   quick_start
+   tutorial
    how_to_docs
 
 **Configuration**
