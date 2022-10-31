@@ -21,8 +21,6 @@ A tutorial data kit was developed to facilitate exploring the model. You can use
 
     .../pypsa-earth (pypsa-earth) % cp config.tutorial.yaml config.yaml
 
-cp config.tutorial.yaml config.yaml
-
 
 In the configuration file `config.yaml` there is a flag `retrieve_databundle` which triggers data loading and a `tutorial` flag which determines that the loaded data belong to the light tutorial kit:
 
@@ -31,6 +29,8 @@ In the configuration file `config.yaml` there is a flag `retrieve_databundle` wh
     tutorial: true
     ...
     retrieve_databundle: true
+
+It's recommended to set `retrieve_databundle: true` when building the model first time to download all the common data files needed. When the first run is completed and all the necessary data extracted, it may be a good idea to set `retrieve_databundle: false` to avoid data loss.
 
 How to run the model?
 ------------------------------
@@ -43,7 +43,7 @@ After configuration set-up, you just need run the modeling workflow with the fol
 
 .. TODO Explain settings of the tutorial case
 
-This command will trigger loading of the whole dataset needed to build the model for a tutorial case that is simulation of power systems in Nigeria and Benin. Note please that data loading and model building will take a while (about 20..50 minutes).
+This command will trigger loading of the whole dataset needed to build the model for a tutorial case if both `tutorial` and `retrieve_databundle` flags are on. The tutorial model will run simulation of power systems in Nigeria and Benin. Note please that data load will need about 1.6Gb and model building will take a while (about 20..50 minutes).
 
 How to analyse the solved networks?
 ------------------------------
