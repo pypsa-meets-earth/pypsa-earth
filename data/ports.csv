@@ -1,1 +1,8 @@
-name,country,fraction,y,xPort of Nador,MA,0.2,35.2748795,-2.92229843Port of Tanger Med,MA,0.2,35.5324,-5.3036Port of Kenitra,MA,0.1,34.26101,-6.5802Port of Casablanca,MA,0.4,33.5999976,-7.6166642Port of Kenitra,MA,0.1,33.1267,-8.62028
+name,country,fraction,y,x
+Port of Nador,MA,0.2,35.2748795,-2.92229843
+Port of Tanger Med,MA,0.2,35.5324,-5.3036
+Port of Kenitra,MA,0.1,34.26101,-6.5802
+Port of Casablanca,MA,0.4,33.5999976,-7.6166642
+Port of Kenitra,MA,0.1,33.1267,-8.62028
+dummy port 1,NG,1,6.455,4.234
+dummy port 1,BJ,1,6.47,2.63
