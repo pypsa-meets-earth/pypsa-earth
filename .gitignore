@@ -30,7 +30,7 @@ gurobi.log
 /data/transport_data.csv
 /data/switzerland*
 /data/.nfs*
-/data/Industrial_Database.csv
+#/data/Industrial_Database.csv
 /data/retro/tabula-calculator-calcsetbuilding.csv
 /data/nuts*
 /scripts/old
