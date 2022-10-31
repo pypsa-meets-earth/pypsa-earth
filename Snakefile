@@ -284,7 +284,7 @@ rule build_industrial_distribution_key:  #YES
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        industrial_database="data/morocco_cement_industry.csv",
+        industrial_database="data/industrial_database.csv",
         #shapes_path="../pypsa-earth/resources/shapes/MAR2.geojson",
         shapes_path=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
