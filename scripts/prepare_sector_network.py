@@ -668,10 +668,15 @@ def add_aviation(n, cost):
     gadm_level = options["gadm_level"]
 
     airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
-        lambda airport: locate_bus(airport[["x", "y"]], airport["country"], gadm_level),
+        lambda airport: locate_bus(
+            airport[["x", "y"]],
+            airport["country"],
+            gadm_level,
+            snakemake.input.shapes_path,
+            snakemake.config["clustering_options"]["alternative_clustering"],
+        ),
         axis=1,
     )
-
     # To change 3 country code to 2
     # airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
     # lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
@@ -846,6 +851,7 @@ def h2_hc_conversions(n, costs):
 def add_shipping(n, costs):
 
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+    ports = ports[ports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
 
@@ -863,7 +869,14 @@ def add_shipping(n, costs):
     shipping_hydrogen_share = get(options["shipping_hydrogen_share"], investment_year)
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(port[["x", "y"]], port["country"], gadm_level), axis=1
+        lambda port: locate_bus(
+            port[["x", "y"]],
+            port["country"],
+            gadm_level,
+            snakemake.input["shapes_path"],
+            snakemake.config["clustering_options"]["alternative_clustering"],
+        ),
+        axis=1,
     )
 
     ports = ports.set_index("gadm_{}".format(gadm_level))
