@@ -3,7 +3,7 @@
 
   SPDX-License-Identifier: CC-BY-4.0
 
-.. _how_to_start:
+.. _quick_start:
 
 
 ##########################################
