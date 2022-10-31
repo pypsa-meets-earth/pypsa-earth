@@ -35,7 +35,7 @@ To create the documentation locally, you need sphinx. It may be installed using 
 
 .. code:: bash
 
-    .../pypsa-earth % mamba env create -f envs/environment.yaml
+    .../pypsa-earth % mamba env create -f envs/environment.docs.yaml
 
     .../pypsa-earth % conda activate pypsa-earth-docs    
 
