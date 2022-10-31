@@ -48,19 +48,22 @@ This command will trigger loading of the whole dataset needed to build the model
 How to analyse the solved networks?
 ------------------------------
 
-After playing with the tutorial model, it's important to clean-up data in your model folder to avoid data conflicts. You may use the `clean` rule for making so:
+The solved networks can be analysed just like any other PyPSA network (e.g. in Jupyter Notebooks).
+
+.. code:: python
+
+    import pypsa
+    network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc")    
+
+For inspiration, you may want to have a look on the `examples section in the PyPSA documentation <https://pypsa.readthedocs.io/en/latest/examples-basic.html>`_.
+
+After playing with the tutorial model, it's important to clean-up data in your model folder before to proceed further to avoid data conflicts. You may use the `clean` rule for making so:
 
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean
 
 Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed.
-
-It's recommended to set `retrieve_databundle: true` when building the model first time to download the common data files needed. The load will start automatically when running the model with:
-
-.. code:: bash
-
-
 
 Snakemake
 ===========================
