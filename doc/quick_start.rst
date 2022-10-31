@@ -60,9 +60,7 @@ It's recommended to set `retrieve_databundle: true` when building the model firs
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks
 
-Please, note that around **20 Gb zipped files will be downloaded**. It's worth to make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed. It's advisable to set `retrieve_databundle: false` after the first model run when all the needed data will be successfully extracted to avoid data loss.
 
 Snakemake
 ===========================
