@@ -110,7 +110,8 @@ def get_transform_and_shape(bounds, res, out_logging):
         _logger.info("Stage 2/5: Get transform and shape")
     left, bottom = [(b // res) * res for b in bounds[:2]]
     right, top = [(b // res + 1) * res for b in bounds[2:]]
-    shape = int((top - bottom) // res), int((right - left) / res)
+    # "latitude, longitude" coordinates order
+    shape = int((top - bottom) // res), int((right - left) // res)
     transform = rio.Affine(res, 0, left, 0, -res, top)
     return transform, shape
 
@@ -152,7 +153,7 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
                 if not row.geometry.is_valid
                 else row.geometry,
                 axis=1,
-            )
+            ).to_crs(natura_crs)
             list_shapes.append(shp)
         except:
             _logger.warn(f"Error reading file {i}")
