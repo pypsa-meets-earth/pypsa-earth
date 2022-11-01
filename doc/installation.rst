@@ -9,58 +9,13 @@
 Installation
 ##########################################
 
-The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the
-directory in which the commands following the ``%`` should be entered.
-
-System requirements
-===================
-
-Building the model with the scripts in this repository runs on a normal computer e.g. 8-16GBRAM.
-Depending of the region of interest, different amounts of Gb storage (HHD/SSD) are required.
-Africa requires about 40Gb, the world 250Gb, a single country between 1-10Gb.
-We have also prepared a tutorial which should be below 10Gb.
+The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the directory in which the commands following the ``%`` should be entered.
 
 
-Software requirements
-=====================
-
-The complete list of software needed before installing PyPSA Earth is listed below.
-
-- `Python 3 <https://www.python.org/>`_ **(mandatory)**: Python is used as our main programming language, thus its knowledge is mandatory.
-  To refresh the knowledge, there are plenty of online courses free-of-charge, e.g. `CSDojo playlist <https://www.youtube.com/c/CSDojo/playlists>`_.
-  Useful content to watch refer to numpy, pandas
-- `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ **(mandatory)**: in order to use packages in python,
-  it is highly recommended to use a conda package manager, such as `Anaconda. <https://docs.anaconda.com/>`_ There are many things you can do wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a crystal clear explanation of conda (**excellent read**).  
-- `Git <https://git-scm.com/>`__ **(mandatory)**: Git is a free open source system aimed at tracking changes in the code development 
-  and enable to coordinate the parallel software development between many developers.
-  It is mandatory to `learn the git basics <https://git-scm.com/doc>`_.
-- `Java <https://www.oracle.com/java/technologies/downloads/>`_ **(recommendation)**: A Java distribution is needed for using `powerplantmatching` package.
-  To have a better user experience, please install the redistribution from the website according to your operating system.
-- `IDE Python` **(recommendation)**: in order to write python code, you need an Integrated Development Environment (IDE)
-  that is a software used to write code. Any program can be used, however, we recommend `Visual Studio Code <https://code.visualstudio.com/>`_,
-  which is freely available online.
-  Other alternatives are also viable if you are familiar with them, such as `PyCharm <https://www.jetbrains.com/pycharm/>`_,
-  however we recommend Visual Studio Code also given its easy to use interface with Git.
-  *Note*: if you decide to use Visual Studio Code, check out the tutorial about how to use 
-  `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`__ and `Github <https://code.visualstudio.com/docs/editor/github>`__ 
-  in Visual Studio Code
-- `Solver` **(mandatory)**: an optimization solver is needed to solve the mathematical problem that is build with the automated workflow.
-  With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as `CBC <https://projects.coin-or.org/Cbc>`_ ,
-  `GLPK <https://www.gnu.org/software/glpk/>`_, `WinGLPK <http://winglpk.sourceforge.net/>`_ or `HiGHS <https://github.com/ERGO-Code/HiGHS>`_;
-  to further improve performances, commercial solvers like `Gurobi <http://www.gurobi.com/>`_ or `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_
-  (both commercial licenses with free academic options) can also be used. A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
- 
-
-.. note::
-  Be aware that the list of software listed above is only the prerequisite elements needed to successfully install the PyPSA Earth model.
-  The complete list of recommended software and prerequisite needed to enjoy the full PyPSA Earth experience is listed in the 
-  `Tutorial section <https://pypsa-meets-earth.readthedocs.io/en/latest/tutorial.html#prerequisites-and-learning-material>`_.
-  Most of the dependencies needed will be automatically installed using the conda environments listed below
-
-Clone the repository
+Clone the Repository
 ====================
 
-First of all, clone the `PyPSA Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth/>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces.
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
@@ -72,106 +27,105 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
 .. _deps:
 
-Install python dependencies
+Install Dependencies
 ===============================
 
-PyPSA Earth relies on a set of other Python packages to function.
-We recommend using the package manager and environment management system ``conda`` to install them.
-Make sure that ``conda`` is already installed on your system or install one of the following two distributions:
- 
-- `Anaconda <https://www.anaconda.com/>`__
+Python Dependencies
+--------------------------------
 
-For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
+PyPSA-Earth relies on a set of other Python packages to function.
 
-The python package requirements are curated in the envs/environment.yaml file.
-We install only `mamba` in the conda base environment to accelerate the installation.
-**Please keep the base environment always clean, meaning don't install anything there!**
-The environment can be installed in about 5-15min (reported by users) and activated using
+The python package requirements are curated in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file. We install only `mamba` in the conda base environment to accelerate the installation.
+**Please keep the base environment always clean, meaning don't install anything there!** It will allow to ensure compatibility of all the packages needed to work with PyPSA-Earth model.
+
+The environment can be installed and activated like this:
 
 .. code:: bash
 
     .../pypsa-earth (base) % conda install -c conda-forge mamba
 
-    .../pypsa-earth (base) % mamba env create -f envs/environment.yaml
+    .../pypsa-earth % mamba env create -f envs/environment.yaml
 
     .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-In case mamba did not work for you, you might want to try the traditional conda installation
+Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you 
+open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.    
 
-.. code::bash
+In case mamba did not work for you, you might want to try conda instead:
 
-    .../pypsa-earth (base) % conda env create -f envs/environment.yaml
-
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
-
-or use miniconda instead.
-    
-To use jupyter lab (new jupyter notebooks) **continue** with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks>`_ 
-and test if your jupyter lab works:
-    
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % ipython kernel install --user --name=pypsa-earth
+    .../pypsa-earth % conda env create -f envs/environment.yaml
 
-    .../pypsa-earth (pypsa-earth) % jupyter lab
+    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-.. note::
-  Please, make sure to have properly installed java, from the  `official website <https://www.oracle.com/java/technologies/downloads/>`__ or equivalent.
 
-In linux only, that is possible through the following command.
+For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
+
+Java Installation 
+---------------------------------
+
+PyPSA-Earth currently needs Java redistribution to work properly. To check if Java is still installed you can request it's version from a terminal:
+
+  .. code:: bash
+
+    .../pypsa-earth % java --version
+
+The expected output should resemble the following:
+   
+   .. code:: bash
+      java version "1.8.0_341"
+      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+
+In case you don't have Java, you have to install it from the `official website <https://www.oracle.com/java/technologies/downloads/>`_ or equivalent. In Linux and Mac OS that is possible through the following command:
 
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
 
-To verify the successful installation, you can verify that by using the following code.
+
+Solver Installation 
+---------------------------------
+
+An optimization solver is needed to solve the mathematical problem that is build with the automated workflow of PyPSA-Earth.
+With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as 
+
+* `CBC <https://projects.coin-or.org/Cbc>`_; 
+
+* `GLPK <https://www.gnu.org/software/glpk/>`_ and `WinGLPK <http://winglpk.sourceforge.net/>`_ (is included into pypsa-earth environment and installed automatically during environment creation); 
+
+* `HiGHS <https://github.com/ERGO-Code/HiGHS>`_.
+
+To further improve performances, commercial solvers like 
+
+* `Gurobi <http://www.gurobi.com/>`_;
+
+* `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
+  
+(both commercial licenses with free academic options) can also be used. 
+
+A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
+
+Set Configuration File
+================================
+
+PyPSA-Earth has several configuration options that must be specified in a ``config.yaml`` file located in the project directory. An example configuration ``config.default.yaml`` is maintained in the repository. More details on the configuration options are in :ref:`config` section.
+
+Before first use, create a ``config.yaml`` by copying the example.
 
 .. code:: bash
-     
-    .../pypsa-earth (pypsa-earth) % java -version
 
-The expected output should resemble the following text:
+    .../pypsa-earth % cp config.default.yaml config.yaml
 
-.. code:: bash
-     java version "1.8.0_341"
-     Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
-     Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+It makes sense to regularly check their own ``config.yaml`` against changes in the ``config.default.yaml`` when pulling a new version from the remote repository.
 
-.. note::
-   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth,
-   thereby there is no need to install it manually.
+Install Jupyter Lab
+================================
 
-The snakemake included in the conda environment pypsa-earth installed with the above-mentioned procedure can be executed with the following procedure:
+We use Jupyter notebooks to share examples on how to use the model and analyse the results. VSCode supports working with Jupyter Notebooks natively. In case you are using different IDE and don't have Jupyter notebooks pre-installed you can install jupyter lab (new jupyter notebooks) with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % .../pypsa-earth % conda activate pypsa-earth
-
-    .../pypsa-earth (pypsa-earth) % snakemake < any command here >
-
-
-Download data
-=============
-
-The entire distribution, including the data for most parts on Earth, is very heavy (>40Gb for Africa) and it involves a large number of files.
-To simplify the installation of the github folder, the main source code is available in the Github folder, whereas the data are stored in cloud.
-The rule ``retrieve_databundle_light`` has been specifically developed to set up the raw data, and the procedure below guides in setting up the needed data.
-
-1. Duplicate the file ``config.default.yaml`` and rename the copy as ``config.yaml``
-2. Open file ``config.yaml`` using any text editor
-3. Make sure that the option ``retrieve_databundle`` is set ``true``
-   ``retrieve_databundle: true``
-
-4. Execute the following code on the shell to download initial files. Please, note that around **20Gb zipped files will be downloaded**, 
-   so make sure you have a stable connection, time and around 50 Gb available in your system. If no errors show up, then you can proceed.
-
-   .. code:: bash
-
-     .../pypsa-earth (base) % conda activate pypsa-earth
-
-     .../pypsa-earth (pypsa-earth) % snakemake -j1 retrieve_databundle_light --force
-
-5. In the file ``config.yaml`` set the option ``retrieve_databundle`` back to ``false`` and save the file:
-   ``retrieve_databundle: false``
-
-Once these tasks have been completed, the package is ready to use.
+    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
+    .../pypsa-earth % jupyter lab

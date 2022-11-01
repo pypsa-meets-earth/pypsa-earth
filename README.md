@@ -5,7 +5,7 @@
 [![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml)
 [![Status Windows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml)
-[![Documentation Status](https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest)](https://pypsa-meets-earth.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -16,7 +16,7 @@
 
 **PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution.** It enables large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions. It is suitable for operational as well as combined generation, storage and transmission expansion studies. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. The data includes electricity demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
 
-The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-meets-earth.readthedocs.io/en/latest/index.html) provides additional information. 
+The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information. 
 
 PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth. We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
@@ -49,9 +49,9 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
-    2. AI asset detection meeting, on demand, <a href="https://drive.google.com/file/d/1U9LYvLBezaKn1IuELbKJts0DOGixQHOv/view?usp=sharing" >download .ics</a>
+    2. AI asset detection meeting, on demand
     3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
-    4. Data workflow and architecture meeting, every Thursday 13:30 (UK time), <a href="https://drive.google.com/file/d/1w9uT6AIC9MIJotFcbglfVFCw1TKwF6bg/view?usp=sharing" >download .ics</a>
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >download .ics</a>
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities
@@ -129,7 +129,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 ## Documentation
 
-The documentation is available here: [documentation](https://pypsa-meets-earth.readthedocs.io/en/latest/index.html).
+The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
 
 ## Collaborators
 
@@ -160,6 +160,13 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/ekatef">
+            <img src="https://avatars.githubusercontent.com/u/30229437?v=4" width="100;" alt="ekatef"/>
+            <br />
+            <sub><b>Ekaterina</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/euronion">
             <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
             <br />
@@ -172,15 +179,15 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
             <br />
             <sub><b>Justus Ilemobayo</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/mnm-matin">
             <img src="https://avatars.githubusercontent.com/u/45293386?v=4" width="100;" alt="mnm-matin"/>
             <br />
             <sub><b>Mnm-matin</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/desenk">
             <img src="https://avatars.githubusercontent.com/u/48335263?v=4" width="100;" alt="desenk"/>
@@ -210,27 +217,13 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/Nayara2020">
-            <img src="https://avatars.githubusercontent.com/u/64689686?v=4" width="100;" alt="Nayara2020"/>
-            <br />
-            <sub><b>Nayara2020</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Ay-Khi">
-            <img src="https://avatars.githubusercontent.com/u/65019030?v=4" width="100;" alt="Ay-Khi"/>
-            <br />
-            <sub><b>Ayman Alkhirbash</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
         <a href="https://github.com/davide-f">
             <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
             <br />
             <sub><b>Davide-f</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/koen-vg">
             <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
@@ -253,10 +246,10 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/ekatef">
-            <img src="https://avatars.githubusercontent.com/u/30229437?v=4" width="100;" alt="ekatef"/>
+        <a href="https://github.com/AnasAlgarei">
+            <img src="https://avatars.githubusercontent.com/u/101210563?v=4" width="100;" alt="AnasAlgarei"/>
             <br />
-            <sub><b>Ekaterina</b></sub>
+            <sub><b>AnasAlgarei</b></sub>
         </a>
     </td>
     <td align="center">
@@ -265,15 +258,15 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
             <br />
             <sub><b>Restyled Commits</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Tomkourou">
             <img src="https://avatars.githubusercontent.com/u/5240283?v=4" width="100;" alt="Tomkourou"/>
             <br />
             <sub><b>Thomas Kouroughli</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
@@ -303,14 +296,6 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AnasAlgarei">
-            <img src="https://avatars.githubusercontent.com/u/101210563?v=4" width="100;" alt="AnasAlgarei"/>
-            <br />
-            <sub><b>AnasAlgarei</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
         <a href="https://github.com/EmreYorat">
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
@@ -323,7 +308,8 @@ The documentation is available here: [documentation](https://pypsa-meets-earth.r
             <br />
             <sub><b>HanaElattar</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/squoilin">
             <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>

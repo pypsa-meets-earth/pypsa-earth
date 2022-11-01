@@ -52,8 +52,7 @@ crs:
 
 # CI relevant
 retrieve_databundle: # required for nice CI test output
-  show_progress: false # disable progress bar in retrieve_databundle
-# test
+  show_progress: true # show (true) or do not show (false) the progress bar in retrieve_databundle while downloading data
 
 
 augmented_line_connection:
@@ -115,7 +114,7 @@ load_options:
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 0
+  co2limit: 1.487e+9
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: false  # should HVDC lines be modeled as `Line` or as `Link` component?

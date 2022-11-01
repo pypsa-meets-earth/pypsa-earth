@@ -25,6 +25,10 @@ Upcoming Release
 
 * Update natura tiff to global scale, revise default databundle description and remove old limitations to environment `PR #470 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/470>`__ and `PR #500 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/500>`__
 
+* Update docs on installation `PR #498 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/498>`__
+
+* Update docs on installation `PR #498 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/498>`__
+
 PyPSA-Earth 0.1.0
 =================
 
