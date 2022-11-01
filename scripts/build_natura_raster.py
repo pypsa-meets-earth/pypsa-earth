@@ -144,9 +144,13 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
             "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
         )
 
+    # initialize counted files
+    total_files = 0
+    read_files = 0
     list_shapes = []
     for i in shp_files:
         shp = gpd.read_file(i)
+        total_files += 1
         try:
             shp.geometry = shp.apply(
                 lambda row: make_valid(row.geometry)
@@ -155,9 +159,14 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
                 axis=1,
             ).to_crs(natura_crs)
             list_shapes.append(shp)
+            read_files += 1
         except:
-            _logger.warn(f"Error reading file {i}")
+            _logger.warning(f"Error reading file {i}")
+
+    # merge dataframes
     shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(natura_crs)
+
+    _logger.info(f"Read {read_files} out of {total_files} landcover files")
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
