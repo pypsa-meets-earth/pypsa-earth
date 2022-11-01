@@ -103,6 +103,7 @@ if __name__ == "__main__":
     config_ind = snakemake.config["industry"]
 
     investment_year = int(snakemake.wildcards.planning_horizons)
+    demand_sc = snakemake.wildcards.demand
 
     production = pd.read_csv(
         snakemake.input.industrial_production_per_country, index_col=0

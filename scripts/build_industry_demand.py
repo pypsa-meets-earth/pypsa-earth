@@ -11,31 +11,6 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
-# # map JRC/our sectors to hotmaps sector, where mapping exist
-# sector_mapping = {
-#     'Electric arc': 'Iron and steel',
-#     'Integrated steelworks': 'Iron and steel',
-#     'DRI + Electric arc': 'Iron and steel',
-#     'Ammonia': 'Chemical industry',
-#     'HVC': 'Chemical industry',
-#     'HVC (mechanical recycling)': 'Chemical industry',
-#     'HVC (chemical recycling)': 'Chemical industry',
-#     'Methanol': 'Chemical industry',
-#     'Chlorine': 'Chemical industry',
-#     'Other chemicals': 'Chemical industry',
-#     'Pharmaceutical products etc.': 'Chemical industry',
-#     'Cement': 'Cement',
-#     'Ceramics & other NMM': 'Non-metallic mineral products',
-#     'Glass production': 'Glass',
-#     'Pulp production': 'Paper and printing',
-#     'Paper production': 'Paper and printing',
-#     'Printing and media reproduction': 'Paper and printing',
-#     'Alumina production': 'Non-ferrous metals',
-#     'Aluminium - primary production': 'Non-ferrous metals',
-#     'Aluminium - secondary production': 'Non-ferrous metals',
-#     'Other non-ferrous metals': 'Non-ferrous metals',
-# }
-
 
 def country_to_nodal(industrial_production, keys):
 
@@ -70,12 +45,22 @@ if __name__ == "__main__":
         from helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_industry_demand", simpl="", clusters=9077, planning_horizons="2030"
+            "build_industry_demand",
+            simpl="",
+            clusters=112,
+            planning_horizons="2030",
+            demand="NZ",
         )
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
     production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0)
+
+    if snakemake.config["custom_data"]["industry_demand"]:
+        production_tom.drop("Industry Machinery", axis=1, inplace=True)
+
+    # to_drop=production_tom.sum()[production_tom.sum()==0].index
+    # production_tom.drop(to_drop, axis=1, inplace=True)
 
     # Load distribution keys
     keys_path = snakemake.input.industrial_distribution_key
@@ -88,6 +73,10 @@ if __name__ == "__main__":
     industry_sector_ratios = pd.read_csv(
         snakemake.input.industry_sector_ratios, index_col=0
     )
+    if snakemake.config["custom_data"]["industry_demand"]:
+        industry_sector_ratios.drop(
+            "Industry Steel Casting Rolling Finishing", axis=1, inplace=True
+        )
 
     # final energy consumption per node and industry (TWh/a)
     nodal_df = nodal_production.dot(industry_sector_ratios.T)
@@ -102,21 +91,26 @@ if __name__ == "__main__":
     }
     nodal_df.rename(columns=rename_sectors, inplace=True)
 
-    # energy demand today to get current electricity #TODO
-    prod_tod_path = snakemake.input.industrial_production_per_country
-    production_tod = pd.read_csv(prod_tod_path, header=0, index_col=0).filter(
-        snakemake.config["countries"], axis=0
-    )
+    if not snakemake.config["custom_data"]["industry_demand"]:
 
-    nodal_production_tod = country_to_nodal(production_tod, dist_keys)
-    nodal_production_tod = nodal_production_tod.reindex(
-        columns=list(industry_sector_ratios.columns), fill_value=0
-    )
-    nodal_energy_today = nodal_production_tod.dot(industry_sector_ratios.T)
-    nodal_energy_today.rename(columns=rename_sectors, inplace=True)
-    nodal_energy_today *= 0.001
+        # energy demand today to get current electricity #TODO
+        prod_tod_path = snakemake.input.industrial_production_per_country
+        production_tod = pd.read_csv(prod_tod_path, header=0, index_col=0).filter(
+            snakemake.config["countries"], axis=0
+        )
+        # if electricity demand is provided by pypsa-earth, the electricty used
+        # in industry is included, and need to be removed from the default elec
+        # demand that's why it isolated to be used in prepare_sector_network
 
-    nodal_df["current electricity"] = nodal_energy_today["electricity"]
+        nodal_production_tod = country_to_nodal(production_tod, dist_keys)
+        nodal_production_tod = nodal_production_tod.reindex(
+            columns=list(industry_sector_ratios.columns), fill_value=0
+        )
+        nodal_energy_today = nodal_production_tod.dot(industry_sector_ratios.T)
+        nodal_energy_today.rename(columns=rename_sectors, inplace=True)
+        nodal_energy_today *= 0.001  # convert GWh to TWh and ktCO2 to MtCO2
+
+        nodal_df["current electricity"] = nodal_energy_today["electricity"]
 
     nodal_df.index.name = "TWh/a (MtCO2/a)"
 

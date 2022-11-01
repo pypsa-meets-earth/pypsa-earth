@@ -13,7 +13,6 @@ from helpers import mock_snakemake, override_component_attrs, sets_path_to_root
 
 
 def override_values(tech, year, dr):
-    buses = list(n.buses[n.buses.carrier == "AC"].index)
 
     custom_res_t = pd.read_csv(
         snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)],
@@ -51,7 +50,7 @@ def override_values(tech, year, dr):
         p_nom_extendable=True,
         p_nom_max=custom_res["p_nom_max"].values,
         # weight=ds["weight"].to_pandas(),
-        marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
+        # marginal_cost=custom_res["fixedomEuroPKW"].values * 1000,
         capital_cost=custom_res["annualcostEuroPMW"].values,
         efficiency=1.0,
         p_max_pu=custom_res_t,
@@ -67,11 +66,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="931",
+            clusters="113",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="73H",
+            sopts="730H",
+            demand="NZ",
             discountrate=0.069,
         )
         sets_path_to_root("pypsa-earth-sec")
@@ -79,6 +79,9 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     m = n.copy()
+    buses = list(n.buses[n.buses.carrier == "AC"].index)
+    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
+    countries = snakemake.config["countries"]
     if snakemake.config["custom_data"]["renewables"]:
         techs = snakemake.config["custom_data"]["renewables"]
         year = snakemake.wildcards["planning_horizons"]
@@ -89,7 +92,16 @@ if __name__ == "__main__":
         for tech in techs:
             override_values(tech, year, dr)
 
-        n.export_to_netcdf(snakemake.output[0])
     else:
         print("No RES potential techs to override...")
-        n.export_to_netcdf(snakemake.output[0])
+
+    if snakemake.config["custom_data"]["elec_demand"]:
+
+        for country in countries:
+
+            n.loads_t.p_set.filter(like=country)[buses] = (
+                n.loads_t.p_set.filter(like=country)[buses]
+                / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
+            ) * energy_totals.loc[country, "electricity residential"]
+
+    n.export_to_netcdf(snakemake.output[0])
