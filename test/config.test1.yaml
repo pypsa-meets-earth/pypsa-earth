@@ -26,7 +26,7 @@ scenario:
   - "DF"
 
 clustering_options:
-  alternative_clustering: true
+  alternative_clustering: false
 
 countries: ['NG', 'BJ']
 
