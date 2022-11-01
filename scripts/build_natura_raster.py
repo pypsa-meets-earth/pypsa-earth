@@ -65,7 +65,7 @@ _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
 CUTOUT_CRS = "EPSG:4326"
-NATURA_CRS = "EPSG:4236"
+NATURA_CRS = "EPSG:4326"
 
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
@@ -174,6 +174,8 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
             "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
         )
     unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=natura_crs)
+
+    unified_shape.to_file("temp_unified.geojson", driver="GeoJSON")
 
     return unified_shape
 
