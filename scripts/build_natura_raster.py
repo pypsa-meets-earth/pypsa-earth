@@ -149,7 +149,7 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     read_files = 0
     list_shapes = []
     for i in shp_files:
-        shp = gpd.read_file(i)
+        shp = gpd.read_file(i).to_crs(natura_crs)
         total_files += 1
         try:
             shp.geometry = shp.apply(
@@ -157,7 +157,7 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
                 if not row.geometry.is_valid
                 else row.geometry,
                 axis=1,
-            ).to_crs(natura_crs)
+            )
             list_shapes.append(shp)
             read_files += 1
         except:
