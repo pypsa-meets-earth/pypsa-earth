@@ -1976,8 +1976,6 @@ def add_services(n, costs):
         / 8760
     )
 
-    # p_set_biomass = profile_residential * energy_totals.loc[countries, "services biomass"].sum()* 1e6 / 8760
-
     n.madd(
         "Load",
         nodes,
@@ -1987,14 +1985,16 @@ def add_services(n, costs):
         p_set=p_set_elec,
     )
 
-    # n.madd(
-    #     "Load",
-    #     nodes,
-    #     suffix=" services",
-    #     bus=spatial.biomass.nodes,
-    #     carrier="services biomass",
-    #     p_set=p_set_biomass,
-    # )
+
+def add_agriculture(n, costs):
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" agriculture electricity",
+        bus=nodes,
+        carrier="agriculture electricity",
+        p_set=nodal_energy_totals.loc[nodes, "agriculture electricity"] * 1e6 / 8760,
+    )
 
 
 if __name__ == "__main__":
@@ -2035,7 +2035,7 @@ if __name__ == "__main__":
     # TODO fetch investment year from config
 
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
-    demand_sc = snakemake.wildcards.demand
+    demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     costs = prepare_costs(
@@ -2051,9 +2051,7 @@ if __name__ == "__main__":
 
     # TODO logging
 
-    # nodal_energy_totals = pd.read_csv(
-    #     snakemake.input.nodal_energy_totals, index_col=0
-    # )
+    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
     energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
@@ -2147,6 +2145,9 @@ if __name__ == "__main__":
     add_land_transport(n, costs)
 
     add_services(n, costs)
+
+    add_agriculture(n, costs)
+
 
     sopts = snakemake.wildcards.sopts.split("-")
 
