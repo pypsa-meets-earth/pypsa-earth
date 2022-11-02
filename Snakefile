@@ -251,7 +251,7 @@ rule build_population_layouts:
     script:
         "scripts/build_population_layouts.py"
 
-        
+
 rule move_hardcoded_files_temp:
     input:
         "data/temp_hard_coded/energy_totals.csv",
@@ -338,7 +338,7 @@ rule copy_config:
     script:
         "scripts/copy_config.py"
 
-        
+
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
