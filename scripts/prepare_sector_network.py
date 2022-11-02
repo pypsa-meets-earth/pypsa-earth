@@ -1964,6 +1964,18 @@ def add_dac(n, costs):
     )
 
 
+def add_agriculture(n, costs):
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" agriculture electricity",
+        bus=nodes,
+        carrier="agriculture electricity",
+        p_set=nodal_energy_totals.loc[nodes, "agriculture electricity"] * 1e6 / 8760,
+    )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -2018,9 +2030,7 @@ if __name__ == "__main__":
 
     # TODO logging
 
-    # nodal_energy_totals = pd.read_csv(
-    #     snakemake.input.nodal_energy_totals, index_col=0
-    # )
+    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
     energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
@@ -2112,6 +2122,8 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
+
+    add_agriculture(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
 
