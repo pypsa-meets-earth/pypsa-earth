@@ -1964,8 +1964,29 @@ def add_dac(n, costs):
     )
 
 
-def add_agriculture(n, costs):
+def add_services(n, costs):
 
+    # TODO make compatible with more counties
+    profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
+
+    p_set_elec = (
+        profile_residential
+        * energy_totals.loc[countries, "services electricity"].sum()
+        * 1e6
+        / 8760
+    )
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services",
+        bus=nodes,
+        carrier="services electricity",
+        p_set=p_set_elec,
+    )
+
+
+def add_agriculture(n, costs):
     n.madd(
         "Load",
         nodes,
@@ -2122,6 +2143,8 @@ if __name__ == "__main__":
     # prepare_transport_data(n)
 
     add_land_transport(n, costs)
+
+    add_services(n, costs)
 
     add_agriculture(n, costs)
 
