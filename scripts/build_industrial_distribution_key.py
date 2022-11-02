@@ -36,6 +36,7 @@ def map_industry_to_buses(df):
     return df.set_index("gadm_" + str(snakemake.config["sector"]["gadm_level"]))
 
 
+
 def build_nodal_distribution_key(
     industrial_database, regions
 ):  # returns percentage of co2 emissions
