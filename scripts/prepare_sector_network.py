@@ -2148,7 +2148,6 @@ if __name__ == "__main__":
 
     add_agriculture(n, costs)
 
-
     sopts = snakemake.wildcards.sopts.split("-")
 
     for o in sopts:
