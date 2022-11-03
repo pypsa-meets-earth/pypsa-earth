@@ -14,6 +14,9 @@ The subsequently described installation steps are demonstrated as shell commands
 
 Clone the Repository
 ====================
+.. note::
+
+  In order to work with the provided Jupyter notebooks in the `documentation repository <https://github.com/pypsa-meets-earth/documentation>`_, it is recommended to follow the folder structure suggested in :ref:`notebooks`.
 
 First of all, clone the `PyPSA-Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth/>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces.
