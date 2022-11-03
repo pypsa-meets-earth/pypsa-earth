@@ -281,7 +281,8 @@ if __name__ == "__main__":
     ).dropna(axis="index", subset=["geometry"])
 
     onshore_regions=pd.concat([onshore_regions], ignore_index=True).to_file(
-            snakemake.output.regions_onshore)
+            snakemake.output.regions_onshore
+            )
 
     if offshore_regions:
         # if a offshore_regions exists excute below
