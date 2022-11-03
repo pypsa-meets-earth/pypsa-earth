@@ -282,9 +282,6 @@ if __name__ == "__main__":
 
     onshore_regions=pd.concat([onshore_regions], ignore_index=True).to_file(
             snakemake.output.regions_onshore)
-            
-    # remove empty polygons
-    onshore_regions = onshore_regions[~onshore_regions.geometry.is_empty]
 
     if offshore_regions:
         # if a offshore_regions exists excute below
