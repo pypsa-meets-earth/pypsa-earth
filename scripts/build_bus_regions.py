@@ -56,22 +56,22 @@ from vresutils.graph import voronoi_partition_pts
 _logger = logging.getLogger(__name__)
 
 
-def save_to_geojson(df, fn):
-    # remove file if it exists
-    if os.path.exists(fn):
-        os.unlink(fn)
-    if not isinstance(df, gpd.GeoDataFrame):
-        df = gpd.GeoDataFrame(dict(geometry=df))
+# def save_to_geojson(df, fn):
+#     # remove file if it exists
+#     if os.path.exists(fn):
+#         os.unlink(fn)
+#     if not isinstance(df, gpd.GeoDataFrame):
+#         df = gpd.GeoDataFrame(dict(geometry=df))
 
-    # save file if the GeoDataFrame is non-empty
-    if df.shape[0] > 0:
-        df = df.reset_index()
-        schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-        df.to_file(fn, driver="GeoJSON", schema=schema)
-    else:
-        # create empty file to avoid issues with snakemake
-        with open(fn, "w") as fp:
-            pass
+#     # save file if the GeoDataFrame is non-empty
+#     if df.shape[0] > 0:
+#         df = df.reset_index()
+#         schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
+#         df.to_file(fn, driver="GeoJSON", schema=schema)
+#     else:
+#         # create empty file to avoid issues with snakemake
+#         with open(fn, "w") as fp:
+#             pass
 
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
@@ -280,26 +280,15 @@ if __name__ == "__main__":
         crs=country_shapes.crs,
     ).dropna(axis="index", subset=["geometry"])
 
+    onshore_regions=pd.concat([onshore_regions], ignore_index=True).to_file(
+            snakemake.output.regions_onshore)
+            
     # remove empty polygons
     onshore_regions = onshore_regions[~onshore_regions.geometry.is_empty]
 
-    save_to_geojson(
-        onshore_regions,
-        snakemake.output.regions_onshore,
-    )
-    if len(offshore_regions) != 0:
-        # create geodataframe and remove nan shapes
-        offshore_regions = gpd.GeoDataFrame(
-            pd.concat(offshore_regions, ignore_index=True),
-            crs=country_shapes.crs,
-        ).dropna(axis="index", subset=["geometry"])
-
-        # remove empty polygons
-        offshore_regions = offshore_regions[~offshore_regions.geometry.is_empty]
-
-    if not offshore_regions.empty:
+    if offshore_regions:
         # if a offshore_regions exists excute below
-        pd.concat([offshore_regions], ignore_index=True).to_file(
+        pd.concat(offshore_regions, ignore_index=True).to_file(
             snakemake.output.regions_offshore
         )
     else:
