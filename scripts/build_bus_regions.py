@@ -280,9 +280,18 @@ if __name__ == "__main__":
         crs=country_shapes.crs,
     ).dropna(axis="index", subset=["geometry"])
 
+<<<<<<< HEAD
     onshore_regions=pd.concat([onshore_regions], ignore_index=True).to_file(
             snakemake.output.regions_onshore
             )
+=======
+    onshore_regions = pd.concat([onshore_regions], ignore_index=True).to_file(
+        snakemake.output.regions_onshore
+    )
+
+    # remove empty polygons
+    onshore_regions = onshore_regions[~onshore_regions.geometry.is_empty]
+>>>>>>> ce99c9c9c080c52a6fc6c05a15d2b57644065efd
 
     if offshore_regions:
         # if a offshore_regions exists excute below
