@@ -111,6 +111,7 @@ Documentation
 * :doc:`how_to_docs`
 * :doc:`introduction`
 * :doc:`installation`
+* :doc:`software_hints`
 * :doc:`tutorial`
 
 .. toctree::
@@ -120,6 +121,7 @@ Documentation
 
    introduction
    installation
+   software_hints
    tutorial
    how_to_docs
 
