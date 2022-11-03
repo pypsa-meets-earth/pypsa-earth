@@ -108,11 +108,10 @@ Documentation
 
 **Getting Started**
 
-* :doc:`how_to_docs`
 * :doc:`introduction`
 * :doc:`installation`
-* :doc:`software_hints`
 * :doc:`tutorial`
+* :doc:`notebooks`
 
 .. toctree::
    :hidden:
@@ -121,9 +120,8 @@ Documentation
 
    introduction
    installation
-   software_hints
    tutorial
-   how_to_docs
+   notebooks
 
 **Configuration**
 
@@ -155,11 +153,14 @@ Documentation
    rules_overview
    api_reference
 
-**Project Info**
+**Help and References**
 
 * :doc:`release_notes`
-* :doc:`project_structure_and_credits`
 * :doc:`how_to_contribute`
+* :doc:`how_to_docs`
+* :doc:`software_hints`
+* :doc:`learning_materials`
+* :doc:`project_structure_and_credits`
 * :doc:`talks_and_papers`
 
 .. toctree::
@@ -168,7 +169,10 @@ Documentation
    :caption: Project Info
 
    release_notes
-   project_structure_and_credits
    how_to_contribute
+   how_to_docs
+   software_hints
+   learning_materials
+   project_structure_and_credits
    talks_and_papers
    

@@ -13,21 +13,25 @@ the rules, a ``notebooks`` folder,as part of the `documentation repository <http
 In order to work with these notebooks, you need to set up the recommended folder structure for pypsa-earth:
 
 Start by creating a folder named pypsa-earth-project by executing the following line in the terminal:
+
 .. code:: bash
 
   $ mkdir pypsa-earth-project
 
 Change the current directory to that folder:
+
 .. code:: bash
 
   $ cd pypsa-earth-project
 
 Clone pypsa-earth repository from GitHub into the folder:
+
 .. code:: bash
 
   $ git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
 
 Finally Clone documentation repository into the folder:
+
 .. code:: bash
 
   $ git clone https://github.com/pypsa-meets-earth/documentation.git
