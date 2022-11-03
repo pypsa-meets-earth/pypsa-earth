@@ -15,7 +15,7 @@ You may learn how to get started with PyPSA-Earth, which has a similar structure
 
     <iframe width="832" height="468" src="https://www.youtube.com/embed/mAwhQnNRIvs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-The :ref:`installation` procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it. To properly model any region of the Earth, PyPSA-Earth needs to download and fetch different datasets. This section explains how to perform this data management.
+The installation procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it. To properly model any region of the Earth, PyPSA-Earth needs to download and fetch different datasets. This section explains how to perform this data management.
 
 How to build the tutorial model?
 -------------------------------------------------
@@ -61,62 +61,76 @@ This command will trigger loading of the whole dataset needed to build the model
 How to customise PyPSA-Earth?
 -------------------------------------------------
 
-The model can be adapted to include any country, even multiple countries or continents (Currently `Africa` work as a whole continent). Several countries have not been tested yet and might not run smoothly at first:
+The model can be adapted to include any country, even multiple countries (e.g. Nigeria and Benin) or continents (Currently `Africa` work as a whole continent). Several countries have not been tested yet and might not run smoothly at first:
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: countries:
-   :end-before: snapshots:
+.. code:: yaml
+
+    countries: ["NG", "BJ"]
 
 Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: snapshots:
-   :end-before: enable:
+.. code:: yaml
 
-It is also possible to allow less or more carbon-dioxide emissions, while defining the current emissions. It is possible to model a net-zero target by setting the `co2limit`_ to zero:
+    snapshots:
+        start: "2013-03-1"
+        end: "2013-03-7"
+        inclusive: "left" # end is not inclusive
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: electricity:
-   :end-before: operational_reserve:
+It is also possible to allow less or more carbon-dioxide emissions, while defining the current emissions. It is possible to model a net-zero target by setting the `co2limit` to zero:
+
+.. code:: yaml
+
+    electricity:
+        voltages: [220., 300., 380.]
+        co2limit: 1.487e+9
+        co2base: 1.487e+9
 
 PyPSA-Earth can generate a database of existing conventional powerplants through open data sources. It is possible to select which types of powerplants to be included:
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: extendable_carriers:
-   :end-before: powerplants_filter:
+.. code:: yaml
+
+    extendable_carriers:
+        Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+        StorageUnit: [] # battery, H2
+        Store: [battery, H2]
+        Link: []  # H2 pipeline
+
 
 To accurately model the temporal and spatial availability of renewables such as wind and solar energy, we rely on historical weather data.
 It is advisable to adapt the required range of coordinates to the selection of countries.
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: atlite:
-   :end-before: renewable:
+.. code:: yaml
+
+    atlite:
+        nprocesses: 4
+        cutouts:
+                africa-2013-era5-tutorial:
+                    module: era5
+                    dx: 0.3  # cutout resolution
+                    dy: 0.3  # cutout resolution
+                    # The cutout time is automatically set by the snapshot range.
 
 It is also possible to decide which weather data source should be used to calculate potentials and capacity factor time-series for each carrier.
 For example, we may want to use the ERA-5 dataset for solar and not the default SARAH-2 dataset.
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: africa-2013-era5-tutorial:
-   :end-at: module:
+.. code:: yaml
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: solar:
-   :end-at: cutout:
+    africa-2013-era5-tutorial:
+        module: era5
+
+.. code:: yaml
+
+    solar:
+        cutout: africa-2013-era5-tutorial
 
 Finally, it is possible to pick a solver. For instance, this tutorial uses the open-source solver glpk and does not rely
 on the commercial solvers such as Gurobi or CPLEX (for which free academic licenses are available).
 
-.. literalinclude:: ../config.tutorial.yaml
-   :language: yaml
-   :start-at: solver:
-   :end-before: plotting:
+.. code:: yaml
+
+    solver:
+        name: glpk
+
 
 Be mindful that we only noted major changes to the provided default configuration that is comprehensibly documented in :ref:`config`.
 There are many more configuration options beyond what is adapted for the tutorial!
@@ -127,6 +141,7 @@ How to execute different parts of the workflow?
 Snakemake is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur. Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
 
 .. note::
+
   ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth, thereby there is no need to install it manually.
 
 The snakemake included in the conda environment pypsa-earth can be used to execute any custom rule with the following command:
@@ -164,7 +179,7 @@ The solved networks can be analysed just like any other PyPSA network (e.g. in J
 
 For inspiration, you may want to have a look on the `examples section in the PyPSA documentation <https://pypsa.readthedocs.io/en/latest/examples-basic.html>`_.
 
-An example of the tutorial network analysis is included in the `pypsa-meets-earth/documentation/notebooks/tutorial-network-analysis.ipynb`.
+An example of the tutorial network analysis is included in the notebook `sample-network-analysis.ipynb` as part of pypsa-meets-earth `documentation repository notebooks <https://github.com/pypsa-meets-earth/documentation/tree/main/notebooks>`_.
 
 After playing with the tutorial model, it's important to clean-up data in your model folder before to proceed further to avoid data conflicts. You may use the `clean` rule for making so:
 
