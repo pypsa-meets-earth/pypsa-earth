@@ -199,6 +199,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import progressbar as pgb
+import rasterio as rio
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
@@ -420,6 +421,11 @@ if __name__ == "__main__":
         if "natura" in config and config["natura"]:
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
+            natura = rio.open(paths.natura)
+            if not natura.crs == area_crs:
+                logger.warning(
+                    f"Coorginate referense system of 'natura.tiff' raster is {natura.crs} which is different from area_crs == {area_crs}"
+                )
         if "copernicus" in config and config["copernicus"]:
             copernicus = config["copernicus"]
             excluder.add_raster(
