@@ -439,6 +439,12 @@ if __name__ == "__main__":
 
             nc_geom = box(*cutout.bounds)
             cutout_in_natura = natura_geom.contains(nc_geom)
+
+            if not cutout_in_natura:
+                logger.warning(
+                    f"A provided 'natura.tiff' does not contain the selected cutout. The coordinates are in the following range\n\r *  cutout: left={cutout.bounds[0]:2.1f}, bottom={cutout.bounds[1]:2.1f}, right={cutout.bounds[2]:2.1f}, top={cutout.bounds[3]:2.1f};\n\r * 'natura.tiff': left={natura_geom.bounds[0]:2.1f}, bottom={natura_geom.bounds[1]:2.1f},right={natura_geom.bounds[2]:2.1f}, top={natura_geom.bounds[3]:2.2f}"
+                )
+
         if "copernicus" in config and config["copernicus"]:
             copernicus = config["copernicus"]
             excluder.add_raster(
