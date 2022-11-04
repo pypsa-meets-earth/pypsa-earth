@@ -108,6 +108,7 @@ def get_transform_and_shape(bounds, res, out_logging):
         _logger.info("Stage 2/5: Get transform and shape")
     left, bottom = [(b // res) * res for b in bounds[:2]]
     right, top = [(b // res + 1) * res for b in bounds[2:]]
+    # "latitude, longitude" coordinates order
     shape = int((top - bottom) // res), int((right - left) // res)
     transform = rio.Affine(res, 0, left, 0, -res, top)
     return transform, shape
@@ -193,7 +194,8 @@ if __name__ == "__main__":
 
     if out_logging:
         _logger.info("Stage 4/5: Mask geometry")
-    raster = ~geometry_mask(shapes.geometry, out_shape[::-1], transform)
+    # out_shape: n_rows, n_columns
+    raster = ~geometry_mask(shapes.geometry, out_shape, transform)
     raster = raster.astype(rio.uint8)
 
     if out_logging:
