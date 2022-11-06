@@ -478,6 +478,7 @@ if __name__ == "__main__":
         n_missed_cells = pd.isnull(capacity_factor).sum()
         n_cells = len(np.ndarray.flatten(capacity_factor.data))
         share_missed_cells = 100 * (n_missed_cells/n_cells)
+        logger.warning(f"The provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost")
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
             layout=layout,
