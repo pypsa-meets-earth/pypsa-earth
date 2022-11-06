@@ -562,4 +562,5 @@ if __name__ == "__main__":
 
         share_missed_weights = 100 * (n_lost_weights/n_weights_initial)
         share_missed_weights2 = 100 * (n_lost_weights/n_weights_clean)
+        logger.warning(f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}")
         ds.to_netcdf(snakemake.output.profile)
