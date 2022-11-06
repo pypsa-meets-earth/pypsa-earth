@@ -480,9 +480,10 @@ if __name__ == "__main__":
         n_missed_cells = pd.isnull(capacity_factor).sum()
         n_cells = len(np.ndarray.flatten(capacity_factor.data))
         share_missed_cells = 100 * (n_missed_cells / n_cells)
-        logger.warning(
-            f"The provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
-        )
+        if share_missed_cells > 0:
+            logger.warning(
+                f"The provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
+            )
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
             layout=layout,
@@ -571,7 +572,8 @@ if __name__ == "__main__":
         else:
             recommend_msg = ""
 
-        logger.warning(
-            f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}"
-        )
+        if n_lost_weights > 0:    
+            logger.warning(
+                f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}"
+            )
         ds.to_netcdf(snakemake.output.profile)
