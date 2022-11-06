@@ -473,6 +473,8 @@ if __name__ == "__main__":
         capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
+        # CDS-extracted ERA5 data sometimes may contain missed values
+        # https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
         n_missed_cells = pd.isnull(capacity_factor).sum()
         n_cells = len(np.ndarray.flatten(capacity_factor.data))
         share_missed_cells = 100 * (n_missed_cells/n_cells)
