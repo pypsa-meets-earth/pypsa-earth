@@ -283,7 +283,7 @@ if __name__ == "__main__":
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
 
-    tech = snakemake.wildcards.technology    
+    tech = snakemake.wildcards.technology
 
     # crs
     geo_crs = snakemake.config["crs"]["geo_crs"]
