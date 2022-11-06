@@ -473,6 +473,9 @@ if __name__ == "__main__":
         capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
+        n_missed_cells = pd.isnull(capacity_factor).sum()
+        n_cells = len(np.ndarray.flatten(capacity_factor.data))
+        share_missed_cells = 100 * (n_missed_cells/n_cells)
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
             layout=layout,
