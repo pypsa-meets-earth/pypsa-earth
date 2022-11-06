@@ -530,6 +530,9 @@ if __name__ == "__main__":
             ]
         )
 
+        n_weights_initial = len(ds.weight)
+        n_lost_weights = pd.isnull(ds.weight).sum()
+
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
             offshore_shape = gpd.read_file(paths["offshore_shapes"]).unary_union
