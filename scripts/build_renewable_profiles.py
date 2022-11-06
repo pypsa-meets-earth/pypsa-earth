@@ -557,4 +557,9 @@ if __name__ == "__main__":
             min_p_max_pu = config["clip_p_max_pu"]
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
+
+        n_weights_clean = len(ds.weight)
+
+        share_missed_weights = 100 * (n_lost_weights/n_weights_initial)
+        share_missed_weights2 = 100 * (n_lost_weights/n_weights_clean)
         ds.to_netcdf(snakemake.output.profile)
