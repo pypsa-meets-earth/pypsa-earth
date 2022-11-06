@@ -477,8 +477,10 @@ if __name__ == "__main__":
         # https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
         n_missed_cells = pd.isnull(capacity_factor).sum()
         n_cells = len(np.ndarray.flatten(capacity_factor.data))
-        share_missed_cells = 100 * (n_missed_cells/n_cells)
-        logger.warning(f"The provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost")
+        share_missed_cells = 100 * (n_missed_cells / n_cells)
+        logger.warning(
+            f"The provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
+        )
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
             layout=layout,
@@ -557,16 +559,17 @@ if __name__ == "__main__":
             min_p_max_pu = config["clip_p_max_pu"]
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
-
         n_weights_clean = len(ds.weight)
 
-        share_missed_weights = 100 * (n_lost_weights/n_weights_initial)
-        share_missed_weights2 = 100 * (n_lost_weights/n_weights_clean)
+        share_missed_weights = 100 * (n_lost_weights / n_weights_initial)
+        share_missed_weights2 = 100 * (n_lost_weights / n_weights_clean)
 
         if share_missed_weights2 >= 30:
             recommend_msg = "\r\nYou may want to re-generate the cutout"
         else:
             recommend_msg = ""
 
-        logger.warning(f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}")
+        logger.warning(
+            f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}"
+        )
         ds.to_netcdf(snakemake.output.profile)
