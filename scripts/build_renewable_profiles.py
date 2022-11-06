@@ -568,5 +568,6 @@ if __name__ == "__main__":
         else:
             recommend_msg = ""
 
-        logger.warning(f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}")
+        logger.warning(f"Missed cutout data have resulted in data loss:\r\n for {tech} missed {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}")
+
         ds.to_netcdf(snakemake.output.profile)
