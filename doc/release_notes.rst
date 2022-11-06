@@ -25,6 +25,8 @@ Upcoming Release
 
 * Update docs on tutorial `PR #507 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/507>`__
 
+* Fix coordinates flip when generating natura raster and add natura raster checks/509>`__
+
 PyPSA-Earth 0.1.0
 =================
 
