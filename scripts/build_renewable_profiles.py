@@ -572,7 +572,7 @@ if __name__ == "__main__":
         else:
             recommend_msg = ""
 
-        if n_lost_weights > 0:    
+        if n_lost_weights > 0:
             logger.warning(
                 f"Missed cutout data have resulted in data loss:\r\n for {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}"
             )
