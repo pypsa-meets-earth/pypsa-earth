@@ -39,7 +39,7 @@ dependencies:
 - shapely>=1.8a1
 - pre-commit
 - pyomo
-- matplotlib
+- matplotlib<=3.5.2
 - reverse-geocode
 
   # Keep in conda environment when calling ipython
