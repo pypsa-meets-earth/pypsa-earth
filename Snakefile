@@ -383,6 +383,7 @@ rule add_electricity:
         **{
             f"profile_{tech}": f"resources/renewable_profiles/profile_{tech}.nc"
             for tech in config["renewable"]
+            if tech in config["electricity"]["renewable_carriers"]
         },
         **{
             f"conventional_{carrier}_{attr}": fn
