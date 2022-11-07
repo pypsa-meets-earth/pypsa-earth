@@ -33,7 +33,7 @@ def map_industry_to_buses(df):
         axis=1,
     )
 
-    return df.set_index("gadm_2")
+    return df.set_index("gadm_" + str(snakemake.config["sector"]["gadm_level"]))
 
 
 def build_nodal_distribution_key(

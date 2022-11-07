@@ -30,6 +30,9 @@ clustering_options:
 
 countries: ['MA']
 
+export:
+  export_h2: 10000000 # Yearly export demand in MWh
+
 custom_data:
   renewables: ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
   elec_demand: true

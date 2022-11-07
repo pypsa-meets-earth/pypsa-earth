@@ -678,7 +678,6 @@ def add_aviation(n, cost):
         ),
         axis=1,
     )
-
     # To change 3 country code to 2
     # airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
     # lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
@@ -2005,12 +2004,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="114",
-            ll="c1.0",
+            clusters="4",
+            ll="c1",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="730H",
-            discountrate="0.069",
+            sopts="144H",
+            discountrate="0.071",
             demand="NZ",
         )
 

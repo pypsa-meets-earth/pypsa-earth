@@ -523,14 +523,12 @@ def locate_bus(
     """
     Function to locate the right node for a coordinate set
     input coords of point
-
     Parameters
     ----------
     coords: pandas dataseries
         dataseries with 2 rows x & y representing the longitude and latitude
     co: string (code for country where coords are MA Morocco)
         code of the countries where the coordinates are
-
     """
     col = "name"
     if not gadm_clustering:
