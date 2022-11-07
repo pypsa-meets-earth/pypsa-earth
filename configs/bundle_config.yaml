@@ -56,8 +56,7 @@ databundles:
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/Worldpop/bwa_ppp_2020_UNadj_constrained.tif
-
+  
   # tutorial bundle specific for Morocco only
   bundle_tutorial_MA:
     countries: [MA]
@@ -69,7 +68,6 @@ databundles:
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/Worldpop/mar_ppp_2020_UNadj_constrained.tif
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
@@ -120,7 +118,6 @@ databundles:
     - data/costs.csv
     - data/hydro_capacities.csv
     - data/custom_powerplants.csv
-    - data/eia_hydro_annual_generation.csv
     - data/eez/eez_v11.gpkg
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/hydrobasins/hybas_world_lev04_v1c.shp
