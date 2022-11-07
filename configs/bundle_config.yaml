@@ -56,7 +56,7 @@ databundles:
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-  
+
   # tutorial bundle specific for Morocco only
   bundle_tutorial_MA:
     countries: [MA]
