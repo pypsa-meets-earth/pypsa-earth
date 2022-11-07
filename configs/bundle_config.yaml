@@ -122,8 +122,6 @@ databundles:
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/hydrobasins/hybas_world_lev04_v1c.shp
     - data/hydrobasins/hybas_world_lev05_v1c.shp
-    - data/hydrobasins/hybas_world_lev06_v1c.shp
-
 
   # resources bundle containing the resources folder for africa only
   bundle_natura_earth:
