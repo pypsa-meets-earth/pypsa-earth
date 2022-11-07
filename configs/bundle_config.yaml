@@ -47,29 +47,29 @@ databundles:
 
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
-      countries: [BW]
-      tutorial: true
-      category: data
-      destination: "data"
-      urls:
-        gdrive: https://drive.google.com/file/d/1fhsF-dby8D1cD2fZyJPnSnARdcXlXjzJ/view?usp=share_link
-      output:
-      - data/gebco/GEBCO_2021_TID.nc
-      - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-      - data/Worldpop/bwa_ppp_2020_UNadj_constrained.tif
+    countries: [BW]
+    tutorial: true
+    category: data
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/1fhsF-dby8D1cD2fZyJPnSnARdcXlXjzJ/view?usp=share_link
+    output:
+    - data/gebco/GEBCO_2021_TID.nc
+    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    - data/Worldpop/bwa_ppp_2020_UNadj_constrained.tif
 
   # tutorial bundle specific for Morocco only
   bundle_tutorial_MA:
-      countries: [MA]
-      tutorial: true
-      category: data
-      destination: "data"
-      urls:
-        gdrive: https://drive.google.com/file/d/15esPqrPfQEhVDmD2JITZkQ4dtZCHY0E0/view?usp=share_link
-      output:
-      - data/gebco/GEBCO_2021_TID.nc
-      - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-      - data/Worldpop/mar_ppp_2020_UNadj_constrained.tif
+    countries: [MA]
+    tutorial: true
+    category: data
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/15esPqrPfQEhVDmD2JITZkQ4dtZCHY0E0/view?usp=share_link
+    output:
+    - data/gebco/GEBCO_2021_TID.nc
+    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    - data/Worldpop/mar_ppp_2020_UNadj_constrained.tif
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
