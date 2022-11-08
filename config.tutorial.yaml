@@ -52,8 +52,7 @@ crs:
 
 # CI relevant
 retrieve_databundle: # required for nice CI test output
-  show_progress: false # disable progress bar in retrieve_databundle
-# test
+  show_progress: true # show (true) or do not show (false) the progress bar in retrieve_databundle while downloading data
 
 
 augmented_line_connection:
