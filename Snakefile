@@ -714,12 +714,14 @@ rule build_test_configs:
     input:
         base_config="config.tutorial.yaml",
         update_file_list=[
+            "test/config.tutorial_noprogress.yaml",
             "test/config.custom.yaml",
             "test/config.monte_carlo.yaml",
             "test/config.landlock.yaml",
         ],
     output:
         tmp_test_configs=[
+            "test/tmp/config.tutorial_noprogress.yaml",
             "test/tmp/config.custom_tmp.yaml",
             "test/tmp/config.monte_carlo_tmp.yaml",
             "test/tmp/config.landlock_tmp.yaml",

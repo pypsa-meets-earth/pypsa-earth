@@ -67,7 +67,7 @@ jobs:
 
     - name: Test tutorial workflow
       run: |
-        cp config.tutorial.yaml config.yaml
+        cp test/tmp/config.tutorial_noprogress.yaml config.yaml
         snakemake --cores all solve_all_networks --forceall
 
     - name: Test custom workflow
@@ -82,7 +82,7 @@ jobs:
 
     - name: Test landlock workflow
       run: |
-        cp test/tmp/config.landlock.yaml config.yaml 
+        cp test/tmp/config.landlock.yaml config.yaml
         snakemake --cores all solve_all_networks --forceall
 
       # - name: Test plotting and summaries
