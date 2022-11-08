@@ -49,7 +49,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      gdrive: https://drive.google.com/file/d/1JEuB_t0tMuipVQK5g3xHlGxYHsVKBK8p/view?usp=share_link
+      gdrive: https://drive.google.com/file/d/1yJ8JYGFVtMPpsEBeXzDR5Ixa9n8gGu5n/view?usp=share_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -61,7 +61,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      gdrive: https://drive.google.com/drive/folders/1CHnI3SEUU3QydGnYEFmy-K4CZVATF77M?usp=share_link
+      gdrive: https://drive.google.com/file/d/1Qjf0xVBuOSTKTPRD_NANruDDG94CF-Ju/view?usp=share_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
