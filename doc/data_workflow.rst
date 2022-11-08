@@ -18,7 +18,7 @@ Two major parts of the energy modeling workflow are preparing of power grid layo
 
 OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references.
 
-.. image:: img/africa_osm_map.jpeg
+.. image:: img/africa_osm_map.png
     :height: 150 px
     :align: center
 
