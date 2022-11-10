@@ -556,7 +556,7 @@ def country_name_2_two_digits(country_name):
     ):
         return "SN-GM"
 
-    full_name = get_country("alpha_2", name=country_name)
+    full_name = coco.convert(country_name, to="ISO2")
     return full_name
 
 
