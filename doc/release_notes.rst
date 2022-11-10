@@ -27,6 +27,10 @@ Upcoming Release
 
 * Update docs on tutorial `PR #507 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/507>`__
 
+* Moved from pycountry to country_converter `PR #493 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/493>`__
+
+* Fix workflow for landlock countries `PR #481 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__
+
 PyPSA-Earth 0.1.0
 =================
 
