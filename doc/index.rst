@@ -110,8 +110,9 @@ Documentation
 
 * :doc:`introduction`
 * :doc:`installation`
-* :doc:`data_workflow`
+* :doc:`short_tutorial`
 * :doc:`tutorial`
+* :doc:`data_workflow`
 * :doc:`notebooks`
 
 .. toctree::
@@ -120,10 +121,10 @@ Documentation
    :caption: Getting Started
 
    introduction
-   data_workflow
    installation
-   how_to_start
+   short_tutorial
    tutorial
+   data_workflow   
    notebooks
 
 **Configuration**
