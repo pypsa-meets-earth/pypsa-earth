@@ -17,7 +17,7 @@ You may learn how to get started with PyPSA-Earth, which has a similar structure
     <iframe width="832" height="468" src="https://www.youtube.com/embed/mAwhQnNRIvs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 How to customise PyPSA-Earth?
--------------------------------------------------
+======================================================
 
 The model can be adapted to include any country, even multiple countries (e.g. Nigeria and Benin) or continents
 (Currently `Africa` work as a whole continent). Several countries have not been tested yet and might not run smoothly at first:
@@ -97,7 +97,7 @@ Be mindful that we only noted major changes to the provided default configuratio
 There are many more configuration options beyond what is adapted for the tutorial!
 
 How to execute different parts of the workflow?
--------------------------------------------------
+======================================================
 
 Snakemake is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur.
 Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
@@ -128,10 +128,9 @@ Solar profile for the requested area may be calculated using the output name:
     .../pypsa-earth (pypsa-earth) % snakemake -j 1 resources/renewable_profiles/profile_solar.nc 
 
 
-.. TODO Add Snakemake tutorial links
+How to use PyPSA-Earth for your energy problem?
+======================================================
 
-How to analyse the solved networks?
--------------------------------------------------
 
 The solved networks can be analysed just like any other PyPSA network (e.g. in Jupyter Notebooks).
 
