@@ -5,155 +5,210 @@
 
 .. _tutorial:
 
+
 ##########################################
 Tutorial
 ##########################################
 
-.. _prerequisites_learning_material:
+You may learn how to get started with PyPSA-Earth, which has a similar structure to PyPSA-EUR, by watching this video:
 
-Prerequisites and learning material
-===================================
+.. raw:: html
 
-PyPSA meets Earth builds on top of several open-source packages, which are here recalled together with recommended sources to learn them from scratch.
+    <iframe width="832" height="468" src="https://www.youtube.com/embed/mAwhQnNRIvs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-.. _data_science_basics:
+The installation procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it.
+To properly model any region of the Earth, PyPSA-Earth needs to download and fetch different datasets.
+This section explains how to perform this data management.
 
-Data science basics (essential)
---------------------------------
+How to build the tutorial model?
+-------------------------------------------------
 
-
-- Refresh your Python knowledge by watching `CSDojo's playlist <https://www.youtube.com/c/CSDojo/playlists>`_. His content is excellent as introduction. You will learn in effective short videos the python basics such as variables If/else statements, functions, lists, for loops, while loops, dictionaries, classes and objects, boolean, list comprehensions, sets - put your hands on and write some test scripts as the video suggests. (~3h)
-- Familiarize yourself with numpy and panda dataframes.  In the Python-based PyPSA tool, we do not work with Excel. Powerful panda dataframes are our friends. `Here <https://www.coursera.org/learn/python-data-analysis>`__ is an extensive 30h course that provides a great introduction if this is completely unfamiliar to you.
-- `Introduction to Unix-shell <https://swcarpentry.github.io/shell-novice/>`_ - "Use of the shell is fundamental to a wide range of advanced computing tasks, including high-performance computing and automated workflow. These lessons will introduce you to this powerful tool." (optional 4h, to become a pro)
-
-
-PyPSA Introduction (essential)
--------------------------------
-
-- Watch how PyPSA-Eur is designed https://www.youtube.com/watch?v=ty47YU1_eeQ (1h)
-- Watch and put your hands on to make PyPSA-Eur work on your computer https://www.youtube.com/watch?v=mAwhQnNRIvs (1-3h)
-- While watching these PyPSA videos always have a look into the excellent `PyPSA-Eur documentation <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_
-- To see what data we can extract we work usually closely with the `basic PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html>`_
-
-
-Git and GitHub (essential)
----------------------------
-
-For code collaboration we use GitHub. Which is a common source control tool that is a very popular collaborative code development tool. Here some notes if you are not already familiar with it:
-
-- Git and GitHub is not the same. Usually, you work with git on your computer (offline) to push changes to GitHub (online).
-- `Here <https://www.youtube.com/watch?v=8JJ101D3knE>`__ a great intro which we recommend
-- Learning by doing. Maybe one of the best ways to learn is to puts your hands on open a GitHub repository and upload/change/reverse files from your local computer on some dummy scripts.
-- This `cheatsheet <https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet>`_ might help using the Git commands
-
-
-Snakemake and advanced changes (essential)
--------------------------------------------
-
-Snakemake is our brain in PyPSA.
-It automates many tasks & keeps the code structure clean.
-Therefore, it is quite useful to learn if your task is to integrate features into PyPSA.
-We can recommend:
-
-- `snakemake basic and advanced tutorial here <https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html>`__ (takes max 3-5h and makes a lot of fun).
-- Explore how PyPSA uses snakemake in the Snakefile and scripts - the GitHub search function is your best friend to find quickly what interests you.
-
-
-Code environment (optional)
------------------------------
-
-We can recommend setting up VScode from Microsoft. Add some extension if you like as described in `this video <https://www.youtube.com/watch?v=0fROnrISdZU>`_. For instance GitHub, Gitlense, and maybe some others.
-
-*Note*: if you decide to use Visual Studio Code, check out the tutorial about how to use `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`_ and `Github <https://code.visualstudio.com/docs/editor/github>`_  in Visual Studio Code
-
-
-Notebooks
-===========
-
-In order to familiarize with the code or investigate the input and outputs of
-the rules, in the ``notebooks`` folder, the following notebooks are available:
-
-- ``network_comparison``: compares the network models developed along the data workflow; useful and interactive plots are generated
-- ``osm_build_network_plot``: provides specific plots and outputs for the ``download_osm_data`` rule
-- ``osm_data_access``: explains how OSM data are being loaded by using ``download_osm_data``
-- ``osm_powermap``: contains nice plots and description of the output of the data downloaded and cleaned by using ``download_osm_data`` and ``clean_osm_data``
-- ``solve_network_results``: provides useful plots and textual outputs to investigate the results of the last optimization performed using solve_network
-- ``build_bus_regions``: it explores the inputs and outputs of the ``build_bus_regions`` rule,
-  namely the bus regions shapes, and the elements of the network (lines, substations, etc.)
-- ``build_shapes``: describes the shapes created using the rule ``build_shapes`` for the on-shore and off-shore areas
-- ``demand_gegis``: it enables exploring th GeGIS dataset used to perform the analysis.
-  These data are obtained using the `GlobalEnergyGIS <https://github.com/niclasmattsson/GlobalEnergyGIS>`_ package for Africa.
-- ``shape_comparison``: this notebook enables comparing the shapes used along the data workflow
-- ``add_electricity``: it analyzes the outputs of the ``add_electricity`` rule, including the PyPSA model and the RES/demand inputs
-- ``base_network``: it eases the visualization and analysis of the output PyPSA network model that the rule ``base_network`` builds
-- ``build_cutout``: the notebook analyzes the outputs of the rule ``build_cutout`` rule, which are the solar, wind and hydro time series
-  generated with `Atlite <https://github.com/PyPSA/atlite/>`_
-- ``build_renewable_profiles``: it enables investigating the specific time series generated by the rule ``build_renewable_profiles``;
-  in particular, it shows the potential of selected resources (e.g. solar) and the corresponding time series of renewable energy production
-  available for selected buses
-- ``landuse-availability``: this notebook aims at showing how ``Atlite`` accounts for land constraints in the analysis
-
-
-Examples
-========
-
-Solve the optimal power flow
------------------------------------
-
-The following snakemake routine enables executing the optimal power flow problem
-for the current configuration using a 6-bus equivalent of the region.
+The user can explore the majority of the model's functions on a local machine by running the tutorial,
+which uses fewer computational resources than the entire model does. A tutorial data kit was developed to facilitate exploring the model.
+You can build it using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`).
+To do that, you may want to do a reserve copy of your current configuration file and then overwrite it by a tutorial configuration:
 
 .. code:: bash
 
-    .../pypsa-earth % snakemake -j 1 results/networks/elec_s_6_ec_l.nc
-
-Change the country for the analysis
------------------------------------
-
-In order to run the code for a set of countries different than the default ones,
-the option ``countries`` in the configuration yaml files shall be modified.
-To do so, follow the following procedure:
-
-1. Make a copy of the ``config.default.yaml`` file and rename it as ``config.yaml``
-2. In ``config.yaml`` modify the option ``countries = ["AA", ..., "ZZ"]`` with the list
-   of countries that you desire; 2-digit country codes are requested or region names.
-
-   For example, to investigate Nigeria and South Africa, the following specification shall be applied in
-   the configuration file.
-
-   .. code:: bash
-
-      countries = ["NG", "ZA"]
-
-   The code also supports pre-set group of countries, such as africa. For example,
-   the African region can be simulated using:
-
-   .. code:: bash
-
-      countries = ["africa"]
-
-Manual test of specific scripts
--------------------------------
-
-The python scripts in the ``scripts`` folder are build so that they can be easily run and tested
-even without the snakemake procedure. This assumes you have all inputs of the rule 
-available (see Snakefile). For instance, let us run the ``build_shapes.py``.
-Looking at the Snakefile or the `workflow <https://pypsa-earth.readthedocs.io/en/latest/introduction.html#workflow>`_
-we need to run the ``retrieve_databundle_light.py`` manually or by snakemake:
-
-   .. code:: bash
-
-      snakemake --cores 1 retrieve_databundle_light
-
-Afterwards, you can manually run build_shapes.py or debug it.
+    .../pypsa-earth (pypsa-earth) % cp config.tutorial.yaml config.yaml
 
 
-YouTube DevTutorials
----------------------
+In the configuration file `config.yaml` there is a flag `retrieve_databundle` which triggers data loading and a `tutorial` flag which
+determines that the loaded data belong to the light tutorial kit:
 
-If some of the above sounds quite unfamiliar, you might want to start with YouTube videos.
-We recorded the following which help you with VScode, git, reading errors and fixing bugs:
-- `How to set-up Visual Studio Code for Windows [PyPSA-Earth][DevTutorial]<https://www.youtube.com/watch?v=9cFOcDxDz7o&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=1>`_
-- `Find a bug, create a fix, contribute a pull request [PyPSA-Earth] [DevTutorial]<https://www.youtube.com/watch?v=HBubZEpIeXk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=2>`_
-- `Land lock country bug - Understanding the bug [PyPSA-Earth][DevTutorial]<https://www.youtube.com/watch?v=zOQpV5bgPPk&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=3>`_
-- `Land lock country bug - Fixing the bug [PyPSA-Earth][DevTutorial]<https://www.youtube.com/watch?v=6keiD6HvnmY&list=PLrn8FatUFb2qbNvAEPK9gU_SQ32ZhQBZG&index=4>`_
+.. code:: yaml
+
+    tutorial: true
+    ...
+    retrieve_databundle: true
+
+It's recommended to set `retrieve_databundle: true` when building the model for the first time to download all needed common data files.
+When the first run is completed and all the necessary data are extracted, it may be a good idea to set `retrieve_databundle: false` to avoid data loss.
+
+How to run the model?
+-------------------------------------------------
+
+After configuration set-up, the model is ready to be built and run.
+Before to actually run the workflow you may check how it will look by using `--dryrun` or `-n` Snakemake option:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks --dryrun
+
+To run the whole modeling workflow you just need the following command:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks
+
+.. TODO Explain settings of the tutorial case
+
+This command will trigger loading of the whole dataset needed to build the model for a tutorial case if
+both `tutorial` and `retrieve_databundle` flags are on. The tutorial model will run simulation of power systems in Nigeria and Benin.
+Note that data load will need about 1.6Gb and model building will take a while (about 20..50 minutes).
+
+How to customise PyPSA-Earth?
+-------------------------------------------------
+
+The model can be adapted to include any country, even multiple countries (e.g. Nigeria and Benin) or continents
+(Currently `Africa` work as a whole continent). Several countries have not been tested yet and might not run smoothly at first:
+
+.. code:: yaml
+
+    countries: ["NG", "BJ"]
+
+Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
+
+.. code:: yaml
+
+    snapshots:
+        start: "2013-03-1"
+        end: "2013-03-7"
+        inclusive: "left" # end is not inclusive
+
+It is also possible to allow less or more carbon-dioxide emissions, while defining the current emissions.
+It is possible to model a net-zero target by setting the `co2limit` to zero:
+
+.. code:: yaml
+
+    electricity:
+        voltages: [220., 300., 380.]
+        co2limit: 1.487e+9
+        co2base: 1.487e+9
+
+PyPSA-Earth can generate a database of existing conventional powerplants through open data sources.
+It is possible to select which types of powerplants to be included:
+
+.. code:: yaml
+
+    extendable_carriers:
+        Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+        StorageUnit: [] # battery, H2
+        Store: [battery, H2]
+        Link: []  # H2 pipeline
+
+
+To accurately model the temporal and spatial availability of renewables such as wind and solar energy, we rely on historical weather data.
+It is advisable to adapt the required range of coordinates to the selection of countries.
+
+.. code:: yaml
+
+    atlite:
+        nprocesses: 4
+        cutouts:
+                africa-2013-era5-tutorial:
+                    module: era5
+                    dx: 0.3  # cutout resolution
+                    dy: 0.3  # cutout resolution
+                    # The cutout time is automatically set by the snapshot range.
+
+It is also possible to decide which weather data source should be used to calculate potentials and capacity factor time-series for each carrier.
+For example, we may want to use the ERA-5 dataset for solar and not the default SARAH-2 dataset.
+
+.. code:: yaml
+
+    africa-2013-era5-tutorial:
+        module: era5
+
+.. code:: yaml
+
+    solar:
+        cutout: africa-2013-era5-tutorial
+
+Finally, it is possible to pick a solver. For instance, this tutorial uses the open-source solver glpk and does not rely
+on the commercial solvers such as Gurobi or CPLEX (for which free academic licenses are available).
+
+.. code:: yaml
+
+    solver:
+        name: glpk
+
+
+Be mindful that we only noted major changes to the provided default configuration that is comprehensibly documented in :ref:`config`.
+There are many more configuration options beyond what is adapted for the tutorial!
+
+How to execute different parts of the workflow?
+-------------------------------------------------
+
+Snakemake is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur.
+Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
+
+.. note::
+
+  ``Snakemake``, which is one of the major dependencies, will be automatically installed in the environment pypsa-earth, thereby there is no need to install it manually.
+
+The snakemake included in the conda environment pypsa-earth can be used to execute any custom rule with the following command:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake < your custom rule >  
+
+Starting with essential usability features, the implemented PyPSA-Earth `Snakemake procedure <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile>`_ that allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
+
+You can execute some parts of the workflow in case you are interested in some specific it's parts.
+E.g. power grid topology may be extracted and cleaned with the following command which refers to the script name: 
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean_osm_data
+
+Solar profile for the requested area may be calculated using the output name:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 resources/renewable_profiles/profile_solar.nc 
+
+
+.. TODO Add Snakemake tutorial links
+
+How to analyse the solved networks?
+-------------------------------------------------
+
+The solved networks can be analysed just like any other PyPSA network (e.g. in Jupyter Notebooks).
+
+.. code:: python
+
+    import pypsa
+    network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc")    
+
+We prepared an example notebook of how you could explore the above generated tutorial network in `sample-network-analysis.ipynb`.
+You can find the notebook in our `notebooks repository <https://github.com/pypsa-meets-earth/documentation/tree/main/notebooks>`_.
+For further inspiration how how to explore networks and also revealing the capabilities of PYPSA you may want to see the
+`examples section in the PyPSA framework documentation <https://pypsa.readthedocs.io/en/latest/examples-basic.html>`_.
+
+
+After playing with the tutorial model and before playing with different fucntions,
+it's important to clean-up data in your model folder before to proceed further to avoid data conflicts.
+You may use the `clean` rule for making so:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean
+
+Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed.
+
+.. note::
+
+  This tutorial only covers Nigeria. To make the workflow run on other regions you need to use the ``config.default.yaml`` as ``config.yaml``.
+  To use the model in and outside Africa, you should also read
+  `How to create a model for you region of interest with PyPSA-Earth? <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/505>`_
