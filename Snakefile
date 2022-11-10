@@ -721,7 +721,7 @@ rule build_test_configs:
         ],
     output:
         tmp_test_configs=[
-            "test/tmp/config.tutorial_noprogress.yaml",
+            "test/tmp/config.tutorial_noprogress_tmp.yaml",
             "test/tmp/config.custom_tmp.yaml",
             "test/tmp/config.monte_carlo_tmp.yaml",
             "test/tmp/config.landlock_tmp.yaml",

@@ -69,7 +69,7 @@ jobs:
 
     - name: Test tutorial workflow
       run: |
-        cp test/tmp/config.tutorial_noprogress.yaml config.yaml
+        cp test/tmp/config.tutorial_noprogress_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks
 
       # - name: Test plotting and summaries
