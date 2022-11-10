@@ -3,7 +3,7 @@
 
   SPDX-License-Identifier: CC-BY-4.0
 
-.. _tutorial::
+.. _how_to_validate::
 
 ##########################################
 How to validate?
