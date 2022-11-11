@@ -65,7 +65,6 @@ _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
 CUTOUT_CRS = "EPSG:4326"
-NATURA_CRS = "EPSG:4326"
 
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
@@ -97,10 +96,10 @@ def determine_cutout_xXyY(cutout_name, out_logging):
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
     cutout_xXyY = [
-        np.clip(x - dx / 2.0, -179.99, 179.99),
-        np.clip(X + dx / 2.0, -179.99, 179.99),
-        np.clip(y - dy / 2.0, -89.99, 89.99),
-        np.clip(Y + dy / 2.0, -89.99, 89.99),
+        np.clip(x - dx / 2.0, -180, 180),
+        np.clip(X + dx / 2.0, -180, 180),
+        np.clip(y - dy / 2.0, -90, 90),
+        np.clip(Y + dy / 2.0, -90, 90),
     ]
     return cutout_xXyY
 
@@ -201,7 +200,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # get crs
-    natura_crs = NATURA_CRS
+    natura_crs = snakemake.config["crs"]["area_crs"]
 
     out_logging = True
     inputs = snakemake.input
