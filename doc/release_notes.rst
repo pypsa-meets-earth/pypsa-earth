@@ -27,8 +27,6 @@ Upcoming Release
 
 * Update docs on installation `PR #498 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/498>`__
 
-* Update docs on installation `PR #498 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/498>`__
-
 PyPSA-Earth 0.1.0
 =================
 
