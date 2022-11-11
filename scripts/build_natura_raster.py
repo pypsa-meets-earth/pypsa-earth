@@ -51,7 +51,6 @@ Tip: The output file `natura.tiff` contains now the 100x100m rasters of protecti
 """
 import logging
 import os
-from tkinter import E
 
 import atlite
 import geopandas as gpd
