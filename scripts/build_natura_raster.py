@@ -184,8 +184,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
         )
     unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=natura_crs)
 
-    unified_shape.to_file("temp_unified.geojson", driver="GeoJSON")
-
     return unified_shape
 
 
