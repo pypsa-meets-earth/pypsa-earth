@@ -18,6 +18,7 @@ PyPSA-Earth
 Video
 -------
 
+- `First PyPSA user meeting with industry, TSO's, non-profits and research groups <https://youtu.be/fmwDxNpSMM4>`_
 - `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_
 - `Getting Started with PyPSA-Eur - Part 1 <https://www.youtube.com/watch?v=ty47YU1_eeQ>`_
 - `Getting Started with PyPSA-Eur - Part 2 <https://www.youtube.com/watch?v=mAwhQnNRIvs>`_ 

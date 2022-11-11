@@ -63,7 +63,7 @@ Note that data load will need about 1.6Gb and model building will take a while (
 
 
 How to analyse the solved networks?
--------------------------------------------------
+------------------------------------
 
 The solved networks can be analysed just like any other PyPSA network (e.g. in Jupyter Notebooks).
 
@@ -72,11 +72,17 @@ The solved networks can be analysed just like any other PyPSA network (e.g. in J
     import pypsa
     network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc")    
 
-We prepared an example notebook of how you could explore the above generated tutorial network in `sample-network-analysis.ipynb`.
-You can find the notebook in our `notebooks repository <https://github.com/pypsa-meets-earth/documentation/tree/main/notebooks>`_.
-For further inspiration how how to explore networks and also revealing the capabilities of PYPSA you may want to see the
-`examples section in the PyPSA framework documentation <https://pypsa.readthedocs.io/en/latest/examples-basic.html>`_.
+The video below shows how to analyse solved PyPSA-Eur networks in Jupyter Notebooks.
+Fabian Neumann did a great job explaining the basics of PyPSA and how to use it for analysis.
 
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/mAwhQnNRIvs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+We also prepared an example notebook such that you can explore the tutorial network yourself.
+Just open in our `notebooks repository <https://github.com/pypsa-meets-earth/documentation/tree/main/notebooks>`_
+the file `sample-network-analysis.ipynb`. For further inspiration on what you can analyse and do with PyPSA,
+you can explore the `examples section in the PyPSA framework documentation <https://pypsa.readthedocs.io/en/latest/examples-basic.html>`_.
 
 After playing with the tutorial model and before playing with different fucntions,
 it's important to clean-up data in your model folder before to proceed further to avoid data conflicts.

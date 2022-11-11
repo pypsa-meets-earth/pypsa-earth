@@ -10,12 +10,6 @@
 Tutorial
 ##########################################
 
-You may learn how to get started with PyPSA-Earth, which has a similar structure to PyPSA-EUR, by watching this video:
-
-.. raw:: html
-
-    <iframe width="832" height="468" src="https://www.youtube.com/embed/mAwhQnNRIvs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 How to customise PyPSA-Earth?
 ======================================================
 
@@ -244,3 +238,6 @@ The following validation notebooks are worth a look when validating your energy 
 3. Validation of `the power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
 
 4. Validation of `hydro <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb>`_, `solar and wind <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb>`_ potentials.
+
+
+.. include:: ./how_to_docs.rst

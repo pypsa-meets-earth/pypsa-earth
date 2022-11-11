@@ -1,0 +1,7 @@
+,Unit,Values,Description
+options,,,
+-- add_to_snakemake,,true or false,Add rule to Snakefile or not
+-- samples,,"int** read description!", "Defines the number of total sample networks that will be later optimized. if orthogonal latin hypercube sampling is applied (default option in scripts), then a prime number, that is not a quadrat of a prime, needs to be chosen. E.g. 7 not 9 (3^2)"
+-- sampling_strategy,,"Any subset of {""pydoe2"", ""chaospy"", ""scipy""}",Current supported packages to create an experimental design
+pypsa_standard,,,
+-- <any pypsa.object syntax>,MW/MWh,"[l_bound, u_bound] or empty []","`Key` is a dynamic PyPSA object that allows to access any pypsa object such as `loads_t.p_set` or the max. wind generation per hour `generators_t.p_max_pu.loc[:, n.generators.carrier == ""wind""]`. `Values` or bounds are multiplication for each object."
