@@ -28,7 +28,7 @@ dependencies:
 - lxml
 - numpy
 - pandas
-- geopandas
+- geopandas>=0.11.0
 - fiona!=1.8.22
 - xarray
 - netcdf4

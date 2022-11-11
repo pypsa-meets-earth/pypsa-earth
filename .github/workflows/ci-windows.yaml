@@ -63,9 +63,13 @@ jobs:
       run: |
         conda list
 
+    - name: Create test configs
+      run: |
+        snakemake --cores all build_test_configs
+
     - name: Test tutorial workflow
       run: |
-        cp config.tutorial.yaml config.yaml
+        cp test/tmp/config.tutorial_noprogress_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks
 
       # - name: Test plotting and summaries
