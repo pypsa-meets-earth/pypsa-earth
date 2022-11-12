@@ -15,10 +15,9 @@ To properly model any region of the Earth, PyPSA-Earth needs to download and fet
 This section explains how to perform this data management.
 
 How to build the tutorial model?
--------------------------------------------------
+--------------------------------
 
-The user can explore the majority of the model's functions on a local machine by running the tutorial,
-which uses fewer computational resources than the entire model does. A tutorial data kit was developed to facilitate exploring the model.
+The user can explore the majority of the model's functions on a local machine by running the tutorial, which uses fewer computational resources than the entire model does. A tutorial data kit was developed to facilitate exploring the model.
 You can build it using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`).
 To do that, you may want to do a reserve copy of your current configuration file and then overwrite it by a tutorial configuration:
 
@@ -40,7 +39,7 @@ It's recommended to set `retrieve_databundle: true` when building the model for 
 When the first run is completed and all the necessary data are extracted, it may be a good idea to set `retrieve_databundle: false` to avoid data loss.
 
 How to run the model?
--------------------------------------------------
+---------------------
 
 After configuration set-up, the model is ready to be built and run.
 Before to actually run the workflow you may check how it will look by using `--dryrun` or `-n` Snakemake option:

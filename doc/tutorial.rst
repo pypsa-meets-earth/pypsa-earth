@@ -11,7 +11,7 @@ Tutorial
 ##########################################
 
 How to customise PyPSA-Earth?
-======================================================
+=============================
 
 The model can be adapted to include any country, even multiple countries (e.g. Nigeria and Benin) or continents
 (Currently `Africa` work as a whole continent). Several countries have not been tested yet and might not run smoothly at first:
@@ -91,7 +91,7 @@ Be mindful that we only noted major changes to the provided default configuratio
 There are many more configuration options beyond what is adapted for the tutorial!
 
 How to execute different parts of the workflow?
-======================================================
+===============================================
 
 Snakemake is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur.
 Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
@@ -123,12 +123,12 @@ Solar profile for the requested area may be calculated using the output name:
 
 
 How to use PyPSA-Earth for your energy problem?
-======================================================
+===============================================
 
 PyPSA-Earth mostly relies on the :ref:`global datasets <data_workflow>` and can be tailored to represent any part of the world in a few steps. The following procedure is recommended.
 
 1. Adjust the model configuration
-----------------------------------------------
+---------------------------------
 
 The main parameters needed to customize the inputs for your national-specific data are defined in the :ref:`configuration <config>` file `config.yaml`. The configuration settings should be adjusted according to a particular problem you are intended to model. The main regional-dependent parameters are:
 
@@ -147,7 +147,7 @@ It could be helpful to keep in mind the following points:
 3. the cutout time dimension, the weather year used for demand modeling and the actual snapshot should match.
 
 2. Build the custom cutout
-----------------------------------------------
+--------------------------
 
 The cutout is the main concept of climate data management in PyPSA ecosystem introduced in `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since such datasets are typically global and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing concepts are contained in `JOSS paper <https://joss.theoj.org/papers/10.21105/joss.03294>`_.
 
@@ -173,7 +173,7 @@ There is also option to set the cutout extent specifying `x` and `y` values dire
 The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
 
 3. Build a natura.tiff raster
-----------------------------------------------
+-----------------------------
 
 A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
 
@@ -183,14 +183,14 @@ A raster file `natura.tiff` is used to store shapes of the protected and reserve
 A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. Currently this raster is valid for Africa, global `natura.tiff` raster is under development. You may generate the `natura.tiff` for a region of interest using `build_natura_raster` rule which aggregates data on protected areas along the cutout extent.
 
 How to validate?
-======================================================
+================
 
 .. TODO add a list of actions needed to do the validation
 
 To validate the data obtained with PyPSA-Earth, we recommend to go through the procedure here detailed. An exampled of the validation procedure is available in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook. Public information on the power system of Nigeria are compared to those obtained from the PyPSA-Earth model.
 
 Simulation procedure
-----------------------------------------------
+--------------------
 
 It may be recommended to check the following quantities the validation:
 
@@ -209,7 +209,7 @@ It may be recommended to check the following quantities the validation:
     #. energy mix.
 
 Where to look for reference data
-----------------------------------------------
+--------------------------------
  
 Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exhaustive list of helpful sources:
 
@@ -227,7 +227,7 @@ Data availability for many parts of the world is still quite limited. Usually th
 
 
 Advanced validation examples
-----------------------------------------------
+----------------------------
 
 The following validation notebooks are worth a look when validating your energy model:
 
