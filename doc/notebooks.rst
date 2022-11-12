@@ -9,7 +9,7 @@ Notebooks
 ===================================
 
 In order to familiarize with the code or investigate the input and outputs of
-the rules, a ``notebooks`` folder,as part of the `documentation repository <https://github.com/pypsa-meets-earth/documentation>`_ has been provided.
+the rules, a ``notebooks`` folder, as part of the `documentation repository <https://github.com/pypsa-meets-earth/documentation>`_ has been provided.
 In order to work with these notebooks, you need to set up the recommended folder structure for pypsa-earth:
 
 Start by creating a folder named pypsa-earth-project by executing the following line in the terminal:
