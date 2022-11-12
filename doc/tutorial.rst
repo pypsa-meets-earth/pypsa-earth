@@ -13,8 +13,13 @@ Tutorial
 How to customise PyPSA-Earth?
 =============================
 
-The model can be adapted to include any country, even multiple countries (e.g. Nigeria and Benin) or continents
-(Currently `Africa` work as a whole continent). Several countries have not been tested yet and might not run smoothly at first:
+A good starting point to customize your model are settings of the default configuration file `config.default`. You may want to do a reserve copy of your current configuration file and then overwrite it by a default configuration:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % cp config.default.yaml config.yaml
+
+The model can be adapted to include any country, multiple countries (e.g. Nigeria and Benin) or continents (currently `Africa` work as a whole continent) using `countries` argument:
 
 .. code:: yaml
 
