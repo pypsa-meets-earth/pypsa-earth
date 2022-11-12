@@ -5,7 +5,7 @@
 
 .. _notebooks:
 
-Notebooks
+Examples
 ===================================
 
 In order to familiarize with the code or investigate the input and outputs of

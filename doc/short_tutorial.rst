@@ -7,7 +7,7 @@
 
 
 ##########################################
-Short Tutorial
+Getting started
 ##########################################
 
 The installation procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it.
