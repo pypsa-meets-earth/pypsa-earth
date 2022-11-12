@@ -31,7 +31,7 @@ The cleaned OSM network data that are the output of the `osm_data_cleaning` rule
 
 The climate data processing is provided by `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. It extracts all the required whether and climate data to generate the time series of renewable potential by `generate_renewable_profiles` rule. The main data source on climate variables is `ERA5 reanalysis <https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.3803>`_.
 
-.. image:: img/era5.png
+.. image:: https://raw.githubusercontent.com/ekatef/assets/5bae4f10773d8787f8c8534deceff271a7e9b444/era5_cropped.png
     :height: 150 px
     :align: center
 
