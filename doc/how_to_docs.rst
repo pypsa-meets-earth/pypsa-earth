@@ -21,8 +21,8 @@ You can find an emotional speak by Eric `here <https://www.youtube.com/watch?v=U
 Structure and Syntax example
 -----------------------------
 
-The documentation is fully stored in our `doc` folder. You might note that most files are used as
-*reStructuredText* file or .rst which is very popular by coders when documentation matters.
+The documentation is fully stored in our `doc` folder. You might note that most files are used as *reStructuredText* file or .rst which is very popular by coders when documentation matters.
+
 You could differentiate between to elements:
 
 1. Non-automated doc elements. They simply make the text appealing. Example in `installation.rst` in our doc folder. To write these requires some knowledge on writing the text which is quite easy to learn having this `**cheat sheet** <https://github.com/DevDungeon/reStructuredText-Documentation-Reference#syntax-examples>`_ in close reach.
