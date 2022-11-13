@@ -33,6 +33,8 @@ We found three important files/file groups for the documentation:
 2. `The .py script` with the actual code documentation.
 3. `conf.py` with some useful information if something does not work.
 
+The images for documentation should be placed into `documentation <https://github.com/pypsa-meets-earth/documentation>`_ repository to the folder "doc/img". The content of the folder "documentation/doc/img/" is copied into "pypsa-earth/doc/img/" during building PyPSA-Earth documentation.
+
 Please, if you have problems with the documentation create an issue and let us know
 
 Compile the documentation locally
