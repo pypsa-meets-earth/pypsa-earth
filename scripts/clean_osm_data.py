@@ -109,6 +109,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_all["dc"] = False  # np.nan
     # Assuming substations completed for installed lines
     bus_all["under_construction"] = False
+    # TODO Wouldn't be better to keep "tag_area" integer?
     bus_all["tag_area"] = 0.0  # np.nan
     bus_all["symbol"] = "substation"
     # TODO: this tag may be improved, maybe depending on voltage levels
