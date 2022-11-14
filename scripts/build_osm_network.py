@@ -862,6 +862,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
                 "substation_lv": [True] * length,
             }
         )
+        # TODO Be aware of possible types coersion
         buses = gpd.GeoDataFrame(
             pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
             crs=buses.crs,
