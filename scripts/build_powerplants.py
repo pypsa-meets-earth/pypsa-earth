@@ -312,11 +312,21 @@ if __name__ == "__main__":
 
             point = Point(coords["lon"], coords["lat"])
 
+            bus_reg = gdf_co[gdf_co.contains(point)]["GADM_ID"]
+
+            if len(bus_reg) > 0:
+                bus_reg = gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            else:
+                bus_reg = pd.NA  
+
             # try:
-            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            #return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            return bus_reg
 
         ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
             lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
         )
+
+        ppl = ppl.loc[~pd.isnull(ppl.region_id)]
 
     ppl.to_csv(snakemake.output.powerplants)
