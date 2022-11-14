@@ -169,6 +169,8 @@ def countries(countries, geo_crs, update=False, out_logging=False):
     df_countries = df_countries[["GID_0", "geometry"]].copy()
     df_countries.rename(columns={"GID_0": "name"}, inplace=True)
 
+    df_countries = df_countries.query("name in @countries")
+
     # set index and simplify polygons
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
 
@@ -755,6 +757,8 @@ def gadm(
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
 
+
+    df_gadm = df_gadm.query("country in @countries")
     # drop useless columns
     df_gadm.drop(
         df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
