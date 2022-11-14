@@ -1,0 +1,3 @@
+The images for documentation should be placed into "documentation/doc/img".
+
+The content of the folder "documentation/doc/img/" is copied into "pypsa-earth/doc/img/" during building rst documentation
