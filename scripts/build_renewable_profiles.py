@@ -232,6 +232,7 @@ def get_eia_annual_hydro_generation(fn, countries):
     return df
 
 
+# TODO It makes sense to check if the country is included into hydro_capacities (India is not)
 def get_hydro_capacity_annual_hydro_generation(
     fn, countries, year_start=2000, year_end=2020
 ):
@@ -335,6 +336,12 @@ if __name__ == "__main__":
 
         hydro_ppls = ppls[ppls.carrier == "hydro"]
 
+        print("hydro_ppls.columns")
+        print(hydro_ppls.columns)
+
+        print(hydro_ppls.bus)
+        print(hydro_ppls.region_id)
+
         # commented out as rivers may span across multiple countries
         # hydrobasins = hydrobasins[
         #     [
@@ -388,6 +395,9 @@ if __name__ == "__main__":
                 normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
                     path_hydro_capacities, countries
                 ) * config.get("normalization_multiplier", 1.0)
+
+                print("normalize_using_yearly")
+                print(normalize_using_yearly)
 
             elif normalization == "eia":
                 path_eia_stats = snakemake.input.eia_hydro_generation
