@@ -40,7 +40,7 @@ rule prepare_sector_networks:
     input:
         expand(
             RDIR
-            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
             **config["scenario"],
             **config["costs"]
         ),
@@ -50,7 +50,7 @@ rule override_res_all_nets:
     input:
         expand(
             RDIR
-            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_presec.nc",
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
             **config["scenario"],
             **config["costs"]
         ),
