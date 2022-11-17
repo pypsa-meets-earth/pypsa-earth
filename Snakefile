@@ -28,6 +28,8 @@ configfile: "configs/bundle_config.yaml"
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
+
+
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
 config["scenario"]["unc"] = [

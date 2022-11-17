@@ -31,7 +31,7 @@ Upcoming Release
 
 * Moved from pycountry to country_converter `PR #493 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/493>`__
 
-* Fix workflow in order to solve the landlock countries bug  `PR #481 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__
+* Fix workflow in order to solve the landlock countries bug  `PR #481 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__ and `PR #517 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/517>`__
 
 PyPSA-Earth 0.1.0
 =================
