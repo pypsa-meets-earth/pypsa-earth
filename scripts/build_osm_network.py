@@ -832,11 +832,10 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     country_list = input
     bus_country_list = buses["country"].unique().tolist()
 
-
     # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
     # difference can't give negative values; the following will return only releant country names
-    no_data_countries = set(country_list).difference(set(bus_country_list))  
-          
+    no_data_countries = set(country_list).difference(set(bus_country_list))
+
     if len(no_data_countries) > 0:
 
         no_data_countries_shape = country_shapes[

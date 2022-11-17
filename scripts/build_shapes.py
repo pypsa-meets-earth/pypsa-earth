@@ -757,7 +757,6 @@ def gadm(
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
 
-
     df_gadm = df_gadm.query("country in @countries")
     # drop useless columns
     df_gadm.drop(
@@ -822,7 +821,7 @@ if __name__ == "__main__":
 
     # holes in geometry cause a lot of troubles along the workflow
     # shp.geometry = shp.apply(lambda row: make_valid(row.geometry) if not row.geometry.is_valid else row.geometry, axis=1)
-    # country_shapes = country_shapes.apply(lambda x: make_valid(x))    
+    # country_shapes = country_shapes.apply(lambda x: make_valid(x))
     country_shapes_valid = country_shapes.apply(
         lambda x: make_valid(x) if not x.is_valid else x
     )
@@ -850,5 +849,10 @@ if __name__ == "__main__":
         year,
         nprocesses=nprocesses,
     )
-    gadm_shapes.geometry = gadm_shapes.apply(lambda row: make_valid(row.geometry) if not row.geometry.is_valid else row.geometry, axis=1)
+    gadm_shapes.geometry = gadm_shapes.apply(
+        lambda row: make_valid(row.geometry)
+        if not row.geometry.is_valid
+        else row.geometry,
+        axis=1,
+    )
     save_to_geojson(gadm_shapes, out.gadm_shapes)

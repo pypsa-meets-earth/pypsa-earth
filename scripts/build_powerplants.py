@@ -317,10 +317,10 @@ if __name__ == "__main__":
             if len(bus_reg) > 0:
                 bus_reg = gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
             else:
-                bus_reg = pd.NA  
+                bus_reg = pd.NA
 
             # try:
-            #return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            # return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
             return bus_reg
 
         ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
