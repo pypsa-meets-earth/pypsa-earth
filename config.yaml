@@ -1,5 +1,5 @@
 logging_level: INFO
-tutorial: true
+tutorial: false
 
 results_dir: results/
 summary_dir: results/
@@ -17,7 +17,7 @@ scenario:
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
-  - "c1"
+  - "c1.0"
   opts:
   - "Co2L"
   sopts:
@@ -28,7 +28,7 @@ scenario:
 clustering_options:
   alternative_clustering: true
 
-countries: ['NG', 'BJ']
+countries: ['MA']
 
 export:
   export_h2: 10000000 # Yearly export demand in MWh
@@ -255,7 +255,16 @@ solving:
     max_iterations: 6
 
   solver:
-    name: cbc
+    name: gurobi
+    threads: 25
+    method: 2 # barrier
+    crossover: 0
+    BarConvTol: 1.e-6
+    Seed: 123
+    AggFill: 0
+    PreDual: 0
+    GURO_PAR_BARDENSETHRESH: 200
+    #FeasibilityTol: 1.e-6
 
   mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
 
