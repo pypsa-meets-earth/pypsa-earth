@@ -398,15 +398,16 @@ def add_biomass(n, costs):
     # TODO get biomass potentials dataset and enable spatially resolved potentials
     biomass_potentials = pd.read_csv(snakemake.input.biomass_potentials, index_col=0)
 
-    
     # if options["biomass_transport"]:
     #     biomass_potentials_spatial = biomass_potentials.rename(
     #         index=lambda x: x + " solid biomass"
     #     )
     # else:
     #     biomass_potentials_spatial = biomass_potentials.sum()
-    biomass_potentials_spatial = biomass_potentials.sum()/len(biomass_potentials)
-    print("Solid Biomass potentials are not spatially resolved, the dummy value is the average solid Biomass of European countries")
+    biomass_potentials_spatial = biomass_potentials.sum() / len(biomass_potentials)
+    print(
+        "Solid Biomass potentials are not spatially resolved, the dummy value is the average solid Biomass of European countries"
+    )
 
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
