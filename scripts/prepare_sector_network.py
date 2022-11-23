@@ -395,15 +395,18 @@ def add_biomass(n, costs):
 
     print("adding biomass")
 
-    # TODO get biomass potentials
+    # TODO get biomass potentials dataset and enable spatially resolved potentials
     biomass_potentials = pd.read_csv(snakemake.input.biomass_potentials, index_col=0)
 
-    if options["biomass_transport"]:
-        biomass_potentials_spatial = biomass_potentials.rename(
-            index=lambda x: x + " solid biomass"
-        )
-    else:
-        biomass_potentials_spatial = biomass_potentials.sum()
+    
+    # if options["biomass_transport"]:
+    #     biomass_potentials_spatial = biomass_potentials.rename(
+    #         index=lambda x: x + " solid biomass"
+    #     )
+    # else:
+    #     biomass_potentials_spatial = biomass_potentials.sum()
+    biomass_potentials_spatial = biomass_potentials.sum()/len(biomass_potentials)
+    print("Solid Biomass potentials are not spatially resolved, the dummy value is the average solid Biomass of European countries")
 
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
@@ -2005,12 +2008,12 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1",
+            ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
             discountrate="0.071",
-            demand="NZ",
+            demand="DF",
         )
 
     # TODO fetch from config
@@ -2121,7 +2124,7 @@ if __name__ == "__main__":
 
     add_gas(n, costs)
     add_generation(n, costs)
-    # add_biomass(n, costs)
+    add_biomass(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
