@@ -439,6 +439,7 @@ if __name__ == "__main__":
             solver_dir=tmpdir,
             solver_logfile=snakemake.log.solver,
         )
+        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
         n.export_to_netcdf(snakemake.output[0])
 
     logger.info("Maximum memory usage: {}".format(mem.mem_usage))

@@ -591,6 +591,7 @@ if __name__ == "__main__":
         )
 
     update_p_nom_max(clustering.network)
+    clustering.network.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     clustering.network.export_to_netcdf(snakemake.output.network)
     for attr in (
         "busmap",
