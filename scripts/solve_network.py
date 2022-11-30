@@ -410,7 +410,6 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "solve_network",
-            network="elec",
             simpl="",
             clusters="54",
             ll="copt",

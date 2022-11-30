@@ -230,7 +230,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "add_extra_components", network="elec", simpl="", clusters=10
+            "add_extra_components", simpl="", clusters=10
         )
     configure_logging(snakemake)
 
