@@ -306,6 +306,7 @@ def attach_load(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
 
+    regions = regions[regions["geometry"].astype(bool)]
     load_paths = load_paths
     # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
     gegis_load = xr.open_mfdataset(load_paths, combine="nested")
