@@ -165,7 +165,6 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "monte_carlo",
-            network="elec",
             simpl="",
             clusters="10",
             ll="copt",
