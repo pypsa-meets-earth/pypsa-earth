@@ -229,9 +229,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake(
-            "add_extra_components", network="elec", simpl="", clusters=10
-        )
+        snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
@@ -249,4 +247,5 @@ if __name__ == "__main__":
 
     add_nice_carrier_names(n, config=snakemake.config)
 
+    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
