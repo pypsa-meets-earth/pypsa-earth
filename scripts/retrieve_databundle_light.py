@@ -642,20 +642,36 @@ if __name__ == "__main__":
         Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence"
     )
 
+    logger.info(
+        "Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download)
+    )
+
     # download the selected bundles
     for b_name in bundles_to_download:
         host_list = config_bundles[b_name]["urls"]
+
+        downloaded_bundle = False
+
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-            # try:
-            download_and_unzip = globals()[f"download_and_unzip_{host}"]
-            if download_and_unzip(
-                config_bundles[b_name], rootpath, disable_progress=disable_progress
-            ):
-                break
-            # except KeyError:
-            #     logger.error(f"Function for {host} has not been defined")
 
+            logger.info(f"Downloading bundle {b_name} - Host {host}")
+
+            try:
+                download_and_unzip = globals()[f"download_and_unzip_{host}"]
+                if download_and_unzip(
+                    config_bundles[b_name], rootpath, disable_progress=disable_progress
+                ):
+                    downloaded_bundle = True
+            except Exception:
+                logger.warning(f"Error in downloading bundle {b_name} - host {host}")
+
+            if downloaded_bundle:
+                break
+        
+        if not downloaded_bundle:
+            logger.error(f"Bundle {b_name} cannot be downloaded")
+    
     logger.info(
         "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundles_to_download)
     )
