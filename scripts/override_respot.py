@@ -66,7 +66,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="113",
+            clusters="22",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -102,6 +102,6 @@ if __name__ == "__main__":
             n.loads_t.p_set.filter(like=country)[buses] = (
                 n.loads_t.p_set.filter(like=country)[buses]
                 / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
-            ) * energy_totals.loc[country, "electricity residential"]
+            ) * energy_totals.loc[country, "electricity residential"] * 1e9
 
     n.export_to_netcdf(snakemake.output[0])

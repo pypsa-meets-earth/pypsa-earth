@@ -108,21 +108,21 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
-rule add_export:
-    input:
-        overrides="data/override_component_attrs",
-        ports="data/ports.csv",
-        network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
-        shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
-        ),
-    output:
-        RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
-        # TODO output file name must be adjusted and integrated in workflow
-    script:
-        "scripts/add_export.py"
+#rule add_export:
+#    input:
+#        overrides="data/override_component_attrs",
+#        ports="data/ports.csv",
+#        network=RDIR
+#        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+#        shapes_path=pypsaearth(
+#            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+#        ),
+#    output:
+#        RDIR
+#        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
+#        # TODO output file name must be adjusted and integrated in workflow
+#    script:
+#        "scripts/add_export.py"
 
 
 rule override_respot:
@@ -345,7 +345,7 @@ rule solve_network:
         # network=RDIR
         # + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
         network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
     output:
         RDIR
@@ -516,7 +516,7 @@ if config["custom_data"].get("industry_demand", False) == True:
 
     rule build_industry_demand:  #custom data
         input:
-            industry_sector_ratios="data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
+            industry_sector_ratios="resources/custom_data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/custom_data/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             costs=CDIR
@@ -569,7 +569,7 @@ if config["custom_data"].get("industry_demand", False) == False:
 
     rule build_industry_demand:  #default data
         input:
-            industry_sector_ratios="data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
+            industry_sector_ratios="data/industry_sector_ratios.csv",
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             industrial_production_per_country="data/industrial_production_per_country.csv",
