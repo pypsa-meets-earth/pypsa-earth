@@ -30,59 +30,95 @@
 
 databundles:
   # tutorial bundle specific for Nigeria and Benin only
-  bundle_data_tutorial:
+  bundle_tutorial_NGBJ:
     countries: [NG, BJ]
     tutorial: true
     category: data
     destination: "data"
     urls:
       # zenodo: https://sandbox.zenodo.org/record/1016522/files/tutorial_data.zip?download=1
-      gdrive: https://drive.google.com/file/d/1iwtRY0iO5EKQucBGlEiBau3uBCQZJou3/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1yg1D5o7FN19ypICQKOuKgKbcGqrOmbia/view?usp=share_link
     output:
-    - data/costs.csv
-    - data/hydro_capacities.csv
-    - data/custom_powerplants.csv
-    - data/eez/eez_v11.gpkg
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/ssp2-2.6/2030/era5_2013/Africa.nc
-    - data/hydrobasins/hybas_world_lev04_v1c.shp
-    - data/hydrobasins/hybas_world_lev05_v1c.shp
+
+  # tutorial bundle specific for Botswana only
+  bundle_tutorial_BW:
+    countries: [BW]
+    tutorial: true
+    category: data
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/1yJ8JYGFVtMPpsEBeXzDR5Ixa9n8gGu5n/view?usp=share_link
+    output:
+    - data/gebco/GEBCO_2021_TID.nc
+    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+
+  # tutorial bundle specific for Morocco only
+  bundle_tutorial_MA:
+    countries: [MA]
+    tutorial: true
+    category: data
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/1Qjf0xVBuOSTKTPRD_NANruDDG94CF-Ju/view?usp=share_link
+    output:
+    - data/gebco/GEBCO_2021_TID.nc
+    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
   # tutorial bundle specific for Nigeria and Benin only
-  bundle_cutouts_tutorial:
+  bundle_cutouts_tutorial_NGBJ:
     countries: [NG, BJ]
     tutorial: true
     category: cutouts
     destination: "cutouts"
     urls:
       zenodo: https://sandbox.zenodo.org/record/1016015/files/tutorial_cutouts.zip?download=1
-      gdrive: https://drive.google.com/file/d/1Lro4X92sVuD30C0B3sQ2jJU37uZ50DWi/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1No_BNKRO4UODdR5rVtwkfZjfVGUQKJ_K/view?usp=share_link
     output: [cutouts/africa-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
 
-  # data bundle containing the data of the data folder common to all regions of the world
-  bundle_data_earth:
-    countries: [Earth]
+  # tutorial bundle specific for Botswana only
+  bundle_cutouts_tutorial_BW:
+    countries: [BW]
+    tutorial: true
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/19-vq48OKAeJ0C_1S8kx2HVQkCMGKzuTF/view?usp=share_link
+    output: [cutouts/africa-2013-era5-tutorial.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # tutorial bundle specific for Morocco only
+  bundle_cutouts_tutorial_ma:
+    countries: [MA]
+    tutorial: true
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/14mgef15MSwOTUxDtXcnPBJbC_M7zxalQ/view?usp=share_link
+    output: [cutouts/africa-2013-era5-tutorial.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+#tutorial bundle for all African countries
+  bundle_tutorial_data_common:
+    countries: [Africa]
+    tutorial: true
     category: common
     destination: "data"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
-      gdrive: https://drive.google.com/file/d/1MdZ4Eb80a2ntsBRBqWMC0Hodvu4e0jSm/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1yWxR7noWXZP74iRLqQGCatXssRGcuEc2/view?usp=share_link
     output:
     - data/costs.csv
     - data/hydro_capacities.csv
     - data/custom_powerplants.csv
-    - data/eia_hydro_annual_generation.csv
     - data/eez/eez_v11.gpkg
-    - data/gebco/GEBCO_2021_TID.nc
-    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/hydrobasins/hybas_world_lev04_v1c.shp
     - data/hydrobasins/hybas_world_lev05_v1c.shp
-    - data/hydrobasins/hybas_world_lev06_v1c.shp
-
 
   # resources bundle containing the resources folder for africa only
   bundle_natura_earth:
@@ -91,7 +127,7 @@ databundles:
     destination: "data"
     urls:
       # zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
-      gdrive: https://drive.google.com/file/d/1XkDG0ipLjXyrw__SauJlDOG1hZna1LTQ/view?usp=sharing
+      gdrive: https://drive.google.com/file/d/1WmAAwY0TAcHg8YZyAGof0bPewFacm7my/view?usp=share_link
     output:
     - data/natura.tiff
 

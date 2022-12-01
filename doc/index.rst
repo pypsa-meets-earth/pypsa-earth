@@ -110,7 +110,9 @@ Documentation
 
 * :doc:`introduction`
 * :doc:`installation`
+* :doc:`short_tutorial`
 * :doc:`tutorial`
+* :doc:`data_workflow`
 * :doc:`notebooks`
 
 .. toctree::
@@ -119,8 +121,10 @@ Documentation
    :caption: Getting Started
 
    introduction
-   installation
+   installation  
+   short_tutorial
    tutorial
+   data_workflow    
    notebooks
 
 **Configuration**
@@ -157,7 +161,6 @@ Documentation
 
 * :doc:`release_notes`
 * :doc:`how_to_contribute`
-* :doc:`how_to_docs`
 * :doc:`software_hints`
 * :doc:`learning_materials`
 * :doc:`project_structure_and_credits`
@@ -170,7 +173,6 @@ Documentation
 
    release_notes
    how_to_contribute
-   how_to_docs
    software_hints
    learning_materials
    project_structure_and_credits

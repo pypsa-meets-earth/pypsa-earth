@@ -5,9 +5,12 @@
 import os
 from pathlib import Path
 
+import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+
+REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 
 def sets_path_to_root(root_directory_name):
@@ -413,46 +416,6 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def get_country(target, **keys):
-    """
-    Function to convert country codes using pycountry
-
-    Parameters
-    ----------
-    target: str
-        Desired type of country code.
-        Examples:
-            - 'alpha_3' for 3-digit
-            - 'alpha_2' for 2-digit
-            - 'name' for full country name
-
-    keys: dict
-        Specification of the country name and reference system.
-        Examples:
-            - alpha_3="ZAF" for 3-digit
-            - alpha_2="ZA" for 2-digit
-            - name="South Africa" for full country name
-
-    Returns
-    -------
-    country code as requested in keys or np.nan, when country code is not recognized
-
-    Example of usage
-    -------
-    - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")
-    - Convert 3-digit code to 2-digit codes: get_country('alpha_2', alpha_3="ZAF")
-    - Convert 2-digit code to full name: get_country('name', alpha_2="ZA")
-
-    """
-    import pycountry as pyc
-
-    assert len(keys) == 1
-    try:
-        return getattr(pyc.countries.get(**keys), target)
-    except (KeyError, AttributeError):
-        return np.nan
-
-
 def getContinent(code):
     """
     Returns continent names that contains list of iso-code countries
@@ -501,10 +464,8 @@ def two_2_three_digits_country(two_code_country):
     """
     if two_code_country == "SN-GM":
         return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
-    if two_code_country == "XK":  # fix for kosovo
-        return "XKO"
 
-    three_code_country = get_country("alpha_3", alpha_2=two_code_country)
+    three_code_country = coco.convert(two_code_country, to="ISO3")
     return three_code_country
 
 
@@ -525,7 +486,7 @@ def three_2_two_digits_country(three_code_country):
     if three_code_country == "SEN-GMB":
         return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
 
-    two_code_country = get_country("alpha_2", alpha_3=three_code_country)
+    two_code_country = coco.convert(three_code_country, to="ISO2")
     return two_code_country
 
 
@@ -551,10 +512,8 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     """
     if two_code_country == "SN-GM":
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
-    if two_code_country == "XK":
-        return "Kosovo"
 
-    full_name = get_country("name", alpha_2=two_code_country)
+    full_name = coco.convert(two_code_country, to="name_short")
 
     if nocomma:
         # separate list by delim
@@ -597,7 +556,7 @@ def country_name_2_two_digits(country_name):
     ):
         return "SN-GM"
 
-    full_name = get_country("alpha_2", name=country_name)
+    full_name = coco.convert(country_name, to="ISO2")
     return full_name
 
 

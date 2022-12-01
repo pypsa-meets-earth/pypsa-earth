@@ -329,16 +329,16 @@ def _remove_dangling_branches(branches, buses):
 
 def _set_countries_and_substations(n):
 
-    buses = n.buses
-
     countries = snakemake.config["countries"]
     country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
         "geometry"
     ]
+
     offshore_shapes = unary_union(
         gpd.read_file(snakemake.input.offshore_shapes)["geometry"]
     )
 
+    buses = n.buses
     bus_locations = buses
     bus_locations = gpd.GeoDataFrame(
         bus_locations,
