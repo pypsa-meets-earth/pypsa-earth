@@ -443,7 +443,9 @@ def _check_disabled_by_opt(config_bundle, config_enable):
     return disabled_outs
 
 
-def get_best_bundles_by_category(country_list, category, config_bundles, tutorial, config_enable):
+def get_best_bundles_by_category(
+    country_list, category, config_bundles, tutorial, config_enable
+):
     """
         get_best_bundles_by_category(country_list, category, config_bundles, tutorial)
 
@@ -549,7 +551,7 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
 
     """
 
-        # categories of data to download
+    # categories of data to download
     categories = list(
         set([config_bundles[conf]["category"] for conf in config_bundles])
     )
@@ -579,13 +581,14 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
                     f"Multiple bundle data for category {cat}: "
                     + ", ".join(selection_bundles)
                 )
-    
+
     return bundles_to_download
+
 
 def datafiles_retrivedatabundle(config):
     """
-        Function to get the output files from the bundles,
-        given the target countries, tutorial settings, etc.
+    Function to get the output files from the bundles,
+    given the target countries, tutorial settings, etc.
     """
 
     tutorial = config["tutorial"]
@@ -593,18 +596,23 @@ def datafiles_retrivedatabundle(config):
     config_enable = config["enable"]
 
     config_bundles = load_databundle_config(config["databundles"])
-    
-    bundles_to_download = get_best_bundles(countries, config_bundles, tutorial, config_enable)
 
-    listoutputs = set([
-        inneroutput
-        for bundlename in bundles_to_download
-        for inneroutput in config["databundles"][bundlename]["output"]
-        if "*" not in inneroutput
-        or inneroutput.endswith("/")  # exclude directories
-    ])
+    bundles_to_download = get_best_bundles(
+        countries, config_bundles, tutorial, config_enable
+    )
+
+    listoutputs = set(
+        [
+            inneroutput
+            for bundlename in bundles_to_download
+            for inneroutput in config["databundles"][bundlename]["output"]
+            if "*" not in inneroutput
+            or inneroutput.endswith("/")  # exclude directories
+        ]
+    )
 
     return listoutputs
+
 
 if __name__ == "__main__":
 
@@ -631,8 +639,10 @@ if __name__ == "__main__":
     config_enable = snakemake.config["enable"]
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
-    
-    bundles_to_download = get_best_bundles(countries, config_bundles, tutorial, config_enable)
+
+    bundles_to_download = get_best_bundles(
+        countries, config_bundles, tutorial, config_enable
+    )
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
@@ -642,9 +652,7 @@ if __name__ == "__main__":
         Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence"
     )
 
-    logger.info(
-        "Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download)
-    )
+    logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
     # download the selected bundles
     for b_name in bundles_to_download:
@@ -668,10 +676,11 @@ if __name__ == "__main__":
 
             if downloaded_bundle:
                 break
-        
+
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
-    
+
     logger.info(
-        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundles_to_download)
+        "Bundle successfully loaded and unzipped:\n\t"
+        + "\n\t".join(bundles_to_download)
     )
