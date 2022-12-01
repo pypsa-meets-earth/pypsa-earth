@@ -601,7 +601,7 @@ def datafiles_retrivedatabundle(config):
         countries, config_bundles, tutorial, config_enable
     )
 
-    listoutputs = set(
+    listoutputs = list(set(
         [
             inneroutput
             for bundlename in bundles_to_download
@@ -609,7 +609,7 @@ def datafiles_retrivedatabundle(config):
             if "*" not in inneroutput
             or inneroutput.endswith("/")  # exclude directories
         ]
-    )
+    ))
 
     return listoutputs
 
