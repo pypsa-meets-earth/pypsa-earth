@@ -513,7 +513,8 @@ if __name__ == "__main__":
         centre_of_mass = []
         for bus in buses:
             row = layoutmatrix.sel(bus=bus).data
-            nz_b = row != 0
+            # nz_b = row != 0
+            nz_b = (row != 0) & (~pd.isnull(row))
             row = row[nz_b]
             co = coords[nz_b]
             distances = haversine(bus_coords.loc[bus], co)
