@@ -297,7 +297,7 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(paths["cutout"])
     regions = gpd.read_file(paths.regions)  # .set_index("name").rename_axis("bus")
 
-    regions = regions[regions["geometry"].astype(bool)]    
+    regions = regions[regions["geometry"].astype(bool)]
 
     assert not regions.empty, (
         f"List of regions in {snakemake.input.regions} is empty, please "
