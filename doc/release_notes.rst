@@ -35,6 +35,8 @@ Upcoming Release
 
 * Add meta data of config to pypsa network per default. Allows keeping track of the config used to generate the network `PR #526 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/526>`__
 
+* Adapt dependencies of powerplantmatching to the PyPSA main branch `PR #527 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/527>`__
+
 PyPSA-Earth 0.1.0
 =================
 
