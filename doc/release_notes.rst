@@ -33,6 +33,8 @@ Upcoming Release
 
 * Fix workflow in order to solve the landlock countries bug  `PR #481 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__
 
+* Fix renewable profiles generation for possible data loss in ERA5-derived cutouts `PR #511 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/511>`__
+
 PyPSA-Earth 0.1.0
 =================
 
