@@ -383,6 +383,7 @@ rule add_electricity:
         **{
             f"profile_{tech}": f"resources/renewable_profiles/profile_{tech}.nc"
             for tech in config["renewable"]
+            if tech in config["electricity"]["renewable_carriers"]
         },
         **{
             f"conventional_{carrier}_{attr}": fn
@@ -713,12 +714,14 @@ rule build_test_configs:
     input:
         base_config="config.tutorial.yaml",
         update_file_list=[
+            "test/config.tutorial_noprogress.yaml",
             "test/config.custom.yaml",
             "test/config.monte_carlo.yaml",
             "test/config.landlock.yaml",
         ],
     output:
         tmp_test_configs=[
+            "test/tmp/config.tutorial_noprogress_tmp.yaml",
             "test/tmp/config.custom_tmp.yaml",
             "test/tmp/config.monte_carlo_tmp.yaml",
             "test/tmp/config.landlock_tmp.yaml",
