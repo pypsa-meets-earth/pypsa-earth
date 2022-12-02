@@ -502,4 +502,5 @@ if __name__ == "__main__":
     _set_links_underwater_fraction(n)
 
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
+    n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])

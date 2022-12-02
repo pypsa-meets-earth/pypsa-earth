@@ -502,7 +502,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("simplify_network", simpl="", network="elec")
+        snakemake = mock_snakemake("simplify_network", simpl="")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
@@ -547,6 +547,7 @@ if __name__ == "__main__":
 
     update_p_nom_max(n)
 
+    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
 
     busmap_s = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
