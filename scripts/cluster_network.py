@@ -400,7 +400,9 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            ["country"], #, "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
+            [
+                "country"
+            ],  # , "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
             # ["country"],
             group_keys=False,
         )
