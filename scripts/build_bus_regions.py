@@ -263,9 +263,9 @@ if __name__ == "__main__":
     ).dropna(axis="index", subset=["geometry"])
 
     # sometimes Voronoi partition may give empty polygons
-    onshore_regions = pd.concat([onshore_regions[~onshore_regions.is_empty]], ignore_index=True).to_file(
-        snakemake.output.regions_onshore
-    )
+    onshore_regions = pd.concat(
+        [onshore_regions[~onshore_regions.is_empty]], ignore_index=True
+    ).to_file(snakemake.output.regions_onshore)
 
     if offshore_regions:
         # if a offshore_regions exists excute below
