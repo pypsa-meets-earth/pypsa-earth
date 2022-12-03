@@ -263,6 +263,7 @@ def get_hydro_capacity_annual_hydro_generation(
 
     return normalize_using_yearly
 
+
 def check_cutout_completness(cf):
     """
     Check if a cutout contains missed values. 
@@ -278,6 +279,7 @@ def check_cutout_completness(cf):
             f"A provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
         )
     return share_missed_cells
+
 
 def estimate_busses_data_loss(data_column):
     """
@@ -297,6 +299,7 @@ def estimate_busses_data_loss(data_column):
             f"Missed cutout cells have resulted in data loss:\r\n for {tech} {share_missed_buses:2.1f}% buses overall {recommend_msg}"
         )
     return share_missed_buses            
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
