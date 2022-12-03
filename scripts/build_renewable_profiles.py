@@ -279,6 +279,24 @@ def check_cutout_completness(cf):
         )
     return share_missed_cells
 
+def estimate_busses_data_loss(data_column):
+    """
+    Calculated share of buses with data loss due to flaws in the cutout data.
+    Returns share of the buses with missed data
+    """
+    n_weights_initial = len(data_column)
+    n_lost_weights = pd.isnull(data_column).sum()
+    share_missed_buses = 100 * (n_lost_weights / n_weights_initial)
+    if share_missed_buses >= 30:
+        recommend_msg = "\r\nYou may want to re-generate the cutout"
+    else:
+        recommend_msg = ""
+
+    if n_lost_weights > 0:
+        logger.warning(
+            f"Missed cutout cells have resulted in data loss:\r\n for {tech} {share_missed_buses:2.1f}% buses overall {recommend_msg}"
+        )
+    return share_missed_buses            
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
