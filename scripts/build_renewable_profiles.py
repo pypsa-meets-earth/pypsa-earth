@@ -571,8 +571,10 @@ if __name__ == "__main__":
             ]
         )
 
-        if n_cells_lost > 0: 
-            estimate_busses_loss(data_column = ds.weight, tech = snakemake.wildcards.technology)
+        if n_cells_lost > 0:
+            estimate_busses_loss(
+                data_column=ds.weight, tech=snakemake.wildcards.technology
+            )
 
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
