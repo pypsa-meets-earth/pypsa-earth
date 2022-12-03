@@ -263,6 +263,22 @@ def get_hydro_capacity_annual_hydro_generation(
 
     return normalize_using_yearly
 
+def check_cutout_completness(cf):
+    """
+    Check if a cutout contains missed values. 
+    That may be the case due to some issues witht accessibility of ERA5 data
+    See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
+    Returns share of cutout cells with missed data
+    """
+    n_missed_cells = pd.isnull(cf).sum()
+    n_cells = len(np.ndarray.flatten(cf.data))
+    share_missed_cells = 100 * (n_missed_cells / n_cells)   
+    if share_missed_cells > 0:
+        logger.warning(
+            f"A provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
+        )
+    return share_missed_cells
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -483,15 +499,8 @@ if __name__ == "__main__":
         capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
-        # CDS-extracted ERA5 data sometimes may contain missed values
-        # https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
-        n_missed_cells = pd.isnull(capacity_factor).sum()
-        n_cells = len(np.ndarray.flatten(capacity_factor.data))
-        share_missed_cells = 100 * (n_missed_cells / n_cells)
-        if share_missed_cells > 0:
-            logger.warning(
-                f"The provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
-            )
+        is_data_loss = check_cutout_completness(capacity_factor) 
+
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
             layout=layout,
