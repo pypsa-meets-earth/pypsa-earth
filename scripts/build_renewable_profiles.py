@@ -281,7 +281,7 @@ def check_cutout_completness(cf):
     return share_missed_cells
 
 
-def estimate_busses_data_loss(data_column):
+def estimate_busses_loss(data_column):
     """
     Calculated share of buses with data loss due to flaws in the cutout data.
     Returns share of the buses with missed data
@@ -574,7 +574,7 @@ if __name__ == "__main__":
         )
 
         if is_data_loss > 0: 
-            estimate_busses_data_loss(data_column = ds.weight)
+            estimate_busses_loss(data_column = ds.weight)
 
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
