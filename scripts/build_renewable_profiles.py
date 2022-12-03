@@ -301,7 +301,6 @@ def estimate_busses_loss(data_column):
     return share_missed_buses
 
 
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -574,8 +573,8 @@ if __name__ == "__main__":
             ]
         )
 
-        if is_data_loss > 0: 
-            estimate_busses_loss(data_column = ds.weight)
+        if is_data_loss > 0:
+            estimate_busses_loss(data_column=ds.weight)
 
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
