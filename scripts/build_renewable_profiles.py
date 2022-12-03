@@ -266,14 +266,14 @@ def get_hydro_capacity_annual_hydro_generation(
 
 def check_cutout_completness(cf):
     """
-    Check if a cutout contains missed values. 
+    Check if a cutout contains missed values.
     That may be the case due to some issues witht accessibility of ERA5 data
     See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
     Returns share of cutout cells with missed data
     """
     n_missed_cells = pd.isnull(cf).sum()
     n_cells = len(np.ndarray.flatten(cf.data))
-    share_missed_cells = 100 * (n_missed_cells / n_cells)   
+    share_missed_cells = 100 * (n_missed_cells / n_cells)
     if share_missed_cells > 0:
         logger.warning(
             f"A provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
@@ -298,7 +298,8 @@ def estimate_busses_loss(data_column):
         logger.warning(
             f"Missed cutout cells have resulted in data loss:\r\n for {tech} {share_missed_buses:2.1f}% buses overall {recommend_msg}"
         )
-    return share_missed_buses            
+    return share_missed_buses
+
 
 
 if __name__ == "__main__":
@@ -520,7 +521,7 @@ if __name__ == "__main__":
         capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
-        is_data_loss = check_cutout_completness(capacity_factor) 
+        is_data_loss = check_cutout_completness(capacity_factor)
 
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
