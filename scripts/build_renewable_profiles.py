@@ -570,8 +570,8 @@ if __name__ == "__main__":
             ]
         )
 
-        n_weights_initial = len(ds.weight)
-        n_lost_weights = pd.isnull(ds.weight).sum()
+        if is_data_loss > 0: 
+            estimate_busses_data_loss(data_column = ds.weight)
 
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
@@ -597,18 +597,4 @@ if __name__ == "__main__":
             min_p_max_pu = config["clip_p_max_pu"]
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
-        n_weights_clean = len(ds.weight)
-
-        share_missed_weights = 100 * (n_lost_weights / n_weights_initial)
-        share_missed_weights2 = 100 * (n_lost_weights / n_weights_clean)
-
-        if share_missed_weights2 >= 30:
-            recommend_msg = "\r\nYou may want to re-generate the cutout"
-        else:
-            recommend_msg = ""
-
-        if n_lost_weights > 0:
-            logger.warning(
-                f"Missed cutout data have resulted in data loss:\r\n for {tech} {share_missed_weights:2.1f}% buses overall and {share_missed_weights2:2.1f}% of buses with non-zero capacities {recommend_msg}"
-            )
         ds.to_netcdf(snakemake.output.profile)
