@@ -518,7 +518,7 @@ if __name__ == "__main__":
         capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
-        is_data_loss = check_cutout_completness(capacity_factor)
+        n_cells_lost = check_cutout_completness(capacity_factor)
 
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
@@ -571,7 +571,7 @@ if __name__ == "__main__":
             ]
         )
 
-        if is_data_loss > 0: 
+        if n_cells_lost > 0: 
             estimate_busses_loss(data_column = ds.weight, tech = snakemake.wildcards.technology)
 
         if snakemake.wildcards.technology.startswith("offwind"):
