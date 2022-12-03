@@ -301,7 +301,6 @@ def estimate_busses_loss(data_column, tech):
     return share_missed_buses
 
 
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
