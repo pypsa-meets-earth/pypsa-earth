@@ -281,7 +281,7 @@ def check_cutout_completness(cf):
     return share_missed_cells
 
 
-def estimate_busses_loss(data_column, tech):
+def estimate_bus_loss(data_column, tech):
     """
     Calculated share of buses with data loss due to flaws in the cutout data.
     Returns share of the buses with missed data
@@ -572,7 +572,7 @@ if __name__ == "__main__":
         )
 
         if n_cells_lost > 0:
-            estimate_busses_loss(
+            estimate_bus_loss(
                 data_column=ds.weight, tech=snakemake.wildcards.technology
             )
 
