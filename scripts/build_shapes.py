@@ -846,5 +846,5 @@ if __name__ == "__main__":
         if not row.geometry.is_valid
         else row.geometry,
         axis=1,
-    )    
+    )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
