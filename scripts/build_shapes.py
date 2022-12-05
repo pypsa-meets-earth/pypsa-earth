@@ -812,7 +812,11 @@ if __name__ == "__main__":
 
     country_shapes = countries(countries_list, geo_crs, update, out_logging)
 
-    country_shapes.reset_index().to_file(snakemake.output.country_shapes)
+    # there may be holes in geometry which cause a lot of troubles along the workflow
+    country_shapes_valid = country_shapes.apply(
+        lambda x: make_valid(x) if not x.is_valid else x
+    )
+    country_shapes_valid.reset_index().to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
@@ -836,4 +840,10 @@ if __name__ == "__main__":
         year,
         nprocesses=nprocesses,
     )
+    gadm_shapes.geometry = gadm_shapes.apply(
+        lambda row: make_valid(row.geometry)
+        if not row.geometry.is_valid
+        else row.geometry,
+        axis=1,
+    )    
     save_to_geojson(gadm_shapes, out.gadm_shapes)
