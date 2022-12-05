@@ -812,7 +812,8 @@ if __name__ == "__main__":
 
     country_shapes = countries(countries_list, geo_crs, update, out_logging)
 
-    # there may be holes in geometry which cause a lot of troubles along the workflow
+    # there may be "holes" in the countries geometry which cause troubles along the workflow
+    # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
     country_shapes_valid = country_shapes.apply(
         lambda x: make_valid(x) if not x.is_valid else x
     )
