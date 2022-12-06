@@ -24,6 +24,7 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
+    country_name_2_two_digits,
 )
 from rasterio.mask import mask
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
