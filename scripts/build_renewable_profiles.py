@@ -264,6 +264,43 @@ def get_hydro_capacity_annual_hydro_generation(
     return normalize_using_yearly
 
 
+def check_cutout_completness(cf):
+    """
+    Check if a cutout contains missed values.
+    That may be the case due to some issues witht accessibility of ERA5 data
+    See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
+    Returns share of cutout cells with missed data
+    """
+    n_missed_cells = pd.isnull(cf).sum()
+    n_cells = len(np.ndarray.flatten(cf.data))
+    share_missed_cells = 100 * (n_missed_cells / n_cells)
+    if share_missed_cells > 0:
+        logger.warning(
+            f"A provided cutout contains missed data:\r\n content of {share_missed_cells:2.1f}% all cutout cells is lost"
+        )
+    return share_missed_cells
+
+
+def estimate_bus_loss(data_column, tech):
+    """
+    Calculated share of buses with data loss due to flaws in the cutout data.
+    Returns share of the buses with missed data
+    """
+    n_weights_initial = len(data_column)
+    n_lost_weights = pd.isnull(data_column).sum()
+    share_missed_buses = 100 * (n_lost_weights / n_weights_initial)
+    if share_missed_buses >= 30:
+        recommend_msg = "\r\nYou may want to re-generate the cutout"
+    else:
+        recommend_msg = ""
+
+    if n_lost_weights > 0:
+        logger.warning(
+            f"Missed cutout cells have resulted in data loss:\r\n for {tech} {share_missed_buses:2.1f}% buses overall {recommend_msg}"
+        )
+    return share_missed_buses
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -481,6 +518,8 @@ if __name__ == "__main__":
         capacity_factor = correction_factor * func(capacity_factor=True, **resource)
         layout = capacity_factor * area * capacity_per_sqkm
 
+        n_cells_lost = check_cutout_completness(capacity_factor)
+
         profile, capacities = func(
             matrix=availability.stack(spatial=["y", "x"]),
             layout=layout,
@@ -512,7 +551,7 @@ if __name__ == "__main__":
         centre_of_mass = []
         for bus in buses:
             row = layoutmatrix.sel(bus=bus).data
-            nz_b = row != 0
+            nz_b = (row != 0) & (~pd.isnull(row))
             row = row[nz_b]
             co = coords[nz_b]
             distances = haversine(bus_coords.loc[bus], co)
@@ -531,6 +570,11 @@ if __name__ == "__main__":
                 average_distance.rename("average_distance"),
             ]
         )
+
+        if n_cells_lost > 0:
+            estimate_bus_loss(
+                data_column=ds.weight, tech=snakemake.wildcards.technology
+            )
 
         if snakemake.wildcards.technology.startswith("offwind"):
             logger.info("Calculate underwater fraction of connections.")
