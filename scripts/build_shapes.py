@@ -126,6 +126,12 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
         ]
 
+        # GID_0 may have some exotic values, "COUNTRY" column may be used instead
+        geodf_temp["GID_0"] = geodf_temp.apply(
+            lambda x: restore_country_code_by_name(x, country_code=country_code), 
+            axis=1
+        )          
+        
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
