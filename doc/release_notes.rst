@@ -37,6 +37,8 @@ Upcoming Release
 
 * Fix renewable profiles generation for possible data loss in ERA5-derived cutouts `PR #511 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/511>`__
 
+* Adapt dependencies of powerplantmatching to the PyPSA main branch `PR #527 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/527>`__
+
 PyPSA-Earth 0.1.0
 =================
 

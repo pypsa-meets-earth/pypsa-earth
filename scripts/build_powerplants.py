@@ -265,8 +265,15 @@ if __name__ == "__main__":
             os.getcwd(), filepath_osm2pm_ppl
         )
 
+    # specify the main query for filtering powerplants
+    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
+    if isinstance(ppl_query, str):
+        config["main_query"] = ppl_query
+    else:
+        config["main_query"] = ""
+
     ppl = (
-        pm.powerplants(from_url=False, update=True, config=config)
+        pm.powerplants(from_url=False, update=True, config_update=config)
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
         .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
@@ -276,10 +283,6 @@ if __name__ == "__main__":
             Country=lambda df: df.Country.map(lambda x: country_mapping[x]),
         )
     )
-
-    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
-    if isinstance(ppl_query, str):
-        ppl.query(ppl_query, inplace=True)
 
     ppl = add_custom_powerplants(ppl)  # add carriers from own powerplant files
 
