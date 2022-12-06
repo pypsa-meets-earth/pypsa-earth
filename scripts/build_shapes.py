@@ -132,6 +132,9 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             axis=1
         )          
         
+        # "not found" hardcoded according to country_converter conventions
+        geodf_temp.drop(geodf_temp[geodf_temp["GID_0"] == "not found"].index, inplace=True)
+
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
