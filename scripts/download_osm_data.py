@@ -693,7 +693,7 @@ def create_country_list(input, iso_coding=True):
         full_codes_list.extend(codes_list)
 
     # Removing duplicates and filter outputs by coding
-    full_codes_list = filter_codes(set(full_codes_list), iso_coding=iso_coding)
+    full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
 
     return full_codes_list
 
