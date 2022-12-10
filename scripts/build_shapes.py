@@ -20,11 +20,11 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
-    country_name_2_two_digits,
 )
 from rasterio.mask import mask
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
@@ -81,11 +81,13 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     return GADM_inputfile_gpkg, GADM_filename
 
+
 def restore_country_code_by_name(row, country_code):
     if row["GID_0"] != country_code:
-         return country_name_2_two_digits(row["COUNTRY"])
+        return country_name_2_two_digits(row["COUNTRY"])
     else:
-        return row["GID_0"]   
+        return row["GID_0"]
+
 
 def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
     """
@@ -128,12 +130,13 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
 
         # GID_0 may have some exotic values, "COUNTRY" column may be used instead
         geodf_temp["GID_0"] = geodf_temp.apply(
-            lambda x: restore_country_code_by_name(x, country_code=country_code), 
-            axis=1
-        )          
-        
+            lambda x: restore_country_code_by_name(x, country_code=country_code), axis=1
+        )
+
         # "not found" hardcoded according to country_converter conventions
-        geodf_temp.drop(geodf_temp[geodf_temp["GID_0"] == "not found"].index, inplace=True)
+        geodf_temp.drop(
+            geodf_temp[geodf_temp["GID_0"] == "not found"].index, inplace=True
+        )
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
