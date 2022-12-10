@@ -76,6 +76,9 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     import numpy as np
     from scipy.spatial import Voronoi
     from shapely.geometry import Point, Polygon
+    from shapely.ops import unary_union
+
+    outline = unary_union(outline)
 
     points = np.asarray(points)
 
