@@ -76,11 +76,10 @@ dependencies:
 - gurobi
 
 - pip:
-  # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
+  - git+https://github.com/pypsa/pypsa.git#egg=pypsa
   - git+https://github.com/PyPSA/powerplantmatching.git@master
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/davide-f/atlite.git@master
-  - git+https://github.com/ekatef/PyPSA.git@master
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf
