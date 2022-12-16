@@ -39,7 +39,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="730H",
             discountrate=0.069,
-            demand='NZ'
+            demand="NZ",
         )
 
     n0 = pypsa.Network(snakemake.input.network)

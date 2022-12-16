@@ -100,8 +100,12 @@ if __name__ == "__main__":
         for country in countries:
 
             n.loads_t.p_set.filter(like=country)[buses] = (
-                n.loads_t.p_set.filter(like=country)[buses]
-                / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
-            ) * energy_totals.loc[country, "electricity residential"] * 1e9
+                (
+                    n.loads_t.p_set.filter(like=country)[buses]
+                    / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
+                )
+                * energy_totals.loc[country, "electricity residential"]
+                * 1e9
+            )
 
     n.export_to_netcdf(snakemake.output[0])
