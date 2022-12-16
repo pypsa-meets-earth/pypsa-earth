@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: runname_test_new_gadm7
+run: runname
 
 foresight: overnight
 
@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 117
+  - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -21,12 +21,12 @@ scenario:
   opts:
   - "Co2L"
   sopts:
-  - "730H"
+  - "144H"
   demand:
-  - "NZ"
+  - "DF"
 
 clustering_options:
-  alternative_clustering: false
+  alternative_clustering: true
 
 countries: ['MA']
 
@@ -34,14 +34,14 @@ export:
   export_h2: 10000000 # Yearly export demand in MWh
 
 custom_data:
-  renewables: ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
-  elec_demand: true
-  industry_demand: true
+  renewables: [] # ['csp', 'rooftop-solar', 'solar']
+  elec_demand: false
+  industry_demand: false
 
 costs:
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
-  discountrate: [0.069] #, 0.071, 0.111]
+  discountrate: [0.071] #, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532
 
@@ -62,8 +62,9 @@ costs:
   lines:
     length_factor: 1.25 #to estimate offwind connection costs
 
+
 industry:
-  St_primary_fraction: 0.90 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
+  St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
     # 2020: 0.6
     # 2025: 0.55
     # 2030: 0.5
@@ -154,7 +155,7 @@ sector:
     central: 180
   boilers: true
   oil_boilers: false
-  chp: false
+  chp: true
   micro_chp: false
   solar_thermal: true
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
@@ -190,7 +191,7 @@ sector:
     BU_2050: 0.00
     AP_2050: 0.06
     NZ_2050: 0.28
-    DF_2050: 0.05
+    DF_2050: 0.08
 
   land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
     BU_2030: 0.00
@@ -200,7 +201,7 @@ sector:
     BU_2050: 0.00
     AP_2050: 0.42
     NZ_2050: 0.68
-    DF_2050: 0.15
+    DF_2050: 0.011
 
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
@@ -208,15 +209,16 @@ sector:
   hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
-  shipping_hydrogen_share:
+
+  shipping_hydrogen_share: #1.0
     BU_2030: 0.00
     AP_2030: 0.00
     NZ_2030: 0.10
-    DF_2030: 0.10
+    DF_2030: 0.05
     BU_2050: 0.00
     AP_2050: 0.25
     NZ_2050: 0.36
-    DF_2050: 0.36
+    DF_2050: 0.12
 
   gadm_level: 2
   h2_cavern: true
@@ -224,7 +226,7 @@ sector:
   methanation: true
   helmeth: true
   dac: true
-  SMR: false
+  SMR: true
   cc_fraction: 0.9
 
   conventional_generation: # generator : carrier
@@ -265,12 +267,6 @@ solving:
     GURO_PAR_BARDENSETHRESH: 200
     #FeasibilityTol: 1.e-6
 
-    #name: cplex
-    #threads: 4
-    #lpmethod: 4 # barrier
-    #solutiontype: 2 # non basic solution, ie no crossover
-    #barrier_convergetol: 1.e-5
-    #feasopt_tolerance: 1.e-6
   mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
 
 plotting:
@@ -332,10 +328,8 @@ plotting:
     process emissions CC: "gray"
     CO2 pipeline: "gray"
     onwind: "dodgerblue"
-    onwind2: "dodgerblue"
     onshore wind: "#235ebc"
     offwind: "#6895dd"
-    offwind2: "#6895dd"
     offshore wind: "#6895dd"
     offwind-ac: "c"
     offshore wind (AC): "#6895dd"
@@ -351,7 +345,6 @@ plotting:
     solar PV: "#f9d002"
     solar thermal: coral
     solar rooftop: '#ffef60'
-    csp: "darkorange"
     OCGT: wheat
     OCGT marginal: sandybrown
     OCGT-heat: '#ee8340'
@@ -408,6 +401,7 @@ plotting:
     agriculture electricity: '#222222'
     solid biomass for industry co2 from atmosphere: '#654321'
     solid biomass for industry co2 to stored: '#654321'
+    solid biomass for industry CC: '#654321'
     gas for industry co2 to atmosphere: '#654321'
     gas for industry co2 to stored: '#654321'
     Fischer-Tropsch: '#44DD33'
@@ -463,4 +457,3 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
-    solid biomass for industry CC: green

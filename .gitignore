@@ -6,7 +6,7 @@
 __pycache__
 gurobi.log
 .vscode
-#config.yaml
+config.yaml
 
 # Folders
 /bak
