@@ -35,7 +35,7 @@ dependencies:
 - networkx
 - scipy
 - pydoe2
-- shapely<2
+- shapely>=1.8a1, <2.0
 - pre-commit
 - pyomo
 - matplotlib<=3.5.2
