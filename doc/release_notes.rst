@@ -41,6 +41,8 @@ Upcoming Release
 
 * Calculate the outputs of retrieve_databundle dynamically depending on settings `PR #529 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/529>`__
 
+* Fix geo-shapes geometry issues found for some world regions `PR #532 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/532>`__
+
 PyPSA-Earth 0.1.0
 =================
 
