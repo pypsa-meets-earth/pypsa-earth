@@ -41,6 +41,8 @@ Upcoming Release
 
 * Calculate the outputs of retrieve_databundle dynamically depending on settings `PR #529 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/529>`__
 
+* Adapt dependencies on PyPSA to the PyPSA main branch `PR #538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/538>`__
+
 PyPSA-Earth 0.1.0
 =================
 
