@@ -664,7 +664,7 @@ def add_aviation(n, cost):
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
-        energy_totals.loc[countries, all_aviation].sum(axis=1).sum() * 1e6 / 8760
+        energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
     )
 
     airports = pd.read_csv(snakemake.input.airports)
@@ -694,6 +694,7 @@ def add_aviation(n, cost):
     airports["p_set"] = airports["fraction"].apply(
         lambda frac: frac
         * aviation_demand
+        * 1e6
         / 8760  # TODO change the way pset is sampled here
         # the current way leads to inaccuracies in the last timestep in case
         # the timestep if 8760 is not divisble by it),
@@ -863,7 +864,7 @@ def add_shipping(n, costs):
     all_navigation = ["total international navigation", "total domestic navigation"]
 
     navigation_demand = (
-        energy_totals.loc[countries, all_navigation].sum(axis=1).sum() * 1e6 / 8760
+        energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
     )
 
     efficiency = (
