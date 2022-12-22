@@ -835,3 +835,11 @@ rule build_test_configs:
         ],
     script:
         "scripts/build_test_configs.py"
+
+
+rule run_scenario:
+    output:
+        directory("scenarios/{scenario}"),
+    threads: 1
+    script:
+        "scripts/run_scenario.py"
