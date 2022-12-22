@@ -26,19 +26,22 @@ def update(d, u):
     return d
 
 
-def create_test_config(base_path, changes_path, output_path):
+def create_test_config(base_path, update_config, output_path):
     # Input paths
     fp_baseconfig = Path(Path.cwd(), base_path)
-    fp_update_file = Path(Path.cwd(), changes_path)
 
     # Load yaml files
     yaml = YAML()
+
+    # get update
+    if isinstance(update_config, str):
+        fp_update_file = Path(Path.cwd(), update_config)
+        # Load update yaml
+        with open(fp_update_file) as fp:
+            update_config = yaml.load(fp)
     with open(fp_baseconfig) as fp:
         base_config = yaml.load(fp)
 
-    # Load update yaml
-    with open(fp_update_file) as fp:
-        update_config = yaml.load(fp)
     # create updated yaml
     test_config = update(copy.deepcopy(base_config), update_config)
     # Output path
