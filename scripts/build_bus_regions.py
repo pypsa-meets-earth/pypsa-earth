@@ -122,6 +122,9 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
             if not poly.is_valid:
                 poly = poly.buffer(0)
 
+            if not outline.is_valid:
+                outline = outline.buffer(0)
+
             poly = poly.intersection(outline)
 
             polygons_arr[i] = poly
