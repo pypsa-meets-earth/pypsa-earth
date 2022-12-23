@@ -13,8 +13,12 @@ import copy
 import os
 import shutil
 
+import geopandas as gpd
+import pandas as pd
+import pypsa
 from _helpers import sets_path_to_root
 from build_test_configs import create_test_config
+from shapely.validation import make_valid
 
 
 def generate_scenario_by_country(path_base, country_list):
@@ -26,6 +30,76 @@ def generate_scenario_by_country(path_base, country_list):
 
     for c in clean_country_list:
         create_test_config(path_base, {"countries": [c]}, f"configs/scenarios/{c}.yaml")
+
+
+def collect_basic_osm_stats(path, name):
+    df = gpd.read_file(path)
+    n_elem = len(df)
+
+    return pd.DataFrame({"size": n_elem}, index=[name])
+
+
+def collect_network_osm_stats(path, name, crs_metric=3857):
+    df = gpd.read_file(path)
+    n_elem = len(df)
+    obj_length = (
+        df["geometry"].apply(make_valid).to_crs(epsg=crs_metric).geometry.length
+    )
+    len_obj = sum(obj_length)
+
+    len_dc_obj = 0.0
+    if "frequency" in df.columns:
+        coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
+        idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
+        len_dc_obj = obj_length.loc[idx_dc].sum()
+
+    return pd.DataFrame(
+        {"size": n_elem, "length": len_obj, "length_dc": len_dc_obj}, index=[name]
+    )
+
+
+def collect_osm_stats(**kwargs):
+    crs_metric = kwargs.pop("crs_metric", 3857)
+    only_basic = kwargs.pop("only_basic", False)
+
+    df_list = []
+
+    for k, v in kwargs.items():
+        if not only_basic and (k in ["lines", "cables"]):
+            df_list.append(collect_network_osm_stats(v, k, crs_metric=crs_metric))
+        else:
+            df_list.append(collect_basic_osm_stats(v, k))
+
+    return pd.concat(df_list)
+
+
+def collect_raw_osm_stats(crs_metric=3857):
+    from _helpers import mock_snakemake
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    snakemake = mock_snakemake("download_osm_data")
+
+    options_raw = dict(snakemake.output)
+    options_raw.pop("generators_csv")
+
+    return collect_osm_stats(only_basic=True, crs_metric=crs_metric, **options_raw)
+
+
+def collect_clean_osm_stats(crs_metric=3857):
+    from _helpers import mock_snakemake
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    snakemake = mock_snakemake("clean_osm_data")
+
+    options_clean = dict(snakemake.output)
+    options_clean.pop("generators_csv")
+
+    return collect_osm_stats(crs_metric=crs_metric, **options_clean)
+
+
+def collect_network_stats(n_path):
+    n = pypsa.Network(n_path)
+    return n.statistics()
 
 
 if __name__ == "__main__":
@@ -47,7 +121,7 @@ if __name__ == "__main__":
 
     val = os.system("snakemake -j all solve_all_networks --forceall")
 
-    for f in ["resources", "networks", "results"]:
+    for f in ["resources", "networks", "results", "benchmarks"]:
         shutil.copytree(f, f"scenarios/{scenario}/{f}")
 
     shutil.copy("config.yaml", f"scenarios/{scenario}/config.yaml")
