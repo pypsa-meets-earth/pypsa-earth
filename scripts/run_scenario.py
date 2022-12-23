@@ -16,6 +16,18 @@ import shutil
 from _helpers import sets_path_to_root
 from build_test_configs import create_test_config
 
+
+def generate_scenario_by_country(path_base, country_list):
+    "Utility function to generate multiple scenario configs"
+
+    from scripts.download_osm_data import create_country_list
+
+    clean_country_list = create_country_list(country_list)
+
+    for c in clean_country_list:
+        create_test_config(path_base, {"countries": [c]}, f"configs/scenarios/{c}.yaml")
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -24,6 +36,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("run_scenario", scenario="NG")
 
     sets_path_to_root("pypsa-earth")
+
+    # generate_scenario_by_country("configs/scenarios/base.yaml", snakemake.config["countries"])
 
     scenario = snakemake.wildcards["scenario"]
     base_config = snakemake.config.get("base_config", "./config.default.yaml")
