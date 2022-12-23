@@ -188,16 +188,12 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
 
 
 def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
+    "Function to calculate statistics"
 
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
     df_shapes = collect_shape_stats(area_crs=area_crs)
 
-    # df_base = collect_network_stats("base_network", config)
-    # df_add = collect_network_stats("add_electricity", config)
-    # df_simp = collect_network_stats("simplify_network", config)
-    # df_clus = collect_network_stats("cluster_network", config)
-    # df_solve = collect_network_stats("solve_network", config)
     network_dict = {
         network_rule: collect_network_stats(network_rule, config)
         for network_rule in [
@@ -235,13 +231,19 @@ if __name__ == "__main__":
     # create scenario config
     create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
 
-    val = os.system("snakemake -j all solve_all_networks --forceall")
+    # execute workflow
+    val = os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
 
+    # create statistics
     stats = calculate_stats(snakemake.config)
-    stats = pd.concat(stats.values).set_index([scenario])
-    stats.to_file(stats_scenario)
+    stats = pd.concat(stats.values(), axis=1).reindex([scenario])
+    stats.to_csv(stats_scenario)
 
+    # copy output files
     for f in ["resources", "networks", "results", "benchmarks"]:
-        shutil.copytree(f, f"{dir_scenario}/{f}")
+        copy_dir = f"{dir_scenario}/{f}"
+        if os.path.exists(copy_dir):
+            shutil.rmtree(copy_dir)
+        shutil.copytree(f, copy_dir)
 
     shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
