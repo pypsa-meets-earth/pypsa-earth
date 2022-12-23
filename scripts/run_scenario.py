@@ -12,14 +12,27 @@ import collections.abc
 import copy
 import os
 import shutil
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import sets_path_to_root
+from _helpers import mock_snakemake, sets_path_to_root
 from build_test_configs import create_test_config
+from ruamel.yaml import YAML
 from shapely.validation import make_valid
+
+
+def _multi_index_scen(rulename, keys):
+    return pd.MultiIndex.from_product([[rulename], keys], names=["rule", "key"])
+
+
+def _mock_snakemake(rule, **kwargs):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    snakemake = mock_snakemake(rule, **kwargs)
+    sets_path_to_root("pypsa-earth")
+    return snakemake
 
 
 def generate_scenario_by_country(path_base, country_list):
@@ -33,24 +46,26 @@ def generate_scenario_by_country(path_base, country_list):
         create_test_config(path_base, {"countries": [c]}, f"configs/scenarios/{c}.yaml")
 
 
-def collect_basic_osm_stats(path, name):
+def collect_basic_osm_stats(path, rulename, header):
     if os.path.exists(path):
         df = gpd.read_file(path)
         n_elem = len(df)
     else:
         n_elem = np.nan
 
-    return pd.DataFrame({"size": n_elem}, index=[name])
+    return pd.DataFrame(
+        [n_elem], columns=_multi_index_scen(rulename, [header + "-size"])
+    )
 
 
-def collect_network_osm_stats(path, name, crs_metric=3857):
+def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
     if os.path.exists(path):
         df = gpd.read_file(path)
         n_elem = len(df)
         obj_length = (
-            df["geometry"].apply(make_valid).to_crs(epsg=crs_metric).geometry.length
+            df["geometry"].apply(make_valid).to_crs(crs=metric_crs).geometry.length
         )
-        len_obj = sum(obj_length)
+        len_obj = sum(obj_length * df.circuits)
 
         len_dc_obj = 0.0
         if "frequency" in df.columns:
@@ -63,90 +78,142 @@ def collect_network_osm_stats(path, name, crs_metric=3857):
         len_dc_obj = np.nan
 
     return pd.DataFrame(
-        {"size": n_elem, "length": len_obj, "length_dc": len_dc_obj}, index=[name]
+        [[n_elem, len_obj, len_dc_obj]],
+        columns=_multi_index_scen(
+            rulename, [header + "-" + k for k in ["size", "length", "length_dc"]]
+        ),
     )
 
 
-def collect_osm_stats(**kwargs):
-    crs_metric = kwargs.pop("crs_metric", 3857)
+def collect_osm_stats(rulename, **kwargs):
+    metric_crs = kwargs.pop("metric_crs", "EPSG:3857")
     only_basic = kwargs.pop("only_basic", False)
 
     df_list = []
 
     for k, v in kwargs.items():
         if not only_basic and (k in ["lines", "cables"]):
-            df_list.append(collect_network_osm_stats(v, k, crs_metric=crs_metric))
+            df_list.append(
+                collect_network_osm_stats(v, rulename, k, metric_crs=metric_crs)
+            )
         else:
-            df_list.append(collect_basic_osm_stats(v, k))
+            df_list.append(collect_basic_osm_stats(v, rulename, k))
 
-    return pd.concat(df_list)
+    return pd.concat(df_list, axis=1)
 
 
-def collect_raw_osm_stats(crs_metric=3857):
-    from _helpers import mock_snakemake
-
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    snakemake = mock_snakemake("download_osm_data")
+def collect_raw_osm_stats(rulename="download_osm_data", metric_crs="EPSG:3857"):
+    snakemake = _mock_snakemake("download_osm_data")
 
     options_raw = dict(snakemake.output)
     options_raw.pop("generators_csv")
 
-    return collect_osm_stats(only_basic=True, crs_metric=crs_metric, **options_raw)
+    return collect_osm_stats(
+        rulename, only_basic=True, metric_crs=metric_crs, **options_raw
+    )
 
 
-def collect_clean_osm_stats(crs_metric=3857):
-    from _helpers import mock_snakemake
-
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    snakemake = mock_snakemake("clean_osm_data")
+def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
+    snakemake = _mock_snakemake("clean_osm_data")
 
     options_clean = dict(snakemake.output)
     options_clean.pop("generators_csv")
 
-    return collect_osm_stats(crs_metric=crs_metric, **options_clean)
+    return collect_osm_stats(rulename, metric_crs=metric_crs, **options_clean)
 
 
-def collect_network_stats(n_path):
-    if os.path.exists(n_path):
-        n = pypsa.Network(n_path)
-        return n.statistics()
+def collect_network_stats(network_rule, config):
+
+    wildcards = {
+        k: config["scenario"][k][0] for k in ["simpl", "ll", "opts", "clusters"]
+    }
+
+    snakemake = _mock_snakemake(network_rule, **wildcards)
+
+    network_path = (
+        snakemake.output["network"]
+        if "network" in snakemake.output.keys()
+        else snakemake.output[0]
+    )
+
+    if os.path.exists(network_path):
+        n = pypsa.Network(network_path)
+
+        lines_length = (n.lines.length * n.lines.num_parallel).sum()
+        lines_capacity = n.lines.s_nom.sum()
+
+        gen_stats = n.generators.groupby("carrier").p_nom.sum()
+        hydro_stats = n.storage_units.groupby("carrier").p_nom.sum()
+
+        line_stats = pd.Series(
+            [lines_length, lines_capacity], index=["lines_length", "lines_capacity"]
+        )
+
+        network_stats = (
+            pd.concat([gen_stats, hydro_stats, line_stats]).to_frame().transpose()
+        )
+        network_stats.columns = _multi_index_scen(network_rule, network_stats.columns)
+
+        return network_stats
     else:
         return pd.DataFrame()
 
 
-def collect_shape_stats(area_crs="ESRI:54009"):
-    from _helpers import mock_snakemake
+def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
+    snakemake = _mock_snakemake(rulename)
 
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    snakemake = mock_snakemake("build_shapes")
+    if not os.path.exists(snakemake.output.africa_shape):
+        return pd.DataFrame()
 
-    continent_area = np.nan
-    if os.path.exists(snakemake.output.africa_shape):
-        df_continent = gpd.read_file(snakemake.output.africa_shape)
-        continent_area = (
-            df_continent["geometry"]
-            .apply(make_valid)
-            .to_crs(crs=area_crs)
-            .geometry.area.iloc[0]
-        )
+    df_continent = gpd.read_file(snakemake.output.africa_shape)
+    continent_area = (
+        df_continent["geometry"]
+        .apply(make_valid)
+        .to_crs(crs=area_crs)
+        .geometry.area.iloc[0]
+    )
 
-    pop_tot = np.nan
-    gdp_tot = np.nan
-    gadm_size = np.nan
-    if os.path.exists(snakemake.output.gadm_shapes):
-        df_gadm = gpd.read_file(snakemake.output.gadm_shapes)
-        pop_tot = df_gadm["pop"].sum()
-        gdp_tot = df_gadm["gdp"].sum()
-        gadm_size = len(df_gadm)
+    if not os.path.exists(snakemake.output.gadm_shapes):
+        return pd.DataFrame()
+
+    df_gadm = gpd.read_file(snakemake.output.gadm_shapes)
+    pop_tot = df_gadm["pop"].sum()
+    gdp_tot = df_gadm["gdp"].sum()
+    gadm_size = len(df_gadm)
 
     return pd.DataFrame(
-        {
-            "area": [continent_area],
-            "gadm_size": [gadm_size],
-            "pop": [pop_tot],
-            "gdp": [gdp_tot],
-        }
+        [[continent_area, gadm_size, pop_tot, gdp_tot]],
+        columns=_multi_index_scen(rulename, ["area", "gadm_size", "pop", "gdp"]),
     )
+
+
+def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
+
+    df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
+    df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
+    df_shapes = collect_shape_stats(area_crs=area_crs)
+
+    # df_base = collect_network_stats("base_network", config)
+    # df_add = collect_network_stats("add_electricity", config)
+    # df_simp = collect_network_stats("simplify_network", config)
+    # df_clus = collect_network_stats("cluster_network", config)
+    # df_solve = collect_network_stats("solve_network", config)
+    network_dict = {
+        network_rule: collect_network_stats(network_rule, config)
+        for network_rule in [
+            "base_network",
+            "add_electricity",
+            "simplify_network",
+            "cluster_network",
+        ]  # , "solve_network"
+    }
+
+    return {
+        "download_osm_data": df_osm_raw,
+        "clean_osm_data": df_osm_clean,
+        "build_shapes": df_shapes,
+        **network_dict,
+    }
 
 
 if __name__ == "__main__":
@@ -158,11 +225,11 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    collect_shape_stats()
-
     # generate_scenario_by_country("configs/scenarios/base.yaml", snakemake.config["countries"])
 
     scenario = snakemake.wildcards["scenario"]
+    dir_scenario = snakemake.output["dir_scenario"]
+    stats_scenario = snakemake.output["stats_scenario"]
     base_config = snakemake.config.get("base_config", "./config.default.yaml")
 
     # create scenario config
@@ -170,7 +237,11 @@ if __name__ == "__main__":
 
     val = os.system("snakemake -j all solve_all_networks --forceall")
 
-    for f in ["resources", "networks", "results", "benchmarks"]:
-        shutil.copytree(f, f"scenarios/{scenario}/{f}")
+    stats = calculate_stats(snakemake.config)
+    stats = pd.concat(stats.values).set_index([scenario])
+    stats.to_file(stats_scenario)
 
-    shutil.copy("config.yaml", f"scenarios/{scenario}/config.yaml")
+    for f in ["resources", "networks", "results", "benchmarks"]:
+        shutil.copytree(f, f"{dir_scenario}/{f}")
+
+    shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")

@@ -839,7 +839,8 @@ rule build_test_configs:
 
 rule run_scenario:
     output:
-        directory("scenarios/{scenario}"),
+        dir_scenario=directory("scenarios/{scenario}"),
+        stats_scenario="scenarios/{scenario}/stats.csv",
     threads: 1
     script:
         "scripts/run_scenario.py"
