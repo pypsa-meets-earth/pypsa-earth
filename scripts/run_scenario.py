@@ -241,9 +241,12 @@ if __name__ == "__main__":
 
     # copy output files
     for f in ["resources", "networks", "results", "benchmarks"]:
-        copy_dir = f"{dir_scenario}/{f}"
+        copy_dir = os.path.abspath(f"{dir_scenario}/{f}")
         if os.path.exists(copy_dir):
             shutil.rmtree(copy_dir)
-        shutil.copytree(f, copy_dir)
+        abs_f = os.path.abspath(f)
+        if os.path.exists(abs_f):
+            shutil.copytree(abs_f, copy_dir)
+            shutil.rmtree(abs_f, ignore_errors=True)
 
     shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
