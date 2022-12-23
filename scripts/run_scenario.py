@@ -114,6 +114,41 @@ def collect_network_stats(n_path):
         return pd.DataFrame()
 
 
+def collect_shape_stats(area_crs="ESRI:54009"):
+    from _helpers import mock_snakemake
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    snakemake = mock_snakemake("build_shapes")
+
+    continent_area = np.nan
+    if os.path.exists(snakemake.output.africa_shape):
+        df_continent = gpd.read_file(snakemake.output.africa_shape)
+        continent_area = (
+            df_continent["geometry"]
+            .apply(make_valid)
+            .to_crs(crs=area_crs)
+            .geometry.area.iloc[0]
+        )
+
+    pop_tot = np.nan
+    gdp_tot = np.nan
+    gadm_size = np.nan
+    if os.path.exists(snakemake.output.gadm_shapes):
+        df_gadm = gpd.read_file(snakemake.output.gadm_shapes)
+        pop_tot = df_gadm["pop"].sum()
+        gdp_tot = df_gadm["gdp"].sum()
+        gadm_size = len(df_gadm)
+
+    return pd.DataFrame(
+        {
+            "area": [continent_area],
+            "gadm_size": [gadm_size],
+            "pop": [pop_tot],
+            "gdp": [gdp_tot],
+        }
+    )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -122,6 +157,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("run_scenario", scenario="NG")
 
     sets_path_to_root("pypsa-earth")
+
+    collect_shape_stats()
 
     # generate_scenario_by_country("configs/scenarios/base.yaml", snakemake.config["countries"])
 
