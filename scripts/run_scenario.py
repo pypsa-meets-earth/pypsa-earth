@@ -14,6 +14,7 @@ import os
 import shutil
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import sets_path_to_root
@@ -33,25 +34,33 @@ def generate_scenario_by_country(path_base, country_list):
 
 
 def collect_basic_osm_stats(path, name):
-    df = gpd.read_file(path)
-    n_elem = len(df)
+    if os.path.exists(path):
+        df = gpd.read_file(path)
+        n_elem = len(df)
+    else:
+        n_elem = np.nan
 
     return pd.DataFrame({"size": n_elem}, index=[name])
 
 
 def collect_network_osm_stats(path, name, crs_metric=3857):
-    df = gpd.read_file(path)
-    n_elem = len(df)
-    obj_length = (
-        df["geometry"].apply(make_valid).to_crs(epsg=crs_metric).geometry.length
-    )
-    len_obj = sum(obj_length)
+    if os.path.exists(path):
+        df = gpd.read_file(path)
+        n_elem = len(df)
+        obj_length = (
+            df["geometry"].apply(make_valid).to_crs(epsg=crs_metric).geometry.length
+        )
+        len_obj = sum(obj_length)
 
-    len_dc_obj = 0.0
-    if "frequency" in df.columns:
-        coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
-        idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
-        len_dc_obj = obj_length.loc[idx_dc].sum()
+        len_dc_obj = 0.0
+        if "frequency" in df.columns:
+            coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
+            idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
+            len_dc_obj = obj_length.loc[idx_dc].sum()
+    else:
+        n_elem = np.nan
+        len_obj = np.nan
+        len_dc_obj = np.nan
 
     return pd.DataFrame(
         {"size": n_elem, "length": len_obj, "length_dc": len_dc_obj}, index=[name]
@@ -98,8 +107,11 @@ def collect_clean_osm_stats(crs_metric=3857):
 
 
 def collect_network_stats(n_path):
-    n = pypsa.Network(n_path)
-    return n.statistics()
+    if os.path.exists(n_path):
+        n = pypsa.Network(n_path)
+        return n.statistics()
+    else:
+        return pd.DataFrame()
 
 
 if __name__ == "__main__":
