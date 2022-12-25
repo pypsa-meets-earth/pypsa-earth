@@ -12,10 +12,10 @@ dependencies:
 - pip
 - mamba   # esp for windows build
 
-# - pypsa>=0.17.1
+- pypsa>=0.21.3
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-  # - powerplantmatching>=0.4.8
+- powerplantmatching>=0.5.5
 
   # Dependencies of the workflow itself
 - xlrd
@@ -76,11 +76,8 @@ dependencies:
 - gurobi
 
 - pip:
-  # - git+https://github.com/pypsa/pypsa.git#egg=pypsa
-  - git+https://github.com/PyPSA/powerplantmatching.git@master
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/davide-f/atlite.git@master
-  - git+https://github.com/ekatef/PyPSA.git@master
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - esy-osm-pbf

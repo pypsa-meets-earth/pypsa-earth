@@ -43,6 +43,8 @@ Upcoming Release
 
 * Fix shape bug in the Voronoi cell creation `PR #541 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/541>`__
 
+* Adapt dependencies on PyPSA to the PyPSA main branch `PR #538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/538>`__
+
 PyPSA-Earth 0.1.0
 =================
 
