@@ -76,7 +76,6 @@ dependencies:
 - gurobi
 
 - pip:
-  - git+https://github.com/PyPSA/powerplantmatching.git@master
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/davide-f/atlite.git@master
   - vresutils>=0.3.1
