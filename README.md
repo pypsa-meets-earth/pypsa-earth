@@ -22,7 +22,9 @@ PyPSA meets Earth is a free and open source software initiative aiming to develo
 
 
 <p align="center">
-  <img src="https://github.com/pypsa-meets-earth/documentation/blob/main/doc/img/africa_osm_map.png?raw=true" width="600">
+  <img src="https://forum.openmod.org/uploads/db8804/original/1X/ddf041d1b98ca8f8c310f1c6393ec426ab5594cf.png" width=30%>
+  <img src="https://forum.openmod.org/uploads/db8804/original/1X/940b2673cfc31c4a6f01b7908f546d39d67df27e.png" width=23%>
+  <img src="https://forum.openmod.org/uploads/db8804/original/1X/6af089c376b19b72ad148e4e4326c162b94db68f.png" width=35%>
 </p>
 
 ## Get involved
