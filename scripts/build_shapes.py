@@ -160,7 +160,6 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
 
                 # a (more useful) approach outputs a file for each of the country (~200kb each for CN and IN)
                 df_filtered = geodf_temp[geodf_temp["GADM_ID"].isin(non_std_gadm_codes)]
-                print(df_filtered)
                 df_filtered.to_csv("non_standard_gadm_" + country_code +  "_raw.csv", index = False)
 
 
