@@ -47,11 +47,11 @@ def generate_scenario_by_country(path_base, country_list):
 
 
 def collect_basic_osm_stats(path, rulename, header):
-    if os.path.exists(path):
+    if os.path.exists(path) and (os.stat(path).st_size > 0):
         df = gpd.read_file(path)
         n_elem = len(df)
     else:
-        n_elem = np.nan
+        pd.DataFrame()
 
     return pd.DataFrame(
         [n_elem], columns=_multi_index_scen(rulename, [header + "-size"])
@@ -59,30 +59,32 @@ def collect_basic_osm_stats(path, rulename, header):
 
 
 def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
-    if os.path.exists(path):
-        df = gpd.read_file(path)
-        n_elem = len(df)
-        obj_length = (
-            df["geometry"].apply(make_valid).to_crs(crs=metric_crs).geometry.length
-        )
-        len_obj = sum(obj_length * df.circuits)
+    if os.path.exists(path) and (os.stat(path).st_size > 0):
+        try:
+            df = gpd.read_file(path)
+            n_elem = len(df)
+            obj_length = (
+                df["geometry"].apply(make_valid).to_crs(crs=metric_crs).geometry.length
+            )
+            len_obj = np.nansum(obj_length * df.circuits)
 
-        len_dc_obj = 0.0
-        if "frequency" in df.columns:
-            coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
-            idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
-            len_dc_obj = obj_length.loc[idx_dc].sum()
+            len_dc_obj = 0.0
+            if "frequency" in df.columns:
+                coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
+                idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
+                len_dc_obj = obj_length.loc[idx_dc].sum()
+
+            return pd.DataFrame(
+                [[n_elem, len_obj, len_dc_obj]],
+                columns=_multi_index_scen(
+                    rulename,
+                    [header + "-" + k for k in ["size", "length", "length_dc"]],
+                ),
+            )
+        except:
+            return pd.DataFrame()
     else:
-        n_elem = np.nan
-        len_obj = np.nan
-        len_dc_obj = np.nan
-
-    return pd.DataFrame(
-        [[n_elem, len_obj, len_dc_obj]],
-        columns=_multi_index_scen(
-            rulename, [header + "-" + k for k in ["size", "length", "length_dc"]]
-        ),
-    )
+        pd.DataFrame()
 
 
 def collect_osm_stats(rulename, **kwargs):
@@ -137,24 +139,29 @@ def collect_network_stats(network_rule, config):
     )
 
     if os.path.exists(network_path):
-        n = pypsa.Network(network_path)
+        try:
+            n = pypsa.Network(network_path)
 
-        lines_length = (n.lines.length * n.lines.num_parallel).sum()
-        lines_capacity = n.lines.s_nom.sum()
+            lines_length = (n.lines.length * n.lines.num_parallel).sum()
+            lines_capacity = n.lines.s_nom.sum()
 
-        gen_stats = n.generators.groupby("carrier").p_nom.sum()
-        hydro_stats = n.storage_units.groupby("carrier").p_nom.sum()
+            gen_stats = n.generators.groupby("carrier").p_nom.sum()
+            hydro_stats = n.storage_units.groupby("carrier").p_nom.sum()
 
-        line_stats = pd.Series(
-            [lines_length, lines_capacity], index=["lines_length", "lines_capacity"]
-        )
+            line_stats = pd.Series(
+                [lines_length, lines_capacity], index=["lines_length", "lines_capacity"]
+            )
 
-        network_stats = (
-            pd.concat([gen_stats, hydro_stats, line_stats]).to_frame().transpose()
-        )
-        network_stats.columns = _multi_index_scen(network_rule, network_stats.columns)
+            network_stats = (
+                pd.concat([gen_stats, hydro_stats, line_stats]).to_frame().transpose()
+            )
+            network_stats.columns = _multi_index_scen(
+                network_rule, network_stats.columns
+            )
 
-        return network_stats
+            return network_stats
+        except:
+            return pd.DataFrame()
     else:
         return pd.DataFrame()
 
@@ -180,10 +187,32 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     pop_tot = df_gadm["pop"].sum()
     gdp_tot = df_gadm["gdp"].sum()
     gadm_size = len(df_gadm)
+    gadm_country_matching_stats = df_gadm.country.value_counts(normalize=True)
+    gadm_country_matching = float(gadm_country_matching_stats.iloc[0]) * 100
 
     return pd.DataFrame(
-        [[continent_area, gadm_size, pop_tot, gdp_tot]],
-        columns=_multi_index_scen(rulename, ["area", "gadm_size", "pop", "gdp"]),
+        [[continent_area, gadm_size, gadm_country_matching, pop_tot, gdp_tot]],
+        columns=_multi_index_scen(
+            rulename, ["area", "gadm_size", "country_matching", "pop", "gdp"]
+        ),
+    )
+
+
+def collect_snakemake_stats(name, dict_dfs):
+    list_rules = [
+        "download_osm_data",
+        "clean_osm_data",
+        "build_shapes",
+        "base_network",
+        "add_electricity",
+        "simplify_network",
+        "cluster_network",
+        # "solve_network",
+    ]
+
+    return pd.DataFrame(
+        [[rule in dict_dfs.keys() for rule in list_rules]],
+        columns=_multi_index_scen(name, list_rules),
     )
 
 
@@ -204,12 +233,18 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         ]  # , "solve_network"
     }
 
-    return {
+    dict_dfs = {
         "download_osm_data": df_osm_raw,
         "clean_osm_data": df_osm_clean,
         "build_shapes": df_shapes,
         **network_dict,
     }
+
+    df_snakemake = collect_snakemake_stats("snakemake_status", dict_dfs)
+
+    dict_dfs["snakemake_status"] = df_snakemake
+
+    return dict_dfs
 
 
 if __name__ == "__main__":
@@ -226,17 +261,17 @@ if __name__ == "__main__":
     scenario = snakemake.wildcards["scenario"]
     dir_scenario = snakemake.output["dir_scenario"]
     stats_scenario = snakemake.output["stats_scenario"]
-    base_config = snakemake.config.get("base_config", "./config.default.yaml")
+    base_config = snakemake.config.get("base_config", "./config.default.scenario.yaml")
 
     # create scenario config
     create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
 
     # execute workflow
-    val = os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
+    # val = os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
 
     # create statistics
     stats = calculate_stats(snakemake.config)
-    stats = pd.concat(stats.values(), axis=1).reindex([scenario])
+    stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([scenario]))
     stats.to_csv(stats_scenario)
 
     # copy output files
@@ -247,6 +282,6 @@ if __name__ == "__main__":
         abs_f = os.path.abspath(f)
         if os.path.exists(abs_f):
             shutil.copytree(abs_f, copy_dir)
-            shutil.rmtree(abs_f, ignore_errors=True)
+            # shutil.rmtree(abs_f, ignore_errors=True)
 
     shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
