@@ -127,7 +127,7 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
 def collect_network_stats(network_rule, config):
 
     wildcards = {
-        k: config["scenario"][k][0] for k in ["simpl", "ll", "opts", "clusters"]
+        k: str(config["scenario"][k][0]) for k in ["simpl", "clusters", "ll", "opts"]
     }
 
     snakemake = _mock_snakemake(network_rule, **wildcards)
@@ -207,7 +207,7 @@ def collect_snakemake_stats(name, dict_dfs):
         "add_electricity",
         "simplify_network",
         "cluster_network",
-        # "solve_network",
+        "solve_network",
     ]
 
     return pd.DataFrame(
@@ -230,7 +230,8 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
             "add_electricity",
             "simplify_network",
             "cluster_network",
-        ]  # , "solve_network"
+            "solve_network",
+        ]
     }
 
     dict_dfs = {
