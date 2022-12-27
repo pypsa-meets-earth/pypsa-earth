@@ -2011,7 +2011,7 @@ def add_residential(n, costs):
         * 1e6
         / 8760
     )
-    # p_set_biomass = profile_residential * energy_totals.loc[countries, "residential biomass"].sum()* 1e6 / 8760
+    p_set_biomass = profile_residential * energy_totals.loc[countries, "residential biomass"].sum()* 1e6 / 8760
 
     n.madd(
         "Load",
