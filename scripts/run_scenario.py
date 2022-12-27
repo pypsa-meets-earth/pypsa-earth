@@ -18,6 +18,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
+import xarray as xr
 from _helpers import mock_snakemake, sets_path_to_root
 from build_test_configs import create_test_config
 from ruamel.yaml import YAML
@@ -198,11 +199,18 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     )
 
 
-def collect_snakemake_stats(name, dict_dfs):
+def collect_snakemake_stats(name, dict_dfs, config):
+    ren_techs = [
+        tech
+        for tech in config["renewable"]
+        if tech in config["electricity"]["renewable_carriers"]
+    ]
+
     list_rules = [
         "download_osm_data",
         "clean_osm_data",
         "build_shapes",
+        *[f"build_renewable_profiles_{rtech}" for rtech in ren_techs],
         "base_network",
         "add_electricity",
         "simplify_network",
@@ -214,6 +222,30 @@ def collect_snakemake_stats(name, dict_dfs):
         [[rule in dict_dfs.keys() for rule in list_rules]],
         columns=_multi_index_scen(name, list_rules),
     )
+
+
+def collect_renewable_stats(rulename, technology):
+    snakemake = _mock_snakemake(rulename, technology=technology)
+
+    if os.path.exists(snakemake.output.profile):
+        try:
+            res = xr.open_dataset(snakemake.output.profile)
+
+            if technology == "hydro":
+                potential = res.inflow.sum()
+                avg_production_pu = res.inflow.mean(dim=["plant"]).sum()
+            else:
+                potential = res.potential.sum()
+                avg_production_pu = res.profile.mean(dim=["bus"]).sum()
+
+            return pd.DataFrame(
+                [[potential, avg_production_pu]],
+                columns=_multi_index_scen(rulename, ["potential", "avg_production_pu"]),
+            )
+        except:
+            pd.DataFrame()
+    else:
+        return pd.DataFrame()
 
 
 def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
@@ -234,14 +266,24 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         ]
     }
 
+    # build_renewable_profiles rule
+    ren_rule = "build_renewable_profiles"
+    renewables_dict = {
+        f"{ren_rule}_{tech}": collect_renewable_stats(ren_rule, tech)
+        for tech in config["renewable"]
+        if tech in config["electricity"]["renewable_carriers"]
+    }
+
+    # network-related rules
     dict_dfs = {
         "download_osm_data": df_osm_raw,
         "clean_osm_data": df_osm_clean,
         "build_shapes": df_shapes,
+        **renewables_dict,
         **network_dict,
     }
 
-    df_snakemake = collect_snakemake_stats("snakemake_status", dict_dfs)
+    df_snakemake = collect_snakemake_stats("snakemake_status", dict_dfs, config)
 
     dict_dfs["snakemake_status"] = df_snakemake
 
@@ -283,6 +325,6 @@ if __name__ == "__main__":
         abs_f = os.path.abspath(f)
         if os.path.exists(abs_f):
             shutil.copytree(abs_f, copy_dir)
-            # shutil.rmtree(abs_f, ignore_errors=True)
+            shutil.rmtree(abs_f, ignore_errors=True)
 
     shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
