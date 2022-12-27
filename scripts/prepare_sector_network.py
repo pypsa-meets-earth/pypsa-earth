@@ -2000,6 +2000,7 @@ def add_agriculture(n, costs):
         p_set=nodal_energy_totals.loc[nodes, "agriculture electricity"] * 1e6 / 8760,
     )
 
+
 def add_residential(n, costs):
 
     # TODO make compatible with more counties
@@ -2030,7 +2031,6 @@ def add_residential(n, costs):
     #     carrier="residential biomass",
     #     p_set=p_set_oil,
     # )
-
 
 
 if __name__ == "__main__":
@@ -2185,7 +2185,7 @@ if __name__ == "__main__":
     add_agriculture(n, costs)
 
     add_residential(n, costs)
-    
+
     sopts = snakemake.wildcards.sopts.split("-")
 
     for o in sopts:
