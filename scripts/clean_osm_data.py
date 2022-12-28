@@ -403,6 +403,9 @@ def integrate_lines_df(df_all_lines, distance_crs):
     else:
         df_all_lines["tag_frequency"] = ac_freq_default
 
+    df_all_lines["tag_frequency"] = df_all_lines["tag_frequency"].astype(str)
+    df_all_lines = split_cells(df_all_lines, lst_col="tag_frequency")
+
     df_all_lines = split_cells_multiple(df_all_lines)
     # Add circuits information
     # if not int make int
