@@ -25,6 +25,9 @@ scenario:
   demand:
   - "DF"
 
+policy_config:
+  policy: "H2_export_yearly_constraint"
+
 clustering_options:
   alternative_clustering: true
 
