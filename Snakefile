@@ -11,7 +11,7 @@ from shutil import copyfile
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from scripts.download_osm_data import create_country_list
+from scripts._helpers import create_country_list
 from scripts.add_electricity import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 

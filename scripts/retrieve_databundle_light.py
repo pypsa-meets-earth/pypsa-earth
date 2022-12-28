@@ -86,8 +86,7 @@ import re
 from zipfile import ZipFile
 
 import yaml
-from _helpers import configure_logging, progress_retrieve, sets_path_to_root
-from download_osm_data import create_country_list
+from _helpers import configure_logging, progress_retrieve, sets_path_to_root, create_country_list
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)

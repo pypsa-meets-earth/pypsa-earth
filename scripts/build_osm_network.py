@@ -34,35 +34,6 @@ def line_endings_to_bus_conversion(lines):
     return lines
 
 
-def create_bus_df_from_lines(substations, lines):
-    # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns)
-
-    # Read information from line.csv
-    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"]
-    ]  # line start points
-    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"]
-    ]  # line end points
-    bus_all = bus_s.append(bus_e).reset_index(drop=True)
-
-    # Assign index to bus_id
-    bus_all.loc[:, "bus_id"] = bus_all.index
-    buses = bus_all
-
-    # Removing the NaN
-    buses["dc"] = "False"
-    buses["symbol"] = "False"
-    buses["under_construction"] = "False"
-    buses["tag_substation"] = "False"
-    buses["tag_area"] = "False"
-    buses["substation_lv"] = True
-
-    return buses
-
-
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
@@ -856,7 +827,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
                 .centroid,
                 "substation_lv": [True] * length,
             }
-        )
+        ).astype(buses.dtypes.to_dict())  # keep the same dtypes as buses
         buses = gpd.GeoDataFrame(
             pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
             crs=buses.crs,
