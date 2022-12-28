@@ -283,7 +283,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
-    ret_df = ret_df[ret_df.geometry.is_valid]
+    ret_df = ret_df[ret_df.geometry.is_valid & ~ret_df.geometry.is_empty]
 
     return ret_df
 
@@ -784,7 +784,7 @@ def gadm(
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
-    df_gadm = df_gadm[df_gadm.geometry.is_valid]
+    df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
 
     return df_gadm
 
