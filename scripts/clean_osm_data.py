@@ -691,7 +691,7 @@ def clean_data(
         df_cables = finalize_lines_type(df_cables)
 
         # concatenate lines and cables in a single dataframe
-        df_all_lines = pd.concat([df_lines, df_cables])
+        df_all_lines = pd.concat([df_lines, df_cables], ignore_index=True)
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
