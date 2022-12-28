@@ -86,7 +86,7 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
             if "frequency" in df.columns:
                 coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
                 idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
-                len_dc_obj = obj_length.loc[idx_dc].sum()
+                len_dc_obj = float(obj_length.loc[idx_dc].sum())
 
             return pd.DataFrame(
                 [[n_elem, len_obj, len_dc_obj]],
@@ -156,11 +156,11 @@ def collect_network_stats(network_rule, config):
         try:
             n = pypsa.Network(network_path)
 
-            lines_length = (n.lines.length * n.lines.num_parallel).sum()
-            lines_capacity = n.lines.s_nom.sum()
+            lines_length = float((n.lines.length * n.lines.num_parallel).sum())
+            lines_capacity = float(n.lines.s_nom.sum())
 
-            gen_stats = n.generators.groupby("carrier").p_nom.sum()
-            hydro_stats = n.storage_units.groupby("carrier").p_nom.sum()
+            gen_stats = float(n.generators.groupby("carrier").p_nom.sum())
+            hydro_stats = float(n.storage_units.groupby("carrier").p_nom.sum())
 
             line_stats = pd.Series(
                 [lines_length, lines_capacity], index=["lines_length", "lines_capacity"]
@@ -198,8 +198,8 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
         return pd.DataFrame()
 
     df_gadm = gpd.read_file(snakemake.output.gadm_shapes)
-    pop_tot = df_gadm["pop"].sum()
-    gdp_tot = df_gadm["gdp"].sum()
+    pop_tot = float(df_gadm["pop"].sum())
+    gdp_tot = float(df_gadm["gdp"].sum())
     gadm_size = len(df_gadm)
     gadm_country_matching_stats = df_gadm.country.value_counts(normalize=True)
     gadm_country_matching = float(gadm_country_matching_stats.iloc[0]) * 100
@@ -245,11 +245,11 @@ def collect_renewable_stats(rulename, technology):
             res = xr.open_dataset(snakemake.output.profile)
 
             if technology == "hydro":
-                potential = res.inflow.sum()
-                avg_production_pu = res.inflow.mean(dim=["plant"]).sum()
+                potential = float(res.inflow.sum())
+                avg_production_pu = float(res.inflow.mean(dim=["plant"]).sum())
             else:
-                potential = res.potential.sum()
-                avg_production_pu = res.profile.mean(dim=["bus"]).sum()
+                potential = float(res.potential.sum())
+                avg_production_pu = float(res.profile.mean(dim=["bus"]).sum())
 
             return pd.DataFrame(
                 [[potential, avg_production_pu]],
