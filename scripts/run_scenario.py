@@ -8,10 +8,9 @@ Execute a scenario optimization
 Run iteratively the workflow under different conditions
 and store the results in specific folders
 """
-import collections.abc
-import copy
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import geopandas as gpd
@@ -51,12 +50,13 @@ def collect_basic_osm_stats(path, rulename, header):
     if os.path.exists(path) and (os.stat(path).st_size > 0):
         df = gpd.read_file(path)
         n_elem = len(df)
-    else:
-        pd.DataFrame()
 
-    return pd.DataFrame(
-        [n_elem], columns=_multi_index_scen(rulename, [header + "-size"])
-    )
+        return pd.DataFrame(
+            [n_elem], columns=_multi_index_scen(rulename, [header + "-size"])
+        )
+
+    else:
+        return pd.DataFrame()
 
 
 def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
@@ -85,7 +85,7 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
         except:
             return pd.DataFrame()
     else:
-        pd.DataFrame()
+        return pd.DataFrame()
 
 
 def collect_osm_stats(rulename, **kwargs):
@@ -248,7 +248,17 @@ def collect_renewable_stats(rulename, technology):
         return pd.DataFrame()
 
 
-def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
+def collect_computational_stats(rulename, timedelta):
+    comp_time = timedelta.total_seconds()
+    return pd.DataFrame(
+        [[comp_time]],
+        columns=_multi_index_scen(rulename, ["total"]),
+    )
+
+
+def calculate_stats(
+    config, timedelta=None, metric_crs="EPSG:3857", area_crs="ESRI:54009"
+):
     "Function to calculate statistics"
 
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
@@ -283,11 +293,42 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         **network_dict,
     }
 
-    df_snakemake = collect_snakemake_stats("snakemake_status", dict_dfs, config)
+    dict_dfs["snakemake_status"] = collect_snakemake_stats(
+        "snakemake_status", dict_dfs, config
+    )
 
-    dict_dfs["snakemake_status"] = df_snakemake
+    if timedelta is not None:
+        dict_dfs["computational_time"] = collect_computational_stats(
+            "computational_time", timedelta
+        )
 
     return dict_dfs
+
+
+def run_scenario(dir_scenario, scenario, config):
+
+    base_config = config.get("base_config", "./config.default.scenario.yaml")
+
+    # create scenario config
+    create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
+
+    # execute workflow
+    start_dt = datetime.now()
+    os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
+    end_dt = datetime.now()
+    timedelta = end_dt - start_dt
+
+    # copy output files
+    for f in ["resources", "networks", "results", "benchmarks"]:
+        copy_dir = os.path.abspath(f"{dir_scenario}/{f}")
+        if os.path.exists(copy_dir):
+            shutil.rmtree(copy_dir)
+        abs_f = os.path.abspath(f)
+        if os.path.exists(abs_f):
+            shutil.copytree(abs_f, copy_dir)
+            shutil.rmtree(abs_f, ignore_errors=True)
+
+    shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
 
 
 if __name__ == "__main__":
@@ -310,10 +351,13 @@ if __name__ == "__main__":
     create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
 
     # execute workflow
-    # val = os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
+    start_dt = datetime.now()
+    os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
+    end_dt = datetime.now()
+    timedelta = end_dt - start_dt
 
     # create statistics
-    stats = calculate_stats(snakemake.config)
+    stats = calculate_stats(snakemake.config, timedelta)
     stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([scenario]))
     stats.to_csv(stats_scenario)
 
