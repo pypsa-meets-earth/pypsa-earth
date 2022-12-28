@@ -51,7 +51,7 @@ def generate_scenario_by_country(path_base, country_list):
     for c in clean_country_list:
 
         modify_dict = {"countries": [c]}
-        if c in df_landlocked["countries"]:
+        if df_landlocked["countries"].str.contains(c).any():
             modify_dict["electricity"] = {
                 "renewable_carriers": ["solar", "onwind", "hydro"]
             }
@@ -353,35 +353,35 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    generate_scenario_by_country("configs/scenarios/base.yaml", ["Africa"])
+    # generate_scenario_by_country("configs/scenarios/base.yaml", ["Africa"])
 
-    # scenario = snakemake.wildcards["scenario"]
-    # dir_scenario = snakemake.output["dir_scenario"]
-    # stats_scenario = snakemake.output["stats_scenario"]
-    # base_config = snakemake.config.get("base_config", "./config.default.scenario.yaml")
+    scenario = snakemake.wildcards["scenario"]
+    dir_scenario = snakemake.output["dir_scenario"]
+    stats_scenario = snakemake.output["stats_scenario"]
+    base_config = snakemake.config.get("base_config", "./config.default.scenario.yaml")
 
-    # # create scenario config
-    # create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
+    # create scenario config
+    create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
 
-    # # execute workflow
-    # start_dt = datetime.now()
-    # os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
-    # end_dt = datetime.now()
-    # timedelta = end_dt - start_dt
+    # execute workflow
+    start_dt = datetime.now()
+    os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
+    end_dt = datetime.now()
+    timedelta = end_dt - start_dt
 
-    # # create statistics
-    # stats = calculate_stats(snakemake.config, timedelta)
-    # stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([scenario]))
-    # stats.to_csv(stats_scenario)
+    # create statistics
+    stats = calculate_stats(snakemake.config, timedelta)
+    stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([scenario]))
+    stats.to_csv(stats_scenario)
 
-    # # copy output files
-    # for f in ["resources", "networks", "results", "benchmarks"]:
-    #     copy_dir = os.path.abspath(f"{dir_scenario}/{f}")
-    #     if os.path.exists(copy_dir):
-    #         shutil.rmtree(copy_dir)
-    #     abs_f = os.path.abspath(f)
-    #     if os.path.exists(abs_f):
-    #         shutil.copytree(abs_f, copy_dir)
-    #         shutil.rmtree(abs_f, ignore_errors=True)
+    # copy output files
+    for f in ["resources", "networks", "results", "benchmarks"]:
+        copy_dir = os.path.abspath(f"{dir_scenario}/{f}")
+        if os.path.exists(copy_dir):
+            shutil.rmtree(copy_dir)
+        abs_f = os.path.abspath(f)
+        if os.path.exists(abs_f):
+            shutil.copytree(abs_f, copy_dir)
+            shutil.rmtree(abs_f, ignore_errors=True)
 
-    # shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
+    shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
