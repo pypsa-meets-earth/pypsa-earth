@@ -629,14 +629,11 @@ def create_country_list(input, iso_coding=True):
         Example ["NG","ZA"]
     """
     import logging
-    from config_osm_data import (
-    continent_regions,
-    world_iso,
-    )
+
+    from config_osm_data import continent_regions, world_iso
 
     _logger = logging.getLogger(__name__)
     _logger.setLevel(logging.INFO)
-
 
     def filter_codes(c_list, iso_coding=True):
         """

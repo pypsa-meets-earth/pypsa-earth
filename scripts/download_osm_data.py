@@ -1,14 +1,13 @@
-from earth_osm import eo
+# -*- coding: utf-8 -*-
+import glob
 import os
 from pathlib import Path
-from _helpers import configure_logging
-import glob
-import pandas as pd
-import geopandas as gpd
 
-from config_osm_data import (
-    iso_to_geofk_dict,
-)
+import geopandas as gpd
+import pandas as pd
+from _helpers import configure_logging
+from config_osm_data import iso_to_geofk_dict
+from earth_osm import eo
 
 
 def country_list_to_geofk(country_list):
@@ -65,25 +64,25 @@ def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_di
 
 
 def concat_outputs(store_path_data, store_path_resources):
-  names = ["generators", "cables", "lines", "substations"]
-  # create output folder if it does not exist
-  os.makedirs(str(store_path_resources), exist_ok=True)
-  for n in names:  
-    filter = Path.joinpath(store_path_data, "out", f"*{n}.csv")
-    filenames = [i for i in glob.glob(str(filter))]
-    path = Path.joinpath(store_path_resources, f"africa_all_raw_{n}.csv")
-    if len(filenames) > 0:
-      concat_csv(filenames).to_csv(path, index=False)
-    else:
-      open(path, "a").close()
+    names = ["generators", "cables", "lines", "substations"]
+    # create output folder if it does not exist
+    os.makedirs(str(store_path_resources), exist_ok=True)
+    for n in names:
+        filter = Path.joinpath(store_path_data, "out", f"*{n}.csv")
+        filenames = [i for i in glob.glob(str(filter))]
+        path = Path.joinpath(store_path_resources, f"africa_all_raw_{n}.csv")
+        if len(filenames) > 0:
+            concat_csv(filenames).to_csv(path, index=False)
+        else:
+            open(path, "a").close()
 
-    filter = Path.joinpath(store_path_data, "out", f"*{n}.geojson")
-    filenames = [i for i in glob.glob(str(filter))]
-    path = Path.joinpath(store_path_resources, f"africa_all_raw_{n}.geojson")
-    if len(filenames) > 0:
-      concat_geojson(filenames).to_file(path, driver="GeoJSON")
-    else:
-      open(path, "a").close()
+        filter = Path.joinpath(store_path_data, "out", f"*{n}.geojson")
+        filenames = [i for i in glob.glob(str(filter))]
+        path = Path.joinpath(store_path_resources, f"africa_all_raw_{n}.geojson")
+        if len(filenames) > 0:
+            concat_geojson(filenames).to_file(path, driver="GeoJSON")
+        else:
+            open(path, "a").close()
 
 
 def concat_csv(filenames):
@@ -106,9 +105,10 @@ def concat_geojson(filenames):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("download_osm_data") 
-        sets_path_to_root("pypsa-earth")   
+        snakemake = mock_snakemake("download_osm_data")
+        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
@@ -118,12 +118,12 @@ if __name__ == "__main__":
     country_list = country_list_to_geofk(snakemake.config["countries"])
 
     eo.get_osm_data(
-      primary_name = 'power',
-      region_list = country_list,
-      feature_list = ['substation', 'line', 'cable', 'generator'],
-      update = False,
-      mp = True,
-      data_dir = store_path_data,
+        primary_name="power",
+        region_list=country_list,
+        feature_list=["substation", "line", "cable", "generator"],
+        update=False,
+        mp=True,
+        data_dir=store_path_data,
     )
 
     concat_outputs(store_path_data, store_path_resources)
