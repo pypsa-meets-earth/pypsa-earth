@@ -293,9 +293,11 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 # first split  [0]
                 df.loc[i, list_col[0]] = d[0][0]
                 df.loc[i, list_col[1]] = d[1][0]
+                df.loc[i, list_col[2]] = d[1][0]
                 # second split [1]
                 r[list_col[0]] = d[0][1]
                 r[list_col[1]] = d[1][1]
+                r[list_col[1]] = d[2][1]
                 df_list.append(r)
 
     df = pd.concat(df_list, ignore_index=True)
