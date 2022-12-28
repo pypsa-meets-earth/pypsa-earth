@@ -289,7 +289,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
             # check both contain ";"
             if [";" in s for s in sub].count(True) == len(list_col):
                 d = [s.split(";") for s in sub]  # split them
-                r = df.loc[i, :].copy()
+                r = df.iloc[i, :].copy()
                 # first split  [0]
                 df.loc[i, list_col[0]] = d[0][0]
                 df.loc[i, list_col[1]] = d[1][0]
