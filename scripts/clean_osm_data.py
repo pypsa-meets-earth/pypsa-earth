@@ -403,6 +403,7 @@ def integrate_lines_df(df_all_lines, distance_crs):
     else:
         df_all_lines["tag_frequency"] = ac_freq_default
 
+    # it may happen that the frequency column also contains ";"    
     df_all_lines["tag_frequency"] = df_all_lines["tag_frequency"].astype(str)
     df_all_lines = split_cells(df_all_lines, lst_col="tag_frequency")
 
