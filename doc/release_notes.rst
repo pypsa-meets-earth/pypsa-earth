@@ -45,6 +45,8 @@ Upcoming Release
 
 * Adapt dependencies on PyPSA to the PyPSA main branch `PR #538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/538>`__
 
+* Fix None geometries into regions `PR #546 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/546>`__
+
 PyPSA-Earth 0.1.0
 =================
 
