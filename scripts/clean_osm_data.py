@@ -290,9 +290,11 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
             if [";" in s for s in sub].count(True) == len(list_col):
                 d = [s.split(";") for s in sub]  # split them
                 r = df.loc[i, :].copy()
-                df.loc[i, list_col[0]] = d[0][0]  # first split  [0]
+                # first split  [0]
+                df.loc[i, list_col[0]] = d[0][0]
                 df.loc[i, list_col[1]] = d[1][0]
-                r[list_col[0]] = d[0][1]  # second split [1]
+                # second split [1]
+                r[list_col[0]] = d[0][1]
                 r[list_col[1]] = d[1][1]
                 df_list.append(r)
 
