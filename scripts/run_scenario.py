@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import mock_snakemake, sets_path_to_root
+from _helpers import mock_snakemake, sets_path_to_root, to_csv_nafix
 from build_test_configs import create_test_config
 from ruamel.yaml import YAML
 from shapely.validation import make_valid
@@ -232,7 +232,12 @@ def collect_snakemake_stats(name, dict_dfs, config):
     ]
 
     return pd.DataFrame(
-        [[rule in dict_dfs.keys() for rule in list_rules]],
+        [
+            [
+                (rule in dict_dfs.keys()) and (~dict_dfs[rule].empty)
+                for rule in list_rules
+            ]
+        ],
         columns=_multi_index_scen(name, list_rules),
     )
 
@@ -372,7 +377,7 @@ if __name__ == "__main__":
     # create statistics
     stats = calculate_stats(snakemake.config, timedelta)
     stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([scenario]))
-    stats.to_csv(stats_scenario)
+    to_csv_nafix(stats, stats_scenario)
 
     # copy output files
     for f in ["resources", "networks", "results", "benchmarks"]:
@@ -382,6 +387,6 @@ if __name__ == "__main__":
         abs_f = os.path.abspath(f)
         if os.path.exists(abs_f):
             shutil.copytree(abs_f, copy_dir)
-            shutil.rmtree(abs_f, ignore_errors=True)
+            shutil.rmtree(abs_f)
 
     shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
