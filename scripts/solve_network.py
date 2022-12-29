@@ -152,8 +152,6 @@ def add_battery_constraints(n):
     define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
 
-
-
 def add_chp_constraints(n):
 
     electric_bool = (
@@ -248,7 +246,7 @@ def add_co2_sequestration_limit(n, sns):
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
-   
+
     # add_co2_sequestration_limit(n, snapshots)
 
 
