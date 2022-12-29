@@ -152,34 +152,6 @@ def add_battery_constraints(n):
     define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
 
-def H2_export_yearly_constraint(n):
-    res = ["csp", "rooftop-solar", "solar", "onwind", "onwind2", "offwind", "offwind2"]
-    res_index = n.generators.loc[n.generators.carrier.isin(res)].index
-
-    weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
-        index=n.snapshots,
-        columns=res_index,
-    )
-    res = join_exprs(
-        linexpr((weightings, get_var(n, "Generator", "p")[res_index]))
-    )  # single line sum
-
-    # electrolysis_index = n.links.loc[n.links.carrier=='H2 export'].index
-    export_index = n.links.filter(like="H2 export", axis=0).index
-    h2_export = get_var(n, "Link", "p")[export_index]
-
-    weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(export_index)),
-        index=n.snapshots,
-        columns=export_index,
-    )
-
-    load = join_exprs(linexpr((-weightings, h2_export)))
-
-    lhs = res + "\n" + load
-
-    con = define_constraints(n, lhs, ">", 0.0, "H2ExportConstraint", "RESproduction")
 
 
 def add_chp_constraints(n):
@@ -276,10 +248,7 @@ def add_co2_sequestration_limit(n, sns):
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
-    if snakemake.config["policy_config"]["policy"] == "H2_export_yearly_constraint":
-        print("setting annual res target")
-        H2_export_yearly_constraint(n)
-
+   
     # add_co2_sequestration_limit(n, snapshots)
 
 
