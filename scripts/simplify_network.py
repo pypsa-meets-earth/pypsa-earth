@@ -190,7 +190,9 @@ def _compute_connection_costs_to_bus(
         adj = n.adjacency_matrix(
             weights=pd.concat(
                 dict(
-                    Link=connection_costs_per_link[tech].reindex(n.links.index),
+                    Link=connection_costs_per_link[tech]
+                    .reindex(n.links.index)
+                    .astype(float),
                     Line=pd.Series(0.0, n.lines.index),
                 )
             )
