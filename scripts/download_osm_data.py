@@ -2,18 +2,16 @@
 # SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-import os
-import pandas as pd
-import geopandas as gpd
-import shutil
 import logging
-
-from earth_osm import eo
+import os
+import shutil
 from pathlib import Path
+
+import geopandas as gpd
+import pandas as pd
 from _helpers import configure_logging
-from config_osm_data import (
-    iso_to_geofk_dict,
-)
+from config_osm_data import iso_to_geofk_dict
+from earth_osm import eo
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
@@ -86,31 +84,30 @@ if __name__ == "__main__":
     country_list = country_list_to_geofk(snakemake.config["countries"])
 
     eo.get_osm_data(
-      primary_name = 'power',
-      region_list = country_list,
-      feature_list = ['substation', 'line', 'cable', 'generator'],
-      update = False,
-      mp = True,
-      data_dir = store_path_data,
-      out_format = ["csv", "geojson"],
-      out_aggregate = True,
+        primary_name="power",
+        region_list=country_list,
+        feature_list=["substation", "line", "cable", "generator"],
+        update=False,
+        mp=True,
+        data_dir=store_path_data,
+        out_format=["csv", "geojson"],
+        out_aggregate=True,
     )
 
     out_path = Path.joinpath(store_path_data, "out")
     names = ["generators", "cables", "lines", "substations"]
     format = ["csv", "geojson"]
-    
+
     # Create file if not existing
     for name in names:
         for f in format:
             filename = Path.joinpath(out_path, f"all_{name}.{f}")
             if not Path.exists(filename):
                 _logger.info(f"{filename} does not exist, create empty file")
-                open(filename, 'w').close()
-    
+                open(filename, "w").close()
+
             # Move and rename
             old_path = Path.joinpath(out_path, f"all_{name}.{f}")
             new_path = Path.joinpath(store_path_resources, f"africa_all_{name}.{f}")
             _logger.info(f"Create {old_path} and move to {new_path}")
             shutil.move(old_path, new_path)
-
