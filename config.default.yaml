@@ -40,6 +40,7 @@ custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
   elec_demand: false
   industry_demand: false
+  water_costs: false
 
 costs:
   lifetime: 25 #default lifetime
