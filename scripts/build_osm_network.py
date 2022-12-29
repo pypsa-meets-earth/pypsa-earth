@@ -827,7 +827,9 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
                 .centroid,
                 "substation_lv": [True] * length,
             }
-        ).astype(buses.dtypes.to_dict())  # keep the same dtypes as buses
+        ).astype(
+            buses.dtypes.to_dict()
+        )  # keep the same dtypes as buses
         buses = gpd.GeoDataFrame(
             pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
             crs=buses.crs,

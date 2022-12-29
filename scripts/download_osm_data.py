@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 import os
 import pandas as pd
 import geopandas as gpd
@@ -71,9 +75,10 @@ def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_di
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("download_osm_data") 
-        sets_path_to_root("pypsa-earth")   
+        snakemake = mock_snakemake("download_osm_data")
+        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
