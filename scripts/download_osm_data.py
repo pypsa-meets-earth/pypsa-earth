@@ -108,6 +108,6 @@ if __name__ == "__main__":
 
             # Move and rename
             old_path = Path.joinpath(out_path, f"all_{name}.{f}")
-            new_path = Path.joinpath(store_path_resources, f"africa_all_{name}.{f}")
+            new_path = Path.joinpath(store_path_resources, f"africa_all_raw_{name}.{f}")
             _logger.info(f"Create {old_path} and move to {new_path}")
             shutil.move(old_path, new_path)
