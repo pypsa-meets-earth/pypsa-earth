@@ -163,19 +163,12 @@ def H2_export_yearly_constraint(n):
     load_ind = n.loads[n.loads.carrier=='AC'].index
     
     load = (n.loads_t.p_set[load_ind].sum(axis=1)*n.snapshot_weightings['generators']).sum()
-    #electrolysis_index = n.links.loc[n.links.carrier=='H2 export'].index
-    #export_index = n.links.filter(like='H2 export', axis=0).index
+   
     h2_export = n.loads.loc["H2 export load"].p_set*8760
-
-    # weightings = pd.DataFrame(np.outer(n.snapshot_weightings["generators"],[1.42]*len(export_index)),
-    #                       index = n.snapshots,
-    #                       columns = export_index)
-
-    #h2_export = join_exprs(linexpr((-weightings ,h2_export)))
 
     lhs = res
 
-    rhs = h2_export * (1/0.7) + load
+    rhs = h2_export * (1/0.7) + load # 0.7 is approximation of electrloyzer capacity
     
     con = define_constraints(n, lhs, '=', rhs, 'H2ExportConstraint','RESproduction')
 
