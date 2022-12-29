@@ -9,7 +9,7 @@ import pandas as pd
 import pypsa
 from helpers import override_component_attrs
 from pypsa.linopf import ilopf, network_lopf
-from pypsa.linopt import define_constraints, get_var, linexpr, join_exprs
+from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
 from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
@@ -322,7 +322,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand='NZ',
+            demand="NZ",
         )
         sets_path_to_root("pypsa-earth-sec")
 

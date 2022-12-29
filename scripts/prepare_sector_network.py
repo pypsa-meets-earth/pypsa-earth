@@ -2029,13 +2029,13 @@ def add_residential(n, costs):
     )
 
     n.madd(
-         "Load",
-         nodes,
-         suffix=" residential",
-         bus=spatial.biomass.nodes,
-         carrier="residential biomass",
-         p_set=p_set_oil,
-     )
+        "Load",
+        nodes,
+        suffix=" residential",
+        bus=spatial.biomass.nodes,
+        carrier="residential biomass",
+        p_set=p_set_oil,
+    )
 
 
 if __name__ == "__main__":
