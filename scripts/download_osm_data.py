@@ -1,14 +1,18 @@
-from earth_osm import eo
 import os
-from pathlib import Path
-from _helpers import configure_logging
-import glob
 import pandas as pd
 import geopandas as gpd
+import shutil
+import logging
 
+from earth_osm import eo
+from pathlib import Path
+from _helpers import configure_logging
 from config_osm_data import (
     iso_to_geofk_dict,
 )
+
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
 
 
 def country_list_to_geofk(country_list):
@@ -64,45 +68,6 @@ def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_di
         return iso_code
 
 
-def concat_outputs(store_path_data, store_path_resources):
-  names = ["generators", "cables", "lines", "substations"]
-  # create output folder if it does not exist
-  os.makedirs(str(store_path_resources), exist_ok=True)
-  for n in names:  
-    filter = Path.joinpath(store_path_data, "out", f"*{n}.csv")
-    filenames = [i for i in glob.glob(str(filter))]
-    path = Path.joinpath(store_path_resources, f"africa_all_raw_{n}.csv")
-    if len(filenames) > 0:
-      concat_csv(filenames).to_csv(path, index=False)
-    else:
-      open(path, "a").close()
-
-    filter = Path.joinpath(store_path_data, "out", f"*{n}.geojson")
-    filenames = [i for i in glob.glob(str(filter))]
-    path = Path.joinpath(store_path_resources, f"africa_all_raw_{n}.geojson")
-    if len(filenames) > 0:
-      concat_geojson(filenames).to_file(path, driver="GeoJSON")
-    else:
-      open(path, "a").close()
-
-
-def concat_csv(filenames):
-    # Read the files into a list of DataFrames
-    data = list(map(pd.read_csv, filenames))
-    # Concatenate the DataFrames into a single DataFrame
-    result = pd.concat(data)
-    return result
-
-
-def concat_geojson(filenames):
-    # Read the files into a list of GeoDataFrames\
-    assert len(filenames) > 0, "No files to concatenate"
-    data = list(map(gpd.read_file, filenames))
-    # Concatenate the GeoDataFrames into a single GeoDataFrame
-    result = gpd.GeoDataFrame(pd.concat(data, ignore_index=True))
-    return result
-
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
@@ -113,8 +78,6 @@ if __name__ == "__main__":
 
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
     store_path_resources = Path.joinpath(Path().cwd(), "resources", "osm", "raw")
-
-    # get list of countries into geofabrik convention; expected iso norm in input
     country_list = country_list_to_geofk(snakemake.config["countries"])
 
     eo.get_osm_data(
@@ -124,6 +87,25 @@ if __name__ == "__main__":
       update = False,
       mp = True,
       data_dir = store_path_data,
+      out_format = ["csv", "geojson"],
+      out_aggregate = True,
     )
 
-    concat_outputs(store_path_data, store_path_resources)
+    out_path = Path.joinpath(store_path_data, "out")
+    names = ["generators", "cables", "lines", "substations"]
+    format = ["csv", "geojson"]
+    
+    # Create file if not existing
+    for name in names:
+        for f in format:
+            filename = Path.joinpath(out_path, f"all_{name}.{f}")
+            if not Path.exists(filename):
+                _logger.info(f"{filename} does not exist, create empty file")
+                open(filename, 'w').close()
+    
+            # Move and rename
+            old_path = Path.joinpath(out_path, f"all_{name}.{f}")
+            new_path = Path.joinpath(store_path_resources, f"africa_all_{name}.{f}")
+            _logger.info(f"Create {old_path} and move to {new_path}")
+            shutil.move(old_path, new_path)
+
