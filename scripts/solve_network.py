@@ -152,7 +152,7 @@ def add_battery_constraints(n):
     define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
 def H2_export_yearly_constraint(n):
-    res = ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2']
+    res = ['csp', 'rooftop-solar', 'solar', 'onwind', 'onwind2', 'offwind', 'offwind2', 'ror']
     res_index = n.generators.loc[n.generators.carrier.isin(res)].index
 
     weightings = pd.DataFrame(np.outer(n.snapshot_weightings["generators"],[1.]*len(res_index)),
@@ -160,19 +160,24 @@ def H2_export_yearly_constraint(n):
                               columns = res_index)
     res = join_exprs(linexpr((weightings,get_var(n, "Generator", "p")[res_index]))) # single line sum
 
+    load_ind = n.loads[n.loads.carrier=='AC'].index
+    
+    load = (n.loads_t.p_set[load_ind].sum(axis=1)*n.snapshot_weightings['generators']).sum()
     #electrolysis_index = n.links.loc[n.links.carrier=='H2 export'].index
-    export_index = n.links.filter(like='H2 export', axis=0).index
-    h2_export = get_var(n, "Link", "p")[export_index]
+    #export_index = n.links.filter(like='H2 export', axis=0).index
+    h2_export = n.loads.loc["H2 export load"].p_set*8760
 
-    weightings = pd.DataFrame(np.outer(n.snapshot_weightings["generators"],[1.]*len(export_index)),
-                          index = n.snapshots,
-                          columns = export_index)
+    # weightings = pd.DataFrame(np.outer(n.snapshot_weightings["generators"],[1.42]*len(export_index)),
+    #                       index = n.snapshots,
+    #                       columns = export_index)
 
-    load = join_exprs(linexpr((-weightings ,h2_export)))
+    #h2_export = join_exprs(linexpr((-weightings ,h2_export)))
 
-    lhs = res+ "\n" + load
+    lhs = res
 
-    con = define_constraints(n, lhs, '>', 0., 'H2ExportConstraint','RESproduction')
+    rhs = h2_export * (1/0.7) + load
+    
+    con = define_constraints(n, lhs, '=', rhs, 'H2ExportConstraint','RESproduction')
 
 
 def add_chp_constraints(n):
@@ -318,7 +323,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="22",
+            clusters="39",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
