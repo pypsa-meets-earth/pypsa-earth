@@ -2038,6 +2038,29 @@ def add_residential(n, costs):
     )
 
 
+def add_custom_water_cost(n):
+    for country in countries:
+        water_costs = pd.read_csv(
+            "resources/custom_data/{}_water_costs.csv".format(country),
+            sep=",",
+            index_col=0,
+        )
+        water_costs = water_costs.filter(like=country, axis=0).loc[nodes]
+
+        electrolysis_links = n.links.filter(like=country, axis=0).filter(
+            like="lectrolysis", axis=0
+        )
+
+        elec_index = n.links[
+            (n.links.carrier == "H2 Electrolysis")
+            & (n.links.bus0.str.contains(country))
+        ].index
+        n.links.loc[elec_index, "marginal_cost"] = water_costs.values
+        # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0)["marginal_cost"] = water_costs.values
+        # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).apply(lambda x: water_costs[x.index], axis=0)
+        # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -2046,13 +2069,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
+            clusters="32",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
             discountrate="0.071",
-            demand="DF",
+            demand="NZ",
         )
 
     # TODO fetch from config
@@ -2201,6 +2224,9 @@ if __name__ == "__main__":
 
     if options["dac"]:
         add_dac(n, costs)
+
+    if snakemake.config["custom_data"]["water_costs"]:
+        add_custom_water_cost(n)
     # n.lines.s_nom*=0.3
     n.export_to_netcdf(snakemake.output[0])
 

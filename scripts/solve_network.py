@@ -283,9 +283,6 @@ def add_co2_sequestration_limit(n, sns):
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
-    if snakemake.config["policy_config"]["policy"] == "H2_export_yearly_constraint":
-        print("setting annual res target")
-        H2_export_yearly_constraint(n)
 
     # add_co2_sequestration_limit(n, snapshots)
 
