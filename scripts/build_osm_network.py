@@ -100,7 +100,7 @@ def add_line_endings_tosubstations(substations, lines):
     # TODO: this tag may be improved, maybe depending on voltage levels
     bus_all["tag_substation"] = "transmission"
 
-    buses = substations.append(bus_all).reset_index(drop=True)
+    buses = pd.concat([substations, bus_all], ignore_index=True)
 
     return buses
 
@@ -265,7 +265,7 @@ def merge_stations_same_station_id(
     # initalize the number of buses
     n_buses = 0
 
-    for g_name, g_value in buses.groupby(by=["station_id"]):
+    for g_name, g_value in buses.groupby(by="station_id"):
 
         # average location of the buses having the same station_id
         station_point_x = np.round(g_value.geometry.x.mean(), precision)
@@ -356,9 +356,7 @@ def get_transformers(buses, lines):
 
     # Transformers should be added between AC buses only
     buses_ac = buses[~buses["dc"]]
-    for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(
-        by=["station_id"]
-    ):
+    for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(by="station_id"):
 
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
@@ -409,9 +407,7 @@ def get_converters(buses, lines):
 
     df_converters = []
 
-    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
-        by=["station_id"]
-    ):
+    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(by="station_id"):
 
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
