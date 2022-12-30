@@ -114,21 +114,21 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
-# rule add_export:
-#    input:
-#        overrides="data/override_component_attrs",
-#        ports="data/ports.csv",
-#        network=RDIR
-#        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
-#        shapes_path=pypsaearth(
-#            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
-#        ),
-#    output:
-#        RDIR
-#        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
-#        # TODO output file name must be adjusted and integrated in workflow
-#    script:
-#        "scripts/add_export.py"
+rule add_export:
+    input:
+        overrides="data/override_component_attrs",
+        ports="data/ports.csv",
+        network=RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        shapes_path=pypsaearth(
+            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
+    output:
+        RDIR
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
+        # TODO output file name must be adjusted and integrated in workflow
+    script:
+        "scripts/add_export.py"
 
 
 rule override_respot:
