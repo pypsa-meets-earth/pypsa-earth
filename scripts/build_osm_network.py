@@ -356,7 +356,9 @@ def get_transformers(buses, lines):
 
     # Transformers should be added between AC buses only
     buses_ac = buses[~buses["dc"]]
-    for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(by="station_id"):
+    for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(
+        by="station_id"
+    ):
 
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
@@ -407,7 +409,9 @@ def get_converters(buses, lines):
 
     df_converters = []
 
-    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(by="station_id"):
+    for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
+        by="station_id"
+    ):
 
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
