@@ -28,6 +28,9 @@ scenario:
 clustering_options:
   alternative_clustering: true
 
+policy_config:
+  policy: "" #"H2_export_yearly_constraint"
+
 countries: ['NG', 'BJ']
 
 export:
