@@ -152,26 +152,39 @@ def collect_network_stats(network_rule, config):
         else snakemake.output[0]
     )
 
+    def capacity_stats(df):
+        if df.empty:
+            return pd.DataFrame()
+        else:
+            return df.groupby("carrier").p_nom.sum().astype(float)
+
     if os.path.exists(network_path):
         try:
             n = pypsa.Network(network_path)
 
             lines_length = float((n.lines.length * n.lines.num_parallel).sum())
+
             lines_capacity = float(n.lines.s_nom.sum())
 
-            gen_stats = float(n.generators.groupby("carrier").p_nom.sum())
-            hydro_stats = float(n.storage_units.groupby("carrier").p_nom.sum())
-
-            line_stats = pd.Series(
-                [lines_length, lines_capacity], index=["lines_length", "lines_capacity"]
+            line_stats = pd.DataFrame(
+                [[lines_length, lines_capacity]],
+                columns=_multi_index_scen(
+                    network_rule, ["lines_length", "lines_capacity"]
+                ),
             )
 
-            network_stats = (
-                pd.concat([gen_stats, hydro_stats, line_stats]).to_frame().transpose()
+            gen_stats = pd.concat(
+                [capacity_stats(n.generators), capacity_stats(n.storage_units)], axis=0
             )
-            network_stats.columns = _multi_index_scen(
-                network_rule, network_stats.columns
-            )
+
+            if gen_stats.empty:
+                network_stats = line_stats
+            else:
+                df_gen_stats = gen_stats.to_frame().transpose().reset_index()
+                df_gen_stats.columns = _multi_index_scen(
+                    network_rule, df_gen_stats.columns
+                )
+                network_stats = pd.concat([line_stats, df_gen_stats], axis=1)
 
             return network_stats
         except:
@@ -234,7 +247,7 @@ def collect_snakemake_stats(name, dict_dfs, config):
     return pd.DataFrame(
         [
             [
-                (rule in dict_dfs.keys()) and (~dict_dfs[rule].empty)
+                (rule in dict_dfs.keys()) and not dict_dfs[rule].empty
                 for rule in list_rules
             ]
         ],
