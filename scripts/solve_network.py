@@ -189,7 +189,6 @@ def H2_export_yearly_constraint(n):
     con = define_constraints(n, lhs, "=", rhs, "H2ExportConstraint", "RESproduction")
 
 
-
 def add_chp_constraints(n):
 
     electric_bool = (
