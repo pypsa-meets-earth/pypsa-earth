@@ -213,19 +213,22 @@ if __name__ == "__main__":
                 onshore_locs.values, onshore_shape
             )
             shape_id = 0  # Not used
-        onshore_regions.append(
-            gpd.GeoDataFrame(
-                {
-                    "name": onshore_locs.index,
-                    "x": onshore_locs["x"],
-                    "y": onshore_locs["y"],
-                    "geometry": onshore_geometry,
-                    "country": country,
-                    "shape_id": shape_id,
-                },
-                crs=country_shapes.crs,
-            )
+
+        temp_region = gpd.GeoDataFrame(
+            {
+                "name": onshore_locs.index,
+                "x": onshore_locs["x"],
+                "y": onshore_locs["y"],
+                "geometry": onshore_geometry,
+                "country": country,
+                "shape_id": shape_id,
+            },
+            crs=country_shapes.crs,
         )
+        temp_region = temp_region[
+            temp_region.geometry.is_valid & ~temp_region.geometry.is_empty
+        ]
+        onshore_regions.append(temp_region)
 
         # These two logging could be commented out
         if country not in offshore_shapes.index:
@@ -256,6 +259,10 @@ if __name__ == "__main__":
             )
             offshore_regions_c = offshore_regions_c.loc[
                 offshore_regions_c.to_crs(area_crs).area > 1e-2
+            ]
+            offshore_regions_c = offshore_regions_c[
+                offshore_regions_c.geometry.is_valid
+                & ~offshore_regions_c.geometry.is_empty
             ]
             offshore_regions.append(offshore_regions_c)
 
