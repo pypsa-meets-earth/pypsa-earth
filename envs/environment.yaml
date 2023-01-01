@@ -78,7 +78,7 @@ dependencies:
 - pip:
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/davide-f/atlite.git@master
-  - git+https://github.com/pypsa-meets-earth/earth-osm.git
+  - earth-osm==0.0.8  # until on conda available
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
