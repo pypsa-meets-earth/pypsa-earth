@@ -60,6 +60,7 @@ dependencies:
 - pip:
   - git+https://github.com/pydata/xarray@main   # till the main is not in conda
   - git+https://github.com/pypsa/pypsa.git#egg=pypsa
+  - earth-osm==0.0.8  # until on conda available
   - vresutils==0.3.1
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip

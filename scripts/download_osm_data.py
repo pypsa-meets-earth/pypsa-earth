@@ -36,7 +36,6 @@ def country_list_to_geofk(country_list):
     full_codes_list : list
         Example ["NG","ZA"]
     """
-
     full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
 
     return full_codes_list
@@ -83,6 +82,8 @@ if __name__ == "__main__":
     store_path_resources = Path.joinpath(Path().cwd(), "resources", "osm", "raw")
     country_list = country_list_to_geofk(snakemake.config["countries"])
 
+    # Python interface to download OpenStreetMap data
+    # Documented at https://github.com/pypsa-meets-earth/earth-osm
     eo.get_osm_data(
         primary_name="power",
         region_list=country_list,
@@ -98,14 +99,16 @@ if __name__ == "__main__":
     names = ["generators", "cables", "lines", "substations"]
     format = ["csv", "geojson"]
 
-    # Create file if not existing
+    # earth-osm (eo) only outputs files with content
+    # If the file is empty, it is not created
+    # This is a workaround to create empty files for the workflow
     for name in names:
         for f in format:
             filename = Path.joinpath(out_path, f"all_{name}.{f}")
+            # Create file if not exist
             if not Path.exists(filename):
                 _logger.info(f"{filename} does not exist, create empty file")
                 open(filename, "w").close()
-
             # Move and rename
             old_path = Path.joinpath(out_path, f"all_{name}.{f}")
             new_path = Path.joinpath(store_path_resources, f"africa_all_raw_{name}.{f}")
