@@ -580,7 +580,7 @@ def to_csv_nafix(df, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     # if len(df) > 0:
-    if not df.empty:
+    if not df.empty or not df.columns.empty:
         return df.to_csv(path, **kwargs, na_rep=NA_VALUES[0])
     else:
         with open(path, "w") as fp:
