@@ -570,7 +570,10 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" in kwargs:
         del kwargs["na_values"]
 
-    return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=NA_VALUES)
+    if os.stat(file).st_size > 0:
+        return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=NA_VALUES)
+    else:
+        return pd.DataFrame()
 
 
 def to_csv_nafix(df, path, **kwargs):

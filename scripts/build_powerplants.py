@@ -88,6 +88,9 @@ logger = logging.getLogger(__name__)
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
+    if os.stat(filepath_ppl_osm).st_size == 0:
+        return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
+
     add_ppls = read_csv_nafix(filepath_ppl_osm, index_col=0, dtype={"bus": "str"})
 
     custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
