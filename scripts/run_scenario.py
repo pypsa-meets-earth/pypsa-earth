@@ -95,7 +95,8 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
                     [header + "-" + k for k in ["size", "length", "length_dc"]],
                 ),
             )
-        except:
+        except Exception as inst:
+            print(inst)
             return pd.DataFrame()
     else:
         return pd.DataFrame()
@@ -154,7 +155,7 @@ def collect_network_stats(network_rule, config):
 
     def capacity_stats(df):
         if df.empty:
-            return pd.DataFrame()
+            return pd.Series(dtype=float)
         else:
             return df.groupby("carrier").p_nom.sum().astype(float)
 
@@ -187,7 +188,8 @@ def collect_network_stats(network_rule, config):
                 network_stats = pd.concat([line_stats, df_gen_stats], axis=1)
 
             return network_stats
-        except:
+        except Exception as inst:
+            print(inst)
             return pd.DataFrame()
     else:
         return pd.DataFrame()
@@ -273,8 +275,9 @@ def collect_renewable_stats(rulename, technology):
                 [[potential, avg_production_pu]],
                 columns=_multi_index_scen(rulename, ["potential", "avg_production_pu"]),
             )
-        except:
-            pd.DataFrame()
+        except Exception as inst:
+            print(inst)
+            return pd.DataFrame()
     else:
         return pd.DataFrame()
 
@@ -357,7 +360,7 @@ def run_scenario(dir_scenario, scenario, config):
         abs_f = os.path.abspath(f)
         if os.path.exists(abs_f):
             shutil.copytree(abs_f, copy_dir)
-            shutil.rmtree(abs_f, ignore_errors=True)
+            shutil.rmtree(abs_f)
 
     shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
 
@@ -367,7 +370,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("run_scenario", scenario="NG")
+        snakemake = mock_snakemake("run_scenario", scenario="NA")
 
     sets_path_to_root("pypsa-earth")
 
