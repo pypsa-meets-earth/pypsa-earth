@@ -265,6 +265,7 @@ def _aggregate_and_move_components(
         df = n.df(c)
         n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
+
 def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
