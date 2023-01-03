@@ -58,7 +58,7 @@ def generate_scenario_by_country(path_base, country_list):
         "LR": 2,
         "LS": 3,
         "SL": 1,
-        "TG": 2,
+        "TG": 1,
         "CG": 2,
         "ER": 1,
         "SS": 1,
@@ -382,7 +382,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("run_scenario", scenario="NA")
+        snakemake = mock_snakemake("run_scenario", scenario="TD")
 
     sets_path_to_root("pypsa-earth")
 
