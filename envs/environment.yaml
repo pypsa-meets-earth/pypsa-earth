@@ -16,6 +16,7 @@ dependencies:
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
 - powerplantmatching>=0.5.5
+- earth-osm==0.0.8  # until 0.1.0
 
   # Dependencies of the workflow itself
 - xlrd
@@ -78,7 +79,6 @@ dependencies:
 - pip:
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/davide-f/atlite.git@master
-  - earth-osm==0.0.8  # until on conda available
   - vresutils>=0.3.1
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
