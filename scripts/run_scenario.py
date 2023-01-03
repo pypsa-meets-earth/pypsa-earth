@@ -48,9 +48,33 @@ def generate_scenario_by_country(path_base, country_list):
     )
     df_landlocked["countries"] = df_landlocked.Code.map(three_2_two_digits_country)
 
+    n_clusters = {
+        "MG": 4,
+        "BF": 1,
+        "BI": 1,
+        "BJ": 2,
+        "DJ": 1,
+        "GM": 2,
+        "LR": 2,
+        "LS": 3,
+        "SL": 1,
+        "TG": 2,
+        "CG": 2,
+        "ER": 1,
+        "SS": 1,
+        "ML": 1,
+        "TD": 2,
+        "CF": 1,
+        "ER": 1,
+    }
+
     for c in clean_country_list:
 
-        modify_dict = {"countries": [c]}
+        n_cluster = "5"
+        if c in n_clusters.keys():
+            n_cluster = str(n_clusters[c])
+
+        modify_dict = {"countries": [c], "scenario": {"clusters": [n_cluster]}}
         if df_landlocked["countries"].str.contains(c).any():
             modify_dict["electricity"] = {
                 "renewable_carriers": ["solar", "onwind", "hydro"]
@@ -160,37 +184,29 @@ def collect_network_stats(network_rule, config):
             return df.groupby("carrier").p_nom.sum().astype(float)
 
     if os.path.exists(network_path):
-        try:
-            n = pypsa.Network(network_path)
+        n = pypsa.Network(network_path)
 
-            lines_length = float((n.lines.length * n.lines.num_parallel).sum())
+        lines_length = float((n.lines.length * n.lines.num_parallel).sum())
 
-            lines_capacity = float(n.lines.s_nom.sum())
+        lines_capacity = float(n.lines.s_nom.sum())
 
-            line_stats = pd.DataFrame(
-                [[lines_length, lines_capacity]],
-                columns=_multi_index_scen(
-                    network_rule, ["lines_length", "lines_capacity"]
-                ),
-            )
+        line_stats = pd.DataFrame(
+            [[lines_length, lines_capacity]],
+            columns=_multi_index_scen(network_rule, ["lines_length", "lines_capacity"]),
+        )
 
-            gen_stats = pd.concat(
-                [capacity_stats(n.generators), capacity_stats(n.storage_units)], axis=0
-            )
+        gen_stats = pd.concat(
+            [capacity_stats(n.generators), capacity_stats(n.storage_units)], axis=0
+        )
 
-            if gen_stats.empty:
-                network_stats = line_stats
-            else:
-                df_gen_stats = gen_stats.to_frame().transpose().reset_index()
-                df_gen_stats.columns = _multi_index_scen(
-                    network_rule, df_gen_stats.columns
-                )
-                network_stats = pd.concat([line_stats, df_gen_stats], axis=1)
+        if gen_stats.empty:
+            network_stats = line_stats
+        else:
+            df_gen_stats = gen_stats.to_frame().transpose().reset_index()
+            df_gen_stats.columns = _multi_index_scen(network_rule, df_gen_stats.columns)
+            network_stats = pd.concat([line_stats, df_gen_stats], axis=1)
 
-            return network_stats
-        except Exception as inst:
-            print(inst)
-            return pd.DataFrame()
+        return network_stats
     else:
         return pd.DataFrame()
 
@@ -261,23 +277,19 @@ def collect_renewable_stats(rulename, technology):
     snakemake = _mock_snakemake(rulename, technology=technology)
 
     if os.path.exists(snakemake.output.profile):
-        try:
-            res = xr.open_dataset(snakemake.output.profile)
+        res = xr.open_dataset(snakemake.output.profile)
 
-            if technology == "hydro":
-                potential = float(res.inflow.sum())
-                avg_production_pu = float(res.inflow.mean(dim=["plant"]).sum())
-            else:
-                potential = float(res.potential.sum())
-                avg_production_pu = float(res.profile.mean(dim=["bus"]).sum())
+        if technology == "hydro":
+            potential = float(res.inflow.sum())
+            avg_production_pu = float(res.inflow.mean(dim=["plant"]).sum())
+        else:
+            potential = float(res.potential.sum())
+            avg_production_pu = float(res.profile.mean(dim=["bus"]).sum())
 
-            return pd.DataFrame(
-                [[potential, avg_production_pu]],
-                columns=_multi_index_scen(rulename, ["potential", "avg_production_pu"]),
-            )
-        except Exception as inst:
-            print(inst)
-            return pd.DataFrame()
+        return pd.DataFrame(
+            [[potential, avg_production_pu]],
+            columns=_multi_index_scen(rulename, ["potential", "avg_production_pu"]),
+        )
     else:
         return pd.DataFrame()
 
