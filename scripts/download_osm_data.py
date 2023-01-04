@@ -748,15 +748,18 @@ if __name__ == "__main__":
     geo_crs = snakemake.config["crs"]["geo_crs"]
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
-    # Set update # Verify = True checks local md5s and pre-filters data again
-    process_data(
-        feature_list,
-        country_list,
-        output_files,
-        geo_crs,
-        distance_crs,
-        iso_coding=True,
-        update=False,
-        verify=False,
-        nprocesses=nprocesses,
-    )
+    try:
+        # Set update # Verify = True checks local md5s and pre-filters data again
+        process_data(
+            feature_list,
+            country_list,
+            output_files,
+            geo_crs,
+            distance_crs,
+            iso_coding=True,
+            update=False,
+            verify=False,
+            nprocesses=nprocesses,
+        )
+    except:
+        _logger.exception("Something went wrong in 'process_data()'")  
