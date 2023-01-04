@@ -46,6 +46,7 @@ from tqdm import tqdm
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# TODO logger name should be the same across all the scripts
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 
