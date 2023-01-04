@@ -826,7 +826,7 @@ if __name__ == "__main__":
     else:
         ext_country_shapes = None
 
-    try:    
+    try:
         clean_data(
             input_files,
             output_files,
@@ -841,4 +841,4 @@ if __name__ == "__main__":
             generator_name_method=generator_name_method,
         )
     except:
-        logger.exception("Something went wrong in 'clean_data()'")    
+        logger.exception("Something went wrong in 'clean_data()'")

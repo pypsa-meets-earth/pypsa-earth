@@ -764,4 +764,4 @@ if __name__ == "__main__":
             nprocesses=nprocesses,
         )
     except:
-        _logger.exception("Something went wrong in 'process_data()'")  
+        _logger.exception("Something went wrong in 'process_data()'")
