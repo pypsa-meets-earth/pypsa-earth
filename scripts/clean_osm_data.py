@@ -826,16 +826,19 @@ if __name__ == "__main__":
     else:
         ext_country_shapes = None
 
-    clean_data(
-        input_files,
-        output_files,
-        africa_shape,
-        geo_crs,
-        distance_crs,
-        ext_country_shapes=ext_country_shapes,
-        names_by_shapes=names_by_shapes,
-        tag_substation=tag_substation,
-        threshold_voltage=threshold_voltage,
-        add_line_endings=add_line_endings,
-        generator_name_method=generator_name_method,
-    )
+    try:    
+        clean_data(
+            input_files,
+            output_files,
+            africa_shape,
+            geo_crs,
+            distance_crs,
+            ext_country_shapes=ext_country_shapes,
+            names_by_shapes=names_by_shapes,
+            tag_substation=tag_substation,
+            threshold_voltage=threshold_voltage,
+            add_line_endings=add_line_endings,
+            generator_name_method=generator_name_method,
+        )
+    except:
+        logger.exception("Something went wrong in 'clean_data()'")    
