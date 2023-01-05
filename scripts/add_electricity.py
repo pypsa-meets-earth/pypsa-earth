@@ -868,34 +868,38 @@ if __name__ == "__main__":
 
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
 
-    attach_load(n, load_paths, regions, admin_shapes, countries, scale)
-    update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
-    conventional_inputs = {
-        k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
-    }
-    attach_conventional_generators(
-        n,
-        costs,
-        ppl,
-        conventional_carriers,
-        extendable_carriers,
-        snakemake.config.get("conventional", {}),
-        conventional_inputs,
-    )
-    attach_wind_and_solar(
-        n,
-        costs,
-        snakemake.input,
-        renewable_carriers,
-        extendable_carriers,
-        snakemake.config["lines"]["length_factor"],
-    )
-    attach_hydro(n, costs, ppl)
-
-    estimate_renewable_capacities_irena(n, snakemake.config)
-
-    update_p_nom_max(n)
-    add_nice_carrier_names(n, snakemake.config)
-
-    n.meta = snakemake.config
-    n.export_to_netcdf(snakemake.output[0])
+    try: 
+        attach_load(n, load_paths, regions, admin_shapes, countries, scale)
+        update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
+        conventional_inputs = {
+            k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
+        }
+        attach_conventional_generators(
+            n,
+            costs,
+            ppl,
+            conventional_carriers,
+            extendable_carriers,
+            snakemake.config.get("conventional", {}),
+            conventional_inputs,
+        )
+        attach_wind_and_solar(
+            n,
+            costs,
+            snakemake.input,
+            renewable_carriers,
+            extendable_carriers,
+            snakemake.config["lines"]["length_factor"],
+        )
+        attach_hydro(n, costs, ppl)
+    
+        estimate_renewable_capacities_irena(n, snakemake.config)
+    
+        update_p_nom_max(n)
+        add_nice_carrier_names(n, snakemake.config)
+    
+        n.meta = snakemake.config
+        n.export_to_netcdf(snakemake.output[0])
+    except:
+        logger.exception("Something went wrong when adding the loads and generators")
+        sys.exit(1)    
