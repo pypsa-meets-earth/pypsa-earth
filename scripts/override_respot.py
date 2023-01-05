@@ -105,7 +105,7 @@ if __name__ == "__main__":
                     / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
                 )
                 * energy_totals.loc[country, "electricity residential"]
-                * 1e9
+                * 1e6
             )
 
     n.export_to_netcdf(snakemake.output[0])
