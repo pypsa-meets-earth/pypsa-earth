@@ -263,12 +263,14 @@ if __name__ == "__main__":
     else:
         config["main_query"] = ""
 
-    try:    
+    try:
         ppl = (
             pm.powerplants(from_url=False, update=True, config_update=config)
             .powerplant.fill_missing_decommissioning_years()
             .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-            .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
+            .replace(
+                {"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}}
+            )
             .powerplant.convert_country_to_alpha2()
             .assign(
                 Technology=replace_natural_gas_technology,
@@ -277,7 +279,7 @@ if __name__ == "__main__":
         )
     except:
         logger.exception("Something went wrong in a powerplantmatching query")
-        sys.exit(1)    
+        sys.exit(1)
 
     ppl = add_custom_powerplants(ppl)  # add carriers from own powerplant files
 
@@ -313,12 +315,14 @@ if __name__ == "__main__":
             # try:
             return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
 
-        try:    
+        try:
             ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
                 lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
             )
         except:
-            logger.exception("Something went wrong when trying to locate the regional powerplants relative to the network buses")
-            sys.exit(1)    
+            logger.exception(
+                "Something went wrong when trying to locate the regional powerplants relative to the network buses"
+            )
+            sys.exit(1)
 
     ppl.to_csv(snakemake.output.powerplants)

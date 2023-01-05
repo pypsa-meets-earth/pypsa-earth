@@ -816,7 +816,7 @@ if __name__ == "__main__":
         country_shapes = countries(countries_list, geo_crs, update, out_logging)
     except:
         logger.exception("Something went wrong when building the country shapes")
-        sys.exit(1)    
+        sys.exit(1)
 
     country_shapes.reset_index().to_file(snakemake.output.country_shapes)
 
@@ -845,5 +845,5 @@ if __name__ == "__main__":
         )
     except:
         logger.exception("Something went wrong when building the gadm shapes")
-        sys.exit(1)         
+        sys.exit(1)
     save_to_geojson(gadm_shapes, out.gadm_shapes)

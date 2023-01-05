@@ -868,7 +868,7 @@ if __name__ == "__main__":
 
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
 
-    try: 
+    try:
         attach_load(n, load_paths, regions, admin_shapes, countries, scale)
         update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
         conventional_inputs = {
@@ -892,14 +892,14 @@ if __name__ == "__main__":
             snakemake.config["lines"]["length_factor"],
         )
         attach_hydro(n, costs, ppl)
-    
+
         estimate_renewable_capacities_irena(n, snakemake.config)
-    
+
         update_p_nom_max(n)
         add_nice_carrier_names(n, snakemake.config)
-    
+
         n.meta = snakemake.config
         n.export_to_netcdf(snakemake.output[0])
     except:
         logger.exception("Something went wrong when adding the loads and generators")
-        sys.exit(1)    
+        sys.exit(1)

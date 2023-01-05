@@ -592,7 +592,7 @@ if __name__ == "__main__":
             )
         except:
             logger.exception("Something went wrong in 'clustering_for_n_clusters()'")
-            sys.exit(1)    
+            sys.exit(1)
 
     update_p_nom_max(clustering.network)
     clustering.network.meta = dict(
