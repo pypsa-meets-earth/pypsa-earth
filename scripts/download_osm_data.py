@@ -765,3 +765,4 @@ if __name__ == "__main__":
         )
     except:
         _logger.exception("Something went wrong in 'process_data()'")
+        sys.exit(1)
