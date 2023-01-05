@@ -79,6 +79,13 @@ def _add_land_use_constraint_m(n):
 
 def prepare_network(n, solve_opts=None):
 
+    if snakemake.config["rescale_emissions"]:
+        n.carriers.co2_emissions = n.carriers.co2_emissions * 1e-6
+        n.global_constraints.at["CO2Limit", "constant"] = n.global_constraints.at["CO2Limit", "constant"] * 1e-9
+    if "lv_limit" in n.global_constraints.index:
+        n.line_volume_limit = n.global_constraints.at["lv_limit", "constant"]
+        n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]    
+
     if "clip_p_max_pu" in solve_opts:
         for df in (
             n.generators_t.p_max_pu,
@@ -151,6 +158,14 @@ def add_battery_constraints(n):
 
     define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
+def add_h2_network_cap(n, cap):
+    h2_network=n.links.loc[n.links.carrier=='H2 pipeline'].index
+    if h2_network.empty or ('Link', 'p_nom') not in n.variables.index:
+        return
+    h2_network_cap = get_var(n, 'Link', 'p_nom')
+    lhs = linexpr((1, h2_network_cap[h2_network])).sum()
+    rhs = cap*1000
+    define_constraints(n, lhs, "<=", rhs, 'h2_network_cap')
 
 def H2_export_yearly_constraint(n):
     res = [
@@ -186,7 +201,7 @@ def H2_export_yearly_constraint(n):
 
     rhs = h2_export * (1 / 0.7) + load  # 0.7 is approximation of electrloyzer capacity
 
-    con = define_constraints(n, lhs, "=", rhs, "H2ExportConstraint", "RESproduction")
+    con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
 
 
 def add_chp_constraints(n):
@@ -283,7 +298,13 @@ def add_co2_sequestration_limit(n, sns):
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
+    if snakemake.config["policy_config"]["policy"] == "H2_export_yearly_constraint":
+        print("setting h2 export to greenness constraint")
+        H2_export_yearly_constraint(n)
 
+    if snakemake.config["H2_network"]:
+        if snakemake.config["H2_network_limit"]:
+            add_h2_network_cap(n, snakemake.config["H2_network_limit"])
     # add_co2_sequestration_limit(n, snapshots)
 
 
@@ -329,12 +350,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="39",
+            clusters="67",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
-            discountrate=0.071,
+            discountrate=0.069,
             demand="NZ",
         )
         sets_path_to_root("pypsa-earth-sec")
@@ -351,7 +372,9 @@ if __name__ == "__main__":
 
     fn = getattr(snakemake.log, "memory", None)
     with memory_logger(filename=fn, interval=30.0) as mem:
+        
 
+            
         overrides = override_component_attrs(snakemake.input.overrides)
         n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
@@ -365,9 +388,9 @@ if __name__ == "__main__":
             solver_logfile=snakemake.log.solver,
         )
 
-        if "lv_limit" in n.global_constraints.index:
-            n.line_volume_limit = n.global_constraints.at["lv_limit", "constant"]
-            n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
+
+
+        
 
         n.export_to_netcdf(snakemake.output[0])
 
