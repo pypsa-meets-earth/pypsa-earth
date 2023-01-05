@@ -326,18 +326,19 @@ def add_hydrogen(n, costs):
             h2_links.at[name, "length"] = candidates.at[candidate, "length"]
 
     # TODO Add efficiency losses
-    n.madd(
-        "Link",
-        h2_links.index,
-        bus0=h2_links.bus0.values + " H2",
-        bus1=h2_links.bus1.values + " H2",
-        p_min_pu=-1,
-        p_nom_extendable=True,
-        length=h2_links.length.values,
-        capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
-        carrier="H2 pipeline",
-        lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-    )
+    if snakemake.config["H2_network"]:
+        n.madd(
+            "Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
+            carrier="H2 pipeline",
+            lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+        )
 
 
 def define_spatial(nodes):
