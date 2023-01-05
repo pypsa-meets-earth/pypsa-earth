@@ -117,7 +117,7 @@ rule prepare_sector_network:
 rule add_export:
     input:
         overrides="data/override_component_attrs",
-        ports="data/ports.csv",
+        export_ports="data/export_ports.csv",
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path=pypsaearth(
