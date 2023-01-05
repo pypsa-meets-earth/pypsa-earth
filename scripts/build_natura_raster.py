@@ -60,8 +60,9 @@ from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-_logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 CUTOUT_CRS = "EPSG:4326"
 
@@ -89,7 +90,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
 def determine_cutout_xXyY(cutout_name, out_logging):
     if out_logging:
-        _logger.info("Stage 1/5: Determine cutout boundaries")
+        logger.info("Stage 1/5: Determine cutout boundaries")
     cutout = atlite.Cutout(cutout_name)
     assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
@@ -105,7 +106,7 @@ def determine_cutout_xXyY(cutout_name, out_logging):
 
 def get_transform_and_shape(bounds, res, out_logging):
     if out_logging:
-        _logger.info("Stage 2/5: Get transform and shape")
+        logger.info("Stage 2/5: Get transform and shape")
     left, bottom = [(b // res) * res for b in bounds[:2]]
     right, top = [(b // res + 1) * res for b in bounds[2:]]
     # "latitude, longitude" coordinates order
@@ -131,14 +132,14 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     from shapely.validation import make_valid
 
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area.")
+        logger.info("Stage 3/5: Unify protected shape area.")
 
     # Read only .shp snakemake inputs
     shp_files = [string for string in inputs if ".shp" in string]
     assert len(shp_files) != 0, "no input shapefiles given"
     # Create one geodataframe with all geometries, of all .shp files
     if out_logging:
-        _logger.info(
+        logger.info(
             "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
         )
 
@@ -159,12 +160,12 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
             list_shapes.append(shp)
             read_files += 1
         except:
-            _logger.warning(f"Error reading file {i}")
+            logger.warning(f"Error reading file {i}")
 
     # merge dataframes
     shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(natura_crs)
 
-    _logger.info(f"Read {read_files} out of {total_files} landcover files")
+    logger.info(f"Read {read_files} out of {total_files} landcover files")
 
     # Removes shapely geometry with null values. Returns geoseries.
     shape = shape["geometry"][shape["geometry"].is_valid]
@@ -175,10 +176,10 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
 
     # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
     if out_logging:
-        _logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
+        logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
     unified_shape_file = unary_union(shape["geometry"])
     if out_logging:
-        _logger.info(
+        logger.info(
             "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
         )
     unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=natura_crs)
@@ -218,12 +219,12 @@ if __name__ == "__main__":
     )
 
     if out_logging:
-        _logger.info("Stage 4/5: Mask geometry")
+        logger.info("Stage 4/5: Mask geometry")
     raster = ~geometry_mask(shapes.geometry, out_shape, transform)
     raster = raster.astype(rio.uint8)
 
     if out_logging:
-        _logger.info("Stage 5/5: Export as .tiff")
+        logger.info("Stage 5/5: Export as .tiff")
     with rio.open(
         snakemake.output[0],
         "w",
