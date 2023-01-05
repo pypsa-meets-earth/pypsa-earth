@@ -574,21 +574,25 @@ if __name__ == "__main__":
         cluster_config = snakemake.config.get("cluster_options", {}).get(
             "cluster_network", {}
         )
-        clustering = clustering_for_n_clusters(
-            n,
-            n_clusters,
-            alternative_clustering,
-            gadm_layer_id,
-            geo_crs,
-            country_list,
-            custom_busmap,
-            aggregate_carriers,
-            line_length_factor,
-            aggregation_strategies,
-            solver_name=snakemake.config["solving"]["solver"]["name"],
-            extended_link_costs=hvac_overhead_cost,
-            focus_weights=focus_weights,
-        )
+        try:
+            clustering = clustering_for_n_clusters(
+                n,
+                n_clusters,
+                alternative_clustering,
+                gadm_layer_id,
+                geo_crs,
+                country_list,
+                custom_busmap,
+                aggregate_carriers,
+                line_length_factor,
+                aggregation_strategies,
+                solver_name=snakemake.config["solving"]["solver"]["name"],
+                extended_link_costs=hvac_overhead_cost,
+                focus_weights=focus_weights,
+            )
+        except:
+            logger.exception("Something went wrong in 'clustering_for_n_clusters()'")
+            sys.exit(1)    
 
     update_p_nom_max(clustering.network)
     clustering.network.meta = dict(
