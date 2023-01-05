@@ -375,7 +375,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 params.setdefault(attr, default)
             n.links.loc[name] = params
 
-            # n.add("Link", **params)
+    logger.debug("Collecting all components using the busmap")
 
     _aggregate_and_move_components(
         n,
