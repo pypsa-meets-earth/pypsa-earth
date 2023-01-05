@@ -524,35 +524,42 @@ if __name__ == "__main__":
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
-
-    n, trafo_map = simplify_network_to_380(n, linetype)
-
-    n, simplify_links_map = simplify_links(
-        n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
-    )
-
-    n, stub_map = remove_stubs(
-        n,
-        technology_costs,
-        snakemake.config,
-        snakemake.output,
-        aggregation_strategies=aggregation_strategies,
-    )
-
-    busmaps = [trafo_map, simplify_links_map, stub_map]
-
-    if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(
-            n, int(snakemake.wildcards.simpl), snakemake.config, aggregation_strategies
+    try:
+        n, trafo_map = simplify_network_to_380(n, linetype)
+    
+        n, simplify_links_map = simplify_links(
+            n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
         )
-        busmaps.append(cluster_map)
+    
+        n, stub_map = remove_stubs(
+            n,
+            technology_costs,
+            snakemake.config,
+            snakemake.output,
+            aggregation_strategies=aggregation_strategies,
+        )
+    
+        busmaps = [trafo_map, simplify_links_map, stub_map]
+    
+        if snakemake.wildcards.simpl:
+            n, cluster_map = cluster(
+                n, int(snakemake.wildcards.simpl), snakemake.config, aggregation_strategies
+            )
+            busmaps.append(cluster_map)
+    
+        update_p_nom_max(n)
+    
+        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+        n.export_to_netcdf(snakemake.output.network)
+    except:
+        logger.exception("Something went wrong when simplifying the network")
+        sys.exit(1)        
 
-    update_p_nom_max(n)
-
-    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
-    n.export_to_netcdf(snakemake.output.network)
-
-    busmap_s = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
-    busmap_s.to_csv(snakemake.output.busmap)
-
-    cluster_regions(busmaps, snakemake.input, snakemake.output)
+    try:    
+        busmap_s = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
+        busmap_s.to_csv(snakemake.output.busmap)
+    
+        cluster_regions(busmaps, snakemake.input, snakemake.output)
+    except:
+        logger.exception("Something went wrong when building a busmap for a simplified network")
+        sys.exit(1)         
