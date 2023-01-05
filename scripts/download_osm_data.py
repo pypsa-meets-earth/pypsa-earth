@@ -49,9 +49,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # TODO logger name should be the same across all the scripts
 logger = logging.getLogger(__name__)
 # TODO check if duplication with basicConfig() is really needed
-logger.setLevel(logging.INFO)
 
-# logger.setLevel(logging.WARNING)
 
 OSM_CRS = "EPSG:4326"
 

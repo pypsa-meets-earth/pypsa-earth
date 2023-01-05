@@ -32,7 +32,6 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-_logger.setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 

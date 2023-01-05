@@ -60,7 +60,6 @@ from _helpers import configure_logging
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-_logger.setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
