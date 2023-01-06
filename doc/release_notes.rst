@@ -47,6 +47,8 @@ Upcoming Release
 
 * Fix None geometries into regions `PR #546 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/546>`__
 
+* Restore saving of logger outputs and enable saving of errors to the logs `PR #555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/555>`__
+
 PyPSA-Earth 0.1.0
 =================
 
