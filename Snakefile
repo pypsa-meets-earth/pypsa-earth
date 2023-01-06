@@ -123,11 +123,11 @@ if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
         output:
-            cables="resources/osm/raw/africa_all_raw_cables.geojson",
-            generators="resources/osm/raw/africa_all_raw_generators.geojson",
-            generators_csv="resources/osm/raw/africa_all_raw_generators.csv",
-            lines="resources/osm/raw/africa_all_raw_lines.geojson",
-            substations="resources/osm/raw/africa_all_raw_substations.geojson",
+            cables="resources/osm/raw/all_raw_cables.geojson",
+            generators="resources/osm/raw/all_raw_generators.geojson",
+            generators_csv="resources/osm/raw/all_raw_generators.csv",
+            lines="resources/osm/raw/all_raw_lines.geojson",
+            substations="resources/osm/raw/all_raw_substations.geojson",
         log:
             "logs/download_osm_data.log",
         script:
@@ -136,18 +136,18 @@ if config["enable"].get("download_osm_data", True):
 
 rule clean_osm_data:
     input:
-        cables="resources/osm/raw/africa_all_raw_cables.geojson",
-        generators="resources/osm/raw/africa_all_raw_generators.geojson",
-        lines="resources/osm/raw/africa_all_raw_lines.geojson",
-        substations="resources/osm/raw/africa_all_raw_substations.geojson",
+        cables="resources/osm/raw/all_raw_cables.geojson",
+        generators="resources/osm/raw/all_raw_generators.geojson",
+        lines="resources/osm/raw/all_raw_lines.geojson",
+        substations="resources/osm/raw/all_raw_substations.geojson",
         country_shapes="resources/shapes/country_shapes.geojson",
         offshore_shapes="resources/shapes/offshore_shapes.geojson",
         africa_shape="resources/shapes/africa_shape.geojson",
     output:
-        generators="resources/osm/clean/africa_all_generators.geojson",
-        generators_csv="resources/osm/clean/africa_all_generators.csv",
-        lines="resources/osm/clean/africa_all_lines.geojson",
-        substations="resources/osm/clean/africa_all_substations.geojson",
+        generators="resources/osm/clean/all_generators.geojson",
+        generators_csv="resources/osm/clean/all_generators.csv",
+        lines="resources/osm/clean/all_lines.geojson",
+        substations="resources/osm/clean/all_substations.geojson",
     log:
         "logs/clean_osm_data.log",
     script:
@@ -156,15 +156,15 @@ rule clean_osm_data:
 
 rule build_osm_network:
     input:
-        generators="resources/osm/clean/africa_all_generators.geojson",
-        lines="resources/osm/clean/africa_all_lines.geojson",
-        substations="resources/osm/clean/africa_all_substations.geojson",
+        generators="resources/osm/clean/all_generators.geojson",
+        lines="resources/osm/clean/all_lines.geojson",
+        substations="resources/osm/clean/all_substations.geojson",
         country_shapes="resources/shapes/country_shapes.geojson",
     output:
-        lines="resources/base_network/africa_all_lines_build_network.csv",
-        converters="resources/base_network/africa_all_converters_build_network.csv",
-        transformers="resources/base_network/africa_all_transformers_build_network.csv",
-        substations="resources/base_network/africa_all_buses_build_network.csv",
+        lines="resources/base_network/all_lines_build_network.csv",
+        converters="resources/base_network/all_converters_build_network.csv",
+        transformers="resources/base_network/all_transformers_build_network.csv",
+        substations="resources/base_network/all_buses_build_network.csv",
     log:
         "logs/build_osm_network.log",
     script:
@@ -195,23 +195,12 @@ rule build_shapes:
 
 rule base_network:
     input:
-        osm_buses="resources/base_network/africa_all_buses_build_network.csv",
-        osm_lines="resources/base_network/africa_all_lines_build_network.csv",
-        osm_converters="resources/base_network/africa_all_converters_build_network.csv",
-        osm_transformers="resources/base_network/africa_all_transformers_build_network.csv",
+        osm_buses="resources/base_network/all_buses_build_network.csv",
+        osm_lines="resources/base_network/all_lines_build_network.csv",
+        osm_converters="resources/base_network/all_converters_build_network.csv",
+        osm_transformers="resources/base_network/all_transformers_build_network.csv",
         country_shapes="resources/shapes/country_shapes.geojson",
         offshore_shapes="resources/shapes/offshore_shapes.geojson",
-        # osm_buses='data/osm/africa_all_buses_clean.csv',
-        # osm_lines='data/osm/africa_all_lines_clean.csv',
-        # eg_buses='data/entsoegridkit/buses.csv',
-        # eg_lines='data/entsoegridkit/lines.csv',
-        # eg_links='data/entsoegridkit/links.csv',
-        # eg_converters='data/entsoegridkit/converters.csv',
-        # eg_transformers='data/entsoegridkit/transformers.csv',
-        # parameter_corrections='data/parameter_corrections.yaml',
-        # links_p_nom='data/links_p_nom.csv',
-        # links_tyndp='data/links_tyndp.csv',
-        # africa_shape='resources/africa_shape.geojson'
     output:
         "networks/base.nc",
     log:
@@ -330,7 +319,7 @@ rule build_powerplants:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
-        osm_powerplants="resources/osm/clean/africa_all_generators.csv",
+        osm_powerplants="resources/osm/clean/all_generators.csv",
         #gadm_shapes="resources/shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/shapes/
