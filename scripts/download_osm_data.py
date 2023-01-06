@@ -1,14 +1,33 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText: : 2021 PyPSA-Earth Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Python interface to download OpenStreetMap data
+Documented at https://github.com/pypsa-meets-earth/earth-osm
+
+Relevant Settings
+-----------------
+
+*None*  # multiprocessing & infrastructure selection can be an option in future
+
+Inputs
+------
+
+*None*
+
+Outputs
+-------
+
+- ``data/osm/pbf``: Raw OpenStreetMap data as .pbf files per country
+- ``data/osm/power``: Filtered power data as .json files per country
+- ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
+- ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
+"""
 import logging
 import os
 import shutil
 from pathlib import Path
-
-import geopandas as gpd
-import pandas as pd
 from _helpers import configure_logging
 from config_osm_data import iso_to_geofk_dict
 from earth_osm import eo
@@ -82,8 +101,6 @@ if __name__ == "__main__":
     store_path_resources = Path.joinpath(Path().cwd(), "resources", "osm", "raw")
     country_list = country_list_to_geofk(snakemake.config["countries"])
 
-    # Python interface to download OpenStreetMap data
-    # Documented at https://github.com/pypsa-meets-earth/earth-osm
     eo.get_osm_data(
         primary_name="power",
         region_list=country_list,
@@ -111,6 +128,6 @@ if __name__ == "__main__":
                 open(filename, "w").close()
             # Move and rename
             old_path = Path.joinpath(out_path, f"all_{name}.{f}")
-            new_path = Path.joinpath(store_path_resources, f"africa_all_raw_{name}.{f}")
+            new_path = Path.joinpath(store_path_resources, f"all_raw_{name}.{f}")
             _logger.info(f"Create {old_path} and move to {new_path}")
             shutil.move(old_path, new_path)
