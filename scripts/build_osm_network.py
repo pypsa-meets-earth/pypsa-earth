@@ -902,7 +902,7 @@ if __name__ == "__main__":
 
     try:
         built_network(snakemake.input, snakemake.output, geo_crs, distance_crs)
-   except:
+    except:
        logger.exception(
            "Something went wrong when extracting network elements"
        )
