@@ -528,11 +528,15 @@ if __name__ == "__main__":
 
     try:
         n, trafo_map = simplify_network_to_380(n, linetype)
-    
+
         n, simplify_links_map = simplify_links(
-            n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
+            n,
+            technology_costs,
+            snakemake.config,
+            snakemake.output,
+            aggregation_strategies,
         )
-    
+
         n, stub_map = remove_stubs(
             n,
             technology_costs,
