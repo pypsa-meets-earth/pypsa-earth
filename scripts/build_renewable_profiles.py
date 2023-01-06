@@ -550,7 +550,7 @@ if __name__ == "__main__":
                 )
             except Exception as e:
                 logger.exception(str(e))
-                sys.exit(1)                
+                sys.exit(1)
 
         logger.info("Calculate average distances.")
         layoutmatrix = (layout * availability).stack(spatial=["y", "x"])
