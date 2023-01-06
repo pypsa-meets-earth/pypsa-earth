@@ -900,4 +900,10 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    built_network(snakemake.input, snakemake.output, geo_crs, distance_crs)
+    try:
+        built_network(snakemake.input, snakemake.output, geo_crs, distance_crs)
+   except:
+       logger.exception(
+           "Something went wrong when extracting network elements"
+       )
+       sys.exit(1)        
