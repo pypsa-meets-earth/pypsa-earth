@@ -214,8 +214,10 @@ if __name__ == "__main__":
                     onshore_locs.values, onshore_shape
                 )
             except:
-                logger.exception("Something went wrong when building voronoi partition for onshore regions")
-                sys.exit(1)                 
+                logger.exception(
+                    "Something went wrong when building voronoi partition for onshore regions"
+                )
+                sys.exit(1)
             shape_id = 0  # Not used
 
         temp_region = gpd.GeoDataFrame(
@@ -252,8 +254,10 @@ if __name__ == "__main__":
                     offshore_locs.values, offshore_shape
                 )
             except:
-                logger.exception("Something went wrong when building voronoi partition for offshore regions")
-                sys.exit(1)     
+                logger.exception(
+                    "Something went wrong when building voronoi partition for offshore regions"
+                )
+                sys.exit(1)
             offshore_regions_c = gpd.GeoDataFrame(
                 {
                     "name": offshore_locs.index,
