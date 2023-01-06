@@ -209,9 +209,13 @@ if __name__ == "__main__":
             onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
             shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
         else:
-            onshore_geometry = custom_voronoi_partition_pts(
-                onshore_locs.values, onshore_shape
-            )
+            try:
+                onshore_geometry = custom_voronoi_partition_pts(
+                    onshore_locs.values, onshore_shape
+                )
+            except:
+                logger.exception("Something went wrong when building voronoi partition for onshore regions")
+                sys.exit(1)                 
             shape_id = 0  # Not used
 
         temp_region = gpd.GeoDataFrame(
@@ -243,9 +247,13 @@ if __name__ == "__main__":
         else:
             offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
             shape_id = 0  # Not used
-            offshore_geometry = custom_voronoi_partition_pts(
-                offshore_locs.values, offshore_shape
-            )
+            try:
+                offshore_geometry = custom_voronoi_partition_pts(
+                    offshore_locs.values, offshore_shape
+                )
+            except:
+                logger.exception("Something went wrong when building voronoi partition for offshore regions")
+                sys.exit(1)     
             offshore_regions_c = gpd.GeoDataFrame(
                 {
                     "name": offshore_locs.index,
