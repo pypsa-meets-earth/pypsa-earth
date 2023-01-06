@@ -241,11 +241,15 @@ if __name__ == "__main__":
         Nyears,
     )
 
-    attach_storageunits(n, costs)
-    attach_stores(n, costs)
-    attach_hydrogen_pipelines(n, costs)
-
-    add_nice_carrier_names(n, config=snakemake.config)
-
-    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
-    n.export_to_netcdf(snakemake.output[0])
+    try:
+        attach_storageunits(n, costs)
+        attach_stores(n, costs)
+        attach_hydrogen_pipelines(n, costs)
+    
+        add_nice_carrier_names(n, config=snakemake.config)
+    
+        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+        n.export_to_netcdf(snakemake.output[0])
+    except:
+        logger.exception("Something went wrong when adding storage units and storages")
+        sys.exit(1)         
