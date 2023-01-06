@@ -499,19 +499,23 @@ if __name__ == "__main__":
             excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 
         kwargs = dict(nprocesses=nprocesses, disable_progressbar=noprogress)
-        if noprogress:
-            logger.info("Calculate landuse availabilities...")
-            start = time.time()
-            availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
-
-            duration = time.time() - start
-            logger.info(f"Completed availability calculation ({duration:2.2f}s)")
-        else:
-            availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
-        area = cutout.grid.to_crs(area_crs).area / 1e6
-        area = xr.DataArray(
-            area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]
-        )
+        try:
+            if noprogress:
+                logger.info("Calculate landuse availabilities...")
+                start = time.time()
+                availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
+    
+                duration = time.time() - start
+                logger.info(f"Completed availability calculation ({duration:2.2f}s)")
+            else:
+                availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
+            area = cutout.grid.to_crs(area_crs).area / 1e6
+            area = xr.DataArray(
+                area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]
+            )
+        except:
+            logger.exception("Something went wrong when calculating landuse availabilities")
+            sys.exit(1)            
 
         potential = capacity_per_sqkm * availability.sum("bus") * area
 
