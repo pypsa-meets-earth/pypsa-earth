@@ -504,18 +504,21 @@ if __name__ == "__main__":
                 logger.info("Calculate landuse availabilities...")
                 start = time.time()
                 availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
-    
+
                 duration = time.time() - start
                 logger.info(f"Completed availability calculation ({duration:2.2f}s)")
             else:
                 availability = cutout.availabilitymatrix(regions, excluder, **kwargs)
             area = cutout.grid.to_crs(area_crs).area / 1e6
             area = xr.DataArray(
-                area.values.reshape(cutout.shape), [cutout.coords["y"], cutout.coords["x"]]
+                area.values.reshape(cutout.shape),
+                [cutout.coords["y"], cutout.coords["x"]],
             )
         except:
-            logger.exception("Something went wrong when calculating landuse availabilities")
-            sys.exit(1)            
+            logger.exception(
+                "Something went wrong when calculating landuse availabilities"
+            )
+            sys.exit(1)
 
         potential = capacity_per_sqkm * availability.sum("bus") * area
 
