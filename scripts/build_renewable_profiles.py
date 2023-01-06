@@ -543,10 +543,14 @@ if __name__ == "__main__":
             max_cap_factor = capacity_factor.where(availability != 0).max(["x", "y"])
             p_nom_max = capacities / max_cap_factor
         else:
-            raise AssertionError(
-                'Config key `potential` should be one of "simple" '
-                f'(default) or "conservative", not "{p_nom_max_meth}"'
-            )
+            try:
+                raise AssertionError(
+                    'Config key `potential` should be one of "simple" '
+                    f'(default) or "conservative", not "{p_nom_max_meth}"'
+                )
+            except Exception as e:
+                logger.exception(str(e))
+                sys.exit(1)                
 
         logger.info("Calculate average distances.")
         layoutmatrix = (layout * availability).stack(spatial=["y", "x"])
