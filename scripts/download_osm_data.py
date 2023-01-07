@@ -46,8 +46,8 @@ from tqdm import tqdm
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-_logger = logging.getLogger(__name__)
-_logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # logger.setLevel(logging.WARNING)
 
@@ -63,7 +63,7 @@ def getContinentCountry(code):
         if country:
             return continent, country
 
-    _logger.info(f"Missing geofabrik reference for country code {code}")
+    logger.info(f"Missing geofabrik reference for country code {code}")
 
     return continent, country
 
@@ -105,11 +105,11 @@ def download_pbf(country_code, update, verify, logging=True):
         os.getcwd(), "data", "osm", continent, "pbf", geofabrik_filename
     )
 
-    _logger.info(f" Input file {PBF_inputfile} ")
+    logger.info(f" Input file {PBF_inputfile} ")
 
     if not os.path.exists(PBF_inputfile):
         if logging:
-            _logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
+            logger.info(f"{geofabrik_filename} downloading to {PBF_inputfile}")
         #  create data/osm directory
         os.makedirs(os.path.dirname(PBF_inputfile), exist_ok=True)
         with requests.get(geofabrik_url, stream=True, verify=False) as r:
@@ -120,13 +120,13 @@ def download_pbf(country_code, update, verify, logging=True):
                     shutil.copyfileobj(r.raw, f)
             else:
                 # error status code: file not found
-                _logger.error(
+                logger.error(
                     f"Error code: {r.status_code}. File {geofabrik_filename} not downloaded from {geofabrik_url}"
                 )
 
     if verify is True:
         if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
-            _logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
+            logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
             if os.path.exists(PBF_inputfile):
                 os.remove(PBF_inputfile)
 
@@ -222,7 +222,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     if os.path.exists(file_stored_pickle):
         filter_file_exists = True
     else:
-        _logger.warning("Element file not found so pre-filtering")
+        logger.warning("Element file not found so pre-filtering")
         filter_file_exists = False
 
     elementname = f"{country_code}_{feature}s"
@@ -237,7 +237,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         # copy backup pickle into Data.pickle
         shutil.copyfile(file_stored_pickle, file_pickle)
 
-        _logger.info(
+        logger.info(
             f"Loading {feature} Pickle for {country_name}, iso-code: {country_code}"
         )
 
@@ -245,10 +245,10 @@ def download_and_filter(feature, country_code, update=False, verify=False):
         create_elements = True
         if country_code not in pre_filtered:  # Ensures pre-filter is not run everytime
             new_prefilter_data = True
-            _logger.info(f"Pre-filtering {country_name} ")
+            logger.info(f"Pre-filtering {country_name} ")
             pre_filtered.append(country_code)
 
-        _logger.info(
+        logger.info(
             f"Creating new {feature} Elements for {country_name}, iso-code: {country_code}"
         )
 
@@ -294,7 +294,7 @@ def download_and_filter(feature, country_code, update=False, verify=False):
     logging.disable(
         logging.NOTSET
     )  # Re-enable logging as run_filter disables logging.INFO
-    _logger.info(
+    logger.info(
         f"Pre: {new_prefilter_data}, Elem: {create_elements}, for {feature} in {country_code}"
     )
 
@@ -315,7 +315,7 @@ def convert_filtered_data_to_dfs(country_code, feature_data, feature):
 def lonlat_lookup(df_way, Data):
     """Lookup refs and convert to list of longlats"""
     if "refs" not in df_way.columns:
-        _logger.warning("refs column not found")
+        logger.warning("refs column not found")
         print(df_way.columns)
 
     def look(ref):
@@ -431,7 +431,7 @@ def output_csv_geojson(output_files, df_all_feature, columns_feature, feature, g
     # get path from snakemake; expected geojson
     path_file_geojson = output_files[feature + "s"]
     if not path_file_geojson.endswith(".geojson"):
-        _logger.error(f"Output file feature {feature} is not a geojson file")
+        logger.error(f"Output file feature {feature} is not a geojson file")
     path_file_csv = path_file_geojson.replace(".geojson", ".csv")  # get csv file
 
     if not os.path.exists(path_file_geojson):
@@ -442,7 +442,7 @@ def output_csv_geojson(output_files, df_all_feature, columns_feature, feature, g
     # check dataframe structure to avoid KeyErrors
     if not "lonlat" in df_all_feature.columns:
         if not "geometry" in df_all_feature.columns:
-            _logger.warning(f"Store empty Dataframe for {feature} as geometry missed.")
+            logger.warning(f"Store empty Dataframe for {feature} as geometry missed.")
             gdf_feature = []
             # create empty file to avoid issues with snakemake
             with open(path_file_geojson, "w") as fp:
@@ -472,7 +472,7 @@ def output_csv_geojson(output_files, df_all_feature, columns_feature, feature, g
     to_csv_nafix(df_all_feature, path_file_csv)  # Generate CSV
 
     if df_all_feature.empty:
-        _logger.warning(f"Store empty Dataframe for {feature}.")
+        logger.warning(f"Store empty Dataframe for {feature}.")
         gdf_feature = []
 
         # create empty file to avoid issues with snakemake
@@ -486,7 +486,7 @@ def output_csv_geojson(output_files, df_all_feature, columns_feature, feature, g
     else:
         gdf_feature = convert_pd_to_gdf_nodes(df_all_feature, geo_crs)
 
-    _logger.info("Writing GeoJSON file")
+    logger.info("Writing GeoJSON file")
     gdf_feature.to_file(path_file_geojson, driver="GeoJSON")  # Generate GeoJson
 
 
@@ -561,7 +561,7 @@ def process_data(
 
     # parallel download of data if parallel download is enabled
     if nprocesses > 1:
-        _logger.info(
+        logger.info(
             f"Parallel raw osm data (pbf files) download with {nprocesses} threads"
         )
         parallel_download_pbf(country_list, nprocesses, update, verify)
@@ -585,11 +585,11 @@ def process_data(
             if feature_category[feature] == "way":
                 convert_ways_lines(
                     df_way, Data, OSM_CRS, distance_crs
-                ) if not df_way.empty else _logger.warning(
+                ) if not df_way.empty else logger.warning(
                     f"Empty Way Dataframe for {feature} in {country_code}"
                 )
                 if not df_node.empty:
-                    _logger.warning(
+                    logger.warning(
                         f"Node dataframe not empty for {feature} in {country_code}"
                     )
 
@@ -657,7 +657,7 @@ def create_country_list(input, iso_coding=True):
 
             # check if elements have been removed and return a working if so
             if len(ret_list) < len(c_list):
-                _logger.warning(
+                logger.warning(
                     "Specified country list contains the following non-iso codes: "
                     + ", ".join(list(set(c_list) - set(ret_list)))
                 )

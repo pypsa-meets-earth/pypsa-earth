@@ -32,8 +32,8 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-_logger = logging.getLogger(__name__)
-_logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-earth")
 
@@ -68,7 +68,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
-            _logger.warning(
+            logger.warning(
                 f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
@@ -156,7 +156,7 @@ def countries(countries, geo_crs, update=False, out_logging=False):
     "Create country shapes"
 
     if out_logging:
-        _logger.info("Stage 1 of 4: Create country shapes")
+        logger.info("Stage 1 of 4: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(countries, 0, geo_crs, update, out_logging)
@@ -174,7 +174,7 @@ def countries(countries, geo_crs, update=False, out_logging=False):
 def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
 
     if out_logging:
-        _logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
+        logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
     shapes = country_shapes.apply(lambda x: x.buffer(distance))
     shapes_list = list(shapes)
@@ -244,7 +244,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     """
 
     if out_logging:
-        _logger.info("Stage 2 of 4: Create offshore shapes")
+        logger.info("Stage 2 of 4: Create offshore shapes")
 
     # load data
     df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
@@ -350,7 +350,7 @@ def download_WorldPop_standard(
         Name of the file
     """
     if out_logging:
-        _logger.info("Stage 3/4: Download WorldPop datasets")
+        logger.info("Stage 3/4: Download WorldPop datasets")
 
     if country_code == "XK":
         WorldPop_filename = f"srb_ppp_{year}_UNadj_constrained.tif"
@@ -372,7 +372,7 @@ def download_WorldPop_standard(
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
-            _logger.warning(
+            logger.warning(
                 f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
@@ -387,7 +387,7 @@ def download_WorldPop_standard(
                         loaded = True
                         break
         if not loaded:
-            _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+            logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -417,7 +417,7 @@ def download_WorldPop_API(
         Name of the file
     """
     if out_logging:
-        _logger.info("Stage 3/4: Download WorldPop datasets")
+        logger.info("Stage 3/4: Download WorldPop datasets")
 
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
@@ -441,7 +441,7 @@ def download_WorldPop_API(
                     loaded = True
                     break
     if not loaded:
-        _logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+        logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -453,7 +453,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
 
     if out_logging:
-        _logger.info("Stage 4/4: Access to GDP raster data")
+        logger.info("Stage 4/4: Access to GDP raster data")
 
     # tif namefile
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -479,7 +479,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     list_years = GDP_dataset["time"]
     if year not in list_years:
         if out_logging:
-            _logger.warning(
+            logger.warning(
                 f"Stage 3/4 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
             )
         year = float(list_years[-1])
@@ -504,7 +504,7 @@ def load_GDP(
     """
 
     if out_logging:
-        _logger.info("Stage 4/4: Access to GDP raster data")
+        logger.info("Stage 4/4: Access to GDP raster data")
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -514,7 +514,7 @@ def load_GDP(
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
-            _logger.warning(
+            logger.warning(
                 f"Stage 4/4: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
             )
         convert_GDP(name_file_nc, year, out_logging)
@@ -577,7 +577,7 @@ def add_gdp_data(
         - Includes a new column ["gdp"]
     """
     if out_logging:
-        _logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
+        logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
 
     # initialize new gdp column
     df_gadm["gdp"] = 0.0
@@ -618,7 +618,7 @@ def add_gdp_data(
     #     # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
 
     #     if out_logging == True:
-    #         _logger.info("Stage 4/4 GDP: shape: " + str(index) +
+    #         logger.info("Stage 4/4 GDP: shape: " + str(index) +
     #                      " out of " + str(df_gadm.shape[0]))
 
     #     # update the gdp data in the dataset
@@ -677,7 +677,7 @@ def add_population_data(
     """
 
     if out_logging:
-        _logger.info("Stage 4/4 POP: Add population data to GADM GeoDataFrame")
+        logger.info("Stage 4/4 POP: Add population data to GADM GeoDataFrame")
 
     # initialize new population column
     df_gadm["pop"] = 0.0
@@ -744,7 +744,7 @@ def gadm(
 ):
 
     if out_logging:
-        _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
+        logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
     df_gadm = get_GADM_layer(countries, layer_id, geo_crs, update)
