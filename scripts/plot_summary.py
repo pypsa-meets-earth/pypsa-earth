@@ -162,9 +162,7 @@ def plot_energy(infn, fn=None):
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        logger.info(
-            "Remaining elements in energy dataframe:\n" + df.to_string() + "\n"
-        )
+        logger.info("Remaining elements in energy dataframe:\n" + df.to_string() + "\n")
 
     new_index_energy = df.index.intersection(preferred_order).append(
         df.index.difference(preferred_order)
