@@ -33,7 +33,6 @@ from shapely.validation import make_valid
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-earth")
 

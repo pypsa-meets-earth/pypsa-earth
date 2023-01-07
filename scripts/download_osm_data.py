@@ -47,9 +47,6 @@ from tqdm import tqdm
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-# logger.setLevel(logging.WARNING)
 
 OSM_CRS = "EPSG:4326"
 
