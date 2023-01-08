@@ -33,7 +33,7 @@ from matplotlib.patches import Circle, Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
@@ -121,7 +121,7 @@ def plot_map(n, ax=None, attribute="p_nom", opts={}):
         link_widths_exp = n.links.p_nom_opt
         link_widths_cur = n.links.p_nom_min
     else:
-        _logger.error("plotting of {} has not been implemented yet".format(attribute))
+        logger.error("plotting of {} has not been implemented yet".format(attribute))
 
     line_colors_with_alpha = (line_widths_cur / n.lines.s_nom > 1e-3).map(
         {True: line_colors["cur"], False: to_rgba(line_colors["cur"], 0.0)}

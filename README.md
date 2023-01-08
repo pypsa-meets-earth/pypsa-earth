@@ -1,4 +1,11 @@
-# PyPSA meets Earth
+# PyPSA-Earth
+
+<p align="left"> 
+by
+<a href="https://pypsa-meets-earth.github.io">
+    <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" width="150">
+<a/>
+</p>
 
 ## Development Status: **Stable and Active**
 
@@ -18,7 +25,7 @@
 
 The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information. 
 
-PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth. We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
+**PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth.** We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
 
 <p align="center">
@@ -144,7 +151,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
@@ -215,7 +222,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/Cesare-Caputo">
             <img src="https://avatars.githubusercontent.com/u/62548290?v=4" width="100;" alt="Cesare-Caputo"/>
             <br />
-            <sub><b>Cesare-Caputo</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
