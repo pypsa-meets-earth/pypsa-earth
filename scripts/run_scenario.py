@@ -49,7 +49,7 @@ def generate_scenario_by_country(path_base, country_list):
     df_landlocked["countries"] = df_landlocked.Code.map(three_2_two_digits_country)
 
     n_clusters = {
-        "MG": 4,
+        "MG": 4,  # Africa
         "BF": 1,
         "BI": 1,
         "BJ": 2,
@@ -65,7 +65,11 @@ def generate_scenario_by_country(path_base, country_list):
         "ML": 1,
         "TD": 2,
         "CF": 1,
-        "ER": 1,
+        "ER": 1,  # Africa
+        "GF": 3,  # South America
+        "SR": 2,  # South America
+        "SG": 1,  # Asia
+        "FJ": 4,  # Oceania
     }
 
     for c in clean_country_list:
