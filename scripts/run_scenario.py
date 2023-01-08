@@ -5,8 +5,9 @@
 """
 Execute a scenario optimization
 
-Run iteratively the workflow under different conditions
-and store the results in specific folders
+This script contains utility functions to iteratively run the workflow for several regions
+and test the execution for each of them.
+During the execution, statistics on the outputs of the execution are generated.
 """
 import os
 import shutil
@@ -35,8 +36,26 @@ def _mock_snakemake(rule, **kwargs):
     return snakemake
 
 
-def generate_scenario_by_country(path_base, country_list):
-    "Utility function to generate multiple scenario configs"
+def generate_scenario_by_country(path_base, country_list, out_dir="configs/scenarios"):
+    """
+    Utility function to create copies of a standard yaml file available in path_base
+    for every country in country_list.
+    Copies are saved into the output directory out_dir
+
+    Note:
+    - the clusters are automatically modified for selected countries with limited data
+    - for landlocked countries, offwind technologies are removed (solar, onwind and hydro are forced)
+
+    Parameters
+    ----------
+        path_base : str
+            Path to the standard yaml file used as default
+        country_list : list
+            List of countries.
+            Note: the input is parsed using download_osm_data.create_country_list
+        out_dir : str (optional)
+            Output directory where output configuration files are executed
+    """
 
     from _helpers import three_2_two_digits_country
     from download_osm_data import create_country_list
@@ -74,20 +93,24 @@ def generate_scenario_by_country(path_base, country_list):
 
     for c in clean_country_list:
 
-        n_cluster = "5"
-        if c in n_clusters.keys():
-            n_cluster = str(n_clusters[c])
+        modify_dict = {"countries": [c]}
 
-        modify_dict = {"countries": [c], "scenario": {"clusters": [n_cluster]}}
+        if c in n_clusters.keys():
+            modify_dict["scenario"] = {"clusters": [str(n_clusters[c])]}
+
         if df_landlocked["countries"].str.contains(c).any():
             modify_dict["electricity"] = {
                 "renewable_carriers": ["solar", "onwind", "hydro"]
             }
 
-        create_test_config(path_base, modify_dict, f"configs/scenarios/{c}.yaml")
+        create_test_config(path_base, modify_dict, f"{out_dir}/{c}.yaml")
 
 
 def collect_basic_osm_stats(path, rulename, header):
+    """
+    Collect basic statistics on OSM data: number of items
+    """
+
     if os.path.exists(path) and (os.stat(path).st_size > 0):
         df = gpd.read_file(path)
         n_elem = len(df)
@@ -101,36 +124,45 @@ def collect_basic_osm_stats(path, rulename, header):
 
 
 def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
+    """
+    Collect statistics on OSM network data:
+    - number of items
+    - length of the stored shapes
+    - length of objects with tag_frequency == 0 (DC elements)
+    """
+
     if os.path.exists(path) and (os.stat(path).st_size > 0):
-        try:
-            df = gpd.read_file(path)
-            n_elem = len(df)
-            obj_length = (
-                df["geometry"].apply(make_valid).to_crs(crs=metric_crs).geometry.length
-            )
-            len_obj = np.nansum(obj_length * df.circuits)
+        df = gpd.read_file(path)
+        n_elem = len(df)
+        obj_length = (
+            df["geometry"].apply(make_valid).to_crs(crs=metric_crs).geometry.length
+        )
+        len_obj = np.nansum(obj_length * df.circuits)
 
-            len_dc_obj = 0.0
-            if "frequency" in df.columns:
-                coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
-                idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
-                len_dc_obj = float(obj_length.loc[idx_dc].sum())
+        len_dc_obj = 0.0
+        if "frequency" in df.columns:
+            coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
+            idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
+            len_dc_obj = float(obj_length.loc[idx_dc].sum())
 
-            return pd.DataFrame(
-                [[n_elem, len_obj, len_dc_obj]],
-                columns=_multi_index_scen(
-                    rulename,
-                    [header + "-" + k for k in ["size", "length", "length_dc"]],
-                ),
-            )
-        except Exception as inst:
-            print(inst)
-            return pd.DataFrame()
+        return pd.DataFrame(
+            [[n_elem, len_obj, len_dc_obj]],
+            columns=_multi_index_scen(
+                rulename,
+                [header + "-" + k for k in ["size", "length", "length_dc"]],
+            ),
+        )
     else:
         return pd.DataFrame()
 
 
 def collect_osm_stats(rulename, **kwargs):
+    """
+    Collect statistics on OSM data.
+    When lines and cables are considered, then network-related statistics are collected
+    (collect_network_osm_stats), otherwise basic statistics are (collect_basic_osm_stats)
+    """
+
     metric_crs = kwargs.pop("metric_crs", "EPSG:3857")
     only_basic = kwargs.pop("only_basic", False)
 
@@ -148,6 +180,10 @@ def collect_osm_stats(rulename, **kwargs):
 
 
 def collect_raw_osm_stats(rulename="download_osm_data", metric_crs="EPSG:3857"):
+    """
+    Collect basic statistics on OSM data; used for raw OSM data.
+    """
+
     snakemake = _mock_snakemake("download_osm_data")
 
     options_raw = dict(snakemake.output)
@@ -159,6 +195,10 @@ def collect_raw_osm_stats(rulename="download_osm_data", metric_crs="EPSG:3857"):
 
 
 def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
+    """
+    Collect statistics on OSM data; used for clean OSM data.
+    """
+
     snakemake = _mock_snakemake("clean_osm_data")
 
     options_clean = dict(snakemake.output)
@@ -168,6 +208,12 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
 
 
 def collect_network_stats(network_rule, config):
+    """
+    Collect statistics on pypsa networks:
+    - installed capacity by carrier
+    - lines total length (accounting for parallel lines)
+    - lines total capacity
+    """
 
     wildcards = {
         k: str(config["scenario"][k][0]) for k in ["simpl", "clusters", "ll", "opts"]
@@ -216,6 +262,15 @@ def collect_network_stats(network_rule, config):
 
 
 def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
+    """
+    Collect statistics on the shapes created by the workflow:
+    - area
+    - number of gadm shapes
+    - Percentage of shapes having country flag matching the gadm file
+    - total population
+    - total gdp
+    """
+
     snakemake = _mock_snakemake(rulename)
 
     if not os.path.exists(snakemake.output.africa_shape):
@@ -248,6 +303,9 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
 
 
 def collect_snakemake_stats(name, dict_dfs, config):
+    """
+    Collect statistics on what rules have been successfull
+    """
     ren_techs = [
         tech
         for tech in config["renewable"]
@@ -278,6 +336,11 @@ def collect_snakemake_stats(name, dict_dfs, config):
 
 
 def collect_renewable_stats(rulename, technology):
+    """
+    Collect statistics on the renewable time series generated by the workflow:
+    - potantial
+    - average production by plant (hydro) or bus (other RES)
+    """
     snakemake = _mock_snakemake(rulename, technology=technology)
 
     if os.path.exists(snakemake.output.profile):
@@ -299,6 +362,9 @@ def collect_renewable_stats(rulename, technology):
 
 
 def collect_computational_stats(rulename, timedelta):
+    """
+    Store the computational timedelta time required to run the workflow
+    """
     comp_time = timedelta.total_seconds()
     return pd.DataFrame(
         [[comp_time]],
@@ -309,7 +375,7 @@ def collect_computational_stats(rulename, timedelta):
 def calculate_stats(
     config, timedelta=None, metric_crs="EPSG:3857", area_crs="ESRI:54009"
 ):
-    "Function to calculate statistics"
+    "Function to collect all statistics"
 
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
