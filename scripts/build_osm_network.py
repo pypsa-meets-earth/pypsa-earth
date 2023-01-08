@@ -14,7 +14,6 @@ from shapely.ops import linemerge, split
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def line_endings_to_bus_conversion(lines):
