@@ -14,12 +14,12 @@ Every little bit helps, and you always earn credits.
 
 You can contribute on the code side in many ways:
 
-- submit feedback,
-- add new features,
-- report bugs, 
-- fix bugs, 
-- implement a new cluster/cloud computation backend,
-- write documentation
+* submit feedback,
+* add new features,
+* report bugs, 
+* fix bugs, 
+* implement a new cluster/cloud computation backend,
+* write documentation
 
 
 Code
