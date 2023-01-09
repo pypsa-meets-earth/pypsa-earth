@@ -270,12 +270,14 @@ if __name__ == "__main__":
             offshore_regions.append(offshore_regions_c)
 
     # create geodataframe and remove nan shapes
-    onshore_regions = gpd.GeoDataFrame(
-        pd.concat(onshore_regions, ignore_index=True),
-        crs=country_shapes.crs,
-    ).dropna(
-    axis="index", subset=["geometry"]
-    ).to_file(snakemake.output.regions_onshore)
+    onshore_regions = (
+        gpd.GeoDataFrame(
+            pd.concat(onshore_regions, ignore_index=True),
+            crs=country_shapes.crs,
+        )
+        .dropna(axis="index", subset=["geometry"])
+        .to_file(snakemake.output.regions_onshore)
+    )
 
     if offshore_regions:
         # if a offshore_regions exists excute below
