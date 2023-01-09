@@ -87,6 +87,64 @@ def restore_country_code_by_name(row, country_code):
     else:
         return row["GID_0"]
 
+#  file=file_gpkg, layer=layer_id, cc=country_code 
+def build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code): 
+    # read gpkg file
+    geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(
+        geo_crs
+    )
+
+    # convert country name representation of the main country (GID_0 column)
+    geodf["GID_0"] = [
+        three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]
+    ]
+
+    # GID_0 may have some exotic values, "COUNTRY" column may be used instead
+    geodf["GID_0"] = geodf.apply(
+        lambda x: restore_country_code_by_name(x, country_code=cc), axis=1
+    )
+
+    # "not found" hardcoded according to country_converter conventions
+    geodf.drop(
+        geodf[geodf["GID_0"] == "not found"].index, inplace=True
+    )
+
+    # create a subindex column that is useful
+    # in the GADM processing of sub-national zones
+    geodf["GADM_ID"] = geodf[f"GID_{layer_id}"]
+
+    if layer_id >= 1:
+        available_gadm_codes = geodf["GADM_ID"].unique()
+        code_three_digits = two_2_three_digits_country(cc)
+
+        # normally the GADM code starts the ISO3
+        non_std_gadm_codes = [
+            w for w in available_gadm_codes if not w.startswith(code_three_digits)
+        ]
+
+        if len(non_std_gadm_codes) > 0:
+
+            # a "minimalistic" approach outputs a single file (~200kb for CN + IN)
+            d = {
+                "country_code": cc,
+                "non_standard_gadm_codes": non_std_gadm_codes,
+            }
+            df = pd.DataFrame(data=d)
+            output_path = "non_standard_gadm_codes.csv"
+            df.to_csv(
+                output_path,
+                mode="a",
+                header=not os.path.exists(output_path),
+                index=False,
+            )
+
+            # a (more useful) approach outputs a file for each of the country (~200kb each for CN and IN)
+            df_filtered = geodf[geodf["GADM_ID"].isin(non_std_gadm_codes)]
+            df_filtered.to_csv(
+                "non_standard_gadm_" + cc + "_raw.csv", index=False
+            )
+        return geodf
+
 
 def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
     """
@@ -117,61 +175,8 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
 
-        # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
-            geo_crs
-        )
-
-        # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-        ]
-
-        # GID_0 may have some exotic values, "COUNTRY" column may be used instead
-        geodf_temp["GID_0"] = geodf_temp.apply(
-            lambda x: restore_country_code_by_name(x, country_code=country_code), axis=1
-        )
-
-        # "not found" hardcoded according to country_converter conventions
-        geodf_temp.drop(
-            geodf_temp[geodf_temp["GID_0"] == "not found"].index, inplace=True
-        )
-
-        # create a subindex column that is useful
-        # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
-
-        if layer_id >= 1:
-            available_gadm_codes = geodf_temp["GADM_ID"].unique()
-            code_three_digits = two_2_three_digits_country(country_code)
-
-            # normally the GADM code starts the ISO3
-            non_std_gadm_codes = [
-                w for w in available_gadm_codes if not w.startswith(code_three_digits)
-            ]
-
-            if len(non_std_gadm_codes) > 0:
-
-                # a "minimalistic" approach outputs a single file (~200kb for CN + IN)
-                d = {
-                    "country_code": country_code,
-                    "non_standard_gadm_codes": non_std_gadm_codes,
-                }
-                df = pd.DataFrame(data=d)
-                output_path = "non_standard_gadm_codes.csv"
-                df.to_csv(
-                    output_path,
-                    mode="a",
-                    header=not os.path.exists(output_path),
-                    index=False,
-                )
-
-                # a (more useful) approach outputs a file for each of the country (~200kb each for CN and IN)
-                df_filtered = geodf_temp[geodf_temp["GADM_ID"].isin(non_std_gadm_codes)]
-                df_filtered.to_csv(
-                    "non_standard_gadm_" + country_code + "_raw.csv", index=False
-                )
-
+        geodf_temp = build_gadm_df()
+                    
         # append geodataframes
         geodf_list.append(geodf_temp)
 
