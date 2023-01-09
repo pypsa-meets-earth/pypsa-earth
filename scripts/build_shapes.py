@@ -87,17 +87,14 @@ def restore_country_code_by_name(row, country_code):
     else:
         return row["GID_0"]
 
-#  file=file_gpkg, layer=layer_id, cc=country_code 
-def build_gadm_df(file, layer, cc): 
+
+#  file=file_gpkg, layer=layer_id, cc=country_code
+def build_gadm_df(file, layer, cc):
     # read gpkg file
-    geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(
-        geo_crs
-    )
+    geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(geo_crs)
 
     # convert country name representation of the main country (GID_0 column)
-    geodf["GID_0"] = [
-        three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]
-    ]
+    geodf["GID_0"] = [three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]]
 
     # GID_0 may have some exotic values, "COUNTRY" column may be used instead
     geodf["GID_0"] = geodf.apply(
@@ -105,14 +102,12 @@ def build_gadm_df(file, layer, cc):
     )
 
     # "not found" hardcoded according to country_converter conventions
-    geodf.drop(
-        geodf[geodf["GID_0"] == "not found"].index, inplace=True
-    )
+    geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
 
     # create a subindex column that is useful
     # in the GADM processing of sub-national zones
     geodf["GADM_ID"] = geodf[f"GID_{layer}"]
-    
+
     if layer >= 1:
         available_gadm_codes = geodf["GADM_ID"].unique()
         code_three_digits = two_2_three_digits_country(cc)
@@ -124,9 +119,7 @@ def build_gadm_df(file, layer, cc):
 
         if len(non_std_gadm_codes) > 0:
             df_filtered = geodf[geodf["GADM_ID"].isin(non_std_gadm_codes)]
-            df_filtered.to_csv(
-                "non_standard_gadm_" + cc + "_raw.csv", index=False
-            )
+            df_filtered.to_csv("non_standard_gadm_" + cc + "_raw.csv", index=False)
 
     return geodf
 
@@ -161,7 +154,7 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             layer_id = len(list_layers) - 1
 
         geodf_temp = build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code)
-                    
+
         # append geodataframes
         geodf_list.append(geodf_temp)
 
@@ -867,9 +860,11 @@ if __name__ == "__main__":
 
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
-    country_shapes_valid = country_shapes.apply(
-        lambda x: make_valid(x) if not x.is_valid else x
-    ).reset_index().to_file(snakemake.output.country_shapes)
+    country_shapes_valid = (
+        country_shapes.apply(lambda x: make_valid(x) if not x.is_valid else x)
+        .reset_index()
+        .to_file(snakemake.output.country_shapes)
+    )
 
     offshore_shapes = eez(
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
