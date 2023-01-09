@@ -825,9 +825,10 @@ def gadm(
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     # df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
-    df_gadm = df_gadm[~df_gadm.geometry.is_empty].geometry.apply(
+    df_gadm.geometry = df_gadm.geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
     )
+    df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
 
     # gadm_shapes.geometry = gadm_shapes.apply(
     #     lambda row: make_valid(row.geometry)
