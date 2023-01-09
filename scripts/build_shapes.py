@@ -824,9 +824,17 @@ def gadm(
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+    # df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
     df_gadm = df_gadm[~df_gadm.geometry.is_empty].geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
     )
+
+    # gadm_shapes.geometry = gadm_shapes.apply(
+    #     lambda row: make_valid(row.geometry)
+    #     if not row.geometry.is_valid
+    #     else row.geometry,
+    #     axis=1,
+    # )
 
     return df_gadm
 
@@ -884,4 +892,10 @@ if __name__ == "__main__":
         year,
         nprocesses=nprocesses,
     )
+    # gadm_shapes.geometry = gadm_shapes.apply(
+    #     lambda row: make_valid(row.geometry)
+    #     if not row.geometry.is_valid
+    #     else row.geometry,
+    #     axis=1,
+    # )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
