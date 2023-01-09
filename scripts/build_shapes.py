@@ -123,26 +123,11 @@ def build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code):
         ]
 
         if len(non_std_gadm_codes) > 0:
-
-            # a "minimalistic" approach outputs a single file (~200kb for CN + IN)
-            d = {
-                "country_code": cc,
-                "non_standard_gadm_codes": non_std_gadm_codes,
-            }
-            df = pd.DataFrame(data=d)
-            output_path = "non_standard_gadm_codes.csv"
-            df.to_csv(
-                output_path,
-                mode="a",
-                header=not os.path.exists(output_path),
-                index=False,
-            )
-
-            # a (more useful) approach outputs a file for each of the country (~200kb each for CN and IN)
             df_filtered = geodf[geodf["GADM_ID"].isin(non_std_gadm_codes)]
             df_filtered.to_csv(
                 "non_standard_gadm_" + cc + "_raw.csv", index=False
             )
+
         return geodf
 
 
