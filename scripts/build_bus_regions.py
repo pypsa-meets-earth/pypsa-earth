@@ -273,11 +273,8 @@ if __name__ == "__main__":
     onshore_regions = gpd.GeoDataFrame(
         pd.concat(onshore_regions, ignore_index=True),
         crs=country_shapes.crs,
-    ).dropna(axis="index", subset=["geometry"])
-
-    # sometimes Voronoi partition may give empty polygons
-    onshore_regions = pd.concat(
-        [onshore_regions[~onshore_regions.is_empty]], ignore_index=True
+    ).dropna(
+    axis="index", subset=["geometry"]
     ).to_file(snakemake.output.regions_onshore)
 
     if offshore_regions:
