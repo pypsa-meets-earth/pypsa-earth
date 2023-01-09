@@ -111,9 +111,9 @@ def build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code):
 
     # create a subindex column that is useful
     # in the GADM processing of sub-national zones
-    geodf["GADM_ID"] = geodf[f"GID_{layer_id}"]
-
-    if layer_id >= 1:
+    geodf["GADM_ID"] = geodf[f"GID_{layer}"]
+    
+    if layer >= 1:
         available_gadm_codes = geodf["GADM_ID"].unique()
         code_three_digits = two_2_three_digits_country(cc)
 
