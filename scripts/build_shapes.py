@@ -128,7 +128,7 @@ def build_gadm_df(file, layer, cc):
                 "non_standard_gadm_" + cc + "_raw.csv", index=False
             )
 
-        return geodf
+    return geodf
 
 
 def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
