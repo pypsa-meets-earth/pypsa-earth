@@ -88,7 +88,7 @@ def restore_country_code_by_name(row, country_code):
         return row["GID_0"]
 
 #  file=file_gpkg, layer=layer_id, cc=country_code 
-def build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code): 
+def build_gadm_df(file, layer, cc): 
     # read gpkg file
     geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(
         geo_crs
@@ -160,7 +160,7 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
 
-        geodf_temp = build_gadm_df()
+        geodf_temp = build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code)
                     
         # append geodataframes
         geodf_list.append(geodf_temp)
