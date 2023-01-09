@@ -868,8 +868,7 @@ if __name__ == "__main__":
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
     country_shapes_valid = country_shapes.apply(
         lambda x: make_valid(x) if not x.is_valid else x
-    )
-    country_shapes_valid.reset_index().to_file(snakemake.output.country_shapes)
+    ).reset_index().to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
