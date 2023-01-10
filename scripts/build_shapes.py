@@ -297,7 +297,8 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     )
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
-    country_shapes = country_shapes.apply(lambda x: make_valid(x))
+    # country_shapes may consist of different geometries which need to be united
+    country_shapes = country_shapes.apply(lambda x: make_valid(x)).unary_union
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
