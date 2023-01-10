@@ -20,6 +20,7 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
