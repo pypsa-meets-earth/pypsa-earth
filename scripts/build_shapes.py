@@ -86,6 +86,42 @@ def restore_country_code_by_name(row, country_code):
     else:
         return row["GID_0"]
 
+
+def build_gadm_df(file, layer, cc):
+    # read gpkg file
+    geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(geo_crs)
+
+    # convert country name representation of the main country (GID_0 column)
+    geodf["GID_0"] = [three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]]
+
+    # GID_0 may have some exotic values, "COUNTRY" column may be used instead
+    geodf["GID_0"] = geodf.apply(
+        lambda x: restore_country_code_by_name(x, country_code=cc), axis=1
+    )
+
+    # "not found" hardcoded according to country_converter conventions
+    geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
+
+    # create a subindex column that is useful
+    # in the GADM processing of sub-national zones
+    geodf["GADM_ID"] = geodf[f"GID_{layer}"]
+
+    if layer >= 1:
+        available_gadm_codes = geodf["GADM_ID"].unique()
+        code_three_digits = two_2_three_digits_country(cc)
+
+        # normally the GADM code starts the ISO3
+        non_std_gadm_codes = [
+            w for w in available_gadm_codes if not w.startswith(code_three_digits)
+        ]
+
+        if len(non_std_gadm_codes) > 0:
+            df_filtered = geodf[geodf["GADM_ID"].isin(non_std_gadm_codes)]
+            df_filtered.to_csv("non_standard_gadm_" + cc + "_raw.csv", index=False)
+
+    return geodf
+
+
 def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
