@@ -80,6 +80,11 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     return GADM_inputfile_gpkg, GADM_filename
 
+def restore_country_code_by_name(row, country_code):
+    if row["GID_0"] != country_code:
+        return country_name_2_two_digits(row["COUNTRY"])
+    else:
+        return row["GID_0"]
 
 def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
     """
