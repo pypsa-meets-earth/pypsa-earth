@@ -80,6 +80,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     return GADM_inputfile_gpkg, GADM_filename
 
+
 def restore_country_code_by_name(row, country_code):
     if row["GID_0"] != country_code:
         return country_name_2_two_digits(row["COUNTRY"])
@@ -816,7 +817,7 @@ def gadm(
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
-    )    
+    )
     df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
 
     return df_gadm
