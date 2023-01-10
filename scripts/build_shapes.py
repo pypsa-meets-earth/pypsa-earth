@@ -151,19 +151,7 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
 
-        # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
-            geo_crs
-        )
-
-        # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-        ]
-
-        # create a subindex column that is useful
-        # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
+        geodf_temp = build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code)
 
         # append geodataframes
         geodf_list.append(geodf_temp)
