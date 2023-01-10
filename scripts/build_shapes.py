@@ -814,6 +814,9 @@ def gadm(
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+    df_gadm.geometry = df_gadm.geometry.apply(
+        lambda r: make_valid(r) if not r.is_valid else r
+    )    
     df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
 
     return df_gadm
