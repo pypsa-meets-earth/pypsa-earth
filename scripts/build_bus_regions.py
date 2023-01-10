@@ -49,6 +49,7 @@ import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging, two_2_three_digits_country
 from shapely.geometry import Point, Polygon
+from shapely.ops import unary_union    
 from vresutils.graph import voronoi_partition_pts
 
 # from scripts.build_shapes import gadm
