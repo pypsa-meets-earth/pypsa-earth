@@ -143,10 +143,10 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
         # download file gpkg
         file_gpkg, name_file = download_GADM(country_code, update, outlogging)
 
-        # # get layers of a geopackage
+        # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
 
-        # # get layer name
+        # get layer name
         if (layer_id < 0) | (layer_id >= len(list_layers)):
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
