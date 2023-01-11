@@ -96,9 +96,8 @@ def build_gadm_df(file, layer, cc):
     geodf["GID_0"] = [three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]]
 
     # GID_0 may have some exotic values, "COUNTRY" column may be used instead
-    geodf["GID_0"] = geodf.apply(
-        lambda x: restore_country_code_by_name(x, country_code=cc), axis=1
-    )
+    geodf["GID_0"] = geodf["GID_0"].where(geodf["GID_0"] == cc, 
+        other = country_name_2_two_digits(geodf["COUNTRY"]))
 
     # "not found" hardcoded according to country_converter conventions
     geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
