@@ -835,7 +835,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     no_data_countries = set(country_list).difference(set(bus_country_list))
 
     if len(no_data_countries) > 0:
-        
+
         no_data_countries_shape = country_shapes[
             country_shapes.index.isin(no_data_countries) == True
         ].reset_index()
