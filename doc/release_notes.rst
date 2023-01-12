@@ -49,6 +49,8 @@ Upcoming Release
 
 * Restore saving of logger outputs `PR #559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/559>`__
 
+* Fix for geometry ussues for countries containing contended zones `PR #563 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/563>`__
+
 PyPSA-Earth 0.1.0
 =================
 
