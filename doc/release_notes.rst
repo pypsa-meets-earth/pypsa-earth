@@ -33,6 +33,8 @@ Upcoming Release
 
 * Fix workflow in order to solve the landlock countries bug  `PR #481 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__ and `PR #517 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/517>`__
 
+* Generalize energy storage model and add new energy storage database 
+
 PyPSA-Earth 0.1.0
 =================
 
