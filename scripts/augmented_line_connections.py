@@ -171,4 +171,5 @@ if __name__ == "__main__":
 
         _set_links_underwater_fraction(n)
 
+    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

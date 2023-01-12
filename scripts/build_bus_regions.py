@@ -53,7 +53,7 @@ from vresutils.graph import voronoi_partition_pts
 
 # from scripts.build_shapes import gadm
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
@@ -121,6 +121,9 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
             if not poly.is_valid:
                 poly = poly.buffer(0)
+
+            if not outline.is_valid:
+                outline = outline.buffer(0)
 
             poly = poly.intersection(outline)
 
@@ -197,7 +200,7 @@ if __name__ == "__main__":
 
         c_b = n.buses.country == country
         if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty:
-            _logger.warning(f"No low voltage buses found for {country}!")
+            logger.warning(f"No low voltage buses found for {country}!")
             continue
 
         onshore_shape = country_shapes[country]
@@ -210,29 +213,32 @@ if __name__ == "__main__":
                 onshore_locs.values, onshore_shape
             )
             shape_id = 0  # Not used
-        onshore_regions.append(
-            gpd.GeoDataFrame(
-                {
-                    "name": onshore_locs.index,
-                    "x": onshore_locs["x"],
-                    "y": onshore_locs["y"],
-                    "geometry": onshore_geometry,
-                    "country": country,
-                    "shape_id": shape_id,
-                },
-                crs=country_shapes.crs,
-            )
+
+        temp_region = gpd.GeoDataFrame(
+            {
+                "name": onshore_locs.index,
+                "x": onshore_locs["x"],
+                "y": onshore_locs["y"],
+                "geometry": onshore_geometry,
+                "country": country,
+                "shape_id": shape_id,
+            },
+            crs=country_shapes.crs,
         )
+        temp_region = temp_region[
+            temp_region.geometry.is_valid & ~temp_region.geometry.is_empty
+        ]
+        onshore_regions.append(temp_region)
 
         # These two logging could be commented out
         if country not in offshore_shapes.index:
-            _logger.warning(f"No off-shore shapes for {country}")
+            logger.warning(f"No off-shore shapes for {country}")
             continue
 
         offshore_shape = offshore_shapes[country]
 
         if n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]].empty:
-            _logger.warning(f"No off-shore substations found for {country}")
+            logger.warning(f"No off-shore substations found for {country}")
             continue
         else:
             offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
@@ -253,6 +259,10 @@ if __name__ == "__main__":
             )
             offshore_regions_c = offshore_regions_c.loc[
                 offshore_regions_c.to_crs(area_crs).area > 1e-2
+            ]
+            offshore_regions_c = offshore_regions_c[
+                offshore_regions_c.geometry.is_valid
+                & ~offshore_regions_c.geometry.is_empty
             ]
             offshore_regions.append(offshore_regions_c)
 

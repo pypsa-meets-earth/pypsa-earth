@@ -190,7 +190,9 @@ def _compute_connection_costs_to_bus(
         adj = n.adjacency_matrix(
             weights=pd.concat(
                 dict(
-                    Link=connection_costs_per_link[tech].reindex(n.links.index),
+                    Link=connection_costs_per_link[tech]
+                    .reindex(n.links.index)
+                    .astype(float),
                     Line=pd.Series(0.0, n.lines.index),
                 )
             )
@@ -220,7 +222,7 @@ def _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, out
                     tech,
                     ", ".join(
                         "{:.0f} Eur/MW/a for `{}`".format(d, b)
-                        for b, d in costs.iteritems()
+                        for b, d in costs.items()
                     ),
                 )
             )
@@ -265,7 +267,7 @@ def _aggregate_and_move_components(
 
 
 def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
-    # Complex multi-node links are folded into end-points
+    ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
     if n.links.empty:
@@ -284,6 +286,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     def split_links(nodes):
         nodes = frozenset(nodes)
+
         seen = set()
         supernodes = {m for m in nodes if len(G.adj[m]) > 2 or (set(G.adj[m]) - nodes)}
 
@@ -293,7 +296,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                     continue
 
                 buses = [u, m]
-                links = [list(ls)]
+                links = [list(ls)]  # [name for name in ls]]
 
                 while m not in (supernodes | seen):
                     seen.add(m)
@@ -301,7 +304,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                         if m2 in seen or m2 == u:
                             continue
                         buses.append(m2)
-                        links.append(list(ls))
+                        links.append(list(ls))  # [name for name in ls])
                         break
                     else:
                         # stub
@@ -337,7 +340,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
             all_links = [i for _, i in sum(links, [])]
 
-            p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
+            p_max_pu = config["links"].get("p_max_pu", 1.0)
             lengths = n.links.loc[all_links, "length"]
             name = lengths.idxmax() + "+{}".format(len(links) - 1)
             params = dict(
@@ -368,9 +371,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             n.mremove("Link", all_links)
 
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
-            for attr, default in static_attrs.default.iteritems():
+            for attr, default in static_attrs.default.items():
                 params.setdefault(attr, default)
-            n.links.loc[name] = pd.Series(params)
+            n.links.loc[name] = params
 
     logger.debug("Collecting all components using the busmap")
 
@@ -502,7 +505,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("simplify_network", simpl="", network="elec")
+        snakemake = mock_snakemake("simplify_network", simpl="")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
@@ -522,7 +525,6 @@ if __name__ == "__main__":
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
-
     n, trafo_map = simplify_network_to_380(n, linetype)
 
     n, simplify_links_map = simplify_links(
@@ -547,6 +549,7 @@ if __name__ == "__main__":
 
     update_p_nom_max(n)
 
+    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
 
     busmap_s = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])

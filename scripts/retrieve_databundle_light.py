@@ -91,7 +91,6 @@ from download_osm_data import create_country_list
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def load_databundle_config(config):
@@ -443,11 +442,13 @@ def _check_disabled_by_opt(config_bundle, config_enable):
     return disabled_outs
 
 
-def get_best_bundles(country_list, category, config_bundles, tutorial, config_enable):
+def get_best_bundles_by_category(
+    country_list, category, config_bundles, tutorial, config_enable
+):
     """
-        get_best_bundles(country_list, category, config_bundles, tutorial)
+        get_best_bundles_by_category(country_list, category, config_bundles, tutorial)
 
-    Function to get the best bundles that download the datafor selected countries,
+    Function to get the best bundles that download the data for selected countries,
     given category and tutorial characteristics.
 
     The selected bundles shall adhere to the following criteria:
@@ -514,7 +515,108 @@ def get_best_bundles(country_list, category, config_bundles, tutorial, config_en
     return returned_bundles
 
 
+def get_best_bundles(countries, config_bundles, tutorial, config_enable):
+    """
+        get_best_bundles(countries, category, config_bundles, tutorial)
+
+    Function to get the best bundles that download the data for selected countries,
+    given tutorial characteristics.
+
+    First, the categories of data to download are identified in agreement to
+    the bundles that match the list of countries and tutorial configuration.
+
+    Then, the bundles to be downloaded shall adhere to the following criteria:
+    - The bundles' tutorial parameter shall match the tutorial argument
+    - The bundles' category shall match the category of data to download
+    - When multiple bundles are identified for the same set of users,
+      the bundles matching more countries are first selected and more bundles
+      are added until all countries are matched or no more bundles are available
+
+    Inputs
+    ------
+    countries : list
+        List of country codes for the countries to download
+    config_bundles : Dict
+        Dictionary of configurations for all available bundles
+    tutorial : Bool
+        Whether data for tutorial shall be downloaded
+    config_enable : dict
+        Dictionary of the enabled/disabled scripts
+
+    Outputs
+    -------
+    returned_bundles : list
+        List of bundles to download
+
+    """
+
+    # categories of data to download
+    categories = list(
+        set([config_bundles[conf]["category"] for conf in config_bundles])
+    )
+
+    # idenfify matched countries for every bundle
+    for bname in config_bundles:
+        config_bundles[bname]["matched_countries"] = [
+            c for c in config_bundles[bname]["countries"] if c in countries
+        ]
+        n_matched = len(config_bundles[bname]["matched_countries"])
+        config_bundles[bname]["n_matched"] = n_matched
+
+    # bundles to download
+    bundles_to_download = []
+
+    for cat in categories:
+        selection_bundles = get_best_bundles_by_category(
+            countries, cat, config_bundles, tutorial, config_enable
+        )
+
+        # check if non-empty dictionary
+        if selection_bundles:
+            bundles_to_download.extend(selection_bundles)
+
+            if len(selection_bundles) > 1:
+                logger.warning(
+                    f"Multiple bundle data for category {cat}: "
+                    + ", ".join(selection_bundles)
+                )
+
+    return bundles_to_download
+
+
+def datafiles_retrivedatabundle(config):
+    """
+    Function to get the output files from the bundles,
+    given the target countries, tutorial settings, etc.
+    """
+
+    tutorial = config["tutorial"]
+    countries = config["countries"]
+    config_enable = config["enable"]
+
+    config_bundles = load_databundle_config(config["databundles"])
+
+    bundles_to_download = get_best_bundles(
+        countries, config_bundles, tutorial, config_enable
+    )
+
+    listoutputs = list(
+        set(
+            [
+                inneroutput
+                for bundlename in bundles_to_download
+                for inneroutput in config["databundles"][bundlename]["output"]
+                if "*" not in inneroutput
+                or inneroutput.endswith("/")  # exclude directories
+            ]
+        )
+    )
+
+    return listoutputs
+
+
 if __name__ == "__main__":
+
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from _helpers import mock_snakemake
@@ -539,61 +641,47 @@ if __name__ == "__main__":
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
 
-    # categories of data to download
-    categories = list(
-        set([config_bundles[conf]["category"] for conf in config_bundles])
+    bundles_to_download = get_best_bundles(
+        countries, config_bundles, tutorial, config_enable
     )
 
-    # idenfify matched countries for every bundle
-    for bname in config_bundles:
-        config_bundles[bname]["matched_countries"] = [
-            c for c in config_bundles[bname]["countries"] if c in countries
-        ]
-        n_matched = len(config_bundles[bname]["matched_countries"])
-        config_bundles[bname]["n_matched"] = n_matched
-
-    # bundles to download
-    bundle_to_download = []
-
-    for cat in categories:
-        selection_bundles = get_best_bundles(
-            countries, cat, config_bundles, tutorial, config_enable
-        )
-
-        # check if non-empty dictionary
-        if selection_bundles:
-            bundle_to_download.extend(selection_bundles)
-
-            if len(selection_bundles) > 1:
-                logger.warning(
-                    f"Multiple bundle data for category {cat}: "
-                    + ", ".join(selection_bundles)
-                )
-
     logger.warning(
-        "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \
+        "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
         to the acceptance of its multiple licenses.\n \
         The use of the code automatically implies that you accept all the licenses.\n \
         See our documentation for more information. \n \
         Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence"
     )
 
+    logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
+
     # download the selected bundles
-    for b_name in bundle_to_download:
+    for b_name in bundles_to_download:
         host_list = config_bundles[b_name]["urls"]
+
+        downloaded_bundle = False
+
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-            # try:
-            download_and_unzip = globals()[f"download_and_unzip_{host}"]
-            if download_and_unzip(
-                config_bundles[b_name], rootpath, disable_progress=disable_progress
-            ):
+
+            logger.info(f"Downloading bundle {b_name} - Host {host}")
+
+            try:
+                download_and_unzip = globals()[f"download_and_unzip_{host}"]
+                if download_and_unzip(
+                    config_bundles[b_name], rootpath, disable_progress=disable_progress
+                ):
+                    downloaded_bundle = True
+            except Exception:
+                logger.warning(f"Error in downloading bundle {b_name} - host {host}")
+
+            if downloaded_bundle:
                 break
-            # except KeyError:
-            #     logger.error(f"Function for {host} has not been defined")
+
+        if not downloaded_bundle:
+            logger.error(f"Bundle {b_name} cannot be downloaded")
 
     logger.info(
-        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(bundle_to_download)
+        "Bundle successfully loaded and unzipped:\n\t"
+        + "\n\t".join(bundles_to_download)
     )
-    # print("Bundle successfully loaded and unzipped:\n\t" +
-    #       "\n\t".join(bundle_to_download))

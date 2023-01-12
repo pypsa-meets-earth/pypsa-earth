@@ -70,7 +70,7 @@ def configure_logging(snakemake, skip_handlers=False):
 
     import logging
 
-    kwargs = snakemake.config.get("logging", dict())
+    kwargs = snakemake.config.get("logging", dict()).copy()
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
@@ -90,7 +90,7 @@ def configure_logging(snakemake, skip_handlers=False):
                 ]
             }
         )
-    logging.basicConfig(**kwargs)
+    logging.basicConfig(**kwargs, force=True)
 
 
 def load_network(import_name=None, custom_components=None):

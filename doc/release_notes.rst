@@ -33,7 +33,21 @@ Upcoming Release
 
 * Fix workflow in order to solve the landlock countries bug  `PR #481 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/481>`__ and `PR #517 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/517>`__
 
-* Generalize energy storage model and add new energy storage database 
+* Add meta data of config to pypsa network per default. Allows keeping track of the config used to generate the network `PR #526 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/526>`__
+
+* Fix renewable profiles generation for possible data loss in ERA5-derived cutouts `PR #511 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/511>`__
+
+* Adapt dependencies of powerplantmatching to the PyPSA main branch `PR #527 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/527>`__
+
+* Calculate the outputs of retrieve_databundle dynamically depending on settings `PR #529 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/529>`__
+
+* Fix shape bug in the Voronoi cell creation `PR #541 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/541>`__
+
+* Adapt dependencies on PyPSA to the PyPSA main branch `PR #538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/538>`__
+
+* Fix None geometries into regions `PR #546 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/546>`__
+
+* Restore saving of logger outputs `PR #559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/559>`__
 
 PyPSA-Earth 0.1.0
 =================

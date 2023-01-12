@@ -400,8 +400,8 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
-            # ["country"],
+            ["country"],
+            # ["country", "sub_network"] # TODO: 2. Add sub_networks (see previous TODO)
             group_keys=False,
         )
         .apply(busmap_for_country)
@@ -591,6 +591,9 @@ if __name__ == "__main__":
         )
 
     update_p_nom_max(clustering.network)
+    clustering.network.meta = dict(
+        snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
+    )
     clustering.network.export_to_netcdf(snakemake.output.network)
     for attr in (
         "busmap",

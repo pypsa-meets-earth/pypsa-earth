@@ -85,11 +85,6 @@ from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
-# Auxiliary function to adapt to the ppl format
-two_digits_2_nocomma_country_name = lambda x: two_digits_2_name_country(
-    x, nocomma=True, remove_start_words=["The ", "the "]
-)
-
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
@@ -149,8 +144,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
             )
         )
         .assign(
-            Country=lambda df: df.Country.map(two_digits_2_nocomma_country_name),
-            Name=lambda df: df.Name,
+            Country=lambda df: df.Country.map(two_digits_2_name_country),
             # Name=lambda df: "OSM_"
             # + df.Country.astype(str)
             # + "_"
@@ -253,10 +247,7 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
-    countries_names = list(map(two_digits_2_nocomma_country_name, countries_codes))
-
-    # create code name mapping to be used as inverse function
-    country_mapping = dict(zip(countries_names, countries_codes))
+    countries_names = list(map(two_digits_2_name_country, countries_codes))
 
     config["target_countries"] = countries_names
 
@@ -265,21 +256,24 @@ if __name__ == "__main__":
             os.getcwd(), filepath_osm2pm_ppl
         )
 
+    # specify the main query for filtering powerplants
+    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
+    if isinstance(ppl_query, str):
+        config["main_query"] = ppl_query
+    else:
+        config["main_query"] = ""
+
     ppl = (
-        pm.powerplants(from_url=False, update=True, config=config)
+        pm.powerplants(from_url=False, update=True, config_update=config)
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
         .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
+        .powerplant.convert_country_to_alpha2()
         .assign(
             Technology=replace_natural_gas_technology,
             Fueltype=replace_natural_gas_fueltype,
-            Country=lambda df: df.Country.map(lambda x: country_mapping[x]),
         )
     )
-
-    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
-    if isinstance(ppl_query, str):
-        ppl.query(ppl_query, inplace=True)
 
     ppl = add_custom_powerplants(ppl)  # add carriers from own powerplant files
 

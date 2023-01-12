@@ -13,12 +13,13 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 from scripts.download_osm_data import create_country_list
 from scripts.add_electricity import get_load_paths_gegis
+from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 
 HTTP = HTTPRemoteProvider()
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
-        copyfile("config.default.yaml", "config.yaml")
+        copyfile("config.tutorial.yaml", "config.yaml")
 
     configfile: "config.yaml"
 
@@ -104,39 +105,6 @@ rule plot_all_summaries:
             country=["all"] + config["countries"],
             ext=["png", "pdf"]
         ),
-
-
-def datafiles_retrivedatabundle(config):
-    listoutputs = [
-        dvalue["output"]
-        for (dname, dvalue) in config["databundles"].items()
-        if config.get("tutorial", False) == dvalue.get("tutorial", False)
-    ]
-    unique_outputs = set(
-        (
-            [
-                inneroutput
-                for output in listoutputs
-                for inneroutput in output
-                if "*" not in inneroutput
-                or inneroutput.endswith("/")  # exclude directories
-            ]
-        )
-    )
-
-    # when option build_natura_raster is enabled, remove natura.tiff from the outputs
-    if config["enable"].get("build_natura_raster", False):
-        unique_outputs = [
-            output for output in unique_outputs if "natura.tiff" not in output
-        ]
-
-    # when option build_cutout is enabled, remove cutouts from the outputs
-    if config["enable"].get("build_cutout", False):
-        unique_outputs = [
-            output for output in unique_outputs if "cutouts/" not in output
-        ]
-
-    return unique_outputs
 
 
 if config["enable"].get("retrieve_databundle", True):
