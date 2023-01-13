@@ -173,8 +173,10 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
     costs = costs.rename(
-        {"hydrogen storage": "hydrogen storage tank",
-         "hydrogen storage tank": "hydrogen storage tank"},
+        {
+            "hydrogen storage": "hydrogen storage tank",
+            "hydrogen storage tank": "hydrogen storage tank",
+        },
     )
 
     costs.at["OCGT", "co2_emissions"] = costs.at["gas", "co2_emissions"]
