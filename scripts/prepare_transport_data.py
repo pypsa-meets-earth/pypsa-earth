@@ -84,7 +84,10 @@ def prepare_transport_data(n):
         nodes=pop_layout.index,
         weekly_profile=traffic.values,
     )
+
+    nodal_transport_shape = transport_shape / transport_shape.sum().sum()
     transport_shape = transport_shape / transport_shape.sum()
+
 
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
@@ -140,11 +143,23 @@ def prepare_transport_data(n):
         - nodal_energy_totals["electricity rail"]
     )
 
-    transport = (
-        (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
-        .divide(efficiency_gain * ice_correction)
-        .multiply(1 + dd_EV)
-    )
+    if snakemake.config["custom_data"]["transport_demand"]:
+        energy_totals_transport = nodal_energy_totals["total road"]
+           
+        transport = (
+            (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
+        )
+    else:
+        energy_totals_transport = (
+            nodal_energy_totals["total road"]
+            + nodal_energy_totals["total rail"]
+            - nodal_energy_totals["electricity rail"]
+        )
+        transport = (
+            (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
+            .divide(efficiency_gain * ice_correction)
+            .multiply(1 + dd_EV)
+        )
 
     # derive plugged-in availability for PKW's (cars)
 
