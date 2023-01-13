@@ -170,6 +170,12 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
 
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
+    # because technology data & pypsa earth costs.csv use different names
+    # TODO: rename the technologies in hosted tutorial data to match technology data
+    costs = costs.rename(
+        {"hydrogen storage": "hydrogen storage tank",
+         "hydrogen storage tank": "hydrogen storage tank"},
+    )
 
     costs.at["OCGT", "co2_emissions"] = costs.at["gas", "co2_emissions"]
     costs.at["CCGT", "co2_emissions"] = costs.at["gas", "co2_emissions"]
@@ -194,7 +200,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         max_hours=max_hours["battery"],
     )
     costs.loc["H2"] = costs_for_storage(
-        costs.loc["hydrogen storage underground"],
+        costs.loc["hydrogen storage tank"],
         costs.loc["fuel cell"],
         costs.loc["electrolysis"],
         max_hours=max_hours["H2"],
