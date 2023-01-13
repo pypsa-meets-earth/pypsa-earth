@@ -105,13 +105,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="50",
+            clusters="102",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
-            discountrate=0.071,
-            demand='NZ'
+            discountrate=0.111,
+            demand='AP',
+            h2export=10
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -120,7 +121,8 @@ if __name__ == "__main__":
     countries = list(n.buses.country.unique())
 
     # get export demand
-    export_h2 = snakemake.config["export"]["export_h2"]
+    
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6 # convert TWh to MWh
     logger.info(
         f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
     )
