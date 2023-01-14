@@ -66,8 +66,6 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     ----------
     points : Nx2 - ndarray[dtype=float]
     outline : Polygon
-    no_multipolygons : bool (default: False)
-        If true, replace each MultiPolygon by its largest component
 
     Returns
     -------
