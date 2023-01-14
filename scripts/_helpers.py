@@ -551,7 +551,7 @@ def country_name_2_two_digits(country_name):
         2-digit country name
     """
     if (
-        country_name.any()
+        country_name
         == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
     ):
         return "SN-GM"
