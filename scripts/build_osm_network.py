@@ -832,7 +832,7 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
     # difference can't give negative values; the following will return only releant country names
-    no_data_countries = set(country_list).difference(set(bus_country_list))
+    no_data_countries = list(set(country_list).difference(set(bus_country_list)))
 
     if len(no_data_countries) > 0:
 
