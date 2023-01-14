@@ -51,8 +51,7 @@ wildcard_constraints:
 
 
 rule clean:
-    run:
-        shell("snakemake -j 1 solve_all_networks --delete-all-output")
+    shell: "snakemake -j 1 solve_all_networks --delete-all-output"
 
 
 rule run_tests:
