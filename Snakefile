@@ -56,6 +56,8 @@ rule clean:
 
 
 rule run_tests:
+    input:
+        ""
     run:
         import os
         shell("snakemake --cores all build_test_configs")
