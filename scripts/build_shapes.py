@@ -93,9 +93,11 @@ def build_gadm_df(file, layer, cc):
     geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(geo_crs)
 
     # convert country name representation of the main country (GID_0 column)
+    # TODO consider map()
     geodf["GID_0"] = [three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]]
 
     # GID_0 may have some exotic values, "COUNTRY" column may be used instead
+    # not clear
     geodf["GID_0"] = geodf.apply(
         lambda x: restore_country_code_by_name(x, country_code=cc), axis=1
     )
