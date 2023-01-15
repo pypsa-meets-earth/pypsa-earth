@@ -82,6 +82,7 @@ def attach_storageunits(n, costs):
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
     for carrier in carriers:
+        roundtrip_correction = 0.5 if carrier == "battery" else 1
         n.madd(
             "StorageUnit",
             buses_i,
@@ -91,8 +92,10 @@ def attach_storageunits(n, costs):
             p_nom_extendable=True,
             capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
-            efficiency_store=costs.at[lookup_store[carrier], "efficiency"],
-            efficiency_dispatch=costs.at[lookup_dispatch[carrier], "efficiency"],
+            efficiency_store=costs.at[lookup_store[carrier], "efficiency"]
+            ** roundtrip_correction,
+            efficiency_dispatch=costs.at[lookup_dispatch[carrier], "efficiency"]
+            ** roundtrip_correction,
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
@@ -140,6 +143,7 @@ def attach_stores(n, costs):
             carrier="H2 fuel cell",
             p_nom_extendable=True,
             efficiency=costs.at["fuel cell", "efficiency"],
+            # NB: fixed cost is per MWel, so we need to divide by efficiency
             capital_cost=costs.at["fuel cell", "capital_cost"]
             * costs.at["fuel cell", "efficiency"],
             marginal_cost=costs.at["fuel cell", "marginal_cost"],
@@ -167,7 +171,8 @@ def attach_stores(n, costs):
             bus0=buses_i,
             bus1=b_buses_i,
             carrier="battery charger",
-            efficiency=costs.at["battery inverter", "efficiency"],
+            # NB: the efficiencies are "round trip efficiencies"
+            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             capital_cost=costs.at["battery inverter", "capital_cost"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
@@ -179,7 +184,8 @@ def attach_stores(n, costs):
             bus0=b_buses_i,
             bus1=buses_i,
             carrier="battery discharger",
-            efficiency=costs.at["battery inverter", "efficiency"],
+            # NB: the efficiencies are "round trip efficiencies"
+            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
