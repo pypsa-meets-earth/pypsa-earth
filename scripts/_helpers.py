@@ -610,7 +610,7 @@ def read_geojson(fn):
 def nested_storage_dict(tech_costs):
     """
     Create a nested dictionary with a storage index and meta data relation.
-    
+
     Input:
     ------
     tech_costs: str, path to technology costs.csv file
@@ -619,7 +619,7 @@ def nested_storage_dict(tech_costs):
     -------
     nested_dict: dict, nested dictionary with storage index and meta data relation
     storage_techs: list, list of unique storage technologies
-    
+
     Example:
     --------
     Data format in Input:
@@ -636,16 +636,22 @@ def nested_storage_dict(tech_costs):
     """
     import ast
 
-    df = pd.read_csv(tech_costs, index_col=["technology"], usecols=["technology","further description"]).sort_index()
-    df = df[df['further description'].str.contains("{'carrier':", na = False)]
+    df = pd.read_csv(
+        tech_costs,
+        index_col=["technology"],
+        usecols=["technology", "further description"],
+    ).sort_index()
+    df = df[df["further description"].str.contains("{'carrier':", na=False)]
     storage_techs = df.index.unique()
     nested_storage_dict = {}
     if df.empty:
         print("No storage technology found in costs.csv")
     else:
         for i in range(len(df)):
-            storage_dict = ast.literal_eval(df.iloc[i,0])  # https://stackoverflow.com/a/988251/13573820
-            _ = storage_dict.pop('note', None)
+            storage_dict = ast.literal_eval(
+                df.iloc[i, 0]
+            )  # https://stackoverflow.com/a/988251/13573820
+            _ = storage_dict.pop("note", None)
             nested_storage_dict[df.index[i]] = storage_dict
     return [nested_storage_dict, storage_techs]
 
@@ -653,23 +659,31 @@ def nested_storage_dict(tech_costs):
 def add_storage_col_to_costs(costs, storage_meta_dict, storage_techs):
     """
     Add storage specific columns to costs.csv.
-    
+
     Input:
     ------
     costs: pd.DataFrame, costs.csv
     storage_meta_dict: dict, nested dictionary with storage index and meta data relation
     storage_techs: list, list of unique storage technologies
-    
+
     Output:
     -------
     costs: pd.DataFrame, costs.csv with added storage specific columns
     """
     # add storage specific columns to costs.csv
     for c in ["carrier", "technology_type", "type"]:
-        costs.loc[storage_techs, c] = [storage_meta_dict[X][c] for X in costs.loc[storage_techs].index]
+        costs.loc[storage_techs, c] = [
+            storage_meta_dict[X][c] for X in costs.loc[storage_techs].index
+        ]
     # remove all 'elec's from carrier columns and read carrier as string
     for i in range(len(costs.loc[storage_techs])):
-        costs.loc[storage_techs[i], "carrier"] = ''.join([e for e in costs.loc[storage_techs].carrier.iloc[i] if e!="elec"])
-        costs.loc[storage_techs[i], "technology_type"] = ''.join(costs.loc[storage_techs].technology_type.iloc[i]) 
-        costs.loc[storage_techs[i], "type"] = ''.join(costs.loc[storage_techs].type.iloc[i]) 
+        costs.loc[storage_techs[i], "carrier"] = "".join(
+            [e for e in costs.loc[storage_techs].carrier.iloc[i] if e != "elec"]
+        )
+        costs.loc[storage_techs[i], "technology_type"] = "".join(
+            costs.loc[storage_techs].technology_type.iloc[i]
+        )
+        costs.loc[storage_techs[i], "type"] = "".join(
+            costs.loc[storage_techs].type.iloc[i]
+        )
     return costs

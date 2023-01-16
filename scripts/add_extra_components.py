@@ -98,7 +98,7 @@ def attach_storageunits(n, costs, config):
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
-    
+
     ### TODO: GENERAL STORAGE_UNIT ATTACH FUNCTION
 
 
