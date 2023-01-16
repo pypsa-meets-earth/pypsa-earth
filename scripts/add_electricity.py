@@ -175,7 +175,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs = costs.rename(
         {
             "hydrogen storage": "hydrogen storage tank",
-            "hydrogen storage tank": "hydrogen storage tank",
+            "hydrogen underground storage": "hydrogen storage underground",
         },
     )
 
