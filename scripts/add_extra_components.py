@@ -69,10 +69,9 @@ idx = pd.IndexSlice
 logger = logging.getLogger(__name__)
 
 
-def attach_storageunits(n, costs):
-    elec_opts = snakemake.config["electricity"]
-    carriers = elec_opts["extendable_carriers"]["StorageUnit"]
-    max_hours = elec_opts["max_hours"]
+def attach_storageunits(n, costs, config):
+    carriers = config["electricity"]["extendable_carriers"]["StorageUnit"]
+    max_hours = config["electricity"]["max_hours"]
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
@@ -99,16 +98,27 @@ def attach_storageunits(n, costs):
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
+    
+    ### TODO: GENERAL STORAGE_UNIT ATTACH FUNCTION
 
 
-def attach_stores(n, costs):
-    elec_opts = snakemake.config["electricity"]
-    carriers = elec_opts["extendable_carriers"]["Store"]
+def attach_stores(n, costs, config):
+    """
+    Add storage units as store and links.
+
+    Two types of storage exists:
+    1. where every components can be independently sized e.g. hydrogen
+    2. where charger and discharger are the same component e.g. Li-battery (inverter)
+    """
+    carriers = config["electricity"]["extendable_carriers"]["Store"]
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     buses_i = n.buses.index
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
+
+    ### TODO: GENERAL STORE ATTACH FUNCTION
+    # Combine bicharger model & traditional model? (or even more general e.g. 5 step charger)
 
     if "H2" in carriers:
         h2_buses_i = n.madd("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
@@ -143,9 +153,7 @@ def attach_stores(n, costs):
             carrier="H2 fuel cell",
             p_nom_extendable=True,
             efficiency=costs.at["fuel cell", "efficiency"],
-            # NB: fixed cost is per MWel, so we need to divide by efficiency
-            capital_cost=costs.at["fuel cell", "capital_cost"]
-            * costs.at["fuel cell", "efficiency"],
+            capital_cost=costs.at["fuel cell", "capital_cost"],
             marginal_cost=costs.at["fuel cell", "marginal_cost"],
         )
 
@@ -172,7 +180,7 @@ def attach_stores(n, costs):
             bus1=b_buses_i,
             carrier="battery charger",
             # NB: the efficiencies are "round trip efficiencies"
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            efficiency=costs.at["battery inverter", "efficiency"],
             capital_cost=costs.at["battery inverter", "capital_cost"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
@@ -185,15 +193,14 @@ def attach_stores(n, costs):
             bus1=buses_i,
             carrier="battery discharger",
             # NB: the efficiencies are "round trip efficiencies"
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            efficiency=costs.at["battery inverter", "efficiency"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
 
-def attach_hydrogen_pipelines(n, costs):
-    elec_opts = snakemake.config["electricity"]
-    ext_carriers = elec_opts["extendable_carriers"]
+def attach_hydrogen_pipelines(n, costs, config):
+    ext_carriers = config["electricity"]["extendable_carriers"]
     as_stores = ext_carriers.get("Store", [])
 
     if "H2 pipeline" not in ext_carriers.get("Link", []):
@@ -242,18 +249,19 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    config = snakemake.config
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        config["costs"],
+        config["electricity"],
         Nyears,
     )
 
-    attach_storageunits(n, costs)
-    attach_stores(n, costs)
-    attach_hydrogen_pipelines(n, costs)
+    attach_storageunits(n, costs, config)
+    attach_stores(n, costs, config)
+    attach_hydrogen_pipelines(n, costs, config)
 
-    add_nice_carrier_names(n, config=snakemake.config)
+    add_nice_carrier_names(n, config=config)
 
-    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    n.meta = dict(config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
