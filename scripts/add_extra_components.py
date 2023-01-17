@@ -120,6 +120,8 @@ def attach_storageunits(n, costs, config):
             cyclic_state_of_charge=True,
         )
 
+    ### TODO: GENERAL STORAGE_UNIT ATTACH FUNCTION
+
 
 def attach_stores(n, costs, config):
     """
