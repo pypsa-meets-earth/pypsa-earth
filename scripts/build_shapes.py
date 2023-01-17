@@ -89,8 +89,6 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
 
 
 def build_gadm_df(file, layer, cc):
-    # read gpkg file
-    geodf = gpd.read_file(file, layer="ADM_ADM_" + str(layer)).to_crs(geo_crs)
 
     # convert country name representation of the main country (GID_0 column)
     # TODO consider map()
@@ -102,9 +100,6 @@ def build_gadm_df(file, layer, cc):
     # "not found" hardcoded according to country_converter conventions
     geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
 
-    # create a subindex column that is useful
-    # in the GADM processing of sub-national zones
-    geodf["GADM_ID"] = geodf[f"GID_{layer}"]
 
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1   
@@ -154,7 +149,13 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
 
-        geodf_temp = build_gadm_df(file=file_gpkg, layer=layer_id, cc=country_code)
+        # read gpkg file
+        geodf_tmp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(geo_crs)            
+
+
+        # create a subindex column that is useful
+        # in the GADM processing of sub-national zones
+        geodf_tmp["GADM_ID"] = geodf_tmp[f"GID_{layer_id}"]
 
         # append geodataframes
         geodf_list.append(geodf_temp)
