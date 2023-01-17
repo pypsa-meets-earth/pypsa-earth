@@ -82,6 +82,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
+from add_electricity import load_costs
 from _helpers import configure_logging
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
@@ -346,6 +347,25 @@ def add_battery_constraints(n):
     define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
 
+def add_bicharger_constraints(n, costs):
+    tech_type = costs.technology_type
+    carrier_bicharger = list(costs.loc[(tech_type == "bicharger"), "carrier"].unique())
+    for c in carrier_bicharger:
+        nodes = n.buses.index[n.buses.carrier == c]
+        if nodes.empty or ("Link", "p_nom") not in n.variables.index:
+            return
+        link_p_nom = get_var(n, "Link", "p_nom")
+        lhs = linexpr(
+            (1, link_p_nom[nodes + " charger"]),
+            (
+                -n.links.loc[nodes + " discharger", "efficiency"].values,
+                link_p_nom[nodes + " discharger"].values,
+            ),
+        )
+        contraint_name = f"charger_ratio_{c}"
+        define_constraints(n, lhs, "=", 0, "Link", contraint_name)
+
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to ``pypsa.linopf.network_lopf``.
@@ -354,6 +374,13 @@ def extra_functionality(n, snapshots):
     """
     opts = n.opts
     config = n.config
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    costs = load_costs(
+        snakemake.input.tech_costs,
+        config["costs"],
+        config["electricity"],
+        Nyears,
+    )
     if "BAU" in opts and n.generators.p_nom_extendable.any():
         add_BAU_constraints(n, config)
     if "SAFE" in opts and n.generators.p_nom_extendable.any():
@@ -367,6 +394,7 @@ def extra_functionality(n, snapshots):
         if "EQ" in o:
             add_EQ_constraints(n, o)
     add_battery_constraints(n)
+    add_bicharger_constraints(n, costs)
 
 
 def solve_network(n, config, opts="", **kwargs):
@@ -411,9 +439,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="54",
+            clusters="6",
             ll="copt",
-            opts="Co2L-1H",
+            opts="Co2L-4H",
         )
     configure_logging(snakemake)
 

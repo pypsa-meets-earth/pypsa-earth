@@ -576,6 +576,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
     rule solve_network:
         input:
             "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            tech_costs=COSTS,
         output:
             "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
@@ -622,6 +623,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
     rule solve_network:
         input:
             "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            tech_costs=COSTS,
         output:
             "results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         log:
