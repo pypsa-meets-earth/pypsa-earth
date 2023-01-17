@@ -104,6 +104,18 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_codes=True
         geodf_non_std = geodf[geodf["GID_0"] != cc]      
         geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
         logger.warning("Regions with non-standard codes dropped:{geodf_non_std}")
+
+    # country shape should have a single geomerty
+    if (layer == 0) & (geodf.shape[0] > 1) :
+        # take the first row only
+        geodf_union = geodf.iloc[[0]]
+        geodf_union = geodf_union.set_geometry(
+            # GeoSeries transformation is neded as Polygon type is not hashable
+            gpd.GeoSeries(unary_union(geodf["geometry"]))#,
+            # drop=True,
+            # inplace=True
+        )       
+        geodf = geodf_union      
     if layer >= 1:
         available_gadm_codes = geodf["GADM_ID"].unique()
         code_three_digits = two_2_three_digits_country(cc)
@@ -304,7 +316,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
     # a country shape may consist of multiple geometries which leads to geometry duplication in offshore_shapes
-    country_shapes = country_shapes.apply(lambda x: make_valid(x)).unary_union
+    country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
