@@ -89,7 +89,6 @@ build_shape_options:
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_areas: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
-  
 clean_osm_data_options:
   names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
