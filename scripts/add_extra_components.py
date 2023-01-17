@@ -118,7 +118,9 @@ def attach_storageunits(n, costs, config):
             p_nom_extendable=True,
             capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
-            efficiency_store=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+            efficiency_store=float(
+                costs.loc[charger_or_bicharger_filter, "efficiency"]
+            ),
             efficiency_dispatch=float(
                 costs.loc[discharger_or_bicharger_filter, "efficiency"]
             ),
@@ -254,14 +256,21 @@ def attach_stores(n, costs, config):
             p_nom_extendable=True,
             efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
             capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
-            marginal_cost=float(costs.loc[charger_or_bicharger_filter, "marginal_cost"]),
+            marginal_cost=float(
+                costs.loc[charger_or_bicharger_filter, "marginal_cost"]
+            ),
         )
 
         # capital cost of discharger is None if bicharger since already added in previous link
-        if costs.loc[discharger_or_bicharger_filter].technology_type.item() == "bicharger":
+        if (
+            costs.loc[discharger_or_bicharger_filter].technology_type.item()
+            == "bicharger"
+        ):
             none_or_value = None
         else:
-            none_or_value = float(costs.loc[discharger_or_bicharger_filter, "capital_cost"])
+            none_or_value = float(
+                costs.loc[discharger_or_bicharger_filter, "capital_cost"]
+            )
         n.madd(
             "Link",
             carrier_buses_i + " discharger",
@@ -271,7 +280,9 @@ def attach_stores(n, costs, config):
             p_nom_extendable=True,
             efficiency=float(costs.loc[discharger_or_bicharger_filter, "efficiency"]),
             capital_cost=none_or_value,
-            marginal_cost=float(costs.loc[discharger_or_bicharger_filter, "marginal_cost"]),
+            marginal_cost=float(
+                costs.loc[discharger_or_bicharger_filter, "marginal_cost"]
+            ),
         )
 
 
