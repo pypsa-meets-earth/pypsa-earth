@@ -77,10 +77,12 @@ def attach_storageunits(n, costs, config):
 
     buses_i = n.buses.index
 
+    carriers_classic = [x for x in carriers if x=="H2" or x=="battery"]
+    carriers_database = [x for x in carriers if x!="H2" and x!="battery"]
     lookup_store = {"H2": "electrolysis", "battery": "battery inverter"}
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
-    for carrier in carriers:
+    for carrier in carriers_classic:
         roundtrip_correction = 0.5 if carrier == "battery" else 1
         n.madd(
             "StorageUnit",
@@ -99,7 +101,24 @@ def attach_storageunits(n, costs, config):
             cyclic_state_of_charge=True,
         )
     
-    ### TODO: GENERAL STORAGE_UNIT ATTACH FUNCTION
+    for carrier in carriers_database:
+        tech_type = costs.technology_type
+        charge_or_bicharge_filter = (costs.carrier==carrier) & ((tech_type=="charger") | (tech_type=="bicharger"))
+        charge_or_bicharge_filter = (costs.carrier==carrier) & ((tech_type=="discharger") | (tech_type=="bicharger"))
+        n.madd(
+            "StorageUnit",
+            buses_i,
+            " " + carrier,
+            bus=buses_i,
+            carrier=carrier,
+            p_nom_extendable=True,
+            capital_cost=costs.at[carrier, "capital_cost"],
+            marginal_cost=costs.at[carrier, "marginal_cost"],
+            efficiency_store=float(costs.loc[charge_or_bicharge_filter, "efficiency"]),
+            efficiency_dispatch=float(costs.loc[charge_or_bicharge_filter, "efficiency"]),
+            max_hours=max_hours[carrier],
+            cyclic_state_of_charge=True,
+        )
 
 
 def attach_stores(n, costs, config):
