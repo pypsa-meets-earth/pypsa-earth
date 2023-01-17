@@ -88,7 +88,7 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
         return row["GID_0"]
 
 
-def build_gadm_df(file, layer, cc):
+def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_codes=True): 
 
     # convert country name representation of the main country (GID_0 column)
     # TODO consider map()
@@ -152,6 +152,8 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
         # read gpkg file
         geodf_tmp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(geo_crs)            
 
+        geodf_tmp = filter_gadm(geodf=geodf_tmp, layer=layer_id, cc=country_code, 
+            output_nonstd_to_csv=True)
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
