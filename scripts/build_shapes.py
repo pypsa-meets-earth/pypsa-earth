@@ -93,16 +93,17 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_codes=True
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)      
 
-    # GID_0 may have some exotic values, "COUNTRY" column may be used instead
-    # not clear
-
-    # "not found" hardcoded according to country_converter conventions
-    geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
-
-
+    if keep_all_codes:
+        # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1   
         )      
+        # "not found" hardcoded according to country_converter conventions
+        geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
+    else: 
+        geodf_non_std = geodf[geodf["GID_0"] != cc]      
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+        logger.warning("Regions with non-standard codes dropped:{geodf_non_std}")
     if layer >= 1:
         available_gadm_codes = geodf["GADM_ID"].unique()
         code_three_digits = two_2_three_digits_country(cc)
