@@ -162,14 +162,14 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             layer_id = len(list_layers) - 1
 
         # read gpkg file
-        geodf_tmp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(geo_crs)            
+        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(geo_crs)            
 
-        geodf_tmp = filter_gadm(geodf=geodf_tmp, layer=layer_id, cc=country_code, 
+        geodf_temp = filter_gadm(geodf=geodf_temp, layer=layer_id, cc=country_code, 
             output_nonstd_to_csv=True)
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
-        geodf_tmp["GADM_ID"] = geodf_tmp[f"GID_{layer_id}"]
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
 
         # append geodataframes
         geodf_list.append(geodf_temp)
