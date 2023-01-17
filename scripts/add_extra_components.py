@@ -71,14 +71,14 @@ logger = logging.getLogger(__name__)
 
 def attach_storageunits(n, costs, config):
     carriers = config["electricity"]["extendable_carriers"]["StorageUnit"]
+    carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
+    carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
     max_hours = config["electricity"]["max_hours"]
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     buses_i = n.buses.index
 
-    carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
-    carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
     lookup_store = {"H2": "electrolysis", "battery": "battery inverter"}
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
@@ -126,8 +126,6 @@ def attach_storageunits(n, costs, config):
             cyclic_state_of_charge=True,
         )
 
-    ### TODO: GENERAL STORAGE_UNIT ATTACH FUNCTION
-
 
 def attach_stores(n, costs, config):
     """
@@ -138,7 +136,8 @@ def attach_stores(n, costs, config):
     2. where charger and discharger are the same component e.g. Li-battery (inverter)
     """
     carriers = config["electricity"]["extendable_carriers"]["Store"]
-
+    carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
+    carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     buses_i = n.buses.index
@@ -147,7 +146,7 @@ def attach_stores(n, costs, config):
     ### TODO: GENERAL STORE ATTACH FUNCTION
     # Combine bicharger model & traditional model? (or even more general e.g. 5 step charger)
 
-    if "H2" in carriers:
+    if "H2" in carriers_classic:
         h2_buses_i = n.madd("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
 
         n.madd(
@@ -184,7 +183,7 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["fuel cell", "marginal_cost"],
         )
 
-    if "battery" in carriers:
+    if "battery" in carriers_classic:
         b_buses_i = n.madd(
             "Bus", buses_i + " battery", carrier="battery", **bus_sub_dict
         )
@@ -223,6 +222,56 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["battery inverter", "efficiency"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
+        )
+
+    for c in carriers_database:
+        carrier_buses_i = n.madd("Bus", buses_i + f" {c}", carrier=c, **bus_sub_dict)
+        tech_type = costs.technology_type
+        carrier = costs.carrier
+        store_filter = (carrier == c) & (tech_type == "store")
+        charger_or_bicharger_filter = (carrier == c) & (
+            (tech_type == "charger") | (tech_type == "bicharger")
+        )
+        discharger_or_bicharger_filter = (carrier == c) & (
+            (tech_type == "discharger") | (tech_type == "bicharger")
+        )
+        n.madd(
+            "Store",
+            carrier_buses_i,
+            bus=carrier_buses_i,
+            carrier=c,
+            e_nom_extendable=True,
+            e_cyclic=True,
+            capital_cost=float(costs.loc[store_filter, "capital_cost"]),
+        )
+
+        n.madd(
+            "Link",
+            carrier_buses_i + " charger",
+            bus0=buses_i,
+            bus1=carrier_buses_i,
+            carrier=f"{c} charger",
+            p_nom_extendable=True,
+            efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+            capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
+            marginal_cost=float(costs.loc[charger_or_bicharger_filter, "marginal_cost"]),
+        )
+
+        # capital cost of discharger is None if bicharger since already added in previous link
+        if costs.loc[discharger_or_bicharger_filter].technology_type.item() == "bicharger":
+            none_or_value = None
+        else:
+            none_or_value = float(costs.loc[discharger_or_bicharger_filter, "capital_cost"])
+        n.madd(
+            "Link",
+            carrier_buses_i + " discharger",
+            bus0=carrier_buses_i,
+            bus1=buses_i,
+            carrier=f"{c} discharger",
+            p_nom_extendable=True,
+            efficiency=float(costs.loc[discharger_or_bicharger_filter, "efficiency"]),
+            capital_cost=none_or_value,
+            marginal_cost=float(costs.loc[discharger_or_bicharger_filter, "marginal_cost"]),
         )
 
 
