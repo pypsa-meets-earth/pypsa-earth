@@ -220,7 +220,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
 
     # add capital_cost to all storage units indexed by carrier e.g. "lead" or "concrete"
-    for c in costs.loc[storage_techs,"carrier"].unique():
+    for c in costs.loc[storage_techs, "carrier"].unique():
         carrier = costs.carrier
         tech_type = costs.technology_type
         costs.loc[c] = costs_for_storageunit(

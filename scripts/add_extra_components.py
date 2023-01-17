@@ -77,8 +77,8 @@ def attach_storageunits(n, costs, config):
 
     buses_i = n.buses.index
 
-    carriers_classic = [x for x in carriers if x=="H2" or x=="battery"]
-    carriers_database = [x for x in carriers if x!="H2" and x!="battery"]
+    carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
+    carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
     lookup_store = {"H2": "electrolysis", "battery": "battery inverter"}
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
@@ -100,11 +100,15 @@ def attach_storageunits(n, costs, config):
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
-    
+
     for carrier in carriers_database:
         tech_type = costs.technology_type
-        charge_or_bicharge_filter = (costs.carrier==carrier) & ((tech_type=="charger") | (tech_type=="bicharger"))
-        charge_or_bicharge_filter = (costs.carrier==carrier) & ((tech_type=="discharger") | (tech_type=="bicharger"))
+        charge_or_bicharge_filter = (costs.carrier == carrier) & (
+            (tech_type == "charger") | (tech_type == "bicharger")
+        )
+        charge_or_bicharge_filter = (costs.carrier == carrier) & (
+            (tech_type == "discharger") | (tech_type == "bicharger")
+        )
         n.madd(
             "StorageUnit",
             buses_i,
@@ -115,7 +119,9 @@ def attach_storageunits(n, costs, config):
             capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
             efficiency_store=float(costs.loc[charge_or_bicharge_filter, "efficiency"]),
-            efficiency_dispatch=float(costs.loc[charge_or_bicharge_filter, "efficiency"]),
+            efficiency_dispatch=float(
+                costs.loc[charge_or_bicharge_filter, "efficiency"]
+            ),
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
