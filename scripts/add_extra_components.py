@@ -103,10 +103,10 @@ def attach_storageunits(n, costs, config):
 
     for carrier in carriers_database:
         tech_type = costs.technology_type
-        charge_or_bicharge_filter = (costs.carrier == carrier) & (
+        charger_or_bicharger_filter = (costs.carrier == carrier) & (
             (tech_type == "charger") | (tech_type == "bicharger")
         )
-        charge_or_bicharge_filter = (costs.carrier == carrier) & (
+        discharger_or_bicharger_filter = (costs.carrier == carrier) & (
             (tech_type == "discharger") | (tech_type == "bicharger")
         )
         n.madd(
@@ -118,9 +118,9 @@ def attach_storageunits(n, costs, config):
             p_nom_extendable=True,
             capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
-            efficiency_store=float(costs.loc[charge_or_bicharge_filter, "efficiency"]),
+            efficiency_store=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
             efficiency_dispatch=float(
-                costs.loc[charge_or_bicharge_filter, "efficiency"]
+                costs.loc[discharger_or_bicharger_filter, "efficiency"]
             ),
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,

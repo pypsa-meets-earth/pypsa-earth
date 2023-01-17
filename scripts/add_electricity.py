@@ -220,18 +220,18 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
 
     # add capital_cost to all storage units indexed by carrier e.g. "lead" or "concrete"
-    for c in costs.loc[storage_techs, "carrier"].unique():
+    for c in costs.loc[storage_techs,"carrier"].unique():
         carrier = costs.carrier
         tech_type = costs.technology_type
+        store_filter = (carrier == c) & (tech_type == "store")
+        charger_or_bicharger_filter = (carrier == c) & ((tech_type == "bicharger") | (tech_type == "charger"))
+        discharger_filter = (carrier == c) & (tech_type == "discharger")
         costs.loc[c] = costs_for_storageunit(
-            costs.loc[(carrier == c) & (tech_type == "store")],
-            costs.loc[
-                (carrier == c) & ((tech_type == "bicharger") | (tech_type == "charger"))
-            ],
-            costs.loc[(carrier == c) & (tech_type == "discharger")],
-            max_hours=max_hours[
-                "battery"
-            ],  # TODO: max_hours data should be read as costs.loc[carrier==c,max_hours] (easy possible)
+            costs.loc[store_filter],
+            costs.loc[charger_or_bicharger_filter],
+            costs.loc[discharger_filter],
+            max_hours=max_hours["battery"],  
+            # TODO: max_hours data should be read as costs.loc[carrier==c,max_hours] (easy possible)
         )
 
     for attr in ("marginal_cost", "capital_cost"):
