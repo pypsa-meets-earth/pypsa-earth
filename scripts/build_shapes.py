@@ -116,6 +116,8 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_codes=True
             # inplace=True
         )       
         geodf = geodf_union      
+
+    # debug output to file
     if layer >= 1:
 
         available_gadm_codes = geodf["GID_0"].unique()
