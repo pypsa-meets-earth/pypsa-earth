@@ -81,7 +81,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def restore_country_code_by_name(row, country_code):
+def replace_nonstd_codes(row, col, country_code, keep_cond=True):
     if row["GID_0"] != country_code:
         return country_name_2_two_digits(row["COUNTRY"])
     else:
@@ -98,9 +98,6 @@ def build_gadm_df(file, layer, cc):
 
     # GID_0 may have some exotic values, "COUNTRY" column may be used instead
     # not clear
-    geodf["GID_0"] = geodf.apply(
-        lambda x: restore_country_code_by_name(x, country_code=cc), axis=1
-    )
 
     # "not found" hardcoded according to country_converter conventions
     geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
@@ -109,6 +106,9 @@ def build_gadm_df(file, layer, cc):
     # in the GADM processing of sub-national zones
     geodf["GADM_ID"] = geodf[f"GID_{layer}"]
 
+        geodf["GID_0"] = geodf.apply(
+            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1   
+        )      
     if layer >= 1:
         available_gadm_codes = geodf["GADM_ID"].unique()
         code_three_digits = two_2_three_digits_country(cc)
