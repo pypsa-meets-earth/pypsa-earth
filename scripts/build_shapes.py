@@ -91,8 +91,7 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
 def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_codes=True): 
 
     # convert country name representation of the main country (GID_0 column)
-    # TODO consider map()
-    geodf["GID_0"] = [three_2_two_digits_country(twoD_c) for twoD_c in geodf["GID_0"]]
+    geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)      
 
     # GID_0 may have some exotic values, "COUNTRY" column may be used instead
     # not clear
