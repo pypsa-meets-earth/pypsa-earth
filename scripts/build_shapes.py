@@ -225,6 +225,8 @@ def countries(countries, geo_crs, update=False, out_logging=False, keep_all_area
 
     # set index and simplify polygons
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
+    ret_df.apply(lambda x: make_valid(x) if not x.is_valid else x)
+    ret_df.reset_index()
 
     return ret_df
 
@@ -880,14 +882,7 @@ if __name__ == "__main__":
     country_shapes = countries(
         countries_list, geo_crs, update, out_logging, keep_all_areas=True
     )
-
-    # there may be "holes" in the countries geometry which cause troubles along the workflow
-    # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
-    country_shapes_valid = (
-        country_shapes.apply(lambda x: make_valid(x) if not x.is_valid else x)
-        .reset_index()
-        .to_file(snakemake.output.country_shapes)
-    )
+    country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
