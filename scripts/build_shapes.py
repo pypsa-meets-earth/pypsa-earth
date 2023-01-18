@@ -106,7 +106,7 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True
         logger.warning("Regions with non-standard codes dropped:{geodf_non_std}")
 
     # country shape should have a single geomerty
-    if (layer == 0) & (geodf.shape[0] > 1):
+    if (layer == 0) and (geodf.shape[0] > 1):
         # take the first row only
         geodf_union = geodf.iloc[[0]]
         geodf_union = geodf_union.set_geometry(
@@ -163,7 +163,7 @@ def get_GADM_layer(
         list_layers = fiona.listlayers(file_gpkg)
 
         # get layer name
-        if (layer_id < 0) | (layer_id >= len(list_layers)):
+        if (layer_id < 0) or (layer_id >= len(list_layers)):
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
 
