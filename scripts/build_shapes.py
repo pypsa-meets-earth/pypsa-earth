@@ -80,7 +80,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     return GADM_inputfile_gpkg, GADM_filename
 
-
+def replace_nonstd_codes(row, col, country_code, keep_cond=True):
     if row["GID_0"] != country_code:
         return country_name_2_two_digits(row["COUNTRY"])
     else:
@@ -92,6 +92,7 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
 
+    if keep_all_areas:
         # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
