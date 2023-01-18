@@ -82,8 +82,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from add_electricity import load_costs
 from _helpers import configure_logging
+from add_electricity import load_costs
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -415,7 +415,7 @@ def solve_network(n, config, opts="", **kwargs):
             solver_name=solver_name,
             solver_options=solver_options,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     else:
         ilopf(
@@ -426,7 +426,7 @@ def solve_network(n, config, opts="", **kwargs):
             min_iterations=min_iterations,
             max_iterations=max_iterations,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     return n
 
