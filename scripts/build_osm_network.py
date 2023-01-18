@@ -865,6 +865,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
+    non_allocated_countries = list(set(country_list).symmetric_difference(set(bus_country_list)))        
+
     if len(non_allocated_countries) > 0:
         logger.error(
             f"There following countries could not be allocated properly: {non_allocated_countries}"
