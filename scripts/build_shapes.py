@@ -107,15 +107,8 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True
 
     # country shape should have a single geomerty
     if (layer == 0) and (geodf.shape[0] > 1):
-        # take the first row only
-        geodf_union = geodf.iloc[[0]]
-        geodf_union = geodf_union.set_geometry(
-            # GeoSeries transformation is neded as Polygon type is not hashable
-            gpd.GeoSeries(unary_union(geodf["geometry"]))  # ,
-            # drop=True,
-            # inplace=True
-        )
-        geodf = geodf_union
+        # take the first row only to re-define geometry keeping other columns
+        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
 
     # debug output to file
     if layer >= 1:
