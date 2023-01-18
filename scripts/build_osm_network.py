@@ -865,9 +865,10 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
             crs=buses.crs,
         )
 
-
     if len(non_allocated_countries) > 0:
-        logger.error(f"There following countries could not be allocated properly: {non_allocated_countries}")       
+        logger.error(
+            f"There following countries could not be allocated properly: {non_allocated_countries}"
+        )
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)
@@ -900,7 +901,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_osm_network")
-    configure_logging(snakemake)  
+    configure_logging(snakemake)
 
     # load default crs
     geo_crs = snakemake.config["crs"]["geo_crs"]
