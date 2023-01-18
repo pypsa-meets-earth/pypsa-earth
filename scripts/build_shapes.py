@@ -80,6 +80,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     return GADM_inputfile_gpkg, GADM_filename
 
+
 def replace_nonstd_codes(row, col, country_code, keep_cond=True):
     if row["GID_0"] != country_code:
         return country_name_2_two_digits(row["COUNTRY"])
@@ -87,7 +88,7 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
         return row["GID_0"]
 
 
-def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True): 
+def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True):
 
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
@@ -135,8 +136,9 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True
     return geodf
 
 
-def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False, 
-    keep_all_areas=True):
+def get_GADM_layer(
+    country_list, layer_id, geo_crs, update=False, outlogging=False, keep_all_areas=True
+):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
 
@@ -169,10 +171,17 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
         geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
             geo_crs
         )
-        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(geo_crs)            
+        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
+            geo_crs
+        )
 
-        geodf_temp = filter_gadm(geodf=geodf_temp, layer=layer_id, cc=country_code, 
-            output_nonstd_to_csv=True, keep_all_areas=True)
+        geodf_temp = filter_gadm(
+            geodf=geodf_temp,
+            layer=layer_id,
+            cc=country_code,
+            output_nonstd_to_csv=True,
+            keep_all_areas=True,
+        )
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
@@ -213,7 +222,9 @@ def countries(countries, geo_crs, update=False, out_logging=False, keep_all_area
         logger.info("Stage 1 of 4: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
-    df_countries = get_GADM_layer(countries, 0, geo_crs, update, out_logging, keep_all_areas=True)
+    df_countries = get_GADM_layer(
+        countries, 0, geo_crs, update, out_logging, keep_all_areas=True
+    )
 
     # select and rename columns
     df_countries = df_countries[["GID_0", "geometry"]].copy()
@@ -864,7 +875,7 @@ if __name__ == "__main__":
     out_logging = snakemake.config["build_shape_options"]["out_logging"]
     year = snakemake.config["build_shape_options"]["year"]
     nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
-    contended_areas = snakemake.config["build_shape_options"]["contended_areas"]    
+    contended_areas = snakemake.config["build_shape_options"]["contended_areas"]
     EEZ_gpkg = snakemake.input["eez"]
     worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
     gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
@@ -873,7 +884,9 @@ if __name__ == "__main__":
 
     keep_all_areas = False if contended_areas == "drop" else True
 
-    country_shapes = countries(countries_list, geo_crs, update, out_logging, keep_all_areas=True)
+    country_shapes = countries(
+        countries_list, geo_crs, update, out_logging, keep_all_areas=True
+    )
 
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
