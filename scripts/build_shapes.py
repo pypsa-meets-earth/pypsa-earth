@@ -81,7 +81,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def replace_nonstd_codes(row, col, country_code):
     if row["GID_0"] != country_code:
         return country_name_2_two_digits(row["COUNTRY"])
     else:
@@ -91,45 +90,46 @@ def replace_nonstd_codes(row, col, country_code):
 def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True): 
 
     # convert country name representation of the main country (GID_0 column)
-    geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)      
+    geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
 
-    if keep_all_areas:
         # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
-            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1   
-        )      
+            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
+        )
         # "not found" hardcoded according to country_converter conventions
         geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
-    else: 
-        geodf_non_std = geodf[geodf["GID_0"] != cc]      
+    else:
+        geodf_non_std = geodf[geodf["GID_0"] != cc]
         geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
         logger.warning("Regions with non-standard codes dropped:{geodf_non_std}")
 
     # country shape should have a single geomerty
-    if (layer == 0) & (geodf.shape[0] > 1) :
+    if (layer == 0) & (geodf.shape[0] > 1):
         # take the first row only
         geodf_union = geodf.iloc[[0]]
         geodf_union = geodf_union.set_geometry(
             # GeoSeries transformation is neded as Polygon type is not hashable
-            gpd.GeoSeries(unary_union(geodf["geometry"]))#,
+            gpd.GeoSeries(unary_union(geodf["geometry"]))  # ,
             # drop=True,
             # inplace=True
-        )       
-        geodf = geodf_union      
+        )
+        geodf = geodf_union
 
     # debug output to file
     if layer >= 1:
 
         available_gadm_codes = geodf["GID_0"].unique()
         # normally the GADM code starts from an ISO3 code
-        code_three_digits = two_2_three_digits_country(cc)        
+        code_three_digits = two_2_three_digits_country(cc)
         non_std_gadm_codes = [
             w for w in available_gadm_codes if not w.startswith(code_three_digits)
         ]
 
         if len(non_std_gadm_codes) > 0:
             df_filtered = geodf[geodf["GID_0"].isin(non_std_gadm_codes)]
-            df_filtered.to_csv("resources/non_standard_gadm_" + cc + "_raw.csv", index=False)
+            df_filtered.to_csv(
+                "resources/non_standard_gadm_" + cc + "_raw.csv", index=False
+            )
 
     return geodf
 
@@ -165,6 +165,9 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             layer_id = len(list_layers) - 1
 
         # read gpkg file
+        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
+            geo_crs
+        )
         geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(geo_crs)            
 
         geodf_temp = filter_gadm(geodf=geodf_temp, layer=layer_id, cc=country_code, 
