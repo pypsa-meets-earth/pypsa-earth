@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
+import geopandas as gpd
 import pypsa
 from helpers import locate_bus, override_component_attrs
 
@@ -52,6 +53,14 @@ def select_ports(n):
 
 
 def add_export(n, hydrogen_buses_ports, export_h2):
+
+    country_shape = gpd.read_file(snakemake.input["shapes_path"])
+    # Find most northwestern point in country shape and get x and y coordinates
+    country_shape = country_shape.to_crs("EPSG:4326")
+
+    # Get coordinates of the most western and northern point of the country and add a buffer of 2 degrees (equiv. to approx 220 km)
+    x_export = country_shape.geometry.centroid.x.min() -2
+    y_export = country_shape.geometry.centroid.y.max() +2
 
     # add export bus
     n.add(
@@ -103,14 +112,15 @@ if __name__ == "__main__":
         from helpers import mock_snakemake, sets_path_to_root
 
         snakemake = mock_snakemake(
-            "add_endogenous_export",
+            "add_export",
             simpl="",
-            clusters="20",
+            clusters="4",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="730H",
-            discountrate=0.069,
+            sopts="144H",
+            discountrate=0.071,
+            demand="DF",
         )
         sets_path_to_root("pypsa-earth-sec")
 
