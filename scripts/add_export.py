@@ -16,8 +16,8 @@ import logging
 import os
 from pathlib import Path
 
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 import pypsa
 from helpers import locate_bus, override_component_attrs
 
@@ -59,8 +59,8 @@ def add_export(n, hydrogen_buses_ports, export_h2):
     country_shape = country_shape.to_crs("EPSG:4326")
 
     # Get coordinates of the most western and northern point of the country and add a buffer of 2 degrees (equiv. to approx 220 km)
-    x_export = country_shape.geometry.centroid.x.min() -2
-    y_export = country_shape.geometry.centroid.y.max() +2
+    x_export = country_shape.geometry.centroid.x.min() - 2
+    y_export = country_shape.geometry.centroid.y.max() + 2
 
     # add export bus
     n.add(
