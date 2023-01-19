@@ -88,12 +88,12 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
         return row["GID_0"]
 
 
-def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, contended_areas):
+def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, contended_flag):
 
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
 
-    if contended_areas != "drop":
+    if contended_flag != "drop":
         # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
@@ -130,7 +130,7 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, contended_areas):
 
 
 def get_GADM_layer(
-    country_list, layer_id, geo_crs, update=False, outlogging=False, contended_areas
+    country_list, layer_id, geo_crs, update=False, outlogging=False, contended_flag
 ):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
@@ -173,7 +173,7 @@ def get_GADM_layer(
             layer=layer_id,
             cc=country_code,
             output_nonstd_to_csv=True,
-            contended_areas,
+            contended_flag,
         )
 
         # create a subindex column that is useful
@@ -208,7 +208,7 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(countries, geo_crs, update=False, out_logging=False, contended_areas):
+def countries(countries, geo_crs, update=False, out_logging=False, contended_flag):
     "Create country shapes"
 
     if out_logging:
@@ -216,7 +216,7 @@ def countries(countries, geo_crs, update=False, out_logging=False, contended_are
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(
-        countries, 0, geo_crs, update, out_logging, contended_areas
+        countries, 0, geo_crs, update, out_logging, contended_flag
     )
 
     # select and rename columns
@@ -870,7 +870,7 @@ if __name__ == "__main__":
     out_logging = snakemake.config["build_shape_options"]["out_logging"]
     year = snakemake.config["build_shape_options"]["year"]
     nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
-    contended_areas = snakemake.config["build_shape_options"]["contended_areas"]
+    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
     EEZ_gpkg = snakemake.input["eez"]
     worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
     gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
@@ -878,7 +878,7 @@ if __name__ == "__main__":
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
     country_shapes = countries(
-        countries_list, geo_crs, update, out_logging, contended_areas
+        countries_list, geo_crs, update, out_logging, contended_flag
     )
     country_shapes.to_file(snakemake.output.country_shapes)
 
