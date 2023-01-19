@@ -161,6 +161,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
+    # set marginal cost to all components generators, charger, discharger, store, ...
     costs["capital_cost"] = (
         (
             calculate_annuity(costs["lifetime"], costs["discount rate"])
@@ -219,7 +220,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     storage_meta_dict, storage_techs = nested_storage_dict(tech_costs)
     costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
 
-    # add capital_cost to all storage units indexed by carrier e.g. "lead" or "concrete"
+    # add capital_cost to all storage_units indexed by carrier e.g. "lead" or "concrete"
     for c in costs.loc[storage_techs, "carrier"].unique():
         carrier = costs.carrier
         tech_type = costs.technology_type

@@ -266,9 +266,9 @@ def attach_stores(n, costs, config):
             costs.loc[discharger_or_bicharger_filter].technology_type.item()
             == "bicharger"
         ):
-            none_or_value = None
+            zero_or_value = 0
         else:
-            none_or_value = float(
+            zero_or_value = float(
                 costs.loc[discharger_or_bicharger_filter, "capital_cost"]
             )
         n.madd(
@@ -279,7 +279,7 @@ def attach_stores(n, costs, config):
             carrier=f"{c} discharger",
             p_nom_extendable=True,
             efficiency=float(costs.loc[discharger_or_bicharger_filter, "efficiency"]),
-            capital_cost=none_or_value,
+            capital_cost=zero_or_value,
             marginal_cost=float(
                 costs.loc[discharger_or_bicharger_filter, "marginal_cost"]
             ),

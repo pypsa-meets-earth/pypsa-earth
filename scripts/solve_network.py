@@ -349,8 +349,10 @@ def add_battery_constraints(n):
 
 def add_bicharger_constraints(n, costs):
     tech_type = costs.technology_type
-    carrier_bicharger = list(costs.loc[(tech_type == "bicharger"), "carrier"].unique())
-    for c in carrier_bicharger:
+    carriers_bicharger = list(costs.loc[(tech_type == "bicharger"), "carrier"].unique())
+    carriers_config = n.config["electricity"]["extendable_carriers"]["Store"]
+    carriers_intersect = list(set(carriers_bicharger) & set(carriers_config))
+    for c in carriers_intersect:
         nodes = n.buses.index[n.buses.carrier == c]
         if nodes.empty or ("Link", "p_nom") not in n.variables.index:
             return
