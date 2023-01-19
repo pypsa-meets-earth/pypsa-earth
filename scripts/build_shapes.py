@@ -88,12 +88,12 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
         return row["GID_0"]
 
 
-def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True):
+def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, contended_areas):
 
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
 
-    if keep_all_areas:
+    if contended_areas != "drop":
         # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
@@ -130,7 +130,7 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True
 
 
 def get_GADM_layer(
-    country_list, layer_id, geo_crs, update=False, outlogging=False, keep_all_areas=True
+    country_list, layer_id, geo_crs, update=False, outlogging=False, contended_areas
 ):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
@@ -173,7 +173,7 @@ def get_GADM_layer(
             layer=layer_id,
             cc=country_code,
             output_nonstd_to_csv=True,
-            keep_all_areas=True,
+            contended_areas,
         )
 
         # create a subindex column that is useful
@@ -208,7 +208,7 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(countries, geo_crs, update=False, out_logging=False, keep_all_areas=True):
+def countries(countries, geo_crs, update=False, out_logging=False, contended_areas):
     "Create country shapes"
 
     if out_logging:
@@ -216,7 +216,7 @@ def countries(countries, geo_crs, update=False, out_logging=False, keep_all_area
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(
-        countries, 0, geo_crs, update, out_logging, keep_all_areas=True
+        countries, 0, geo_crs, update, out_logging, contended_areas
     )
 
     # select and rename columns
@@ -808,7 +808,7 @@ def gadm(
         logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, update, keep_all_areas=True)
+    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, update, contended_areas)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -877,10 +877,8 @@ if __name__ == "__main__":
     geo_crs = snakemake.config["crs"]["geo_crs"]
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
-    keep_all_areas = False if contended_areas == "drop" else True
-
     country_shapes = countries(
-        countries_list, geo_crs, update, out_logging, keep_all_areas=True
+        countries_list, geo_crs, update, out_logging, contended_areas
     )
     country_shapes.to_file(snakemake.output.country_shapes)
 
