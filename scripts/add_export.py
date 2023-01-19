@@ -67,6 +67,8 @@ def add_export(n, hydrogen_buses_ports, export_h2):
         "Bus",
         "H2 export bus",
         carrier="H2",
+        x=x_export,
+        y=y_export,
     )
 
     # add export links
