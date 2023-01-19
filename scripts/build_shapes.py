@@ -111,7 +111,7 @@ def filter_gadm(geodf, layer, cc, output_nonstd_to_csv=True, keep_all_areas=True
         geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
 
     # debug output to file
-    if layer >= 1:
+    if (layer >= 1) and output_nonstd_to_csv:
 
         available_gadm_codes = geodf["GID_0"].unique()
         # normally the GADM code starts from an ISO3 code
