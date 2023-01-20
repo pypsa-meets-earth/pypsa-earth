@@ -172,7 +172,7 @@ def get_GADM_layer(
             geodf=geodf_temp,
             layer=layer_id,
             cc=country_code,
-            contended_flag=contended_flag
+            contended_flag=contended_flag,
             output_nonstd_to_csv=True,
         )
 
