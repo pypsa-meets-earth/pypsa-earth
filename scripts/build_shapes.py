@@ -164,9 +164,6 @@ def get_GADM_layer(
         geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
             geo_crs
         )
-        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
-            geo_crs
-        )
 
         geodf_temp = filter_gadm(
             geodf=geodf_temp,
@@ -809,7 +806,7 @@ def gadm(
         logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update, )
+    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
