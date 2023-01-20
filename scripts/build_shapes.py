@@ -179,7 +179,7 @@ def get_GADM_layer(
             layer=layer_id,
             cc=country_code,
             contended_flag=contended_flag,
-            output_nonstd_to_csv=True,
+            output_nonstd_to_csv=False,
         )
 
         # create a subindex column that is useful
