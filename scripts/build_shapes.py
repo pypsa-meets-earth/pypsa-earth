@@ -899,6 +899,7 @@ if __name__ == "__main__":
         gdp_method,
         countries_list,
         geo_crs,
+        contended_flag,
         layer_id,
         update,
         out_logging,
