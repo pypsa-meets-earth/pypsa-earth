@@ -172,7 +172,7 @@ def get_GADM_layer(
             geodf=geodf_temp,
             layer=layer_id,
             cc=country_code,
-            contended_flag=contended_flag
+            contended_flag=contended_flag,
             output_nonstd_to_csv=True,
         )
 
@@ -216,7 +216,7 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(
-        countries, 0, geo_crs, contended_flag=contended_flag, update, out_logging, 
+        countries, 0, geo_crs, contended_flag, update, out_logging, 
     )
 
     # select and rename columns
@@ -797,19 +797,19 @@ def gadm(
     gdp_method,
     countries,
     geo_crs,
+    contended_flag,
     layer_id=2,
     update=False,
     out_logging=False,
     year=2020,
-    nprocesses=None,
-    contended_flag
+    nprocesses=None,    
 ):
 
     if out_logging:
         logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag=contended_flag, update, )
+    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update, )
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -879,7 +879,7 @@ if __name__ == "__main__":
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
     country_shapes = countries(
-        countries_list, geo_crs, contended_flag=contended_flag, update, out_logging, 
+        countries_list, geo_crs, contended_flag, update, out_logging, 
     )
     country_shapes.to_file(snakemake.output.country_shapes)
 
