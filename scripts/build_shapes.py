@@ -93,7 +93,7 @@ def filter_gadm(
     layer,
     cc,
     contended_flag,
-    output_nonstd_to_csv=True,
+    output_nonstd_to_csv=False,
 ):
 
     # convert country name representation of the main country (GID_0 column)
