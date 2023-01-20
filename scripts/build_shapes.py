@@ -88,7 +88,13 @@ def replace_nonstd_codes(row, col, country_code, keep_cond=True):
         return row["GID_0"]
 
 
-def filter_gadm(geodf, layer, cc, contended_flag, output_nonstd_to_csv=True, ):
+def filter_gadm(
+    geodf,
+    layer,
+    cc,
+    contended_flag,
+    output_nonstd_to_csv=True,
+):
 
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
@@ -130,7 +136,12 @@ def filter_gadm(geodf, layer, cc, contended_flag, output_nonstd_to_csv=True, ):
 
 
 def get_GADM_layer(
-    country_list, layer_id, geo_crs, contended_flag, update=False, outlogging=False, 
+    country_list,
+    layer_id,
+    geo_crs,
+    contended_flag,
+    update=False,
+    outlogging=False,
 ):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
@@ -213,7 +224,12 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(
-        countries, 0, geo_crs, contended_flag, update, out_logging, 
+        countries,
+        0,
+        geo_crs,
+        contended_flag,
+        update,
+        out_logging,
     )
 
     # select and rename columns
@@ -801,7 +817,7 @@ def gadm(
     update=False,
     out_logging=False,
     year=2020,
-    nprocesses=None,    
+    nprocesses=None,
 ):
 
     if out_logging:
@@ -878,7 +894,11 @@ if __name__ == "__main__":
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
     country_shapes = countries(
-        countries_list, geo_crs, contended_flag, update, out_logging, 
+        countries_list,
+        geo_crs,
+        contended_flag,
+        update,
+        out_logging,
     )
     country_shapes.to_file(snakemake.output.country_shapes)
 
