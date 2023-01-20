@@ -122,9 +122,7 @@ def filter_gadm(
         available_gadm_codes = geodf["GID_0"].unique()
         # normally the GADM code starts from an ISO3 code
         code_three_digits = two_2_three_digits_country(cc)
-        non_std_gadm_codes = [
-            w for w in available_gadm_codes if not w.startswith(code_three_digits)
-        ]
+        non_std_gadm_codes = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].GID_0
 
         if len(non_std_gadm_codes) > 0:
             df_filtered = geodf[geodf["GID_0"].isin(non_std_gadm_codes)]
