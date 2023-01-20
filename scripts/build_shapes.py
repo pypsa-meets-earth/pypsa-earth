@@ -98,8 +98,8 @@ def filter_gadm(geodf, layer, cc, contended_flag, output_nonstd_to_csv=True, ):
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
         )
-        # "not found" hardcoded according to country_converter conventions
-        geodf.drop(geodf[geodf["GID_0"] == "not found"].index, inplace=True)
+        # replacement of ISO2 by the a country name may fail evernually
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
     else:
         geodf_non_std = geodf[geodf["GID_0"] != cc]
         geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
