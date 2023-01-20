@@ -222,6 +222,8 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
 
     # set index and simplify polygons
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
+    # there may be "holes" in the countries geometry which cause troubles along the workflow
+    # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
     ret_df.apply(lambda x: make_valid(x) if not x.is_valid else x)
     ret_df.reset_index()
 
