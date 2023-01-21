@@ -102,15 +102,17 @@ def filter_gadm(
     if contended_flag == "drop":
         geodf_non_std = geodf[geodf["GID_0"] != cc]
         geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+        logger.warning(f"Contended areas have been found. They will be dropped according to {contended_flag} option")
     elif contended_flag == "set_by_country":
          # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
         )
+        logger.warning(f"Contended areas have been found. They will be allocated following GADM conventions according to {contended_flag} option")
         # replacement of ISO2 by the a country name may fail evernually
         geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
     else:
-        logger.warning("Regions with non-standard codes dropped:{geodf_non_std}")
+        logger.warning(f"Contended areas have been found. They will be allocated following GADM conventions according to {contended_flag} option")
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
         )
@@ -120,6 +122,7 @@ def filter_gadm(
 
     # country shape should have a single geomerty
     if (layer == 0) and (geodf.shape[0] > 1):
+        logger.warning("Merging all the country shape geometries")                
         # take the first row only to re-define geometry keeping other columns
         geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
 
