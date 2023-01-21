@@ -20,6 +20,7 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -81,7 +82,84 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=False):
+def replace_nonstd_codes(row, col, country_code, keep_cond=True):
+    if row["GID_0"] != country_code:
+        return country_name_2_two_digits(row["COUNTRY"])
+    else:
+        return row["GID_0"]
+
+
+def filter_gadm(
+    geodf,
+    layer,
+    cc,
+    contended_flag,
+    output_nonstd_to_csv=False,
+):
+
+    # convert country name representation of the main country (GID_0 column)
+    geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
+
+    if contended_flag == "drop":
+        geodf_non_std = geodf[geodf["GID_0"] != cc]
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+        logger.warning(
+            f"Contended areas have been found. They will be dropped according to {contended_flag} option"
+        )
+    elif contended_flag == "set_by_country":
+        # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
+        geodf["GID_0"] = geodf.apply(
+            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
+        )
+        logger.warning(
+            f"Contended areas have been found. They will be allocated following GADM conventions according to {contended_flag} option"
+        )
+        # replacement of ISO2 by the a country name may fail evernually
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+    else:
+        logger.warning(
+            f"Contended areas have been found. They will be allocated following GADM conventions according to {contended_flag} option"
+        )
+        geodf["GID_0"] = geodf.apply(
+            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
+        )
+        # replacement of ISO2 by the a country name may fail evernually
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+
+    # country shape should have a single geomerty
+    # TODO Check a mutlple-region country
+    if (layer == 0) and (geodf.shape[0] > 1):
+        logger.warning("Merging all the country shape geometries")
+        # take the first row only to re-define geometry keeping other columns
+        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
+
+    # debug output to file
+    if (layer >= 1) and output_nonstd_to_csv:
+
+        available_gadm_codes = geodf["GID_0"].unique()
+        # normally the GADM code starts from an ISO3 code
+        code_three_digits = two_2_three_digits_country(cc)
+        non_std_gadm_codes = geodf[
+            geodf["GID_0"] != two_2_three_digits_country(cc)
+        ].GID_0
+
+        if len(non_std_gadm_codes) > 0:
+            df_filtered = geodf[geodf["GID_0"].isin(non_std_gadm_codes)]
+            df_filtered.to_csv(
+                "resources/non_standard_gadm_" + cc + "_raw.csv", index=False
+            )
+
+    return geodf
+
+
+def get_GADM_layer(
+    country_list,
+    layer_id,
+    geo_crs,
+    contended_flag,
+    update=False,
+    outlogging=False,
+):
     """
     Function to retrive a specific layer id of a geopackage for a selection of countries
 
@@ -102,11 +180,11 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
         # download file gpkg
         file_gpkg, name_file = download_GADM(country_code, update, outlogging)
 
-        # # get layers of a geopackage
+        # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
 
-        # # get layer name
-        if (layer_id < 0) | (layer_id >= len(list_layers)):
+        # get layer name
+        if (layer_id < 0) or (layer_id >= len(list_layers)):
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
 
@@ -115,10 +193,13 @@ def get_GADM_layer(country_list, layer_id, geo_crs, update=False, outlogging=Fal
             geo_crs
         )
 
-        # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-        ]
+        geodf_temp = filter_gadm(
+            geodf=geodf_temp,
+            layer=layer_id,
+            cc=country_code,
+            contended_flag=contended_flag,
+            output_nonstd_to_csv=False,
+        )
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
@@ -152,14 +233,21 @@ def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(countries, geo_crs, update=False, out_logging=False):
+def countries(countries, geo_crs, contended_flag, update=False, out_logging=False):
     "Create country shapes"
 
     if out_logging:
         _logger.info("Stage 1 of 4: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
-    df_countries = get_GADM_layer(countries, 0, geo_crs, update, out_logging)
+    df_countries = get_GADM_layer(
+        countries,
+        0,
+        geo_crs,
+        contended_flag,
+        update,
+        out_logging,
+    )
 
     # select and rename columns
     df_countries = df_countries[["GID_0", "geometry"]].copy()
@@ -167,6 +255,10 @@ def countries(countries, geo_crs, update=False, out_logging=False):
 
     # set index and simplify polygons
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
+    # there may be "holes" in the countries geometry which cause troubles along the workflow
+    # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
+    ret_df.apply(lambda x: make_valid(x) if not x.is_valid else x)
+    ret_df.reset_index()
 
     return ret_df
 
@@ -268,6 +360,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     )
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
+    # a country shape may consist of multiple geometries which leads to geometry duplication in offshore_shapes
     country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
@@ -736,6 +829,7 @@ def gadm(
     gdp_method,
     countries,
     geo_crs,
+    contended_flag,
     layer_id=2,
     update=False,
     out_logging=False,
@@ -747,7 +841,7 @@ def gadm(
         _logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, update)
+    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
@@ -784,6 +878,9 @@ def gadm(
     # set index and simplify polygons
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+    df_gadm.geometry = df_gadm.geometry.apply(
+        lambda r: make_valid(r) if not r.is_valid else r
+    )
     df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
 
     return df_gadm
@@ -806,15 +903,21 @@ if __name__ == "__main__":
     out_logging = snakemake.config["build_shape_options"]["out_logging"]
     year = snakemake.config["build_shape_options"]["year"]
     nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
+    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
     EEZ_gpkg = snakemake.input["eez"]
     worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
     gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
     distance_crs = snakemake.config["crs"]["distance_crs"]
 
-    country_shapes = countries(countries_list, geo_crs, update, out_logging)
-
-    country_shapes.reset_index().to_file(snakemake.output.country_shapes)
+    country_shapes = countries(
+        countries_list,
+        geo_crs,
+        contended_flag,
+        update,
+        out_logging,
+    )
+    country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
         countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
@@ -832,6 +935,7 @@ if __name__ == "__main__":
         gdp_method,
         countries_list,
         geo_crs,
+        contended_flag,
         layer_id,
         update,
         out_logging,
