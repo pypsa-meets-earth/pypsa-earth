@@ -99,17 +99,24 @@ def filter_gadm(
     # convert country name representation of the main country (GID_0 column)
     geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
 
-    if contended_flag != "drop":
-        # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
+    if contended_flag == "drop":
+        geodf_non_std = geodf[geodf["GID_0"] != cc]
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+    elif contended_flag == "set_by_country":
+         # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
         geodf["GID_0"] = geodf.apply(
             lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
         )
         # replacement of ISO2 by the a country name may fail evernually
         geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
     else:
-        geodf_non_std = geodf[geodf["GID_0"] != cc]
-        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
         logger.warning("Regions with non-standard codes dropped:{geodf_non_std}")
+        geodf["GID_0"] = geodf.apply(
+            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
+        )
+        # replacement of ISO2 by the a country name may fail evernually
+        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)    
+        
 
     # country shape should have a single geomerty
     if (layer == 0) and (geodf.shape[0] > 1):
