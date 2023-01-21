@@ -121,6 +121,7 @@ def filter_gadm(
         
 
     # country shape should have a single geomerty
+    # TODO Check a mutlple-region country
     if (layer == 0) and (geodf.shape[0] > 1):
         logger.warning("Merging all the country shape geometries")                
         # take the first row only to re-define geometry keeping other columns
