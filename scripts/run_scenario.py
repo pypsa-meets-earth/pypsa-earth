@@ -355,7 +355,10 @@ def collect_renewable_stats(rulename, technology):
 
         return pd.DataFrame(
             [[potential, avg_production_pu]],
-            columns=_multi_index_scen(rulename, ["potential", "avg_production_pu"]),
+            columns=_multi_index_scen(
+                f"{rulename}_{technology}",
+                ["potential", "avg_production_pu"],
+            ),
         )
     else:
         return pd.DataFrame()
