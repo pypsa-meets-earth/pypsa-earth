@@ -317,7 +317,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     # load data
     df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
 
-    eez_countries = [cc for cc in countries if cc in df_eez.name]
+    eez_countries = [cc for cc in countries if df_eez.name.str.contains(cc).any()]
     ret_df = gpd.GeoDataFrame(
         {
             "name": eez_countries,
