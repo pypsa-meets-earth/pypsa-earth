@@ -34,6 +34,7 @@ from shapely.validation import make_valid
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-earth")
 
@@ -81,13 +82,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def replace_nonstd_codes(row, col, country_code, keep_cond=True):
-    if row["GID_0"] != country_code:
-        return country_name_2_two_digits(row["COUNTRY"])
-    else:
-        return row["GID_0"]
-
-
 def filter_gadm(
     geodf,
     layer,
@@ -96,57 +90,41 @@ def filter_gadm(
     output_nonstd_to_csv=False,
 ):
 
-    # convert country name representation of the main country (GID_0 column)
-    geodf["GID_0"] = geodf["GID_0"].map(three_2_two_digits_country)
+    # identify non standard geodf rows
+    geodf_non_std = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].copy()
 
-    if contended_flag == "drop":
-        geodf_non_std = geodf[geodf["GID_0"] != cc]
-        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
-        logger.warning(
-            f"Contended areas have been found. They will be dropped according to {contended_flag} option"
+    if not geodf_non_std.empty:
+        logger.info(
+            f"Contended areas have been found for gadm layer {layer}. They will be dropped according to {contended_flag} option"
         )
-    elif contended_flag == "set_by_country":
-        # in case GID_0 have any exotic values, "COUNTRY" column may be used instead
-        geodf["GID_0"] = geodf.apply(
-            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
-        )
-        logger.warning(
-            f"Contended areas have been found. They will be allocated following GADM conventions according to {contended_flag} option"
-        )
-        # replacement of ISO2 by the a country name may fail evernually
-        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
-    else:
-        logger.warning(
-            f"Contended areas have been found. They will be allocated following GADM conventions according to {contended_flag} option"
-        )
-        geodf["GID_0"] = geodf.apply(
-            lambda x: replace_nonstd_codes(x, col="GID_0", country_code=cc), axis=1
-        )
-        # replacement of ISO2 by the a country name may fail evernually
-        geodf.drop(geodf[geodf["GID_0"] != cc].index, inplace=True)
+
+        # NOTE: in these options GID_0 is not changed because it is modified below
+        if contended_flag == "drop":
+            geodf.drop(geodf_non_std.index, inplace=True)
+        else:
+            # this is the "set_by_country" option that is also the fallback for unexpected values
+            if contended_flag != "set_by_country":
+                logger.warning(
+                    f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
+                    + "Fallback to 'set_by_country'"
+                )
+
+    # force GID_0 to be the country code for the relevant countries
+    geodf["GID_0"] = cc
 
     # country shape should have a single geomerty
-    # TODO Check a mutlple-region country
     if (layer == 0) and (geodf.shape[0] > 1):
-        logger.warning("Merging all the country shape geometries")
+        logger.warning(
+            f"Country shape contains multiple contended areas that are being merged in agreement to contented_flag option '{contended_flag}'"
+        )
         # take the first row only to re-define geometry keeping other columns
         geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
 
     # debug output to file
-    if (layer >= 1) and output_nonstd_to_csv:
-
-        available_gadm_codes = geodf["GID_0"].unique()
-        # normally the GADM code starts from an ISO3 code
-        code_three_digits = two_2_three_digits_country(cc)
-        non_std_gadm_codes = geodf[
-            geodf["GID_0"] != two_2_three_digits_country(cc)
-        ].GID_0
-
-        if len(non_std_gadm_codes) > 0:
-            df_filtered = geodf[geodf["GID_0"].isin(non_std_gadm_codes)]
-            df_filtered.to_csv(
-                "resources/non_standard_gadm_" + cc + "_raw.csv", index=False
-            )
+    if output_nonstd_to_csv and not geodf_non_std.empty:
+        geodf_non_std.to_csv(
+            f"resources/non_standard_gadm{layer}_{cc}_raw.csv", index=False
+        )
 
     return geodf
 
@@ -197,7 +175,7 @@ def get_GADM_layer(
             layer=layer_id,
             cc=country_code,
             contended_flag=contended_flag,
-            output_nonstd_to_csv=False,
+            output_nonstd_to_csv=True,
         )
 
         # create a subindex column that is useful
@@ -340,27 +318,21 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     # load data
     df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
 
-    ret_df = df_eez[["name", "geometry"]]
-    # create unique shape if country is described by multiple shapes
-    for c_code in countries:
-        selection = ret_df.name == c_code
-        n_offshore_shapes = selection.sum()
+    ret_df = gpd.GeoDataFrame(
+        {
+            "name": df_eez.name.copy(),
+            "geometry": [
+                df_eez.geometry.loc[df_eez.name == cc].geometry.unary_union
+                for cc in df_eez.name
+            ],
+        }
+    ).set_index("name")
 
-        if n_offshore_shapes > 1:
-            # when multiple shapes per country, then merge polygons
-            geom = ret_df[selection].geometry.unary_union
-            ret_df.drop(ret_df[selection].index, inplace=True)
-            ret_df = ret_df.append(
-                {"name": c_code, "geometry": geom}, ignore_index=True
-            )
-
-    ret_df = ret_df.set_index("name")["geometry"].map(
+    ret_df = ret_df.geometry.map(
         lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001)
     )
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
-    # a country shape may consist of multiple geometries which leads to geometry duplication in offshore_shapes
-    country_shapes = country_shapes.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
