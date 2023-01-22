@@ -7,7 +7,7 @@ import sys
 sys.path.append("./scripts")
 
 from os.path import normpath, exists, isdir
-from shutil import copyfile
+from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -19,7 +19,7 @@ HTTP = HTTPRemoteProvider()
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
-        copyfile("config.default.yaml", "config.yaml")
+        copyfile("config.tutorial.yaml", "config.yaml")
 
     configfile: "config.yaml"
 
@@ -38,7 +38,10 @@ config["scenario"]["unc"] = [
 ]
 
 load_data_paths = get_load_paths_gegis("data", config)
-COSTS = "data/costs.csv"
+if config["enable"].get("retrieve_cost_data", True):
+    COSTS = "resources/costs.csv"
+else:
+    COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 20)
 
 
@@ -51,23 +54,27 @@ wildcard_constraints:
 
 
 rule clean:
-    run:
-        shell("snakemake -j 1 solve_all_networks --delete-all-output")
+    shell:
+        "snakemake -j 1 solve_all_networks --delete-all-output"
 
 
 rule run_tests:
+    input:
+        "",
     run:
         import os
 
         shell("snakemake --cores all build_test_configs")
         directory = "test/tmp"  # assign directory
-        for filename in os.scandir(directory):  # iterate over files in that directory
+        for filename in os.scandir(
+            directory
+        ):  # iterate over files in that directory
             if filename.is_file():
                 print(filename.path)
                 shell("cp {filename.path} config.yaml")
                 shell("snakemake --cores all solve_all_networks --forceall")
-        # shell("rm -r config.yaml")
         print("Tests are successful.")
+
 
 
 rule solve_all_networks:
@@ -291,6 +298,24 @@ if not config["enable"].get("build_natura_raster", False):
             import shutil
 
             shutil.copyfile(input[0], output[0])
+
+
+if config["enable"].get("retrieve_cost_data", True):
+
+    rule retrieve_cost_data:
+        input:
+            HTTP.remote(
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs_{config['costs']['year']}.csv",
+                keep_local=True,
+            ),
+        output:
+            COSTS,
+        log:
+            "logs/retrieve_cost_data.log",
+        resources:
+            mem_mb=5000,
+        run:
+            move(input[0], output[0])
 
 
 rule build_renewable_profiles:

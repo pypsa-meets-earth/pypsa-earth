@@ -12,6 +12,16 @@ PyPSA meets Earth builds on top of several open-source packages, which are here 
 
 .. _data_science_basics:
 
+YouTube Tutorials
+---------------------
+
+We host **training** and **presentation** videos about PyPSA ecosystem tools made for users, developers and interested people.
+
+- `Training playlist <https://www.youtube.com/playlist?list=PLz1RcE1NdLlEzCT8G_v-sJKOeHOhZvw5R>`_
+- `Presentation playlist <https://www.youtube.com/playlist?list=PLz1RcE1NdLlHpsyopZUKDkeyAuQotfOE7>`_
+- `Youtube channel <https://www.youtube.com/@pypsameetsearth7475/featured>`_
+
+
 Data science basics (essential)
 --------------------------------
 
@@ -60,14 +70,3 @@ Code environment (optional)
 We can recommend setting up VScode from Microsoft. Add some extension if you like as described in `this video <https://www.youtube.com/watch?v=0fROnrISdZU>`_. For instance GitHub, Gitlense, and maybe some others.
 
 *Note*: if you decide to use Visual Studio Code, check out the tutorial about how to use `Git <https://code.visualstudio.com/docs/editor/versioncontrol#_git-support>`_ and `Github <https://code.visualstudio.com/docs/editor/github>`_  in Visual Studio Code
-
-YouTube DevTutorials
----------------------
-
-If some of the above sounds quite a lot, you might want to start with our YouTube videos.
-We recorded the following which help you with VScode, git, reading errors and fixing bugs:
-
-- `How to set-up Visual Studio Code for Windows [PyPSA-Earth][DevTutorial] <https://youtu.be/9cFOcDxDz7o>`_
-- `Find a bug, create a fix, contribute a pull request [PyPSA-Earth] [DevTutorial] <https://youtu.be/HBubZEpIeXk>`_
-- `Land lock country bug - Understanding the bug [PyPSA-Earth][DevTutorial] <https://youtu.be/zOQpV5bgPPk>`_
-- `Land lock country bug - Fixing the bug [PyPSA-Earth][DevTutorial] <https://youtu.be/6keiD6HvnmY>`_
