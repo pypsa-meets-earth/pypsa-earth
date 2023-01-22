@@ -95,19 +95,18 @@ def filter_gadm(
 
     if not geodf_non_std.empty:
         logger.info(
-            f"Contended areas have been found for gadm layer {layer}. They will be dropped according to {contended_flag} option"
+            f"Contended areas have been found for gadm layer {layer}. They will be treated according to {contended_flag} option"
         )
 
         # NOTE: in these options GID_0 is not changed because it is modified below
         if contended_flag == "drop":
             geodf.drop(geodf_non_std.index, inplace=True)
-        else:
-            # this is the "set_by_country" option that is also the fallback for unexpected values
-            if contended_flag != "set_by_country":
-                logger.warning(
-                    f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
-                    + "Fallback to 'set_by_country'"
-                )
+        elif contended_flag != "set_by_country":
+            # "set_by_country" option is the default; if this elif applies, the desired option falls back to the default
+            logger.warning(
+                f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
+                + "Fallback to 'set_by_country'"
+            )
 
     # force GID_0 to be the country code for the relevant countries
     geodf["GID_0"] = cc
@@ -115,7 +114,7 @@ def filter_gadm(
     # country shape should have a single geomerty
     if (layer == 0) and (geodf.shape[0] > 1):
         logger.warning(
-            f"Country shape contains multiple contended areas that are being merged in agreement to contented_flag option '{contended_flag}'"
+            f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
         )
         # take the first row only to re-define geometry keeping other columns
         geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
@@ -175,7 +174,7 @@ def get_GADM_layer(
             layer=layer_id,
             cc=country_code,
             contended_flag=contended_flag,
-            output_nonstd_to_csv=True,
+            output_nonstd_to_csv=False,
         )
 
         # create a subindex column that is useful
@@ -318,12 +317,13 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     # load data
     df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
 
+    eez_countries = [cc for cc in countries if cc in df_eez.name]
     ret_df = gpd.GeoDataFrame(
         {
-            "name": df_eez.name.copy(),
+            "name": eez_countries,
             "geometry": [
                 df_eez.geometry.loc[df_eez.name == cc].geometry.unary_union
-                for cc in df_eez.name
+                for cc in eez_countries
             ],
         }
     ).set_index("name")
