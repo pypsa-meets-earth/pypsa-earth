@@ -33,8 +33,7 @@ from _helpers import configure_logging
 from config_osm_data import iso_to_geofk_dict
 from earth_osm import eo
 
-_logger = logging.getLogger(__name__)
-_logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def country_list_to_geofk(country_list):
@@ -125,10 +124,10 @@ if __name__ == "__main__":
             filename = Path.joinpath(out_path, f"all_{name}.{f}")
             # Create file if not exist
             if not Path.exists(filename):
-                _logger.info(f"{filename} does not exist, create empty file")
+                logger.info(f"{filename} does not exist, create empty file")
                 open(filename, "w").close()
             # Move and rename
             old_path = Path.joinpath(out_path, f"all_{name}.{f}")
             new_path = Path.joinpath(store_path_resources, f"all_raw_{name}.{f}")
-            _logger.info(f"Create {old_path} and move to {new_path}")
+            logger.info(f"Create {old_path} and move to {new_path}")
             shutil.move(old_path, new_path)
