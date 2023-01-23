@@ -55,6 +55,8 @@ Upcoming Release
 
 * Added approaches to process contended areas `PR #572 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/572>`__
 
+* Improve parallel capabilities of build_shapes to enable parallelization even within a country shape `PR #575 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/575>`__
+
 PyPSA-Earth 0.1.0
 =================
 

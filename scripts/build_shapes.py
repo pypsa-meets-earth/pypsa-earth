@@ -8,6 +8,7 @@ import os
 import shutil
 import zipfile
 from itertools import takewhile
+from math import ceil
 from operator import attrgetter
 
 import fiona
@@ -694,24 +695,31 @@ def _init_process_pop(df_gadm_, year_, worldpop_method_):
     df_gadm, year, worldpop_method = df_gadm_, year_, worldpop_method_
 
 
-def _process_func_pop(c_code):
+def _process_func_pop(gadm_idxs):
 
     # get subset by country code
-    country_rows = df_gadm.loc[df_gadm["country"] == c_code].copy()
+    df_gadm_subset = df_gadm.loc[gadm_idxs].copy()
 
-    # get worldpop image
-    WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-        c_code, worldpop_method, year, False, False
-    )
+    country_sublist = df_gadm_subset["country"].unique()
 
-    with rasterio.open(WorldPop_inputfile) as src:
+    for c_code in country_sublist:
 
-        for i in country_rows.index:
-            country_rows.loc[i, "pop"] = _sum_raster_over_mask(
-                country_rows.geometry.loc[i], src
-            )
+        # get worldpop image
+        WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+            c_code, worldpop_method, year, False, False
+        )
 
-    return country_rows
+        idxs_country = df_gadm_subset[df_gadm_subset["country"] == c_code].index
+
+        with rasterio.open(WorldPop_inputfile) as src:
+
+            for i in idxs_country:
+
+                df_gadm_subset.loc[i, "pop"] = _sum_raster_over_mask(
+                    df_gadm_subset.geometry.loc[i], src
+                )
+
+    return df_gadm_subset
 
 
 def add_population_data(
@@ -722,6 +730,7 @@ def add_population_data(
     update=False,
     out_logging=False,
     nprocesses=2,
+    nchunks=2,
     disable_progressbar=False,
 ):
     """
@@ -748,8 +757,6 @@ def add_population_data(
 
     tqdm_kwargs = dict(
         ascii=False,
-        unit=" countries",
-        # total=len(country_codes),
         desc="Compute population ",
     )
     if (nprocesses is None) or (nprocesses == 1):
@@ -773,6 +780,15 @@ def add_population_data(
 
     else:
 
+        # generator function to split a list ll into n_objs lists
+        def divide_list(ll, n_objs):
+            for i in range(0, len(ll), n_objs):
+                yield ll[i : i + n_objs]
+
+        id_parallel_chunks = list(
+            divide_list(df_gadm.index, ceil(len(df_gadm) / nchunks))
+        )
+
         kwargs = {
             "initializer": _init_process_pop,
             "initargs": (df_gadm, year, worldpop_method),
@@ -780,14 +796,14 @@ def add_population_data(
         }
         with mp.get_context("spawn").Pool(**kwargs) as pool:
             if disable_progressbar:
-                _ = list(pool.map(_process_func_pop, country_codes))
+                _ = list(pool.map(_process_func_pop, id_parallel_chunks))
                 for elem in _:
                     df_gadm.loc[elem.index, "pop"] = elem["pop"]
             else:
                 _ = list(
                     tqdm(
-                        pool.imap(_process_func_pop, country_codes),
-                        total=len(country_codes),
+                        pool.imap(_process_func_pop, id_parallel_chunks),
+                        total=len(id_parallel_chunks),
                         **tqdm_kwargs,
                     )
                 )
@@ -806,6 +822,7 @@ def gadm(
     out_logging=False,
     year=2020,
     nprocesses=None,
+    nchunks=None,
 ):
 
     if out_logging:
@@ -834,6 +851,7 @@ def gadm(
             update,
             out_logging,
             nprocesses=nprocesses,
+            nchunks=nchunks,
         )
 
     if gdp_method != False:
@@ -880,6 +898,10 @@ if __name__ == "__main__":
     gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
     distance_crs = snakemake.config["crs"]["distance_crs"]
+    nchunks = snakemake.config["build_shape_options"]["nchunks"]
+    if nchunks < nprocesses:
+        logger.info(f"build_shapes data chunks set to nprocesses {nprocesses}")
+        nchunks = nprocesses
 
     country_shapes = countries(
         countries_list,
@@ -912,5 +934,6 @@ if __name__ == "__main__":
         out_logging,
         year,
         nprocesses=nprocesses,
+        nchunks=nchunks,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
