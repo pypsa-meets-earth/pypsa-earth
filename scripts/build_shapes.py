@@ -695,6 +695,7 @@ def _init_process_pop(df_gadm_, year_, worldpop_method_):
     df_gadm, year, worldpop_method = df_gadm_, year_, worldpop_method_
 
 
+# Auxiliary function to calculate population data in a parallel way
 def _process_func_pop(gadm_idxs):
 
     # get subset by country code
@@ -720,6 +721,12 @@ def _process_func_pop(gadm_idxs):
                 )
 
     return df_gadm_subset
+
+# Auxiliary function to download WorldPop data in a parallel way
+def _process_func_download_pop(c_code):
+    WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+        c_code, worldpop_method, year, False, False
+    )
 
 
 def add_population_data(
@@ -796,10 +803,20 @@ def add_population_data(
         }
         with mp.get_context("spawn").Pool(**kwargs) as pool:
             if disable_progressbar:
+                list(pool.map(_process_func_download_pop, country_codes))
                 _ = list(pool.map(_process_func_pop, id_parallel_chunks))
                 for elem in _:
                     df_gadm.loc[elem.index, "pop"] = elem["pop"]
             else:
+                list(
+                    tqdm(
+                        pool.imap(_process_func_download_pop, country_codes),
+                        total=len(country_codes),
+                        ascii=False,
+                        desc="Download WorldPop ",
+                        unit=" countries",
+                    )
+                )
                 _ = list(
                     tqdm(
                         pool.imap(_process_func_pop, id_parallel_chunks),
