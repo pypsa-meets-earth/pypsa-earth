@@ -722,6 +722,7 @@ def _process_func_pop(gadm_idxs):
 
     return df_gadm_subset
 
+
 # Auxiliary function to download WorldPop data in a parallel way
 def _process_func_download_pop(c_code):
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
