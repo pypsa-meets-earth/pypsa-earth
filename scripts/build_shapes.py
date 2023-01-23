@@ -661,34 +661,6 @@ def add_gdp_data(
             df_gadm.loc[i, "gdp"] = _sum_raster_over_mask(df_gadm.geometry.loc[i], src)
     return df_gadm
 
-    # for index, row in tqdm(df_gadm.iterrows(), index=df_gadm.shape[0]):
-    #     # select the desired area of the raster corresponding to each polygon
-    #     # Approximation: the gdp is measured excluding the pixels
-    #     #   where the border of the shape lays. This may affect the computation
-    #     #   but it is conservative and avoids considering multiple times the same
-    #     #   pixels
-    #     out_image, out_transform = generalized_mask(src,
-    #                                                 row["geometry"],
-    #                                                 all_touched=True,
-    #                                                 invert=False,
-    #                                                 nodata=0.0)
-    #     # out_image_int, out_transform = mask(src,
-    #     #                                row["geometry"],
-    #     #                                all_touched=False,
-    #     #                                invert=False,
-    #     #                                nodata=0.0)
-
-    #     # calculate total gdp in the selected geometry
-    #     gdp_by_geom = np.nansum(out_image)
-    #     # gdp_by_geom = out_image.sum()/2 + out_image_int.sum()/2
-
-    #     if out_logging == True:
-    #         logger.info("Stage 4/4 GDP: shape: " + str(index) +
-    #                      " out of " + str(df_gadm.shape[0]))
-
-    #     # update the gdp data in the dataset
-    #     df_gadm.loc[index, "gdp"] = gdp_by_geom
-
 
 def _init_process_pop(df_gadm_, year_, worldpop_method_):
     global df_gadm, year, worldpop_method
@@ -727,7 +699,6 @@ def _process_func_download_pop(c_code):
     WorldPop_inputfile, WorldPop_filename = download_WorldPop(
         c_code, worldpop_method, year, False, False
     )
-
 
 def add_population_data(
     df_gadm,
