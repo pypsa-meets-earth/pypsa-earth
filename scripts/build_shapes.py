@@ -692,8 +692,6 @@ def add_population_data(
 
     tqdm_kwargs = dict(
         ascii=False,
-        unit=" countries",
-        # total=len(country_codes),
         desc="Compute population ",
     )
     if (nprocesses is None) or (nprocesses == 1):
