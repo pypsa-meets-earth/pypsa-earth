@@ -49,6 +49,7 @@ import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging, two_2_three_digits_country
 from shapely.geometry import Point, Polygon
+from shapely.ops import unary_union
 from vresutils.graph import voronoi_partition_pts
 
 # from scripts.build_shapes import gadm
@@ -65,8 +66,6 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     ----------
     points : Nx2 - ndarray[dtype=float]
     outline : Polygon
-    no_multipolygons : bool (default: False)
-        If true, replace each MultiPolygon by its largest component
 
     Returns
     -------
@@ -76,6 +75,8 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     import numpy as np
     from scipy.spatial import Voronoi
     from shapely.geometry import Point, Polygon
+
+    outline = unary_union(outline)
 
     points = np.asarray(points)
 
