@@ -9,6 +9,9 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
+run: 
+  name: ""
+
 scenario:
   simpl: ['']
   ll: ['copt']
