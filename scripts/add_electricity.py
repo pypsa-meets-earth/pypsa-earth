@@ -308,7 +308,7 @@ def attach_load(
     logger.info(f"Load data scaled with scalling factor {scale}.")
     gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
-    shapes.loc[:, "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
+    shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
     def upsample(cntry, group):
         """
