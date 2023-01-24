@@ -344,7 +344,7 @@ def calculate_supply(n, label, supply):
             for end in [col[3:] for col in c.df.columns if col[:3] == "bus"]:
                 print(c.name, end)
                 items = c.df.index[
-                    c.df["bus" + end].map(bus_map, na_action=False)
+                    c.df["bus" + end].map(bus_map, na_action=None)
                 ]  # .fillna(False)]
 
                 if len(items) == 0:
@@ -398,7 +398,7 @@ def calculate_supply_energy(n, label, supply_energy):
 
             for end in [col[3:] for col in c.df.columns if col[:3] == "bus"]:
 
-                items = c.df.index[c.df["bus" + str(end)].map(bus_map, na_action=False)]
+                items = c.df.index[c.df["bus" + str(end)].map(bus_map, na_action=None)]
 
                 if len(items) == 0:
                     continue
@@ -649,7 +649,7 @@ def make_summaries(networks_dict):
     ]
 
     columns = pd.MultiIndex.from_tuples(
-        networks_dict.keys(), names=["cluster", "ll", "opt", "planning_horizon"]
+        networks_dict.keys(), names=["cluster", "ll", "opt", "planning_horizon", "discount_rate", "demand"]
     )
 
     df = {}
@@ -693,17 +693,19 @@ if __name__ == "__main__":
 
     networks_dict = {
         # (cluster, lv, opt+sector_opt, planning_horizon) :
-        (cluster, ll, opt + "-" + sopt, planning_horizon): snakemake.config[
+        (cluster, ll, opt + "-" + sopt, planning_horizon, discountrate, demand): snakemake.config[
             "results_dir"
         ]
         + snakemake.config["run"]
-        + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
+        + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}_{discountrate}_{demand}.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
         for simpl in snakemake.config["scenario"]["simpl"]
         for cluster in snakemake.config["scenario"]["clusters"]
         for ll in snakemake.config["scenario"]["ll"]
         for opt in snakemake.config["scenario"]["opts"]
         for sopt in snakemake.config["scenario"]["sopts"]
         for planning_horizon in snakemake.config["scenario"]["planning_horizons"]
+        for discountrate in snakemake.config["costs"]["discountrate"]
+        for demand in snakemake.config["scenario"]["demand"]
     }
 
     print(networks_dict)
