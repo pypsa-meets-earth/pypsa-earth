@@ -136,7 +136,7 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
             "CO2 intensity": 0,
             "FOM": 0,
             "VOM": 0,
-            "discount rate": discount_rate[0],
+            "discount rate": discount_rate,
             "efficiency": 1,
             "fuel": 0,
             "investment": 0,
