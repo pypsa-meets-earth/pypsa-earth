@@ -186,7 +186,9 @@ rule build_osm_network:
     output:
         lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
         converters="resources/" + RDIR + "base_network/all_converters_build_network.csv",
-        transformers="resources/" + RDIR + "base_network/all_transformers_build_network.csv",
+        transformers="resources/"
+        + RDIR
+        + "base_network/all_transformers_build_network.csv",
         substations="resources/" + RDIR + "base_network/all_buses_build_network.csv",
     log:
         "logs/" + RDIR + "build_osm_network.log",
@@ -224,8 +226,12 @@ rule base_network:
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
-        osm_converters="resources/" + RDIR + "base_network/all_converters_build_network.csv",
-        osm_transformers="resources/" + RDIR + "base_network/all_transformers_build_network.csv",
+        osm_converters="resources/"
+        + RDIR
+        + "base_network/all_converters_build_network.csv",
+        osm_transformers="resources/"
+        + RDIR
+        + "base_network/all_transformers_build_network.csv",
         country_shapes="resources/shapes/country_shapes.geojson",
         offshore_shapes="resources/shapes/offshore_shapes.geojson",
     output:
