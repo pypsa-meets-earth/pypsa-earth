@@ -307,6 +307,11 @@ costs:
     co2: 0.
 
 
+technology_assessment:
+  options:
+    add_to_snakefile: True
+
+
 monte_carlo:
   options:
     add_to_snakefile: false

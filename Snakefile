@@ -633,41 +633,6 @@ def memory(w):
         return int(factor * (10000 + 195 * int(w.clusters)))
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
-
-    rule solve_network:
-        input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-            tech_costs=COSTS,
-        output:
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        log:
-            solver=normpath(
-                "logs/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
-            ),
-            python="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
-            memory="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
-        benchmark:
-            (
-                "benchmarks/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
-            )
-        threads: 20
-        resources:
-            mem=memory,
-        shadow:
-            "shallow"
-        script:
-            "scripts/solve_network.py"
-
-
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
 
     rule monte_carlo:
@@ -691,14 +656,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         script:
             "scripts/monte_carlo.py"
 
-    rule solve_monte:
-        input:
-            expand(
-                "networks/"
-                + RDIR
-                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
-            ),
 
     rule solve_network:
         input:
@@ -734,6 +691,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         script:
             "scripts/solve_network.py"
 
+
     rule solve_all_networks_monte:
         input:
             expand(
@@ -742,6 +700,109 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
                 **config["scenario"]
             ),
+
+elif config["technology_assessment"]["options"].get("add_to_snakefile", False) == True:
+    
+    rule prepare_technology_assessment:
+        input:
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        output:
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+        log:
+            "logs/"
+            + RDIR
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+            )
+        threads: 1
+        resources:
+            mem_mb=4000,
+        script:
+            "scripts/prepare_technology_assessment.py"
+
+
+    rule solve_network:
+        input:
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            tech_costs=COSTS,
+        output:
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+        log:
+            solver=normpath(
+                "logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
+            ),
+            python="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_python.log",
+            memory="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_memory.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+            )
+        threads: 20
+        resources:
+            mem_mb=memory,
+        shadow:
+            "shallow"
+        script:
+            "scripts/solve_network.py"
+
+
+    rule solve_all_networks_tech_assessment:
+        input:
+            expand(
+                "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                **config["scenario"]
+            ),
+
+
+else:
+
+    rule solve_network:
+        input:
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            tech_costs=COSTS,
+        output:
+            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        log:
+            solver=normpath(
+                "logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+            ),
+            python="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+            memory="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+            )
+        threads: 20
+        resources:
+            mem=memory,
+        shadow:
+            "shallow"
+        script:
+            "scripts/solve_network.py"
 
 
 def input_make_summary(w):
