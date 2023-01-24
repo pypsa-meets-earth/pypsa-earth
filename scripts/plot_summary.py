@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from _helpers import configure_logging
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def rename_techs(label):
@@ -80,7 +80,7 @@ def plot_costs(infn, fn=None):
     to_drop = df.index[df.max(axis=1) < snakemake.config["plotting"]["costs_threshold"]]
 
     if not to_drop.empty:
-        _logger.info(
+        logger.info(
             "Dropping elements from costs dataframe:\n"
             + df.loc[to_drop].to_string()
             + "\n"
@@ -89,7 +89,7 @@ def plot_costs(infn, fn=None):
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        _logger.info("Remaining elements in costs dataframe:\n" + df.to_string() + "\n")
+        logger.info("Remaining elements in costs dataframe:\n" + df.to_string() + "\n")
 
     new_index_costs = df.index.intersection(preferred_order).append(
         df.index.difference(preferred_order)
@@ -101,7 +101,7 @@ def plot_costs(infn, fn=None):
     fig_costs.set_size_inches((12, 8))
 
     if new_index_costs.empty:
-        _logger.error(
+        logger.error(
             f"No costs data to plot for country {snakemake.wildcards.country}, no valid plot is generated"
         )
         # create empty file to avoid issues with snakemake
@@ -153,7 +153,7 @@ def plot_energy(infn, fn=None):
     ]
 
     if not to_drop.empty:
-        _logger.info(
+        logger.info(
             "Dropping elements from energy dataframe:\n"
             + df.loc[to_drop].to_string()
             + "\n"
@@ -162,9 +162,7 @@ def plot_energy(infn, fn=None):
     df = df.drop(to_drop)
 
     if not to_drop.empty:
-        _logger.info(
-            "Remaining elements in energy dataframe:\n" + df.to_string() + "\n"
-        )
+        logger.info("Remaining elements in energy dataframe:\n" + df.to_string() + "\n")
 
     new_index_energy = df.index.intersection(preferred_order).append(
         df.index.difference(preferred_order)
@@ -176,7 +174,7 @@ def plot_energy(infn, fn=None):
     fig_energy.set_size_inches((12, 8))
 
     if new_index_energy.empty:
-        _logger.error(
+        logger.error(
             f"No energy data to plot for country {snakemake.wildcards.country}, no valid plot is generated"
         )
         # create empty file to avoid issues with snakemake
@@ -242,6 +240,6 @@ if __name__ == "__main__":
     try:
         func = globals()[f"plot_{summary}"]
     except KeyError:
-        _logger.error(f"plotting function for {summary} has not been defined")
+        logger.error(f"plotting function for {summary} has not been defined")
 
     func(os.path.join(snakemake.input[0], f"{summary}.csv"), snakemake.output[0])

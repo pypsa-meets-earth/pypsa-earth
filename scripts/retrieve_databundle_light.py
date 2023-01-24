@@ -95,7 +95,6 @@ from _helpers import (
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def load_databundle_config(config):

@@ -90,7 +90,7 @@ def configure_logging(snakemake, skip_handlers=False):
                 ]
             }
         )
-    logging.basicConfig(**kwargs)
+    logging.basicConfig(**kwargs, force=True)
 
 
 def load_network(import_name=None, custom_components=None):

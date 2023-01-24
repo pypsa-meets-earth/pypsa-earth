@@ -151,7 +151,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazemakhalek</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
@@ -222,7 +222,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/Cesare-Caputo">
             <img src="https://avatars.githubusercontent.com/u/62548290?v=4" width="100;" alt="Cesare-Caputo"/>
             <br />
-            <sub><b>Cesare-Caputo</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
