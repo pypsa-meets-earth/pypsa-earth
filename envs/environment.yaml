@@ -26,7 +26,7 @@ dependencies:
 - ruamel.yaml
 - pytables
 - lxml
-- numpy<1.24
+- numpy
 - pandas
 - geopandas>=0.11.0
 - fiona!=1.8.22
@@ -35,7 +35,7 @@ dependencies:
 - networkx
 - scipy
 - pydoe2
-- shapely>=1.8a1, <2.0
+- shapely>=2
 - pre-commit
 - pyomo
 - matplotlib<=3.5.2
@@ -78,7 +78,7 @@ dependencies:
 - pip:
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/davide-f/atlite.git@master
-  - vresutils>=0.3.1
+  - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
   - tsam>=1.1.0
   - esy-osm-pbf
   - esy-osmfilter
