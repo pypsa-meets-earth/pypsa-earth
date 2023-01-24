@@ -97,8 +97,10 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
+    run = snakemake.config.get("run", {})
+    RDIR = run["name"] + "/" if run.get("name") else ""
+    store_path_resources = Path.joinpath(Path().cwd(), "resources", RDIR, "osm", "raw")
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
-    store_path_resources = Path.joinpath(Path().cwd(), "resources", "osm", "raw")
     country_list = country_list_to_geofk(snakemake.config["countries"])
 
     eo.get_osm_data(
@@ -129,5 +131,8 @@ if __name__ == "__main__":
             # Move and rename
             old_path = Path.joinpath(out_path, f"all_{name}.{f}")
             new_path = Path.joinpath(store_path_resources, f"all_raw_{name}.{f}")
+            # Create directory if not exist (required for shutil)
+            if not os.path.exists(store_path_resources):
+                os.makedirs(store_path_resources)
             logger.info(f"Create {old_path} and move to {new_path}")
             shutil.move(old_path, new_path)
