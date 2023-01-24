@@ -276,6 +276,7 @@ renewable:
 # TODO: Needs to be adjusted for Africa
 costs:
   year: 2030
+  version: v0.4.0
   discountrate: 0.07 # From a Lion Hirth paper, also reflects average of Noothout et al 2016
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
   marginal_cost: # EUR/MWh
