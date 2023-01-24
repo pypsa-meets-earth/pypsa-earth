@@ -144,10 +144,10 @@ rule clean_osm_data:
         offshore_shapes="resources/shapes/offshore_shapes.geojson",
         africa_shape="resources/shapes/africa_shape.geojson",
     output:
-        generators="resources/osm/clean/all_generators.geojson",
-        generators_csv="resources/osm/clean/all_generators.csv",
-        lines="resources/osm/clean/all_lines.geojson",
-        substations="resources/osm/clean/all_substations.geojson",
+        generators="resources/osm/clean/all_clean_generators.geojson",
+        generators_csv="resources/osm/clean/all_clean_generators.csv",
+        lines="resources/osm/clean/all_clean_lines.geojson",
+        substations="resources/osm/clean/all_clean_substations.geojson",
     log:
         "logs/clean_osm_data.log",
     script:
@@ -156,9 +156,9 @@ rule clean_osm_data:
 
 rule build_osm_network:
     input:
-        generators="resources/osm/clean/all_generators.geojson",
-        lines="resources/osm/clean/all_lines.geojson",
-        substations="resources/osm/clean/all_substations.geojson",
+        generators="resources/osm/clean/all_clean_generators.geojson",
+        lines="resources/osm/clean/all_clean_lines.geojson",
+        substations="resources/osm/clean/all_clean_substations.geojson",
         country_shapes="resources/shapes/country_shapes.geojson",
     output:
         lines="resources/base_network/all_lines_build_network.csv",
@@ -319,7 +319,7 @@ rule build_powerplants:
         base_network="networks/base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
-        osm_powerplants="resources/osm/clean/all_generators.csv",
+        osm_powerplants="resources/osm/clean/all_clean_generators.csv",
         #gadm_shapes="resources/shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/shapes/
