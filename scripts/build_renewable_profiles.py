@@ -582,7 +582,7 @@ if __name__ == "__main__":
             underwater_fraction = []
             for bus in buses:
                 p = centre_of_mass.sel(bus=bus).data
-                line = LineString([p, regions.loc[bus, ["x", "y"]]])
+                line = LineString([tuple(p), tuple(regions.loc[bus, ["x", "y"]])])
                 frac = line.intersection(offshore_shape).length / line.length
                 underwater_fraction.append(frac)
 
