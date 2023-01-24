@@ -132,6 +132,8 @@ if config["enable"].get("retrieve_databundle", True):
             directory("data/landcover"),
         log:
             "logs/" + RDIR + "retrieve_databundle.log",
+        benchmark:
+            "benchmarks/" + RDIR + "retrieve_databundle_light"
         script:
             "scripts/retrieve_databundle_light.py"
 
@@ -149,6 +151,8 @@ if config["enable"].get("download_osm_data", True):
             + "osm/raw/africa_all_raw_substations.geojson",
         log:
             "logs/" + RDIR + "download_osm_data.log",
+        benchmark:
+            "benchmarks/" + RDIR + "download_osm_data"
         script:
             "scripts/download_osm_data.py"
 
@@ -169,6 +173,8 @@ rule clean_osm_data:
         substations="resources/" + RDIR + "osm/clean/africa_all_substations.geojson",
     log:
         "logs/" + RDIR + "clean_osm_data.log",
+    benchmark:
+        "benchmarks/" + RDIR + "clean_osm_data"
     script:
         "scripts/clean_osm_data.py"
 
@@ -192,6 +198,8 @@ rule build_osm_network:
         + "base_network/africa_all_buses_build_network.csv",
     log:
         "logs/" + RDIR + "build_osm_network.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_osm_network"
     script:
         "scripts/build_osm_network.py"
 
@@ -211,6 +219,8 @@ rule build_shapes:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     log:
         "logs/" + RDIR + "build_shapes.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_shapes"
     threads: 1
     resources:
         mem_mb=500,
@@ -273,6 +283,8 @@ rule build_bus_regions:
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
     log:
         "logs/" + RDIR + "build_bus_regions.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_bus_regions"
     threads: 1
     resources:
         mem_mb=1000,
@@ -309,6 +321,8 @@ if config["enable"].get("build_natura_raster", False):
             "resources/" + RDIR + "natura.tiff",
         log:
             "logs/" + RDIR + "build_natura_raster.log",
+        benchmark:
+            "benchmarks/" + RDIR + "build_natura_raster"
         script:
             "scripts/build_natura_raster.py"
 
@@ -393,6 +407,8 @@ rule build_powerplants:
         powerplants_osm2pm="resources/" + RDIR + "powerplants_osm2pm.csv",
     log:
         "logs/" + RDIR + "build_powerplants.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_powerplants"
     threads: 1
     resources:
         mem_mb=500,

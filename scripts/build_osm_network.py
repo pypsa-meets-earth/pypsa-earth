@@ -84,10 +84,9 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
     bus_e["dc"] = ~is_ac
 
-    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True).set_crs(substations.crs)
     # Assign index to bus_id
-    bus_all.loc[:, "bus_id"] = bus_all.index
-    buses = bus_all
+    bus_all["bus_id"] = bus_all.index
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
