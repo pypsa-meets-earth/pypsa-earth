@@ -188,7 +188,7 @@ def filter_voltage(df, threshold_voltage=35000):
     df = df.dropna(subset=["voltage"])  # Drop any row with Voltage = N/A
 
     # convert voltage to int
-    df.loc[:, "voltage"] = df["voltage"].astype(int)
+    df["voltage"] = df["voltage"].astype(int)
 
     # keep only lines with a voltage no lower than than threshold_voltage
     df = df[df.voltage >= threshold_voltage]
@@ -201,7 +201,7 @@ def finalize_substation_types(df_all_substations):
     Specify bus_id and voltage columns as integer
     """
     df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
-    df_all_substations.loc[:, "voltage"] = df_all_substations["voltage"].astype(int)
+    df_all_substations["voltage"] = df_all_substations["voltage"].astype(int)
 
     return df_all_substations
 
