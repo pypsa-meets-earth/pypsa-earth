@@ -47,6 +47,8 @@ Upcoming Release
 
 * Fix None geometries into regions `PR #546 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/546>`__
 
+* Swap OpenStreetMap python download interface from esy-osm to earth-osm `PR #547 https://github.com/pypsa-meets-earth/pypsa-earth/pull/547>`__
+
 * Restore saving of logger outputs `PR #559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/559>`__
 
 * Techno-economic parameters of technologies (e.g. costs and efficiencies) can be now retrieved from a separate repository `PyPSA/technology-data <https://github.com/pypsa/technology-data>`_ 
