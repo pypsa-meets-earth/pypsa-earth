@@ -850,9 +850,11 @@ rule run_scenario:
         from scripts.build_test_configs import create_test_config
 
         create_test_config(
-            diff_config, {"run": {"name": scenario_name}}, diff_config
+            input.diff_config,
+            {"run": {"name": wildcards.scenario_name}},
+            input.diff_config,
         )
-        create_test_config(base_config, diff_config, "config.yaml")
+        create_test_config(input.base_config, input.diff_config, "config.yaml")
         os.system(
             "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
         )
