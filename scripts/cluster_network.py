@@ -405,7 +405,7 @@ def busmap_for_n_clusters(
             group_keys=False,
         )
         .apply(busmap_for_country)
-        .squeeze()
+        .squeeze(axis=0)
         .rename("busmap")
     )
 
@@ -538,6 +538,10 @@ if __name__ == "__main__":
         linemap = n.lines.index.to_series()
         clustering = pypsa.networkclustering.Clustering(
             n, busmap, linemap, linemap, pd.Series(dtype="O")
+        )
+    elif len(n.buses) < n_clusters:
+        logger.error(
+            f"Desired number of clusters ({n_clusters}) higher than the number of buses ({len(n.buses)})"
         )
     else:
         line_length_factor = snakemake.config["lines"]["length_factor"]
