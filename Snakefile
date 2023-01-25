@@ -63,8 +63,8 @@ rule clean:
 
 
 rule run_tests:
-    input:
-        "",
+    output:
+        touch("tests.done"),
     run:
         import os
 
