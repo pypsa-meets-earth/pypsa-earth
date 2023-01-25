@@ -464,6 +464,12 @@ def base_network():
         n.import_components_from_dataframe(lines, "Line")
     else:
         lines_dc = _set_electrical_parameters_links(lines_dc)
+        # parse line information into p_nom required for converters
+        lines_dc["p_nom"] = lines_dc.apply(
+            lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
+            axis=1,
+            result_type="reduce",
+        )
         n.import_components_from_dataframe(lines_ac, "Line")
         # The columns which names starts with "bus" are mixed up with the third-bus specification
         # when executing additional_linkports()
