@@ -111,9 +111,9 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
     )
 
 
-def _load_buses_from_osm():
+def _load_buses_from_osm(fp_buses, config):
     buses = (
-        read_csv_nafix(snakemake.input.osm_buses)
+        read_csv_nafix(fp_buses)
         .set_index("bus_id")
         .drop(["station_id"], axis=1)
         .rename(columns=dict(voltage="v_nom"))
@@ -129,27 +129,27 @@ def _load_buses_from_osm():
     buses = buses.dropna(axis="index", subset=["x", "y", "country"])
 
     # Rebase all voltages to three levels
-    buses = _rebase_voltage_to_config(buses)
+    buses = _rebase_voltage_to_config(config, buses)
 
     logger.info(
         "Removing buses with voltages {}".format(
             pd.Index(buses.v_nom.unique())
             .dropna()
-            .difference(snakemake.config["electricity"]["voltages"])
+            .difference(config["electricity"]["voltages"])
         )
     )
 
     return buses
 
 
-def _set_links_underwater_fraction(n):
+def _set_links_underwater_fraction(fp_offshore_shapes, n):
     if n.links.empty:
         return
 
     if not hasattr(n.links, "geometry"):
         n.links["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
+        offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
         if offshore_shape is None or offshore_shape.empty:
             n.links["underwater_fraction"] = 0.0
         else:
@@ -159,10 +159,10 @@ def _set_links_underwater_fraction(n):
             )
 
 
-def _load_lines_from_osm(buses):
+def _load_lines_from_osm(fp_osm_lines, config, buses):
     lines = (
         read_csv_nafix(
-            snakemake.input.osm_lines,
+            fp_osm_lines,
             dtype=dict(
                 line_id="str",
                 bus0="str",
@@ -178,22 +178,22 @@ def _load_lines_from_osm(buses):
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
     lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
-    lines = _rebase_voltage_to_config(lines)  # rebase voltage to config inputs
+    lines = _rebase_voltage_to_config(config, lines)  # rebase voltage to config inputs
     # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
     return lines
 
 
 # TODO Seems to be not needed anymore
-def _load_links_from_osm(buses):
+def _load_links_from_osm(fp_osm_converters, config):
     # the links file can be empty
-    if os.path.getsize(snakemake.input.osm_converters) == 0:
+    if os.path.getsize(fp_osm_converters) == 0:
         links = pd.DataFrame()
         return links
 
     links = (
         read_csv_nafix(
-            snakemake.input.osm_converters,
+            fp_osm_converters,
             dtype=dict(
                 line_id="str",
                 bus0="str",
@@ -209,20 +209,20 @@ def _load_links_from_osm(buses):
     links["length"] /= 1e3  # m to km conversion
     links["v_nom"] /= 1e3  # V to kV conversion
     links = links.loc[:, ~links.columns.str.contains("^Unnamed")]  # remove unnamed col
-    links = _rebase_voltage_to_config(links)  # rebase voltage to config inputs
+    links = _rebase_voltage_to_config(config, links)  # rebase voltage to config inputs
     # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
 
     return links
 
 
-def _load_converters_from_osm(buses):
+def _load_converters_from_osm(fp_osm_converters, buses):
     # the links file can be empty
-    if os.path.getsize(snakemake.input.osm_converters) == 0:
+    if os.path.getsize(fp_osm_converters) == 0:
         converters = pd.DataFrame()
         return converters
 
     converters = read_csv_nafix(
-        snakemake.input.osm_converters,
+        fp_osm_converters,
         dtype=dict(converter_id="str", bus0="str", bus1="str"),
     ).set_index("converter_id")
 
@@ -233,10 +233,10 @@ def _load_converters_from_osm(buses):
     return converters
 
 
-def _load_transformers_from_osm(buses):
+def _load_transformers_from_osm(fp_osm_transformers, buses):
     transformers = (
         read_csv_nafix(
-            snakemake.input.osm_transformers,
+            fp_osm_transformers,
             dtype=dict(transformer_id="str", bus0="str", bus1="str"),
         )
         .rename(columns=dict(line_id="transformer_id"))
@@ -247,34 +247,34 @@ def _load_transformers_from_osm(buses):
     return transformers
 
 
-def _set_electrical_parameters_lines(lines):
-    v_noms = snakemake.config["electricity"]["voltages"]
-    linetypes = snakemake.config["lines"]["types"]
+def _set_electrical_parameters_lines(config, lines):
+    v_noms = config["electricity"]["voltages"]
+    linetypes = config["lines"]["types"]
 
     for v_nom in v_noms:
         lines.loc[lines["v_nom"] == v_nom, "type"] = linetypes[v_nom]
 
-    lines["s_max_pu"] = snakemake.config["lines"]["s_max_pu"]
+    lines["s_max_pu"] = config["lines"]["s_max_pu"]
 
     return lines
 
 
-def _set_electrical_parameters_dc_lines(lines):
-    v_noms = snakemake.config["electricity"]["voltages"]
+def _set_electrical_parameters_dc_lines(config, lines):
+    v_noms = config["electricity"]["voltages"]
     lines["carrier"] = "DC"
 
-    lines["type"] = snakemake.config["lines"]["dc_type"]
+    lines["type"] = config["lines"]["dc_type"]
 
-    lines["s_max_pu"] = snakemake.config["lines"]["s_max_pu"]
+    lines["s_max_pu"] = config["lines"]["s_max_pu"]
 
     return lines
 
 
-def _set_electrical_parameters_links(links):
+def _set_electrical_parameters_links(config, links):
     if links.empty:
         return links
 
-    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
+    p_max_pu = config["links"].get("p_max_pu", 1.0)
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
@@ -283,8 +283,8 @@ def _set_electrical_parameters_links(links):
     return links
 
 
-def _set_electrical_parameters_transformers(transformers):
-    config = snakemake.config["transformers"]
+def _set_electrical_parameters_transformers(config, transformers):
+    config = config["transformers"]
 
     ## Add transformer parameters
     transformers["x"] = config.get("x", 0.1)
@@ -294,8 +294,8 @@ def _set_electrical_parameters_transformers(transformers):
     return transformers
 
 
-def _set_electrical_parameters_converters(converters):
-    p_max_pu = snakemake.config["links"].get("p_max_pu", 1.0)
+def _set_electrical_parameters_converters(config, converters):
+    p_max_pu = config["links"].get("p_max_pu", 1.0)
     converters["p_max_pu"] = p_max_pu
     converters["p_min_pu"] = -p_max_pu
 
@@ -330,16 +330,12 @@ def _remove_dangling_branches(branches, buses):
     )
 
 
-def _set_countries_and_substations(n):
+def _set_countries_and_substations(inputs, config, n):
 
-    countries = snakemake.config["countries"]
-    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
-        "geometry"
-    ]
+    countries = config["countries"]
+    country_shapes = gpd.read_file(inputs.country_shapes).set_index("name")["geometry"]
 
-    offshore_shapes = unary_union(
-        gpd.read_file(snakemake.input.offshore_shapes)["geometry"]
-    )
+    offshore_shapes = unary_union(gpd.read_file(inputs.offshore_shapes)["geometry"])
 
     buses = n.buses
     bus_locations = buses
@@ -354,7 +350,7 @@ def _set_countries_and_substations(n):
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
         buses["v_nom"]
-        >= snakemake.config["base_network"]["min_voltage_substation_offshore"] / 1000
+        >= config["base_network"]["min_voltage_substation_offshore"] / 1000
     )
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
@@ -404,7 +400,7 @@ def _set_countries_and_substations(n):
     return buses
 
 
-def _rebase_voltage_to_config(component):
+def _rebase_voltage_to_config(config, component):
     """
     Rebase the voltage of components to the config.yaml input
 
@@ -415,14 +411,15 @@ def _rebase_voltage_to_config(component):
 
     Parameters
     ----------
+    config : dictionary (by snakemake)
     component : dataframe
     """
     v_min = (
-        snakemake.config["base_network"]["min_voltage_rebase_voltage"] / 1000
+        config["base_network"]["min_voltage_rebase_voltage"] / 1000
     )  # min. filtered value in dataset
-    v_low = snakemake.config["electricity"]["voltages"][0]
-    v_mid = snakemake.config["electricity"]["voltages"][1]
-    v_up = snakemake.config["electricity"]["voltages"][2]
+    v_low = config["electricity"]["voltages"][0]
+    v_mid = config["electricity"]["voltages"][1]
+    v_up = config["electricity"]["voltages"][2]
     v_low_mid = (v_mid - v_low) / 2 + v_low  # between low and mid voltage
     v_mid_up = (v_up - v_mid) / 2 + v_mid  # between mid and upper voltage
     component.loc[
@@ -436,34 +433,34 @@ def _rebase_voltage_to_config(component):
     return component
 
 
-def base_network():
-    buses = _load_buses_from_osm().reset_index()
-    lines = _load_lines_from_osm(buses)
-    transformers = _load_transformers_from_osm(buses)
-    converters = _load_converters_from_osm(buses)
+def base_network(inputs, config):
+    buses = _load_buses_from_osm(inputs.osm_buses, config).reset_index()
+    lines = _load_lines_from_osm(inputs.osm_lines, config, buses)
+    transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
+    converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
     lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
-    lines_ac = _set_electrical_parameters_lines(lines_ac)
-    lines_dc = _set_electrical_parameters_dc_lines(lines_dc)
+    lines_ac = _set_electrical_parameters_lines(config, lines_ac)
+    lines_dc = _set_electrical_parameters_dc_lines(config, lines_dc)
 
-    transformers = _set_electrical_parameters_transformers(transformers)
-    converters = _set_electrical_parameters_converters(converters)
+    transformers = _set_electrical_parameters_transformers(config, transformers)
+    converters = _set_electrical_parameters_converters(config, converters)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
 
-    n.set_snapshots(pd.date_range(freq="h", **snakemake.config["snapshots"]))
+    n.set_snapshots(pd.date_range(freq="h", **config["snapshots"]))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
     n.import_components_from_dataframe(buses, "Bus")
 
-    if snakemake.config["electricity"]["hvdc_as_lines"]:
+    if config["electricity"]["hvdc_as_lines"]:
         lines = pd.concat([lines_ac, lines_dc])
         n.import_components_from_dataframe(lines, "Line")
     else:
-        lines_dc = _set_electrical_parameters_links(lines_dc)
+        lines_dc = _set_electrical_parameters_links(config, lines_dc)
         # parse line information into p_nom required for converters
         lines_dc["p_nom"] = lines_dc.apply(
             lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
@@ -492,7 +489,9 @@ def base_network():
 
     _set_lines_s_nom_from_linetypes(n)
 
-    _set_countries_and_substations(n)
+    _set_countries_and_substations(inputs, config, n)
+
+    _set_links_underwater_fraction(inputs.offshore_shapes, n)
 
     return n
 
@@ -506,9 +505,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)
 
-    n = base_network()
+    inputs, config = snakemake.input, snakemake.config
 
-    _set_links_underwater_fraction(n)
+    n = base_network(inputs, config)
 
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
     n.meta = snakemake.config

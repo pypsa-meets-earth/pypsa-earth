@@ -65,7 +65,7 @@ preferred_order = pd.Index(
 )
 
 
-def plot_costs(infn, snakemake, fn=None):
+def plot_costs(infn, snmk, fn=None):
 
     # For now ignore the simpl header
     cost_df = pd.read_csv(infn, index_col=list(range(3)), header=[1, 2, 3])
@@ -77,7 +77,7 @@ def plot_costs(infn, snakemake, fn=None):
 
     df = df.groupby(df.index.map(rename_techs)).sum()
 
-    to_drop = df.index[df.max(axis=1) < snakemake.config["plotting"]["costs_threshold"]]
+    to_drop = df.index[df.max(axis=1) < snmk.config["plotting"]["costs_threshold"]]
 
     if not to_drop.empty:
         logger.info(
@@ -102,7 +102,7 @@ def plot_costs(infn, snakemake, fn=None):
 
     if new_index_costs.empty:
         logger.error(
-            f"No costs data to plot for country {snakemake.wildcards.country}, no valid plot is generated"
+            f"No costs data to plot for country {snmk.wildcards.country}, no valid plot is generated"
         )
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:
@@ -113,7 +113,7 @@ def plot_costs(infn, snakemake, fn=None):
         kind="bar",
         ax=ax,
         stacked=True,
-        color=[snakemake.config["plotting"]["tech_colors"][i] for i in new_index_costs],
+        color=[snmk.config["plotting"]["tech_colors"][i] for i in new_index_costs],
     )
 
     handles, labels = ax.get_legend_handles_labels()
@@ -121,7 +121,7 @@ def plot_costs(infn, snakemake, fn=None):
     handles.reverse()
     labels.reverse()
 
-    ax.set_ylim([0, snakemake.config["plotting"]["costs_max"]])
+    ax.set_ylim([0, snmk.config["plotting"]["costs_max"]])
 
     ax.set_ylabel("System Cost [EUR billion per year]")
 
@@ -137,7 +137,7 @@ def plot_costs(infn, snakemake, fn=None):
         fig_costs.savefig(fn, transparent=True)
 
 
-def plot_energy(infn, snakemake, fn=None):
+def plot_energy(infn, snmk, fn=None):
 
     energy_df = pd.read_csv(infn, index_col=list(range(2)), header=[1, 2, 3])
 
@@ -149,7 +149,7 @@ def plot_energy(infn, snakemake, fn=None):
     df = df.groupby(df.index.map(rename_techs)).sum()
 
     to_drop = df.index[
-        df.abs().max(axis=1) < snakemake.config["plotting"]["energy_threshold"]
+        df.abs().max(axis=1) < snmk.config["plotting"]["energy_threshold"]
     ]
 
     if not to_drop.empty:
@@ -175,7 +175,7 @@ def plot_energy(infn, snakemake, fn=None):
 
     if new_index_energy.empty:
         logger.error(
-            f"No energy data to plot for country {snakemake.wildcards.country}, no valid plot is generated"
+            f"No energy data to plot for country {snmk.wildcards.country}, no valid plot is generated"
         )
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:
@@ -186,9 +186,7 @@ def plot_energy(infn, snakemake, fn=None):
         kind="bar",
         ax=ax,
         stacked=True,
-        color=[
-            snakemake.config["plotting"]["tech_colors"][i] for i in new_index_energy
-        ],
+        color=[snmk.config["plotting"]["tech_colors"][i] for i in new_index_energy],
     )
 
     handles, labels = ax.get_legend_handles_labels()
@@ -198,8 +196,8 @@ def plot_energy(infn, snakemake, fn=None):
 
     ax.set_ylim(
         [
-            snakemake.config["plotting"]["energy_min"],
-            snakemake.config["plotting"]["energy_max"],
+            snmk.config["plotting"]["energy_min"],
+            snmk.config["plotting"]["energy_max"],
         ]
     )
 
