@@ -33,9 +33,15 @@ config["countries"] = create_country_list(config["countries"])
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
-config["scenario"]["unc"] = [
-    f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
-]
+if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+    config["scenario"]["unc"] = [
+        f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
+    ]
+
+if config["technology_assessment"]["options"].get("add_to_snakefile", False) == True:
+      config["scenario"]["unc"] = [
+        f"f{i}" for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
+    ]
 
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""

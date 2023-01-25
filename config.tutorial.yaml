@@ -309,7 +309,12 @@ costs:
 
 technology_assessment:
   options:
-    add_to_snakefile: True
+    add_to_snakefile: false
+    assessment_strategy: "any-chance"
+  pypsa_standard:
+  # deviation from BAU
+  # only store components are tested
+    stores.capital_cost: [0.8, 1.2]
 
 
 monte_carlo:
