@@ -150,10 +150,13 @@ def _set_links_underwater_fraction(n):
         n.links["underwater_fraction"] = 0.0
     else:
         offshore_shape = gpd.read_file(snakemake.input.offshore_shapes).unary_union
-        links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
-        n.links["underwater_fraction"] = (
-            links.intersection(offshore_shape).length / links.length
-        )
+        if offshore_shape is None or offshore_shape.empty:
+            n.links["underwater_fraction"] = 0.0
+        else:
+            links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
+            n.links["underwater_fraction"] = (
+                links.intersection(offshore_shape).length / links.length
+            )
 
 
 def _load_lines_from_osm(buses):
