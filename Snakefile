@@ -843,3 +843,42 @@ rule make_statistics:
     threads: 1
     script:
         "scripts/make_statistics.py"
+
+
+rule run_scenario:
+    input:
+        base_config="config.default.yaml",
+        diff_config="configs/scenarios/config.{scenario_name}.yaml",
+    output:
+        touch("results/{scenario_name}/scenario.done"),
+    threads: 1
+    resources:
+        mem_mb=5000,
+    run:
+        from scripts.build_test_configs import create_test_config
+
+        create_test_config(
+            input.diff_config,
+            {"run": {"name": wildcards.scenario_name}},
+            input.diff_config,
+        )
+        create_test_config(input.base_config, input.diff_config, "config.yaml")
+        os.system(
+            "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
+        )
+
+
+rule run_all_scenarios:
+    input:
+        expand(
+            "results/{scenario_name}/scenario.done",
+            scenario_name=[
+                c.replace("config.", "").replace(".yaml", "")
+                for c in (
+                    os.listdir("configs/scenarios")
+                    if isdir("configs/scenarios")
+                    else []
+                )
+                if c.startswith("config.") and c.endswith(".yaml")
+            ],
+        ),
