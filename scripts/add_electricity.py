@@ -259,7 +259,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
             str(ssp),
             str(prediction_year),
             "era5_" + str(weather_year),
-            str(continent).capitalize() + ".nc",
+            str(continent) + ".nc",
         )
         load_paths.append(load_path)
 
