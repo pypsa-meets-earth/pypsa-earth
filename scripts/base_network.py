@@ -150,7 +150,7 @@ def _set_links_underwater_fraction(fp_offshore_shapes, n):
         n.links["underwater_fraction"] = 0.0
     else:
         offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
-        if offshore_shape is None or offshore_shape.empty:
+        if offshore_shape is None or offshore_shape.is_empty:
             n.links["underwater_fraction"] = 0.0
         else:
             links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
