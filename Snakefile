@@ -835,3 +835,36 @@ rule build_test_configs:
         ],
     script:
         "scripts/build_test_configs.py"
+
+
+rule run_scenario:
+    input:
+        base_config="config.default.yaml",
+        diff_config="configs/scenarios/config.{scenario_name}.yaml",
+    output:
+        touch("results/{scenario_name}/scenario.done"),
+    threads: 1
+    resources:
+        mem_mb=5000,
+    run:
+        from scripts.build_test_configs import create_test_config
+
+        create_test_config(
+            diff_config, {"run": {"name": scenario_name}}, diff_config
+        )
+        create_test_config(base_config, diff_config, "config.yaml")
+        os.system(
+            "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
+        )
+
+
+rule run_all_scenarios:
+    input:
+        expand(
+            "results/{scenario_name}/scenario.done",
+            scenario_name=[
+                c.replace("config.", "").replace(".yaml", "")
+                for c in os.listdir("configs/scenarios")
+                if c.startswith("config.") and c.endswith(".yaml")
+            ],
+        ),
