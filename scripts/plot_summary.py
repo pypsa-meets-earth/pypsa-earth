@@ -65,7 +65,7 @@ preferred_order = pd.Index(
 )
 
 
-def plot_costs(infn, fn=None):
+def plot_costs(infn, snakemake, fn=None):
 
     # For now ignore the simpl header
     cost_df = pd.read_csv(infn, index_col=list(range(3)), header=[1, 2, 3])
@@ -137,7 +137,7 @@ def plot_costs(infn, fn=None):
         fig_costs.savefig(fn, transparent=True)
 
 
-def plot_energy(infn, fn=None):
+def plot_energy(infn, snakemake, fn=None):
 
     energy_df = pd.read_csv(infn, index_col=list(range(2)), header=[1, 2, 3])
 
@@ -242,4 +242,8 @@ if __name__ == "__main__":
     except KeyError:
         logger.error(f"plotting function for {summary} has not been defined")
 
-    func(os.path.join(snakemake.input[0], f"{summary}.csv"), snakemake.output[0])
+    func(
+        os.path.join(snakemake.input[0], f"{summary}.csv"),
+        snakemake,
+        snakemake.output[0],
+    )

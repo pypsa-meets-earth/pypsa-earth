@@ -485,7 +485,7 @@ outputs = [
 ]
 
 
-def make_summaries(networks_dict, country="all"):
+def make_summaries(networks_dict, snakemake, country="all"):
 
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
@@ -574,6 +574,6 @@ if __name__ == "__main__":
         for opts in expand_from_wildcard("opts")
     }
 
-    dfs = make_summaries(networks_dict, country=snakemake.wildcards.country)
+    dfs = make_summaries(networks_dict, snakemake, country=snakemake.wildcards.country)
 
     to_csv(dfs)
