@@ -364,20 +364,18 @@ def collect_renewable_stats(rulename, technology):
         return pd.DataFrame()
 
 
-def collect_computational_stats(rulename, timedelta):
+def add_computational_stats(df, rulename, snakemake):
     """
-    Store the computational timedelta time required to run the workflow
+    Add the major computational information of a given rule into the existing dataframe
     """
-    comp_time = timedelta.total_seconds()
+
     return pd.DataFrame(
         [[comp_time]],
         columns=_multi_index_scen(rulename, ["total"]),
     )
 
 
-def calculate_stats(
-    config, timedelta=None, metric_crs="EPSG:3857", area_crs="ESRI:54009"
-):
+def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     "Function to collect all statistics"
 
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
@@ -415,11 +413,6 @@ def calculate_stats(
     dict_dfs["snakemake_status"] = collect_snakemake_stats(
         "snakemake_status", dict_dfs, config
     )
-
-    if timedelta is not None:
-        dict_dfs["computational_time"] = collect_computational_stats(
-            "computational_time", timedelta
-        )
 
     return dict_dfs
 
@@ -459,35 +452,12 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    # generate_scenario_by_country("configs/scenarios/base.yaml", ["Africa"])
+    fp_stats = snakemake.output["stats"]
+    config = snakemake.config
 
-    scenario = snakemake.wildcards["scenario"]
-    dir_scenario = snakemake.output["dir_scenario"]
-    stats_scenario = snakemake.output["stats_scenario"]
-    base_config = snakemake.config.get("base_config", "./config.default.scenario.yaml")
-
-    # create scenario config
-    create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
-
-    # execute workflow
-    start_dt = datetime.now()
-    os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
-    end_dt = datetime.now()
-    timedelta = end_dt - start_dt
+    name_index = config["run"].get("name", config["countries"].join("-"))
 
     # create statistics
-    stats = calculate_stats(snakemake.config, timedelta)
-    stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([scenario]))
-    to_csv_nafix(stats, stats_scenario)
-
-    # copy output files
-    for f in ["resources", "networks", "results", "benchmarks"]:
-        copy_dir = os.path.abspath(f"{dir_scenario}/{f}")
-        if os.path.exists(copy_dir):
-            shutil.rmtree(copy_dir)
-        abs_f = os.path.abspath(f)
-        if os.path.exists(abs_f):
-            shutil.copytree(abs_f, copy_dir)
-            shutil.rmtree(abs_f)
-
-    shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
+    stats = calculate_stats(config)
+    stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([name_index]))
+    to_csv_nafix(stats, fp_stats)

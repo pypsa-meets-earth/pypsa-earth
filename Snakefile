@@ -837,28 +837,9 @@ rule build_test_configs:
         "scripts/build_test_configs.py"
 
 
-rule run_scenario:
+rule make_statistics:
     output:
-        dir_scenario=directory("scenarios/{scenario}"),
-        stats_scenario="scenarios/{scenario}/stats.csv",
+        stats="scenarios/" + RDIR + "/stats.csv",
     threads: 1
     script:
-        "scripts/run_scenario.py"
-
-
-rule run_all_scenarios:
-    input:
-        expand("scenarios/{scenario}/stats.csv", scenario=config["countries"]),
-    output:
-        stat_scenarios="scenarios/stats.csv",
-    threads: 1
-    run:
-        import pandas as pd
-        from scripts._helpers import read_csv_nafix, to_csv_nafix
-
-        df_list = []
-
-        for f in list(input):
-            df_list.append(read_csv_nafix(f, header=[0, 1], index_col=0))
-
-        to_csv_nafix(pd.concat(df_list), output.stat_scenarios)
+        "scripts/make_statistics.py"
