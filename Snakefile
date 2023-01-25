@@ -866,7 +866,11 @@ rule run_all_scenarios:
             "results/{scenario_name}/scenario.done",
             scenario_name=[
                 c.replace("config.", "").replace(".yaml", "")
-                for c in os.listdir("configs/scenarios")
+                for c in (
+                    os.listdir("configs/scenarios")
+                    if isdir("configs/scenarios")
+                    else []
+                )
                 if c.startswith("config.") and c.endswith(".yaml")
             ],
         ),

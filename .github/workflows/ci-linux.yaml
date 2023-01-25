@@ -74,7 +74,7 @@ jobs:
       run: |
         mkdir configs/scenarios
         cp test/config.custom.yaml configs/scenarios/config.custom.yaml
-        snakemake --cores all run_all_scenarios --forceall
+        snakemake --cores 1 run_all_scenarios --forceall
 
     - name: Test monte-carlo workflow
       run: |
