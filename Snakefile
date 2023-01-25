@@ -839,7 +839,7 @@ rule build_test_configs:
 
 rule make_statistics:
     output:
-        stats="scenarios/" + RDIR + "/stats.csv",
+        stats="results/" + RDIR + "stats.csv",
     threads: 1
     script:
         "scripts/make_statistics.py"

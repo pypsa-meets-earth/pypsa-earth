@@ -408,6 +408,9 @@ def mock_snakemake(rulename, **wildcards):
         job.rule.name,
         None,
     )
+
+    snakemake.benchmark = job.benchmark
+
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
         Path(path).parent.mkdir(parents=True, exist_ok=True)

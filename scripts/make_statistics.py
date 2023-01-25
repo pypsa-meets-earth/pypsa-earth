@@ -189,9 +189,13 @@ def collect_raw_osm_stats(rulename="download_osm_data", metric_crs="EPSG:3857"):
     options_raw = dict(snakemake.output)
     options_raw.pop("generators_csv")
 
-    return collect_osm_stats(
+    df_raw_osm_stats = collect_osm_stats(
         rulename, only_basic=True, metric_crs=metric_crs, **options_raw
     )
+
+    add_computational_stats(df_raw_osm_stats, snakemake)
+
+    return df_raw_osm_stats
 
 
 def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
@@ -204,7 +208,13 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
     options_clean = dict(snakemake.output)
     options_clean.pop("generators_csv")
 
-    return collect_osm_stats(rulename, metric_crs=metric_crs, **options_clean)
+    df_clean_osm_stats = collect_osm_stats(
+        rulename, metric_crs=metric_crs, **options_clean
+    )
+
+    add_computational_stats(df_clean_osm_stats, snakemake)
+
+    return df_clean_osm_stats
 
 
 def collect_network_stats(network_rule, config):
@@ -256,6 +266,8 @@ def collect_network_stats(network_rule, config):
             df_gen_stats.columns = _multi_index_scen(network_rule, df_gen_stats.columns)
             network_stats = pd.concat([line_stats, df_gen_stats], axis=1)
 
+        add_computational_stats(network_stats, snakemake)
+
         return network_stats
     else:
         return pd.DataFrame()
@@ -294,12 +306,16 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     gadm_country_matching_stats = df_gadm.country.value_counts(normalize=True)
     gadm_country_matching = float(gadm_country_matching_stats.iloc[0]) * 100
 
-    return pd.DataFrame(
+    df_shapes_stats = pd.DataFrame(
         [[continent_area, gadm_size, gadm_country_matching, pop_tot, gdp_tot]],
         columns=_multi_index_scen(
             rulename, ["area", "gadm_size", "country_matching", "pop", "gdp"]
         ),
     )
+
+    add_computational_stats(df_shapes_stats, snakemake)
+
+    return df_shapes_stats
 
 
 def collect_snakemake_stats(name, dict_dfs, config):
@@ -353,26 +369,48 @@ def collect_renewable_stats(rulename, technology):
             potential = float(res.potential.sum())
             avg_production_pu = float(res.profile.mean(dim=["bus"]).sum())
 
-        return pd.DataFrame(
+        df_RES_stats = pd.DataFrame(
             [[potential, avg_production_pu]],
             columns=_multi_index_scen(
                 f"{rulename}_{technology}",
                 ["potential", "avg_production_pu"],
             ),
         )
+
+        add_computational_stats(df_RES_stats, snakemake)
+
+        return df_RES_stats
     else:
         return pd.DataFrame()
 
 
-def add_computational_stats(df, rulename, snakemake):
+def add_computational_stats(df, snakemake):
     """
     Add the major computational information of a given rule into the existing dataframe
     """
 
-    return pd.DataFrame(
-        [[comp_time]],
-        columns=_multi_index_scen(rulename, ["total"]),
+    comp_time = np.nan
+    mean_load = np.nan
+    max_mem = np.nan
+
+    if snakemake.benchmark:
+        if not os.path.isfile(snakemake.benchmark):
+            return df
+
+        bench_data = pd.read_csv(snakemake.benchmark, delimiter="\t")
+
+        comp_time, mean_load, max_mem = bench_data[["s", "mean_load", "max_vms"]].iloc[
+            0
+        ]
+
+    new_cols = _multi_index_scen(
+        snakemake.rule, ["total_time", "mean_load", "max_memory"]
     )
+    comp_data = [comp_time, mean_load, max_mem]
+
+    df[new_cols] = [comp_data]
+
+    return df
 
 
 def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
@@ -417,47 +455,25 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     return dict_dfs
 
 
-def run_scenario(dir_scenario, scenario, config):
-
-    base_config = config.get("base_config", "./config.default.scenario.yaml")
-
-    # create scenario config
-    create_test_config(base_config, f"configs/scenarios/{scenario}.yaml", "config.yaml")
-
-    # execute workflow
-    start_dt = datetime.now()
-    os.system("snakemake -j all solve_all_networks --forceall --rerun-incomplete")
-    end_dt = datetime.now()
-    timedelta = end_dt - start_dt
-
-    # copy output files
-    for f in ["resources", "networks", "results", "benchmarks"]:
-        copy_dir = os.path.abspath(f"{dir_scenario}/{f}")
-        if os.path.exists(copy_dir):
-            shutil.rmtree(copy_dir)
-        abs_f = os.path.abspath(f)
-        if os.path.exists(abs_f):
-            shutil.copytree(abs_f, copy_dir)
-            shutil.rmtree(abs_f)
-
-    shutil.copy("config.yaml", f"{dir_scenario}/config.yaml")
-
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("run_scenario", scenario="TD")
+        snakemake = mock_snakemake("make_statistics")
 
     sets_path_to_root("pypsa-earth")
 
     fp_stats = snakemake.output["stats"]
     config = snakemake.config
 
-    name_index = config["run"].get("name", config["countries"].join("-"))
+    geo_crs = config["crs"]["geo_crs"]
+    metric_crs = config["crs"]["distance_crs"]
+    area_crs = config["crs"]["area_crs"]
+
+    name_index = config["run"].get("name", "-".join(config["countries"]))
 
     # create statistics
-    stats = calculate_stats(config)
+    stats = calculate_stats(config, metric_crs=metric_crs, area_crs=area_crs)
     stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([name_index]))
     to_csv_nafix(stats, fp_stats)
