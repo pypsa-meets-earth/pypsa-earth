@@ -177,17 +177,32 @@ def single_best_in_worst_list(worst_list, best_list):
     """
     Return list with single best value per list of worst values
 
+    The goal is to create a list of scenarios where each scenario
+    has one best value and the rest are worst cases. This is useful for
+    assessing the impact of a single technology on the system.
+    E.g. if a technology is not optimised in any best case, it is
+    likely not relevant to include in the optimization or
+    global sensitivity analysis.
+
+    What is good and what is bad is determined by the user.
+    See example below for clarification of use cases.
+
     Input:
     ------
-    worst_list: 1D array
-    best_list: 1D array
+    worst_list: 1D array, represents the worst value per technology
+    best_list: 1D array, represents the best value per technology
 
     Output:
     -------
-    new_list: 2D array
+    new_list: 2D array 
 
     Example:
     --------
+    Let's create a scenario set with 3 technologies (creates 3 scenarios)
+    # Scenario set when low values are good e.g. costs
+    >>> single_best_in_worst_list([4, 4, 4], [1, 1, 1])
+    [[1, 4, 4], [4, 1, 4], [4, 4, 1]]
+    # Scenario set when high values are good e.g. efficiency
     >>> single_best_in_worst_list([1, 1, 1], [4, 4, 4])
     [[4, 1, 1], [1, 4, 1], [1, 1, 4]]
     """
@@ -262,8 +277,8 @@ if __name__ == "__main__":
 
     elif OPTIONS.get("method") == "single_best_in_worst":
         carrier_no = len(n.stores.carrier.unique())
-        worst_list = L_BOUNDS * carrier_no
-        best_list = U_BOUNDS * carrier_no
+        worst_list = U_BOUNDS * carrier_no
+        best_list = L_BOUNDS * carrier_no
         scenarios = single_best_in_worst_list(worst_list, best_list)
 
     ### NETWORK MODIFICATION

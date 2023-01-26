@@ -614,6 +614,13 @@ def nested_storage_dict(tech_costs):
     """
     Create a nested dictionary with a storage index and meta data relation.
 
+    The costs.csv file from the technology_data interface contains metadata
+    for storage technologies when the PNNL data extractions is activated PR #67.
+    The metadata is stored in a csv as a nested dictionary value which is
+    read out by this function and converted to a nested dictionary for further
+    use. One example use the metadata enables is the automatic energy storage
+    creation in the model from the config.yaml.
+
     Input:
     ------
     tech_costs: str, path to technology costs.csv file

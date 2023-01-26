@@ -83,6 +83,7 @@ def attach_storageunits(n, costs, config):
     lookup_store = {"H2": "electrolysis", "battery": "battery inverter"}
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
+    # TODO: add metadata to H2 and battery to only read in over database interface
     for carrier in carriers_classic:
         roundtrip_correction = 0.5 if carrier == "battery" else 1
         n.madd(
@@ -102,6 +103,7 @@ def attach_storageunits(n, costs, config):
             cyclic_state_of_charge=True,
         )
 
+    # automated attach of storage_units from database
     for carrier in carriers_database:
         tech_type = costs.technology_type
         charger_or_bicharger_filter = (costs.carrier == carrier) & (
@@ -146,9 +148,7 @@ def attach_stores(n, costs, config):
     buses_i = n.buses.index
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
-    ### TODO: GENERAL STORE ATTACH FUNCTION
-    # Combine bicharger model & traditional model? (or even more general e.g. 5 step charger)
-
+    # TODO: add metadata to H2 and battery to only read in over database interface
     if "H2" in carriers_classic:
         h2_buses_i = n.madd("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
 
@@ -227,14 +227,18 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
+    # automated attach of store-link storages from database
     for c in carriers_database:
         carrier_buses_i = n.madd("Bus", buses_i + f" {c}", carrier=c, **bus_sub_dict)
         tech_type = costs.technology_type
         carrier = costs.carrier
+        # filters for pypsa store
         store_filter = (carrier == c) & (tech_type == "store")
+        # filters for pypsa charger or bicharger
         charger_or_bicharger_filter = (carrier == c) & (
             (tech_type == "charger") | (tech_type == "bicharger")
         )
+        # filters for pypsa discharger or bicharger
         discharger_or_bicharger_filter = (carrier == c) & (
             (tech_type == "discharger") | (tech_type == "bicharger")
         )
