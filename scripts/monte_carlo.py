@@ -81,11 +81,14 @@ def wildcard_creator(config, method=None):
     """
     Creates wildcard for monte-carlo simulations.
     """
-    if method=="global_sensitivity":
+    if method == "global_sensitivity":
         return [f"g{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
-    
-    elif method=="any_chance_store_test":
-        return [f"a{i}" for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))]
+
+    elif method == "any_chance_store_test":
+        return [
+            f"a{i}"
+            for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
+        ]
 
 
 def monte_carlo_sampling_pydoe2(
@@ -172,16 +175,16 @@ def monte_carlo_sampling_scipy(
 def single_best_in_worst_list(worst_list, best_list):
     """
     Return list with single best value per list of worst values
-    
+
     Input:
     ------
     worst_list: 1D array
     best_list: 1D array
-    
+
     Output:
     -------
     new_list: 2D array
-    
+
     Example:
     --------
     >>> single_best_in_worst_list([1, 1, 1], [4, 4, 4])
@@ -192,7 +195,7 @@ def single_best_in_worst_list(worst_list, best_list):
         l = worst_list.copy()
         l[i] = best_list[i]
         new_list.append(l)
-    
+
     return new_list
 
 
@@ -219,16 +222,14 @@ if __name__ == "__main__":
     OPTIONS = config["monte_carlo"]["options"]
     L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
     U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
-    N_FEATURES = len(
-        PYPSA_FEATURES
-    )  # only counts features when specified in config
+    N_FEATURES = len(PYPSA_FEATURES)  # only counts features when specified in config
 
     ### SCENARIO CREATION
     ###
-    if OPTIONS.get("method")=="global_sensitivity":
+    if OPTIONS.get("method") == "global_sensitivity":
         SAMPLES = OPTIONS.get(
             "samples"
-        )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper    
+        )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
         SAMPLING_STRATEGY = OPTIONS.get("sampling_strategy")
 
         if SAMPLING_STRATEGY == "pydoe2":
@@ -258,7 +259,7 @@ if __name__ == "__main__":
             )
         scenarios = qmc.scale(lh, L_BOUNDS, U_BOUNDS)
 
-    elif OPTIONS.get("method")=="any_chance_store_test":
+    elif OPTIONS.get("method") == "any_chance_store_test":
         carrier_no = len(n.stores.carrier.unique())
         worst_list = L_BOUNDS * carrier_no
         best_list = U_BOUNDS * carrier_no
@@ -270,7 +271,7 @@ if __name__ == "__main__":
     i = int(unc_wildcards[1:])
     j = 0
 
-    if OPTIONS.get("method")=="global_sensitivity":
+    if OPTIONS.get("method") == "global_sensitivity":
         for k, v in PYPSA_FEATURES.items():
             # this loop sets in one scenario each "i" feature assumption
             # k is the config input key "loads_t.p_set"
@@ -281,18 +282,22 @@ if __name__ == "__main__":
             logger.info(f"Scaled n.{k} by factor {scenarios[i,j]} in the {i} scenario")
             j = j + 1
 
-    if OPTIONS.get("method")=="any_chance_store_test":
+    if OPTIONS.get("method") == "any_chance_store_test":
         for k, _ in PYPSA_FEATURES.items():
-            type = k.split(".")[0] # "stores", "generators", ...
-            feature = k.split(".")[1] # "capital_cost", "efficiency", ...
+            type = k.split(".")[0]  # "stores", "generators", ...
+            feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
 
         if type == "stores":
             # scales the whole storage-chain
             carrier_list = n.stores.carrier.unique()
             for c in carrier_list:
-                n.stores.loc[n.stores.carrier==c, feature] *= scenarios[i][j]
-                n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[i][j] 
-                logger.info(f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario")
+                n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j]
+                n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[
+                    i
+                ][j]
+                logger.info(
+                    f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario"
+                )
                 j += 1
 
     ### EXPORT AND METADATA

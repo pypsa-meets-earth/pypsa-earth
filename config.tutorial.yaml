@@ -308,7 +308,7 @@ costs:
 
 
 monte_carlo:
-  add_to_snakefile: True
+  add_to_snakefile: true
   options:
     method: "global_sensitivity"  # or any_chance_store_test
     samples: 7  # number of optimizations
