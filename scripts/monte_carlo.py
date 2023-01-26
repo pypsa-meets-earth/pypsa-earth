@@ -194,7 +194,7 @@ def single_best_in_worst_list(worst_list, best_list):
 
     Output:
     -------
-    new_list: 2D array 
+    new_list: 2D array
 
     Example:
     --------
@@ -303,7 +303,7 @@ if __name__ == "__main__":
             type = k.split(".")[0]  # "stores", "generators", ...
             feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
 
-        #TODO: Generalize for other features. Currently this scales the whole storage-chain
+        # TODO: Generalize for other features. Currently this scales the whole storage-chain
         if type == "stores":
             # scales the whole storage-chain
             carrier_list = n.stores.carrier.unique()
