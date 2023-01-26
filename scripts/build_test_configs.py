@@ -29,7 +29,7 @@ def update(d, u):
 def _parse_inputconfig(input_config, yaml):
     """Utility function to parse input config into a dictionary"""
     if isinstance(input_config, dict):
-        return dict
+        return input_config
 
     if isinstance(input_config, str):
         input_config = Path(Path.cwd(), input_config)
@@ -94,7 +94,3 @@ if __name__ == "__main__":
 
     for (finput, foutput) in zip(fp_update_file_list, fp_output_file_list):
         create_test_config(fp_baseconfig, finput, foutput)
-
-    # Manual output in terminal
-    # import sys
-    # yaml.dump(data, sys.stdout)
