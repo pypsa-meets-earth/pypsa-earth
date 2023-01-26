@@ -870,7 +870,7 @@ rule run_all_scenarios:
         expand(
             "results/{scenario_name}/scenario.done",
             scenario_name=[
-                c.replace("config.", "").replace(".yaml", "")
+                c.stem.replace("config.", "")
                 for c in Path("configs/scenarios").glob("config.*.yaml")
             ],
         ),
