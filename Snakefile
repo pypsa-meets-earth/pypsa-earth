@@ -844,7 +844,7 @@ rule run_scenario:
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touch("results/{scenario_name}/scenario.done"),
-        copyconfig="results/" + RDIR + "config.yaml",
+        copyconfig="results/{scenario_name}/config.yaml",
     threads: 1
     resources:
         mem_mb=5000,
