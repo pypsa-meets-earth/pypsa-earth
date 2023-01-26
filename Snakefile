@@ -165,9 +165,9 @@ rule clean_osm_data:
         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
         lines="resources/" + RDIR + "osm/raw/all_raw_lines.geojson",
         substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
-        country_shapes="resources/shapes/country_shapes.geojson",
-        offshore_shapes="resources/shapes/offshore_shapes.geojson",
-        africa_shape="resources/shapes/africa_shape.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
     output:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         generators_csv="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
@@ -186,7 +186,7 @@ rule build_osm_network:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
         substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
-        country_shapes="resources/shapes/country_shapes.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
     output:
         lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
         converters="resources/" + RDIR + "base_network/all_converters_build_network.csv",
@@ -236,8 +236,8 @@ rule base_network:
         osm_transformers="resources/"
         + RDIR
         + "base_network/all_transformers_build_network.csv",
-        country_shapes="resources/shapes/country_shapes.geojson",
-        offshore_shapes="resources/shapes/offshore_shapes.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
     output:
         "networks/" + RDIR + "base.nc",
     log:
