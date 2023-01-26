@@ -8,6 +8,17 @@ Execute a scenario optimization
 This script contains utility functions to iteratively run the workflow for several regions
 and test the execution for each of them.
 During the execution, statistics on the outputs of the execution are generated.
+Examples of relevant statistics are:
+- For clean_osm_data and download_osm_data,
+  the number of elements, length of the lines and length of dc lines are stored
+- For build_renewable_profiles, total available potential and average production are collected
+- For network rules (base_network, add_electricity, simplify_network and solve_network),
+  length of lines, number of buses and total installed capacity by generation technology
+- Execution time for the rules, when benchmark is available
+
+Outputs
+------
+This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
 import os
 import shutil
@@ -249,22 +260,23 @@ def collect_network_stats(network_rule, config):
         lines_length = float((n.lines.length * n.lines.num_parallel).sum())
 
         lines_capacity = float(n.lines.s_nom.sum())
+        buses_number = float(n.buses.shape[0])
 
-        line_stats = pd.DataFrame(
-            [[lines_length, lines_capacity]],
-            columns=_multi_index_scen(network_rule, ["lines_length", "lines_capacity"]),
+        network_stats = pd.DataFrame(
+            [[buses_number, lines_length, lines_capacity]],
+            columns=_multi_index_scen(
+                network_rule, ["buses_number", "lines_length", "lines_capacity"]
+            ),
         )
 
         gen_stats = pd.concat(
             [capacity_stats(n.generators), capacity_stats(n.storage_units)], axis=0
         )
 
-        if gen_stats.empty:
-            network_stats = line_stats
-        else:
+        if not gen_stats.empty:
             df_gen_stats = gen_stats.to_frame().transpose().reset_index()
             df_gen_stats.columns = _multi_index_scen(network_rule, df_gen_stats.columns)
-            network_stats = pd.concat([line_stats, df_gen_stats], axis=1)
+            network_stats = pd.concat([network_stats, df_gen_stats], axis=1)
 
         add_computational_stats(network_stats, snakemake)
 
