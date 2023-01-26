@@ -301,6 +301,18 @@ def estimate_bus_loss(data_column, tech):
     return share_missed_buses
 
 
+def filter_cutout_region(cutout, regions):
+    """
+    Filter the cutout to focus on the region of interest
+    """
+    # filter cutout regions to focus on the region of interest
+    minx, miny, maxx, maxy = regions.total_bounds
+    minx, maxx = max(-180.0, minx - cutout.dx), min(180.0, maxx + cutout.dx)
+    miny, maxy = max(-90.0, miny - cutout.dy), min(90.0, maxy + cutout.dy)
+    cutout.data = cutout.data.sel(x=slice(minx, maxx), y=slice(miny, maxy))
+    return cutout
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -329,8 +341,6 @@ if __name__ == "__main__":
 
     if correction_factor != 1.0:
         logger.info(f"correction_factor is set as {correction_factor}")
-
-    cutout = atlite.Cutout(paths["cutout"])
     regions = gpd.read_file(paths.regions)  # .set_index("name").rename_axis("bus")
 
     assert not regions.empty, (
@@ -340,6 +350,9 @@ if __name__ == "__main__":
 
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
+
+    cutout = atlite.Cutout(paths["cutout"])
+    cutout = filter_cutout_region(cutout, regions)
 
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(
