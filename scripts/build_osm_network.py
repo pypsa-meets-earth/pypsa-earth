@@ -753,7 +753,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     return lines, buses
 
 
-def built_network(inputs, outputs, geo_crs, distance_crs):
+def built_network(inputs, outputs, config, geo_crs, distance_crs):
 
     logger.info("Stage 1/5: Read input data")
 
@@ -768,12 +768,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     buses = add_line_endings_tosubstations(substations, lines)
 
     # Address the overpassing line issue Step 3/5
-    if snakemake.config.get("build_osm_network", {}).get(
-        "split_overpassing_lines", False
-    ):
-        tol = snakemake.config["build_osm_network"].get(
-            "overpassing_lines_tolerance", 1
-        )
+    if config.get("build_osm_network", {}).get("split_overpassing_lines", False):
+        tol = config["build_osm_network"].get("overpassing_lines_tolerance", 1)
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
         lines, buses = fix_overpassing_lines(lines, buses, distance_crs, tol=tol)
@@ -781,8 +777,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
-    if snakemake.config.get("build_osm_network", {}).get("group_close_buses", False):
-        tol = snakemake.config["build_osm_network"].get("group_tolerance_buses", 500)
+    if config.get("build_osm_network", {}).get("group_close_buses", False):
+        tol = config["build_osm_network"].get("group_tolerance_buses", 500)
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
@@ -794,10 +790,9 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     logger.info("Stage 5/5: Add augmented substation to country with no data")
 
-    country_shapes_fn = snakemake.input.country_shapes
+    country_shapes_fn = inputs.country_shapes
     country_shapes = gpd.read_file(country_shapes_fn).set_index("name")["geometry"]
-    input = snakemake.config["countries"]
-    country_list = input
+    country_list = config["countries"]
     bus_country_list = buses["country"].unique().tolist()
 
     # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
@@ -885,4 +880,6 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    built_network(snakemake.input, snakemake.output, geo_crs, distance_crs)
+    built_network(
+        snakemake.input, snakemake.output, snakemake.config, geo_crs, distance_crs
+    )

@@ -287,32 +287,33 @@ world_iso = {
         "YE": "yemen",
     },
     "Oceania": {
-        # "AS": "american-samoa",  # Island
+        "AS": "american-samoa",  # Island
         "AU": "australia",
-        # "CK": "cook islands",  # Island
-        # "FJ": "fiji",  # Island
-        # "PF": "french-polynesia",  # Island
+        # "CP": "ile-de-clipperton",  # Island  In gadm as XCL
+        "CK": "cook-islands",  # Island
+        "FJ": "fiji",  # Island
+        "PF": "french-polynesia",  # Island
         # "GU": "guam",  # Island
-        # "KI": "kiribati",  # Island
-        # "MH": "marshall-islands",  # Island
-        # "FM": "micronesia",  # Island
-        # "NR": "nauru",  # Island
+        "KI": "kiribati",  # Island
+        "MH": "marshall-islands",  # Island
+        "FM": "micronesia",  # Island
+        "NR": "nauru",  # Island
         "NC": "new-caledonia",
         "NZ": "new-zealand",
-        # "NU": "niue",  # Island
-        # "NF": "norfolk-island",  # Island
-        # "MP": "northern-mariana-islands",
-        # "PW": "palau",  # Island
-        # "PN": "pitcairn-islands", # Islands
-        # "PW": "palau",  # Island
-        # "WS": "samoa",  # Island
-        # "SB": "solomon-islands",
-        # "TK": "tokelau",  # Island
-        # "TO": "tonga",  # Island
-        # "TV": "tuvalu",  # Island
+        "NU": "niue",  # Island
+        "NF": "norfolk-island",  # Island
+        "MP": "northern-mariana-islands",
+        "PG": "papua-new-guinea",
+        "PN": "pitcairn-islands",  # Islands
+        "PW": "palau",  # Island
+        "WS": "samoa",  # Island
+        "SB": "solomon-islands",
+        "TK": "tokelau",  # Island
+        "TO": "tonga",  # Island
+        "TV": "tuvalu",  # Island
         # "UM": "united-states-minor-outlying-islands", #Islands
-        # "VU": "vanuatu",  # Island
-        # "WF": "wallis-and-futuna",  # Island
+        "VU": "vanuatu",  # Island
+        "WF": "wallis-and-futuna",  # Island
     },
     "Europe": {
         # "AX":"aland-islands", # Island
@@ -427,7 +428,7 @@ world_iso = {
         "EC": "ecuador",
         # "FK": "falkland-islands", #Islands
         "GF": "french-guiana",
-        # "GY": "guyana", # No Data
+        "GY": "guyana",  # No Data
         "PE": "peru",
         "PY": "paraguay",
         "SR": "suriname",
@@ -577,6 +578,10 @@ iso_to_geofk_dict = {
     "VA": "IT",  # Vatican is merged to Italy
     "HT": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
     "DO": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
+    "NF": "AU",  # norfolk island is an AU territory
+    "MP": "USOC",  # northern mariana islands are US territory
+    "GU": "USOC",  # Guam is a US territory
+    "AS": "USOC",  # American Samoa is a US territory
 }
 
 # Cyprus and Georgia -> European domain
@@ -690,28 +695,31 @@ world_geofk = {
     },
     "australia-oceania": {
         "AU": "australia",
-        # "CK": "cook islands",  # Island
-        # "FJ": "fiji",  # Islands
-        # "PF": "french-polynesia",  # Islands
+        "CK": "cook-islands",  # Island
+        "CP": "ile-de-clipperton",  # Island
+        "FJ": "fiji",  # Islands
+        "PF": "polynesie-francaise",  # Islands
         # "GU": "guam",  # Island
-        # "KI": "kiribati",  # Islands
-        # "MH": "marshall islands",  # Islands
-        # "FM": "micronesia",  # Islands
-        # "NR": "nauru",  # Islands
+        "KI": "kiribati",  # Islands
+        "MH": "marshall-islands",  # Islands
+        "FM": "micronesia",  # Islands
+        "NR": "nauru",  # Islands
         "NC": "new-caledonia",
         "NZ": "new-zealand",
-        # "NU": "niue",  # Island
+        "NU": "niue",  # Island
         # "NF": "norfolk island",  # Island
         # "MP": "northern mariana islands",  # Islands
-        # "PW": "palau",  # Islands
+        "PN": "pitcairn-islands",  # Islands
+        "PW": "palau",  # Islands
         "PG": "papua-new-guinea",
-        # "WS": "samoa",  # Islands
-        # "SB": "solomon islands",  # Islands
-        # "TK": "tokelau",  # Islands
-        # "TO": "tonga",  # Islands
-        # "TV": "tuvalu",  # Islands
-        # "VU": "vanuatu",  # Islands
-        # "WF": "wallis-et-futuna",  # Islands
+        "WS": "samoa",  # Islands
+        "SB": "solomon-islands",  # Islands
+        "TK": "tokelau",  # Islands
+        "TO": "tonga",  # Islands
+        "TV": "tuvalu",  # Islands
+        "VU": "vanuatu",  # Islands
+        "WF": "wallis-et-futuna",  # Islands
+        "USOC": "american-oceania",
     },
     "europe": {
         "AL": "albania",

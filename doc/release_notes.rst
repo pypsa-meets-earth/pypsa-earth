@@ -61,6 +61,9 @@ Upcoming Release
 
 * Add pypsa-eur scenario management `PR #577 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/577>`__
 
+* Minor bug fixing and improvements `PR #580 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/580>`__
+
+
 PyPSA-Earth 0.1.0
 =================
 

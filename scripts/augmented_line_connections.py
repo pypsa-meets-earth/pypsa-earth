@@ -169,7 +169,7 @@ if __name__ == "__main__":
             lifetime=costs.at["HVAC overhead", "lifetime"],
         )
 
-        _set_links_underwater_fraction(n)
+        _set_links_underwater_fraction(snakemake.input.regions_offshore, n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

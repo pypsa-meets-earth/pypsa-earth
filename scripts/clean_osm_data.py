@@ -65,6 +65,11 @@ def prepare_substation_df(df_all_substations):
     ]
     df_all_substations = df_all_substations[clist]
 
+    # Check. If column is not in df create an empty one.
+    for c in clist:
+        if c not in df_all_substations:
+            df_all_substations[c] = np.nan
+
     # add the under_construction and dc
     df_all_substations["under_construction"] = False
     df_all_substations["dc"] = False
@@ -117,7 +122,7 @@ def add_line_endings_tosubstations(substations, lines):
     buses = pd.concat([substations, bus_all], ignore_index=True)
 
     # Assign index to bus_id
-    buses.loc[:, "bus_id"] = buses.index
+    buses["bus_id"] = buses.index
 
     return buses
 
@@ -644,7 +649,7 @@ def set_name_by_closestcity(df_all_generators, colname="name"):
     list_cities = rg.search([g.coords[0] for g in df_all_generators.geometry])
 
     # replace name
-    df_all_generators.loc[:, colname] = [
+    df_all_generators[colname] = [
         l["city"] + "_" + str(id) + " - " + c_code
         for (l, c_code, id) in zip(
             list_cities, df_all_generators.country, df_all_generators.index

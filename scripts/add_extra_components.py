@@ -70,6 +70,7 @@ logger = logging.getLogger(__name__)
 
 
 def attach_storageunits(n, costs, config):
+
     carriers = config["electricity"]["extendable_carriers"]["StorageUnit"]
     carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
     carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
@@ -287,6 +288,7 @@ def attach_stores(n, costs, config):
 
 
 def attach_hydrogen_pipelines(n, costs, config):
+
     ext_carriers = config["electricity"]["extendable_carriers"]
     as_stores = ext_carriers.get("Store", [])
 
@@ -337,6 +339,7 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     config = snakemake.config
+
     costs = load_costs(
         snakemake.input.tech_costs,
         config["costs"],

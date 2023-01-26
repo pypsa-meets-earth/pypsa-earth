@@ -485,7 +485,7 @@ outputs = [
 ]
 
 
-def make_summaries(networks_dict, country="all"):
+def make_summaries(networks_dict, inputs, config, country="all"):
 
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
@@ -513,9 +513,9 @@ def make_summaries(networks_dict, country="all"):
 
         Nyears = n.snapshot_weightings.objective.sum() / 8760.0
         costs = load_costs(
-            snakemake.input.tech_costs,
-            snakemake.config["costs"],
-            snakemake.config["electricity"],
+            inputs.tech_costs,
+            config["costs"],
+            config["electricity"],
             Nyears,
         )
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
@@ -528,8 +528,7 @@ def make_summaries(networks_dict, country="all"):
     return dfs
 
 
-def to_csv(dfs):
-    dir = snakemake.output[0]
+def to_csv(dfs, dir):
     os.makedirs(dir, exist_ok=True)
     for key, df in dfs.items():
         df.to_csv(os.path.join(dir, f"{key}.csv"))
@@ -574,6 +573,11 @@ if __name__ == "__main__":
         for opts in expand_from_wildcard("opts")
     }
 
-    dfs = make_summaries(networks_dict, country=snakemake.wildcards.country)
+    dfs = make_summaries(
+        networks_dict,
+        snakemake.input,
+        snakemake.config,
+        country=snakemake.wildcards.country,
+    )
 
-    to_csv(dfs)
+    to_csv(dfs, snakemake.output[0])
