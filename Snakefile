@@ -28,6 +28,9 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 configfile: "configs/bundle_config.yaml"
 
 
+DEFAULT_CONFIG = "config.tutorial.yaml" if config["tutorial"] else "config.default.yaml"
+
+
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
@@ -840,7 +843,7 @@ rule build_test_configs:
 
 rule run_scenario:
     input:
-        default_config="config.default.yaml",
+        default_config=DEFAULT_CONFIG,
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touch("results/{scenario_name}/scenario.done"),
