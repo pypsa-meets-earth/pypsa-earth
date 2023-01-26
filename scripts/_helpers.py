@@ -654,14 +654,14 @@ def nested_storage_dict(tech_costs):
             storage_dict = ast.literal_eval(
                 df.iloc[i, 0]
             )  # https://stackoverflow.com/a/988251/13573820
-            _ = storage_dict.pop("note", None)
+            storage_dict.pop("note", None)
             nested_storage_dict[df.index[i]] = storage_dict
     return [nested_storage_dict, storage_techs]
 
 
 def add_storage_col_to_costs(costs, storage_meta_dict, storage_techs):
     """
-    Add storage specific columns to costs.csv.
+    Add storage specific columns e.g. "carrier", "type", "technology_type" to costs.csv
 
     Input:
     ------
@@ -672,6 +672,15 @@ def add_storage_col_to_costs(costs, storage_meta_dict, storage_techs):
     Output:
     -------
     costs: pd.DataFrame, costs.csv with added storage specific columns
+
+    Example:
+    --------
+    From the nested dictionary:
+    {
+        'Ni-Zn-bicharger': {'carrier': ['elec', 'nizn', 'elec'], 'technology_type': ['bicharger'], 'type': ['electrochemical']}
+        ...
+        }
+    The columns "carrier", "type", "technology_type" will be added to costs.csv
     """
     # add storage specific columns to costs.csv
     for c in ["carrier", "technology_type", "type"]:

@@ -81,10 +81,11 @@ def wildcard_creator(config, method=None):
     """
     Creates wildcard for monte-carlo simulations.
     """
+    method = config["monte_carlo"]["options"].get("method")
     if method == "global_sensitivity":
         return [f"g{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
 
-    elif method == "any_chance_store_test":
+    elif method == "single_best_in_worst":
         return [
             f"a{i}"
             for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
@@ -259,7 +260,7 @@ if __name__ == "__main__":
             )
         scenarios = qmc.scale(lh, L_BOUNDS, U_BOUNDS)
 
-    elif OPTIONS.get("method") == "any_chance_store_test":
+    elif OPTIONS.get("method") == "single_best_in_worst":
         carrier_no = len(n.stores.carrier.unique())
         worst_list = L_BOUNDS * carrier_no
         best_list = U_BOUNDS * carrier_no
@@ -282,7 +283,7 @@ if __name__ == "__main__":
             logger.info(f"Scaled n.{k} by factor {scenarios[i,j]} in the {i} scenario")
             j = j + 1
 
-    if OPTIONS.get("method") == "any_chance_store_test":
+    if OPTIONS.get("method") == "single_best_in_worst":
         for k, _ in PYPSA_FEATURES.items():
             type = k.split(".")[0]  # "stores", "generators", ...
             feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
