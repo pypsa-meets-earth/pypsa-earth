@@ -14,6 +14,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 from scripts._helpers import create_country_list
 from scripts.add_electricity import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
+from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
 
@@ -839,25 +840,29 @@ rule build_test_configs:
 
 rule run_scenario:
     input:
-        base_config="config.default.yaml",
+        default_config="config.default.yaml",
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touch("results/{scenario_name}/scenario.done"),
+        copyconfig="results/" + RDIR + "config.yaml",
     threads: 1
     resources:
         mem_mb=5000,
     run:
         from scripts.build_test_configs import create_test_config
 
+        # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
             {"run": {"name": wildcards.scenario_name}},
             input.diff_config,
         )
-        create_test_config(input.base_config, input.diff_config, "config.yaml")
+        # merge the default config file with the difference
+        create_test_config(input.default_config, input.diff_config, "config.yaml")
         os.system(
             "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
         )
+        copyfile("config.yaml", input.copyconfig)
 
 
 rule run_all_scenarios:
@@ -866,11 +871,6 @@ rule run_all_scenarios:
             "results/{scenario_name}/scenario.done",
             scenario_name=[
                 c.replace("config.", "").replace(".yaml", "")
-                for c in (
-                    os.listdir("configs/scenarios")
-                    if isdir("configs/scenarios")
-                    else []
-                )
-                if c.startswith("config.") and c.endswith(".yaml")
+                for c in Path("configs/scenarios").glob("config.*.yaml")
             ],
         ),
