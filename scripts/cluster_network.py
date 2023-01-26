@@ -185,18 +185,20 @@ def weighting_for_country(n, x):
         return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
-def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
+def distribute_clusters(
+    inputs, config, n, n_clusters, focus_weights=None, solver_name=None
+):
     """Determine the number of clusters per country"""
 
-    distribution_cluster = snakemake.config["cluster_options"]["distribute_cluster"]
-    country_list = snakemake.config["countries"]
-    year = snakemake.config["build_shape_options"]["year"]
-    update = snakemake.config["build_shape_options"]["update_file"]
-    out_logging = snakemake.config["build_shape_options"]["out_logging"]
-    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
+    distribution_cluster = config["cluster_options"]["distribute_cluster"]
+    country_list = config["countries"]
+    year = config["build_shape_options"]["year"]
+    update = config["build_shape_options"]["update_file"]
+    out_logging = config["build_shape_options"]["out_logging"]
+    nprocesses = config["build_shape_options"]["nprocesses"]
 
     if solver_name is None:
-        solver_name = snakemake.config["solving"]["solver"]["name"]
+        solver_name = config["solving"]["solver"]["name"]
 
     if distribution_cluster == ["load"]:
         L = (
@@ -214,7 +216,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         distribution_factor = L
 
     if distribution_cluster == ["pop"]:
-        df_pop_c = gpd.read_file(snakemake.input.country_shapes).rename(
+        df_pop_c = gpd.read_file(inputs.country_shapes).rename(
             columns={"name": "country"}
         )
         add_population_data(
@@ -225,7 +227,7 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
         distribution_factor = P
 
     if distribution_cluster == ["gdp"]:
-        df_gdp_c = gpd.read_file(snakemake.input.country_shapes).rename(
+        df_gdp_c = gpd.read_file(inputs.country_shapes).rename(
             columns={"name": "country"}
         )
         add_gdp_data(
@@ -314,10 +316,10 @@ def distribute_clusters(n, n_clusters, focus_weights=None, solver_name=None):
     )
 
 
-def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
+def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
 
     # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
-    gdf = gpd.read_file(snakemake.input.gadm_shapes)
+    gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
 
@@ -342,7 +344,14 @@ def busmap_for_gadm_clusters(n, gadm_level, geo_crs, country_list):
 
 
 def busmap_for_n_clusters(
-    n, n_clusters, solver_name, focus_weights=None, algorithm="kmeans", **algorithm_kwds
+    inputs,
+    config,
+    n,
+    n_clusters,
+    solver_name,
+    focus_weights=None,
+    algorithm="kmeans",
+    **algorithm_kwds,
 ):
     if algorithm == "kmeans":
         algorithm_kwds.setdefault("n_init", 1000)
@@ -355,7 +364,12 @@ def busmap_for_n_clusters(
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(
-            n, n_clusters, focus_weights=focus_weights, solver_name=solver_name
+            inputs,
+            config,
+            n,
+            n_clusters,
+            focus_weights=focus_weights,
+            solver_name=solver_name,
         )
 
     def reduce_network(n, buses):
@@ -405,12 +419,14 @@ def busmap_for_n_clusters(
             group_keys=False,
         )
         .apply(busmap_for_country)
-        .squeeze()
+        .squeeze(axis=0)
         .rename("busmap")
     )
 
 
 def clustering_for_n_clusters(
+    inputs,
+    config,
     n,
     n_clusters,
     alternative_clustering,
@@ -433,10 +449,12 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
-            busmap = busmap_for_gadm_clusters(n, gadm_layer_id, geo_crs, country_list)
+            busmap = busmap_for_gadm_clusters(
+                inputs, n, gadm_layer_id, geo_crs, country_list
+            )
         else:
             busmap = busmap_for_n_clusters(
-                n, n_clusters, solver_name, focus_weights, algorithm
+                inputs, config, n, n_clusters, solver_name, focus_weights, algorithm
             )
     else:
         busmap = custom_busmap
@@ -474,18 +492,14 @@ def save_to_geojson(s, fn):
     df.to_file(fn, driver="GeoJSON", schema=schema)
 
 
-def cluster_regions(busmaps, input=None, output=None):
-    if input is None:
-        input = snakemake.input
-    if output is None:
-        output = snakemake.output
+def cluster_regions(busmaps, inputs, output):
 
     busmap = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
 
     for which in ("regions_onshore", "regions_offshore"):
 
         # regions = gpd.read_file(getattr(input, which)).set_index("name")
-        regions = gpd.read_file(getattr(input, which))
+        regions = gpd.read_file(getattr(inputs, which))
         regions = regions.reindex(columns=REGION_COLS).set_index("name")
         aggfunc = dict(x="mean", y="mean", country="first")
         regions_c = regions.dissolve(busmap, aggfunc=aggfunc)
@@ -505,7 +519,9 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.network)
+    inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
+
+    n = pypsa.Network(inputs.network)
 
     alternative_clustering = snakemake.config["cluster_options"][
         "alternative_clustering"
@@ -538,6 +554,10 @@ if __name__ == "__main__":
         linemap = n.lines.index.to_series()
         clustering = pypsa.networkclustering.Clustering(
             n, busmap, linemap, linemap, pd.Series(dtype="O")
+        )
+    elif len(n.buses) < n_clusters:
+        logger.error(
+            f"Desired number of clusters ({n_clusters}) higher than the number of buses ({len(n.buses)})"
         )
     else:
         line_length_factor = snakemake.config["lines"]["length_factor"]
@@ -575,6 +595,8 @@ if __name__ == "__main__":
             "cluster_network", {}
         )
         clustering = clustering_for_n_clusters(
+            inputs,
+            config,
             n,
             n_clusters,
             alternative_clustering,
@@ -594,11 +616,11 @@ if __name__ == "__main__":
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
     )
-    clustering.network.export_to_netcdf(snakemake.output.network)
+    clustering.network.export_to_netcdf(outputs.network)
     for attr in (
         "busmap",
         "linemap",
     ):  # also available: linemap_positive, linemap_negative
-        getattr(clustering, attr).to_csv(snakemake.output[attr])
+        getattr(clustering, attr).to_csv(outputs[attr])
 
-    cluster_regions((clustering.busmap,))
+    cluster_regions((clustering.busmap,), inputs, outputs)

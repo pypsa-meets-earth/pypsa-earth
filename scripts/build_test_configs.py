@@ -26,28 +26,58 @@ def update(d, u):
     return d
 
 
-def create_test_config(base_path, update_config, output_path):
-    # Input paths
-    fp_baseconfig = Path(Path.cwd(), base_path)
+def _parse_inputconfig(input_config, yaml):
+    """Utility function to parse input config into a dictionary"""
+    if isinstance(input_config, dict):
+        return input_config
+
+    if isinstance(input_config, str):
+        input_config = Path(Path.cwd(), input_config)
+
+    with open(input_config) as fp:
+        return yaml.load(fp)
+
+
+def create_test_config(default_config, diff_config, output_path):
+    """
+    This function takes as input a default dictionary-like object
+    and a difference dictionary-like object, merges the changes of the latter into the former,
+    and saves the output in the desired output path.
+
+    Inputs
+    ------
+    default_config : dict or path-like
+        Default dictionray-like object provided as
+        a dictionary or a path to a yaml file
+    diff_config : dict or path-like
+        Difference dictionray-like object provided as
+        a dictionary or a path to a yaml file
+    output_path : path-like
+        Output path where the merged dictionary is saved
+
+    Outputs
+    -------
+    - merged dictionary
+
+    """
 
     # Load yaml files
     yaml = YAML()
 
-    # get update
-    if isinstance(update_config, str):
-        fp_update_file = Path(Path.cwd(), update_config)
-        # Load update yaml
-        with open(fp_update_file) as fp:
-            update_config = yaml.load(fp)
-    with open(fp_baseconfig) as fp:
-        base_config = yaml.load(fp)
+    default_config = _parse_inputconfig(default_config, yaml)
+    diff_config = _parse_inputconfig(diff_config, yaml)
 
     # create updated yaml
-    test_config = update(copy.deepcopy(base_config), update_config)
+    merged_config = update(copy.deepcopy(default_config), diff_config)
+
     # Output path
-    fp = Path(Path.cwd(), output_path)
+    if isinstance(output_path, str):
+        output_path = Path(Path.cwd(), output_path)
+
     # Save file
-    yaml.dump(test_config, fp)
+    yaml.dump(merged_config, output_path)
+
+    return merged_config
 
 
 if __name__ == "__main__":
@@ -64,7 +94,3 @@ if __name__ == "__main__":
 
     for (finput, foutput) in zip(fp_update_file_list, fp_output_file_list):
         create_test_config(fp_baseconfig, finput, foutput)
-
-    # Manual output in terminal
-    # import sys
-    # yaml.dump(data, sys.stdout)

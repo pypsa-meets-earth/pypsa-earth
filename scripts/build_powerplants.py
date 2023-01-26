@@ -88,6 +88,9 @@ logger = logging.getLogger(__name__)
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
+    if os.stat(filepath_ppl_osm).st_size == 0:
+        return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
+
     add_ppls = read_csv_nafix(filepath_ppl_osm, index_col=0, dtype={"bus": "str"})
 
     custom_ppls_coords = gpd.GeoSeries.from_wkt(add_ppls["geometry"])
@@ -194,7 +197,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     add_ppls.loc[add_ppls["Technology"] == "battery storage", "Set"] = "Store"
 
     add_ppls = add_ppls.replace(dict(Fueltype={"battery": "Other"})).drop(
-        columns=["tags.generator:method", "geometry", "Area", "id"]
+        columns=["tags.generator:method", "geometry", "Area", "id"],
+        errors="ignore",
     )
 
     to_csv_nafix(add_ppls, filepath_ppl_pm, index=False)
@@ -202,15 +206,15 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     return add_ppls
 
 
-def add_custom_powerplants(ppl):
-    if "custom_powerplants" not in snakemake.config["electricity"]:
+def add_custom_powerplants(ppl, inputs, config):
+    if "custom_powerplants" not in config["electricity"]:
         return ppl
 
-    custom_ppl_query = snakemake.config["electricity"]["custom_powerplants"]
+    custom_ppl_query = config["electricity"]["custom_powerplants"]
     if not custom_ppl_query:
         return ppl
     add_ppls = read_csv_nafix(
-        snakemake.input.custom_powerplants, index_col=0, dtype={"bus": "str"}
+        inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
     )
     # if isinstance(custom_ppl_query, str):
     #     add_ppls.query(custom_ppl_query, inplace=True)
@@ -275,7 +279,9 @@ if __name__ == "__main__":
         )
     )
 
-    ppl = add_custom_powerplants(ppl)  # add carriers from own powerplant files
+    ppl = add_custom_powerplants(
+        ppl, snakemake.input, snakemake.config
+    )  # add carriers from own powerplant files
 
     cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]
 
