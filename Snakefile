@@ -14,6 +14,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 from scripts._helpers import create_country_list
 from scripts.add_electricity import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
+from scripts.monte_carlo import wildcard_creator
 
 HTTP = HTTPRemoteProvider()
 
@@ -30,18 +31,12 @@ configfile: "configs/bundle_config.yaml"
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
-
 # create a list of iteration steps, required to solve the experimental design
-# each value is used as wildcard input e.g. solution_{unc}
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
-    config["scenario"]["unc"] = [
-        f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
-    ]
-
-if config["technology_assessment"]["options"].get("add_to_snakefile", False) == True:
-      config["scenario"]["unc"] = [
-        f"f{i}" for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
-    ]
+# each value is used as wildcard input e.g. solution_{unc} 
+if config["monte_carlo"].get("add_to_snakefile", False) == True:
+    config["scenario"]["unc"] = wildcard_creator(
+        config, config["monte_carlo"]["options"].get("method")
+    )
 
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
@@ -639,7 +634,7 @@ def memory(w):
         return int(factor * (10000 + 195 * int(w.clusters)))
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+if config["monte_carlo"].get("add_to_snakefile", False) == True:
 
     rule monte_carlo:
         input:
@@ -699,74 +694,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
 
 
     rule solve_all_networks_monte:
-        input:
-            expand(
-                "results/"
-                + RDIR
-                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
-            ),
-
-elif config["technology_assessment"]["options"].get("add_to_snakefile", False) == True:
-    
-    rule prepare_technology_assessment:
-        input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        output:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-        log:
-            "logs/"
-            + RDIR
-            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
-        benchmark:
-            (
-                "benchmarks/"
-                + RDIR
-                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
-            )
-        threads: 1
-        resources:
-            mem_mb=4000,
-        script:
-            "scripts/prepare_technology_assessment.py"
-
-
-    rule solve_network:
-        input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-            tech_costs=COSTS,
-        output:
-            "results/"
-            + RDIR
-            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-        log:
-            solver=normpath(
-                "logs/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
-            ),
-            python="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_python.log",
-            memory="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_memory.log",
-        benchmark:
-            (
-                "benchmarks/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
-            )
-        threads: 20
-        resources:
-            mem_mb=memory,
-        shadow:
-            "shallow"
-        script:
-            "scripts/solve_network.py"
-
-
-    rule solve_all_networks_tech_assessment:
         input:
             expand(
                 "results/"

@@ -307,29 +307,21 @@ costs:
     co2: 0.
 
 
-technology_assessment:
-  options:
-    add_to_snakefile: false
-    assessment_strategy: "any-chance"
-  pypsa_standard:
-  # deviation from BAU
-  # only store components are tested
-    stores.capital_cost: [0.8, 1.2]
-
-
 monte_carlo:
+  add_to_snakefile: True
   options:
-    add_to_snakefile: false
-    samples: 7    # number of optimizations
-    sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
+    method: "global_sensitivity"  # or any_chance_store_test
+    samples: 7  # number of optimizations
+    sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
   pypsa_standard:
       # User can add here flexibly more features for the Monte-Carlo sampling.
       # Given as "key: value" format
       # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
       # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
-    loads_t.p_set: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
+      # Examples:
+      # loads_t.p_set: [0.9, 1.1]
+      # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
+    stores.capital_cost: [0.8, 1.2]  # for any_chance_store_test 
 
 
 solving:
