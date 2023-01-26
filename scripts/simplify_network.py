@@ -128,6 +128,7 @@ def simplify_network_to_380(n, linetype):
     n.lines["type"] = linetype_380
     n.lines["v_nom"] = 380
     n.lines["i_nom"] = n.line_types.i_nom[linetype_380]
+    # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
     # Replace transformers by lines
