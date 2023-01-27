@@ -175,7 +175,7 @@ rule clean_osm_data:
         "benchmarks/" + RDIR + "clean_osm_data"
     script:
         "scripts/clean_osm_data.py"
-
+    
 
 rule build_osm_network:
     input:
@@ -395,6 +395,37 @@ rule build_powerplants:
         "scripts/build_powerplants.py"
 
 
+rule build_demand:
+    input:
+        # **{
+        #     f"conventional_{carrier}_{attr}": fn
+        #     for carrier, d in config.get("conventional", {None: {}}).items()
+        #     for attr, fn in d.items()
+        #     if str(fn).startswith("data/")
+        # },
+        elec_network="networks/" + RDIR + "elec.nc",
+        #tech_costs=COSTS,
+        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        #powerplants="resources/" + RDIR + "powerplants.csv",
+        load=load_data_paths,
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
+        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        #hydro_capacities="data/hydro_capacities.csv",
+    output:
+        "networks/" + RDIR + "elec_1.nc",
+    log:
+        "logs/" + RDIR + "build_demand.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_demand"
+    threads: 1
+    resources:
+        mem_mb=3000,
+    script:
+        "scripts/build_demand.py"
+
 rule add_electricity:
     input:
         **{
@@ -412,9 +443,9 @@ rule add_electricity:
         },
         base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
-        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        #regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         powerplants="resources/" + RDIR + "powerplants.csv",
-        load=load_data_paths,
+        #load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -436,7 +467,7 @@ rule add_electricity:
 
 rule simplify_network:
     input:
-        network="networks/" + RDIR + "elec.nc",
+        network="networks/" + RDIR + "elec_1.nc",
         tech_costs=COSTS,
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
