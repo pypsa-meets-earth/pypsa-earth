@@ -59,12 +59,12 @@ from _helpers import configure_logging, getContinent, update_p_nom_max
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 
-
 logger = logging.getLogger(__name__)
 
 
 def normed(s):
     return s / s.sum()
+
 
 def attach_load(
     n,
