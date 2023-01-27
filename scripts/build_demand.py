@@ -22,8 +22,8 @@ Relevant Settings
 Inputs
 ------
 
-- ``networks/ + RDIR + "elec.nc``: a network created in the script add_electricity with generators and hydro storage units,
-- ``resources/ + RDIR + bus_regions/regions_onshore.geojson``: confer :ref:`busregions`,
+- ``networks/elec.nc``: a network created in the script add_electricity with generators and hydro storage units,
+- ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`busregions`,
 - ``load_data_paths``, 
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`,
 - ``networks/elec.nc``: confer :ref:`elec`

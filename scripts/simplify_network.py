@@ -48,7 +48,7 @@ Inputs
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
 - ``resources/regions_offshore.geojson``: confer :ref:`busregions`
-- ``networks/elec.nc``: confer :ref:`electricity`
+- ``networks/elec_1.nc``: confer :ref:`electricity`
 
 Outputs
 -------
