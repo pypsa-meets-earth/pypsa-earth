@@ -827,9 +827,6 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
 
     # Snakemake imports:
-    regions = snakemake.input.regions
-
-    load_paths = snakemake.input["load"]
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
@@ -861,7 +858,6 @@ if __name__ == "__main__":
 
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
 
-    attach_load(n, load_paths, regions, admin_shapes, countries, scale)
     update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
     conventional_inputs = {
         k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
@@ -883,6 +879,7 @@ if __name__ == "__main__":
         extendable_carriers,
         snakemake.config["lines"]["length_factor"],
     )
+    
     attach_hydro(n, costs, ppl)
 
     estimate_renewable_capacities_irena(n, snakemake.config)
