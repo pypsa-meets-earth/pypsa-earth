@@ -114,32 +114,28 @@ logger = logging.getLogger(__name__)
 
 
 def simplify_network_to_380(n, linetype):
-    """Simplify network to v_nom == 380"""
+    """
+    Fix all lines to a voltage level of 380 kV and remove all transformers.
+    The function preserves the transmission capacity for each line while updating
+    its voltage level, line type and number of parallel bundles (num_parallel).
+    Transformers are removed and connected components are moved from their
+    starting bus to their ending bus. The corresponing starting buses are
+    removed as well.
+    """
     logger.info("Mapping all network lines onto a single 380kV layer")
 
     linetype_380 = linetype
-    lines_v_nom_b = n.lines.v_nom != 380.0
-    n.lines.loc[lines_v_nom_b, "num_parallel"] *= (
-        n.lines.loc[lines_v_nom_b, "type"].map(n.line_types.i_nom)
-        / n.line_types.loc[linetype_380, "i_nom"]
-        * n.lines.loc[lines_v_nom_b, "v_nom"]
-        / 380.0
-    )
-    n.lines.loc[lines_v_nom_b, "v_nom"] = 380.0
-    n.lines.loc[lines_v_nom_b, "type"] = linetype_380
-    n.buses["v_nom"] = 380.0
-    n.lines.loc[lines_v_nom_b, "s_nom"] = (
-        np.sqrt(3)
-        * n.line_types.loc[linetype_380, "i_nom"]
-        * n.lines.bus0.map(n.buses.v_nom)
-        * n.lines.num_parallel
-    )
+    n.lines["type"] = linetype_380
+    n.lines["v_nom"] = 380
+    n.lines["i_nom"] = n.line_types.i_nom[linetype_380]
+    # Note: s_nom is set in base_network
+    n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
     # Replace transformers by lines
-    trafo_map = pd.Series(n.transformers.bus1.values, index=n.transformers.bus0.values)
+    trafo_map = pd.Series(n.transformers.bus1.values, n.transformers.bus0.values)
     trafo_map = trafo_map[~trafo_map.index.duplicated(keep="first")]
     several_trafo_b = trafo_map.isin(trafo_map.index)
-    trafo_map.loc[several_trafo_b] = trafo_map.loc[several_trafo_b].map(trafo_map)
+    trafo_map[several_trafo_b] = trafo_map[several_trafo_b].map(trafo_map)
     missing_buses_i = n.buses.index.difference(trafo_map.index)
     trafo_map = pd.concat([trafo_map, pd.Series(missing_buses_i, missing_buses_i)])
 

@@ -33,35 +33,6 @@ def line_endings_to_bus_conversion(lines):
     return lines
 
 
-def create_bus_df_from_lines(substations, lines):
-    # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns)
-
-    # Read information from line.csv
-    bus_s[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus0_lon", "bus0_lat", "bus_0_coors", "country"]
-    ]  # line start points
-    bus_e[["voltage", "lon", "lat", "geometry", "country"]] = lines[
-        ["voltage", "bus1_lon", "bus1_lat", "bus_1_coors", "country"]
-    ]  # line end points
-    bus_all = bus_s.append(bus_e).reset_index(drop=True)
-
-    # Assign index to bus_id
-    bus_all.loc[:, "bus_id"] = bus_all.index
-    buses = bus_all
-
-    # Removing the NaN
-    buses["dc"] = "False"
-    buses["symbol"] = "False"
-    buses["under_construction"] = "False"
-    buses["tag_substation"] = "False"
-    buses["tag_area"] = "False"
-    buses["substation_lv"] = True
-
-    return buses
-
-
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns)
@@ -84,10 +55,9 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["bus_id"] = lines["line_id"].astype(str) + "_e"
     bus_e["dc"] = ~is_ac
 
-    bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
+    bus_all = pd.concat([bus_s, bus_e], ignore_index=True).set_crs(substations.crs)
     # Assign index to bus_id
-    bus_all.loc[:, "bus_id"] = bus_all.index
-    buses = bus_all
+    bus_all["bus_id"] = bus_all.index
 
     # Add NaN as default
     bus_all["station_id"] = np.nan
@@ -783,7 +753,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     return lines, buses
 
 
-def built_network(inputs, outputs, geo_crs, distance_crs):
+def built_network(inputs, outputs, config, geo_crs, distance_crs):
 
     logger.info("Stage 1/5: Read input data")
 
@@ -798,12 +768,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
     buses = add_line_endings_tosubstations(substations, lines)
 
     # Address the overpassing line issue Step 3/5
-    if snakemake.config.get("build_osm_network", {}).get(
-        "split_overpassing_lines", False
-    ):
-        tol = snakemake.config["build_osm_network"].get(
-            "overpassing_lines_tolerance", 1
-        )
+    if config.get("build_osm_network", {}).get("split_overpassing_lines", False):
+        tol = config["build_osm_network"].get("overpassing_lines_tolerance", 1)
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
         lines, buses = fix_overpassing_lines(lines, buses, distance_crs, tol=tol)
@@ -811,8 +777,8 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
-    if snakemake.config.get("build_osm_network", {}).get("group_close_buses", False):
-        tol = snakemake.config["build_osm_network"].get("group_tolerance_buses", 500)
+    if config.get("build_osm_network", {}).get("group_close_buses", False):
+        tol = config["build_osm_network"].get("group_tolerance_buses", 500)
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
@@ -824,14 +790,17 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
 
     logger.info("Stage 5/5: Add augmented substation to country with no data")
 
-    country_shapes_fn = snakemake.input.country_shapes
+    country_shapes_fn = inputs.country_shapes
     country_shapes = gpd.read_file(country_shapes_fn).set_index("name")["geometry"]
-    input = snakemake.config["countries"]
-    country_list = input
+    country_list = config["countries"]
     bus_country_list = buses["country"].unique().tolist()
 
-    if len(bus_country_list) != len(country_list):
-        no_data_countries = set(country_list).difference(set(bus_country_list))
+    # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
+    # difference can't give negative values; the following will return only releant country names
+    no_data_countries = list(set(country_list).difference(set(bus_country_list)))
+
+    if len(no_data_countries) > 0:
+
         no_data_countries_shape = country_shapes[
             country_shapes.index.isin(no_data_countries) == True
         ].reset_index()
@@ -855,10 +824,21 @@ def built_network(inputs, outputs, geo_crs, distance_crs):
                 .centroid,
                 "substation_lv": [True] * length,
             }
-        )
+        ).astype(
+            buses.dtypes.to_dict()
+        )  # keep the same dtypes as buses
         buses = gpd.GeoDataFrame(
             pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
             crs=buses.crs,
+        )
+
+    non_allocated_countries = list(
+        set(country_list).symmetric_difference(set(bus_country_list))
+    )
+
+    if len(non_allocated_countries) > 0:
+        logger.error(
+            f"There following countries could not be allocated properly: {non_allocated_countries}"
         )
 
     # get transformers: modelled as lines connecting buses with different voltage
@@ -900,4 +880,6 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    built_network(snakemake.input, snakemake.output, geo_crs, distance_crs)
+    built_network(
+        snakemake.input, snakemake.output, snakemake.config, geo_crs, distance_crs
+    )

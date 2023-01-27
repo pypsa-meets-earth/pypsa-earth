@@ -259,7 +259,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
             str(ssp),
             str(prediction_year),
             "era5_" + str(weather_year),
-            str(continent).capitalize() + ".nc",
+            str(continent) + ".nc",
         )
         load_paths.append(load_path)
 
@@ -308,7 +308,7 @@ def attach_load(
     logger.info(f"Load data scaled with scalling factor {scale}.")
     gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
-    shapes.loc[:, "geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
+    shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
     def upsample(cntry, group):
         """

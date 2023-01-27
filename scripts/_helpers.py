@@ -570,14 +570,17 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" in kwargs:
         del kwargs["na_values"]
 
-    return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=NA_VALUES)
+    if os.stat(file).st_size > 0:
+        return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=NA_VALUES)
+    else:
+        return pd.DataFrame()
 
 
 def to_csv_nafix(df, path, **kwargs):
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     # if len(df) > 0:
-    if not df.empty:
+    if not df.empty or not df.columns.empty:
         return df.to_csv(path, **kwargs, na_rep=NA_VALUES[0])
     else:
         with open(path, "w") as fp:
@@ -605,3 +608,86 @@ def read_geojson(fn):
     else:
         # else return an empty GeoDataFrame
         return gpd.GeoDataFrame(geometry=[])
+
+
+def create_country_list(input, iso_coding=True):
+    """
+    Create a country list for defined regions in config_osm_data.py
+
+    Parameters
+    ----------
+    input : str
+        Any two-letter country name, regional name, or continent given in config_osm_data.py
+        Country name duplications won't distort the result.
+        Examples are:
+        ["NG","ZA"], downloading osm data for Nigeria and South Africa
+        ["africa"], downloading data for Africa
+        ["NAR"], downloading data for the North African Power Pool
+        ["TEST"], downloading data for a customized test set.
+        ["NG","ZA","NG"], won't distort result.
+
+    Returns
+    -------
+    full_codes_list : list
+        Example ["NG","ZA"]
+    """
+    import logging
+
+    from config_osm_data import continent_regions, world_iso
+
+    _logger = logging.getLogger(__name__)
+    _logger.setLevel(logging.INFO)
+
+    def filter_codes(c_list, iso_coding=True):
+        """
+        Filter list according to the specified coding.
+        When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
+        When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
+        """
+        if (
+            iso_coding
+        ):  # if country lists are in iso coding, then check if they are 2-string
+            # 2-code countries
+            ret_list = [c for c in c_list if len(c) == 2]
+
+            # check if elements have been removed and return a working if so
+            if len(ret_list) < len(c_list):
+                _logger.warning(
+                    "Specified country list contains the following non-iso codes: "
+                    + ", ".join(list(set(c_list) - set(ret_list)))
+                )
+
+            return ret_list
+        else:
+            return c_list  # [c for c in c_list if c not in iso_to_geofk_dict]
+
+    full_codes_list = []
+
+    for value1 in input:
+
+        codes_list = []
+
+        # extract countries in world
+        if value1 == "Earth":
+            for continent in world_iso.keys():
+                codes_list.extend(list(world_iso[continent]))
+
+        # extract countries in continent
+        elif value1 in world_iso.keys():
+            codes_list = list(world_iso[value1])
+
+        # extract countries in regions
+        elif value1 in continent_regions.keys():
+            codes_list = continent_regions[value1]
+
+        # extract countries
+        else:
+            codes_list.extend([value1])
+
+        # create a list with all countries
+        full_codes_list.extend(codes_list)
+
+    # Removing duplicates and filter outputs by coding
+    full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
+
+    return full_codes_list

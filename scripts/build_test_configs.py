@@ -26,6 +26,60 @@ def update(d, u):
     return d
 
 
+def _parse_inputconfig(input_config, yaml):
+    """Utility function to parse input config into a dictionary"""
+    if isinstance(input_config, dict):
+        return input_config
+
+    if isinstance(input_config, str):
+        input_config = Path(Path.cwd(), input_config)
+
+    with open(input_config) as fp:
+        return yaml.load(fp)
+
+
+def create_test_config(default_config, diff_config, output_path):
+    """
+    This function takes as input a default dictionary-like object
+    and a difference dictionary-like object, merges the changes of the latter into the former,
+    and saves the output in the desired output path.
+
+    Inputs
+    ------
+    default_config : dict or path-like
+        Default dictionray-like object provided as
+        a dictionary or a path to a yaml file
+    diff_config : dict or path-like
+        Difference dictionray-like object provided as
+        a dictionary or a path to a yaml file
+    output_path : path-like
+        Output path where the merged dictionary is saved
+
+    Outputs
+    -------
+    - merged dictionary
+
+    """
+
+    # Load yaml files
+    yaml = YAML()
+
+    default_config = _parse_inputconfig(default_config, yaml)
+    diff_config = _parse_inputconfig(diff_config, yaml)
+
+    # create updated yaml
+    merged_config = update(copy.deepcopy(default_config), diff_config)
+
+    # Output path
+    if isinstance(output_path, str):
+        output_path = Path(Path.cwd(), output_path)
+
+    # Save file
+    yaml.dump(merged_config, output_path)
+
+    return merged_config
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -34,28 +88,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_test_configs")
 
     # Input paths
-    fp_baseconfig = Path(Path.cwd(), snakemake.input.base_config)
-    fp_update_file_list = [
-        Path(Path.cwd(), i) for i in snakemake.input.update_file_list
-    ]
+    fp_baseconfig = snakemake.input.base_config
+    fp_update_file_list = snakemake.input.update_file_list
+    fp_output_file_list = snakemake.output.tmp_test_configs
 
-    # Load yaml files
-    yaml = YAML()
-    with open(fp_baseconfig) as fp:
-        base_config = yaml.load(fp)
-
-    for c in fp_update_file_list:
-        # Load update yaml
-        with open(c) as fp:
-            update_config = yaml.load(fp)
-        # create updated yaml
-        test_config = update(copy.deepcopy(base_config), update_config)
-        # Output path
-        list_no = fp_update_file_list.index(c)
-        fp = Path(Path.cwd(), snakemake.output[list_no])
-        # Save file
-        yaml.dump(test_config, fp)
-
-    # Manual output in terminal
-    # import sys
-    # yaml.dump(data, sys.stdout)
+    for (finput, foutput) in zip(fp_update_file_list, fp_output_file_list):
+        create_test_config(fp_baseconfig, finput, foutput)
