@@ -873,6 +873,7 @@ rule run_scenario:
         os.system(
             "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
         )
+        os.system("snakemake -j1 make_statistics")
         copyfile("config.yaml", output.copyconfig)
 
 

@@ -47,7 +47,9 @@ def _mock_snakemake(rule, **kwargs):
     return snakemake
 
 
-def generate_scenario_by_country(path_base, country_list, out_dir="configs/scenarios"):
+def generate_scenario_by_country(
+    path_base, country_list, out_dir="configs/scenarios", pre="config."
+):
     """
     Utility function to create copies of a standard yaml file available in path_base
     for every country in country_list.
@@ -68,8 +70,7 @@ def generate_scenario_by_country(path_base, country_list, out_dir="configs/scena
             Output directory where output configuration files are executed
     """
 
-    from _helpers import three_2_two_digits_country
-    from download_osm_data import create_country_list
+    from _helpers import create_country_list, three_2_two_digits_country
 
     clean_country_list = create_country_list(country_list)
 
@@ -114,7 +115,7 @@ def generate_scenario_by_country(path_base, country_list, out_dir="configs/scena
                 "renewable_carriers": ["solar", "onwind", "hydro"]
             }
 
-        create_test_config(path_base, modify_dict, f"{out_dir}/{c}.yaml")
+        create_test_config(path_base, modify_dict, f"{out_dir}/{pre}{c}.yaml")
 
 
 def collect_basic_osm_stats(path, rulename, header):
@@ -151,16 +152,19 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
         len_obj = np.nansum(obj_length * df.circuits)
 
         len_dc_obj = 0.0
-        if "frequency" in df.columns:
-            coerced_vals = pd.to_numeric(df.frequency, errors="coerce")
-            idx_dc = coerced_vals[coerced_vals.as_type(int) == 0].index
-            len_dc_obj = float(obj_length.loc[idx_dc].sum())
+        n_elem_dc = 0
+        if "tag_frequency" in df.columns:
+            coerced_vals = pd.to_numeric(df.tag_frequency, errors="coerce")
+            coerced_vals.fillna(50, inplace=True)
+            idx_dc = coerced_vals[coerced_vals.astype(int) == 0].index
+            len_dc_obj = np.nansum(obj_length.loc[idx_dc] * df.circuits.loc[idx_dc])
+            n_elem_dc = int(len(idx_dc))
 
         return pd.DataFrame(
-            [[n_elem, len_obj, len_dc_obj]],
+            [[n_elem, n_elem_dc, len_obj, len_dc_obj]],
             columns=_multi_index_scen(
                 rulename,
-                [header + "-" + k for k in ["size", "length", "length_dc"]],
+                [header + "-" + k for k in ["size", "size_dc", "length", "length_dc"]],
             ),
         )
     else:
@@ -260,12 +264,19 @@ def collect_network_stats(network_rule, config):
         lines_length = float((n.lines.length * n.lines.num_parallel).sum())
 
         lines_capacity = float(n.lines.s_nom.sum())
-        buses_number = float(n.buses.shape[0])
+        buses_number = int(n.buses.shape[0])
+        buses_number_dc = (n.buses.carrier != "AC").sum()
 
         network_stats = pd.DataFrame(
-            [[buses_number, lines_length, lines_capacity]],
+            [[buses_number, buses_number_dc, lines_length, lines_capacity]],
             columns=_multi_index_scen(
-                network_rule, ["buses_number", "lines_length", "lines_capacity"]
+                network_rule,
+                [
+                    "buses_number",
+                    "buses_number_non_ac",
+                    "lines_length",
+                    "lines_capacity",
+                ],
             ),
         )
 
@@ -274,7 +285,7 @@ def collect_network_stats(network_rule, config):
         )
 
         if not gen_stats.empty:
-            df_gen_stats = gen_stats.to_frame().transpose().reset_index()
+            df_gen_stats = gen_stats.to_frame().transpose().reset_index(drop=True)
             df_gen_stats.columns = _multi_index_scen(network_rule, df_gen_stats.columns)
             network_stats = pd.concat([network_stats, df_gen_stats], axis=1)
 
@@ -363,6 +374,41 @@ def collect_snakemake_stats(name, dict_dfs, config):
     )
 
 
+def aggregate_computational_stats(name, dict_dfs):
+    """Function to aggregate the total computational statistics of the rules"""
+
+    cols_comp = ["total_time", "mean_load", "max_memory"]
+
+    def get_selected_cols(df, level=1, lvl_cols=cols_comp):
+        filter_cols = df.columns[df.columns.get_level_values(level).isin(lvl_cols)]
+
+        if len(filter_cols) == len(lvl_cols):
+            df_ret = df[filter_cols].copy()
+            df_ret.columns = filter_cols.get_level_values(level)
+            return df_ret
+        else:
+            return pd.DataFrame()
+
+    def weigh_avg(df, coldata="total_time", colweight="mean_load"):
+        d, w = df[coldata], df[colweight]
+        return (d * w).sum() / w.sum()
+
+    df_comb = pd.concat(
+        [get_selected_cols(d) for d in dict_dfs.values()], ignore_index=True
+    )
+
+    if df_comb.empty:
+        return pd.DataFrame()
+
+    df_comb_agg = df_comb.agg({"total_time": np.sum, "max_memory": np.max})
+    df_comb_agg["mean_load"] = weigh_avg(df_comb)
+
+    df_comb_agg = df_comb_agg.to_frame().transpose().reset_index(drop=True)
+    df_comb_agg.columns = _multi_index_scen(name, df_comb_agg.columns)
+
+    return df_comb_agg
+
+
 def collect_renewable_stats(rulename, technology):
     """
     Collect statistics on the renewable time series generated by the workflow:
@@ -389,21 +435,19 @@ def collect_renewable_stats(rulename, technology):
             ),
         )
 
-        add_computational_stats(df_RES_stats, snakemake)
+        add_computational_stats(df_RES_stats, snakemake, rulename)
 
         return df_RES_stats
     else:
         return pd.DataFrame()
 
 
-def add_computational_stats(df, snakemake):
+def add_computational_stats(df, snakemake, column_name=None):
     """
     Add the major computational information of a given rule into the existing dataframe
     """
 
-    comp_time = np.nan
-    mean_load = np.nan
-    max_mem = np.nan
+    comp_data = [np.nan] * 3  # total_time, mean_load and max_memory
 
     if snakemake.benchmark:
         if not os.path.isfile(snakemake.benchmark):
@@ -411,16 +455,14 @@ def add_computational_stats(df, snakemake):
 
         bench_data = pd.read_csv(snakemake.benchmark, delimiter="\t")
 
-        comp_time, mean_load, max_mem = bench_data[["s", "mean_load", "max_vms"]].iloc[
-            0
-        ]
+        comp_data = bench_data[["s", "mean_load", "max_vms"]].iloc[0]
 
-    new_cols = _multi_index_scen(
-        snakemake.rule, ["total_time", "mean_load", "max_memory"]
-    )
-    comp_data = [comp_time, mean_load, max_mem]
+    if column_name is None:
+        column_name = snakemake.rule
 
-    df[new_cols] = [comp_data]
+    new_cols = _multi_index_scen(column_name, ["total_time", "mean_load", "max_memory"])
+
+    df[new_cols] = comp_data
 
     return df
 
@@ -460,6 +502,9 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         **network_dict,
     }
 
+    dict_dfs["total_comp_stats"] = aggregate_computational_stats(
+        "total_comp_stats", dict_dfs
+    )
     dict_dfs["snakemake_status"] = collect_snakemake_stats(
         "snakemake_status", dict_dfs, config
     )
@@ -472,18 +517,19 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("make_statistics")
+        snakemake = mock_snakemake("make_statistics", scenario_name="BD")
 
     sets_path_to_root("pypsa-earth")
 
     fp_stats = snakemake.output["stats"]
     config = snakemake.config
+    scenario_name = snakemake.wildcards.scenario_name
 
     geo_crs = config["crs"]["geo_crs"]
     metric_crs = config["crs"]["distance_crs"]
     area_crs = config["crs"]["area_crs"]
 
-    name_index = config["run"].get("name", "-".join(config["countries"]))
+    name_index = scenario_name if not scenario_name else "-".join(config["countries"])
 
     # create statistics
     stats = calculate_stats(config, metric_crs=metric_crs, area_crs=area_crs)
