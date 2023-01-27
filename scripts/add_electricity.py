@@ -62,7 +62,7 @@ Inputs
 - ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
 - ``resources/ssp2-2.6/2030/era5_2013/Africa.nc`` Hourly country load profiles produced by GEGIS
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
-- ``resources/gadm_shapes.geojson``: confer :ref:`shapes`
+- ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
 - ``resources/profile_{}.nc``: all technologies in ``config["renewables"].keys()``, confer :ref:`renewableprofiles`.
 - ``networks/base.nc``: confer :ref:`base`

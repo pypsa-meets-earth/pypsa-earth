@@ -341,6 +341,29 @@ if config["enable"].get("retrieve_cost_data", True):
             move(input[0], output[0])
 
 
+rule build_demand:
+    input:
+        elec_network="networks/" + RDIR + "elec.nc",
+        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        load=load_data_paths,
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
+        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+    output:
+        "networks/" + RDIR + "elec_1.nc",
+    log:
+        "logs/" + RDIR + "build_demand.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_demand"
+    threads: 1
+    resources:
+        mem_mb=3000,
+    script:
+        "scripts/build_demand.py"
+
+
 rule build_renewable_profiles:
     input:
         base_network="networks/" + RDIR + "base.nc",
@@ -398,37 +421,6 @@ rule build_powerplants:
     script:
         "scripts/build_powerplants.py"
 
-
-rule build_demand:
-    input:
-        # **{
-        #     f"conventional_{carrier}_{attr}": fn
-        #     for carrier, d in config.get("conventional", {None: {}}).items()
-        #     for attr, fn in d.items()
-        #     if str(fn).startswith("data/")
-        # },
-        elec_network="networks/" + RDIR + "elec.nc",
-        #tech_costs=COSTS,
-        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
-        #powerplants="resources/" + RDIR + "powerplants.csv",
-        load=load_data_paths,
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        #hydro_capacities="data/hydro_capacities.csv",
-    output:
-        "networks/" + RDIR + "elec_1.nc",
-    log:
-        "logs/" + RDIR + "build_demand.log",
-    benchmark:
-        "benchmarks/" + RDIR + "build_demand"
-    threads: 1
-    resources:
-        mem_mb=3000,
-    script:
-        "scripts/build_demand.py"
 
 rule add_electricity:
     input:

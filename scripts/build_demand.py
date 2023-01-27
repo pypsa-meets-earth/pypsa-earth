@@ -4,30 +4,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # coding: utf-8
 """
-Adds electrical generators, load and existing hydro storage units to a base network.
+Adds load to a network having generators and existing hydro storage units.
 
 Relevant Settings
 -----------------
 
 .. code:: yaml
-
-    costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
-        marginal_cost:
-        capital_cost:
-        conventional_carriers:
-        co2limit:
-        extendable_carriers:
-        include_renewable_capacities_from_OPSD:
-        estimate_renewable_capacities_from_capacity_stats:
 
     load:
         scale:
@@ -37,57 +19,30 @@ Relevant Settings
         region_load:
 
 
-    renewable:
-        hydro:
-            carriers:
-            hydro_max_hours:
-            hydro_capital_cost:
-
-    lines:
-        length_factor:
-
-.. seealso::
-    Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
-    :ref:`electricity_cf`, :ref:`load_cf`, :ref:`renewable_cf`, :ref:`lines_cf`
-
 Inputs
 ------
 
-- ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
-- ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
-
-    .. image:: ../img/hydrocapacities.png
-        :scale: 34 %
-
-- ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
-- ``resources/ssp2-2.6/2030/era5_2013/Africa.nc`` Hourly country load profiles produced by GEGIS
-- ``resources/regions_onshore.geojson``: confer :ref:`busregions`
-- ``resources/gadm_shapes.geojson``: confer :ref:`shapes`
-- ``resources/powerplants.csv``: confer :ref:`powerplants`
-- ``resources/profile_{}.nc``: all technologies in ``config["renewables"].keys()``, confer :ref:`renewableprofiles`.
-- ``networks/base.nc``: confer :ref:`base`
+- ``networks/ + RDIR + "elec.nc``: a network created in the script add_electricity with generators and hydro storage units,
+- ``resources/ + RDIR + bus_regions/regions_onshore.geojson``: confer :ref:`busregions`,
+- ``load_data_paths``, 
+- ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`,
+- ``networks/elec.nc``: confer :ref:`elec`
 
 Outputs
 -------
 
-- ``networks/elec.nc``:
+- ``networks/elec_1.nc``:
 
-    .. image:: ../img/elec.png
+    .. image:: ../img/elec_1.png
             :scale: 33 %
 
 Description
 -----------
 
-The rule :mod:`add_electricity` ties all the different data inputs from the preceding rules together into a detailed PyPSA network that is stored in ``networks/elec.nc``. It includes:
+The rule :mod:`build_demand` attaches the load to the network stored in networks/elec.nc and stores the results in ``networks/elec_1.nc``. It includes:
 
-- today's transmission topology and transfer capacities (in future, optionally including lines which are under construction according to the config settings ``lines: under_construction`` and ``links: under_construction``),
-- today's thermal and hydro power generation capacities (for the technologies listed in the config setting ``electricity: conventional_carriers``), and
 - today's load time-series (upsampled in a top-down approach according to population and gross domestic product)
 
-It further adds extendable ``generators`` with **zero** capacity for
-
-- photovoltaic, onshore and AC- as well as DC-connected offshore wind installations with today's locational, hourly wind and solar capacity factors (but **no** current capacities),
-- additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
 
@@ -104,44 +59,12 @@ from _helpers import configure_logging, getContinent, update_p_nom_max
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 
-#idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
 
 def normed(s):
     return s / s.sum()
-
-# def get_load_paths_gegis(ssp_parentfolder, config):
-#     """
-#     Creates load paths for the GEGIS outputs
-
-#     The paths are created automatically according to included country,
-#     weather year, prediction year and ssp scenario
-
-#     Example
-#     -------
-#     ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
-#     """
-#     countries = config.get("countries")
-#     region_load = getContinent(countries)
-#     weather_year = config.get("load_options")["weather_year"]
-#     prediction_year = config.get("load_options")["prediction_year"]
-#     ssp = config.get("load_options")["ssp"]
-
-#     load_paths = []
-#     for continent in region_load:
-#         load_path = os.path.join(
-#             ssp_parentfolder,
-#             str(ssp),
-#             str(prediction_year),
-#             "era5_" + str(weather_year),
-#             str(continent) + ".nc",
-#         )
-#         load_paths.append(load_path)
-
-#     return load_paths
-
 
 def attach_load(
     n,
@@ -233,7 +156,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake, sets_path_to_root
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("add_electricity")
+        snakemake = mock_snakemake("build_demand")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
