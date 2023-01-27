@@ -14,6 +14,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 from scripts._helpers import create_country_list
 from scripts.add_electricity import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
+from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
 
@@ -25,6 +26,9 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 
 
 configfile: "configs/bundle_config.yaml"
+
+
+DEFAULT_CONFIG = "config.tutorial.yaml" if config["tutorial"] else "config.default.yaml"
 
 
 # convert country list according to the desired region
@@ -161,9 +165,9 @@ rule clean_osm_data:
         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
         lines="resources/" + RDIR + "osm/raw/all_raw_lines.geojson",
         substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
-        country_shapes="resources/shapes/country_shapes.geojson",
-        offshore_shapes="resources/shapes/offshore_shapes.geojson",
-        africa_shape="resources/shapes/africa_shape.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
     output:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         generators_csv="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
@@ -182,7 +186,7 @@ rule build_osm_network:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
         substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
-        country_shapes="resources/shapes/country_shapes.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
     output:
         lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
         converters="resources/" + RDIR + "base_network/all_converters_build_network.csv",
@@ -232,8 +236,8 @@ rule base_network:
         osm_transformers="resources/"
         + RDIR
         + "base_network/all_transformers_build_network.csv",
-        country_shapes="resources/shapes/country_shapes.geojson",
-        offshore_shapes="resources/shapes/offshore_shapes.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
     output:
         "networks/" + RDIR + "base.nc",
     log:
@@ -835,3 +839,41 @@ rule build_test_configs:
         ],
     script:
         "scripts/build_test_configs.py"
+
+
+rule run_scenario:
+    input:
+        default_config=DEFAULT_CONFIG,
+        diff_config="configs/scenarios/config.{scenario_name}.yaml",
+    output:
+        touchfile=touch("results/{scenario_name}/scenario.done"),
+        copyconfig="results/{scenario_name}/config.yaml",
+    threads: 1
+    resources:
+        mem_mb=5000,
+    run:
+        from scripts.build_test_configs import create_test_config
+
+        # Ensure the scenario name matches the name of the configuration
+        create_test_config(
+            input.diff_config,
+            {"run": {"name": wildcards.scenario_name}},
+            input.diff_config,
+        )
+        # merge the default config file with the difference
+        create_test_config(input.default_config, input.diff_config, "config.yaml")
+        os.system(
+            "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
+        )
+        copyfile("config.yaml", output.copyconfig)
+
+
+rule run_all_scenarios:
+    input:
+        expand(
+            "results/{scenario_name}/scenario.done",
+            scenario_name=[
+                c.stem.replace("config.", "")
+                for c in Path("configs/scenarios").glob("config.*.yaml")
+            ],
+        ),
