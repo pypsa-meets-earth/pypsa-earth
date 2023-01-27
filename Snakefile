@@ -179,7 +179,7 @@ rule clean_osm_data:
         "benchmarks/" + RDIR + "clean_osm_data"
     script:
         "scripts/clean_osm_data.py"
-    
+
 
 rule build_osm_network:
     input:

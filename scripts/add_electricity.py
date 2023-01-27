@@ -879,7 +879,7 @@ if __name__ == "__main__":
         extendable_carriers,
         snakemake.config["lines"]["length_factor"],
     )
-    
+
     attach_hydro(n, costs, ppl)
 
     estimate_renewable_capacities_irena(n, snakemake.config)
