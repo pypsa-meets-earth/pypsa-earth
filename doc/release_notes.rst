@@ -63,6 +63,7 @@ Upcoming Release
 
 * Minor bug fixing and improvements `PR #580 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/580>`__
 
+* Creation of the build_demand script for attaching the load to the network `PR #582 https://github.com/pypsa-meets-earth/pypsa-earth/pull/582`__
 
 PyPSA-Earth 0.1.0
 =================
