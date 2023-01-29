@@ -301,7 +301,7 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
                 r[list_col[1]] = d[1][1]
                 row_list.append(r)
 
-    df = pd.concat([df, pd.DataFrame(row_list)], ignore_index=True)
+    df = pd.concat([df, gpd.GeoDataFrame(row_list, crs=df.crs)], ignore_index=True)
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
