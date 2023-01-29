@@ -397,6 +397,13 @@ def integrate_lines_df(df_all_lines, distance_crs):
 
         df_all_lines.tag_frequency.fillna(ac_freq_default, inplace=True)
 
+        df_all_lines["tag_frequency"] = (
+            df_all_lines.tag_frequency.astype(str)
+            .str.split(pat=";", n=1)
+            .str[0]
+            .astype(float)
+        )
+
     # Add frequency column if not present in data
     else:
         df_all_lines["tag_frequency"] = ac_freq_default
