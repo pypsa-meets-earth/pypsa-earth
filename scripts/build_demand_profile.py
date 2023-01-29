@@ -156,8 +156,7 @@ def create_demand_profile(
     print(selected_load)
     selected_load.to_csv("resources/demand.csv", header=True)
 
-
-    #n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
+    # n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
 
 
 if __name__ == "__main__":
@@ -178,9 +177,11 @@ if __name__ == "__main__":
     countries = snakemake.config["countries"]
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.config["load_options"]["scale"]
-    start_date=snakemake.config["snapshots"]["start"]
-    end_date=snakemake.config["snapshots"]["end"]
+    start_date = snakemake.config["snapshots"]["start"]
+    end_date = snakemake.config["snapshots"]["end"]
 
-    create_demand_profile(n, load_paths, regions, admin_shapes, countries, scale, start_date, end_date)
+    create_demand_profile(
+        n, load_paths, regions, admin_shapes, countries, scale, start_date, end_date
+    )
 
     n.meta = snakemake.config

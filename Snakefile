@@ -353,7 +353,7 @@ rule build_demand_profile:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
         #"networks/" + RDIR + "elec_1.nc",
-        "resources/demand.csv"
+        "resources/demand.csv",
     log:
         "logs/" + RDIR + "build_demand_profile.log",
     benchmark:
