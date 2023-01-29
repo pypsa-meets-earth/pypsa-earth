@@ -572,8 +572,8 @@ iso_to_geofk_dict = {
     "QA": "SA-QA-AE-OM-BH-KW",  # Qatar -> Gulf Cooperation Council
     "AE": "SA-QA-AE-OM-BH-KW",  # United Arab Emirates -> Gulf Cooperation Council
     "OM": "SA-QA-AE-OM-BH-KW",  # Oman -> Gulf Cooperation Council
-    "PS": "PL-IL",  # Israel and Palestine are merged in OSM
-    "IL": "PL-IL",  # Israel and Palestine are merged in OSM
+    "PS": "PS-IL",  # Israel and Palestine are merged in OSM
+    "IL": "PS-IL",  # Israel and Palestine are merged in OSM
     "SM": "IT",  # San-Marino is merged to Italy
     "VA": "IT",  # Vatican is merged to Italy
     "HT": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
@@ -667,7 +667,7 @@ world_geofk = {
         "ID": "indonesia",
         "IR": "iran",
         "IQ": "iraq",
-        "PL-IL": "israel-and-palestine",
+        "PS-IL": "israel-and-palestine",
         "JP": "japan",
         "JO": "jordan",
         "KZ": "kazakhstan",

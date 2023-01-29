@@ -80,7 +80,7 @@ def generate_scenario_by_country(
     df_landlocked["countries"] = df_landlocked.Code.map(three_2_two_digits_country)
 
     n_clusters = {
-        "MG": 4,  # Africa
+        "MG": 3,  # Africa
         "BF": 1,
         "BI": 1,
         "BJ": 2,
@@ -91,7 +91,7 @@ def generate_scenario_by_country(
         "SL": 1,
         "TG": 1,
         "CG": 2,
-        "ER": 1,
+        "GN": 3,
         "SS": 1,
         "ML": 1,
         "TD": 2,
@@ -380,6 +380,9 @@ def aggregate_computational_stats(name, dict_dfs):
     cols_comp = ["total_time", "mean_load", "max_memory"]
 
     def get_selected_cols(df, level=1, lvl_cols=cols_comp):
+        if df.columns.nlevels < level + 1:
+            return pd.DataFrame()
+
         filter_cols = df.columns[df.columns.get_level_values(level).isin(lvl_cols)]
 
         if len(filter_cols) == len(lvl_cols):
@@ -517,13 +520,13 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("make_statistics", scenario_name="BD")
+        snakemake = mock_snakemake("make_statistics")
 
     sets_path_to_root("pypsa-earth")
 
     fp_stats = snakemake.output["stats"]
     config = snakemake.config
-    scenario_name = snakemake.wildcards.scenario_name
+    scenario_name = config["run"]["name"]
 
     geo_crs = config["crs"]["geo_crs"]
     metric_crs = config["crs"]["distance_crs"]
