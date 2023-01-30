@@ -168,6 +168,10 @@ def split_cells(df, lst_col="voltage"):
     lst_col : str
         Target column over which to perform the analysis
     """
+
+    if df.empty:
+        return df
+
     x = df.assign(**{lst_col: df[lst_col].str.split(";")})
     x = pd.DataFrame(
         {
