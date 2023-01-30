@@ -343,7 +343,7 @@ if config["enable"].get("retrieve_cost_data", True):
 
 rule build_demand_profile:
     input:
-        elec_network="networks/" + RDIR + "elec.nc",
+        base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 

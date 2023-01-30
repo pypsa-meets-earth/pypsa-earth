@@ -168,7 +168,7 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.elec_network)
+    n = pypsa.Network(snakemake.input.base_network)
 
     # Snakemake imports:
     regions = snakemake.input.regions
