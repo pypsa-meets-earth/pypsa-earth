@@ -341,14 +341,15 @@ def attach_load(n, demand_profile, regions):
     #         axis=1,
     #     )
 
-    demand_df = pd.read_csv(demand_profile, index_col=False)
+    demand_df = pd.read_csv(demand_profile, index_col=0)
     #     #demand_df = demand_df.set_index([n.snapshots]).rename_axis("time")
     #     a=14
     #     #for i in len(demand_df.columns):
     #     n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
+    for i in demand_df.columns:
 
-    n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=demand_df)
-
+        n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=[i])
+    a=15
     # def attach_load(
     #     n,
     #     load_paths,

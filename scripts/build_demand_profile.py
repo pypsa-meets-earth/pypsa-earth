@@ -151,7 +151,7 @@ def create_demand_profile(
     )
 
     start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
+    end_date = pd.to_datetime(end_date)- pd.Timedelta(hours=1)
     selected_load = load.loc[start_date:end_date]
     print(selected_load)
     selected_load.to_csv("resources/demand.csv", header=True)
