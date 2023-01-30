@@ -352,7 +352,6 @@ rule build_demand_profile:
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
-        #"networks/" + RDIR + "elec_1.nc",
         "resources/demand.csv",
     log:
         "logs/" + RDIR + "build_demand_profile.log",
@@ -467,7 +466,7 @@ rule add_electricity:
 
 rule simplify_network:
     input:
-        network="networks/" + RDIR + "elec_1.nc",
+        network="networks/" + RDIR + "elec.nc",
         tech_costs=COSTS,
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
