@@ -98,7 +98,7 @@ def generate_scenario_by_country(
         "CF": 1,
         "ER": 1,  # Africa
         "GF": 3,  # South America
-        "SR": 2,  # South America
+        "SR": 1,  # South America
         "SG": 1,  # Asia
         "FJ": 4,  # Oceania
     }
