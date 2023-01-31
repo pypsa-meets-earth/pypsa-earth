@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # coding: utf-8
 """
-Adds load to a network having generators and existing hydro storage units.
+Creates an electric demand file.
 
 Relevant Settings
 -----------------
@@ -18,20 +18,19 @@ Relevant Settings
         prediction_year:
         region_load:
 
-
+        
 Inputs
 ------
 
-- ``networks/elec.nc``: a network created in the script add_electricity with generators and hydro storage units,
+- ``networks/base.nc``: confer :ref:`base`
 - ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`busregions`,
 - ``load_data_paths``, 
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`,
-- ``networks/elec.nc``: confer :ref:`elec`
 
 Outputs
 -------
 
-- ``networks/elec_1.nc``:
+- ``resources/demand_profiles.csv``:
 
     .. image:: ../img/elec_1.png
             :scale: 33 %
@@ -39,12 +38,9 @@ Outputs
 Description
 -----------
 
-The rule :mod:`build_demand` attaches the load to the network stored in networks/elec.nc and stores the results in ``networks/elec_1.nc``. It includes:
-
-- today's load time-series (upsampled in a top-down approach according to population and gross domestic product)
+The rule :mod:`build_demand` creates load demand profiles in correspondance of the buses of the network.
 
 """
-
 
 import logging
 import os
@@ -96,7 +92,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     return load_paths
 
-def create_demand_profile(
+def build_demand_profiles(
     n,
     load_paths,
     regions,
@@ -207,7 +203,7 @@ if __name__ == "__main__":
     start_date = snakemake.config["snapshots"]["start"]
     end_date = snakemake.config["snapshots"]["end"]
 
-    create_demand_profile(
+    build_demand_profiles(
         n, load_paths, regions, admin_shapes, countries, scale, start_date, end_date
     )
     
