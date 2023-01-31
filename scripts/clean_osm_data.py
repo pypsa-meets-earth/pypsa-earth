@@ -701,7 +701,7 @@ def clean_data(
         df_cables = finalize_lines_type(df_cables)
 
         # concatenate lines and cables in a single dataframe
-        df_all_lines = pd.concat([df_lines, df_cables])
+        df_all_lines = pd.concat([df_lines, df_cables], ignore_index=True)
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
@@ -739,7 +739,7 @@ def clean_data(
     # add line endings if option is enabled
     if add_line_endings:
         df_all_substations = add_line_endings_tosubstations(
-            gpd.GeoDataFrame(), df_all_lines
+            df_all_substations, df_all_lines
         )
 
     # filter substations by tag
