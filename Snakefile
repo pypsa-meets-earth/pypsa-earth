@@ -872,7 +872,7 @@ rule run_scenario:
         # merge the default config file with the difference
         create_test_config(input.default_config, input.diff_config, "config.yaml")
         os.system("snakemake -j all solve_all_networks --rerun-incomplete")
-        os.system("snakemake -j1 make_statistics --force")
+        os.system(f"snakemake -j1 make_statistics")
         copyfile("config.yaml", output.copyconfig)
 
 
