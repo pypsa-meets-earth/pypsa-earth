@@ -287,21 +287,22 @@ def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
     """
     # TODO: split multiple cell probably needs fix
     n_rows = df.shape[0]
-    df_list = [df]
+    row_list = []
     for i in range(n_rows):
         sub = df[list_col].iloc[i]  # for each cables and voltage
         if sub.notnull().all() == True:  # check not both empty
             # check both contain ";"
             if [";" in s for s in sub].count(True) == len(list_col):
                 d = [s.split(";") for s in sub]  # split them
-                r = df.loc[i, :].copy()
+                r = df.loc[i].copy()
                 df.loc[i, list_col[0]] = d[0][0]  # first split  [0]
                 df.loc[i, list_col[1]] = d[1][0]
                 r[list_col[0]] = d[0][1]  # second split [1]
                 r[list_col[1]] = d[1][1]
-                df_list.append(r)
+                row_list.append(r)
 
-    df = pd.concat(df_list, ignore_index=True)
+    if row_list:
+        df = pd.concat([df, gpd.GeoDataFrame(row_list, crs=df.crs)], ignore_index=True)
 
     # if some columns still contain ";" then sum the values
     for cl_name in list_col:
@@ -382,23 +383,27 @@ def integrate_lines_df(df_all_lines, distance_crs):
     # TODO Fill by adjancent value
 
     # Initialize a default frequency value
-    ac_freq_default = 50
+    ac_freq_default = 50.0
 
     if "tag_frequency" in df_all_lines.columns:
 
-        grid_freq_levels = df_all_lines["tag_frequency"].value_counts(
-            sort=True, dropna=True
+        ac_grid_freq_levels = (
+            df_all_lines["tag_frequency"]
+            .value_counts(sort=True, dropna=True)
+            .drop(["0", 0], errors="ignore")
         )
-        if not grid_freq_levels.empty:
-            # AC lines frequency shouldn't be 0Hz
-            ac_freq_levels = grid_freq_levels.loc[
-                grid_freq_levels.index.get_level_values(0) != "0"
-            ]
-            ac_freq_default = float(ac_freq_levels.index.get_level_values(0)[0])
 
-        df_all_lines.loc[
-            df_all_lines["tag_frequency"].isna(), "tag_frequency"
-        ] = ac_freq_default
+        if not ac_grid_freq_levels.empty:
+            ac_freq_default = float(ac_grid_freq_levels.idxmax())
+
+        df_all_lines.tag_frequency.fillna(ac_freq_default, inplace=True)
+
+        df_all_lines["tag_frequency"] = (
+            df_all_lines.tag_frequency.astype(str)
+            .str.split(pat=";", n=1)
+            .str[0]
+            .astype(float)
+        )
 
     # Add frequency column if not present in data
     else:
