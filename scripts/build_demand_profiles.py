@@ -92,6 +92,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     return load_paths
 
+
 def build_demand_profiles(
     n,
     load_paths,
@@ -167,6 +168,7 @@ def build_demand_profiles(
                 index=l.index,
                 columns=factors.index,
             )
+
     demand_profiles = pd.concat(
         [
             upsample(cntry, group)
@@ -176,7 +178,7 @@ def build_demand_profiles(
     )
 
     start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)- pd.Timedelta(hours=1)
+    end_date = pd.to_datetime(end_date) - pd.Timedelta(hours=1)
     demand_profiles = demand_profiles.loc[start_date:end_date]
     demand_profiles.to_csv("resources/demand_profiles.csv", header=True)
 
@@ -206,4 +208,3 @@ if __name__ == "__main__":
     build_demand_profiles(
         n, load_paths, regions, admin_shapes, countries, scale, start_date, end_date
     )
-    
