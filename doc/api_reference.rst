@@ -34,6 +34,12 @@ build_cutout
 .. automodule:: build_cutout
     :members:
 
+build_demand_profiles
+-------------------------------
+
+.. automodule:: build_demand_profiles
+    :members:
+
 build_natura_raster
 -------------------------------
 
