@@ -12,7 +12,7 @@ from shutil import copyfile, move
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 from scripts._helpers import create_country_list
-from scripts.add_electricity import get_load_paths_gegis
+from scripts.build_demand_profiles import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
