@@ -21,7 +21,7 @@ scenario:
   clusters: [55]
   opts: [Co2L-3H]
 
-countries: ["Africa"]
+countries: ["NG"]
 # Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 snapshots:
