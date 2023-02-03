@@ -226,55 +226,16 @@ def load_powerplants(ppl_fn):
     )
 
 
-def get_load_paths_gegis(ssp_parentfolder, config):
-    """
-    Creates load paths for the GEGIS outputs
-
-    The paths are created automatically according to included country,
-    weather year, prediction year and ssp scenario
-
-    Example
-    -------
-    ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
-    """
-    countries = config.get("countries")
-    region_load = getContinent(countries)
-    weather_year = config.get("load_options")["weather_year"]
-    prediction_year = config.get("load_options")["prediction_year"]
-    ssp = config.get("load_options")["ssp"]
-
-    load_paths = []
-    for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
-        )
-        load_paths.append(load_path)
-
-    return load_paths
-
-
 def attach_load(n, demand_profiles):
 
     """
-    Add load to the network and distributes them according GDP and population.
+    Add load to the buses of the network according to the csv file "resources/demand_profiles.csv". 
 
     Parameters
     ----------
     n : pypsa network
-    regions : .geojson
-        Contains bus_id of low voltage substations and
-        bus region shapes (voronoi cells)
-    load_paths: paths of the load files
-    admin_shapes : .geojson
-        contains subregional gdp, population and shape data
-    countries : list
-        List of countries that is config input
-    scale : float
-        The scale factor is multiplied with the load (1.3 = 30% more load)
+
+    demand_profiles : csv file of elecric demand time series, having snapshots as rows and buses as columns
 
     Returns
     -------

@@ -101,37 +101,39 @@ def build_demand_profiles(
     end_date,
 ):
     """
-    Add load to the network and distributes them according GDP and population.
-
+    Creates a csv file of electric demand time series.
+    
     Parameters
     ----------
     n : pypsa network
+    load_paths: paths of the load files
     regions : .geojson
         Contains bus_id of low voltage substations and
         bus region shapes (voronoi cells)
-    load_paths: paths of the load files
     admin_shapes : .geojson
         contains subregional gdp, population and shape data
     countries : list
         List of countries that is config input
     scale : float
         The scale factor is multiplied with the load (1.3 = 30% more load)
+    start_date: parameter
+        The start_date is the first hour of the first day of the snapshots
+    end_date: parameter
+        The end_date is the last hour of the last day of the snapshots
 
     Returns
     -------
-    n : pypsa network
-        Now attached with load time series
+    demand_profiles.csv : csv file containing the electric demand time series
     """
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
-
     load_paths = load_paths
     # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
     gegis_load = xr.open_mfdataset(load_paths, combine="nested")
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
-    logger.info(f"Load data scaled with scalling factor {scale}.")
+    logger.info(f"Load data scaled with scaling factor {scale}.")
     gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
