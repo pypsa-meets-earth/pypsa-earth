@@ -723,9 +723,6 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
 
     # Snakemake imports:
-    countries = snakemake.config["countries"]
-    admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.config["load_options"]["scale"]
     demand_profiles = snakemake.input["demand_profiles"]
 
     costs = load_costs(
