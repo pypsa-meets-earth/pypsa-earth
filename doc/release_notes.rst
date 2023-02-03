@@ -63,6 +63,8 @@ Upcoming Release
 
 * Minor bug fixing and improvements `PR #580 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/580>`__
 
+* Streamline default configuration file `PR #589 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/589>`__
+
 * Creation of the build_demand_profiles script where demand_profiles.csv is generated `PR #582 https://github.com/pypsa-meets-earth/pypsa-earth/pull/582`__
 
 PyPSA-Earth 0.1.0
