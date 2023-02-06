@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Creates an electric demand file.
+Creates electric demand profile csv
 
 Relevant Settings
 -----------------
@@ -13,15 +13,13 @@ Relevant Settings
         weather_year:
         prediction_year:
         region_load:
-
         
 Inputs
 ------
 
-- ``networks/base.nc``: confer :ref:`base`, a base Pypsa Network 
-- ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`bus regions`
-- ``resources/ssp2-2.6/2030/era5_2013/Africa.nc``: hourly country load profiles produced by GEGIS
-- ``load_data_paths``
+- ``networks/base.nc``: confer :ref:`base`, a base PyPSA Network 
+- ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`bus regions` 
+- ``load_data_paths``: paths to load profiles, e.g. hourly country load profiles produced by GEGIS
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`, file containing the gadm shapes
 
 Outputs
@@ -38,10 +36,8 @@ Then with a function that takes in the PyPSA network "base.nc", region and gadm 
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 
 """
-
 import logging
 import os
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -61,7 +57,7 @@ def normed(s):
 
 def get_load_paths_gegis(ssp_parentfolder, config):
     """
-    Creates load paths for the GEGIS outputs
+    Create load paths for GEGIS outputs
 
     The paths are created automatically according to included country,
     weather year, prediction year and ssp scenario
@@ -101,7 +97,7 @@ def build_demand_profiles(
     end_date,
 ):
     """
-    Creates a csv file of electric demand time series.
+    Create csv file of electric demand time series.
 
     Parameters
     ----------
