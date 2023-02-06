@@ -80,7 +80,10 @@ rule run_tests:
             if filename.is_file():
                 print(filename.path)
                 shell("cp {filename.path} config.yaml")
-                shell("snakemake --cores all solve_all_networks --forceall")
+                if "monte" in filename.name:
+                    shell("snakemake --cores all solve_all_networks_monte --forceall")
+                else:
+                    shell("snakemake --cores all solve_all_networks --forceall")
         print("Tests are successful.")
 
 
