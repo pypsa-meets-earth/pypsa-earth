@@ -331,7 +331,6 @@ def _remove_dangling_branches(branches, buses):
 
 
 def _set_countries_and_substations(inputs, config, n):
-
     countries = config["countries"]
     country_shapes = gpd.read_file(inputs.country_shapes).set_index("name")["geometry"]
 
