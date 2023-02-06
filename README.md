@@ -7,7 +7,7 @@ by
 <a/>
 </p>
 
-## Development Status: **Stable and Active**
+## [Development Status: **Stable and Active**]()
 
 [![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml)
@@ -20,10 +20,9 @@ by
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
-
 **PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution.** It enables large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions. It is suitable for operational as well as combined generation, storage and transmission expansion studies. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. The data includes electricity demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
 
-The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information. 
+The model is described in the preprint "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663. The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information.
 
 **PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth.** We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
@@ -33,31 +32,30 @@ The model is described in the preprint "PyPSA-Earth. A New Global Open Energy Sy
   <img src="https://forum.openmod.org/uploads/db8804/original/1X/6af089c376b19b72ad148e4e4326c162b94db68f.png" width=35%>
 </p>
 
+## Livetracker. Most popular global models:
 
-## Livetracker of similar tools
 <p align="center">
 <a href="https://star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date">
     <img src="https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,SGIModel/MUSE_OS,etsap-TIMES/TIMES_model&type=Date" width="60%">
 <a/>
 
+## [Get involved]()
 
-## Get involved
-
-There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
+[There are multiple ways to get involved and learn more about our work. That&#39;s how we organise ourselves:]()
 
 - [**Discord NEW! (Open)**](https://discord.gg/AnuJBk23FU)
   - chat with the community, team up on features, exchange with developers, code in voice channels
   - registration and usage is for free
-      <p align="left">
+    <p align="left">
         <a href="https://discord.gg/AnuJBk23FU">
           <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
         <a/>
       </p>
-- **General initiative meeting (Open)**
-  - every forth Thursday each month Thursday 16-17:00 (UK time) <a href="https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing" >download .ics</a>
+- [**General initiative meeting (Open)**]()
+  [- every forth Thursday each month Thursday 16-17:00 (UK time) `<a href="https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing" >`download .ics`</a>`
   - join for project news and high-level code updates
   - meeting hosted on Discord
-  - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
+  ]()- [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - book a 30min meeting with Max to discuss anything you like
   - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min)
@@ -66,8 +64,8 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
     2. AI asset detection meeting, on demand
-    3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >download .ics</a>
-    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >download .ics</a>
+    3. Sector coupling meeting, every Thursday 09:00 (UK time), `<a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >`download .ics`</a>`
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), `<a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >`download .ics`</a>`
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities
@@ -81,13 +79,13 @@ There are multiple ways to get involved and learn more about our work. That's ho
    ```bash
       .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
    ```
-
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
 ```bash
     .../pypsa-earth % conda env create -f envs/environment.yaml
 ```
+
    If the above takes longer than 30min, you might want to try mamba for faster installation:
 
 ```bash
@@ -97,14 +95,12 @@ There are multiple ways to get involved and learn more about our work. That's ho
 ```
 
 3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
-
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
    ```bash
       .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
       .../pypsa-earth % jupyter lab
    ```
-
 5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
    To verify the successfull installation the following code can be tested from bash:
 
@@ -113,7 +109,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
    ```
 
    The expected output should resemble the following:
-   
+
    ```bash
       java version "1.8.0_341"
       Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
@@ -132,6 +128,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
   ```bash
   snakemake -j 1 solve_all_networks -n
   ```
+
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
 
 ## Training
@@ -152,6 +149,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 <!-- https://github.com/marketplace/actions/contribute-list -->
 
 <!-- readme: collaborators,contributors -start -->
+
 <table>
 <tr>
     <td align="center">
