@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText: 2023- PyPSA-Earth Authors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
 Creates electric demand profile csv
 
