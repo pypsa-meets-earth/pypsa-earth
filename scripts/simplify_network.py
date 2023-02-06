@@ -91,11 +91,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import (
-    configure_logging,
-    get_aggregation_strategies,
-    update_p_nom_max,
-)
+from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
@@ -492,9 +488,7 @@ if __name__ == "__main__":
     busmaps = [trafo_map, simplify_links_map, stub_map]
 
     if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(
-            n, int(snakemake.wildcards.simpl), snakemake.config
-        )
+        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
         busmaps.append(cluster_map)
 
     update_p_nom_max(n)
