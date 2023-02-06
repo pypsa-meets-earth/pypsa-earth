@@ -52,11 +52,11 @@ Inputs
         :scale: 34 %
 
 - ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
+- ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
 - ``resources/profile_{}.nc``: all technologies in ``config["renewables"].keys()``, confer :ref:`renewableprofiles`
 - ``networks/base.nc``: confer :ref:`base`
-- ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
 
 Outputs
 -------
@@ -227,15 +227,16 @@ def load_powerplants(ppl_fn):
 
 
 def attach_load(n, demand_profiles):
-
     """
-    Adds load to the buses of the network using the csv file "resources/demand_profiles.csv".
+    Add load profiles to network buses
 
     Parameters
     ----------
-    n : pypsa network
+    n: pypsa network
 
-    demand_profiles : csv file of elecric demand time series, having snapshots as rows and buses as columns
+    demand_profiles: str
+        Path to csv file of elecric demand time series, e.g. "resources/demand_profiles.csv"
+        Demand profile has snapshots as rows and bus names as columns.
 
     Returns
     -------
@@ -751,7 +752,6 @@ if __name__ == "__main__":
         )
 
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
-
     attach_load(n, demand_profiles)
     update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
     conventional_inputs = {
