@@ -229,7 +229,7 @@ def load_powerplants(ppl_fn):
 def attach_load(n, demand_profiles):
 
     """
-    Adds load to the buses of the network using the csv file "resources/demand_profiles.csv". 
+    Adds load to the buses of the network using the csv file "resources/demand_profiles.csv".
 
     Parameters
     ----------

@@ -102,7 +102,7 @@ def build_demand_profiles(
 ):
     """
     Creates a csv file of electric demand time series.
-    
+
     Parameters
     ----------
     n : pypsa network
