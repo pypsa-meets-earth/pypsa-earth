@@ -65,7 +65,7 @@ Upcoming Release
 
 * Streamline default configuration file `PR #589 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/589>`__
 
-* Creation of the build_demand_profiles script where demand_profiles.csv is generated `PR #582 https://github.com/pypsa-meets-earth/pypsa-earth/pull/582`__
+* Add new build_demand_profiles.py. It builds demand_profiles.csv and allow easier interfacing of new data `PR #582 https://github.com/pypsa-meets-earth/pypsa-earth/pull/582`__
 
 PyPSA-Earth 0.1.0
 =================
