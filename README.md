@@ -152,7 +152,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 <!-- https://github.com/marketplace/actions/contribute-list -->
 
 <!-- readme: collaborators,contributors -start -->
-
 <table>
 <tr>
     <td align="center">
