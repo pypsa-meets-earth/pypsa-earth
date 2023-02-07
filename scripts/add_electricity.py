@@ -398,7 +398,6 @@ def attach_wind_and_solar(
             continue
 
         with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
-
             if ds.indexes["bus"].empty:
                 continue
 
@@ -481,12 +480,10 @@ def attach_conventional_generators(
     )
 
     for carrier in conventional_config:
-
         # Generators with technology affected
         idx = n.generators.query("carrier == @carrier").index
 
         for attr in list(set(conventional_config[carrier]) & set(n.generators)):
-
             values = conventional_config[carrier][attr]
 
             if f"conventional_{carrier}_{attr}" in conventional_inputs:
@@ -707,7 +704,6 @@ def attach_extendable_generators(n, costs, ppl):
 
 
 def estimate_renewable_capacities_irena(n, config):
-
     if not config["electricity"].get("estimate_renewable_capacities"):
         return
 
@@ -756,7 +752,6 @@ def estimate_renewable_capacities_irena(n, config):
     )
 
     for ppm_technology, techs in tech_map.items():
-
         if ppm_technology not in capacities.index:
             logger.info(
                 f"technology {ppm_technology} is not provided by {stats} and therefore not estimated"

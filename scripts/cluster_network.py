@@ -249,7 +249,6 @@ def distribute_clusters(
     ), f"Number of clusters must be {len(N)} <= n_clusters <= {N.sum()} for this selection of countries."
 
     if focus_weights is not None:
-
         total_focus = sum(list(focus_weights.values()))
 
         assert (
@@ -317,12 +316,10 @@ def distribute_clusters(
 
 
 def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
-
     # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
-
         gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
         point = Point(coords["x"], coords["y"])
 
@@ -384,7 +381,6 @@ def busmap_for_n_clusters(
         return nr
 
     def busmap_for_country(x):
-
         # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
             if isinstance(x.name, tuple):
@@ -442,7 +438,6 @@ def clustering_for_n_clusters(
     extended_link_costs=0,
     focus_weights=None,
 ):
-
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
     )
@@ -493,11 +488,9 @@ def save_to_geojson(s, fn):
 
 
 def cluster_regions(busmaps, inputs, output):
-
     busmap = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
 
     for which in ("regions_onshore", "regions_offshore"):
-
         # regions = gpd.read_file(getattr(input, which)).set_index("name")
         regions = gpd.read_file(getattr(inputs, which))
         regions = regions.reindex(columns=REGION_COLS).set_index("name")
