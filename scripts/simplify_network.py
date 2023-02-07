@@ -91,12 +91,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import (
-    configure_logging,
-    get_aggregation_strategies,
-    sets_path_to_root,
-    update_p_nom_max,
-)
+from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
@@ -104,7 +99,6 @@ from pypsa.networkclustering import (
     aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
-    get_clustering_from_busmap,
 )
 from scipy.sparse.csgraph import connected_components, dijkstra
 
@@ -385,52 +379,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     return n, busmap
 
 
-def busmap_by_stubs(network, matching_attrs=None):
-    """Create a busmap by reducing stubs and stubby trees
-    (i.e. sequentially reducing dead-ends).
-
-    Parameters
-    ----------
-    network : pypsa.Network
-
-    matching_attrs : None|[str]
-        bus attributes clusters have to agree on
-
-    Returns
-    -------
-    busmap : pandas.Series
-        Mapping of network.buses to k-means clusters (indexed by
-        non-negative integers).
-    """
-    busmap = pd.Series(network.buses.index, network.buses.index)
-
-    G = network.graph()
-
-    def attrs_match(u, v):
-        return matching_attrs is None or (
-            all(
-                [
-                    network.buses.loc[u, matching_attrs]
-                    == network.buses.loc[v, matching_attrs]
-                ]
-            )
-        )
-
-    while True:
-        stubs = []
-        for u in G.nodes:
-            neighbours = list(G.adj[u].keys())
-            if len(neighbours) == 1:
-                (v,) = neighbours
-                if attrs_match(u, v):
-                    busmap[busmap == u] = v
-                    stubs.append(u)
-        G.remove_nodes_from(stubs)
-        if len(stubs) == 0:
-            break
-    return busmap
-
-
 def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
     logger.info("Removing stubs")
 
@@ -540,9 +488,7 @@ if __name__ == "__main__":
     busmaps = [trafo_map, simplify_links_map, stub_map]
 
     if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(
-            n, int(snakemake.wildcards.simpl), snakemake.config, aggregation_strategies
-        )
+        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
         busmaps.append(cluster_map)
 
     update_p_nom_max(n)
