@@ -502,7 +502,6 @@ def get_best_bundles_by_category(
         remaining_countries = set(country_list)
 
         for d_val in dict_sort:
-
             bname = d_val[0]
 
             cbundle_list = set(config_bundles[bname]["countries"])
@@ -620,7 +619,6 @@ def datafiles_retrivedatabundle(config):
 
 
 if __name__ == "__main__":
-
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from _helpers import mock_snakemake
@@ -667,7 +665,6 @@ if __name__ == "__main__":
 
         # loop all hosts until data is successfully downloaded
         for host in host_list:
-
             logger.info(f"Downloading bundle {b_name} - Host {host}")
 
             try:

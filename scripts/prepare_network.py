@@ -71,7 +71,6 @@ logger = logging.getLogger(__name__)
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
-
     n.add(
         "GlobalConstraint",
         "CO2Limit",
@@ -82,7 +81,6 @@ def add_co2limit(n, annual_emissions, Nyears=1.0):
 
 
 def add_gaslimit(n, gaslimit, Nyears=1.0):
-
     sel = n.carriers.index.intersection(["OCGT", "CCGT", "CHP"])
     n.carriers.loc[sel, "gas_usage"] = 1.0
 

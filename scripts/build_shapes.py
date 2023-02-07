@@ -90,7 +90,6 @@ def filter_gadm(
     contended_flag,
     output_nonstd_to_csv=False,
 ):
-
     # identify non standard geodf rows
     geodf_non_std = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].copy()
 
@@ -241,7 +240,6 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
 
 
 def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
-
     if out_logging:
         logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
@@ -669,14 +667,12 @@ def _init_process_pop(df_gadm_, year_, worldpop_method_):
 
 # Auxiliary function to calculate population data in a parallel way
 def _process_func_pop(gadm_idxs):
-
     # get subset by country code
     df_gadm_subset = df_gadm.loc[gadm_idxs].copy()
 
     country_sublist = df_gadm_subset["country"].unique()
 
     for c_code in country_sublist:
-
         # get worldpop image
         WorldPop_inputfile, WorldPop_filename = download_WorldPop(
             c_code, worldpop_method, year, False, False
@@ -685,9 +681,7 @@ def _process_func_pop(gadm_idxs):
         idxs_country = df_gadm_subset[df_gadm_subset["country"] == c_code].index
 
         with rasterio.open(WorldPop_inputfile) as src:
-
             for i in idxs_country:
-
                 df_gadm_subset.loc[i, "pop"] = _sum_raster_over_mask(
                     df_gadm_subset.geometry.loc[i], src
                 )
@@ -740,9 +734,7 @@ def add_population_data(
         desc="Compute population ",
     )
     if (nprocesses is None) or (nprocesses == 1):
-
         with tqdm(total=df_gadm.shape[0], **tqdm_kwargs) as pbar:
-
             for c_code in country_codes:
                 # get subset by country code
                 country_rows = df_gadm.loc[df_gadm["country"] == c_code]
@@ -753,13 +745,11 @@ def add_population_data(
                 )
 
                 with rasterio.open(WorldPop_inputfile) as src:
-
                     for i, row in country_rows.iterrows():
                         df_gadm.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
                         pbar.update(1)
 
     else:
-
         # generator function to split a list ll into n_objs lists
         def divide_list(ll, n_objs):
             for i in range(0, len(ll), n_objs):
@@ -814,7 +804,6 @@ def gadm(
     nprocesses=None,
     nchunks=None,
 ):
-
     if out_logging:
         logger.info("Stage 4/4: Creation GADM GeoDataFrame")
 

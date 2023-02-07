@@ -71,7 +71,6 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     list_fileshapes = []
     for lf in list_paths:
         if os.path.isdir(lf):  # if it is a folder, then list all shapes files contained
-
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
                 # loop over all files
