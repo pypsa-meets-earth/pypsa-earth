@@ -4,7 +4,8 @@
 
 # Copied from https://github.com/PyPSA/pypsa-eur/pull/302/files
 
-exclude: "^LICENSES"
+exclude: ^(LICENSES|README.md)
+
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks

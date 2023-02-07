@@ -7,7 +7,7 @@ by
 <a/>
 </p>
 
-## [Development Status: **Stable and Active**]()
+## Development Status: **Stable and Active**
 
 [![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml)
@@ -39,23 +39,26 @@ The model is described in the preprint "PyPSA-Earth. A New Global Open Energy Sy
     <img src="https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,SGIModel/MUSE_OS,etsap-TIMES/TIMES_model&type=Date" width="60%">
 <a/>
 
-## [Get involved]()
+## Get involved
 
-[There are multiple ways to get involved and learn more about our work. That&#39;s how we organise ourselves:]()
+There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
 
 - [**Discord NEW! (Open)**](https://discord.gg/AnuJBk23FU)
   - chat with the community, team up on features, exchange with developers, code in voice channels
   - registration and usage is for free
-    <p align="left">
-        <a href="https://discord.gg/AnuJBk23FU">
-          <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
-        <a/>
-      </p>
-- [**General initiative meeting (Open)**]()
-  [- every forth Thursday each month Thursday 16-17:00 (UK time) `<a href="https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing" >`download .ics`</a>`
+        <p align="left">
+            <a href="https://discord.gg/AnuJBk23FU">
+            <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
+            <a/>
+        </p>
+- **General initiative meeting (Open)**
+  - every forth Thursday each month Thursday 16-17:00 (UK time)
+    <a href="https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing">
+    `download .ics`
+    </a>
   - join for project news and high-level code updates
   - meeting hosted on Discord
-  ]()- [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
+  - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - book a 30min meeting with Max to discuss anything you like
   - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min)
@@ -64,8 +67,8 @@ The model is described in the preprint "PyPSA-Earth. A New Global Open Energy Sy
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
     2. AI asset detection meeting, on demand
-    3. Sector coupling meeting, every Thursday 09:00 (UK time), `<a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >`download .ics`</a>`
-    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), `<a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >`download .ics`</a>`
+    3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >`download .ics`</a>
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >`download .ics`</a>
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities

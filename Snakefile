@@ -89,6 +89,7 @@ rule run_tests:
         print("Tests are successful.")
 
 
+
 rule solve_all_networks:
     input:
         expand(
