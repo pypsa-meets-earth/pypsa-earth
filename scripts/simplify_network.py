@@ -381,7 +381,12 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
     logger.info("Removing stubs")
 
-    busmap = busmap_by_stubs(n)
+    across_borders = config["cluster_options"]["simplify_network"].get(
+        "remove_stubs_across_borders", True
+    )
+    matching_attrs = [] if across_borders else ["country"]    
+
+    busmap = busmap_by_stubs(n, matching_attrs)
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
 
