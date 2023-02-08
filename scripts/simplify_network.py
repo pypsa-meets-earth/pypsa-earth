@@ -401,6 +401,59 @@ def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
     return n, busmap
 
 
+def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
+    # can be used to aggregate a selection of buses to electrically closest neighbors
+    # if no buses are given, nodes that are no substations or without offshore connection are aggregated
+
+    if buses_i is None:
+        logger.info(
+            "Aggregating buses that are no substations or have no valid offshore connection"
+        )
+        buses_i = list(set(n.buses.index) - set(n.generators.bus) - set(n.loads.bus))
+
+    weight = pd.concat(
+        {
+            "Line": n.lines.length / n.lines.s_nom.clip(1e-3),
+            "Link": n.links.length / n.links.p_nom.clip(1e-3),
+        }
+    )
+
+    adj = n.adjacency_matrix(branch_components=["Line", "Link"], weights=weight)
+
+    bus_indexer = n.buses.index.get_indexer(buses_i)
+    dist = pd.DataFrame(
+        dijkstra(adj, directed=False, indices=bus_indexer), buses_i, n.buses.index
+    )
+
+    dist[
+        buses_i
+    ] = np.inf  # bus in buses_i should not be assigned to different bus in buses_i
+
+    for c in n.buses.country.unique():
+        incountry_b = n.buses.country == c
+        dist.loc[incountry_b, ~incountry_b] = np.inf
+
+    busmap = n.buses.index.to_series()
+    busmap.loc[buses_i] = dist.idxmin(1)
+
+    bus_strategies, generator_strategies = get_aggregation_strategies(
+        aggregation_strategies
+    )
+
+    clustering = get_clustering_from_busmap(
+        n,
+        busmap,
+        bus_strategies=bus_strategies,
+        aggregate_generators_weighted=True,
+        aggregate_generators_carriers=None,
+        aggregate_one_ports=["Load", "StorageUnit"],
+        line_length_factor=1.0,
+        generator_strategies=generator_strategies,
+        scale_link_capital_costs=False,
+    )
+    return clustering.network, busmap
+
+
 def cluster(n, n_clusters, config):
     logger.info(f"Clustering to {n_clusters} buses")
 
@@ -490,6 +543,11 @@ if __name__ == "__main__":
     )
 
     busmaps = [trafo_map, simplify_links_map, stub_map]
+
+
+    if cluster_config.get("to_substations", False):
+        n, substation_map = aggregate_to_substations(n, aggregation_strategies)
+        busmaps.append(substation_map)    
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
