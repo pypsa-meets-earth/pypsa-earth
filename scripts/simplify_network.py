@@ -534,16 +534,18 @@ if __name__ == "__main__":
         n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
     )
 
-    n, stub_map = remove_stubs(
-        n,
-        technology_costs,
-        snakemake.config,
-        snakemake.output,
-        aggregation_strategies=aggregation_strategies,
-    )
-
     busmaps = [trafo_map, simplify_links_map, stub_map]
 
+    cluster_config = snakemake.config["cluster_options"]["simplify_network"]
+    if cluster_config.get("remove_stubs", True):
+        n, stub_map = remove_stubs(
+            n,
+            technology_costs,
+            snakemake.config,
+            snakemake.output,
+            aggregation_strategies=aggregation_strategies,
+        )
+        busmaps.append(stub_map)
 
     if cluster_config.get("to_substations", False):
         n, substation_map = aggregate_to_substations(n, aggregation_strategies)
