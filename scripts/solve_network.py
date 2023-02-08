@@ -100,7 +100,6 @@ logger = logging.getLogger(__name__)
 
 
 def prepare_network(n, solve_opts):
-
     if "clip_p_max_pu" in solve_opts:
         for df in (n.generators_t.p_max_pu, n.storage_units_t.inflow):
             df.where(df > solve_opts["clip_p_max_pu"], other=0.0, inplace=True)
@@ -258,7 +257,6 @@ def add_SAFE_constraints(n, config):
 
 
 def add_operational_reserve_margin_constraint(n, config):
-
     reserve_config = config["electricity"]["operational_reserve"]
     EPSILON_LOAD = reserve_config["epsilon_load"]
     EPSILON_VRES = reserve_config["epsilon_vres"]
