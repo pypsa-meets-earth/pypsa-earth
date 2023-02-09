@@ -467,7 +467,9 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
     return clustering.network, busmap
 
 
-def cluster(n, n_clusters, config):
+def cluster(
+    n, n_clusters, config, algorithm="hac", feature=None, aggregation_strategies=dict()
+):
     logger.info(f"Clustering to {n_clusters} buses")
 
     focus_weights = config.get("focus_weights", None)
@@ -508,8 +510,11 @@ def cluster(n, n_clusters, config):
         geo_crs,
         country_list,
         custom_busmap=False,
+        aggregation_strategies=aggregation_strategies,        
         potential_mode=potential_mode,
         solver_name=config["solving"]["solver"]["name"],
+        algorithm=algorithm,
+        feature=feature,        
         focus_weights=focus_weights,
     )
 
@@ -565,7 +570,14 @@ if __name__ == "__main__":
         busmaps.append(substation_map)    
 
     if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
+        n, cluster_map = cluster(
+            n, 
+            int(snakemake.wildcards.simpl), 
+            snakemake.config,
+            cluster_config.get("algorithm", "hac"),
+            cluster_config.get("feature", None),
+            aggregation_strategies,            
+        )
         busmaps.append(cluster_map)
 
     # some entries in n.buses are not updated in previous functions, therefore can be wrong. as they are not needed
