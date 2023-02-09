@@ -214,7 +214,6 @@ GEBCO_CRS = "EPSG:4326"
 
 
 def get_eia_annual_hydro_generation(fn, countries):
-
     # in billion kWh/a = TWh/a
     df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
     df.index = df.index.str.strip()
@@ -430,7 +429,6 @@ if __name__ == "__main__":
 
         # check if normalization field belongs to the settings and it is not false
         if ("normalization" in resource) & (type(resource["normalization"]) == str):
-
             normalization = resource.pop("normalization")
 
             if normalization == "hydro_capacities":
@@ -470,7 +468,6 @@ if __name__ == "__main__":
 
             inflow.rename("inflow").to_netcdf(snakemake.output.profile)
     else:
-
         capacity_per_sqkm = config["capacity_per_sqkm"]
 
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)

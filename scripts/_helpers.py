@@ -248,7 +248,6 @@ def aggregate_p_curtailed(n):
 
 
 def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
-
     components = dict(
         Link=("p_nom", "p0"),
         Generator=("p_nom", "p"),
@@ -762,7 +761,6 @@ def create_country_list(input, iso_coding=True):
     full_codes_list = []
 
     for value1 in input:
-
         codes_list = []
 
         # extract countries in world

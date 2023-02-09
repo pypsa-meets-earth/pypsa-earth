@@ -165,7 +165,6 @@ def set_lines_ids(lines, buses, distance_crs):
     linesepsg = lines.to_crs(distance_crs)
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
-
         row["dc"] = float(row["tag_frequency"]) == 0
 
         # select buses having the voltage level of the current line
@@ -235,7 +234,6 @@ def merge_stations_same_station_id(
     n_buses = 0
 
     for g_name, g_value in buses.groupby(by="station_id"):
-
         # average location of the buses having the same station_id
         station_point_x = np.round(g_value.geometry.x.mean(), precision)
         station_point_y = np.round(g_value.geometry.y.mean(), precision)
@@ -245,7 +243,6 @@ def merge_stations_same_station_id(
         # each bus corresponding to a voltage level and each polatity is located at a distance regulated by delta_lon/delta_lat
         v_it = 0
         for v_name, bus_row in g_value.groupby(by=["voltage", "dc"]):
-
             lon_bus = np.round(station_point_x + v_it * delta_lon, precision)
             lat_bus = np.round(station_point_y + v_it * delta_lat, precision)
 
@@ -328,12 +325,10 @@ def get_transformers(buses, lines):
     for g_name, g_value in buses_ac.sort_values("voltage", ascending=True).groupby(
         by="station_id"
     ):
-
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
 
         if n_voltages > 1:
-
             for id in range(0, n_voltages - 1):
                 # when g_value has more than one node, it means that there are multiple voltages for the same bus
                 geom_trans = LineString(
@@ -381,13 +376,11 @@ def get_converters(buses, lines):
     for g_name, g_value in buses.sort_values("voltage", ascending=True).groupby(
         by="station_id"
     ):
-
         # note: by construction there cannot be more that two buses with the same station_id and same voltage
         n_voltages = len(g_value)
 
         # A converter stations should have both AC and DC parts
         if g_value["dc"].any() & ~g_value["dc"].all():
-
             dc_voltage = g_value[g_value.dc]["voltage"].values
 
             for u in dc_voltage:
@@ -687,7 +680,6 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     )
 
     for l in tqdm(lines.index, **tqdm_kwargs_substation_ids):
-
         # bus indices being within tolerance from the line
         bus_in_tol_epsg = buses_epsgmod[
             buses_epsgmod.geometry.distance(lines_epsgmod.geometry.loc[l]) <= tol
@@ -754,7 +746,6 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
 
 
 def built_network(inputs, outputs, config, geo_crs, distance_crs):
-
     logger.info("Stage 1/5: Read input data")
 
     substations = gpd.read_file(inputs["substations"])
@@ -800,7 +791,6 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs):
     no_data_countries = list(set(country_list).difference(set(bus_country_list)))
 
     if len(no_data_countries) > 0:
-
         no_data_countries_shape = country_shapes[
             country_shapes.index.isin(no_data_countries) == True
         ].reset_index()

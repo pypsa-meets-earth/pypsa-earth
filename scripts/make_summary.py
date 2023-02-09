@@ -62,7 +62,6 @@ def _add_indexed_rows(df, raw_index):
 
 
 def assign_carriers(n):
-
     if "carrier" not in n.loads:
         n.loads["carrier"] = "electricity"
         for carrier in ["transport", "heat", "urban heat"]:
@@ -89,7 +88,6 @@ def assign_carriers(n):
 
 
 def calculate_costs(n, label, costs):
-
     for c in n.iterate_components(
         n.branch_components | n.controllable_one_port_components ^ {"Load"}
     ):
@@ -135,7 +133,6 @@ def calculate_costs(n, label, costs):
 
 
 def calculate_curtailment(n, label, curtailment):
-
     avail = (
         n.generators_t.p_max_pu.multiply(n.generators.p_nom_opt)
         .sum()
@@ -150,9 +147,7 @@ def calculate_curtailment(n, label, curtailment):
 
 
 def calculate_energy(n, label, energy):
-
     for c in n.iterate_components(n.one_port_components | n.branch_components):
-
         if c.name in {"Generator", "Load", "ShuntImpedance"}:
             c_energies = (
                 c.pnl.p.multiply(n.snapshot_weightings.generators, axis=0)
@@ -189,7 +184,6 @@ def calculate_energy(n, label, energy):
 
 
 def include_in_summary(summary, multiindexprefix, label, item):
-
     # Index tuple(s) indicating the newly to-be-added row(s)
     raw_index = tuple([multiindexprefix, list(item.index)])
     summary = _add_indexed_rows(summary, raw_index)
@@ -200,7 +194,6 @@ def include_in_summary(summary, multiindexprefix, label, item):
 
 
 def calculate_capacity(n, label, capacity):
-
     for c in n.iterate_components(n.one_port_components):
         if "p_nom_opt" in c.df.columns:
             c_capacities = (
@@ -225,7 +218,6 @@ def calculate_supply(n, label, supply):
     load_types = n.loads.carrier.value_counts().index
 
     for i in load_types:
-
         buses = n.loads.bus[n.loads.carrier == i].values
 
         bus_map = pd.Series(False, index=n.buses.index)
@@ -233,7 +225,6 @@ def calculate_supply(n, label, supply):
         bus_map.loc[buses] = True
 
         for c in n.iterate_components(n.one_port_components):
-
             items = c.df.index[c.df.bus.map(bus_map)]
 
             if len(items) == 0 or c.pnl.p.empty:
@@ -254,9 +245,7 @@ def calculate_supply(n, label, supply):
             supply.loc[idx[raw_index], label] = s.values
 
         for c in n.iterate_components(n.branch_components):
-
             for end in ["0", "1"]:
-
                 items = c.df.index[c.df["bus" + end].map(bus_map)]
 
                 if len(items) == 0 or c.pnl["p" + end].empty:
@@ -283,7 +272,6 @@ def calculate_supply_energy(n, label, supply_energy):
     load_types = n.loads.carrier.value_counts().index
 
     for i in load_types:
-
         buses_tot = n.loads.bus[n.loads.carrier == i].values
 
         bus_map = pd.Series(False, index=n.buses.index)
@@ -291,7 +279,6 @@ def calculate_supply_energy(n, label, supply_energy):
         bus_map.loc[buses_tot] = True
 
         for c in n.iterate_components(n.one_port_components):
-
             items_c = c.df.index[c.df.bus.map(bus_map)]
 
             if len(items_c) == 0 or c.pnl.p.empty:
@@ -312,9 +299,7 @@ def calculate_supply_energy(n, label, supply_energy):
             supply_energy.loc[idx[raw_index], label] = s.values
 
         for c in n.iterate_components(n.branch_components):
-
             for end in ["0", "1"]:
-
                 items_cend = c.df.index[c.df["bus" + end].map(bus_map)]
 
                 if len(items_cend) == 0 or c.pnl["p" + end].empty:
@@ -335,7 +320,6 @@ def calculate_supply_energy(n, label, supply_energy):
 
 
 def calculate_metrics(n, label, metrics):
-
     metrics = metrics.reindex(
         metrics.index.union(
             pd.Index(
@@ -372,7 +356,6 @@ def calculate_metrics(n, label, metrics):
 
 
 def calculate_prices(n, label, prices):
-
     bus_type = pd.Series(n.buses.index.str[3:], n.buses.index).replace(
         "", "electricity"
     )
@@ -386,7 +369,6 @@ def calculate_prices(n, label, prices):
 
 
 def calculate_weighted_prices(n, label, weighted_prices):
-
     logger.warning("Weighted prices don't include storage units as loads")
 
     weighted_prices = weighted_prices.reindex(
@@ -419,7 +401,6 @@ def calculate_weighted_prices(n, label, weighted_prices):
     }
 
     for carrier in link_loads:
-
         if carrier == "electricity":
             suffix = ""
         elif carrier[:5] == "space":
@@ -440,7 +421,6 @@ def calculate_weighted_prices(n, label, weighted_prices):
             load = n.loads_t.p_set[buses]
 
         for tech in link_loads[carrier]:
-
             names = n.links.index[n.links.index.to_series().str[-len(tech) :] == tech]
 
             if names.empty:
@@ -486,7 +466,6 @@ outputs = [
 
 
 def make_summaries(networks_dict, inputs, config, country="all"):
-
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
     )

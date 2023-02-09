@@ -63,6 +63,9 @@ Upcoming Release
 
 * Minor bug fixing and improvements `PR #580 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/580>`__
 
+* Streamline default configuration file `PR #589 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/589>`__
+
+* Fix rule run_test, remove code duplication, add gitstars to readme `PR #593 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/593>`
 
 PyPSA-Earth 0.1.0
 =================

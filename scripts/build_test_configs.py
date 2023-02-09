@@ -92,5 +92,5 @@ if __name__ == "__main__":
     fp_update_file_list = snakemake.input.update_file_list
     fp_output_file_list = snakemake.output.tmp_test_configs
 
-    for (finput, foutput) in zip(fp_update_file_list, fp_output_file_list):
+    for finput, foutput in zip(fp_update_file_list, fp_output_file_list):
         create_test_config(fp_baseconfig, finput, foutput)

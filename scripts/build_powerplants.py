@@ -87,7 +87,6 @@ logger = logging.getLogger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
-
     if os.stat(filepath_ppl_osm).st_size == 0:
         return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
 
