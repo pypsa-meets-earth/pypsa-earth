@@ -843,7 +843,8 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from scripts.build_test_configs import create_test_config
+        from scripts.build_test_configs import create_test_config, _parse_inputconfig
+        from ruamel.yaml import YAML
 
         # Ensure the scenario name matches the name of the configuration
         create_test_config(
@@ -853,9 +854,15 @@ rule run_scenario:
         )
         # merge the default config file with the difference
         create_test_config(input.default_config, input.diff_config, "config.yaml")
-        os.system(
-            "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
-        )
+        config = _parse_inputconfig("config.yaml", YAML())
+        if config["monte_carlo"].get("add_to_snakefile", False) == True:
+            os.system(
+                "snakemake -j all solve_all_networks_monte --forceall --rerun-incomplete"
+            )
+        else:
+            os.system(
+                "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
+            )
         copyfile("config.yaml", output.copyconfig)
 
 
