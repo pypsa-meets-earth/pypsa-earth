@@ -696,9 +696,9 @@ if __name__ == "__main__":
             aggregate_carriers,
             line_length_factor,
             aggregation_strategies,
-            solver_name=snakemake.config["solving"]["solver"]["name"],
+            snakemake.config["solving"]["solver"]["name"],             
             cluster_config.get("algorithm", "hac"),
-            cluster_config.get("feature", "solar+onwind-time"),            
+            cluster_config.get("feature", "solar+onwind-time"),           
             extended_link_costs=hvac_overhead_cost,
             focus_weights=focus_weights,
         )
