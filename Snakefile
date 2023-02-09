@@ -843,7 +843,10 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from scripts.build_test_configs import create_test_config, _parse_inputconfig
+        from scripts.build_test_configs import (
+            create_test_config,
+            _parse_inputconfig,
+        )
         from ruamel.yaml import YAML
 
         # Ensure the scenario name matches the name of the configuration
@@ -864,6 +867,7 @@ rule run_scenario:
                 "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
             )
         copyfile("config.yaml", output.copyconfig)
+
 
 
 rule run_all_scenarios:
