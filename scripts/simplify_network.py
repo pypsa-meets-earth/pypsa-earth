@@ -99,6 +99,7 @@ from pypsa.networkclustering import (
     aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
+    get_clustering_from_busmap,
 )
 from scipy.sparse.csgraph import connected_components, dijkstra
 
