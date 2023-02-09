@@ -185,6 +185,49 @@ def weighting_for_country(n, x):
         return (w * (100.0 / w.max())).clip(lower=1.0).astype(int)
 
 
+def get_feature_for_hac(n, buses_i=None, feature=None):
+    if buses_i is None:
+        buses_i = n.buses.index
+
+    if feature is None:
+        feature = "solar+onwind-time"
+
+    carriers = feature.split("-")[0].split("+")
+    if "offwind" in carriers:
+        carriers.remove("offwind")
+        carriers = np.append(
+            carriers, network.generators.carrier.filter(like="offwind").unique()
+        )
+
+    if feature.split("-")[1] == "cap":
+        feature_data = pd.DataFrame(index=buses_i, columns=carriers)
+        for carrier in carriers:
+            gen_i = n.generators.query("carrier == @carrier").index
+            attach = (
+                n.generators_t.p_max_pu[gen_i]
+                .mean()
+                .rename(index=n.generators.loc[gen_i].bus)
+            )
+            feature_data[carrier] = attach
+
+    if feature.split("-")[1] == "time":
+        feature_data = pd.DataFrame(columns=buses_i)
+        for carrier in carriers:
+            gen_i = n.generators.query("carrier == @carrier").index
+            attach = n.generators_t.p_max_pu[gen_i].rename(
+                columns=n.generators.loc[gen_i].bus
+            )
+            feature_data = pd.concat([feature_data, attach], axis=0)[buses_i]
+
+        feature_data = feature_data.T
+        # timestamp raises error in sklearn >= v1.2:
+        feature_data.columns = feature_data.columns.astype(str)
+
+    feature_data = feature_data.fillna(0)
+
+    return feature_data
+
+
 def distribute_clusters(
     inputs, config, n, n_clusters, focus_weights=None, solver_name=None
 ):
@@ -356,6 +399,51 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("tol", 1e-6)
         algorithm_kwds.setdefault("random_state", 0)
 
+
+    def fix_country_assignment_for_hac(n):
+        from scipy.sparse import csgraph
+
+        # overwrite country of nodes that are disconnected from their country-topology
+        for country in n.buses.country.unique():
+            m = n[n.buses.country == country].copy()
+
+            _, labels = csgraph.connected_components(
+                m.adjacency_matrix(), directed=False
+            )
+
+            component = pd.Series(labels, index=m.buses.index)
+            component_sizes = component.value_counts()
+
+            if len(component_sizes) > 1:
+                disconnected_bus = component[
+                    component == component_sizes.index[-1]
+                ].index[0]
+
+                neighbor_bus = n.lines.query(
+                    "bus0 == @disconnected_bus or bus1 == @disconnected_bus"
+                ).iloc[0][["bus0", "bus1"]]
+                new_country = list(
+                    set(n.buses.loc[neighbor_bus].country) - set([country])
+                )[0]
+
+                logger.info(
+                    f"overwriting country `{country}` of bus `{disconnected_bus}` "
+                    f"to new country `{new_country}`, because it is disconnected "
+                    "from its initial inter-country transmission grid."
+                )
+                n.buses.at[disconnected_bus, "country"] = new_country
+        return n
+
+    if algorithm == "hac":
+        feature = get_feature_for_hac(n, buses_i=n.buses.index, feature=feature)
+        n = fix_country_assignment_for_hac(n)
+
+    if (algorithm != "hac") and (feature is not None):
+        logger.warning(
+            f"Keyword argument feature is only valid for algorithm `hac`. "
+            f"Given feature `{feature}` will be ignored."
+        )
+
     n.determine_network_topology()
     # n.lines.loc[:, "sub_network"] = "0"  # current fix
 
@@ -402,10 +490,17 @@ def busmap_for_n_clusters(
             return prefix + busmap_by_kmeans(
                 n, weight, n_cluster_c, buses_i=x.index, **algorithm_kwds
             )
-
+        elif algorithm == "hac":
+            return prefix + busmap_by_hac(
+                n, n_clusters[x.name], buses_i=x.index, feature=feature.loc[x.index]
+            )
+        elif algorithm == "modularity":
+            return prefix + busmap_by_greedy_modularity(
+                n, n_clusters[x.name], buses_i=x.index
+            )            
         else:
             raise ValueError(
-                f"`algorithm` must be one of 'kmeans' or 'louvain'. Is {algorithm}."
+                f"`algorithm` must be one of 'kmeans' or 'hac'. Is {algorithm}."
             )
 
     return (
@@ -435,6 +530,7 @@ def clustering_for_n_clusters(
     aggregation_strategies=dict(),
     solver_name="cbc",
     algorithm="kmeans",
+    feature=None,    
     extended_link_costs=0,
     focus_weights=None,
 ):
@@ -449,7 +545,7 @@ def clustering_for_n_clusters(
             )
         else:
             busmap = busmap_for_n_clusters(
-                inputs, config, n, n_clusters, solver_name, focus_weights, algorithm
+                inputs, config, n, n_clusters, solver_name, focus_weights, algorithm, feature
             )
     else:
         busmap = custom_busmap
@@ -601,6 +697,8 @@ if __name__ == "__main__":
             line_length_factor,
             aggregation_strategies,
             solver_name=snakemake.config["solving"]["solver"]["name"],
+            cluster_config.get("algorithm", "hac"),
+            cluster_config.get("feature", "solar+onwind-time"),            
             extended_link_costs=hvac_overhead_cost,
             focus_weights=focus_weights,
         )
