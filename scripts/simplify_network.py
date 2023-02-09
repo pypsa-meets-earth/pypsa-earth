@@ -534,7 +534,7 @@ if __name__ == "__main__":
         n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
     )
 
-    busmaps = [trafo_map, simplify_links_map, stub_map]
+    busmaps = [trafo_map, simplify_links_map]
 
     cluster_config = snakemake.config["cluster_options"]["simplify_network"]
     if cluster_config.get("remove_stubs", True):
