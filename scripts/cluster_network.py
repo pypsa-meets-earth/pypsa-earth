@@ -391,6 +391,7 @@ def busmap_for_n_clusters(
     solver_name,
     focus_weights=None,
     algorithm="kmeans",
+    feature=None,
     **algorithm_kwds,
 ):
     if algorithm == "kmeans":
