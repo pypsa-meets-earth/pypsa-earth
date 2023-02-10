@@ -634,6 +634,8 @@ if __name__ == "__main__":
         aggregate_carriers = snakemake.config["electricity"].get(
             "conventional_carriers"
         )
+    elif snakemake.wildcards.clusters == "all":
+        n_clusters = len(n.buses)        
     else:
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
