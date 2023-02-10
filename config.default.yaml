@@ -62,6 +62,10 @@ cluster_options:
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: true
+  cluster_network:
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []    
   alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true  # When "True", logging is printed to console
