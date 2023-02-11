@@ -165,7 +165,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # TODO: rename the technologies in hosted tutorial data to match technology data
     costs = costs.rename(
         {
-            "hydrogen storage": "hydrogen storage tank",
+            "hydrogen storage tank type 1": "hydrogen storage tank",
             "hydrogen underground storage": "hydrogen storage underground",
         },
     )

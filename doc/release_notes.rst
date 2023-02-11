@@ -69,6 +69,8 @@ Upcoming Release
 
 * Add new build_demand_profiles.py. It builds demand_profiles.csv and allow easier interfacing of new data `PR #582 https://github.com/pypsa-meets-earth/pypsa-earth/pull/582`__
 
+* Upgrade technology data to v0.5.0
+
 PyPSA-Earth 0.1.0
 =================
 
