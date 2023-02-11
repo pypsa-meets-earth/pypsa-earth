@@ -185,7 +185,7 @@ There is also option to set the cutout extent specifying `x` and `y` values dire
 Temporal extent
 ^^^^^^^^^^^^^^^
 
-Note please that if you create the cutout for a certain year (let say 2013) and want to run scenarios for a subset of the year 2013, you don't need to rerun the `build_cutout` as the cuotout still contains all the hours of the requsted year. The workflow will automatically subset the cutout archive to extract data for the particular timeframes. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed. 
+Note please that if you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of the year 2013, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of the requested year. The workflow will automatically subset the cutout archive to extract data for the particular timeframes. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed. 
 
 In case you need model a number of years, a convenient approach, may be to create the cutout for the whole period under interest (e.g. 2013-2015) so that you don't need to build any additional cutouts. Note, however, that the disk requirements increase.
 
