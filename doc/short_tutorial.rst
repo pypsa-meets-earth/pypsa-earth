@@ -93,7 +93,9 @@ You may use the `clean` rule for making so:
 
     .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean
 
-Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed.
+Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed to avoid conflicts between run settings corresponding to different scenarios.
+
+It is also possible to make manual clean-up removing folders "resources", "networks" and "results". Those folders store the intermediate output of the workflow and if you don't need them anymore it is safe to delete them.
 
 .. note::
 
