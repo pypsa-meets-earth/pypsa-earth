@@ -171,19 +171,28 @@ In case you are interested in other parts of the world you have to generate a cu
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 
+The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
+
+After the first run, if you don't change country and need to increase a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
+
+Spatial extent
+^^^^^^^^^^^^^^
+
 Normally cutout extent is calculated from the shape of the requested region defined by the `countries` parameter in the configuration file `config.yaml`. It could make sense to set the countries list as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model by adjusting content of the `countries` list.
 
 There is also option to set the cutout extent specifying `x` and `y` values directly. However, these values will overwrite values extracted from the countries shape. Which means that nothing prevents `build_cutout` to extract data which has no relation to the requested countries. Please use direct definition of `x` and `y` only if you really understand what and why you are doing.
 
-The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
+Temporal extent
+^^^^^^^^^^^^^^^
+
+If you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of this year, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of 2013. The workflow will automatically subset the cutout archive to extract data for the particular timeframe of interest. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed. 
+
+In case you need model a number of years, a convenient approach may be to create the cutout for the whole period under interest (e.g. 2013-2015) so that you don't need to build any additional cutouts. Note, however, that the disk requirements increase in this case.
 
 3. Build a natura.tiff raster
 -----------------------------
 
 A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
-
-.. note::
-    Skip this recommendation if the region of your interest is within Africa
 
 A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. This raster file contains data on the on protected areas around the world where areas no (renewable) assets can be installed. The `natura.tiff` raster has now global coverage so you don't need to create it locally.
 
@@ -238,7 +247,7 @@ The following validation notebooks are worth a look when validating your energy 
 
 1. A detailed `network validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb>`_.
  
-2. Analys of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
+2. Analysis of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
 
 3. Validation of `the power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
 
