@@ -171,11 +171,13 @@ In case you are interested in other parts of the world you have to generate a cu
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 
+The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
+
+After the first run, if you don't change country and need to insrease a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
 Normally cutout extent is calculated from the shape of the requested region defined by the `countries` parameter in the configuration file `config.yaml`. It could make sense to set the countries list as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model by adjusting content of the `countries` list.
 
 There is also option to set the cutout extent specifying `x` and `y` values directly. However, these values will overwrite values extracted from the countries shape. Which means that nothing prevents `build_cutout` to extract data which has no relation to the requested countries. Please use direct definition of `x` and `y` only if you really understand what and why you are doing.
 
-The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
 
 3. Build a natura.tiff raster
 -----------------------------
