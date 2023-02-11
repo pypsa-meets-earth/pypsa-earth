@@ -174,9 +174,16 @@ These steps are required to use CDS API which allows an automatic file download 
 The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
 
 After the first run, if you don't change country and need to insrease a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
+
+Spatial extent
+^^^^^^^^^^^^^^
+
 Normally cutout extent is calculated from the shape of the requested region defined by the `countries` parameter in the configuration file `config.yaml`. It could make sense to set the countries list as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model by adjusting content of the `countries` list.
 
 There is also option to set the cutout extent specifying `x` and `y` values directly. However, these values will overwrite values extracted from the countries shape. Which means that nothing prevents `build_cutout` to extract data which has no relation to the requested countries. Please use direct definition of `x` and `y` only if you really understand what and why you are doing.
+
+Temporal extent
+^^^^^^^^^^^^^^^
 
 Note please that if you create the cutout for a certain year (let say 2013) and want to run scenarios for a subset of the year 2013, you don't need to rerun the `build_cutout` as the cuotout still contains all the hours of the requsted year. The workflow will automatically subset the cutout archive to extract data for the particular timeframes. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed. 
 
