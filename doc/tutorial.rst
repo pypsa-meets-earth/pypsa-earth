@@ -173,7 +173,7 @@ These steps are required to use CDS API which allows an automatic file download 
 
 The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
 
-After the first run, if you don't change country and need to insrease a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
+After the first run, if you don't change country and need to increase a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
 
 Spatial extent
 ^^^^^^^^^^^^^^
@@ -247,7 +247,7 @@ The following validation notebooks are worth a look when validating your energy 
 
 1. A detailed `network validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb>`_.
  
-2. Analys of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
+2. Analysis of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
 
 3. Validation of `the power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
 
