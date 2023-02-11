@@ -185,7 +185,7 @@ A raster file `natura.tiff` is used to store shapes of the protected and reserve
 .. note::
     Skip this recommendation if the region of your interest is within Africa
 
-A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. Currently this raster is valid for Africa, global `natura.tiff` raster is under development. You may generate the `natura.tiff` for a region of interest using `build_natura_raster` rule which aggregates data on protected areas along the cutout extent.
+A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. This raster file contains data on the on protected areas around the world where areas no (renewable) assets can be installed. The `natura.tiff` raster has now global coverage so you don't need to create it locally.
 
 How to validate?
 ================
