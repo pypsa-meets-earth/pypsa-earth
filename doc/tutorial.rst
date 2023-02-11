@@ -194,9 +194,6 @@ In case you need model a number of years, a convenient approach may be to create
 
 A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
 
-.. note::
-    Skip this recommendation if the region of your interest is within Africa
-
 A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. This raster file contains data on the on protected areas around the world where areas no (renewable) assets can be installed. The `natura.tiff` raster has now global coverage so you don't need to create it locally.
 
 How to validate?
