@@ -161,10 +161,12 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
 
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
-    # because technology data & pypsa earth costs.csv use different names
+    # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
     costs = costs.rename(
         {
+            "hydrogen storage": "hydrogen storage tank",
+            "hydrogen storage tank": "hydrogen storage tank",
             "hydrogen storage tank type 1": "hydrogen storage tank",
             "hydrogen underground storage": "hydrogen storage underground",
         },
