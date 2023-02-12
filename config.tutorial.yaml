@@ -281,7 +281,7 @@ renewable:
 # TODO: Needs to be adjusted for Africa
 costs:
   year: 2030
-  version: v0.4.0
+  version: v0.5.0
   rooftop_share: 0.14  # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
   fill_values:
