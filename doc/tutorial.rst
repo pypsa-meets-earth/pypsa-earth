@@ -156,11 +156,12 @@ It could be helpful to keep in mind the following points:
 
 The cutout is the main concept of climate data management in PyPSA ecosystem introduced in `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since such datasets are typically global and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing concepts are contained in `JOSS paper <https://joss.theoj.org/papers/10.21105/joss.03294>`_.
 
-.. note::
-    Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
 Generally, the spatial and time resolution of the cutout data is determined by parameters of an underlying dataset. That is 30 km x 30 km grid and houtly resolution for ERA5 recommended for usage in PyPSA-Earth.
 
 The pre-built cutout for Africa is available for 2013 year and can be loaded directly from zenodo through the rule `retrieve_cutout`. There is also a smaller cutout for Africa built for a two-weeks time span; it is automatically downloaded when retrieving common data with `retrieve_databundle_light`.
+
+.. note::
+    Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
 
 In case you are interested in other parts of the world you have to generate a cutout yourself using the `build_cutouts` rule. To run it you will need to: 
 
