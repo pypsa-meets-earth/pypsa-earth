@@ -83,7 +83,6 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     if len(points) == 1:
         polygons_arr = [outline]
     else:
-
         xmin, ymin = np.amin(points, axis=0)
         xmax, ymax = np.amax(points, axis=0)
 
@@ -196,7 +195,6 @@ if __name__ == "__main__":
     offshore_regions = []
 
     for country in countries:
-
         c_b = n.buses.country == country
         if n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]].empty:
             logger.warning(f"No low voltage buses found for {country}!")

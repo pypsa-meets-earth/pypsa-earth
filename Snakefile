@@ -12,7 +12,7 @@ from shutil import copyfile, move
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 from scripts._helpers import create_country_list
-from scripts.add_electricity import get_load_paths_gegis
+from scripts.build_demand_profiles import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
@@ -74,15 +74,15 @@ rule run_tests:
 
         shell("snakemake --cores all build_test_configs")
         directory = "test/tmp"  # assign directory
-        for filename in os.scandir(
-            directory
-        ):  # iterate over files in that directory
+        for filename in os.scandir(directory):  # iterate over files in that directory
             if filename.is_file():
                 print(filename.path)
                 shell("cp {filename.path} config.yaml")
-                shell("snakemake --cores all solve_all_networks --forceall")
+                if "monte" in filename.name:
+                    shell("snakemake --cores all solve_all_networks_monte --forceall")
+                else:
+                    shell("snakemake --cores all solve_all_networks --forceall")
         print("Tests are successful.")
-
 
 
 rule solve_all_networks:
@@ -341,6 +341,29 @@ if config["enable"].get("retrieve_cost_data", True):
             move(input[0], output[0])
 
 
+rule build_demand_profiles:
+    input:
+        base_network="networks/" + RDIR + "base.nc",
+        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        load=load_data_paths,
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
+        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+    output:
+        "resources/demand_profiles.csv",
+    log:
+        "logs/" + RDIR + "build_demand_profiles.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_demand_profiles"
+    threads: 1
+    resources:
+        mem_mb=3000,
+    script:
+        "scripts/build_demand_profiles.py"
+
+
 rule build_renewable_profiles:
     input:
         natura="resources/" + RDIR + "natura.tiff",
@@ -415,15 +438,14 @@ rule add_electricity:
         },
         base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
-        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         powerplants="resources/" + RDIR + "powerplants.csv",
-        load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
+        demand_profiles="resources/" + RDIR + "demand_profiles.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:

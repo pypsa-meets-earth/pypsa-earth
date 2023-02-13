@@ -104,7 +104,6 @@ def generate_scenario_by_country(
     }
 
     for c in clean_country_list:
-
         modify_dict = {"countries": [c]}
 
         if c in n_clusters.keys():

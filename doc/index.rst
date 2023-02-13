@@ -19,7 +19,7 @@ Welcome to the PyPSA-Earth documentation!
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
 
-.. image:: https://readthedocs.org/projects/pypsa-meets-earth/badge/?version=latest
+.. image:: https://readthedocs.org/projects/pypsa-earth/badge/?version=latest
     :target: https://pypsa-earth.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 

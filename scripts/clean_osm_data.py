@@ -183,7 +183,6 @@ def split_cells(df, lst_col="voltage"):
 
 
 def filter_voltage(df, threshold_voltage=35000):
-
     # Drop any row with N/A voltage
     df = df.dropna(subset=["voltage"])
 
@@ -390,7 +389,6 @@ def integrate_lines_df(df_all_lines, distance_crs):
     ac_freq_default = 50.0
 
     if "tag_frequency" in df_all_lines.columns:
-
         ac_grid_freq_levels = (
             df_all_lines["tag_frequency"]
             .value_counts(sort=True, dropna=True)
@@ -417,7 +415,6 @@ def integrate_lines_df(df_all_lines, distance_crs):
     # Add circuits information
     # if not int make int
     if df_all_lines["cables"].dtype != int:
-
         dropped_cables = [
             x for x in dropped_cables_tags if x in df_all_lines["cables"].values
         ]
@@ -475,10 +472,8 @@ def integrate_lines_df(df_all_lines, distance_crs):
     ] = 1
 
     if df_all_lines["circuits"].dtype != int:
-
         # it's possible that some df_all_lines["circuits"] are in manually dropped_tags
         if any(df_all_lines["circuits"].isin(dropped_circuits_tags)):
-
             # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
             df_one_third_circuits = df_all_lines.loc[
                 df_all_lines["circuits"].isin(dropped_circuits_tags)
@@ -561,7 +556,6 @@ def integrate_lines_df(df_all_lines, distance_crs):
 
 
 def filter_lines_by_geometry(df_all_lines):
-
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
