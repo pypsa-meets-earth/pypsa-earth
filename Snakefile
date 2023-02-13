@@ -343,7 +343,6 @@ if config["enable"].get("retrieve_cost_data", True):
 
 rule build_renewable_profiles:
     input:
-        base_network="networks/" + RDIR + "base.nc",
         natura="resources/" + RDIR + "natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         gebco="data/gebco/GEBCO_2021_TID.nc",
