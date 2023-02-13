@@ -856,7 +856,6 @@ rule run_scenario:
     output:
         touchfile=touch("results/{scenario_name}/scenario.done"),
         copyconfig="results/{scenario_name}/config.yaml",
-        stats="results/{scenario_name}/stats.csv",
     threads: 1
     resources:
         mem_mb=5000,
@@ -872,7 +871,7 @@ rule run_scenario:
         # merge the default config file with the difference
         create_test_config(input.default_config, input.diff_config, "config.yaml")
         os.system("snakemake -j all solve_all_networks --rerun-incomplete")
-        os.system(f"snakemake -j1 make_statistics")
+        os.system("snakemake -j1 make_statistics --force")
         copyfile("config.yaml", output.copyconfig)
 
 
