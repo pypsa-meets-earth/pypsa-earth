@@ -158,6 +158,7 @@ The cutout is the main concept of climate data management in PyPSA ecosystem int
 
 .. note::
     Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
+Generally, the spatial and time resolution of the cutout data is determined by parameters of an underlying dataset. That is 30 km x 30 km grid and houtly resolution for ERA5 recommended for usage in PyPSA-Earth.
 
 The pre-built cutout for Africa is available for 2013 year and can be loaded directly from zenodo through the rule `retrieve_cutout`. There is also a smaller cutout for Africa built for a two-weeks time span; it is automatically downloaded when retrieving common data with `retrieve_databundle_light`.
 
