@@ -43,7 +43,7 @@ hydrogen_underground_storage: false
 
 
 export:
-  export_h2: [1, 5] # Yearly export demand in TWh
+  h2export: [1, 5] # Yearly export demand in TWh
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
