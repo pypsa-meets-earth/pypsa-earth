@@ -69,7 +69,6 @@ def generate_scenario_by_country(
         out_dir : str (optional)
             Output directory where output configuration files are executed
     """
-
     from _helpers import create_country_list, three_2_two_digits_country
 
     clean_country_list = create_country_list(country_list)
@@ -121,8 +120,7 @@ def collect_basic_osm_stats(path, rulename, header):
     """
     Collect basic statistics on OSM data: number of items
     """
-
-    if os.path.exists(path) and (os.stat(path).st_size > 0):
+    if Path(path).is_file() and Path(path).stat().st_size > 0:
         df = gpd.read_file(path)
         n_elem = len(df)
 
@@ -141,8 +139,7 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
     - length of the stored shapes
     - length of objects with tag_frequency == 0 (DC elements)
     """
-
-    if os.path.exists(path) and (os.stat(path).st_size > 0):
+    if Path(path).is_file() and Path(path).stat().st_size > 0:
         df = gpd.read_file(path)
         n_elem = len(df)
         obj_length = (
@@ -176,7 +173,6 @@ def collect_osm_stats(rulename, **kwargs):
     When lines and cables are considered, then network-related statistics are collected
     (collect_network_osm_stats), otherwise basic statistics are (collect_basic_osm_stats)
     """
-
     metric_crs = kwargs.pop("metric_crs", "EPSG:3857")
     only_basic = kwargs.pop("only_basic", False)
 
@@ -197,7 +193,6 @@ def collect_raw_osm_stats(rulename="download_osm_data", metric_crs="EPSG:3857"):
     """
     Collect basic statistics on OSM data; used for raw OSM data.
     """
-
     snakemake = _mock_snakemake("download_osm_data")
 
     options_raw = dict(snakemake.output)
@@ -216,7 +211,6 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
     """
     Collect statistics on OSM data; used for clean OSM data.
     """
-
     snakemake = _mock_snakemake("clean_osm_data")
 
     options_clean = dict(snakemake.output)
@@ -238,7 +232,6 @@ def collect_network_stats(network_rule, config):
     - lines total length (accounting for parallel lines)
     - lines total capacity
     """
-
     wildcards = {
         k: str(config["scenario"][k][0]) for k in ["simpl", "clusters", "ll", "opts"]
     }
@@ -257,7 +250,7 @@ def collect_network_stats(network_rule, config):
         else:
             return df.groupby("carrier").p_nom.sum().astype(float)
 
-    if os.path.exists(network_path):
+    if Path(network_path).is_file():
         n = pypsa.Network(network_path)
 
         lines_length = float((n.lines.length * n.lines.num_parallel).sum())
@@ -304,10 +297,9 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     - total population
     - total gdp
     """
-
     snakemake = _mock_snakemake(rulename)
 
-    if not os.path.exists(snakemake.output.africa_shape):
+    if not Path(snakemake.output.africa_shape).is_file():
         return pd.DataFrame()
 
     df_continent = gpd.read_file(snakemake.output.africa_shape)
@@ -318,7 +310,7 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
         .geometry.area.iloc[0]
     )
 
-    if not os.path.exists(snakemake.output.gadm_shapes):
+    if not Path(snakemake.output.gadm_shapes).is_file():
         return pd.DataFrame()
 
     df_gadm = gpd.read_file(snakemake.output.gadm_shapes)
@@ -375,7 +367,6 @@ def collect_snakemake_stats(name, dict_dfs, config):
 
 def aggregate_computational_stats(name, dict_dfs):
     """Function to aggregate the total computational statistics of the rules"""
-
     cols_comp = ["total_time", "mean_load", "max_memory"]
 
     def get_selected_cols(df, level=1, lvl_cols=cols_comp):
@@ -419,7 +410,7 @@ def collect_renewable_stats(rulename, technology):
     """
     snakemake = _mock_snakemake(rulename, technology=technology)
 
-    if os.path.exists(snakemake.output.profile):
+    if sets_path_to_root(snakemake.output.profile).is_file():
         res = xr.open_dataset(snakemake.output.profile)
 
         if technology == "hydro":
@@ -448,11 +439,10 @@ def add_computational_stats(df, snakemake, column_name=None):
     """
     Add the major computational information of a given rule into the existing dataframe
     """
-
     comp_data = [np.nan] * 3  # total_time, mean_load and max_memory
 
     if snakemake.benchmark:
-        if not os.path.isfile(snakemake.benchmark):
+        if not Path(snakemake.benchmark).is_file():
             return df
 
         bench_data = pd.read_csv(snakemake.benchmark, delimiter="\t")
@@ -471,7 +461,6 @@ def add_computational_stats(df, snakemake, column_name=None):
 
 def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     "Function to collect all statistics"
-
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
     df_shapes = collect_shape_stats(area_crs=area_crs)
