@@ -552,36 +552,39 @@ continent_regions = {
 # dictionary of correspondance between iso country codes and geofabrik codes containing those information
 # This dictionary instructs the script download_osm_data about how to successfully download data
 # from countries that are aggregated into osm.
-# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SNGM
+# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SN-GM
 #   That's the reason why in this dictionary they can be found the following entries:
-#       "SN": "SNGM"
-#       "GM": "SNGM"
-#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SNGM" file
+#       "SN": "SN-GM"
+#       "GM": "SN-GM"
+#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SN-GM" file
 iso_to_geofk_dict = {
     "EH": "MA",  # Western Sahara -> Morocco
-    "SN": "SNGM",  # Senegal -> Senegal-Gambia
-    "GM": "SNGM",  # Gambia -> Senegal-Gambia
+    "SN": "SN-GM",  # Senegal -> Senegal-Gambia
+    "GM": "SN-GM",  # Gambia -> Senegal-Gambia
     # "HK": "CN",  # Hong Kong  -> China  # no more with gadm 4.1
     # "MO": "CN",  # Macao  -> China  # no more with gadm 4.1
-    "SG": "MY-SG-BN",  # Singapore -> Malaysia-Singapore-Brunei
-    "BN": "MY-SG-BN",  # Brunei -> Malaysia-Singapore-Brunei
-    "MY": "MY-SG-BN",  # Malaysia -> Malaysia-Singapore-Brunei
-    "SA": "GCC",  # Saudi Arabia -> Gulf Cooperation Council
-    "KW": "GCC",  # Kuwait -> Gulf Cooperation Council
-    "BH": "GCC",  # Bahrain -> Gulf Cooperation Council
-    "QA": "GCC",  # Qatar -> Gulf Cooperation Council
-    "AE": "GCC",  # United Arab Emirates -> Gulf Cooperation Council
-    "OM": "GCC",  # Oman -> Gulf Cooperation Council
-    "PS": "IL-PL",  # Israel and Palestine are merged in OSM
-    "IL": "IL-PL",  # Israel and Palestine are merged in OSM
+    "SG": "MY",  # Singapore -> Malaysia-Singapore-Brunei
+    "BN": "MY",  # Brunei -> Malaysia-Singapore-Brunei
+    "SA": "QA-AE-OM-BH-KW",  # Saudi Arabia -> Gulf Cooperation Council
+    "KW": "QA-AE-OM-BH-KW",  # Kuwait -> Gulf Cooperation Council
+    "BH": "QA-AE-OM-BH-KW",  # Bahrain -> Gulf Cooperation Council
+    "QA": "QA-AE-OM-BH-KW",  # Qatar -> Gulf Cooperation Council
+    "AE": "QA-AE-OM-BH-KW",  # United Arab Emirates -> Gulf Cooperation Council
+    "OM": "QA-AE-OM-BH-KW",  # Oman -> Gulf Cooperation Council
+    "PS": "PS-IL",  # Israel and Palestine are merged in OSM
+    "IL": "PS-IL",  # Israel and Palestine are merged in OSM
     "SM": "IT",  # San-Marino is merged to Italy
     "VA": "IT",  # Vatican is merged to Italy
-    "HT": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
-    "DO": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
+    "HT": "haiti-and-domrep",  # Haiti and Dominican Republic are merged in OSM
+    "DO": "haiti-and-domrep",  # Haiti and Dominican Republic are merged in OSM
     "NF": "AU",  # norfolk island is an AU territory
-    "MP": "USOC",  # northern mariana islands are US territory
-    "GU": "USOC",  # Guam is a US territory
-    "AS": "USOC",  # American Samoa is a US territory
+    "MP": "american-oceania",  # northern mariana islands are US territory
+    "GU": "american-oceania",  # Guam is a US territory
+    "AS": "american-oceania",  # American Samoa is a US territory
+    "CP": "ile-de-clipperton",  # Ile de clipperton
+    "PF": "polynesie-francaise",  # Polynesie Francaise
+    "VU": "tokelau",  #  tokelau
+    "WS": "wallis-et-futuna",  # Wallis et Fortnuna
 }
 
 # Cyprus and Georgia -> European domain
@@ -638,7 +641,7 @@ world_geofk = {
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
         # "ST": "sao-tome-and-principe", # Island
-        "SNGM": "senegal-and-gambia",  # Geofk shortcurt
+        "SN-GM": "senegal-and-gambia",  # Geofk shortcurt
         # "SC": "seychelles", # Island
         "SL": "sierra-leone",
         "SO": "somalia",  # No Data
@@ -662,12 +665,12 @@ world_geofk = {
         "BT": "bhutan",
         "KH": "cambodia",
         "CN": "china",
-        "GCC": "gcc-states",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
+        "QA-AE-OM-BH-KW": "gcc-states",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
         "IN": "india",
         "ID": "indonesia",
         "IR": "iran",
         "IQ": "iraq",
-        "IL-PL": "israel-and-palestine",
+        "PS-IL": "israel-and-palestine",
         "JP": "japan",
         "JO": "jordan",
         "KZ": "kazakhstan",
@@ -696,9 +699,9 @@ world_geofk = {
     "australia-oceania": {
         "AU": "australia",
         "CK": "cook-islands",  # Island
-        "CP": "ile-de-clipperton",  # Island
+        "ile-de-clipperton": "ile-de-clipperton",  # Island
         "FJ": "fiji",  # Islands
-        "PF": "polynesie-francaise",  # Islands
+        "polynesie-francaise": "polynesie-francaise",  # Islands
         # "GU": "guam",  # Island
         "KI": "kiribati",  # Islands
         "MH": "marshall-islands",  # Islands
@@ -717,9 +720,9 @@ world_geofk = {
         "TK": "tokelau",  # Islands
         "TO": "tonga",  # Islands
         "TV": "tuvalu",  # Islands
-        "VU": "vanuatu",  # Islands
-        "WF": "wallis-et-futuna",  # Islands
-        "USOC": "american-oceania",
+        "vanatu": "vanuatu",  # Islands
+        "wallis-et-futuna": "wallis-et-futuna",  # Islands
+        "american-oceania": "american-oceania",
     },
     "europe": {
         "AL": "albania",

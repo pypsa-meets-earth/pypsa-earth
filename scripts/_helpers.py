@@ -67,7 +67,6 @@ def configure_logging(snakemake, skip_handlers=False):
     skip_handlers : True | False (default)
         Do (not) skip the default handlers created for redirecting output to STDERR and file.
     """
-
     import logging
 
     kwargs = snakemake.config.get("logging", dict()).copy()
@@ -407,6 +406,8 @@ def mock_snakemake(rulename, **wildcards):
         job.rule.name,
         None,
     )
+    snakemake.benchmark = job.benchmark
+
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
         Path(path).parent.mkdir(parents=True, exist_ok=True)

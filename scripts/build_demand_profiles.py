@@ -99,6 +99,7 @@ def build_demand_profiles(
     scale,
     start_date,
     end_date,
+    out_path,
 ):
     """
     Create csv file of electric demand time series.
@@ -179,7 +180,7 @@ def build_demand_profiles(
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date) - pd.Timedelta(hours=1)
     demand_profiles = demand_profiles.loc[start_date:end_date]
-    demand_profiles.to_csv("resources/demand_profiles.csv", header=True)
+    demand_profiles.to_csv(out_path, header=True)
 
     logger.info(f"Demand_profiles csv file created for the corrisponding snapshots.")
 
@@ -203,7 +204,16 @@ if __name__ == "__main__":
     scale = snakemake.config["load_options"]["scale"]
     start_date = snakemake.config["snapshots"]["start"]
     end_date = snakemake.config["snapshots"]["end"]
+    out_path = snakemake.output[0]
 
     build_demand_profiles(
-        n, load_paths, regions, admin_shapes, countries, scale, start_date, end_date
+        n,
+        load_paths,
+        regions,
+        admin_shapes,
+        countries,
+        scale,
+        start_date,
+        end_date,
+        out_path,
     )

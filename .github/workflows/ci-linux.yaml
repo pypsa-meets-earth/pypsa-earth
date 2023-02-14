@@ -72,7 +72,7 @@ jobs:
 
     - name: Test custom workflow
       run: |
-        mkdir configs/scenarios
+        mkdir -p configs/scenarios
         cp test/config.custom.yaml configs/scenarios/config.custom.yaml
         snakemake --cores 1 run_all_scenarios --forceall
 
