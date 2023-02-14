@@ -352,7 +352,7 @@ rule build_demand_profiles:
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
-        "resources/demand_profiles.csv",
+        "resources/" + RDIR + "demand_profiles.csv",
     log:
         "logs/" + RDIR + "build_demand_profiles.log",
     benchmark:
