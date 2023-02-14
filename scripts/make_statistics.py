@@ -3,14 +3,14 @@
 #
 # coding: utf-8
 """
-Execute a scenario optimization
+Create statistics for a given scenario run
 
-This script contains utility functions to iteratively run the workflow for several regions
-and test the execution for each of them.
-During the execution, statistics on the outputs of the execution are generated.
-Examples of relevant statistics are:
+This script contains functions to create statistics of the workflow for the current execution
+
+Relevant statistics that are created are:
 - For clean_osm_data and download_osm_data,
   the number of elements, length of the lines and length of dc lines are stored
+- For build_shapes, the surface, total GDP, total population and number of shapes are collected
 - For build_renewable_profiles, total available potential and average production are collected
 - For network rules (base_network, add_electricity, simplify_network and solve_network),
   length of lines, number of buses and total installed capacity by generation technology
