@@ -815,7 +815,9 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs):
                 "substation_lv": [True] * length,
             }
         )
-        df.astype({**buses.dtypes.to_dict(), "station_id": type(np.nan)}) # keep the same dtypes as buses and allow NAN in "station_id"
+        df.astype(
+            {**buses.dtypes.to_dict(), "station_id": type(np.nan)}
+        )  # keep the same dtypes as buses and allow NAN in "station_id"
         buses = gpd.GeoDataFrame(
             pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
             crs=buses.crs,
