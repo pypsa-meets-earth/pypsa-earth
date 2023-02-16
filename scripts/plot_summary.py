@@ -6,7 +6,7 @@ import pandas as pd
 
 plt.style.use("ggplot")
 
-from prepare_sector_network import (
+from prepare_sector_network_eur_sec import (
     co2_emissions_year,  # TODO or implemented as co2_emissions_year = 2030?
 )
 
