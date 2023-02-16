@@ -6,7 +6,11 @@ import pandas as pd
 
 plt.style.use("ggplot")
 
-from prepare_sector_network import co2_emissions_year # TODO or implemented as co2_emissions_year = 2030?
+from prepare_sector_network import (
+    co2_emissions_year,  # TODO or implemented as co2_emissions_year = 2030?
+)
+
+
 # consolidate and rename
 def rename_techs(label):
     prefix_to_remove = [

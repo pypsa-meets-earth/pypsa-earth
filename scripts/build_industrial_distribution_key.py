@@ -51,7 +51,6 @@ def build_nodal_distribution_key(
     keys["population"] = pop["total"].values / pop["total"].sum()
 
     for tech, country in product(technology, countries):
-
         regions_ct = regions.name[regions.name.str.contains(country)]
 
         facilities = industrial_database.query(

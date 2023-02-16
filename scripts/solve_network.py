@@ -402,8 +402,11 @@ if __name__ == "__main__":
     with memory_logger(filename=fn, interval=30.0) as mem:
         overrides = override_component_attrs(snakemake.input.overrides)
         n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-        
-        if snakemake.config["custom_data"]["add_existing"] and snakemake.wildcards.planning_horizons=="2050":
+
+        if (
+            snakemake.config["custom_data"]["add_existing"]
+            and snakemake.wildcards.planning_horizons == "2050"
+        ):
             add_existing(n)
         n = prepare_network(n, solve_opts)
 

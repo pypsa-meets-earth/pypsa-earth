@@ -119,7 +119,6 @@ def mock_snakemake(rulename, **wildcards):
 
 
 def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
-
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 

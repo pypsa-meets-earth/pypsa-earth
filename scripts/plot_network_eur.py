@@ -571,6 +571,7 @@ def plot_series(network, carrier="AC", name="test"):
         transparent=True,
     )
 
+
 # TODO function redifinition
 # def plot_series(network, carrier="AC", name="test"):
 
