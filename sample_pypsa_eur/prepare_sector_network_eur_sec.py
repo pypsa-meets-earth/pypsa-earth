@@ -97,6 +97,7 @@ def get(item, investment_year=None):
     else:
         return item
 
+
 # TODO function redefinition
 # def create_network_topology(n, prefix, connector=" -> "):
 #     """
@@ -899,6 +900,7 @@ def add_generation(n, costs):
             efficiency2=costs.at[carrier, "CO2 intensity"],
             lifetime=costs.at[generator, "lifetime"],
         )
+
 
 # TODO locations was missing
 # def add_wave(n, wave_cost_factor):
