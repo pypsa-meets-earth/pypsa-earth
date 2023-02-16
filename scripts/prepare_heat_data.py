@@ -32,7 +32,6 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
 
 
 def prepare_heat_data(n):
-
     ashp_cop = (
         xr.open_dataarray(snakemake.input.cop_air_total)
         .to_pandas()
