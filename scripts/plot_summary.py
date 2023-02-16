@@ -9,7 +9,6 @@ plt.style.use("ggplot")
 from prepare_sector_network import co2_emissions_year # TODO or implemented as co2_emissions_year = 2030?
 # consolidate and rename
 def rename_techs(label):
-
     prefix_to_remove = [
         "residential ",
         "services ",
@@ -117,7 +116,6 @@ preferred_order = pd.Index(
 
 
 def plot_costs():
-
     cost_df = pd.read_csv(
         snakemake.input.costs, index_col=list(range(3)), header=list(range(n_header))
     )
@@ -176,7 +174,6 @@ def plot_costs():
 
 
 def plot_energy():
-
     energy_df = pd.read_csv(
         snakemake.input.energy, index_col=list(range(2)), header=list(range(n_header))
     )
@@ -240,7 +237,6 @@ def plot_energy():
 
 
 def plot_balances():
-
     co2_carriers = ["co2", "co2 stored", "process emissions"]
 
     balances_df = pd.read_csv(
@@ -253,7 +249,6 @@ def plot_balances():
     ]
 
     for k, v in balances.items():
-
         df = balances_df.loc[v]
         df = df.groupby(df.index.get_level_values(2)).sum()
 

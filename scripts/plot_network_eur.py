@@ -91,7 +91,6 @@ def plot_map(
     bus_size_factor=1.7e10,
     transmission=False,
 ):
-
     n = network.copy()
     assign_location(n)
     # Drop non-electric buses so they don't clutter the plot
@@ -242,7 +241,6 @@ def plot_map(
 
 
 def plot_h2_map(network):
-
     n = network.copy()
     if "H2 pipeline" not in n.links.carrier.unique():
         return
@@ -344,7 +342,6 @@ def plot_h2_map(network):
 
 
 def plot_map_without(network):
-
     n = network.copy()
     assign_location(n)
 
@@ -415,7 +412,6 @@ def plot_map_without(network):
 
 
 def plot_series(network, carrier="AC", name="test"):
-
     n = network.copy()
     assign_location(n)
     assign_carriers(n)
