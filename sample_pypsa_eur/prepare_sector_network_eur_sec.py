@@ -1590,7 +1590,8 @@ def add_heat(n, costs):
                 tes_time_constant_days = options["tes_tau"][name_type]
             else:
                 logger.warning(
-                    "Deprecated: a future version will require you to specify 'tes_tau' for 'decentral' and 'central' separately.")
+                    "Deprecated: a future version will require you to specify 'tes_tau' for 'decentral' and 'central' separately."
+                )
                 tes_time_constant_days = (
                     options["tes_tau"] if name_type == "decentral" else 180.0
                 )
@@ -2627,7 +2628,7 @@ if __name__ == "__main__":
         if o[:4] == "wave":
             wave_cost_factor = float(o[4:].replace("p", ".").replace("m", "-"))
             print("Including wave generators with cost factor of", wave_cost_factor)
-            #add_wave(n, wave_cost_factor) # TODO removed for now
+            # add_wave(n, wave_cost_factor) # TODO removed for now
         if o[:4] == "dist":
             options["electricity_distribution_grid"] = True
             options["electricity_distribution_grid_cost_factor"] = float(
