@@ -764,5 +764,5 @@ if __name__ == "__main__":
     plot_h2_map(n)
     plot_map_without(n)
 
-    plot_series(n, carrier="AC", name=suffix)
+    plot_series(n, carrier="AC", name="suffix")
     # plot_series(n, carrier="heat", name=suffix)
