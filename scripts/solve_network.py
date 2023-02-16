@@ -404,7 +404,7 @@ if __name__ == "__main__":
         n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
         
         if snakemake.config["custom_data"]["add_existing"] and snakemake.wildcards.planning_horizons=="2050":
-            n = add_existing(n)
+            add_existing(n)
         n = prepare_network(n, solve_opts)
 
         n = solve_network(
