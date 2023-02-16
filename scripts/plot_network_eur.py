@@ -410,6 +410,7 @@ def plot_map_without(network):
 
     fig.savefig(snakemake.output.today, transparent=True, bbox_inches="tight")
 
+
 # TODO function redefinition
 # def plot_series(network, carrier="AC", name="test"):
 
