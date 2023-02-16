@@ -88,7 +88,6 @@ def prepare_transport_data(n):
     nodal_transport_shape = transport_shape / transport_shape.sum().sum()
     transport_shape = transport_shape / transport_shape.sum()
 
-
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
 
     nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.0)
@@ -145,10 +144,8 @@ def prepare_transport_data(n):
 
     if snakemake.config["custom_data"]["transport_demand"]:
         energy_totals_transport = nodal_energy_totals["total road"]
-           
-        transport = (
-            (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
-        )
+
+        transport = transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears
     else:
         energy_totals_transport = (
             nodal_energy_totals["total road"]

@@ -37,7 +37,6 @@ if __name__ == "__main__":
     I = cutout.indicatormatrix(clustered_regions)
 
     for area in ["total", "rural", "urban"]:
-
         pop_layout = xr.open_dataarray(snakemake.input[f"pop_layout_{area}"])
 
         stacked_pop = pop_layout.stack(spatial=("y", "x"))

@@ -72,7 +72,6 @@ rule solve_all_networks:
             **config["scenario"],
             **config["costs"],
             **config["export"]
-
         ),
 
 
@@ -486,7 +485,6 @@ rule run_test:
         import yaml
 
         with open("../pypsa-earth/config.tutorial.yaml") as file:
-
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
