@@ -25,6 +25,7 @@ repos:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
 
+
 # # Find common spelling mistakes in comments and docstrings
 # - repo: https://github.com/codespell-project/codespell
 #   rev: v2.2.1

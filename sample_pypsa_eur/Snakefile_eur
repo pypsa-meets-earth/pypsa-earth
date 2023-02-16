@@ -259,7 +259,6 @@ if config["sector"]["biomass_transport"]:
         script:
             "scripts/build_biomass_transport_costs.py"
 
-
     build_biomass_transport_costs_output = rules.build_biomass_transport_costs.output
 
 
@@ -429,7 +428,6 @@ if config["sector"]["retrofitting"]["retro_endogen"]:
             "benchmarks/build_retro_cost/s{simpl}_{clusters}"
         script:
             "scripts/build_retro_cost.py"
-
 
     build_retro_cost_output = rules.build_retro_cost.output
 
@@ -665,7 +663,6 @@ if config["foresight"] == "myopic":
             )
         script:
             "scripts/add_existing_baseyear.py"
-
 
     def solved_previous_horizon(wildcards):
         planning_horizons = config["scenario"]["planning_horizons"]
