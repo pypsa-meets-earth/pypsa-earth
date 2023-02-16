@@ -17,7 +17,6 @@ pypsa.pf.logger.setLevel(logging.WARNING)
 
 
 def add_land_use_constraint(n):
-
     if "m" in snakemake.wildcards.clusters:
         _add_land_use_constraint_m(n)
     else:
@@ -47,7 +46,6 @@ def _add_land_use_constraint_m(n):
     current_horizon = snakemake.wildcards.planning_horizons
 
     for carrier in ["solar", "onwind", "offwind-ac", "offwind-dc"]:
-
         existing = n.generators.loc[n.generators.carrier == carrier, "p_nom"]
         ind = list(
             set(
@@ -78,7 +76,6 @@ def _add_land_use_constraint_m(n):
 
 
 def prepare_network(n, solve_opts=None):
-
     if "clip_p_max_pu" in solve_opts:
         for df in (
             n.generators_t.p_max_pu,
@@ -131,7 +128,6 @@ def prepare_network(n, solve_opts=None):
 
 
 def add_battery_constraints(n):
-
     chargers_b = n.links.carrier.str.contains("battery charger")
     chargers = n.links.index[chargers_b & n.links.p_nom_extendable]
     dischargers = chargers.str.replace("charger", "discharger")
@@ -190,7 +186,6 @@ def H2_export_yearly_constraint(n):
 
 
 def add_chp_constraints(n):
-
     electric_bool = (
         n.links.index.str.contains("urban central")
         & n.links.index.str.contains("CHP")
@@ -214,7 +209,6 @@ def add_chp_constraints(n):
     link_p = get_var(n, "Link", "p")
 
     if not electric_ext.empty:
-
         link_p_nom = get_var(n, "Link", "p_nom")
 
         # ratio of output heat to electricity set by p_nom_ratio
@@ -239,7 +233,6 @@ def add_chp_constraints(n):
         define_constraints(n, lhs, "<=", 0, "chplink", "top_iso_fuel_line_ext")
 
     if not electric_fix.empty:
-
         # top_iso_fuel_line for fixed
         lhs = linexpr((1, link_p[heat_fix]), (1, link_p[electric_fix].values))
 
@@ -248,7 +241,6 @@ def add_chp_constraints(n):
         define_constraints(n, lhs, "<=", rhs, "chplink", "top_iso_fuel_line_fix")
 
     if not electric.empty:
-
         # backpressure
         lhs = linexpr(
             (
@@ -262,7 +254,6 @@ def add_chp_constraints(n):
 
 
 def add_co2_sequestration_limit(n, sns):
-
     co2_stores = n.stores.loc[n.stores.carrier == "co2 stored"].index
 
     if co2_stores.empty or ("Store", "e") not in n.variables.index:
@@ -351,7 +342,6 @@ if __name__ == "__main__":
 
     fn = getattr(snakemake.log, "memory", None)
     with memory_logger(filename=fn, interval=30.0) as mem:
-
         overrides = override_component_attrs(snakemake.input.overrides)
         n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 

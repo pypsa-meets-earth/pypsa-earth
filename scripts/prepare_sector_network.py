@@ -85,7 +85,6 @@ def add_generation(n, costs):
     conventionals = options.get("conventional_generation", fallback)
 
     for generator, carrier in conventionals.items():
-
         add_carrier_buses(n, carrier)
 
         n.madd(
@@ -179,7 +178,6 @@ def add_oil(n, costs):
 
 
 def add_gas(n, costs):
-
     spatial.gas = SimpleNamespace()
 
     if options["gas_network"]:
@@ -268,7 +266,6 @@ def add_hydrogen(n, costs):
 
     cavern_nodes = pd.DataFrame()
     if options["hydrogen_underground_storage"]:
-
         h2_salt_cavern_potential = pd.read_csv(
             snakemake.input.h2_cavern, index_col=0, squeeze=True
         )
@@ -392,7 +389,6 @@ def define_spatial(nodes):
 
 
 def add_biomass(n, costs):
-
     print("adding biomass")
 
     # TODO get biomass potentials dataset and enable spatially resolved potentials
@@ -457,7 +453,6 @@ def add_biomass(n, costs):
     )
 
     if options["biomass_transport"]:
-
         # TODO add biomass transport costs
         transport_costs = pd.read_csv(
             snakemake.input.biomass_transport_costs, index_col=0, squeeze=True
@@ -660,7 +655,6 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
@@ -783,7 +777,6 @@ def add_storage(n, costs):
 def h2_hc_conversions(n, costs):
     "function to add the conversion technologies between H2 and hydrocarbons"
     if options["methanation"]:
-
         n.madd(
             "Link",
             spatial.nodes,
@@ -803,7 +796,6 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["helmeth"]:
-
         n.madd(
             "Link",
             spatial.nodes,
@@ -821,7 +813,6 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["SMR"]:
-
         n.madd(
             "Link",
             spatial.nodes,
@@ -855,7 +846,6 @@ def h2_hc_conversions(n, costs):
 
 
 def add_shipping(n, costs):
-
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
     ports = ports[ports.country.isin(countries)]
 
@@ -909,7 +899,6 @@ def add_shipping(n, costs):
     ports = ports.fillna(0)
 
     if options["shipping_hydrogen_liquefaction"]:
-
         n.madd("Bus", nodes, suffix=" H2 liquid", carrier="H2 liquid", location=nodes)
 
         # link the H2 supply to liquified H2
@@ -939,7 +928,6 @@ def add_shipping(n, costs):
     )
 
     if shipping_hydrogen_share < 1:
-
         shipping_oil_share = 1 - shipping_hydrogen_share
 
         ports["p_set"] = ports["fraction"].apply(
@@ -982,7 +970,6 @@ def add_shipping(n, costs):
     if "oil" not in n.buses.carrier.unique():
         n.madd("Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil")
     if "oil" not in n.stores.carrier.unique():
-
         # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
         n.madd(
             "Store",
@@ -994,7 +981,6 @@ def add_shipping(n, costs):
         )
 
     if "oil" not in n.generators.carrier.unique():
-
         n.madd(
             "Generator",
             spatial.oil.nodes,
@@ -1006,7 +992,6 @@ def add_shipping(n, costs):
 
 
 def add_industry(n, costs):
-
     #     print("adding industrial demand")
     #     # 1e6 to convert TWh to MWh
 
@@ -1344,7 +1329,6 @@ def add_land_transport(n, costs):
     # nodes = pop_layout.index
 
     if electric_share > 0:
-
         n.add("Carrier", "Li ion")
 
         n.madd(
@@ -1399,7 +1383,6 @@ def add_land_transport(n, costs):
         )
 
     if electric_share > 0 and options["v2g"]:
-
         n.madd(
             "Link",
             nodes,
@@ -1413,7 +1396,6 @@ def add_land_transport(n, costs):
         )
 
     if electric_share > 0 and options["bev_dsm"]:
-
         e_nom = (
             nodal_transport_data["number cars"]
             * options.get("bev_energy", 0.05)
@@ -1434,7 +1416,6 @@ def add_land_transport(n, costs):
         )
 
     if fuel_cell_share > 0:
-
         n.madd(
             "Load",
             nodes,
@@ -1447,7 +1428,6 @@ def add_land_transport(n, costs):
         )
 
     if ice_share > 0:
-
         if "oil" not in n.buses.carrier.unique():
             n.madd(
                 "Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil"
@@ -1553,7 +1533,6 @@ def add_heat(n, costs):
     ]
 
     for name in heat_systems:
-
         name_type = "central" if name == "urban central" else "decentral"
 
         n.add("Carrier", name + " heat")
@@ -1633,7 +1612,6 @@ def add_heat(n, costs):
         )
 
         if options["tes"]:
-
             n.add("Carrier", name + " water tanks")
 
             n.madd(
@@ -1690,7 +1668,6 @@ def add_heat(n, costs):
             )
 
         if options["boilers"]:
-
             key = f"{name_type} resistive heater"
 
             n.madd(
@@ -1723,7 +1700,6 @@ def add_heat(n, costs):
             )
 
         if options["solar_thermal"]:
-
             n.add("Carrier", name + " solar thermal")
 
             n.madd(
@@ -1739,7 +1715,6 @@ def add_heat(n, costs):
             )
 
         if options["chp"] and name == "urban central":
-
             # add gas CHP; biomass CHP is added in biomass section
             n.madd(
                 "Link",
@@ -1799,7 +1774,6 @@ def add_heat(n, costs):
             )
 
         if options["chp"] and options["micro_chp"] and name != "urban central":
-
             n.madd(
                 "Link",
                 nodes[name] + f" {name} micro gas CHP",
@@ -1937,7 +1911,6 @@ def average_every_nhours(n, offset):
 
 
 def add_dac(n, costs):
-
     heat_carriers = ["urban central heat", "services urban decentral heat"]
     heat_buses = n.buses.index[n.buses.carrier.isin(heat_carriers)]
     locations = n.buses.location[heat_buses]
@@ -1969,7 +1942,6 @@ def add_dac(n, costs):
 
 
 def add_services(n, costs):
-
     # TODO make compatible with more counties
     profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
 
@@ -2002,7 +1974,6 @@ def add_agriculture(n, costs):
 
 
 def add_residential(n, costs):
-
     # TODO make compatible with more counties
     profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
 

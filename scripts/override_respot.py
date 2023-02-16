@@ -13,7 +13,6 @@ from helpers import mock_snakemake, override_component_attrs, sets_path_to_root
 
 
 def override_values(tech, year, dr):
-
     custom_res_t = pd.read_csv(
         snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)],
         index_col=0,
@@ -33,7 +32,6 @@ def override_values(tech, year, dr):
     custom_res = custom_res.set_index("Generator")
 
     if tech.replace("-", " ") in n.generators.carrier.unique():
-
         to_drop = n.generators[n.generators.carrier == tech].index
         n.mremove("Generator", to_drop)
 
@@ -96,9 +94,7 @@ if __name__ == "__main__":
         print("No RES potential techs to override...")
 
     if snakemake.config["custom_data"]["elec_demand"]:
-
         for country in countries:
-
             n.loads_t.p_set.filter(like=country)[buses] = (
                 (
                     n.loads_t.p_set.filter(like=country)[buses]

@@ -18,7 +18,6 @@ from matplotlib.patches import Circle, Ellipse
 
 def assign_location(n):
     for c in n.iterate_components(n.one_port_components | n.branch_components):
-
         ifind = pd.Series(c.df.index.str.find(" ", start=4), c.df.index)
 
         for i in ifind.value_counts().index:
@@ -368,7 +367,6 @@ def plot_smr(network):
 
 
 def plot_transmission_topology(network):
-
     n = network.copy()
     bus_size_factor = 1e5  # Def 1e5
     linewidth_factor = 2e4  # Def 1e4
@@ -480,7 +478,6 @@ preferred_order = pd.Index(
 
 
 def rename_techs(label):
-
     prefix_to_remove = [
         "residential ",
         "services ",
@@ -573,7 +570,6 @@ def plot_map(
     transmission=False,
     geometry=True,
 ):
-
     n = network.copy()
     assign_location(n)
     # Drop non-electric buses so they don't clutter the plot

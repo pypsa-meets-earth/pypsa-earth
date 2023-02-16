@@ -12,7 +12,6 @@ from prepare_sector_network import get
 
 
 def industry_prod_tomorrow(production):
-
     production_tomorrow = production.copy()
     # Steel production
 
