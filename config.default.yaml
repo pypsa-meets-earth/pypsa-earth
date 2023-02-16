@@ -33,7 +33,7 @@ clustering_options:
 
 countries: ['MA']
 
-H2_network: False
+H2_network: false
 H2_network_limit: 2000 #GWkm
 
 fossil_reserves:
