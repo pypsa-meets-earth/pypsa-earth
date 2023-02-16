@@ -1,14 +1,15 @@
-# SPDX-FileCopyrightText: 2022 The PyPSA-Africa and Eur Authors
+# SPDX-FileCopyrightText: 2022 The PyPSA-Earth and Eur Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
-# Copied from https://github.com/pypsa-meets-africa/pypsa-africa/blob/main/.pre-commit-config.yaml
+# Copied from https://github.com/PyPSA/pypsa-eur/pull/302/files
 
-exclude: "^LICENSES"
+exclude: ^(LICENSES|README.md)
+
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.3.0
+  rev: v4.4.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
@@ -19,23 +20,23 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 5.10.1
+  rev: 5.12.0
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
 
-# Find common spelling mistakes in comments and docstrings
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.2.1
-  hooks:
-  - id: codespell
-    args: ['--ignore-regex="\b[A-Z]+\b"'] # Ignore capital case words, e.g. country codes
-    types_or: [python, rst, markdown]
-    files: ^(actions|doc)/
+# # Find common spelling mistakes in comments and docstrings
+# - repo: https://github.com/codespell-project/codespell
+#   rev: v2.2.1
+#   hooks:
+#   - id: codespell
+#     args: ['--ignore-regex="\b[A-Z]+\b"'] # Ignore capital case words, e.g. country codes
+#     types_or: [python, rst, markdown]
+#     files: ^(actions|doc)/
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 22.8.0
+  rev: 23.1.0
   hooks:
   # Format Python files
   - id: black
@@ -44,21 +45,21 @@ repos:
 
 # Do YAML formatting (before the linter checks it for misses)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.4.0
+  rev: v2.6.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2', --preserve-quotes]
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.28.0
+  rev: v1.29.0
   hooks:
   - id: yamllint
     args: [--format, parsable, -c=.yamllint]
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.6.1
+  rev: v0.8.1
   hooks:
   - id: snakefmt
 
