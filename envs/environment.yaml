@@ -16,7 +16,7 @@ dependencies:
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
 - powerplantmatching>=0.5.6
-- earth-osm==0.0.8  # until 0.1.0
+- earth-osm>=0.0.8  # until 0.1.0
 
   # Dependencies of the workflow itself
 - xlrd
