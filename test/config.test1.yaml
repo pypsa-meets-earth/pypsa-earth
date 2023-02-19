@@ -32,15 +32,27 @@ policy_config:
   policy: "" #"H2_export_yearly_constraint"
 
 countries: ['NG', 'BJ']
+H2_network: false
+H2_network_limit: 2000 #GWkm
+
+fossil_reserves:
+  oil: 100 #TWh Maybe reduntant
+
+hydrogen_underground_storage: false
+
 
 export:
-  export_h2: 10000000 # Yearly export demand in MWh
+  h2export: [1, 5] # Yearly export demand in TWh
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
   elec_demand: false
+  heat_demand: false
   industry_demand: false
+  transport_demand: false
   water_costs: false
+  h2_underground: false
+  add_existing: false
 
 costs:
   lifetime: 25 #default lifetime
@@ -239,9 +251,10 @@ sector:
 
 # snapshots are originally set in PyPSA-Earth/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
+  # arguments to pd.date_range
   start: "2013-03-1"
   end: "2013-03-7"
-  inclusive: "left" # end is not inclusive
+  closed: "left" # end is not inclusive
 
 # atlite:
 #   cutout: ./cutouts/africa-2013-era5.nc

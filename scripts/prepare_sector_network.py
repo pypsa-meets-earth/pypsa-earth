@@ -85,7 +85,6 @@ def add_generation(n, costs):
     conventionals = options.get("conventional_generation", fallback)
 
     for generator, carrier in conventionals.items():
-
         add_carrier_buses(n, carrier)
         carrier_nodes = vars(spatial)[carrier].nodes
         n.madd(
@@ -156,7 +155,7 @@ def add_oil(n, costs):
     #     n.add("Bus", "Africa oil", location="Africa", carrier="oil")
 
     # if "Africa oil Store" not in n.stores.index:
-        
+
     e_initial = (snakemake.config["fossil_reserves"]).get("oil", 0) * 1e6
     # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
     n.madd(
@@ -193,7 +192,6 @@ def add_oil(n, costs):
 
 
 def add_gas(n, costs):
-
     spatial.gas = SimpleNamespace()
 
     if options["gas_network"]:
@@ -283,16 +281,15 @@ def add_hydrogen(n, costs):
     cavern_nodes = pd.DataFrame()
     if snakemake.config["hydrogen_underground_storage"]:
         if snakemake.config["custom_data"]["h2_underground"]:
-            
-            custom_cavern=pd.read_csv("resources/custom_data/h2_underground.csv")
-            countries=n.buses.country.unique().to_list()
+            custom_cavern = pd.read_csv("resources/custom_data/h2_underground.csv")
+            countries = n.buses.country.unique().to_list()
             custom_cavern = custom_cavern[custom_cavern.country.isin(countries)]
             cavern_nodes = n.buses[n.buses.country.isin(custom_cavern.country.index)]
             h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
-            
+
             h2_pot = custom_cavern.loc[cavern_nodes.country]
             h2_pot.index = cavern_nodes.index
-            
+
             n.madd(
                 "Store",
                 cavern_nodes.index + " H2 Store",
@@ -303,24 +300,23 @@ def add_hydrogen(n, costs):
                 carrier="H2 Store",
                 capital_cost=h2_capital_cost,
             )
-        
+
         else:
-            
             h2_salt_cavern_potential = pd.read_csv(
                 snakemake.input.h2_cavern, index_col=0, squeeze=True
             )
             h2_cavern_ct = h2_salt_cavern_potential[~h2_salt_cavern_potential.isna()]
             cavern_nodes = n.buses[n.buses.country.isin(h2_cavern_ct.index)]
-    
+
             h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
-    
+
             # assumptions: weight storage potential in a country by population
             # TODO: fix with real geographic potentials
             # convert TWh to MWh with 1e6
             h2_pot = h2_cavern_ct.loc[cavern_nodes.country]
             h2_pot.index = cavern_nodes.index
             # h2_pot = h2_pot * cavern_nodes.fraction * 1e6
-    
+
             n.madd(
                 "Store",
                 cavern_nodes.index + " H2 Store",
@@ -430,7 +426,6 @@ def define_spatial(nodes):
 
 
 def add_biomass(n, costs):
-
     print("adding biomass")
 
     # TODO get biomass potentials dataset and enable spatially resolved potentials
@@ -513,7 +508,6 @@ def add_biomass(n, costs):
     )
 
     if options["biomass_transport"]:
-
         # TODO add biomass transport costs
         transport_costs = pd.read_csv(
             snakemake.input.biomass_transport_costs, index_col=0, squeeze=True
@@ -730,7 +724,6 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
@@ -853,7 +846,6 @@ def add_storage(n, costs):
 def h2_hc_conversions(n, costs):
     "function to add the conversion technologies between H2 and hydrocarbons"
     if options["methanation"]:
-
         n.madd(
             "Link",
             spatial.nodes,
@@ -873,7 +865,6 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["helmeth"]:
-
         n.madd(
             "Link",
             spatial.nodes,
@@ -891,7 +882,6 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["SMR"]:
-
         n.madd(
             "Link",
             spatial.nodes,
@@ -925,7 +915,6 @@ def h2_hc_conversions(n, costs):
 
 
 def add_shipping(n, costs):
-
     ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
     ports = ports[ports.country.isin(countries)]
 
@@ -979,7 +968,6 @@ def add_shipping(n, costs):
     ports = ports.fillna(0)
 
     if options["shipping_hydrogen_liquefaction"]:
-
         n.madd("Bus", nodes, suffix=" H2 liquid", carrier="H2 liquid", location=nodes)
 
         # link the H2 supply to liquified H2
@@ -1009,7 +997,6 @@ def add_shipping(n, costs):
     )
 
     if shipping_hydrogen_share < 1:
-
         shipping_oil_share = 1 - shipping_hydrogen_share
 
         ports["p_set"] = ports["fraction"].apply(
@@ -1034,8 +1021,7 @@ def add_shipping(n, costs):
         co2 = (
             shipping_oil_share
             * ports["p_set"].sum()
-    
-            #/ 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+            # / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
             # the current way leads to inaccuracies in the last timestep in case
             # the timestep if 8760 is not divisble by it),
             * costs.at["oil", "CO2 intensity"]
@@ -1052,7 +1038,6 @@ def add_shipping(n, costs):
     if "oil" not in n.buses.carrier.unique():
         n.madd("Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil")
     if "oil" not in n.stores.carrier.unique():
-
         # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
         n.madd(
             "Store",
@@ -1064,7 +1049,6 @@ def add_shipping(n, costs):
         )
 
     if "oil" not in n.generators.carrier.unique():
-
         n.madd(
             "Generator",
             spatial.oil.nodes,
@@ -1414,7 +1398,6 @@ def add_land_transport(n, costs):
     # nodes = pop_layout.index
 
     if electric_share > 0:
-
         n.add("Carrier", "Li ion")
 
         n.madd(
@@ -1469,7 +1452,6 @@ def add_land_transport(n, costs):
         )
 
     if electric_share > 0 and options["v2g"]:
-
         n.madd(
             "Link",
             nodes,
@@ -1483,7 +1465,6 @@ def add_land_transport(n, costs):
         )
 
     if electric_share > 0 and options["bev_dsm"]:
-
         e_nom = (
             nodal_transport_data["number cars"]
             * options.get("bev_energy", 0.05)
@@ -1504,7 +1485,6 @@ def add_land_transport(n, costs):
         )
 
     if fuel_cell_share > 0:
-
         n.madd(
             "Load",
             nodes,
@@ -1517,7 +1497,6 @@ def add_land_transport(n, costs):
         )
 
     if ice_share > 0:
-
         if "oil" not in n.buses.carrier.unique():
             n.madd(
                 "Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil"
@@ -1624,7 +1603,6 @@ def add_heat(n, costs):
     ]
 
     for name in heat_systems:
-
         name_type = "central" if name == "urban central" else "decentral"
 
         n.add("Carrier", name + " heat")
@@ -1704,7 +1682,6 @@ def add_heat(n, costs):
         )
 
         if options["tes"]:
-
             n.add("Carrier", name + " water tanks")
 
             n.madd(
@@ -1761,7 +1738,6 @@ def add_heat(n, costs):
             )
 
         if options["boilers"]:
-
             key = f"{name_type} resistive heater"
 
             n.madd(
@@ -1794,7 +1770,6 @@ def add_heat(n, costs):
             )
 
         if options["solar_thermal"]:
-
             n.add("Carrier", name + " solar thermal")
 
             n.madd(
@@ -1810,7 +1785,6 @@ def add_heat(n, costs):
             )
 
         if options["chp"] and name == "urban central":
-
             # add gas CHP; biomass CHP is added in biomass section
             n.madd(
                 "Link",
@@ -1870,7 +1844,6 @@ def add_heat(n, costs):
             )
 
         if options["chp"] and options["micro_chp"] and name != "urban central":
-
             n.madd(
                 "Link",
                 nodes[name] + f" {name} micro gas CHP",
@@ -2008,7 +1981,6 @@ def average_every_nhours(n, offset):
 
 
 def add_dac(n, costs):
-
     heat_carriers = ["urban central heat", "services urban decentral heat"]
     heat_buses = n.buses.index[n.buses.carrier.isin(heat_carriers)]
     locations = n.buses.location[heat_buses]
@@ -2040,7 +2012,6 @@ def add_dac(n, costs):
 
 
 def add_services(n, costs):
-
     # TODO make compatible with more counties
     profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
 
@@ -2118,43 +2089,64 @@ def add_agriculture(n, costs):
     )
 
 def add_residential(n, costs):
-    #need to adapt for many countries #TODO
-
-
+    # need to adapt for many countries #TODO
 
     if snakemake.config["custom_data"]["heat_demand"]:
         # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
         # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
-        
-        heat_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='rural heat').dropna(axis=1).columns
-        oil_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='oil').dropna(axis=1).columns
-        bio_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='biomass').dropna(axis=1).columns
 
-        heat_shape=(
-            n.loads_t.p_set.loc[:,heat_ind]
-            / n.loads_t.p_set.loc[:,heat_ind].sum().sum()
+        heat_ind = (
+            n.loads_t.p_set.filter(like=countries[0])
+            .filter(like="residential")
+            .filter(like="heat")
+            .dropna(axis=1)
+            .columns
+        )
+        oil_ind = (
+            n.loads_t.p_set.filter(like=countries[0])
+            .filter(like="residential")
+            .filter(like="oil")
+            .dropna(axis=1)
+            .columns
+        )
+        bio_ind = (
+            n.loads_t.p_set.filter(like=countries[0])
+            .filter(like="residential")
+            .filter(like="biomass")
+            .dropna(axis=1)
+            .columns
+        )
+
+        heat_shape = (
+            n.loads_t.p_set.loc[:, heat_ind]
+            / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
         )
         heat_oil_demand = (
-            heat_shape
-            * energy_totals.loc[countries[0], "residential heat oil"]
-            * 1e6
+            heat_shape * energy_totals.loc[countries[0], "residential heat oil"] * 1e6
         )
-        
+
         heat_biomass_demand = (
             heat_shape
             * energy_totals.loc[countries[0], "residential heat biomass"]
             * 1e6
         )
 
-        n.loads_t.p_set.loc[:, heat_ind] = heat_shape * \
-        ( energy_totals.loc[countries, "total residential space"].sum() +
-         energy_totals.loc[countries, "total residential water"].sum() -
-         energy_totals.loc[countries[0], "residential heat biomass"] -
-         energy_totals.loc[countries[0], "residential heat oil"]) * 1e6
+        n.loads_t.p_set.loc[:, heat_ind] = (
+            heat_shape
+            * (
+                energy_totals.loc[countries, "total residential space"].sum()
+                + energy_totals.loc[countries, "total residential water"].sum()
+                - energy_totals.loc[countries[0], "residential heat biomass"]
+                - energy_totals.loc[countries[0], "residential heat oil"]
+            )
+            * 1e6
+        )
 
         # TODO make compatible with more counties
-        profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
-    
+        profile_residential = (
+            n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
+        )
+
         p_set_oil = (
             profile_residential
             * energy_totals.loc[countries, "residential oil"].sum()
@@ -2231,11 +2223,13 @@ def add_residential(n, costs):
             
         if snakemake.config["custom_data"]["elec_demand"]:
             for country in countries:
-                #indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
-                
-                buses = n.buses[(n.buses.carrier=='AC') & (n.buses.country==country)].index
+                # indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
 
-                n.loads_t.p_set.loc[:,buses] = (
+                buses = n.buses[
+                    (n.buses.carrier == "AC") & (n.buses.country == country)
+                ].index
+
+                n.loads_t.p_set.loc[:, buses] = (
                     (
                         n.loads_t.p_set.filter(like=country)[buses]
                         / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
@@ -2243,6 +2237,7 @@ def add_residential(n, costs):
                     * energy_totals.loc[country, "electricity residential"]
                     * 1e6
                 )
+
 
 def add_custom_water_cost(n):
     for country in countries:
@@ -2501,8 +2496,6 @@ if __name__ == "__main__":
         
 
 
-
-
     sopts = snakemake.wildcards.sopts.split("-")
 
     for o in sopts:
@@ -2518,8 +2511,6 @@ if __name__ == "__main__":
         add_custom_water_cost(n)
     # n.lines.s_nom*=0.3
     n.export_to_netcdf(snakemake.output[0])
-
-
 
     # n.lopf()
 

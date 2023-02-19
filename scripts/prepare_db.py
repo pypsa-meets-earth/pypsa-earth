@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 
-#%%
+# %%
 
 # base_path = os.path.dirname(os.path.realpath(__file__))
 # dataset_paths = {'IGG': os.path.join(base_path, 'IGG', 'data'),
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     tech_colors = snakemake.config["plotting"]["tech_colors"]
 
 
-#%%
+# %%
 # def summary_h2(n, t):
 t = 720
 
@@ -419,7 +419,7 @@ add_store("co2 stored", "co2 stored")
 
 # add
 # REMEMER TO ADD ALL DECENTRAL SHIT
-#%%
+# %%
 
 # summary_elec['h2_t_pipeline'] = summary_elec.appy(lambda row: h2_net_flow(n0, row.name, 24), axis=1)
 
@@ -432,9 +432,11 @@ db.reset_index(drop=True, inplace=True)
 # round(db).to_csv('db_fraction.csv')
 round(db).to_csv(snakemake.output.db)
 yearly_agg = round(db.groupby([db.node_id, db.carrier, db.flow, db.tech]).sum() / 1e3)
+
+
 # yearly_agg.to_csv('summary_db.csv')
 # yearly_agg.to_csv(snakemake.output.yr_agg)
-#%%
+# %%
 def calc_energy_flow(carrier, node_id):
     agg = yearly_agg.reset_index()
     agg = agg[(agg.carrier == carrier)]

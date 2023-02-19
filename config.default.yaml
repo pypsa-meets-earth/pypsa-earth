@@ -33,7 +33,7 @@ clustering_options:
 
 countries: ['MA']
 
-H2_network: False
+H2_network: false
 H2_network_limit: 2000 #GWkm
 
 fossil_reserves:
@@ -43,7 +43,7 @@ hydrogen_underground_storage: false
 
 
 export:
-  export_h2: [1, 5] # Yearly export demand in TWh
+  h2export: [1, 5] # Yearly export demand in TWh
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']

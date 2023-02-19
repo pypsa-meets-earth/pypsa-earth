@@ -13,7 +13,6 @@ import pandas as pd
 
 
 def country_to_nodal(industrial_production, keys):
-
     keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
 
     nodal_production = pd.DataFrame(
@@ -24,7 +23,6 @@ def country_to_nodal(industrial_production, keys):
     sectors = industrial_production.columns
 
     for country, sector in product(countries, sectors):
-
         buses = keys.index[keys.country == country]
 
         if sector not in dist_keys.columns or dist_keys[sector].sum() == 0:
