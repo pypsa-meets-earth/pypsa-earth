@@ -93,3 +93,9 @@ simplify_network
 
 .. automodule:: simplify_network
     :members:
+
+make_statistics
+-------------------------------
+
+.. automodule:: make_statistics
+    :members:

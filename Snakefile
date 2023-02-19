@@ -50,7 +50,7 @@ if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
     COSTS = "data/costs.csv"
-ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 20)
+ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 10)
 
 
 wildcard_constraints:
@@ -352,7 +352,7 @@ rule build_demand_profiles:
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
-        "resources/demand_profiles.csv",
+        "resources/" + RDIR + "demand_profiles.csv",
     log:
         "logs/" + RDIR + "build_demand_profiles.log",
     benchmark:
@@ -366,7 +366,6 @@ rule build_demand_profiles:
 
 rule build_renewable_profiles:
     input:
-        base_network="networks/" + RDIR + "base.nc",
         natura="resources/" + RDIR + "natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         gebco="data/gebco/GEBCO_2021_TID.nc",
@@ -863,6 +862,14 @@ rule build_test_configs:
         "scripts/build_test_configs.py"
 
 
+rule make_statistics:
+    output:
+        stats="results/" + RDIR + "stats.csv",
+    threads: 1
+    script:
+        "scripts/make_statistics.py"
+
+
 rule run_scenario:
     input:
         default_config=DEFAULT_CONFIG,
@@ -884,9 +891,8 @@ rule run_scenario:
         )
         # merge the default config file with the difference
         create_test_config(input.default_config, input.diff_config, "config.yaml")
-        os.system(
-            "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
-        )
+        os.system("snakemake -j all solve_all_networks --rerun-incomplete")
+        os.system("snakemake -j1 make_statistics --force")
         copyfile("config.yaml", output.copyconfig)
 
 
