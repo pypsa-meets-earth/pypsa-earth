@@ -142,7 +142,8 @@ from _helpers import (
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
 from pypsa.networkclustering import (
-    _make_consense,
+    busmap_by_greedy_modularity,
+    busmap_by_hac,
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
