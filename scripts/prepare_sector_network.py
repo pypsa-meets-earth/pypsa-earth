@@ -87,11 +87,11 @@ def add_generation(n, costs):
     for generator, carrier in conventionals.items():
 
         add_carrier_buses(n, carrier)
-
+        carrier_nodes = vars(spatial)[carrier].nodes
         n.madd(
             "Link",
             nodes + " " + generator,
-            bus0=spatial.gas.nodes,
+            bus0=carrier_nodes,
             bus1=nodes,
             bus2="co2 atmosphere",
             marginal_cost=costs.at[generator, "efficiency"]
@@ -166,9 +166,18 @@ def add_oil(n, costs):
         e_nom_extendable=True,
         e_cyclic=False,
         carrier="oil",
-        e_initial=e_initial
+        e_initial=e_initial,
+        marginal_cost=costs.at["oil", "fuel"]
 
     )
+    
+    # n.madd("Generator",
+    #     spatial.oil.nodes,
+    #     bus=spatial.oil.nodes,
+    #     p_nom_extendable=True,
+    #     carrier="oil",
+    #     marginal_cost=costs.at["oil", 'fuel']
+    # )
     
     
 
@@ -472,6 +481,24 @@ def add_biomass(n, costs):
         e_initial=biomass_potentials_spatial["solid biomass"],
     )
 
+    biomass_gen = "biomass EOP"
+    n.madd(
+                "Link",
+                nodes + " biomass EOP" ,
+                bus0=spatial.biomass.nodes,
+                bus1=nodes,
+                bus2="co2 atmosphere",
+                marginal_cost=costs.at[biomass_gen, "efficiency"]
+                * costs.at[biomass_gen, "VOM"],  # NB: VOM is per MWel
+                # NB: fixed cost is per MWel
+                capital_cost=costs.at[biomass_gen, "efficiency"]
+                * costs.at[biomass_gen, "fixed"],
+                p_nom_extendable=True,
+                carrier=biomass_gen,
+                efficiency=costs.at[biomass_gen, "efficiency"],
+                efficiency2=costs.at["solid biomass", "CO2 intensity"],
+                lifetime=costs.at[biomass_gen, "lifetime"],
+            )
     n.madd(
         "Link",
         spatial.gas.biogas_to_gas,
@@ -516,6 +543,20 @@ def add_biomass(n, costs):
             carrier="solid biomass transport",
         )
 
+    # n.madd(
+    #         "Link",
+    #         urban_central + " urban central solid biomass CHP",
+    #         bus0=spatial.biomass.df.loc[urban_central, "nodes"].values,
+    #         bus1=urban_central,
+    #         bus2=urban_central + " urban central heat",
+    #         carrier="urban central solid biomass CHP",
+    #         p_nom_extendable=True,
+    #         capital_cost=costs.at[key, "fixed"] * costs.at[key, "efficiency"],
+    #         marginal_cost=costs.at[key, "VOM"],
+    #         efficiency=costs.at[key, "efficiency"],
+    #         efficiency2=costs.at[key, "efficiency-heat"],
+    #         lifetime=costs.at[key, "lifetime"],
+    #     )
     # AC buses with district heating
     urban_central = n.buses.index[n.buses.carrier == "urban central heat"]
     if not urban_central.empty and options["chp"]:
@@ -604,16 +645,16 @@ def add_co2(n, costs):
         spatial.co2.nodes,
         location=spatial.co2.locations,
         carrier="co2 stored",
-        x=spatial.co2.x[0],
-        y=spatial.co2.y[0],
+        #x=spatial.co2.x[0],
+        #y=spatial.co2.y[0],
     )
-
+    """
     co2_stored_x = n.buses.filter(like="co2 stored", axis=0).loc[:, "x"]
     co2_stored_y = n.buses.loc[n.buses[n.buses.carrier == "co2 stored"].location].y
 
     n.buses[n.buses.carrier == "co2 stored"].x = co2_stored_x.values
     n.buses[n.buses.carrier == "co2 stored"].y = co2_stored_y.values
-
+    """
     # n.madd(
     #     "Store",
     #     spatial.co2.nodes.str[:-2] + "age",
@@ -1036,66 +1077,66 @@ def add_shipping(n, costs):
 
 def add_industry(n, costs):
 
-    #     print("adding industrial demand")
-    #     # 1e6 to convert TWh to MWh
+    print("adding industrial demand")
+    # 1e6 to convert TWh to MWh
 
-    # industrial_demand.reset_index(inplace=True)
+    #industrial_demand.reset_index(inplace=True)
 
-    # Add carrier Biomass
+    #Add carrier Biomass
 
-    # n.madd(
-    #     "Bus",
-    #     spatial.biomass.industry,
-    #     location=spatial.biomass.locations,
-    #     carrier="solid biomass for industry",
-    # )
+    n.madd(
+        "Bus",
+        spatial.biomass.industry,
+        location=spatial.biomass.locations,
+        carrier="solid biomass for industry",
+    )
 
-    # if options["biomass_transport"]:
-    #     p_set = (
-    #         industrial_demand.loc[spatial.biomass.locations, "solid biomass"].rename(
-    #             index=lambda x: x + " solid biomass for industry"
-    #         )
-    #         / 8760
-    #     )
-    # else:
-    #     p_set = industrial_demand["solid biomass"].sum() / 8760
+    if options["biomass_transport"]:
+        p_set = (
+            industrial_demand.loc[spatial.biomass.locations, "solid biomass"].rename(
+                index=lambda x: x + " solid biomass for industry"
+            )
+            / 8760
+        )
+    else:
+        p_set = industrial_demand["solid biomass"].sum() / 8760
 
-    # n.madd(
-    #     "Load",
-    #     spatial.biomass.industry,
-    #     bus=spatial.biomass.industry,
-    #     carrier="solid biomass for industry",
-    #     p_set=p_set,
-    # )
+    n.madd(
+        "Load",
+        spatial.biomass.industry,
+        bus=spatial.biomass.industry,
+        carrier="solid biomass for industry",
+        p_set=p_set,
+    )
 
-    # n.madd(
-    #     "Link",
-    #     spatial.biomass.industry,
-    #     bus0=spatial.biomass.nodes,
-    #     bus1=spatial.biomass.industry,
-    #     carrier="solid biomass for industry",
-    #     p_nom_extendable=True,
-    #     efficiency=1.0,
-    # )
+    n.madd(
+        "Link",
+        spatial.biomass.industry,
+        bus0=spatial.biomass.nodes,
+        bus1=spatial.biomass.industry,
+        carrier="solid biomass for industry",
+        p_nom_extendable=True,
+        efficiency=1.0,
+    )
 
-    # n.madd(
-    #     "Link",
-    #     spatial.biomass.industry_cc,
-    #     bus0=spatial.biomass.nodes,
-    #     bus1=spatial.biomass.industry,
-    #     bus2="co2 atmosphere",
-    #     bus3=spatial.co2.nodes,
-    #     carrier="solid biomass for industry CC",
-    #     p_nom_extendable=True,
-    #     capital_cost=costs.at["cement capture", "fixed"]
-    #     * costs.at["solid biomass", "CO2 intensity"],
-    #     efficiency=0.9,  # TODO: make config option
-    #     efficiency2=-costs.at["solid biomass", "CO2 intensity"]
-    #     * costs.at["cement capture", "capture_rate"],
-    #     efficiency3=costs.at["solid biomass", "CO2 intensity"]
-    #     * costs.at["cement capture", "capture_rate"],
-    #     lifetime=costs.at["cement capture", "lifetime"],
-    # )
+    n.madd(
+        "Link",
+        spatial.biomass.industry_cc,
+        bus0=spatial.biomass.nodes,
+        bus1=spatial.biomass.industry,
+        bus2="co2 atmosphere",
+        bus3=spatial.co2.nodes,
+        carrier="solid biomass for industry CC",
+        p_nom_extendable=True,
+        capital_cost=costs.at["cement capture", "fixed"]
+        * costs.at["solid biomass", "CO2 intensity"],
+        efficiency=0.9,  # TODO: make config option
+        efficiency2=-costs.at["solid biomass", "CO2 intensity"]
+        * costs.at["cement capture", "capture_rate"],
+        efficiency3=costs.at["solid biomass", "CO2 intensity"]
+        * costs.at["cement capture", "capture_rate"],
+        lifetime=costs.at["cement capture", "lifetime"],
+    )
 
     # CARRIER = FOSSIL GAS
 
@@ -1535,7 +1576,7 @@ def create_nodes_for_heat_sector():
     central_fraction = options["district_heating"]["potential"]
     # district heating share at each node
     dist_fraction_node = (
-        district_heat_share * pop_layout["urban_ct_fraction"] / pop_layout["fraction"]
+        district_heat_share["district heat share"] * pop_layout["urban_ct_fraction"] / pop_layout["fraction"]
     )
     nodes["urban central"] = dist_fraction_node.index
     # if district heating share larger than urban fraction -> set urban
@@ -1563,6 +1604,7 @@ def add_heat(n, costs):
     sectors = ["residential", "services"]
 
     nodes, dist_fraction, urban_fraction = create_nodes_for_heat_sector()
+
 
     # NB: must add costs of central heating afterwards (EUR 400 / kWpeak, 50a, 1% FOM from Fraunhofer ISE)
 
@@ -2006,20 +2048,45 @@ def add_services(n, costs):
         profile_residential
         * energy_totals.loc[countries, "services electricity"].sum()
         * 1e6
-        / 8760
     )
 
     n.madd(
         "Load",
         nodes,
-        suffix=" services",
+        suffix=" services electricity",
         bus=nodes,
         carrier="services electricity",
         p_set=p_set_elec,
     )
+    p_set_biomass = (
+        profile_residential
+        * energy_totals.loc[countries, "services biomass"].sum()
+        * 1e6
+    )
 
-
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services biomass",
+        bus=spatial.biomass.nodes,
+        carrier="services biomass",
+        p_set=p_set_biomass,
+    )
+    co2 = (
+         p_set_biomass.sum().sum()* costs.at["solid biomass", "CO2 intensity"]
+    )  / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+    # the current way leads to inaccuracies in the last timestep in case
+    # the timestep if 8760 is not divisble by it
+    
+    n.add(
+        "Load",
+        "services biomass emissions",
+        bus="co2 atmosphere",
+        carrier="biomass emissions",
+        p_set=-co2,
+    )
 def add_agriculture(n, costs):
+
     n.madd(
         "Load",
         nodes,
@@ -2028,7 +2095,27 @@ def add_agriculture(n, costs):
         carrier="agriculture electricity",
         p_set=nodal_energy_totals.loc[nodes, "agriculture electricity"] * 1e6 / 8760,
     )
-
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" agriculture oil",
+        bus=spatial.oil.nodes,
+        carrier="agriculture oil",
+        p_set=nodal_energy_totals.loc[nodes, "agriculture oil"] * 1e6 / 8760,
+    )
+    co2 = (
+         nodal_energy_totals.loc[nodes, "agriculture oil"] * 1e6 * costs.at["oil", "CO2 intensity"]
+    )  # / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+    # the current way leads to inaccuracies in the last timestep in case
+    # the timestep if 8760 is not divisble by it
+    
+    n.add(
+        "Load",
+        "agriculture oil emissions",
+        bus="co2 atmosphere",
+        carrier="oil emissions",
+        p_set=-co2,
+    )
 
 def add_residential(n, costs):
     #need to adapt for many countries #TODO
@@ -2039,7 +2126,7 @@ def add_residential(n, costs):
         # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
         # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
         
-        heat_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='heat').dropna(axis=1).columns
+        heat_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='rural heat').dropna(axis=1).columns
         oil_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='oil').dropna(axis=1).columns
         bio_ind=n.loads_t.p_set.filter(like=countries[0]).filter(like='residential').filter(like='biomass').dropna(axis=1).columns
 
@@ -2072,34 +2159,76 @@ def add_residential(n, costs):
             profile_residential
             * energy_totals.loc[countries, "residential oil"].sum()
             * 1e6
-            / 8760
         )+ heat_oil_demand.values
         
         p_set_biomass = (
             profile_residential
             * energy_totals.loc[countries, "residential biomass"].sum()
             * 1e6
-            / 8760
-        ) + heat_biomass_demand.values
+            ) + heat_biomass_demand.values
     
         n.madd(
             "Load",
             nodes,
-            suffix=" residential",
+            suffix=" residential oil",
             bus=spatial.oil.nodes,
             carrier="residential oil",
             p_set=p_set_oil,
         )
-    
+        co2 = (
+             p_set_oil.sum().sum()* costs.at["oil", "CO2 intensity"]
+        )  / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+        # the current way leads to inaccuracies in the last timestep in case
+        # the timestep if 8760 is not divisble by it
+
+        n.add(
+            "Load",
+            "residential oil emissions",
+            bus="co2 atmosphere",
+            carrier="oil emissions",
+            p_set=-co2,
+        )
         n.madd(
             "Load",
             nodes,
-            suffix=" residential",
+            suffix=" residential biomass",
             bus=spatial.biomass.nodes,
             carrier="residential biomass",
             p_set=p_set_biomass,
         )
         
+        co2 = (
+             p_set_oil.sum().sum()* costs.at["solid biomass", "CO2 intensity"]
+        )   / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
+        # the current way leads to inaccuracies in the last timestep in case
+        # the timestep if 8760 is not divisble by it
+
+        n.add(
+            "Load",
+            "residential biomass emissions",
+            bus="co2 atmosphere",
+            carrier="biomass emissions",
+            p_set=-co2,
+        )
+        
+        for country in countries:
+            rem_heat_demand=(
+                energy_totals.loc[country, "total residential space"] +
+                energy_totals.loc[country, "total residential water"] -
+                energy_totals.loc[country, "residential heat biomass"] - 
+                energy_totals.loc[country, "residential heat oil"]
+                )
+                             
+            heat_buses=(n.loads_t.p_set.filter(regex='heat')).columns
+            n.loads_t.p_set.loc[:,heat_buses] = (
+                (
+                    n.loads_t.p_set.filter(like=country)[heat_buses]
+                    / n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum()
+                )
+                * rem_heat_demand
+                * 1e6
+                )
+            
         if snakemake.config["custom_data"]["elec_demand"]:
             for country in countries:
                 #indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
@@ -2136,6 +2265,35 @@ def add_custom_water_cost(n):
         # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).apply(lambda x: water_costs[x.index], axis=0)
         # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
+def add_rail_transport(n, costs):
+
+    p_set_elec =nodal_energy_totals.loc[nodes, "electricity rail"] 
+    p_set_oil = (nodal_energy_totals.loc[nodes, "total rail"]) - p_set_elec
+    
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" rail transport oil",
+        bus=spatial.oil.nodes,
+        carrier=" rail transport oil",
+        p_set=p_set_oil* 1e6 / 8760,
+    )
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" rail transport electricity",
+        bus=nodes,
+        carrier=" rail transport electricity",
+        p_set=p_set_elec* 1e6 / 8760,
+    )
+
+
+    
+
+   
+
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -2145,13 +2303,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="173",
+            clusters="232",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L1",
             planning_horizons="2030",
-            sopts="730H",
-            discountrate="0.069",
-            demand="NZ",
+            sopts="720H",
+            discountrate="0.071",
+            demand="AP",
         )
 
     # TODO fetch from config
@@ -2161,12 +2319,59 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    
+    # n.add("Link", "my_line_name1", bus0="MAR003005", bus1="MAR003004",  carrier="AC", p_nom=10)
+    # n.add("Link", "my_line_name2", bus0="MAR007004", bus1="MAR004005",  carrier="AC", p_nom=10)
+    # n.add("Link", "my_line_name3", bus0="MAR005001", bus1="MAR003001",  carrier="AC", p_nom=10)
+    # n.add("Link", "my_line_name4", bus0="MAR011001", bus1="MAR003001",  carrier="AC", p_nom=10)
+    # n.add("Link", "my_line_name5", bus0="MAR008002", bus1="MAR003001",  carrier="AC", p_nom=10)
+    # n.add("Link", "my_line_name6", bus0="MAR009005", bus1="MAR003001",  carrier="AC", p_nom=10)
+    # n.add("Link", "my_line_name7", bus0="MAR010005", bus1="MAR003001",  carrier="AC", p_nom=10)
+    
+
+    
+    
     countries = list(n.buses.country.unique())
 
     nodes = n.buses[
         n.buses.carrier == "AC"
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
+
+
+    
+    # n.add(
+    #   "Bus",
+    #   "ELEC curtail",
+    #   carrier="AC",
+    # )
+    
+    # # add export links
+    # #logger.info("Adding export links")
+    # n.madd(
+    #   "Link",
+    #   names=nodes + " curtail",
+    #   bus0=nodes,
+    #   bus1="ELEC curtail",
+    #   p_nom_extendable=True,
+    #   p_min_pu=0,
+    # )
+    
+    # #export_links = n.links[n.links.index.str.contains("export")]
+    # #logger.info(export_links)
+    
+    # # add store
+    # n.add(
+    #   "Store",
+    #   "Elec curtail store",
+    #   bus="ELEC curtail",
+    #   e_nom_extendable=True,
+    #   carrier="AC",
+    #   e_initial=0,
+    #   e_cyclic=0,
+    #   marginal_cost=0,
+    #   capital_cost=0,
+    # )
 
     n.loads.loc[nodes, "carrier"] = "AC"
 
@@ -2284,11 +2489,17 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
 
-    add_services(n, costs)
+    if snakemake.config["custom_data"]["transport_demand"]:
+        add_rail_transport(n, costs)
 
-    add_agriculture(n, costs)
+    if snakemake.config["custom_data"]["custom_sectors"]:
+        add_agriculture(n, costs)
+        add_residential(n, costs)
+        add_services(n, costs)
 
-    add_residential(n, costs)
+
+        
+
 
 
 
