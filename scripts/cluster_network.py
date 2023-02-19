@@ -494,11 +494,15 @@ def busmap_for_n_clusters(
             )
         elif algorithm == "hac":
             return prefix + busmap_by_hac(
-                n, n_clusters[x.name], buses_i=x.index, feature=feature.loc[x.index]
+                # TODO Check consistency (fix for TypeError: 'int' object is not subscriptable in case of a single country)
+                n, n_cluster_c, buses_i=x.index, feature=feature.loc[x.index]
+                # n, n_clusters[x.name], buses_i=x.index, feature=feature.loc[x.index]
             )
         elif algorithm == "modularity":
             return prefix + busmap_by_greedy_modularity(
-                n, n_clusters[x.name], buses_i=x.index
+                # TODO Check consistency (fix for TypeError: 'int' object is not subscriptable in case of a single country)
+                n, n_cluster_c, buses_i=x.index
+                # n, n_clusters[x.name], buses_i=x.index
             )            
         else:
             raise ValueError(
