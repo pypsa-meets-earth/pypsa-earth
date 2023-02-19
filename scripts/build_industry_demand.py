@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
-    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0, sep=';')
+    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0, sep=";")
 
     if snakemake.config["custom_data"]["industry_demand"]:
         production_tom.drop("Industry Machinery", axis=1, inplace=True)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     # Transfromation key to map the material demand to the corresponding carrier demand
     industry_sector_ratios = pd.read_csv(
-        snakemake.input.industry_sector_ratios, index_col=0, sep=';'
+        snakemake.input.industry_sector_ratios, index_col=0, sep=";"
     )
     if snakemake.config["custom_data"]["industry_demand"]:
         industry_sector_ratios.drop(
@@ -79,7 +79,6 @@ if __name__ == "__main__":
     # final energy consumption per node and industry (TWh/a)
     nodal_df = nodal_production.dot(industry_sector_ratios.T)
 
-
     rename_sectors = {
         "elec": "electricity",
         "biomass": "solid biomass",
@@ -87,10 +86,10 @@ if __name__ == "__main__":
     }
     nodal_df.rename(columns=rename_sectors, inplace=True)
 
-    if not snakemake.config["custom_data"]["industry_demand"]:#
+    if not snakemake.config["custom_data"]["industry_demand"]:  #
         # convert GWh to TWh and ktCO2 to MtCO2
-    
-        nodal_df *= 0.001 #TODO check
+
+        nodal_df *= 0.001  # TODO check
 
         # energy demand today to get current electricity #TODO
         prod_tod_path = snakemake.input.industrial_production_per_country

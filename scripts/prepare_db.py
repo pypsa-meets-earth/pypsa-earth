@@ -40,7 +40,7 @@ if __name__ == "__main__":
             sopts="720H",
             discountrate=0.071,
             demand="AP",
-            h2export="0"
+            h2export="0",
         )
 
     n0 = pypsa.Network(snakemake.input.network)
@@ -138,10 +138,10 @@ def add_load(tech, carrier, reg=False):
 
         # summary_elec['elec_l_ac'] = loads
     else:
-        if reg==False:
-            tech_col = loads.filter(regex=tech)#
+        if reg == False:
+            tech_col = loads.filter(regex=tech)  #
         else:
-            tech_col = loads.filter(regex=tech+"$")#
+            tech_col = loads.filter(regex=tech + "$")  #
 
     populate_db(tech_col, carrier, "l", tech, ngv=True)
 
@@ -186,9 +186,9 @@ def add_store(tech, carrier, reg=False):
         tech_col = stores.filter(like=tech)
     else:
         tech_col = stores.filter(regex=tech + "$")
-        
-    if tech == 'co2 atmosphere' or tech == 'co2 stored':
-        tech_col*=-1
+
+    if tech == "co2 atmosphere" or tech == "co2 stored":
+        tech_col *= -1
     populate_db(tech_col, carrier, "s", tech)
 
 
@@ -250,7 +250,7 @@ add_conv("H2 export", "h2", 0, True)
 
 add_conv("H2 Electrolysis", "hv", 0, True)
 add_conv("H2 Fuel Cell", "hv", 1, False)
-#add_conv("H2 Export", "hv", 1, False)
+# add_conv("H2 Export", "hv", 1, False)
 add_conv("DAC", "hv", 2, True)
 add_conv("helmeth", "hv", 0, True)
 add_conv("electricity distribution grid", "hv", 0, True)
@@ -364,22 +364,22 @@ add_load("residential oil emissions", "co2")
 add_load("residential biomass emissions", "co2")
 add_load("services biomass emissions", "co2")
 
-#add_store("co2 stored", "co2")
+# add_store("co2 stored", "co2")
 add_store("co2 atmosphere", "co2")
 
 add_conv("Fischer-Tropsch", "oil", 1, False)
 
 add_load("naphtha for industry", "oil")
 add_load("residential oil", "oil", reg=True)
-add_load("rail transport oil", "oil",reg=True)
-add_load("agriculture oil", "oil",reg=True)
+add_load("rail transport oil", "oil", reg=True)
+add_load("agriculture oil", "oil", reg=True)
 add_load("shipping oil", "oil", reg=True)
-add_load("land transport oil", "oil", reg=True) #mistakenly add oil emissions
+add_load("land transport oil", "oil", reg=True)  # mistakenly add oil emissions
 add_load("kerosene for aviation", "oil")
 add_store("oil Store", "oil", 1)
 add_gen("oil", "oil")
 
-#add_load("gas for industry", "gas")
+# add_load("gas for industry", "gas")
 add_conv("OCGT", "gas", 0, True)
 add_conv("residential rural gas boiler", "gas", 0, True)
 add_conv("services rural gas boiler", "gas", 0, True)
@@ -402,7 +402,7 @@ add_conv("gas for industry CC", "gas", 1, True)
 
 
 add_conv("co2 vent", "co2 stored", 0, True)
-#add_conv("CO2 pipeline", "co2 stored", 0, True)
+# add_conv("CO2 pipeline", "co2 stored", 0, True)
 add_conv("DAC", "co2 stored", 1, True)
 
 add_conv("Fischer-Tropsch", "co2 stored", 2, False)
@@ -413,7 +413,7 @@ add_conv("process emissions CC", "co2 stored", 2, True)
 add_conv("solid biomass for industry CC", "co2 stored", 3, True)
 add_conv("gas for industry CC", "co2 stored", 3, True)
 
-#add_store("co2 stored")
+# add_store("co2 stored")
 add_store("co2 stored", "co2 stored")
 
 
