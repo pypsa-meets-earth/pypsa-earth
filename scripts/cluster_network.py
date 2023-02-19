@@ -614,6 +614,8 @@ if __name__ == "__main__":
 
     n = pypsa.Network(inputs.network)
 
+    focus_weights = snakemake.config.get("focus_weights", None)
+
     alternative_clustering = snakemake.config["cluster_options"][
         "alternative_clustering"
     ]
@@ -630,6 +632,10 @@ if __name__ == "__main__":
         ]
     )
 
+    exclude_carriers = snakemake.config["cluster_options"]["cluster_network"].get(
+        "exclude_carriers", []
+    )    
+    aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
         aggregate_carriers = snakemake.config["electricity"].get(
