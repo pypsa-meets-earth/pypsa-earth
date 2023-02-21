@@ -54,6 +54,7 @@ custom_data:
   water_costs: false
   h2_underground: false
   add_existing: false
+  custom_sectors: false
 
 costs:
   lifetime: 25 #default lifetime
