@@ -45,14 +45,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=112,
+            clusters=4,
             planning_horizons="2030",
-            demand="AP",
+            demand="DF",
         )
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
-    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0, sep=";")
+    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0)
 
     if snakemake.config["custom_data"]["industry_demand"]:
         production_tom.drop("Industry Machinery", axis=1, inplace=True)
@@ -69,8 +69,8 @@ if __name__ == "__main__":
 
     # Transfromation key to map the material demand to the corresponding carrier demand
     industry_sector_ratios = pd.read_csv(
-        snakemake.input.industry_sector_ratios, index_col=0, sep=";"
-    )
+        snakemake.input.industry_sector_ratios, index_col=0)
+    
     if snakemake.config["custom_data"]["industry_demand"]:
         industry_sector_ratios.drop(
             "Industry Steel Casting Rolling Finishing", axis=1, inplace=True
