@@ -401,7 +401,6 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("tol", 1e-6)
         algorithm_kwds.setdefault("random_state", 0)
 
-
     def fix_country_assignment_for_hac(n):
         from scipy.sparse import csgraph
 
@@ -421,19 +420,22 @@ def busmap_for_n_clusters(
                     component == component_sizes.index[-1]
                 ].index[0]
 
-                neighbor_bus = n.lines.query(
+                disconn_bus_line = n.lines.query(
                     "bus0 == @disconnected_bus or bus1 == @disconnected_bus"
-                ).iloc[0][["bus0", "bus1"]]
-                new_country = list(
-                    set(n.buses.loc[neighbor_bus].country) - set([country])
-                )[0]
-
-                logger.info(
-                    f"overwriting country `{country}` of bus `{disconnected_bus}` "
-                    f"to new country `{new_country}`, because it is disconnected "
-                    "from its initial inter-country transmission grid."
                 )
-                n.buses.at[disconnected_bus, "country"] = new_country
+
+                if not disconn_bus_line.empty:
+                    neighbor_bus = disconn_bus_line.iloc[0][["bus0", "bus1"]]
+                    new_country = list(
+                        set(n.buses.loc[neighbor_bus].country) - set([country])
+                    )[0]
+
+                    logger.info(
+                        f"overwriting country `{country}` of bus `{disconnected_bus}` "
+                        f"to new country `{new_country}`, because it is disconnected "
+                        "from its initial inter-country transmission grid."
+                    )
+                    n.buses.at[disconnected_bus, "country"] = new_country
         return n
 
     if algorithm == "hac":
@@ -459,6 +461,7 @@ def busmap_for_n_clusters(
             solver_name=solver_name,
         )
 
+    # TODO Check if `reduce_network()` is used
     def reduce_network(n, buses):
         nr = pypsa.Network()
         nr.import_components_from_dataframe(buses, "Bus")
@@ -495,15 +498,20 @@ def busmap_for_n_clusters(
         elif algorithm == "hac":
             return prefix + busmap_by_hac(
                 # TODO Check consistency (fix for TypeError: 'int' object is not subscriptable in case of a single country)
-                n, n_cluster_c, buses_i=x.index, feature=feature.loc[x.index]
+                n,
+                n_cluster_c,
+                buses_i=x.index,
+                feature=feature.loc[x.index]
                 # n, n_clusters[x.name], buses_i=x.index, feature=feature.loc[x.index]
             )
         elif algorithm == "modularity":
             return prefix + busmap_by_greedy_modularity(
                 # TODO Check consistency (fix for TypeError: 'int' object is not subscriptable in case of a single country)
-                n, n_cluster_c, buses_i=x.index
+                n,
+                n_cluster_c,
+                buses_i=x.index
                 # n, n_clusters[x.name], buses_i=x.index
-            )            
+            )
         else:
             raise ValueError(
                 f"`algorithm` must be one of 'kmeans' or 'hac'. Is {algorithm}."
@@ -536,7 +544,7 @@ def clustering_for_n_clusters(
     aggregation_strategies=dict(),
     solver_name="cbc",
     algorithm="kmeans",
-    feature=None,    
+    feature=None,
     extended_link_costs=0,
     focus_weights=None,
 ):
@@ -551,7 +559,14 @@ def clustering_for_n_clusters(
             )
         else:
             busmap = busmap_for_n_clusters(
-                inputs, config, n, n_clusters, solver_name, focus_weights, algorithm, feature
+                inputs,
+                config,
+                n,
+                n_clusters,
+                solver_name,
+                focus_weights,
+                algorithm,
+                feature,
             )
     else:
         busmap = custom_busmap
@@ -638,7 +653,7 @@ if __name__ == "__main__":
 
     exclude_carriers = snakemake.config["cluster_options"]["cluster_network"].get(
         "exclude_carriers", []
-    )    
+    )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
@@ -646,7 +661,7 @@ if __name__ == "__main__":
             "conventional_carriers"
         )
     elif snakemake.wildcards.clusters == "all":
-        n_clusters = len(n.buses)        
+        n_clusters = len(n.buses)
     else:
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
@@ -710,9 +725,9 @@ if __name__ == "__main__":
             aggregate_carriers,
             line_length_factor,
             aggregation_strategies,
-            snakemake.config["solving"]["solver"]["name"],             
+            snakemake.config["solving"]["solver"]["name"],
             cluster_config.get("algorithm", "hac"),
-            cluster_config.get("feature", "solar+onwind-time"),           
+            cluster_config.get("feature", "solar+onwind-time"),
             extended_link_costs=hvac_overhead_cost,
             focus_weights=focus_weights,
         )

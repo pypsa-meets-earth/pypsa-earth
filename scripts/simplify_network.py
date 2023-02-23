@@ -374,7 +374,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     exclude_carriers = config["cluster_options"]["simplify_network"].get(
         "exclude_carriers", []
-    )    
+    )
 
     _aggregate_and_move_components(
         n,
@@ -393,7 +393,7 @@ def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
     across_borders = config["cluster_options"]["simplify_network"].get(
         "remove_stubs_across_borders", True
     )
-    matching_attrs = [] if across_borders else ["country"]    
+    matching_attrs = [] if across_borders else ["country"]
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
@@ -401,7 +401,7 @@ def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
 
     exclude_carriers = config["cluster_options"]["simplify_network"].get(
         "exclude_carriers", []
-    )    
+    )
 
     _aggregate_and_move_components(
         n,
@@ -511,11 +511,11 @@ def cluster(
         geo_crs,
         country_list,
         custom_busmap=False,
-        aggregation_strategies=aggregation_strategies,        
+        aggregation_strategies=aggregation_strategies,
         potential_mode=potential_mode,
         solver_name=config["solving"]["solver"]["name"],
         algorithm=algorithm,
-        feature=feature,        
+        feature=feature,
         focus_weights=focus_weights,
     )
 
@@ -531,14 +531,9 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    Nyears = n.snapshot_weightings.objective.sum() / 8760
+
     linetype = snakemake.config["lines"]["types"][380.0]
-    technology_costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
-        Nyears,
-    )
+
     aggregation_strategies = snakemake.config["cluster_options"].get(
         "aggregation_strategies", {}
     )
@@ -548,6 +543,15 @@ if __name__ == "__main__":
         for p in aggregation_strategies.keys()
     }
     n, trafo_map = simplify_network_to_380(n, linetype)
+
+    Nyears = n.snapshot_weightings.objective.sum() / 8760
+
+    technology_costs = load_costs(
+        snakemake.input.tech_costs,
+        snakemake.config["costs"],
+        snakemake.config["electricity"],
+        Nyears,
+    )
 
     n, simplify_links_map = simplify_links(
         n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
@@ -568,16 +572,38 @@ if __name__ == "__main__":
 
     if cluster_config.get("to_substations", False):
         n, substation_map = aggregate_to_substations(n, aggregation_strategies)
-        busmaps.append(substation_map)    
+        busmaps.append(substation_map)
+
+    # treatment of outliers (nodes without a profile for considered carrier):
+    # all nodes that have no profile of the given carrier are being aggregated to closest neighbor
+    if (
+        snakemake.config.get("clustering", {})
+        .get("cluster_network", {})
+        .get("algorithm", "hac")
+        == "hac"
+        or cluster_config.get("algorithm", "hac") == "hac"
+    ):
+        carriers = (
+            cluster_config.get("feature", "solar+onwind-time").split("-")[0].split("+")
+        )
+        for carrier in carriers:
+            buses_i = list(
+                set(n.buses.index) - set(n.generators.query("carrier == @carrier").bus)
+            )
+            logger.info(
+                f"clustering preparaton (hac): aggregating {len(buses_i)} buses of type {carrier}."
+            )
+            n, busmap_hac = aggregate_to_substations(n, aggregation_strategies, buses_i)
+            busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
         n, cluster_map = cluster(
-            n, 
-            int(snakemake.wildcards.simpl), 
+            n,
+            int(snakemake.wildcards.simpl),
             snakemake.config,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
-            aggregation_strategies,            
+            aggregation_strategies,
         )
         busmaps.append(cluster_map)
 
@@ -590,7 +616,7 @@ if __name__ == "__main__":
         "substation_lv",
         "substation_off",
     }.intersection(n.buses.columns)
-    n.buses = n.buses.drop(buses_c, axis=1)        
+    n.buses = n.buses.drop(buses_c, axis=1)
 
     update_p_nom_max(n)
 
