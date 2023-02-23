@@ -99,6 +99,7 @@ from pypsa.networkclustering import (
     aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
+    get_clustering_from_busmap,
 )
 from scipy.sparse.csgraph import connected_components, dijkstra
 
@@ -229,6 +230,7 @@ def _aggregate_and_move_components(
     output,
     aggregate_one_ports={"Load", "StorageUnit"},
     aggregation_strategies=dict(),
+    exclude_carriers=None,
 ):
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
@@ -241,8 +243,10 @@ def _aggregate_and_move_components(
     _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, output)
 
     _, generator_strategies = get_aggregation_strategies(aggregation_strategies)
+
+    carriers = set(n.generators.carrier) - set(exclude_carriers)
     generators, generators_pnl = aggregategenerators(
-        n, busmap, custom_strategies=generator_strategies
+        n, busmap, carriers=carriers, custom_strategies=generator_strategies
     )
 
     replace_components(n, "Generator", generators, generators_pnl)
@@ -368,12 +372,17 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     logger.debug("Collecting all components using the busmap")
 
+    exclude_carriers = config["cluster_options"]["simplify_network"].get(
+        "exclude_carriers", []
+    )
+
     _aggregate_and_move_components(
         n,
         busmap,
         connection_costs_to_bus,
         output,
         aggregation_strategies=aggregation_strategies,
+        exclude_carriers=exclude_carriers,
     )
     return n, busmap
 
@@ -381,9 +390,18 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
     logger.info("Removing stubs")
 
-    busmap = busmap_by_stubs(n)
+    across_borders = config["cluster_options"]["simplify_network"].get(
+        "remove_stubs_across_borders", True
+    )
+    matching_attrs = [] if across_borders else ["country"]
+
+    busmap = busmap_by_stubs(n, matching_attrs)
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
+
+    exclude_carriers = config["cluster_options"]["simplify_network"].get(
+        "exclude_carriers", []
+    )
 
     _aggregate_and_move_components(
         n,
@@ -391,12 +409,68 @@ def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
         connection_costs_to_bus,
         output,
         aggregation_strategies=aggregation_strategies,
+        exclude_carriers=exclude_carriers,
     )
 
     return n, busmap
 
 
-def cluster(n, n_clusters, config):
+def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
+    # can be used to aggregate a selection of buses to electrically closest neighbors
+    # if no buses are given, nodes that are no substations or without offshore connection are aggregated
+
+    if buses_i is None:
+        logger.info(
+            "Aggregating buses that are no substations or have no valid offshore connection"
+        )
+        buses_i = list(set(n.buses.index) - set(n.generators.bus) - set(n.loads.bus))
+
+    weight = pd.concat(
+        {
+            "Line": n.lines.length / n.lines.s_nom.clip(1e-3),
+            "Link": n.links.length / n.links.p_nom.clip(1e-3),
+        }
+    )
+
+    adj = n.adjacency_matrix(branch_components=["Line", "Link"], weights=weight)
+
+    bus_indexer = n.buses.index.get_indexer(buses_i)
+    dist = pd.DataFrame(
+        dijkstra(adj, directed=False, indices=bus_indexer), buses_i, n.buses.index
+    )
+
+    dist[
+        buses_i
+    ] = np.inf  # bus in buses_i should not be assigned to different bus in buses_i
+
+    for c in n.buses.country.unique():
+        incountry_b = n.buses.country == c
+        dist.loc[incountry_b, ~incountry_b] = np.inf
+
+    busmap = n.buses.index.to_series()
+    busmap.loc[buses_i] = dist.idxmin(1)
+
+    bus_strategies, generator_strategies = get_aggregation_strategies(
+        aggregation_strategies
+    )
+
+    clustering = get_clustering_from_busmap(
+        n,
+        busmap,
+        bus_strategies=bus_strategies,
+        aggregate_generators_weighted=True,
+        aggregate_generators_carriers=None,
+        aggregate_one_ports=["Load", "StorageUnit"],
+        line_length_factor=1.0,
+        generator_strategies=generator_strategies,
+        scale_link_capital_costs=False,
+    )
+    return clustering.network, busmap
+
+
+def cluster(
+    n, n_clusters, config, algorithm="hac", feature=None, aggregation_strategies=dict()
+):
     logger.info(f"Clustering to {n_clusters} buses")
 
     focus_weights = config.get("focus_weights", None)
@@ -437,8 +511,11 @@ def cluster(n, n_clusters, config):
         geo_crs,
         country_list,
         custom_busmap=False,
+        aggregation_strategies=aggregation_strategies,
         potential_mode=potential_mode,
         solver_name=config["solving"]["solver"]["name"],
+        algorithm=algorithm,
+        feature=feature,
         focus_weights=focus_weights,
     )
 
@@ -454,14 +531,9 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    Nyears = n.snapshot_weightings.objective.sum() / 8760
+
     linetype = snakemake.config["lines"]["types"][380.0]
-    technology_costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
-        Nyears,
-    )
+
     aggregation_strategies = snakemake.config["cluster_options"].get(
         "aggregation_strategies", {}
     )
@@ -472,23 +544,79 @@ if __name__ == "__main__":
     }
     n, trafo_map = simplify_network_to_380(n, linetype)
 
+    Nyears = n.snapshot_weightings.objective.sum() / 8760
+
+    technology_costs = load_costs(
+        snakemake.input.tech_costs,
+        snakemake.config["costs"],
+        snakemake.config["electricity"],
+        Nyears,
+    )
+
     n, simplify_links_map = simplify_links(
         n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
     )
 
-    n, stub_map = remove_stubs(
-        n,
-        technology_costs,
-        snakemake.config,
-        snakemake.output,
-        aggregation_strategies=aggregation_strategies,
-    )
+    busmaps = [trafo_map, simplify_links_map]
 
-    busmaps = [trafo_map, simplify_links_map, stub_map]
+    cluster_config = snakemake.config["cluster_options"]["simplify_network"]
+    if cluster_config.get("remove_stubs", True):
+        n, stub_map = remove_stubs(
+            n,
+            technology_costs,
+            snakemake.config,
+            snakemake.output,
+            aggregation_strategies=aggregation_strategies,
+        )
+        busmaps.append(stub_map)
+
+    if cluster_config.get("to_substations", False):
+        n, substation_map = aggregate_to_substations(n, aggregation_strategies)
+        busmaps.append(substation_map)
+
+    # treatment of outliers (nodes without a profile for considered carrier):
+    # all nodes that have no profile of the given carrier are being aggregated to closest neighbor
+    if (
+        snakemake.config.get("clustering", {})
+        .get("cluster_network", {})
+        .get("algorithm", "hac")
+        == "hac"
+        or cluster_config.get("algorithm", "hac") == "hac"
+    ):
+        carriers = (
+            cluster_config.get("feature", "solar+onwind-time").split("-")[0].split("+")
+        )
+        for carrier in carriers:
+            buses_i = list(
+                set(n.buses.index) - set(n.generators.query("carrier == @carrier").bus)
+            )
+            logger.info(
+                f"clustering preparaton (hac): aggregating {len(buses_i)} buses of type {carrier}."
+            )
+            n, busmap_hac = aggregate_to_substations(n, aggregation_strategies, buses_i)
+            busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
-        n, cluster_map = cluster(n, int(snakemake.wildcards.simpl), snakemake.config)
+        n, cluster_map = cluster(
+            n,
+            int(snakemake.wildcards.simpl),
+            snakemake.config,
+            cluster_config.get("algorithm", "hac"),
+            cluster_config.get("feature", None),
+            aggregation_strategies,
+        )
         busmaps.append(cluster_map)
+
+    # some entries in n.buses are not updated in previous functions, therefore can be wrong. as they are not needed
+    # and are lost when clustering (for example with the simpl wildcard), we remove them for consistency:
+    buses_c = {
+        "symbol",
+        "tags",
+        "under_construction",
+        "substation_lv",
+        "substation_off",
+    }.intersection(n.buses.columns)
+    n.buses = n.buses.drop(buses_c, axis=1)
 
     update_p_nom_max(n)
 

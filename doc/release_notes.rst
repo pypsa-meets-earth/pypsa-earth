@@ -71,6 +71,8 @@ Upcoming Release
 
 * Upgrade technology data to v0.5.0 `PR #600 https://github.com/pypsa-meets-earth/pypsa-earth/pull/600`__
 
+* Update simplify_network and cluster_network according to PyPSA-Eur developments `PR #597 https://github.com/pypsa-meets-earth/pypsa-earth/pull/597`__
+
 PyPSA-Earth 0.1.0
 =================
 
