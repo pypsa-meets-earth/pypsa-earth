@@ -278,6 +278,23 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
     To change cost assumptions in more detail (i.e. other than ``marginal_cost`` and ``capital_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
     You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
 
+
+.. _clustering_cf:
+
+``clustering``
+==============
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-after:     co2:
+   :end-before: solving:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/clustering.csv
+
+
 .. _monte_cf:
 
 ``monte_carlo``

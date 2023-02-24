@@ -1,4 +1,16 @@
 ,Unit,Values,Description
+-- simplify_network,,,
+-- -- to_substations,bool,"true/false","Aggregates all nodes without power injection (positive or negative, i.e. demand or generation) to electrically closest ones"
+-- -- algorithm,str,"One of {‘kmeans’, ‘hac’, ‘modularity‘}}","Clustering algorithm"
+-- -- feature,str,"Str in the format ‘carrier1+carrier2+...+carrierN-X’, where CarrierI can be from {‘solar’, ‘onwind’, ‘offwind’, ‘ror’} and X is one of {‘cap’, ‘time’}.","Is used for hierarchical clustering"
+-- -- exclude_carriers,list,"List of Str like [ 'solar', 'onwind'] or empy list []","List of carriers which will not be aggregated. If empty, all carriers will be aggregated."
+-- -- remove_stubs,bool,"true/false",
+-- remove stubs,bool,"true/false","Controls whether radial parts of the network should be recursively aggregated. Defaults to true."
+-- -- remove_stubs_across_borders,bool,"true/false","Controls whether radial parts of the network should be recursively aggregated across borders. Defaults to true."
+-- cluster_network,,,
+-- -- algorithm,str,"One of {‘kmeans’, ‘hac’}","Clustering algorithm"
+-- -- feature,str,"Str in the format ‘carrier1+carrier2+...+carrierN-X’, where CarrierI can be from {‘solar’, ‘onwind’, ‘offwind’, ‘ror’} and X is one of {‘cap’, ‘time’}.","Is used for hierarchical clustering"
+-- -- exclude_carriers,list,"List of Str like [ 'solar', 'onwind'] or empy list []","List of carriers which will not be aggregated. If empty, all carriers will be aggregated."
 -- alternative_clustering,bool," ""False"" use Voronoi shapes,  ""True"" use GADM shapes as aggregation zones",
 -- distribute_cluster,list," distribute nodes per country according to ['load'], ['pop'] meaning population or ['gdp']",
 -- out_logging," bool"," when true logging is printed to console",
