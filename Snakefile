@@ -27,7 +27,7 @@ wildcard_constraints:
     ll="[a-z0-9\.]+",
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+m?|all",
-    opts="[-+a-zA-Z0-9]*",
+    opts="[-+a-zA-Z0-9\.\s]*",
     sopts="[-+a-zA-Z0-9\.\s]*",
     discountrate="[-+a-zA-Z0-9\.\s]*",
     demand="[-+a-zA-Z0-9\.\s]*",
