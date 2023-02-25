@@ -40,10 +40,7 @@ def add_carrier_buses(n, carrier, nodes=None):
     if not isinstance(nodes, pd.Index):
         nodes = pd.Index(nodes)
 
-    n.add("Carrier",
-           carrier,
-           co2_emissions=costs.at[carrier, "CO2 intensity"]
-    )
+    n.add("Carrier", carrier, co2_emissions=costs.at[carrier, "CO2 intensity"])
 
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
@@ -2242,6 +2239,7 @@ def add_residential(n, costs):
                     * 1e6
                 )
 
+
 # def add_co2limit(n, Nyears=1.0, limit=0.0):
 #     print("Adding CO2 budget limit as per unit of 1990 levels of", limit)
 
@@ -2263,6 +2261,7 @@ def add_residential(n, costs):
 #         sense="<=",
 #         constant=co2_limit,
 #     )
+
 
 def add_custom_water_cost(n):
     for country in countries:
@@ -2514,9 +2513,9 @@ if __name__ == "__main__":
             n = average_every_nhours(n, m.group(0))
             break
 
-# TODO add co2 limit here, if necessary    
+    # TODO add co2 limit here, if necessary
     # co2_limit_pu = eval(sopts[0][5:])
-    # co2_limit = co2_limit_pu * 
+    # co2_limit = co2_limit_pu *
     # # Add co2 limit
     # co2_limit = 1e9
     # n.add(
@@ -2526,9 +2525,6 @@ if __name__ == "__main__":
     #     sense="<=",
     #     constant=co2_limit,
     # )
-
-
-
 
     if options["dac"]:
         add_dac(n, costs)
