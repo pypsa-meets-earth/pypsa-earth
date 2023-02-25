@@ -40,7 +40,10 @@ def add_carrier_buses(n, carrier, nodes=None):
     if not isinstance(nodes, pd.Index):
         nodes = pd.Index(nodes)
 
-    n.add("Carrier", carrier)
+    n.add("Carrier",
+           carrier,
+           co2_emissions=costs.at[carrier, "CO2 intensity"]
+    )
 
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
@@ -2239,6 +2242,27 @@ def add_residential(n, costs):
                     * 1e6
                 )
 
+# def add_co2limit(n, Nyears=1.0, limit=0.0):
+#     print("Adding CO2 budget limit as per unit of 1990 levels of", limit)
+
+#     countries = n.buses.country.dropna().unique()
+
+#     sectors = emission_sectors_from_opts(opts)
+
+#     # convert Mt to tCO2
+#     co2_totals = 1e6 * pd.read_csv(snakemake.input.co2_totals_name, index_col=0)
+
+#     co2_limit = co2_totals.loc[countries, sectors].sum().sum()
+
+#     co2_limit *= limit * Nyears
+
+#     n.add(
+#         "GlobalConstraint",
+#         "CO2Limit",
+#         carrier_attribute="co2_emissions",
+#         sense="<=",
+#         constant=co2_limit,
+#     )
 
 def add_custom_water_cost(n):
     for country in countries:
@@ -2293,13 +2317,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="232",
+            clusters="4",
             ll="c1.0",
-            opts="Co2L1",
+            opts="",
             planning_horizons="2030",
-            sopts="720H",
+            sopts="CO2L0.90-144H",
             discountrate="0.071",
-            demand="AP",
+            demand="DF",
         )
 
     # TODO fetch from config
@@ -2489,6 +2513,22 @@ if __name__ == "__main__":
         if m is not None:
             n = average_every_nhours(n, m.group(0))
             break
+
+# TODO add co2 limit here, if necessary    
+    # co2_limit_pu = eval(sopts[0][5:])
+    # co2_limit = co2_limit_pu * 
+    # # Add co2 limit
+    # co2_limit = 1e9
+    # n.add(
+    #     "GlobalConstraint",
+    #     "CO2Limit",
+    #     carrier_attribute="co2_emissions",
+    #     sense="<=",
+    #     constant=co2_limit,
+    # )
+
+
+
 
     if options["dac"]:
         add_dac(n, costs)
