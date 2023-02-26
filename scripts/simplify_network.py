@@ -547,7 +547,7 @@ def merge_isolated_buses(n, drop_p_threshold=0):
     busmap_to_aggregate.values[:] = i_islands_aggregate
     buses_aggreagate_df = aggregatebuses(n, busmap_to_aggregate)
 
-    i_generators_islands = n.buses.loc[i_islands].generator
+    i_generators_islands = n.generators[n.generators.bus.isin(i_islands)].index
 
     p_nom_aggr = n.generators.loc[i_generators_islands].p_nom.sum(axis=0)
     p_set_aggr = n.generators.loc[i_generators_islands].p_set.sum(axis=0)
