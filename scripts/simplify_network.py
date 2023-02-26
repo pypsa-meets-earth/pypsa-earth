@@ -521,6 +521,59 @@ def cluster(
 
     return clustering.network, clustering.busmap
 
+def merge_isolated_buses(n, drop_p_threshold=0):
+
+    generators_sum_origin = n.generators.p_nom.sum()
+    load_sum_origin = n.loads_t.p_set.sum().sum()      
+ 
+    # duplicated sub-networks mean that there is at least one interconnection between buses
+    i_islands = n.buses[~n.buses.duplicated(subset=['sub_network'], keep=False)].index
+
+    load_sum_isol_origin = n.loads_t.p_set[i_islands].sum().sum()
+
+    # disregard buses having very small attached load when rearranging
+    loads_t_avr = n.loads_t.p_set.mean(axis=0)
+    i_islands_large = i_islands[loads_t_avr[i_islands] >= drop_p_threshold]
+    
+    # agregate all the load to a single isolated bus
+    i_islands_aggregate = i_islands_large[0]
+    i_buses_remove = i_islands.drop(i_islands_aggregate)
+    p_set_aggregate = n.loads_t["p_set"][i_islands].sum(axis=1)
+    n.loads_t["p_set"][i_islands_aggregate].values[:] = p_set_aggregate     
+
+    # TODO modify position of the aggregated bus
+    busmap_to_aggregate = n.buses.loc[i_islands_large].index.to_series()
+    busmap_to_aggregate.values[:] = i_islands_aggregate
+    buses_aggreagate_df = aggregatebuses(n, busmap_to_aggregate)
+
+    i_generators_islands = n.buses.loc[i_islands].generator   
+
+    p_nom_aggr = n.generators.loc[i_generators_islands].p_nom.sum(axis=0)
+    p_set_aggr = n.generators.loc[i_generators_islands].p_set.sum(axis=0)
+    p_nom_max_aggr = n.generators.loc[i_generators_islands].p_nom_max.sum(axis=0)
+    p_nom_min_aggr = n.generators.loc[i_generators_islands].p_nom_min.sum(axis=0)
+
+    # attach all the capacity to a single generator
+    # TODO account for all the carriers
+    i_generator_aggreg = i_generators_islands[0]
+    i_generators_remove = i_generators_islands[1:]
+    # TODO vectorize?
+    n.generators.loc[i_generator_aggreg].p_nom = p_nom_aggr
+    n.generators.loc[i_generator_aggreg].p_set = p_set_aggr
+    n.generators.loc[i_generator_aggreg].p_nom_max = p_nom_max_aggr
+    n.generators.loc[i_generator_aggreg].p_nom_min = p_nom_min_aggr
+
+    n.mremove("Bus", i_buses_remove)
+    n.mremove("Load", i_buses_remove)
+    n.mremove("Generator", i_generators_remove)
+
+    load_sum_final = n.loads_t.p_set.sum().sum()
+    generators_sum_final = n.generators.p_nom.sum()
+
+    logger.info(f"Dropped {len(i_islands)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_sum_final - load_sum_origin)/load_sum_origin)):2.1E}% and {(100 * ((generators_sum_final - generators_sum_origin)/generators_sum_origin)):2.1E}% for load and generation capacity, respectivelly")
+
+    return(n)
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -619,6 +672,8 @@ if __name__ == "__main__":
     n.buses = n.buses.drop(buses_c, axis=1)
 
     update_p_nom_max(n)
+
+    merge_isolated_buses(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
