@@ -522,32 +522,32 @@ def cluster(
 
     return clustering.network, clustering.busmap
 
-def merge_isolated_buses(n, drop_p_threshold=0):
 
+def merge_isolated_buses(n, drop_p_threshold=0):
     generators_sum_origin = n.generators.p_nom.sum()
-    load_sum_origin = n.loads_t.p_set.sum().sum()      
- 
+    load_sum_origin = n.loads_t.p_set.sum().sum()
+
     # duplicated sub-networks mean that there is at least one interconnection between buses
-    i_islands = n.buses[~n.buses.duplicated(subset=['sub_network'], keep=False)].index
+    i_islands = n.buses[~n.buses.duplicated(subset=["sub_network"], keep=False)].index
 
     load_sum_isol_origin = n.loads_t.p_set[i_islands].sum().sum()
 
     # disregard buses having very small attached load when rearranging
     loads_t_avr = n.loads_t.p_set.mean(axis=0)
     i_islands_large = i_islands[loads_t_avr[i_islands] >= drop_p_threshold]
-    
+
     # agregate all the load to a single isolated bus
     i_islands_aggregate = i_islands_large[0]
     i_buses_remove = i_islands.drop(i_islands_aggregate)
     p_set_aggregate = n.loads_t["p_set"][i_islands].sum(axis=1)
-    n.loads_t["p_set"][i_islands_aggregate].values[:] = p_set_aggregate     
+    n.loads_t["p_set"][i_islands_aggregate].values[:] = p_set_aggregate
 
     # TODO modify position of the aggregated bus
     busmap_to_aggregate = n.buses.loc[i_islands_large].index.to_series()
     busmap_to_aggregate.values[:] = i_islands_aggregate
     buses_aggreagate_df = aggregatebuses(n, busmap_to_aggregate)
 
-    i_generators_islands = n.buses.loc[i_islands].generator   
+    i_generators_islands = n.buses.loc[i_islands].generator
 
     p_nom_aggr = n.generators.loc[i_generators_islands].p_nom.sum(axis=0)
     p_set_aggr = n.generators.loc[i_generators_islands].p_set.sum(axis=0)
@@ -571,9 +571,11 @@ def merge_isolated_buses(n, drop_p_threshold=0):
     load_sum_final = n.loads_t.p_set.sum().sum()
     generators_sum_final = n.generators.p_nom.sum()
 
-    logger.info(f"Dropped {len(i_islands)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_sum_final - load_sum_origin)/load_sum_origin)):2.1E}% and {(100 * ((generators_sum_final - generators_sum_origin)/generators_sum_origin)):2.1E}% for load and generation capacity, respectivelly")
+    logger.info(
+        f"Dropped {len(i_islands)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_sum_final - load_sum_origin)/load_sum_origin)):2.1E}% and {(100 * ((generators_sum_final - generators_sum_origin)/generators_sum_origin)):2.1E}% for load and generation capacity, respectivelly"
+    )
 
-    return(n)
+    return n
 
 
 if __name__ == "__main__":
