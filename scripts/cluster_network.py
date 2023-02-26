@@ -286,7 +286,7 @@ def distribute_clusters(
         distribution_factor = G
 
     # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_network"]
-    N = n.buses.groupby(["country"]).size()
+    N = n.buses.groupby(["country", "sub_network"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -449,7 +449,7 @@ def busmap_for_n_clusters(
         )
 
     n.determine_network_topology()
-    # n.lines.loc[:, "sub_network"] = "0"  # current fix
+    n.lines.loc[:, "sub_network"] = "0"  # current fix
 
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(
@@ -519,8 +519,8 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            ["country"],
-            # ["country", "sub_network"] # TODO: 2. Add sub_networks (see previous TODO)
+            # ["country"],
+            ["country", "sub_network"], # TODO: 2. Add sub_networks (see previous TODO)
             group_keys=False,
         )
         .apply(busmap_for_country)
