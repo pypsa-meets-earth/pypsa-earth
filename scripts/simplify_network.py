@@ -96,6 +96,7 @@ from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from pypsa.networkclustering import (
+    aggregatebuses,
     aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
