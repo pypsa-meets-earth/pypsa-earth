@@ -246,13 +246,13 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 
 .. _load_cf:
 
-``load``
+``load_options``
 =============
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
-   :start-at: load:
-   :end-before: costs:
+   :start-at: load_options:
+   :end-before: electricity:
 
 .. csv-table::
    :header-rows: 1
