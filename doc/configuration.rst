@@ -244,7 +244,7 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
    :widths: 25,7,22,30
    :file: configtables/transformers.csv
 
-.. _load_cf:
+.. _load_options_cf:
 
 ``load_options``
 =============
