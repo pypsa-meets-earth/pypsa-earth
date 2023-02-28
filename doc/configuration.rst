@@ -206,6 +206,13 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
+   .. "start-after: PV:" is used next because the word "lines" appears many times in config.yaml.
+   ..
+   .. "PV:"" is the last entry of the previous section "estimate_renewable_capacities", and it
+   .. appears only once in config.yaml, hence it worked at the time of writing. 
+   ..
+   .. WARNING! Docs can be broken here if the sections "estimate_renewable_capacities" and/or "lines"
+   .. are moved. 
    :start-after: PV:
    :end-before: links:
 
