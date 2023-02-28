@@ -1,0 +1,4 @@
+,Unit,Values,Description
+geo_crs,, "General geographic projection. Not used for metric measures.", "Recommended value is ‘EPSG:4326’ (used by OSM and Google Maps)."
+distance_crs,, "Projection for distance measurements only.", "Recommended value is ‘EPSG:3857’ (used by OSM and Google Maps)."
+area_crs,, "Projection for area measurements only.", "Recommended value is the Global Mollweide projection ‘ESRI:54009’."

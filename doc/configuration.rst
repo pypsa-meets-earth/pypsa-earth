@@ -94,6 +94,23 @@ Specifies the temporal range to build an energy system model for as arguments to
    :widths: 25,7,22,30
    :file: configtables/snapshots.csv
 
+.. _crs_cf:
+
+``crs``
+===============
+
+Defines the coordinate reference systems (crs).
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: crs:
+   :end-at: area_crs:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/crs.csv
+
 .. _electricity_cf:
 
 ``electricity``
