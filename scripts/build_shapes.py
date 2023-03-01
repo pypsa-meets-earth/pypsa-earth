@@ -741,7 +741,7 @@ def add_population_data(
 
                 # get worldpop image
                 WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-                    worldpop_method, c_code, year, update, out_logging
+                    c_code, worldpop_method, year, update, out_logging
                 )
 
                 with rasterio.open(WorldPop_inputfile) as src:
