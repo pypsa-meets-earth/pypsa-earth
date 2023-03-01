@@ -70,6 +70,9 @@ It is advisable to adapt the required range of coordinates to the selection of c
                     dy: 0.3  # cutout resolution
                     # The cutout time is automatically set by the snapshot range.
 
+
+Note please that a temporal dimension of the cutout should be consistent with the values set for `snapshots` parameter. A time range of the cutout is determined by the parameters set when building this cutout while the time resolution corresponds to those of the used climate archives. In case of ERA5 dataset used in PyPSA-Earth by default, hourly resolution is implied.
+
 It is also possible to decide which weather data source should be used to calculate potentials and capacity factor time-series for each carrier.
 For example, we may want to use the ERA-5 dataset for solar and not the default SARAH-2 dataset.
 
@@ -173,7 +176,7 @@ In case you are interested in other parts of the world you have to generate a cu
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 
-The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
+The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident. The `snapshots` values set when generating the cutout, will determine the temporal parameters of the cutout. Accessible years which can be used to build a cutout depend on ERA5 data availability. `ERA5 page <https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5>`_ explains that the data is available from 1950 and updated continuously with about 3 month delay while the data on 1950-1978 should be treated as preliminary as that is a rather recent development.
 
 After the first run, if you don't change country and need to increase a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
 
