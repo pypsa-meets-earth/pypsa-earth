@@ -28,8 +28,6 @@ To do that, you may want to do a reserve copy of your current configuration file
 
 In the configuration file `config.yaml` there is a flag `retrieve_databundle` which triggers data loading and a `tutorial` flag which determines that the loaded data belong to the tutorial kit. Currently the tutorial can be run only for Nigeria ("NG"), Benin ("BJ"), Botswana ("BW") and Morocco ("MA").
 
-:
-
 .. code:: yaml
 
     tutorial: true
