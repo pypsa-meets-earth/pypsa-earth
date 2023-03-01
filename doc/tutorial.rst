@@ -34,6 +34,19 @@ Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
         end: "2013-03-7"
         inclusive: "left" # end is not inclusive
 
+
+Year-related parameters are also being used  when specifying `load_options`:
+
+.. code:: yaml
+
+    load_options:
+      ssp: "ssp2-2.6"
+      weather_year: 2013
+      prediction_year: 2030
+      scale: 1
+
+The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` correspond to the point of a ssp trajectory. The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
+
 It is also possible to allow less or more carbon-dioxide emissions, while defining the current emissions.
 It is possible to model a net-zero target by setting the `co2limit` to zero:
 
