@@ -410,7 +410,7 @@ def collect_renewable_stats(rulename, technology):
     """
     snakemake = _mock_snakemake(rulename, technology=technology)
 
-    if sets_path_to_root(snakemake.output.profile).is_file():
+    if Path(snakemake.output.profile).is_file():
         res = xr.open_dataset(snakemake.output.profile)
 
         if technology == "hydro":
