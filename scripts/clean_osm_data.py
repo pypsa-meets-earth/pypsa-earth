@@ -43,8 +43,7 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["lon"] = df_all_substations["geometry"].x
     df_all_substations["lat"] = df_all_substations["geometry"].y
 
-    # Add NaN as default
-    df_all_substations["station_id"] = np.nan
+    # Initialize columns to default value
     df_all_substations["dc"] = False
     df_all_substations["under_construction"] = False
 
@@ -105,11 +104,11 @@ def add_line_endings_tosubstations(substations, lines):
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
-    # Add NaN as default
+    # Initialize default values
     bus_all["station_id"] = np.nan
     # Assuming substations completed for installed lines
     bus_all["under_construction"] = False
-    bus_all["tag_area"] = 0.0  # np.nan
+    bus_all["tag_area"] = 0.0
     bus_all["symbol"] = "substation"
     # TODO: this tag may be improved, maybe depending on voltage levels
     bus_all["tag_substation"] = "transmission"
@@ -162,6 +161,15 @@ def split_cells(df, cols=["voltage"]):
         Dataframe under analysis
     cols : list
         List of target columns over which to perform the analysis
+
+    Example
+    -------
+    Original data:
+    row 1: '66000;220000', '50'
+
+    After applying split_cells():
+    row 1, '66000', '50'
+    row 2, '220000', '50'
     """
     if df.empty:
         return df
@@ -172,6 +180,7 @@ def split_cells(df, cols=["voltage"]):
 
 
 def filter_voltage(df, threshold_voltage=35000):
+    """Filters df to contain only lines with voltage above threshold_voltage"""
     # Convert to numeric and drop any row with N/A voltage
     df["voltage"] = pd.to_numeric(df["voltage"], errors="coerce").astype(float)
     df.dropna(subset=["voltage"], inplace=True)
@@ -186,6 +195,7 @@ def filter_voltage(df, threshold_voltage=35000):
 
 
 def filter_frequency(df, accepted_values=[50, 60, 0]):
+    """Filters df to contain only lines with frequency with accepted_values"""
     df["tag_frequency"] = pd.to_numeric(df["tag_frequency"], errors="coerce").astype(
         float
     )
@@ -202,6 +212,7 @@ def filter_frequency(df, accepted_values=[50, 60, 0]):
 
 
 def filter_circuits(df, min_value_circuit=0.1):
+    """Filters df to contain only lines with circuit value above min_value_circuit."""
     df["circuits"] = pd.to_numeric(df["circuits"], errors="coerce").astype(float)
     df.dropna(subset=["circuits"], inplace=True)
 
@@ -246,12 +257,6 @@ def prepare_lines_df(df_lines):
         }
     )
 
-    # Add NaN as default
-    df_lines["bus0"] = np.nan
-    df_lines["bus1"] = np.nan
-    df_lines["underground"] = np.nan
-    df_lines["under_construction"] = np.nan
-
     # Rearrange columns
     clist = [
         "line_id",
@@ -288,13 +293,13 @@ def finalize_lines_type(df_lines):
     return df_lines
 
 
-def parse_frequency(df):
-    "Function to parse raw frequency column: manual fixing and drop undesired values"
-
+def clean_frequency(df):
+    """
+    Function to clean raw frequency column: manual fixing and fill nan values
+    """
     # replace raw values
     repl_freq = {
         "16.67": "16.7",
-        "50;50;16.716.7": "50;50;16.7;16.7",
         "50;50;16.716.7": "50;50;16.7;16.7",
         "50;16.7?": "50;16.7",
         # "24 kHz": "24000",
@@ -311,9 +316,10 @@ def parse_frequency(df):
     return df
 
 
-def parse_voltage(df):
-    "Function to parse raw voltage column: manual fixing and drop undesired values"
-
+def clean_voltage(df):
+    """
+    Function to clean the raw voltage column: manual fixing and drop nan values
+    """
     # replace raw values
     repl_voltage = {
         "medium": "33000",
@@ -332,7 +338,8 @@ def parse_voltage(df):
         .str.replace("_", "")
         .str.replace("kv", "000")
         .str.replace("v", "")
-        # .str.replace("/", ";")
+        # .str.replace("/", ";")  # few OSM entries are separated by / instead of ;
+        # this line can be a fix for that if relevant
     )
 
     # drop na values in voltage
@@ -341,13 +348,14 @@ def parse_voltage(df):
     return df
 
 
-def parse_circuits(df):
-    "Function to parse raw circuits column: manual fixing and drop undesired values"
-
+def clean_circuits(df):
+    """
+    Function to clean the raw circuits column: manual fixing and clean nan values
+    """
     # replace raw values
     repl_circuits = {
-        "1/3": "0",
-        "2/3": "0",
+        "1/3": "1",
+        "2/3": "2",
         # assumption of two lines and one grounding wire
         "2-1": "2",
         "single": "1",
@@ -366,9 +374,10 @@ def parse_circuits(df):
     return df
 
 
-def parse_cables(df):
-    "Function to parse raw cables column: manual fixing and drop undesired values"
-
+def clean_cables(df):
+    """
+    Function to clean the raw cables column: manual fixing and drop undesired values
+    """
     # replace raw values
     repl_cables = {
         "single": "1",
@@ -397,10 +406,27 @@ def parse_cables(df):
     return df
 
 
-def split_and_match_vf(df):
+def split_and_match_voltage_frequency_size(df):
     """
     Function to match the length of the columns in subset
     by duplicating the last value in the column
+
+    The function does as follows:
+    1. First, it splits voltage and frequency columns by semicolon
+       For example, the following lines
+       row 1: '50', '220000
+       row 2: '50;50;50', '220000;380000'
+
+       become:
+       row 1: ['50'], ['220000']
+       row 2: ['50','50','50'], ['220000','380000']
+
+    2. Then, it harmonize each row to match the length of the lists
+       by filling the missing values with the last elements of each list.
+       In agreement to the example of before, after the cleaning:
+
+       row 1: ['50'], ['220000']
+       row 2: ['50','50','50'], ['220000','380000','380000']
     """
     for col in ["tag_frequency", "voltage"]:
         df[col] = df[col].str.split(";")
@@ -409,13 +435,18 @@ def split_and_match_vf(df):
     len_voltage = df["voltage"].map(len)
 
     def _fill_by_last(row, col_to_fill, size_col):
+        """
+        This functions takes a series and checks two elements in
+        locations col_to_fill and size_col that are lists.
+        The list of col_to_fill has less elements than of size_col.
+        This function extends the col_to_fill element to match the size
+        of size_col by replicating the last element as necessary.
+        """
         size_to_fill = len(row[size_col])
         if not row[col_to_fill]:
             return None
         n_missing = size_to_fill - len(row[col_to_fill])
         fill_val = row[col_to_fill][-1]
-
-        new_row = row[col_to_fill].copy()
 
         return row[col_to_fill] + [fill_val] * n_missing
 
@@ -436,8 +467,28 @@ def split_and_match_vf(df):
 
 def fill_circuits(df):
     """
-    This function fills the circuits column to match the length of v/f columns
-    The value of cables may be used to parse the values
+    This function fills the rows circuits column so that the size of
+    each list element matches the size of the list in the frequency column.
+
+    Multiple procedure are adopted:
+    1. In the rows of circuits where the number of elements matches
+       the number of the frequency column, nothing is done
+    2. Where the number of elements in the cables column match the ones
+       in the frequency column, then the values of cables are used.
+    3. Where the number of elements in cables exceed those in frequency,
+       the cables elements are downscaled and the last values of cables
+       are summed.
+       Let's assume that cables is [3,3,3] but frequency is [50,50].
+       With this procedures, cables is treated as [3,6] and used for
+       calculating the circuits
+    4. Where the number in cables has an unique number, e.g. ['6'],
+       but frequency does not, e.g. ['50', '50'],
+       then distribute the cables proportionally across the values.
+       Note: the distribution accounts for the frequency type;
+       when the frequency is 50 or 60, then a circuit requires 3 cables,
+       when DC (0 frequency) is used, a circuit requires 2 cables.
+    5. Where no information of cables or circuits is available,
+       a circuit is assumed for every frequency entry.
     """
 
     def _get_circuits_status(df):
@@ -544,7 +595,18 @@ def fill_circuits(df):
     return df
 
 
-def explode_columns(df, cols):
+def explode_rows(df, cols):
+    """
+    Function that explodes the rows as specified in cols, including warning alerts for unexpected values.
+
+    Example
+    --------
+    row 1: [50,50], [33000, 110000]
+
+    after explode_rows applied on the two columns becomes
+    row 1: 50, 33000
+    row 2: 50, 110000
+    """
     # check if all row elements are list
     is_all_list = df[cols].applymap(lambda x: isinstance(x, list)).all(axis=1)
     if not is_all_list.all():
@@ -576,13 +638,18 @@ def integrate_lines_df(df_all_lines, distance_crs):
     df = pd.DataFrame(df_all_lines)
 
     # preliminary raw parsing of raw columns
-    parse_frequency(df)
-    parse_voltage(df)
-    parse_circuits(df)
-    parse_cables(df)
+    clean_frequency(df)
+    clean_voltage(df)
+    clean_circuits(df)
+    clean_cables(df)
 
-    # fill voltage and frequency columns length for explode
-    split_and_match_vf(df)
+    # analyse each row of voltage and requency and match their content
+    # Example:
+    #       tag_frequency   voltage
+    # row1: 50;50           33000
+    # Becomes
+    # row1: 50;50           33000;33000
+    split_and_match_voltage_frequency_size(df)
 
     # fill the circuits column for explode
     fill_circuits(df)
@@ -598,8 +665,8 @@ def integrate_lines_df(df_all_lines, distance_crs):
     # drop columns
     df.drop(columns=["tag_location", "cables"], errors="ignore", inplace=True)
 
-    # explode columns
-    df = explode_columns(df, ["tag_frequency", "voltage", "circuits"])
+    # explode rows
+    df = explode_rows(df, ["tag_frequency", "voltage", "circuits"])
 
     return gpd.GeoDataFrame(df, crs=df_all_lines.crs)
 

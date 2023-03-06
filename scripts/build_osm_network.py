@@ -705,8 +705,14 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
 
 
 def force_ac_lines(df, col="tag_frequency"):
-    "Function to force AC for lines"
+    """
+    Function that forces all PyPSA lines to be AC lines.
 
+    A network can contain AC and DC power lines that are modelled as PyPSA "Line" component.
+    When DC lines are available, their power flow can be controlled by their converter.
+    When it is artificially converted into AC, this feature is lost.
+    However, for debugging and preliminary analysis, it can be useful to bypass problems.
+    """
     DC_freq = 0.0
     DC_lines = (df["tag_frequency"] - DC_freq).abs() <= 0.01
 
