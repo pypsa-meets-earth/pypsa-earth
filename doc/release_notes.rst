@@ -73,6 +73,8 @@ Upcoming Release
 
 * Update simplify_network and cluster_network according to PyPSA-Eur developments `PR #597 https://github.com/pypsa-meets-earth/pypsa-earth/pull/597`__
 
+* Revise OSM cleaning to improve the cleaning process and error resilience `PR #620 https://github.com/pypsa-meets-earth/pypsa-earth/pull/620`__
+
 PyPSA-Earth 0.1.0
 =================
 
