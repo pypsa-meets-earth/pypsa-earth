@@ -725,6 +725,8 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False
     lines = gpd.read_file(inputs["lines"])
     generators = read_geojson(inputs["generators"])
 
+    lines = line_endings_to_bus_conversion(lines)
+
     if force_ac:
         logger.info(
             "Stage 2/5: AC and DC network: disabled, forced buses and lines to AC"

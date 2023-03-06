@@ -770,15 +770,15 @@ def clean_data(
         df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
     ]
 
-    # set unique line ids
-    df_all_lines = set_unique_id(df_all_lines, "line_id")
-
     df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
     # set the country name by the shape
     if names_by_shapes:
         logger.info("Setting lines country name using the GADM shapes")
         df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
+
+    # set unique line ids
+    df_all_lines = set_unique_id(df_all_lines, "line_id")
 
     # save lines output
     logger.info("Saving lines output")
@@ -816,9 +816,6 @@ def clean_data(
     # finalize dataframe types
     df_all_substations = finalize_substation_types(df_all_substations)
 
-    # set unique bus ids
-    df_all_substations = set_unique_id(df_all_substations, "bus_id")
-
     # save to geojson file
     df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
 
@@ -830,6 +827,9 @@ def clean_data(
             ext_country_shapes,
             col_country="Country",
         )
+
+    # set unique bus ids
+    df_all_substations = set_unique_id(df_all_substations, "bus_id")
 
     # save substations output
     logger.info("Saving substations output")
