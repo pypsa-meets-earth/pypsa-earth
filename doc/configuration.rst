@@ -97,7 +97,7 @@ Specifies the temporal range to build an energy system model for as arguments to
 .. _crs_cf:
 
 ``crs``
-===============
+=======
 
 Defines the coordinate reference systems (crs).
 
@@ -110,6 +110,23 @@ Defines the coordinate reference systems (crs).
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/crs.csv
+
+.. _augmented_line_connection_cf:
+
+``augmented_line_connection``
+=============================
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: augmented_line_connection:
+   :end-at: min_DC_length:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/augmented_line_connection.csv
+
+
 
 .. _electricity_cf:
 
