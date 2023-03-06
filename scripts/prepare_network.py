@@ -59,17 +59,13 @@ import logging
 import os
 import re
 
+import country_converter as coco
 import numpy as np
 import pandas as pd
 import pypsa
-import country_converter as coco
-from config_osm_data import continent_regions, world_iso
-from _helpers import (
-    configure_logging,
-    sets_path_to_root,
-    create_country_list,
-)
+from _helpers import configure_logging, create_country_list, sets_path_to_root
 from add_electricity import load_costs, update_transmission_costs
+from config_osm_data import continent_regions, world_iso
 
 idx = pd.IndexSlice
 
@@ -78,25 +74,29 @@ logger = logging.getLogger(__name__)
 
 def emission_extractor():
     country_names = create_country_list(snakemake.config["countries"])
-    #data reading process  
-    os.chdir(os.path.join(os.getcwd(),
-"data",
-))
+    # data reading process
+    os.chdir(
+        os.path.join(
+            os.getcwd(),
+            "data",
+        )
+    )
     emission_of_countries = []
-    df = pd.ExcelFile('v60_CO2_excl_short-cycle_org_C_1970_2018.xls')
-    df = pd.read_excel(df,1)
+    df = pd.ExcelFile("v60_CO2_excl_short-cycle_org_C_1970_2018.xls")
+    df = pd.read_excel(df, 1)
 
     for j in country_names:
         j = coco.convert(j, to="ISO3")
-        for i in range(9,3918):
-            #2 represents Country_Code_A3 column of the dataframe
+        for i in range(9, 3918):
+            # 2 represents Country_Code_A3 column of the dataframe
             three_digits = df.loc[i][2]
             if j == three_digits:
-                #27 represents Y_1990 column of the dataframe
-                if df.loc[i][5] == 'Public electricity and heat production': 
-                   emission_of_countries.append(df.loc[i][27])
+                # 27 represents Y_1990 column of the dataframe
+                if df.loc[i][5] == "Public electricity and heat production":
+                    emission_of_countries.append(df.loc[i][27])
     sets_path_to_root("pypsa-earth")
     return emission_of_countries
+
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
     n.add(
