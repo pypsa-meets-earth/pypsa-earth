@@ -62,12 +62,13 @@ def prepare_substation_df(df_all_substations):
         "geometry",
         "country",
     ]
-    df_all_substations = df_all_substations[clist]
 
     # Check. If column is not in df create an empty one.
     for c in clist:
         if c not in df_all_substations:
             df_all_substations[c] = np.nan
+
+    df_all_substations = df_all_substations[clist]
 
     return df_all_substations
 
