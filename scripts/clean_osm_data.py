@@ -294,7 +294,7 @@ def finalize_lines_type(df_lines):
     return df_lines
 
 
-def clean_frequency(df):
+def clean_frequency(df, default_frequency="50"):
     """
     Function to clean raw frequency column: manual fixing and fill nan values
     """
@@ -307,9 +307,6 @@ def clean_frequency(df):
     }
 
     # TODO: default frequency may be by country
-    # default frequency
-    default_frequency = "50"
-
     df["tag_frequency"] = (
         df["tag_frequency"].replace(repl_freq).fillna(default_frequency)
     )
@@ -343,7 +340,6 @@ def clean_voltage(df):
         # this line can be a fix for that if relevant
     )
 
-    # drop na values in voltage
     df.dropna(subset=["voltage"], inplace=True)
 
     return df
@@ -381,25 +377,25 @@ def clean_cables(df):
     """
     # replace raw values
     repl_cables = {
+        "1 disused": "0",
+        "ground": "0",
         "single": "1",
         "triple": "3",
-        "partial": "1",
-        "1 disused": "0",
         "3;3 disused": "3;0",
         "1 (Looped - Haul & Return) + 1 power wire": "1",
-        "ground": "0",
-        "line": "1",
-        # assuming that in case of a typo there is at least one line
-        "`": "1",
-        "^1": "1",
-        "e": "1",
-        "d": "1",
         "2-1": "3",
         "3+3": "6",
         "6+1": "6",
         "2x3": "6",
         "3x2": "6",
         "2x2": "4",
+        # assuming that in case of a typo there is at least one line
+        "partial": "1",
+        "`": "1",
+        "^1": "1",
+        "e": "1",
+        "d": "1",
+        "line": "1",
     }
 
     df["cables"] = df["cables"].replace(repl_cables).str.replace(" ", "")
@@ -712,10 +708,10 @@ def prepare_generators_df(df_all_generators):
 
 def find_first_overlap(geom, country_geoms, default_name):
     """Return the first index whose shape intersects the geometry"""
-    return next(
-        (idx for idx, c_geom in country_geoms.items() if not geom.disjoint(c_geom)),
-        default_name,
-    )
+    for c_name, c_geom in country_geoms.items():
+        if not geom.disjoint(c_geom):
+            return c_name
+    return default_name
 
 
 def set_countryname_by_shape(
