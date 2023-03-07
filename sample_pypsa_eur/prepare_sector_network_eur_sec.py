@@ -902,7 +902,6 @@ def add_generation(n, costs):
         )
 
 
-
 # TODO locations was missing
 # def add_wave(n, wave_cost_factor):
 

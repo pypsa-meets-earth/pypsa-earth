@@ -1058,7 +1058,6 @@ def add_shipping(n, costs):
 
 
 def add_industry(n, costs):
-
     print("adding industrial demand")
     # 1e6 to convert TWh to MWh
 

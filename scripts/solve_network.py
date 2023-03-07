@@ -76,7 +76,6 @@ def _add_land_use_constraint_m(n):
 
 
 def prepare_network(n, solve_opts=None):
-
     # if snakemake.config["rescale_emissions"]:
     #     pass
     # n.carriers.co2_emissions = n.carriers.co2_emissions * 1e-6

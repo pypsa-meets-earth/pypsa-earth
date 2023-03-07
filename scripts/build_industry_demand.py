@@ -87,13 +87,10 @@ if __name__ == "__main__":
     }
     nodal_df.rename(columns=rename_sectors, inplace=True)
 
-
-
     if not snakemake.config["custom_data"]["industry_demand"]:  #
         # convert GWh to TWh and ktCO2 to MtCO2
 
         nodal_df *= 0.001  # TODO check
-
 
         # energy demand today to get current electricity #TODO
         prod_tod_path = snakemake.input.industrial_production_per_country
