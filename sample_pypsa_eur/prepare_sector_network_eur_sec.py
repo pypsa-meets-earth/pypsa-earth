@@ -99,37 +99,37 @@ def get(item, investment_year=None):
 
 
 # TODO function redefinition
-# def create_network_topology(n, prefix, connector=" -> "):
-#     """
-#     Create a network topology like the power transmission network.
+ def create_network_topology(n, prefix, connector=" -> "):
+     """
+     Create a network topology like the power transmission network.
 
-#     Parameters
-#     ----------
-#     n : pypsa.Network
-#     prefix : str
-#     connector : str
+     Parameters
+     ----------
+     n : pypsa.Network
+     prefix : str
+     connector : str
 
-#     Returns
-#     -------
-#     pd.DataFrame with columns bus0, bus1 and length
-#     """
+     Returns
+     -------
+     pd.DataFrame with columns bus0, bus1 and length
+     """
 
-#     ln_attrs = ["bus0", "bus1", "length"]
-#     lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
+     ln_attrs = ["bus0", "bus1", "length"]
+     lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
 
-#     candidates = pd.concat(
-#         [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
-#     ).fillna(0)
+     candidates = pd.concat(
+         [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
+     ).fillna(0)
 
-#     positive_order = candidates.bus0 < candidates.bus1
-#     candidates_p = candidates[positive_order]
-#     swap_buses = {"bus0": "bus1", "bus1": "bus0"}
-#     candidates_n = candidates[~positive_order].rename(columns=swap_buses)
-#     candidates = pd.concat([candidates_p, candidates_n])
+     positive_order = candidates.bus0 < candidates.bus1
+     candidates_p = candidates[positive_order]
+     swap_buses = {"bus0": "bus1", "bus1": "bus0"}
+     candidates_n = candidates[~positive_order].rename(columns=swap_buses)
+     candidates = pd.concat([candidates_p, candidates_n])
 
-#     topo = candidates.groupby(["bus0", "bus1"], as_index=False).mean()
-#     topo.index = topo.apply(lambda c: prefix + c.bus0 + connector + c.bus1, axis=1)
-#     return topo
+     topo = candidates.groupby(["bus0", "bus1"], as_index=False).mean()
+     topo.index = topo.apply(lambda c: prefix + c.bus0 + connector + c.bus1, axis=1)
+     return topo
 
 
 def co2_emissions_year(countries, opts, year):
