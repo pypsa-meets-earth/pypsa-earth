@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def select_ports(n):
     """This function selects the buses where ports are located"""
 
-    ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+    ports = pd.read_csv(snakemake.input.export_ports, index_col=None, squeeze=True)
     ports = ports[ports.country.isin(countries)]
 
     gadm_level = snakemake.config["sector"]["gadm_level"]
@@ -52,7 +52,6 @@ def select_ports(n):
 
 
 def add_export(n, hydrogen_buses_ports, export_h2):
-
     # add export bus
     n.add(
         "Bus",
@@ -103,14 +102,16 @@ if __name__ == "__main__":
         from helpers import mock_snakemake, sets_path_to_root
 
         snakemake = mock_snakemake(
-            "add_endogenous_export",
+            "add_export",
             simpl="",
-            clusters="20",
+            clusters="102",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="730H",
-            discountrate=0.069,
+            sopts="144H",
+            discountrate=0.111,
+            demand="AP",
+            h2export=10,
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -119,7 +120,8 @@ if __name__ == "__main__":
     countries = list(n.buses.country.unique())
 
     # get export demand
-    export_h2 = snakemake.config["export"]["export_h2"]
+
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
     logger.info(
         f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
     )

@@ -27,10 +27,11 @@ wildcard_constraints:
     ll="[a-z0-9\.]+",
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+m?|all",
-    opts="[-+a-zA-Z0-9]*",
+    opts="[-+a-zA-Z0-9\.\s]*",
     sopts="[-+a-zA-Z0-9\.\s]*",
     discountrate="[-+a-zA-Z0-9\.\s]*",
     demand="[-+a-zA-Z0-9\.\s]*",
+    h2export="[0-9]+m?|all",
 
 
 subworkflow pypsaearth:
@@ -58,7 +59,8 @@ rule override_res_all_nets:
             RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
             **config["scenario"],
-            **config["costs"]
+            **config["costs"],
+            **config["export"]
         ),
 
 
@@ -66,9 +68,10 @@ rule solve_all_networks:
     input:
         expand(
             RDIR
-            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             **config["scenario"],
-            **config["costs"]
+            **config["costs"],
+            **config["export"]
         ),
 
 
@@ -117,7 +120,7 @@ rule prepare_sector_network:
 rule add_export:
     input:
         overrides="data/override_component_attrs",
-        ports="data/ports.csv",
+        export_ports="data/export_ports.csv",
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path=pypsaearth(
@@ -125,7 +128,7 @@ rule add_export:
         ),
     output:
         RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         # TODO output file name must be adjusted and integrated in workflow
     script:
         "scripts/add_export.py"
@@ -351,27 +354,27 @@ rule solve_network:
         # network=RDIR
         # + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
         network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_export.nc",
+        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
     output:
         RDIR
-        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     shadow:
         "shallow"
     log:
         solver=RDIR
-        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_solver.log",
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
         python=RDIR
-        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_python.log",
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_python.log",
         memory=RDIR
-        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_memory.log",
+        + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
     threads: 25
     resources:
         mem_mb=config["solving"]["mem"],
     benchmark:
         (
             RDIR
-            + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}"
+            + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
     script:
         "scripts/solve_network.py"
@@ -382,16 +385,18 @@ rule make_summary:
         overrides="data/override_component_attrs",
         networks=expand(
             RDIR
-            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             **config["scenario"],
-            **config["costs"]
+            **config["costs"],
+            **config["export"]
         ),
         costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         plots=expand(
             RDIR
-            + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}.pdf",
+            + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
             **config["scenario"],
-            **config["costs"]
+            **config["costs"],
+            **config["export"]
         ),
     output:
         nodal_costs=SDIR + "/csvs/nodal_costs.csv",
@@ -422,17 +427,17 @@ rule plot_network:
     input:
         overrides="data/override_component_attrs",
         network=RDIR
-        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
         map=RDIR
-        + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}.pdf",
+        + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
         (
             RDIR
-            + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}"
+            + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
     script:
         "scripts/plot_network.py"
@@ -459,17 +464,17 @@ rule plot_summary:
 rule prepare_db:
     input:
         network=RDIR
-        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
         db=RDIR
-        + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}.csv",
+        + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
         (
             RDIR
-            + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}"
+            + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
     script:
         "scripts/prepare_db.py"
@@ -480,7 +485,6 @@ rule run_test:
         import yaml
 
         with open("../pypsa-earth/config.tutorial.yaml") as file:
-
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
