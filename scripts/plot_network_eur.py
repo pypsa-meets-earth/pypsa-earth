@@ -735,6 +735,7 @@ def plot_series(network, carrier="AC", name="test"):
     )
 
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake

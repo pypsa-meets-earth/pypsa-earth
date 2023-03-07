@@ -219,7 +219,7 @@ def add_lifetime_wind_solar(n, costs):
         n.generators.loc[gen_i, "lifetime"] = costs.at[carrier, "lifetime"]
 
 
-def create_network_topology(n, prefix, connector=" -> ", bidirectional=True):
+def create_network_topology_other(n, prefix, connector=" -> ", bidirectional=True):
     """
     Create a network topology like the power transmission network.
 
@@ -902,8 +902,10 @@ def add_generation(n, costs):
         )
 
 
+
 # TODO locations was missing
 # def add_wave(n, wave_cost_factor):
+
 
 #     # TODO: handle in Snakefile
 #     wave_fn = "data/WindWaveWEC_GLTB.xlsx"
