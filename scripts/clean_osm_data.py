@@ -645,11 +645,6 @@ def integrate_lines_df(df_all_lines, distance_crs):
     clean_cables(df)
 
     # analyse each row of voltage and requency and match their content
-    # Example:
-    #       tag_frequency   voltage
-    # row1: 50;50           33000
-    # Becomes
-    # row1: 50;50           33000;33000
     split_and_match_voltage_frequency_size(df)
 
     # fill the circuits column for explode
