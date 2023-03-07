@@ -1,23 +1,28 @@
-# SPDX-FileCopyrightText: : 2021 The PyPSA-Africa Authors
+# SPDX-FileCopyrightText: : 2021 The PyPSA-Earth Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
 
-version: 0.0.2
+version: 1.0.0
 tutorial: false
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
+run:
+  name: "" # use this to keep track of runs with different settings
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
+
 scenario:
   simpl: ['']
   ll: ['1.0']
-  clusters: [203]
+  clusters: [10]
   opts: [Co2L1-144H]
 
 countries: ["MA"]
-# Can be replaced by country ["NG", "BJ"] or user specific region, more at https://pypsa-meets-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 snapshots:
   start: "2013-01-01"
@@ -26,6 +31,7 @@ snapshots:
 
 enable:
   retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: false  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, than an exclusion raster will be build
   build_cutout: true
@@ -43,17 +49,19 @@ crs:
 
 augmented_line_connection:
   add_to_snakefile: false  # If True, includes this rule to the workflow
-  connectivity_upgrade: 3  # Min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
-  new_line_type: "HVDC"  # Expanded lines can be either "HVAC" or "HVDC"
-  min_expansion: 1  # New created line expands by float/int input [MW]
+  connectivity_upgrade: 2  # Min. lines connection per node, https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: ["HVAC"]  # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
+  min_expansion: 1  # [MW] New created line expands by float/int input
+  min_DC_length: 600  # [km] Minimum line length of DC line
 
 cluster_options:
   alternative_clustering: true  # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true  # When "True", logging is printed to console
   aggregation_strategies:
-    generators:
-      p_nom_max: sum # use "min" for more conservative assumptions
+    generators:  # use "min" for more conservative assumptions
+      p_nom: sum
+      p_nom_max: sum
       p_nom_min: sum
       p_min_pu: mean
       marginal_cost: mean
@@ -68,9 +76,10 @@ build_shape_options:
   out_logging: true  # When true, logging is printed to console
   year: 2020  # reference year used to derive shapes, info on population and info on GDP
   nprocesses: 5  # number of processes to be used in build_shapes
+  nchunks: 3  # number of data chuncks for build_shapes. If not specified or smaller than nprocesses, specified as nprocesses
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
-
+  contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
@@ -80,7 +89,7 @@ clean_osm_data_options:  # osm = OpenStreetMap
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 1000  # [m] (default 500) Tolerance in meters of the close buses to merge
+  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
 
@@ -96,8 +105,8 @@ load_options:
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 4.0e+3 # 0.05 * 3.1e9*0.5
-  co2base: 1.487e+8
+  co2limit: 4.0e+3  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
+  co2base: 1.487e+8  # European default, adjustment to Africa necessary
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
 
@@ -139,7 +148,7 @@ lines:
     220.: "Al/St 240/40 2-bundle 220.0"
     300.: "Al/St 240/40 3-bundle 300.0"
     380.: "Al/St 240/40 4-bundle 380.0"
-  dc_type: "DC_custom_linetype"
+  dc_type: "HVDC XLPE 1000"
   s_max_pu: 0.7
   s_nom_max: .inf
   length_factor: 1.25
@@ -164,10 +173,10 @@ atlite:
       module: era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
-      # Below customization options are dealt in an automated way depending on
-      # the snapshots and the selected countries. See 'build_cutout.py'
-      # time: ["2013-01-01", "2014-01-01"]  # specify different weather year (~40 years available)
-      # x: [-12., 35.]  # manual set cutout range
+      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
 
 
@@ -244,7 +253,7 @@ renewable:
       orientation: latitude_optimal # will lead into optimal design
         # slope: 0.  # slope: 0 represent a flat panel
         # azimuth: 180.  # azimuth: 180 south orientation
-    capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361 # ScholzPhd Tab 4.3.1: 170 MW/km^2
+    capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
     # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
@@ -276,8 +285,18 @@ renewable:
 # TODO: Needs to be adjusted for Africa
 costs:
   year: 2030
-  discountrate: 0.07 # From a Lion Hirth paper, also reflects average of Noothout et al 2016
+  version: v0.5.0
+  rooftop_share: 0.14  # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    CO2 intensity: 0
+    discount rate: 0.07
   marginal_cost: # EUR/MWh
     solar: 0.01
     onwind: 0.015
@@ -290,6 +309,7 @@ costs:
     battery inverter: 0.
   emission_prices: # in currency per tonne emission, only used with the option Ep
     co2: 0.
+
 
 monte_carlo:
   options:
@@ -345,8 +365,7 @@ plotting:
   energy_threshold: 50.
 
   vre_techs: ["onwind", "offwind-ac", "offwind-dc", "solar", "ror"]
-  # conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
-  conv_techs: []
+  conv_techs: ["OCGT", "CCGT", "nuclear", "coal", "oil"]
   storage_techs: ["hydro+PHS", "battery", "H2"]
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]

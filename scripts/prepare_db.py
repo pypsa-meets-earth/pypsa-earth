@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 
-#%%
+# %%
 
 # base_path = os.path.dirname(os.path.realpath(__file__))
 # dataset_paths = {'IGG': os.path.join(base_path, 'IGG', 'data'),
@@ -33,13 +33,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_db",
             simpl="",
-            clusters="22",
+            clusters="244",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L1",
             planning_horizons="2030",
-            sopts="730H",
-            discountrate=0.069,
-            demand="NZ",
+            sopts="720H",
+            discountrate=0.071,
+            demand="AP",
+            h2export="0",
         )
 
     n0 = pypsa.Network(snakemake.input.network)
@@ -47,12 +48,14 @@ if __name__ == "__main__":
     tech_colors = snakemake.config["plotting"]["tech_colors"]
 
 
-#%%
+# %%
 # def summary_h2(n, t):
-t = 730
+t = 720
 
 n = n0.copy()
-
+# n = pypsa.Network("../results/MA_REALISTIC_2030/postnetworks/elec_s_195_ec_lc1.0_Co2L_3H_2030_0.071_AP_428export.nc")
+# n = pypsa.Network("../results/MA_REALISTIC_2030_Q0_NoGreeness/postnetworks/elec_s_198_ec_lc1.0_Co2L_3H_2030_0.071_AP_0export.nc")
+# n = pypsa.Network("../results/MA_REALISTIC_2030_Q0_oilnew_13/postnetworks/elec_s_213_ec_lc1.0_Co2L_720H_2030_0.071_AP_0export.nc")
 summary_index = (n0.buses.loc[n0.buses.carrier == "AC"].index).sort_values()
 
 nodes = n.buses.loc[n.buses.carrier == "AC"].index.tolist()
@@ -124,7 +127,7 @@ def add_gen(tech, carrier, reg=False):
     # summary_elec['{0}_g_{1}'.format(carrier, tech.replace(' ', '_'))] = tech_col.sum()
 
 
-def add_load(tech, carrier):
+def add_load(tech, carrier, reg=False):
     global db
     if tech == "ac":
         ac_labels = loads.stack().reset_index(level=1).level_1
@@ -135,7 +138,11 @@ def add_load(tech, carrier):
 
         # summary_elec['elec_l_ac'] = loads
     else:
-        tech_col = loads.filter(like=tech)
+        if reg == False:
+            tech_col = loads.filter(regex=tech)  #
+        else:
+            tech_col = loads.filter(regex=tech + "$")  #
+
     populate_db(tech_col, carrier, "l", tech, ngv=True)
 
     # tech_col.index = tech_col.name.apply(lambda x: x.replace(' '+tech, ''))
@@ -179,6 +186,9 @@ def add_store(tech, carrier, reg=False):
         tech_col = stores.filter(like=tech)
     else:
         tech_col = stores.filter(regex=tech + "$")
+
+    if tech == "co2 atmosphere" or tech == "co2 stored":
+        tech_col *= -1
     populate_db(tech_col, carrier, "s", tech)
 
 
@@ -236,9 +246,11 @@ add_gen("offwind-ac", "hv")
 add_gen("offwind-dc", "hv")
 add_gen("ror", "hv")
 
+add_conv("H2 export", "h2", 0, True)
 
 add_conv("H2 Electrolysis", "hv", 0, True)
 add_conv("H2 Fuel Cell", "hv", 1, False)
+# add_conv("H2 Export", "hv", 1, False)
 add_conv("DAC", "hv", 2, True)
 add_conv("helmeth", "hv", 0, True)
 add_conv("electricity distribution grid", "hv", 0, True)
@@ -287,6 +299,7 @@ add_conv("urban central resistive heater", "hv", 0, True)
 add_conv("home battery charger", "hv", 0, True)
 add_conv("home battery discharger", "hv", 1, False)
 
+
 add_load("ac", "hv")
 add_load("industry electricity", "hv")
 
@@ -323,9 +336,90 @@ add_conv("DAC", "heat", 3, True)
 add_conv("Fischer-Tropsch", "heat", 3, False)
 
 
+add_conv("services urban decentral DAC", "co2", 0, False)
+add_conv("urban central DAC", "co2", 0, False)
+
+add_conv("process emissions", "co2", 1, True, True)
+add_conv("process emissions CC", "co2", 1, True)
+add_conv("co2 vent", "co2", 1, True)
+
+add_conv("OCGT", "co2", 2, True)
+add_conv("biogas to gas", "co2", 2, False)
+add_conv("biomass EOP", "co2", 2, True)
+add_conv("residential rural gas boiler", "co2", 2, True)
+add_conv("services rural gas boiler", "co2", 2, True)
+add_conv("residential urban decentral gas boiler", "co2", 2, True)
+add_conv("services urban decentral gas boiler", "co2", 2, True)
+add_conv("urban central gas boiler", "co2", 2, True)
+add_conv("solid biomass for industry CC", "co2", 2, False)
+add_conv("gas for industry", "co2", 2, True)
+add_conv("gas for industry CC", "co2", 2, True)
+
+
+add_load("industry oil emissions", "co2")
+add_load("shipping oil emissions", "co2")
+add_load("land transport oil emissions", "co2")
+add_load("aviation oil emissions", "co2")
+add_load("residential oil emissions", "co2")
+add_load("residential biomass emissions", "co2")
+add_load("services biomass emissions", "co2")
+
+# add_store("co2 stored", "co2")
+add_store("co2 atmosphere", "co2")
+
+add_conv("Fischer-Tropsch", "oil", 1, False)
+
+add_load("naphtha for industry", "oil")
+add_load("residential oil", "oil", reg=True)
+add_load("rail transport oil", "oil", reg=True)
+add_load("agriculture oil", "oil", reg=True)
+add_load("shipping oil", "oil", reg=True)
+add_load("land transport oil", "oil", reg=True)  # mistakenly add oil emissions
+add_load("kerosene for aviation", "oil")
+add_store("oil Store", "oil", 1)
+add_gen("oil", "oil")
+
+# add_load("gas for industry", "gas")
+add_conv("OCGT", "gas", 0, True)
+add_conv("residential rural gas boiler", "gas", 0, True)
+add_conv("services rural gas boiler", "gas", 0, True)
+add_conv("residential urban decentral gas boiler", "gas", 0, True)
+add_conv("services urban decentral gas boiler", "gas", 0, True)
+add_conv("gas for industry", "gas", 0, True, True)
+add_conv("gas for industry CC", "gas", 0, True)
+add_conv("urban central gas boiler", "gas", 0, True)
+
+add_conv("Sabatier", "gas", 1, False)
+add_conv("helmeth", "gas", 1, False)
+
+add_store("gas Store", "gas")
+add_gen("gas", "gas")
+
+add_conv("biogas to gas", "gas", 1, False)
+
+add_conv("gas for industry", "gas", 1, True)
+add_conv("gas for industry CC", "gas", 1, True)
+
+
+add_conv("co2 vent", "co2 stored", 0, True)
+# add_conv("CO2 pipeline", "co2 stored", 0, True)
+add_conv("DAC", "co2 stored", 1, True)
+
+add_conv("Fischer-Tropsch", "co2 stored", 2, False)
+add_conv("Sabatier", "co2 stored", 2, False)
+add_conv("helmeth", "co2 stored", 2, False)
+add_conv("process emissions CC", "co2 stored", 2, True)
+
+add_conv("solid biomass for industry CC", "co2 stored", 3, True)
+add_conv("gas for industry CC", "co2 stored", 3, True)
+
+# add_store("co2 stored")
+add_store("co2 stored", "co2 stored")
+
+
 # add
 # REMEMER TO ADD ALL DECENTRAL SHIT
-#%%
+# %%
 
 # summary_elec['h2_t_pipeline'] = summary_elec.appy(lambda row: h2_net_flow(n0, row.name, 24), axis=1)
 
@@ -338,9 +432,11 @@ db.reset_index(drop=True, inplace=True)
 # round(db).to_csv('db_fraction.csv')
 round(db).to_csv(snakemake.output.db)
 yearly_agg = round(db.groupby([db.node_id, db.carrier, db.flow, db.tech]).sum() / 1e3)
+
+
 # yearly_agg.to_csv('summary_db.csv')
 # yearly_agg.to_csv(snakemake.output.yr_agg)
-#%%
+# %%
 def calc_energy_flow(carrier, node_id):
     agg = yearly_agg.reset_index()
     agg = agg[(agg.carrier == carrier)]

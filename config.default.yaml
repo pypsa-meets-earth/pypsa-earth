@@ -33,14 +33,28 @@ clustering_options:
 
 countries: ['MA']
 
+H2_network: false
+H2_network_limit: 2000 #GWkm
+
+fossil_reserves:
+  oil: 100 #TWh Maybe reduntant
+
+hydrogen_underground_storage: false
+
+
 export:
-  export_h2: 10000000 # Yearly export demand in MWh
+  h2export: [1, 5] # Yearly export demand in TWh
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
   elec_demand: false
+  heat_demand: false
   industry_demand: false
+  transport_demand: false
   water_costs: false
+  h2_underground: false
+  add_existing: false
+  custom_sectors: false
 
 costs:
   lifetime: 25 #default lifetime

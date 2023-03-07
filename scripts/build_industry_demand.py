@@ -13,7 +13,6 @@ import pandas as pd
 
 
 def country_to_nodal(industrial_production, keys):
-
     keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
 
     nodal_production = pd.DataFrame(
@@ -24,7 +23,6 @@ def country_to_nodal(industrial_production, keys):
     sectors = industrial_production.columns
 
     for country, sector in product(countries, sectors):
-
         buses = keys.index[keys.country == country]
 
         if sector not in dist_keys.columns or dist_keys[sector].sum() == 0:
@@ -47,9 +45,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=112,
+            clusters=4,
             planning_horizons="2030",
-            demand="NZ",
+            demand="DF",
         )
 
     # Load production per country tomorrow
@@ -73,6 +71,7 @@ if __name__ == "__main__":
     industry_sector_ratios = pd.read_csv(
         snakemake.input.industry_sector_ratios, index_col=0
     )
+
     if snakemake.config["custom_data"]["industry_demand"]:
         industry_sector_ratios.drop(
             "Industry Steel Casting Rolling Finishing", axis=1, inplace=True
@@ -81,9 +80,6 @@ if __name__ == "__main__":
     # final energy consumption per node and industry (TWh/a)
     nodal_df = nodal_production.dot(industry_sector_ratios.T)
 
-    # convert GWh to TWh and ktCO2 to MtCO2
-    nodal_df *= 0.001
-
     rename_sectors = {
         "elec": "electricity",
         "biomass": "solid biomass",
@@ -91,7 +87,10 @@ if __name__ == "__main__":
     }
     nodal_df.rename(columns=rename_sectors, inplace=True)
 
-    if not snakemake.config["custom_data"]["industry_demand"]:
+    if not snakemake.config["custom_data"]["industry_demand"]:  #
+        # convert GWh to TWh and ktCO2 to MtCO2
+
+        nodal_df *= 0.001  # TODO check
 
         # energy demand today to get current electricity #TODO
         prod_tod_path = snakemake.input.industrial_production_per_country

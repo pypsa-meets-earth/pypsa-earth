@@ -73,7 +73,6 @@ if __name__ == "__main__":
     pop_urban = pd.Series(0.0, density_cells.index)
 
     for ct in countries:
-
         indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0 if x == ct else 0.0)
 
         indicator_cells_ct = pd.Series(Iinv.T.dot(indicator_nuts3_ct))
@@ -104,7 +103,6 @@ if __name__ == "__main__":
     pop_cells["urban"] = pop_urban
 
     for key, pop in pop_cells.items():
-
         ycoords = ("y", cutout.coords["y"].data)
         xcoords = ("x", cutout.coords["x"].data)
         values = pop.values.reshape(cutout.shape)
