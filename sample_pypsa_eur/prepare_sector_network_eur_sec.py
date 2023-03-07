@@ -1944,7 +1944,7 @@ def add_biomass(n, costs):
 
         # add biomass transport
         biomass_transport = create_network_topology(
-            n, "biomass transport " #, bidirectional=False
+            n, "biomass transport "  # , bidirectional=False
         )
 
         # costs
