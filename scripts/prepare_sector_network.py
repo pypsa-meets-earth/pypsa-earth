@@ -276,6 +276,7 @@ def add_hydrogen(n, costs):
     )
 
     cavern_nodes = pd.DataFrame()
+
     if snakemake.config["hydrogen_underground_storage"]:
         if snakemake.config["custom_data"]["h2_underground"]:
             custom_cavern = pd.read_csv("resources/custom_data/h2_underground.csv")
@@ -2064,6 +2065,7 @@ def add_agriculture(n, costs):
         carrier="agriculture electricity",
         p_set=nodal_energy_totals.loc[nodes, "agriculture electricity"] * 1e6 / 8760,
     )
+
     n.madd(
         "Load",
         nodes,

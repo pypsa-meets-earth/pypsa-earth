@@ -98,6 +98,7 @@ def get(item, investment_year=None):
         return item
 
 
+# TODO function redefinition
 def create_network_topology(n, prefix, connector=" -> "):
     """
     Create a network topology like the power transmission network.
@@ -901,7 +902,10 @@ def add_generation(n, costs):
         )
 
 
+# TODO locations was missing
 # def add_wave(n, wave_cost_factor):
+
+
 #     # TODO: handle in Snakefile
 #     wave_fn = "data/WindWaveWEC_GLTB.xlsx"
 
@@ -1940,7 +1944,7 @@ def add_biomass(n, costs):
 
         # add biomass transport
         biomass_transport = create_network_topology(
-            n, "biomass transport ", bidirectional=False
+            n, "biomass transport "  # , bidirectional=False
         )
 
         # costs
@@ -2625,7 +2629,7 @@ if __name__ == "__main__":
         if o[:4] == "wave":
             wave_cost_factor = float(o[4:].replace("p", ".").replace("m", "-"))
             print("Including wave generators with cost factor of", wave_cost_factor)
-            add_wave(n, wave_cost_factor)
+            # add_wave(n, wave_cost_factor) # TODO removed for now
         if o[:4] == "dist":
             options["electricity_distribution_grid"] = True
             options["electricity_distribution_grid_cost_factor"] = float(
