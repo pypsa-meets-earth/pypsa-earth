@@ -528,7 +528,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("plot_summary")
 
-    n_header = 6  # Header lines in the csv files
+    n_header = 7  # Header lines in the csv files
 
     plot_costs()
 
