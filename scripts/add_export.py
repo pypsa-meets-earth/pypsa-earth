@@ -27,7 +27,12 @@ logger = logging.getLogger(__name__)
 def select_ports(n):
     """This function selects the buses where ports are located"""
 
-    ports = pd.read_csv(snakemake.input.export_ports, index_col=None, squeeze=True, keep_default_na=False)
+    ports = pd.read_csv(
+        snakemake.input.export_ports,
+        index_col=None,
+        squeeze=True,
+        keep_default_na=False,
+    )
     ports = ports[ports.country.isin(countries)]
 
     gadm_level = snakemake.config["sector"]["gadm_level"]
@@ -131,7 +136,6 @@ if __name__ == "__main__":
     countries = list(n.buses.country.unique())
 
     # get export demand
-
 
     export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
     logger.info(

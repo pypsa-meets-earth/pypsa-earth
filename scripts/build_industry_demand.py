@@ -53,7 +53,9 @@ if __name__ == "__main__":
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
-    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0, keep_default_na=False)
+    production_tom = pd.read_csv(
+        prod_tom_path, header=0, index_col=0, keep_default_na=False
+    )
 
     if snakemake.config["custom_data"]["industry_demand"]:
         production_tom.drop("Industry Machinery", axis=1, inplace=True)
@@ -95,9 +97,9 @@ if __name__ == "__main__":
 
         # energy demand today to get current electricity #TODO
         prod_tod_path = snakemake.input.industrial_production_per_country
-        production_tod = pd.read_csv(prod_tod_path, header=0, index_col=0,keep_default_na=False).filter(
-            snakemake.config["countries"], axis=0
-        )
+        production_tod = pd.read_csv(
+            prod_tod_path, header=0, index_col=0, keep_default_na=False
+        ).filter(snakemake.config["countries"], axis=0)
         # if electricity demand is provided by pypsa-earth, the electricty used
         # in industry is included, and need to be removed from the default elec
         # demand that's why it isolated to be used in prepare_sector_network
