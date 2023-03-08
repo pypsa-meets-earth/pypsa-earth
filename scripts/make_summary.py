@@ -634,7 +634,15 @@ def make_summaries(networks_dict):
 
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(),
-        names=["cluster", "ll", "opt", "planning_horizon", "discount_rate", "demand", "export"],
+        names=[
+            "cluster",
+            "ll",
+            "opt",
+            "planning_horizon",
+            "discount_rate",
+            "demand",
+            "export",
+        ],
     )
 
     df = {}
