@@ -31,6 +31,7 @@ def country_to_nodal(industrial_production, keys):
             mapping = sector
 
         key = keys.loc[buses, mapping]
+        print(sector)
         nodal_production.loc[buses, sector] = (
             industrial_production.at[country, sector] * key
         )
@@ -45,14 +46,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=4,
+            clusters=16,
             planning_horizons="2030",
             demand="DF",
         )
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
-    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0)
+    production_tom = pd.read_csv(prod_tom_path, header=0, index_col=0, keep_default_na=False)
 
     if snakemake.config["custom_data"]["industry_demand"]:
         production_tom.drop("Industry Machinery", axis=1, inplace=True)
@@ -94,7 +95,7 @@ if __name__ == "__main__":
 
         # energy demand today to get current electricity #TODO
         prod_tod_path = snakemake.input.industrial_production_per_country
-        production_tod = pd.read_csv(prod_tod_path, header=0, index_col=0).filter(
+        production_tod = pd.read_csv(prod_tod_path, header=0, index_col=0,keep_default_na=False).filter(
             snakemake.config["countries"], axis=0
         )
         # if electricity demand is provided by pypsa-earth, the electricty used
