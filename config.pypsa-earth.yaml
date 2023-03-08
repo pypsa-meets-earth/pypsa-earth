@@ -21,7 +21,7 @@ scenario:
   clusters: [10]
   opts: [Co2L1-144H]
 
-countries: ["MA"]
+countries: ["NA"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 snapshots:
@@ -55,7 +55,18 @@ augmented_line_connection:
   min_DC_length: 600  # [km] Minimum line length of DC line
 
 cluster_options:
-  alternative_clustering: true  # "False" use Voronoi shapes, "True" use GADM shapes
+  simplify_network:
+      to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
+      algorithm: kmeans # choose from: [hac, kmeans]
+      feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
+      exclude_carriers: []
+      remove_stubs: true
+      remove_stubs_across_borders: true
+  cluster_network:
+    algorithm: kmeans
+    feature: solar+onwind-time
+    exclude_carriers: []
+  alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true  # When "True", logging is printed to console
   aggregation_strategies:
