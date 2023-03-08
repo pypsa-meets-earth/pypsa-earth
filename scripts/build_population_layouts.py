@@ -47,6 +47,7 @@ if __name__ == "__main__":
             index_col=0,
             names=["fraction"],
             squeeze=True,
+            keep_default_na=False,
         )
         / 100.0
     )

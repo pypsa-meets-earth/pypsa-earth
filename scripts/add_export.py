@@ -27,7 +27,12 @@ logger = logging.getLogger(__name__)
 def select_ports(n):
     """This function selects the buses where ports are located"""
 
-    ports = pd.read_csv(snakemake.input.export_ports, index_col=None, squeeze=True)
+    ports = pd.read_csv(
+        snakemake.input.export_ports,
+        index_col=None,
+        squeeze=True,
+        keep_default_na=False,
+    )
     ports = ports[ports.country.isin(countries)]
 
     gadm_level = snakemake.config["sector"]["gadm_level"]
@@ -115,14 +120,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="4",
+            clusters="16",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
             demand="DF",
-            h2export=10,
+            h2export=[0],
         )
         sets_path_to_root("pypsa-earth-sec")
 

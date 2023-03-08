@@ -508,7 +508,10 @@ def add_biomass(n, costs):
     if options["biomass_transport"]:
         # TODO add biomass transport costs
         transport_costs = pd.read_csv(
-            snakemake.input.biomass_transport_costs, index_col=0, squeeze=True
+            snakemake.input.biomass_transport_costs,
+            index_col=0,
+            squeeze=True,
+            keep_default_na=False,
         )
 
         # add biomass transport
@@ -728,7 +731,7 @@ def add_aviation(n, cost):
         energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
     )
 
-    airports = pd.read_csv(snakemake.input.airports)
+    airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
@@ -913,7 +916,9 @@ def h2_hc_conversions(n, costs):
 
 
 def add_shipping(n, costs):
-    ports = pd.read_csv(snakemake.input.ports, index_col=None, squeeze=True)
+    ports = pd.read_csv(
+        snakemake.input.ports, index_col=None, squeeze=True, keep_default_na=False
+    )
     ports = ports[ports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
@@ -2318,11 +2323,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
+            clusters="16",
             ll="c1.0",
-            opts="",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="CO2L0.90-144H",
+            sopts="144H",
             discountrate="0.071",
             demand="DF",
         )
@@ -2407,7 +2412,9 @@ if __name__ == "__main__":
     # TODO logging
 
     nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
-    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
+    energy_totals = pd.read_csv(
+        snakemake.input.energy_totals, index_col=0, keep_default_na=False
+    )
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
     transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)

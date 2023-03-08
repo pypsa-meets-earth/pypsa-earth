@@ -72,7 +72,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="171",
+            clusters="16",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -85,48 +85,49 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     m = n.copy()
-    buses = list(n.buses[n.buses.carrier == "AC"].index)
-    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
-    countries = snakemake.config["countries"]
     if snakemake.config["custom_data"]["renewables"]:
-        techs = snakemake.config["custom_data"]["renewables"]
-        year = snakemake.wildcards["planning_horizons"]
-        dr = snakemake.wildcards["discountrate"]
+        buses = list(n.buses[n.buses.carrier == "AC"].index)
+        energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
+        countries = snakemake.config["countries"]
+        if snakemake.config["custom_data"]["renewables"]:
+            techs = snakemake.config["custom_data"]["renewables"]
+            year = snakemake.wildcards["planning_horizons"]
+            dr = snakemake.wildcards["discountrate"]
 
-        m = n.copy()
+            m = n.copy()
 
-        for tech in techs:
-            override_values(tech, year, dr)
+            for tech in techs:
+                override_values(tech, year, dr)
 
-    else:
-        print("No RES potential techs to override...")
+        else:
+            print("No RES potential techs to override...")
 
-    if (
-        snakemake.config["custom_data"]["add_existing"]
-        and snakemake.wildcards["planning_horizons"] == "2030"
-    ):
-        n.generators.loc["MAR010003 onwind", "p_nom_min"] = 50
-        n.generators.loc["MAR010005 offwind", "p_nom_min"] = 120
-        n.generators.loc["MAR010005 offwind", "p_nom_max"] = 120
-        n.generators.loc["MAR010001 onwind", "p_nom_min"] = 154
-        n.generators.loc["MAR004005 onwind", "p_nom_min"] = 150
-        n.generators.loc["MAR003003 onwind", "p_nom_min"] = 180
-        n.generators.loc["MAR006003 onwind", "p_nom_min"] = 60
-        n.generators.loc["MAR011001 onwind", "p_nom_min"] = 208
+        if (
+            snakemake.config["custom_data"]["add_existing"]
+            and snakemake.wildcards["planning_horizons"] == "2030"
+        ):
+            n.generators.loc["MAR010003 onwind", "p_nom_min"] = 50
+            n.generators.loc["MAR010005 offwind", "p_nom_min"] = 120
+            n.generators.loc["MAR010005 offwind", "p_nom_max"] = 120
+            n.generators.loc["MAR010001 onwind", "p_nom_min"] = 154
+            n.generators.loc["MAR004005 onwind", "p_nom_min"] = 150
+            n.generators.loc["MAR003003 onwind", "p_nom_min"] = 180
+            n.generators.loc["MAR006003 onwind", "p_nom_min"] = 60
+            n.generators.loc["MAR011001 onwind", "p_nom_min"] = 208
 
-        n.generators.loc["MAR003001 csp", "p_nom_min"] = 500
+            n.generators.loc["MAR003001 csp", "p_nom_min"] = 500
 
-        n.generators.loc["MAR003001 solar", "p_nom_min"] = 72
+            n.generators.loc["MAR003001 solar", "p_nom_min"] = 72
 
-    if snakemake.config["custom_data"]["elec_demand"]:
-        for country in countries:
-            n.loads_t.p_set.filter(like=country)[buses] = (
-                (
-                    n.loads_t.p_set.filter(like=country)[buses]
-                    / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
+        if snakemake.config["custom_data"]["elec_demand"]:
+            for country in countries:
+                n.loads_t.p_set.filter(like=country)[buses] = (
+                    (
+                        n.loads_t.p_set.filter(like=country)[buses]
+                        / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
+                    )
+                    * energy_totals.loc[country, "electricity residential"]
+                    * 1e6
                 )
-                * energy_totals.loc[country, "electricity residential"]
-                * 1e6
-            )
 
     n.export_to_netcdf(snakemake.output[0])
