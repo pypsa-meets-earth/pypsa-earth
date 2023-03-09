@@ -76,7 +76,7 @@ The PyPSA meets Earth team is currently running four types of meetings:
 
 - **General code meeting (Open)**
 
-  - every forth Thursday each month 16-17:00 (UK time) `download .ics file <https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing>`_
+  - every forth Thursday each month 16-17:00 (UK time) `download .ics file <https://drive.google.com/file/d/1naH4WwW9drkOkOJ3PLO4fyWdkZQi5-_w/view?usp=share_link>`_
   - updates on overall project and code blocks
   - meeting hosted on `Discord <https://discord.gg/AnuJBk23FU>`_; join us, we are waiting for you!
   - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
@@ -88,8 +88,8 @@ The PyPSA meets Earth team is currently running four types of meetings:
   
     1. Demand creation and prediction meeting, on demand basis
     2. AI asset detection meeting, on demand basis
-    3. Sector coupling meeting, every Thursday 09:00 (UK time), `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
-    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), `download .ics file <https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing>`__
+    3. Sector coupling meeting, every Thursday 09:00 (UK time), `download .ics file <https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link>`__
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), `download .ics file <https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link>`__
 
 - **Outreach meeting (by invitation)**
 
