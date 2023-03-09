@@ -6,9 +6,9 @@ import pandas as pd
 
 plt.style.use("ggplot")
 
-from prepare_sector_network_eur_sec import (
-    co2_emissions_year,  # TODO or implemented as co2_emissions_year = 2030?
-)
+# from prepare_sector_network_eur_sec import (
+#     co2_emissions_year,  # Currently not required, only for carbon budget plotting
+# )
 
 
 # consolidate and rename
@@ -261,7 +261,9 @@ def plot_balances():
 
         # remove trailing link ports
         df.index = [
-            i[:-1] if ((i != "co2") and (i[-1:] in ["0", "1", "2", "3"])) else i
+            i[:-1]
+            if ((i != "co2") and (i != "H2") and (i[-1:] in ["0", "1", "2", "3"]))
+            else i
             for i in df.index
         ]
 
@@ -528,7 +530,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("plot_summary")
 
-    n_header = 6  # Header lines in the csv files
+    n_header = 7  # Header lines in the csv files
 
     plot_costs()
 

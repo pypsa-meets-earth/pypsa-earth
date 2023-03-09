@@ -634,7 +634,15 @@ def make_summaries(networks_dict):
 
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(),
-        names=["cluster", "ll", "opt", "planning_horizon", "discount_rate", "demand"],
+        names=[
+            "cluster",
+            "ll",
+            "opt",
+            "planning_horizon",
+            "discount_rate",
+            "demand",
+            "export",
+        ],
     )
 
     df = {}
@@ -646,7 +654,7 @@ def make_summaries(networks_dict):
         print(label, filename)
 
         overrides = override_component_attrs(snakemake.input.overrides)
-        n = pypsa.Network("../" + filename, override_component_attrs=overrides)
+        n = pypsa.Network(filename, override_component_attrs=overrides)
 
         assign_carriers(n)
         assign_locations(n)
@@ -685,9 +693,10 @@ if __name__ == "__main__":
             planning_horizon,
             discountrate,
             demand,
+            export,
         ): snakemake.config["results_dir"]
         + snakemake.config["run"]
-        + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}_{discountrate}_{demand}.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
+        + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}_{discountrate}_{demand}_{export}export.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
         for simpl in snakemake.config["scenario"]["simpl"]
         for cluster in snakemake.config["scenario"]["clusters"]
         for ll in snakemake.config["scenario"]["ll"]
@@ -696,6 +705,7 @@ if __name__ == "__main__":
         for planning_horizon in snakemake.config["scenario"]["planning_horizons"]
         for discountrate in snakemake.config["costs"]["discountrate"]
         for demand in snakemake.config["scenario"]["demand"]
+        for export in snakemake.config["export"]["h2export"]
     }
 
     print(networks_dict)
