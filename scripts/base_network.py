@@ -25,8 +25,8 @@ Relevant Settings
 
     links:
         p_max_pu:
+        p_nom_max:
         under_construction:
-        include_tyndp:
 
     transformers:
         x:
