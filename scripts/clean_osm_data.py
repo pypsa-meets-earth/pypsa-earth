@@ -272,6 +272,7 @@ def prepare_lines_df(df_lines):
         "under_construction",
         "tag_type",
         "tag_frequency",
+        "dc",
         "cables",
         "geometry",
         "country",
