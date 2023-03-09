@@ -209,6 +209,8 @@ def filter_frequency(df, accepted_values=[50, 60, 0]):
 
     df.drop(df[~accepted_rows].index, inplace=True)
 
+    df["dc"] = df["tag_frequency"] == 0
+
     return df
 
 
