@@ -78,8 +78,6 @@ def add_line_endings_tosubstations(substations, lines):
     bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
     bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
 
-    is_ac = lines["tag_frequency"].astype(float) != 0
-
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_s["geometry"] = lines.geometry.boundary.map(
@@ -92,7 +90,7 @@ def add_line_endings_tosubstations(substations, lines):
         + 1
         + bus_s.index
     )
-    bus_s["dc"] = ~is_ac
+    bus_s["dc"] = lines["dc"]
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_e["geometry"] = lines.geometry.boundary.map(
@@ -101,7 +99,7 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x if p != None else None)
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
-    bus_e["dc"] = ~is_ac
+    bus_e["dc"] = lines["dc"]
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
@@ -195,7 +193,7 @@ def filter_voltage(df, threshold_voltage=35000):
     return df
 
 
-def filter_frequency(df, accepted_values=[50, 60, 0]):
+def filter_frequency(df, accepted_values=[50, 60, 0], threshold=0.1):
     """Filters df to contain only lines with frequency with accepted_values"""
     df["tag_frequency"] = pd.to_numeric(df["tag_frequency"], errors="coerce").astype(
         float
@@ -203,11 +201,13 @@ def filter_frequency(df, accepted_values=[50, 60, 0]):
     df.dropna(subset=["tag_frequency"], inplace=True)
 
     accepted_rows = pd.concat(
-        [(df["tag_frequency"] - f_val).abs() <= 0.01 for f_val in accepted_values],
+        [(df["tag_frequency"] - f_val).abs() <= threshold for f_val in accepted_values],
         axis=1,
     ).any(axis="columns")
 
     df.drop(df[~accepted_rows].index, inplace=True)
+
+    df["dc"] = df["tag_frequency"].abs() <= threshold
 
     return df
 
@@ -270,6 +270,7 @@ def prepare_lines_df(df_lines):
         "under_construction",
         "tag_type",
         "tag_frequency",
+        "dc",
         "cables",
         "geometry",
         "country",
