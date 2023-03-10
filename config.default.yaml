@@ -31,7 +31,7 @@ policy_config:
 clustering_options:
   alternative_clustering: true
 
-countries: ['MA']
+countries: ['UA']
 
 H2_network: false
 H2_network_limit: 2000 #GWkm
