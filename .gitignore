@@ -8,6 +8,7 @@ gurobi.log
 .vscode
 config.yaml
 data/energy_totals_NZ_2030.csv
+gadm_shapes.geojson
 
 # Folders
 /bak
@@ -40,6 +41,8 @@ doc/_build
 /tmp
 /pypsa
 /notes_Leon
+/scripts/data
+/sample_pypsa_eur
 
 # File extensions
 *.org
