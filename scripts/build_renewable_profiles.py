@@ -204,7 +204,7 @@ import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 
 cc = coco.CountryConverter()
 
@@ -534,31 +534,32 @@ if __name__ == "__main__":
         # if extendable option is true, all buses are included
         # otherwise only where hydro powerplants are available are considered
         if snakemake.config["cluster_options"]["alternative_clustering"]:
-            busbus_to_consider = [
-                (
-                    config.get("extendable", False)
-                    | (bus_id in hydro_ppls.region_id.values)
-                )
-                & any(hydrobasins.geometry.intersects(p))
-                for (p, bus_id) in zip(
-                    gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
-                    regions.shape_id,
-                )
-            ]
+            filter_bus_to_consider = regions.index.map(
+                lambda bus_id: config.get("extendable", False)
+                | (bus_id in hydro_ppls.region_id.values)
+            )
         ### TODO: quickfix. above case and the below case should by unified
         if snakemake.config["cluster_options"]["alternative_clustering"] == False:
-            busbus_to_consider = [
-                (config.get("extendable", False) | (bus_id in hydro_ppls.bus.values))
-                & any(hydrobasins.geometry.intersects(p))
-                for (p, bus_id) in zip(
-                    gpd.points_from_xy(regions.x, regions.y, crs=regions.crs),
-                    regions.index,
-                )
-            ]
+            filter_bus_to_consider = regions.index.map(
+                lambda bus_id: config.get("extendable", False)
+                | (bus_id in hydro_ppls.bus.values)
+            )
+        bus_to_consider = regions.index[filter_bus_to_consider]
+
+        # identify subset of buses within the hydrobasins
+        filter_bus_in_hydrobasins = regions[filter_bus_to_consider].apply(
+            lambda row: any(hydrobasins.geometry.contains(Point(row["x"], row["y"]))),
+            axis=1,
+        )
+        bus_in_hydrobasins = filter_bus_in_hydrobasins[filter_bus_in_hydrobasins].index
+
+        bus_notin_hydrobasins = list(
+            set(bus_to_consider).difference(set(bus_in_hydrobasins))
+        )
 
         resource["plants"] = regions.rename(
             columns={"x": "lon", "y": "lat", "country": "countries"}
-        ).loc[busbus_to_consider, ["lon", "lat", "countries"]]
+        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries"]]
 
         resource["plants"]["installed_hydro"] = [
             True if (bus_id in hydro_ppls.bus.values) else False
@@ -609,6 +610,29 @@ if __name__ == "__main__":
                 logger.info("No hydro normalization")
 
             inflow *= config.get("multiplier", 1.0)
+
+            # add zero values for out of hydrobasins elements
+            if len(bus_notin_hydrobasins) > 0:
+                regions_notin = regions.loc[
+                    bus_notin_hydrobasins, ["x", "y", "country"]
+                ]
+                logger.warning(
+                    f"Buses {bus_notin_hydrobasins} are not contained into hydrobasins."
+                    f"Setting empty time series. Bus location:\n{regions_notin}"
+                )
+
+                # initialize empty DataArray and append to inflow
+                notin_data = xr.DataArray(
+                    np.zeros(
+                        (len(bus_notin_hydrobasins), inflow.coords["time"].shape[0])
+                    ),
+                    dims=("plant", "time"),
+                    coords=dict(
+                        plant=bus_notin_hydrobasins,
+                        time=inflow.coords["time"],
+                    ),
+                )
+                inflow = xr.concat([inflow, notin_data], dim="plant")
 
             inflow.rename("inflow").to_netcdf(snakemake.output.profile)
     else:
