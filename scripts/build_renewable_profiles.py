@@ -192,6 +192,7 @@ import functools
 import logging
 import os
 import time
+from math import isnan
 
 import atlite
 import country_converter as coco
@@ -312,12 +313,156 @@ def filter_cutout_region(cutout, regions):
     return cutout
 
 
+def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
+    """
+    Function used to normalize the inflows of the hydro capacities to match country statistics
+
+    Parameters
+    ----------
+    plants : DataFrame
+        Run-of-river plants or dams with lon, lat, countries, installed_hydro columns.
+        Countries and installed_hydro column are only used with normalize_using_yearly
+        installed_hydro column shall be a boolean vector specifying whether that plant
+        is currently installed and used to normalize the inflows
+    runoff : xarray object
+        Runoff at each bus
+    normalize_using_yearly : DataFrame
+        Dataframe that specifies for every country the total hydro production
+    year : int
+        Year used for normalization
+    """
+
+    if plants.empty or plants.installed_hydro.any() == False:
+        logger.info("No bus has installed hydro plants, ignoring normalization.")
+        return runoff
+
+    years_statistics = normalize_using_yearly.index
+    if isinstance(years_statistics, pd.DatetimeIndex):
+        years_statistics = years_statistics.year
+    else:
+        years_statistics = years_statistics.astype(int)
+
+    years_statistics = years_statistics.unique()
+    years_runoff = pd.to_datetime(runoff.time).year.unique()
+
+    if year not in set(years_statistics):
+        logger.warning(
+            f"Missing hydro statistics for year {normalization_year}; no normalization performed."
+        )
+    else:
+        # get buses that have installed hydro capacity to be used to compute
+        # the normalization
+        normalization_buses = plants[plants.installed_hydro == True].index
+
+        # average yearly runoff by plant
+        yearlyavg_runoff_by_plant = (
+            runoff.rename("runoff").mean("time").to_dataframe()
+        ) * 8760.0
+
+        yearlyavg_runoff_by_plant["country"] = plants.loc[
+            yearlyavg_runoff_by_plant.index, "countries"
+        ]
+
+        # group runoff by country
+        grouped_runoffs = (
+            yearlyavg_runoff_by_plant.loc[normalization_buses].groupby("country").sum()
+        )
+
+        # common country indeces
+        common_countries = normalize_using_yearly.columns.intersection(
+            grouped_runoffs.index
+        )
+
+        tot_common_yearly = np.nansum(
+            normalize_using_yearly.loc[year, common_countries]
+        )
+        tot_common_runoff = np.nansum(grouped_runoffs.runoff[common_countries])
+
+        # define default_factor. When nan values, used the default 1.0
+        default_factor = 1.0
+        if not (
+            isnan(tot_common_yearly)
+            or isnan(tot_common_runoff)
+            or tot_common_runoff <= 0.0
+        ):
+            default_factor = tot_common_yearly / tot_common_runoff
+
+        def create_scaling_factor(
+            normalize_yearly, grouped_runoffs, year, c_bus, default_value=1.0
+        ):
+            if c_bus in normalize_yearly.columns and c_bus in grouped_runoffs.index:
+                # normalization in place
+                return (
+                    np.nansum(normalize_yearly.loc[year, c_bus])
+                    / grouped_runoffs.runoff[c_bus]
+                )
+            elif c_bus not in normalize_yearly.columns:
+                # data not available in the normalization procedure
+                # return unity factor
+                return default_value
+            elif c_bus not in grouped_runoffs.index:
+                # no hydro inflows available for he country
+                return default_value
+
+        unique_countries = plants.countries.unique()
+        missing_countries_normalization = np.setdiff1d(
+            unique_countries, normalize_using_yearly.columns
+        )
+        missing_countries_grouped_runoff = np.setdiff1d(
+            unique_countries, grouped_runoffs.index
+        )
+
+        if missing_countries_normalization.size != 0:
+            logger.warning(
+                f"Missing countries in the normalization dataframe: "
+                + ", ".join(missing_countries_normalization)
+                + ". Default value used"
+            )
+
+        if missing_countries_grouped_runoff.size != 0:
+            logger.warning(
+                f"Missing installed plants in: "
+                + ", ".join(missing_countries_grouped_runoff)
+                + ". Default value used"
+            )
+
+        # matrix used to scale the runoffs
+        scaling_matrix = xr.DataArray(
+            [
+                create_scaling_factor(
+                    normalize_using_yearly,
+                    grouped_runoffs,
+                    year,
+                    c_bus,
+                    default_factor,
+                )
+                * np.ones(runoff.time.shape)
+                * 8760
+                / len(runoff.time)
+                for c_bus in plants.countries
+            ],
+            coords=dict(
+                plant=plants.index.values,
+                time=runoff.time.values,
+            ),
+        )
+
+        # Check all buses to be in the final dataset
+        missing_buses = plants.index.difference(scaling_matrix.plant)
+        if len(missing_buses) > 0:
+            logger.warning(f"Missing hydro inflows for buse {missing_buses}")
+
+        runoff *= scaling_matrix
+
+    return runoff
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
@@ -427,29 +572,10 @@ if __name__ == "__main__":
             for bus_id in resource["plants"].index
         ]
 
-        # check if normalization field belongs to the settings and it is not false
-        if ("normalization" in resource) & (type(resource["normalization"]) == str):
-            normalization = resource.pop("normalization")
-
-            if normalization == "hydro_capacities":
-                path_hydro_capacities = snakemake.input.hydro_capacities
-                normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
-                    path_hydro_capacities, countries
-                ) * config.get("normalization_multiplier", 1.0)
-
-            elif normalization == "eia":
-                path_eia_stats = snakemake.input.eia_hydro_generation
-                normalize_using_yearly = get_eia_annual_hydro_generation(
-                    path_eia_stats, countries
-                ) * config.get("normalization_multiplier", 1.0)
-
-            resource["normalize_using_yearly"] = normalize_using_yearly
-            logger.info(f"Hydro normalization mode {normalization}")
-        else:
-            logger.info("No hydro normalization")
-
-            if "normalization" in resource:
-                resource.pop("normalization")
+        # get normalization before executing runoff
+        normalization = None
+        if ("normalization" in config) and isinstance(config["normalization"], dict):
+            normalization = config.pop("normalization")
 
         # check if there are hydro powerplants
         if resource["plants"].empty:
@@ -465,6 +591,31 @@ if __name__ == "__main__":
 
             if "clip_min_inflow" in config:
                 inflow = inflow.where(inflow > config["clip_min_inflow"], 0)
+
+            # check if normalization field belongs to the settings and it is not false
+            if normalization:
+                method, year = normalization["method"], normalization["year"]
+                if method == "hydro_capacities":
+                    path_hydro_capacities = snakemake.input.hydro_capacities
+                    normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
+                        path_hydro_capacities, countries
+                    ) * config.get("multiplier", 1.0)
+                elif method == "eia":
+                    path_eia_stats = snakemake.input.eia_hydro_generation
+                    normalize_using_yearly = get_eia_annual_hydro_generation(
+                        path_eia_stats, countries
+                    ) * config.get("multiplier", 1.0)
+
+                inflow = normalize_hydro(
+                    resource["plants"], inflow, normalize_using_yearly, year
+                )
+                logger.info(
+                    f"Hydro normalization method '{method}' on year-statistics {year}"
+                )
+            else:
+                logger.info("No hydro normalization")
+
+            inflow *= config.get("multiplier", 1.0)
 
             inflow.rename("inflow").to_netcdf(snakemake.output.profile)
     else:
