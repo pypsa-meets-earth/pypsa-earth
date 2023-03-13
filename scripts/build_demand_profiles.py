@@ -182,7 +182,7 @@ def build_demand_profiles(
     demand_profiles = demand_profiles.loc[start_date:end_date]
     demand_profiles.to_csv(out_path, header=True)
 
-    logger.info(f"Demand_profiles csv file created for the corrisponding snapshots.")
+    logger.info(f"Demand_profiles csv file created for the corresponding snapshots.")
 
 
 if __name__ == "__main__":
