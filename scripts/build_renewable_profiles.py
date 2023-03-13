@@ -228,13 +228,12 @@ def get_eia_annual_hydro_generation(fn, countries):
     df.index.name = "countries"
 
     df = df.T[countries] * 1e6  # in MWh/a
+    df.index = df.index.astype(int)
 
     return df
 
 
-def get_hydro_capacity_annual_hydro_generation(
-    fn, countries, year_start=2000, year_end=2020
-):
+def get_hydro_capacity_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
         pd.read_csv(
             fn,
@@ -253,15 +252,9 @@ def get_hydro_capacity_annual_hydro_generation(
         * 1e3
         * 8760
     )  # change unit to MWh/y
+    hydro_prod_by_country.index = pd.Index([year])
 
-    range_years = range(year_start, year_end + 1)
-
-    normalize_using_yearly = pd.concat(
-        [hydro_prod_by_country] * len(range_years), ignore_index=True
-    )
-    normalize_using_yearly.index = pd.Index(range_years)
-
-    return normalize_using_yearly
+    return hydro_prod_by_country
 
 
 def check_cutout_completness(cf):
@@ -345,7 +338,7 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     years_statistics = years_statistics.unique()
     years_runoff = pd.to_datetime(runoff.time).year.unique()
 
-    if year not in set(years_statistics):
+    if normalization_year not in set(years_statistics):
         logger.warning(
             f"Missing hydro statistics for year {normalization_year}; no normalization performed."
         )
@@ -374,7 +367,7 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         )
 
         tot_common_yearly = np.nansum(
-            normalize_using_yearly.loc[year, common_countries]
+            normalize_using_yearly.loc[normalization_year, common_countries]
         )
         tot_common_runoff = np.nansum(grouped_runoffs.runoff[common_countries])
 
@@ -432,7 +425,7 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
                 create_scaling_factor(
                     normalize_using_yearly,
                     grouped_runoffs,
-                    year,
+                    normalization_year,
                     c_bus,
                     default_factor,
                 )
@@ -594,11 +587,11 @@ if __name__ == "__main__":
 
             # check if normalization field belongs to the settings and it is not false
             if normalization:
-                method, year = normalization["method"], normalization["year"]
+                method, norm_year = normalization["method"], normalization["year"]
                 if method == "hydro_capacities":
                     path_hydro_capacities = snakemake.input.hydro_capacities
                     normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
-                        path_hydro_capacities, countries
+                        path_hydro_capacities, countries, norm_year
                     ) * config.get("multiplier", 1.0)
                 elif method == "eia":
                     path_eia_stats = snakemake.input.eia_hydro_generation
@@ -607,10 +600,10 @@ if __name__ == "__main__":
                     ) * config.get("multiplier", 1.0)
 
                 inflow = normalize_hydro(
-                    resource["plants"], inflow, normalize_using_yearly, year
+                    resource["plants"], inflow, normalize_using_yearly, norm_year
                 )
                 logger.info(
-                    f"Hydro normalization method '{method}' on year-statistics {year}"
+                    f"Hydro normalization method '{method}' on year-statistics {norm_year}"
                 )
             else:
                 logger.info("No hydro normalization")
