@@ -124,8 +124,6 @@ def set_lines_ids(lines, buses, distance_crs):
     linesepsg = lines.to_crs(distance_crs)
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
-        row["dc"] = float(row["tag_frequency"]) == 0
-
         # select buses having the voltage level of the current line
         buses_sel = busesepsg[
             (buses["voltage"] == row["voltage"]) & (buses["dc"] == row["dc"])
@@ -713,13 +711,11 @@ def force_ac_lines(df, col="tag_frequency"):
     When it is artificially converted into AC, this feature is lost.
     However, for debugging and preliminary analysis, it can be useful to bypass problems.
     """
-    DC_freq = 0.0
-    DC_lines = (df["tag_frequency"] - DC_freq).abs() <= 0.01
-
     # TODO: default frequency may be by country
-    default_frequency = 50
+    default_ac_frequency = 50
 
-    df[df[DC_lines].index] = default_frequency
+    df["tag_frequency"] = default_ac_frequency
+    df["dc"] = False
 
     return df
 
