@@ -53,7 +53,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
         </p>
 - **General initiative meeting (Open)**
   - every forth Thursday each month Thursday 16-17:00 (UK time)
-    <a href="https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing">
+    <a href="https://drive.google.com/file/d/1naH4WwW9drkOkOJ3PLO4fyWdkZQi5-_w/view?usp=share_link">
     `download .ics`
     </a>
   - join for project news and high-level code updates
@@ -67,8 +67,8 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - join updates, demos, Q&A's, discussions and the coordination of each work package
     1. Demand creation and prediction meeting, on demand
     2. AI asset detection meeting, on demand
-    3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing" >`download .ics`</a>
-    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing" >`download .ics`</a>
+    3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link" >`download .ics`</a>
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link" >`download .ics`</a>
 - **Outreach meeting (Open)**
   - every second week, Tuesday 17:00 (UK time)
   - planning, discussing events, workshops, communication, community activities
