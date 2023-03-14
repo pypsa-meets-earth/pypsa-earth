@@ -116,21 +116,6 @@ def add_oil(n, costs):
     # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
     # spatial.gas = SimpleNamespace()
 
-    # if options["gas_network"]:
-    #     spatial.gas.nodes = nodes + " gas"
-    #     spatial.gas.locations = nodes
-    #     # spatial.gas.biogas = nodes + " biogas"
-    #     spatial.gas.industry = nodes + " gas for industry"
-    #     spatial.gas.industry_cc = nodes + " gas for industry CC"
-    #     # spatial.gas.biogas_to_gas = nodes + " biogas to gas"
-    # else:
-    #     spatial.gas.nodes = ["Africa gas"]
-    #     spatial.gas.locations = ["Africa"]
-    #     # spatial.gas.biogas = ["Africa biogas"]
-    #     spatial.gas.industry = ["gas for industry"]
-    #     spatial.gas.industry_cc = ["gas for industry CC"]
-    #     # spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
-
     spatial.oil = SimpleNamespace()
 
     if options["oil_network"]:
@@ -169,15 +154,7 @@ def add_oil(n, costs):
         marginal_cost=costs.at["oil", "fuel"],
     )
 
-    # n.madd("Generator",
-    #     spatial.oil.nodes,
-    #     bus=spatial.oil.nodes,
-    #     p_nom_extendable=True,
-    #     carrier="oil",
-    #     marginal_cost=costs.at["oil", 'fuel']
-    # )
 
-    # if "Africa oil" not in n.generators.index:
     n.madd(
         "Generator",
         spatial.oil.nodes,
@@ -650,15 +627,7 @@ def add_co2(n, costs):
     n.buses[n.buses.carrier == "co2 stored"].x = co2_stored_x.values
     n.buses[n.buses.carrier == "co2 stored"].y = co2_stored_y.values
     """
-    # n.madd(
-    #     "Store",
-    #     spatial.co2.nodes.str[:-2] + "age",
-    #     e_nom_extendable=True,
-    #     e_nom_max=np.inf,
-    #     capital_cost=options["co2_sequestration_cost"],
-    #     carrier="co2 stored",
-    #     bus=spatial.co2.nodes,
-    # )
+   
 
     n.madd(
         "Link",
@@ -759,10 +728,8 @@ def add_aviation(n, cost):
         lambda frac: frac
         * aviation_demand
         * 1e6
-        / 8760  # TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),
-    )  # TODO use real data here
+        / 8760 
+    )  
 
     airports = pd.concat([airports, ind])
 
@@ -779,12 +746,9 @@ def add_aviation(n, cost):
         p_set=airports["p_set"],
     )
 
-    # co2_release = ["kerosene for aviation"]
     co2 = (
         airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
-    )  # / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-    # the current way leads to inaccuracies in the last timestep in case
-    # the timestep if 8760 is not divisble by it
+    )  
 
     n.add(
         "Load",
@@ -1007,9 +971,7 @@ def add_shipping(n, costs):
             * frac
             * navigation_demand
             * 1e6
-            / 8760  # * n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
+            / 8760
         )
 
         n.madd(
@@ -1024,9 +986,6 @@ def add_shipping(n, costs):
         co2 = (
             shipping_oil_share
             * ports["p_set"].sum()
-            # / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -1863,102 +1822,6 @@ def add_heat(n, costs):
                 capital_cost=costs.at["micro CHP", "fixed"],
                 lifetime=costs.at["micro CHP", "lifetime"],
             )
-    ###############################
-    ###############################
-    #######Heat Retrofitting#######
-    ###############################
-
-    # if options['retrofitting']['retro_endogen']:
-
-    #     print("adding retrofitting endogenously")
-
-    #     # resample heat demand temporal 'heat_demand_r' depending on in config
-    #     # specified temporal resolution, to not overestimate retrofitting
-    #     hours = list(filter(re.compile(r'^\d+h$', re.IGNORECASE).search, opts))
-    #     if len(hours)==0:
-    #         hours = [n.snapshots[1] - n.snapshots[0]]
-    #     heat_demand_r =  heat_demand.resample(hours[0]).mean()
-
-    #     # retrofitting data 'retro_data' with 'costs' [EUR/m^2] and heat
-    #     # demand 'dE' [per unit of original heat demand] for each country and
-    #     # different retrofitting strengths [additional insulation thickness in m]
-    #     retro_data = pd.read_csv(snakemake.input.retro_cost_energy,
-    #                              index_col=[0, 1], skipinitialspace=True,
-    #                              header=[0, 1])
-    #     # heated floor area [10^6 * m^2] per country
-    #     floor_area = pd.read_csv(snakemake.input.floor_area, index_col=[0, 1])
-
-    #     n.add("Carrier", "retrofitting")
-
-    #     # share of space heat demand 'w_space' of total heat demand
-    #     w_space = {}
-    #     for sector in sectors:
-    #         w_space[sector] = heat_demand_r[sector + " space"] / \
-    #             (heat_demand_r[sector + " space"] + heat_demand_r[sector + " water"])
-    #     w_space["tot"] = ((heat_demand_r["services space"] +
-    #                        heat_demand_r["residential space"]) /
-    #                        heat_demand_r.groupby(level=[1], axis=1).sum())
-
-    #     for name in n.loads[n.loads.carrier.isin([x + " heat" for x in heat_systems])].index:
-
-    #         node = n.buses.loc[name, "location"]
-    #         ct = pop_layout.loc[node, "ct"]
-
-    #         # weighting 'f' depending on the size of the population at the node
-    #         f = urban_fraction[node] if "urban" in name else (1-urban_fraction[node])
-    #         if f == 0:
-    #             continue
-    #         # get sector name ("residential"/"services"/or both "tot" for urban central)
-    #         sec = [x if x in name else "tot" for x in sectors][0]
-
-    #         # get floor aread at node and region (urban/rural) in m^2
-    #         floor_area_node = ((pop_layout.loc[node].fraction
-    #                               * floor_area.loc[ct, "value"] * 10**6).loc[sec] * f)
-    #         # total heat demand at node [MWh]
-    #         demand = (n.loads_t.p_set[name].resample(hours[0])
-    #                   .mean())
-
-    #         # space heat demand at node [MWh]
-    #         space_heat_demand = demand * w_space[sec][node]
-    #         # normed time profile of space heat demand 'space_pu' (values between 0-1),
-    #         # p_max_pu/p_min_pu of retrofitting generators
-    #         space_pu = (space_heat_demand / space_heat_demand.max()).to_frame(name=node)
-
-    #         # minimum heat demand 'dE' after retrofitting in units of original heat demand (values between 0-1)
-    #         dE = retro_data.loc[(ct, sec), ("dE")]
-    #         # get addtional energy savings 'dE_diff' between the different retrofitting strengths/generators at one node
-    #         dE_diff = abs(dE.diff()).fillna(1-dE.iloc[0])
-    #         # convert costs Euro/m^2 -> Euro/MWh
-    #         capital_cost =  retro_data.loc[(ct, sec), ("cost")] * floor_area_node / \
-    #                         ((1 - dE) * space_heat_demand.max())
-    #         # number of possible retrofitting measures 'strengths' (set in list at config.yaml 'l_strength')
-    #         # given in additional insulation thickness [m]
-    #         # for each measure, a retrofitting generator is added at the node
-    #         strengths = retro_data.columns.levels[1]
-
-    #         # check that ambitious retrofitting has higher costs per MWh than moderate retrofitting
-    #         if (capital_cost.diff() < 0).sum():
-    #             print(f"Warning: costs are not linear for {ct} {sec}")
-    #             s = capital_cost[(capital_cost.diff() < 0)].index
-    #             strengths = strengths.drop(s)
-
-    #         # reindex normed time profile of space heat demand back to hourly resolution
-    #         space_pu = space_pu.reindex(index=heat_demand.index).fillna(method="ffill")
-
-    #         # add for each retrofitting strength a generator with heat generation profile following the profile of the heat demand
-    #         for strength in strengths:
-    #             n.madd('Generator',
-    #                 [node],
-    #                 suffix=' retrofitting ' + strength + " " + name[6::],
-    #                 bus=name,
-    #                 carrier="retrofitting",
-    #                 p_nom_extendable=True,
-    #                 p_nom_max=dE_diff[strength] * space_heat_demand.max(), # maximum energy savings for this renovation strength
-    #                 p_max_pu=space_pu,
-    #                 p_min_pu=space_pu,
-    #                 country=ct,
-    #                 capital_cost=capital_cost[strength] * options['retrofitting']['cost_factor']
-    #             )
 
 
 def average_every_nhours(n, offset):
@@ -2332,72 +2195,36 @@ if __name__ == "__main__":
             demand="DF",
         )
 
-    # TODO fetch from config
+    # Load population layout
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
+    # Load all sector wildcards
     options = snakemake.config["sector"]
 
+    # Load input network
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-
-    # n.add("Link", "my_line_name1", bus0="MAR003005", bus1="MAR003004",  carrier="AC", p_nom=10)
-    # n.add("Link", "my_line_name2", bus0="MAR007004", bus1="MAR004005",  carrier="AC", p_nom=10)
-    # n.add("Link", "my_line_name3", bus0="MAR005001", bus1="MAR003001",  carrier="AC", p_nom=10)
-    # n.add("Link", "my_line_name4", bus0="MAR011001", bus1="MAR003001",  carrier="AC", p_nom=10)
-    # n.add("Link", "my_line_name5", bus0="MAR008002", bus1="MAR003001",  carrier="AC", p_nom=10)
-    # n.add("Link", "my_line_name6", bus0="MAR009005", bus1="MAR003001",  carrier="AC", p_nom=10)
-    # n.add("Link", "my_line_name7", bus0="MAR010005", bus1="MAR003001",  carrier="AC", p_nom=10)
-
+    
+    # Fetch the coutry list from the network
     countries = list(n.buses.country.unique())
 
+    # Locate all the AC buses
     nodes = n.buses[
         n.buses.carrier == "AC"
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
 
-    # n.add(
-    #   "Bus",
-    #   "ELEC curtail",
-    #   carrier="AC",
-    # )
-
-    # # add export links
-    # #logger.info("Adding export links")
-    # n.madd(
-    #   "Link",
-    #   names=nodes + " curtail",
-    #   bus0=nodes,
-    #   bus1="ELEC curtail",
-    #   p_nom_extendable=True,
-    #   p_min_pu=0,
-    # )
-
-    # #export_links = n.links[n.links.index.str.contains("export")]
-    # #logger.info(export_links)
-
-    # # add store
-    # n.add(
-    #   "Store",
-    #   "Elec curtail store",
-    #   bus="ELEC curtail",
-    #   e_nom_extendable=True,
-    #   carrier="AC",
-    #   e_initial=0,
-    #   e_cyclic=0,
-    #   marginal_cost=0,
-    #   capital_cost=0,
-    # )
-
+    # Set carrier of AC loads 
     n.loads.loc[nodes, "carrier"] = "AC"
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    # TODO fetch investment year from config
-
+    # Fetch wildcards
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
+    # Prepare the costs dataframe
     costs = prepare_costs(
         snakemake.input.costs,
         snakemake.config["costs"]["USD2013_to_EUR2013"],
@@ -2412,9 +2239,7 @@ if __name__ == "__main__":
     # TODO logging
 
     nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
-    energy_totals = pd.read_csv(
-        snakemake.input.energy_totals, index_col=0, keep_default_na=False
-    )
+    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
     transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
@@ -2425,7 +2250,7 @@ if __name__ == "__main__":
     dsm_profile = pd.read_csv(
         snakemake.input.dsm_profile, index_col=0, parse_dates=True
     )
-    nodal_transport_data = pd.read_csv(  # TODO Leon, This only includes no. of cars, change name to something descriptive?
+    nodal_transport_data = pd.read_csv(  # TODO This only includes no. of cars, change name to something descriptive?
         snakemake.input.nodal_transport_data, index_col=0
     )
 
@@ -2453,13 +2278,10 @@ if __name__ == "__main__":
     # Share of district heating at each node
     district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
 
-    ashp_cop = pd.read_csv(snakemake.input.ashp_cop, index_col=0, parse_dates=True)
-
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat
 
     # Load industry demand data
-
     industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
     print(industrial_demand)
     if (
@@ -2470,15 +2292,13 @@ if __name__ == "__main__":
         ].apply(lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:])
 
     industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+    
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
 
     add_co2(n, costs)  # TODO add costs
 
-    # Add_generation() currently adds gas carrier/bus, as defined in config "conventional_generation"
-
-    # Add_oil() adds oil carrier/bus.
     # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
     add_oil(n, costs)
 
@@ -2540,15 +2360,8 @@ if __name__ == "__main__":
 
     if snakemake.config["custom_data"]["water_costs"]:
         add_custom_water_cost(n)
-    # n.lines.s_nom*=0.3
+    
     n.export_to_netcdf(snakemake.output[0])
-
-    # n.lopf()
-
-    # Add biomass (TODO currently only for debugging, not working yet)
-
-    # TODO define spatial (for biomass and co2)
 
     # TODO changes in case of myopic oversight
 
-    # TODO add co2 tracking function
