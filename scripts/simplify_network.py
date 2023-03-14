@@ -456,12 +456,12 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         buses_i
     ] = np.inf  # bus in buses_i should not be assigned to different bus in buses_i
 
-    # avoid assignnment a bus to a wrong country 
+    # avoid assignnment a bus to a wrong country
     for c in n.buses.country.unique():
         incountry_b = n.buses.country == c
         dist.loc[incountry_b, ~incountry_b] = np.inf
 
-    # avoid assignnment DC buses to AC ones    
+    # avoid assignnment DC buses to AC ones
     for c in n.buses.carrier.unique():
         incarrier_b = n.buses.carrier == c
         dist.loc[incarrier_b, ~incarrier_b] = np.inf
