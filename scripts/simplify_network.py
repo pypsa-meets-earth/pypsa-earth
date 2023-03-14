@@ -796,7 +796,7 @@ if __name__ == "__main__":
     p_threshold_drop_isolated = max(
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
     )
-    p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", 0.0)
+    p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
     if p_threshold_merge_isolated:
