@@ -154,7 +154,6 @@ def add_oil(n, costs):
         marginal_cost=costs.at["oil", "fuel"],
     )
 
-
     n.madd(
         "Generator",
         spatial.oil.nodes,
@@ -627,7 +626,6 @@ def add_co2(n, costs):
     n.buses[n.buses.carrier == "co2 stored"].x = co2_stored_x.values
     n.buses[n.buses.carrier == "co2 stored"].y = co2_stored_y.values
     """
-   
 
     n.madd(
         "Link",
@@ -725,11 +723,8 @@ def add_aviation(n, cost):
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
     airports["p_set"] = airports["fraction"].apply(
-        lambda frac: frac
-        * aviation_demand
-        * 1e6
-        / 8760 
-    )  
+        lambda frac: frac * aviation_demand * 1e6 / 8760
+    )
 
     airports = pd.concat([airports, ind])
 
@@ -746,9 +741,7 @@ def add_aviation(n, cost):
         p_set=airports["p_set"],
     )
 
-    co2 = (
-        airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
-    )  
+    co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -967,11 +960,7 @@ def add_shipping(n, costs):
         shipping_oil_share = 1 - shipping_hydrogen_share
 
         ports["p_set"] = ports["fraction"].apply(
-            lambda frac: shipping_oil_share
-            * frac
-            * navigation_demand
-            * 1e6
-            / 8760
+            lambda frac: shipping_oil_share * frac * navigation_demand * 1e6 / 8760
         )
 
         n.madd(
@@ -984,9 +973,7 @@ def add_shipping(n, costs):
         )
 
         co2 = (
-            shipping_oil_share
-            * ports["p_set"].sum()
-            * costs.at["oil", "CO2 intensity"]
+            shipping_oil_share * ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
         )
 
         n.add(
@@ -2204,7 +2191,7 @@ if __name__ == "__main__":
     # Load input network
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    
+
     # Fetch the coutry list from the network
     countries = list(n.buses.country.unique())
 
@@ -2214,7 +2201,7 @@ if __name__ == "__main__":
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
 
-    # Set carrier of AC loads 
+    # Set carrier of AC loads
     n.loads.loc[nodes, "carrier"] = "AC"
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
@@ -2292,7 +2279,7 @@ if __name__ == "__main__":
         ].apply(lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:])
 
     industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
-    
+
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
@@ -2360,8 +2347,7 @@ if __name__ == "__main__":
 
     if snakemake.config["custom_data"]["water_costs"]:
         add_custom_water_cost(n)
-    
+
     n.export_to_netcdf(snakemake.output[0])
 
     # TODO changes in case of myopic oversight
-
