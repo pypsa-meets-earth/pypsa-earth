@@ -577,14 +577,19 @@ iso_to_geofk_dict = {
     "VA": "IT",  # Vatican is merged to Italy
     "HT": "haiti-and-domrep",  # Haiti and Dominican Republic are merged in OSM
     "DO": "haiti-and-domrep",  # Haiti and Dominican Republic are merged in OSM
+    "PA": "panama",  # Panama
     "NF": "AU",  # norfolk island is an AU territory
     "MP": "american-oceania",  # northern mariana islands are US territory
     "GU": "american-oceania",  # Guam is a US territory
     "AS": "american-oceania",  # American Samoa is a US territory
     "CP": "ile-de-clipperton",  # Ile de clipperton
     "PF": "polynesie-francaise",  # Polynesie Francaise
-    "VU": "tokelau",  #  tokelau
-    "WS": "wallis-et-futuna",  # Wallis et Fortnuna
+    "VU": "vanuatu",  #  Vanuatu
+    "TK": "tokelau",  # Tokelau
+    "MH": "marshall-islands",  # Marshal islands
+    "PN": "pitcairn-islands",  # Pitcairn
+    "WF": "wallis-et-futuna",  # Wallis et Fortnuna
+    "XK": "RS-KM",  # Kosovo
 }
 
 # data for some islands seem to be merged with some other areas data

@@ -43,10 +43,9 @@ def prepare_substation_df(df_all_substations):
     df_all_substations["lon"] = df_all_substations["geometry"].x
     df_all_substations["lat"] = df_all_substations["geometry"].y
 
-    # Add NaN as default
-    df_all_substations["station_id"] = np.nan
-    df_all_substations["dc"] = np.nan
-    df_all_substations["under_construction"] = np.nan
+    # Initialize columns to default value
+    df_all_substations["dc"] = False
+    df_all_substations["under_construction"] = False
 
     # Rearrange columns
     clist = [
@@ -63,26 +62,21 @@ def prepare_substation_df(df_all_substations):
         "geometry",
         "country",
     ]
-    df_all_substations = df_all_substations[clist]
 
     # Check. If column is not in df create an empty one.
     for c in clist:
         if c not in df_all_substations:
             df_all_substations[c] = np.nan
 
-    # add the under_construction and dc
-    df_all_substations["under_construction"] = False
-    df_all_substations["dc"] = False
+    df_all_substations = df_all_substations[clist]
 
     return df_all_substations
 
 
 def add_line_endings_tosubstations(substations, lines):
     # extract columns from substation df
-    bus_s = gpd.GeoDataFrame(columns=substations.columns)
-    bus_e = gpd.GeoDataFrame(columns=substations.columns)
-
-    is_ac = lines["tag_frequency"].astype(float) != 0
+    bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
+    bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
 
     # Read information from line.csv
     bus_s[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
@@ -96,7 +90,7 @@ def add_line_endings_tosubstations(substations, lines):
         + 1
         + bus_s.index
     )
-    bus_s["dc"] = ~is_ac
+    bus_s["dc"] = lines["dc"]
 
     bus_e[["voltage", "country"]] = lines[["voltage", "country"]].astype(str)
     bus_e["geometry"] = lines.geometry.boundary.map(
@@ -105,16 +99,15 @@ def add_line_endings_tosubstations(substations, lines):
     bus_e["lon"] = bus_e["geometry"].map(lambda p: p.x if p != None else None)
     bus_e["lat"] = bus_e["geometry"].map(lambda p: p.y if p != None else None)
     bus_e["bus_id"] = bus_s["bus_id"].max() + 1 + bus_e.index
-    bus_s["dc"] = ~is_ac
+    bus_e["dc"] = lines["dc"]
 
     bus_all = pd.concat([bus_s, bus_e], ignore_index=True)
 
-    # Add NaN as default
+    # Initialize default values
     bus_all["station_id"] = np.nan
-    bus_all["dc"] = False  # np.nan
     # Assuming substations completed for installed lines
     bus_all["under_construction"] = False
-    bus_all["tag_area"] = 0.0  # np.nan
+    bus_all["tag_area"] = 0.0
     bus_all["symbol"] = "substation"
     # TODO: this tag may be improved, maybe depending on voltage levels
     bus_all["tag_substation"] = "transmission"
@@ -157,7 +150,7 @@ def set_unique_id(df, col):
     return df
 
 
-def split_cells(df, lst_col="voltage"):
+def split_cells(df, cols=["voltage"]):
     """
     Split semicolon separated cells i.e. [66000;220000] and create new identical rows
 
@@ -165,40 +158,68 @@ def split_cells(df, lst_col="voltage"):
     ----------
     df : dataframe
         Dataframe under analysis
-    lst_col : str
-        Target column over which to perform the analysis
+    cols : list
+        List of target columns over which to perform the analysis
+
+    Example
+    -------
+    Original data:
+    row 1: '66000;220000', '50'
+
+    After applying split_cells():
+    row 1, '66000', '50'
+    row 2, '220000', '50'
     """
     if df.empty:
         return df
 
-    x = df.assign(**{lst_col: df[lst_col].str.split(";")})
-    x = pd.DataFrame(
-        {
-            col: np.repeat(x[col].values, x[lst_col].str.len())
-            for col in x.columns.difference([lst_col])
-        }
-    ).assign(**{lst_col: np.concatenate(x[lst_col].values)})[x.columns.tolist()]
-    return x
+    x = df.assign(**{col: df[col].str.split(";") for col in cols})
+
+    return x.explode(cols, ignore_index=True)
 
 
 def filter_voltage(df, threshold_voltage=35000):
-    # Drop any row with N/A voltage
-    df = df.dropna(subset=["voltage"])
-
-    # Split semicolon separated cells i.e. [66000;220000] and create new identical rows
-    df = split_cells(df)
-
-    # Convert voltage to float, if impossible, discard row
-    df["voltage"] = (
-        df["voltage"].apply(lambda x: pd.to_numeric(x, errors="coerce")).astype(float)
-    )
-    df = df.dropna(subset=["voltage"])  # Drop any row with Voltage = N/A
+    """Filters df to contain only lines with voltage above threshold_voltage"""
+    # Convert to numeric and drop any row with N/A voltage
+    df["voltage"] = pd.to_numeric(df["voltage"], errors="coerce").astype(float)
+    df.dropna(subset=["voltage"], inplace=True)
 
     # convert voltage to int
     df["voltage"] = df["voltage"].astype(int)
 
     # keep only lines with a voltage no lower than than threshold_voltage
     df = df[df.voltage >= threshold_voltage]
+
+    return df
+
+
+def filter_frequency(df, accepted_values=[50, 60, 0], threshold=0.1):
+    """Filters df to contain only lines with frequency with accepted_values"""
+    df["tag_frequency"] = pd.to_numeric(df["tag_frequency"], errors="coerce").astype(
+        float
+    )
+    df.dropna(subset=["tag_frequency"], inplace=True)
+
+    accepted_rows = pd.concat(
+        [(df["tag_frequency"] - f_val).abs() <= threshold for f_val in accepted_values],
+        axis=1,
+    ).any(axis="columns")
+
+    df.drop(df[~accepted_rows].index, inplace=True)
+
+    df["dc"] = df["tag_frequency"].abs() <= threshold
+
+    return df
+
+
+def filter_circuits(df, min_value_circuit=0.1):
+    """Filters df to contain only lines with circuit value above min_value_circuit."""
+    df["circuits"] = pd.to_numeric(df["circuits"], errors="coerce").astype(float)
+    df.dropna(subset=["circuits"], inplace=True)
+
+    accepted_rows = df["circuits"] >= min_value_circuit
+
+    df.drop(df[~accepted_rows].index, inplace=True)
 
     return df
 
@@ -237,12 +258,6 @@ def prepare_lines_df(df_lines):
         }
     )
 
-    # Add NaN as default
-    df_lines["bus0"] = np.nan
-    df_lines["bus1"] = np.nan
-    df_lines["underground"] = np.nan
-    df_lines["under_construction"] = np.nan
-
     # Rearrange columns
     clist = [
         "line_id",
@@ -255,6 +270,7 @@ def prepare_lines_df(df_lines):
         "under_construction",
         "tag_type",
         "tag_frequency",
+        "dc",
         "cables",
         "geometry",
         "country",
@@ -279,279 +295,373 @@ def finalize_lines_type(df_lines):
     return df_lines
 
 
-def split_cells_multiple(df, list_col=["cables", "circuits", "voltage"]):
+def clean_frequency(df, default_frequency="50"):
     """
-    Split function for cables and voltage
-
-    One line with 'cable':{3,6} and 'voltage':{220000,110000} or
-    only 'voltage':{110000, 220000, 3330000} needs to split in several lines
-    with new line_ID
+    Function to clean raw frequency column: manual fixing and fill nan values
     """
-    # TODO: split multiple cell probably needs fix
-    n_rows = df.shape[0]
-    row_list = []
-    for i in range(n_rows):
-        sub = df[list_col].iloc[i]  # for each cables and voltage
-        if sub.notnull().all() == True:  # check not both empty
-            # check both contain ";"
-            if [";" in s for s in sub].count(True) == len(list_col):
-                d = [s.split(";") for s in sub]  # split them
-                r = df.loc[i].copy()
-                df.loc[i, list_col[0]] = d[0][0]  # first split  [0]
-                df.loc[i, list_col[1]] = d[1][0]
-                r[list_col[0]] = d[0][1]  # second split [1]
-                r[list_col[1]] = d[1][1]
-                row_list.append(r)
+    # replace raw values
+    repl_freq = {
+        "16.67": "16.7",
+        "50;50;16.716.7": "50;50;16.7;16.7",
+        "50;16.7?": "50;16.7",
+        # "24 kHz": "24000",
+    }
 
-    if row_list:
-        df = pd.concat([df, gpd.GeoDataFrame(row_list, crs=df.crs)], ignore_index=True)
+    # TODO: default frequency may be by country
+    df["tag_frequency"] = (
+        df["tag_frequency"].replace(repl_freq).fillna(default_frequency)
+    )
 
-    # if some columns still contain ";" then sum the values
-    for cl_name in list_col:
-        if df[cl_name].dtype == "string":
-            sel_ids = df[cl_name].str.contains(";") == True
-            # TODO: split multiple cell need fix
-            df = df.drop(
-                df.loc[sel_ids, cl_name].index,
-            )
-    return df  # return new frame
+    return df
 
 
-# cable and circuit tags may be in a non-numeric format
-cables_tag_to_n_cables = {
-    "single": "1",
-    "triple": "3",
-    "partial": "1",
-    "1 disused": "0",
-    "3 disused": "0",
-    "1 (Looped - Haul & Return) + 1 power wire": "1",
-    "ground": "0",
-    "line": "1",
-    # assuming that in case of a typo there is at least one line
-    "`": "1",
-    "^1": "1",
-    "e": "1",
-    "d": "1",
-    "2-1": "3",
-    "3+3": "6",
-    "6+1": "6",
-    "2x3": "6",
-    "3x2": "6",
-    "2x2": "4",
-}
+def clean_voltage(df):
+    """
+    Function to clean the raw voltage column: manual fixing and drop nan values
+    """
+    # replace raw values
+    repl_voltage = {
+        "medium": "33000",
+        "19.1 kV": "19100",
+        "high": "220000",
+        "240 VAC": "240",
+        "2*220000": "220000;220000",
+        "KV30": "30kV",
+    }
 
-circuits_tag_to_n_circuits = {
-    "1/3": "0",
-    "2/3": "0",
-    # assumption of two lines and one grounding wire
-    "2-1": "2",
-    "single": "1",
-    "partial": "1",
-    "1 disused": "0",
-    # assuming that in case of a typo there is at least one line
-    "`": "1",
-    "^1": "1",
-    "e": "1",
-    "d": "1",
-    "1.": "1",
-}
+    df["voltage"] = (
+        df["voltage"]
+        .replace(repl_voltage)
+        .str.lower()
+        .str.replace(" ", "")
+        .str.replace("_", "")
+        .str.replace("kv", "000")
+        .str.replace("v", "")
+        # .str.replace("/", ";")  # few OSM entries are separated by / instead of ;
+        # this line can be a fix for that if relevant
+    )
 
-dropped_cables_tags = [
-    x for x in cables_tag_to_n_cables.keys() if cables_tag_to_n_cables[x] == "0"
-]
-dropped_circuits_tags = [
-    x for x in circuits_tag_to_n_circuits.keys() if circuits_tag_to_n_circuits[x] == "0"
-]
+    df.dropna(subset=["voltage"], inplace=True)
+
+    return df
+
+
+def clean_circuits(df):
+    """
+    Function to clean the raw circuits column: manual fixing and clean nan values
+    """
+    # replace raw values
+    repl_circuits = {
+        "1/3": "1",
+        "2/3": "2",
+        # assumption of two lines and one grounding wire
+        "2-1": "2",
+        "single": "1",
+        "partial": "1",
+        "1;1 disused": "1;0",
+        # assuming that in case of a typo there is at least one line
+        "`": "1",
+        "^1": "1",
+        "e": "1",
+        "d": "1",
+        "1.": "1",
+    }
+
+    df["circuits"] = df["circuits"].replace(repl_circuits).str.replace(" ", "")
+
+    return df
+
+
+def clean_cables(df):
+    """
+    Function to clean the raw cables column: manual fixing and drop undesired values
+    """
+    # replace raw values
+    repl_cables = {
+        "1 disused": "0",
+        "ground": "0",
+        "single": "1",
+        "triple": "3",
+        "3;3 disused": "3;0",
+        "1 (Looped - Haul & Return) + 1 power wire": "1",
+        "2-1": "3",
+        "3+3": "6",
+        "6+1": "6",
+        "2x3": "6",
+        "3x2": "6",
+        "2x2": "4",
+        # assuming that in case of a typo there is at least one line
+        "partial": "1",
+        "`": "1",
+        "^1": "1",
+        "e": "1",
+        "d": "1",
+        "line": "1",
+    }
+
+    df["cables"] = df["cables"].replace(repl_cables).str.replace(" ", "")
+
+    return df
+
+
+def split_and_match_voltage_frequency_size(df):
+    """
+    Function to match the length of the columns in subset
+    by duplicating the last value in the column
+
+    The function does as follows:
+    1. First, it splits voltage and frequency columns by semicolon
+       For example, the following lines
+       row 1: '50', '220000
+       row 2: '50;50;50', '220000;380000'
+
+       become:
+       row 1: ['50'], ['220000']
+       row 2: ['50','50','50'], ['220000','380000']
+
+    2. Then, it harmonize each row to match the length of the lists
+       by filling the missing values with the last elements of each list.
+       In agreement to the example of before, after the cleaning:
+
+       row 1: ['50'], ['220000']
+       row 2: ['50','50','50'], ['220000','380000','380000']
+    """
+    for col in ["tag_frequency", "voltage"]:
+        df[col] = df[col].str.split(";")
+
+    len_freq = df["tag_frequency"].map(len)
+    len_voltage = df["voltage"].map(len)
+
+    def _fill_by_last(row, col_to_fill, size_col):
+        """
+        This functions takes a series and checks two elements in
+        locations col_to_fill and size_col that are lists.
+        The list of col_to_fill has less elements than of size_col.
+        This function extends the col_to_fill element to match the size
+        of size_col by replicating the last element as necessary.
+        """
+        size_to_fill = len(row[size_col])
+        if not row[col_to_fill]:
+            return None
+        n_missing = size_to_fill - len(row[col_to_fill])
+        fill_val = row[col_to_fill][-1]
+
+        return row[col_to_fill] + [fill_val] * n_missing
+
+    df_fhv = df[len_freq > len_voltage].apply(
+        lambda row: _fill_by_last(row, "voltage", "tag_frequency"),
+        axis=1,
+    )
+    df.loc[df_fhv.index, "voltage"] = df_fhv
+
+    df_vhf = df[len_freq < len_voltage].apply(
+        lambda row: _fill_by_last(row, "tag_frequency", "voltage"),
+        axis=1,
+    )
+    df.loc[df_vhf.index, "tag_frequency"] = df_vhf
+
+    return df
+
+
+def fill_circuits(df):
+    """
+    This function fills the rows circuits column so that the size of
+    each list element matches the size of the list in the frequency column.
+
+    Multiple procedure are adopted:
+    1. In the rows of circuits where the number of elements matches
+       the number of the frequency column, nothing is done
+    2. Where the number of elements in the cables column match the ones
+       in the frequency column, then the values of cables are used.
+    3. Where the number of elements in cables exceed those in frequency,
+       the cables elements are downscaled and the last values of cables
+       are summed.
+       Let's assume that cables is [3,3,3] but frequency is [50,50].
+       With this procedures, cables is treated as [3,6] and used for
+       calculating the circuits
+    4. Where the number in cables has an unique number, e.g. ['6'],
+       but frequency does not, e.g. ['50', '50'],
+       then distribute the cables proportionally across the values.
+       Note: the distribution accounts for the frequency type;
+       when the frequency is 50 or 60, then a circuit requires 3 cables,
+       when DC (0 frequency) is used, a circuit requires 2 cables.
+    5. Where no information of cables or circuits is available,
+       a circuit is assumed for every frequency entry.
+    """
+
+    def _get_circuits_status(df):
+        len_f = df["tag_frequency"].map(len)
+        len_c = df["circuits"].str.count(";") + 1
+        isna_c = df["circuits"].isna()
+        len_cab = df["cables"].str.count(";") + 1
+        isna_cab = df["cables"].isna()
+        return len_f, len_c, isna_c, len_cab, isna_cab
+
+    def _parse_float(x, ret_def=0.0):
+        if isinstance(x, (int, float)):
+            return float(x)
+        str_x = str(x)
+        if str_x.isnumeric():
+            return float(str_x)
+        return ret_def
+
+    # cables requirement for circuits calculation
+    cables_req = {
+        "50": 3,
+        "60": 3,
+        "16.7": 2,
+        "0": 2,
+    }
+
+    def _basic_cables(f_val, cables_req=cables_req, def_circ=2):
+        return cables_req[f_val] if f_val in cables_req.keys() else def_circ
+
+    len_f, len_c, isna_c, len_cab, isna_cab = _get_circuits_status(df)
+
+    to_fill = isna_c | (len_f != len_c)
+    to_fill_direct = to_fill & (len_cab == len_f)
+    to_fill_merge = to_fill & (len_cab > len_f)
+    to_fill_indirect = to_fill & ~to_fill_direct & df["cables"].str.isnumeric()
+    to_fill_default = to_fill & ~to_fill_merge & ~to_fill_direct & ~to_fill_indirect
+
+    # length of cables match the frequency one
+    # matching uses directly only the cables series
+    df_match_by_cables = df[to_fill_direct][["tag_frequency", "cables"]].copy()
+    df_match_by_cables["cables"] = df_match_by_cables["cables"].str.split(";")
+
+    def _filter_cables(row):
+        return ";".join(
+            [
+                str(_parse_float(vc) / _basic_cables(vf))
+                for (vc, vf) in zip(row["cables"], row["tag_frequency"])
+            ]
+        )
+
+    df.loc[df_match_by_cables.index, "circuits"] = df_match_by_cables.apply(
+        _filter_cables, axis=1
+    )
+
+    # length of cables elements is larger than frequency; the last cable data are merged to match
+    df_merge_by_cables = df[to_fill_merge][["tag_frequency", "cables"]].copy()
+    df_merge_by_cables["cables"] = df_merge_by_cables["cables"].str.split(";")
+
+    def _parse_cables_to_len(row):
+        lf = len(row["tag_frequency"])
+        float_cable = [_parse_float(vc) for vc in row["cables"]]
+        parsed_cable_list = float_cable[0 : lf - 1] + [sum(float_cable[lf - 1 :])]
+
+        return ";".join(
+            [
+                str(vc / _basic_cables(vf))
+                for (vc, vf) in zip(parsed_cable_list, row["tag_frequency"])
+            ]
+        )
+
+    df.loc[df_merge_by_cables.index, "circuits"] = df_merge_by_cables.apply(
+        _parse_cables_to_len, axis=1
+    )
+
+    # indirect matching exploiting the total numeric value in cables
+    # the minimum requirement of cables by frequency value is calculated
+    # then using the total numeric cables number, the values are scaled proportionally
+    df_indirect = df[to_fill_indirect]
+
+    basic_cables = (
+        df_indirect["tag_frequency"]
+        .map(lambda x: [_basic_cables(v) for v in x])
+        .rename("basic_cables")
+    )
+    min_cables = basic_cables.map(sum).rename("min_cables")
+    multiplier = (
+        pd.to_numeric(df_indirect["cables"], errors="coerce") / min_cables
+    ).rename("multiplier")
+    filled_values = pd.concat([basic_cables, multiplier], axis=1).apply(
+        lambda x: ";".join([str(x["multiplier"] * v) for v in x["basic_cables"]]),
+        axis=1,
+    )
+    df.loc[filled_values.index, "circuits"] = filled_values
+
+    # otherwise assume a circuit per element
+    df_fill_default = df[to_fill_default]
+    df.loc[df_fill_default.index, "circuits"] = len_f.loc[df_fill_default.index].map(
+        lambda x: ";".join(["1"] * x)
+    )
+
+    # explode column
+    df["circuits"] = df["circuits"].str.split(";")
+
+    return df
+
+
+def explode_rows(df, cols):
+    """
+    Function that explodes the rows as specified in cols, including warning alerts for unexpected values.
+
+    Example
+    --------
+    row 1: [50,50], [33000, 110000]
+
+    after explode_rows applied on the two columns becomes
+    row 1: 50, 33000
+    row 2: 50, 110000
+    """
+    # check if all row elements are list
+    is_all_list = df[cols].applymap(lambda x: isinstance(x, list)).all(axis=1)
+    if not is_all_list.all():
+        df_nonlist = df[~is_all_list]
+        logger.warning(
+            f"Unexpected non-list values in dataframe; dropping rows. Needed fix for entries:\n{df_nonlist}"
+        )
+        df.drop(df_nonlist.index, inplace=True)
+
+    # check if errors in the columns
+    nunique_values = df[cols].applymap(len).nunique(axis=1)
+    df_nunique = df[nunique_values != 1]
+    if not df_nunique.empty:
+        logger.warning(
+            f"Improper explosion of dataframe entries; dropping rows. Needed fix for entries:\n{df_nunique}"
+        )
+        df.drop(df_nunique.index, inplace=True)
+
+    df = df.explode(cols, ignore_index=True)
+
+    return df
 
 
 def integrate_lines_df(df_all_lines, distance_crs):
     """
     Function to add underground, under_construction, frequency and circuits
     """
+    # explode frequency and columns
+    df = pd.DataFrame(df_all_lines)
+
+    # preliminary raw parsing of raw columns
+    clean_frequency(df)
+    clean_voltage(df)
+    clean_circuits(df)
+    clean_cables(df)
+
+    # analyse each row of voltage and requency and match their content
+    split_and_match_voltage_frequency_size(df)
+
+    # fill the circuits column for explode
+    fill_circuits(df)
+
     # Add under construction info
     # Default = False. No more information available atm
-    df_all_lines["under_construction"] = False
+    df["under_construction"] = False
 
     # Add underground flag to check whether the line (cable) is underground
     # Simplified. If tag_type cable then underground is True
-    df_all_lines["underground"] = df_all_lines["tag_type"] == "cable"
+    df["underground"] = df["tag_type"] == "cable"
 
-    # More information extractable for "underground" by looking at "tag_location".
-    if "tag_location" in df_all_lines:  # drop column if exist
-        df_all_lines.drop(columns="tag_location", inplace=True)
+    # drop columns
+    df.drop(columns=["tag_location", "cables"], errors="ignore", inplace=True)
 
-    # Keep original frequency if it exists  and set a standard value
-    # NB The standard frequency value may be regional-dependent
-    # TODO Fill by adjancent value
+    # explode rows
+    df = explode_rows(df, ["tag_frequency", "voltage", "circuits"])
 
-    # Initialize a default frequency value
-    ac_freq_default = 50.0
-
-    if "tag_frequency" in df_all_lines.columns:
-        ac_grid_freq_levels = (
-            df_all_lines["tag_frequency"]
-            .value_counts(sort=True, dropna=True)
-            .drop(["0", 0], errors="ignore")
-        )
-
-        if not ac_grid_freq_levels.empty:
-            ac_freq_default = float(ac_grid_freq_levels.idxmax())
-
-        df_all_lines.tag_frequency.fillna(ac_freq_default, inplace=True)
-
-        df_all_lines["tag_frequency"] = (
-            df_all_lines.tag_frequency.astype(str)
-            .str.split(pat=";", n=1)
-            .str[0]
-            .astype(float)
-        )
-
-    # Add frequency column if not present in data
-    else:
-        df_all_lines["tag_frequency"] = ac_freq_default
-
-    df_all_lines = split_cells_multiple(df_all_lines)
-    # Add circuits information
-    # if not int make int
-    if df_all_lines["cables"].dtype != int:
-        dropped_cables = [
-            x for x in dropped_cables_tags if x in df_all_lines["cables"].values
-        ]
-        if len(dropped_cables) != 0:
-            logger.info(
-                f"The lines with a cables tag in {set(dropped_cables)} will be dropped."
-            )
-
-        # map known non-numerical issues into a reasonable n_cables value
-        df_all_lines["cables"] = (
-            df_all_lines["cables"]
-            .map(cables_tag_to_n_cables)
-            .fillna(df_all_lines["cables"])
-        )
-        # HERE. "0" if cables "None", "nan" or "1"
-        df_all_lines.loc[
-            (df_all_lines["cables"] < "3") | df_all_lines["cables"].isna(), "cables"
-        ] = "0"
-
-        # there may be some non-known numerical issues
-        not_resolved_cables = (
-            ~pd.to_numeric(df_all_lines["cables"], errors="coerce")
-            .astype(float)
-            .apply(float.is_integer)
-        )
-        unknown_cables_tags = set(
-            df_all_lines.loc[not_resolved_cables]["cables"].values
-        )
-        if any(not_resolved_cables):
-            df_all_lines.drop(df_all_lines[not_resolved_cables].index, inplace=True)
-            logger.warning(
-                f"The lines with an unexpected cables tag value in {unknown_cables_tags} will be dropped."
-            )
-
-        df_all_lines["cables"] = df_all_lines["cables"].astype("int")
-
-    # downgrade 4 and 5 cables to 3...
-    if 4 or 5 in df_all_lines["cables"].values:
-        # Reason: 4 cables have 1 lighting protection cables, 5 cables has 2 LP cables - not transferring energy;
-        # see https://hackaday.com/2019/06/11/a-field-guide-to-transmission-lines/
-        # where circuits are "0" make "1"
-        df_all_lines.loc[
-            (df_all_lines["cables"] == 4) | (df_all_lines["cables"] == 5), "cables"
-        ] = 3
-
-    # one circuit contains 3 cable under a preliminary assumption of an AC line
-    df_all_lines.loc[df_all_lines["circuits"].isna(), "circuits"] = (
-        df_all_lines.loc[df_all_lines["circuits"].isna(), "cables"] / 3
-    )
-
-    # where circuits are "0" make "1"
-    df_all_lines.loc[
-        (df_all_lines["circuits"] == "0") | (df_all_lines["circuits"] == 0),
-        "circuits",
-    ] = 1
-
-    if df_all_lines["circuits"].dtype != int:
-        # it's possible that some df_all_lines["circuits"] are in manually dropped_tags
-        if any(df_all_lines["circuits"].isin(dropped_circuits_tags)):
-            # reset indexing to avoid 'SettingWithCopyWarning' troubles in further operations with the data frame
-            df_one_third_circuits = df_all_lines.loc[
-                df_all_lines["circuits"].isin(dropped_circuits_tags)
-            ].reset_index()
-
-            # avoid mixing column name with geopandas method
-            df_one_third_circuits = df_one_third_circuits.rename(
-                columns={
-                    "length": "length_osm",
-                }
-            )
-
-            # transfrom to metric crs to obtain length in m from coordinates
-            df_one_third_circuits_m = df_one_third_circuits.to_crs(distance_crs)
-
-            length_from_crs = df_one_third_circuits_m.length
-            df_one_third_circuits["length_crs"] = length_from_crs
-
-            # in case a line length is not available directly
-            df_one_third_circuits.loc[
-                df_one_third_circuits["length_osm"].isna(), "length_osm"
-            ] = df_one_third_circuits.loc[
-                df_one_third_circuits["length_osm"].isna(), "length_crs"
-            ]
-
-            # [m] -> [km]
-            dropped_length = round(df_one_third_circuits["length_osm"].sum() / 1e3, 1)
-            dropped_values = set(df_one_third_circuits["circuits"])
-            logger.warning(
-                f"The lines with a circuit tag in {dropped_values} of an overal length {dropped_length} km dropped."
-            )
-
-            # troubles with projections can lead to discrepancy between the length values
-            tol = 0.1  # [m]
-            length_diff = (
-                df_one_third_circuits["length_osm"]
-                - df_one_third_circuits["length_crs"]
-            )
-
-            if any(length_diff > tol):
-                total_length_diff = round(sum(length_diff), 2)
-                logger.warning(
-                    f"There is a difference of {total_length_diff} m in the dropped lines length as compared with values extracted from geographical coordinates."
-                )
-
-        # drop circuits if "None" or "nan"
-        df_all_lines.loc[
-            df_all_lines["circuits"].isna(),
-            "circuits",
-        ] = "0"
-        # map known non-numerical issues into a reasonable n_circuits value
-        df_all_lines["circuits"] = (
-            df_all_lines["circuits"]
-            .map(circuits_tag_to_n_circuits)
-            .fillna(df_all_lines["circuits"])
-        )
-
-        # there may be some non-known numerical issues
-        not_resolved_circuits = (
-            ~pd.to_numeric(df_all_lines["circuits"], errors="coerce")
-            .astype(float)
-            .apply(float.is_integer)
-        )
-        unknown_circuits_tags = set(
-            df_all_lines.loc[not_resolved_circuits]["circuits"].values
-        )
-        if any(not_resolved_circuits):
-            df_all_lines.drop(df_all_lines[not_resolved_circuits].index, inplace=True)
-            logger.warning(
-                f"The lines with an unexpected circuits tag value in {unknown_circuits_tags} will be dropped."
-            )
-
-        df_all_lines["circuits"] = df_all_lines["circuits"].astype(int)
-
-    # drop column if exist
-    if "cables" in df_all_lines:
-        df_all_lines.drop(columns="cables", inplace=True)
-
-    return df_all_lines
+    return gpd.GeoDataFrame(df, crs=df_all_lines.crs)
 
 
 def filter_lines_by_geometry(df_all_lines):
@@ -586,6 +696,7 @@ def prepare_generators_df(df_all_generators):
     )
 
     # convert electricity column from string to float value
+    # TODO: this filtering can be improved
     df_all_generators = df_all_generators[
         df_all_generators["power_output_MW"].astype(str).str.contains("MW")
     ]
@@ -597,7 +708,7 @@ def prepare_generators_df(df_all_generators):
 
 
 def find_first_overlap(geom, country_geoms, default_name):
-    """Return the first country whose shape intersects the geometry"""
+    """Return the first index whose shape intersects the geometry"""
     for c_name, c_geom in country_geoms.items():
         if not geom.disjoint(c_geom):
             return c_name
@@ -674,6 +785,7 @@ def clean_data(
     add_line_endings=True,
     generator_name_method="OSM",
 ):
+    logger.info("Process OSM lines")
     # Load raw data lines
     df_lines = gpd.read_file(input_files["lines"])
 
@@ -686,6 +798,7 @@ def clean_data(
 
     # load cables only if data are stored
     if os.path.getsize(input_files["cables"]) > 0:
+        logger.info("Add OSM cables to data")
         # Load raw data lines
         df_cables = gpd.read_file(input_files["cables"])
 
@@ -695,45 +808,50 @@ def clean_data(
 
         # concatenate lines and cables in a single dataframe
         df_all_lines = pd.concat([df_lines, df_cables], ignore_index=True)
+    else:
+        logger.info("No OSM cables to add: skipping")
 
     # Add underground, under_construction, frequency and circuits columns to the dataframe
     # and drop corresponding unused columns
     df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
 
-    # filter lines by voltage
-    df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
+    logger.info("Filter lines by voltage, frequency, circuits and geometry")
 
-    # filter lines to make sure the geometry is appropriate
+    # filter lines
+    df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
+    df_all_lines = filter_frequency(df_all_lines)
+    df_all_lines = filter_circuits(df_all_lines)
     df_all_lines = filter_lines_by_geometry(df_all_lines)
+
+    logger.info("Select lines and cables in the region of interest")
 
     # drop lines crossing regions with and without the region under interest
     df_all_lines = df_all_lines[
         df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
     ]
 
-    # set unique line ids
-    df_all_lines = set_unique_id(df_all_lines, "line_id")
-
     df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
     # set the country name by the shape
     if names_by_shapes:
+        logger.info("Setting lines country name using the GADM shapes")
         df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
 
+    # set unique line ids
+    df_all_lines = set_unique_id(df_all_lines, "line_id")
+
+    # save lines output
+    logger.info("Saving lines output")
     save_to_geojson(df_all_lines, output_files["lines"])
 
     # ----------- SUBSTATIONS -----------
+
+    logger.info("Process OSM substations")
 
     df_all_substations = gpd.read_file(input_files["substations"])
 
     # prepare dataset for substations
     df_all_substations = prepare_substation_df(df_all_substations)
-
-    # add line endings if option is enabled
-    if add_line_endings:
-        df_all_substations = add_line_endings_tosubstations(
-            df_all_substations, df_all_lines
-        )
 
     # filter substations by tag
     if tag_substation:  # if the string is not empty check it
@@ -741,29 +859,48 @@ def clean_data(
             df_all_substations["tag_substation"] == tag_substation
         ]
 
+    df_all_substations = gpd.GeoDataFrame(
+        split_cells(pd.DataFrame(df_all_substations)),
+        crs=df_all_substations.crs,
+    )
+
+    # add line endings if option is enabled
+    if add_line_endings:
+        df_all_substations = add_line_endings_tosubstations(
+            df_all_substations, df_all_lines
+        )
+
+    # drop substations with nan geometry
+    df_all_substations.dropna(subset=["geometry"], axis=0, inplace=True)
+
     # filter substation by voltage
     df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
 
     # finalize dataframe types
     df_all_substations = finalize_substation_types(df_all_substations)
 
-    # set unique bus ids
-    df_all_substations = set_unique_id(df_all_substations, "bus_id")
-
     # save to geojson file
     df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
 
     if names_by_shapes:
         # set the country name by the shape
+        logger.info("Setting substations country name using the GADM shapes")
         df_all_substations = set_countryname_by_shape(
             df_all_substations,
             ext_country_shapes,
             col_country="Country",
         )
 
+    # set unique bus ids
+    df_all_substations = set_unique_id(df_all_substations, "bus_id")
+
+    # save substations output
+    logger.info("Saving substations output")
     save_to_geojson(df_all_substations, output_files["substations"])
 
     # ----------- GENERATORS -----------
+
+    logger.info("Process OSM generators")
 
     df_all_generators = gpd.read_file(input_files["generators"])
 
@@ -772,6 +909,7 @@ def clean_data(
 
     if names_by_shapes:
         # set the country name by the shape
+        logger.info("Setting generators country name using the GADM shapes")
         df_all_generators = set_countryname_by_shape(
             df_all_generators,
             ext_country_shapes,
@@ -780,12 +918,14 @@ def clean_data(
 
     # set name tag by closest city when the value is nan
     if generator_name_method == "closest_city":
+        logger.info("Setting unknown generators name using the closest city")
         df_all_generators = set_name_by_closestcity(df_all_generators)
 
     # save to csv
     to_csv_nafix(df_all_generators, output_files["generators_csv"])
 
     # save to geojson
+    logger.info("Saving generators output")
     save_to_geojson(df_all_generators, output_files["generators"])
 
     return None
