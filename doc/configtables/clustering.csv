@@ -7,6 +7,9 @@
 -- -- remove_stubs,bool,"true/false",
 -- remove stubs,bool,"true/false","Controls whether radial parts of the network should be recursively aggregated. Defaults to true."
 -- -- remove_stubs_across_borders,bool,"true/false","Controls whether radial parts of the network should be recursively aggregated across borders. Defaults to true."
+-- -- p_threshold_drop_isolated,--,float,"Isolated buses are being discarded if bus mean power is below the specified threshold."
+-- -- p_threshold_merge_isolated,--,float,"Isolated buses are being merged into a single isolated bus if bus mean power is above the specified threshold."
+
 -- cluster_network,,,
 -- -- algorithm,str,"One of {‘kmeans’, ‘hac’}","Clustering algorithm"
 -- -- feature,str,"Str in the format ‘carrier1+carrier2+...+carrierN-X’, where CarrierI can be from {‘solar’, ‘onwind’, ‘offwind’, ‘ror’} and X is one of {‘cap’, ‘time’}.","Is used for hierarchical clustering"

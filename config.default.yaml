@@ -62,6 +62,8 @@ cluster_options:
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: true
+    p_threshold_drop_isolated: 10 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is above the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time

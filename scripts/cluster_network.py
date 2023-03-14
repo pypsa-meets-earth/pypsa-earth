@@ -197,7 +197,7 @@ def get_feature_for_hac(n, buses_i=None, feature=None):
     if "offwind" in carriers:
         carriers.remove("offwind")
         carriers = np.append(
-            carriers, network.generators.carrier.filter(like="offwind").unique()
+            carriers, n.generators.carrier.filter(like="offwind").unique()
         )
 
     if feature.split("-")[1] == "cap":
@@ -249,13 +249,14 @@ def distribute_clusters(
             n.loads_t.p_set.mean()
             .groupby(n.loads.bus)
             .sum()
-            .groupby([n.buses.country])
+            .groupby([n.buses.country, n.buses.sub_network])
             .sum()
             .pipe(normed)
         )
-        assert len(L.index) == len(n.buses.country.unique()), (
+        countries_in_L = pd.unique(L.index.get_level_values(0))
+        assert len(countries_in_L) == len(n.buses.country.unique()), (
             "The following countries have no load: "
-            f"{list(set(L.index).symmetric_difference(set(n.buses.country.unique())))}"
+            f"{list(set(countries_in_L).symmetric_difference(set(n.buses.country.unique())))}"
         )
         distribution_factor = L
 
@@ -264,11 +265,17 @@ def distribute_clusters(
             columns={"name": "country"}
         )
         add_population_data(
-            df_pop_c, country_list, year, update, out_logging, nprocesses=nprocesses
+            df_pop_c, country_list, "standard", year, update, out_logging
         )
         P = df_pop_c.loc[:, ("country", "pop")]
-        P = P.groupby(P["country"]).sum().pipe(normed).squeeze()
-        distribution_factor = P
+        n_df = n.buses.copy()[["country", "sub_network"]]
+
+        pop_dict = P.set_index("country")["pop"].to_dict()
+        n_df["pop"] = n_df["country"].map(pop_dict)
+
+        distribution_factor = (
+            n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
+        )
 
     if distribution_cluster == ["gdp"]:
         df_gdp_c = gpd.read_file(inputs.country_shapes).rename(
@@ -281,12 +288,19 @@ def distribute_clusters(
             out_logging,
             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
         )
+
         G = df_gdp_c.loc[:, ("country", "gdp")]
-        G = G.groupby(df_gdp_c["country"]).sum().pipe(normed).squeeze()
-        distribution_factor = G
+        n_df = n.buses.copy()[["country", "sub_network"]]
+
+        gdp_dict = G.set_index("country")["gdp"].to_dict()
+        n_df["gdp"] = n_df["country"].map(gdp_dict)
+
+        distribution_factor = (
+            n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
+        )
 
     # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_network"]
-    N = n.buses.groupby(["country"]).size()
+    N = n.buses.groupby(["country", "sub_network"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -318,7 +332,7 @@ def distribute_clusters(
 
     m = po.ConcreteModel()
 
-    def n_bounds(model, n_id):
+    def n_bounds(model, *n_id):
         """
         Create a function that makes a bound pair for pyomo
 
@@ -379,7 +393,11 @@ def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
         lambda bus: locate_bus(bus[["x", "y"]], bus["country"]), axis=1
     )
-    busmap = buses["gadm_{}".format(gadm_level)]
+
+    buses["gadm_subnetwork"] = (
+        buses["gadm_{}".format(gadm_level)] + "_" + buses["carrier"].astype(str)
+    )
+    busmap = buses["gadm_subnetwork"]
 
     return busmap
 
@@ -476,11 +494,10 @@ def busmap_for_n_clusters(
     def busmap_for_country(x):
         # A number of the countries in the clustering can be > 1
         if isinstance(n_clusters, pd.Series):
+            n_cluster_c = n_clusters[x.name]
             if isinstance(x.name, tuple):
-                n_cluster_c = n_clusters[x.name[0]]
                 prefix = x.name[0] + x.name[1] + " "
             else:
-                n_cluster_c = n_clusters[x.name]
                 prefix = x.name + " "
         else:
             n_cluster_c = n_clusters
@@ -519,8 +536,8 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            ["country"],
-            # ["country", "sub_network"] # TODO: 2. Add sub_networks (see previous TODO)
+            # ["country"],
+            ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
             group_keys=False,
         )
         .apply(busmap_for_country)
