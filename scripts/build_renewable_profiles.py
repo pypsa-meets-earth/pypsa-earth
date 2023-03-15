@@ -430,8 +430,6 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
                     default_factor,
                 )
                 * np.ones(runoff.time.shape)
-                * 8760
-                / len(runoff.time)
                 for c_bus in plants.countries
             ],
             coords=dict(
