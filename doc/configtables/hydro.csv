@@ -4,4 +4,7 @@ carriers,--,"Any subset of {'ror', 'PHS', 'hydro'}","Specifies the types of hydr
 PHS_max_hours,h,float,"Maximum state of charge capacity of the pumped-hydro storage (PHS) in terms of hours at full output capacity ``p_nom``. Cf. `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_."
 hydro_max_hours,h,"Any of {float, 'energy_capacity_totals_by_country', 'estimate_by_large_installations'}","Maximum state of charge capacity of the pumped-hydro storage (PHS) in terms of hours at full output capacity ``p_nom`` or heuristically determined. Cf. `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_."
 clip_min_inflow,MW,float,"To avoid too small values in the inflow time series, values below this threshold are set to zero."
-normalization_multiplier,--,float,"Multiplier factor of the normalization process (default 1.0)"
+normalization,--,dict,"When specified, it describes how to normalize hydro time series"
+--method,--,str,"Data source used to normalize the data; option 'hydro_capacities' to use the provided 'data/hydro_capacities.csv' or 'eia' for using the eia file"
+--year,--,year,"Specify the desired year to be used for normalization"
+multiplier,--,float,"Multiplier factor of the normalization process (default 1.0)"

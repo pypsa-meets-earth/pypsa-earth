@@ -77,6 +77,8 @@ Upcoming Release
 
 * Fix isolated buses when simplifying the network and add clustering by networks `PR #632 https://github.com/pypsa-meets-earth/pypsa-earth/pull/632`__
 
+* Include hydro runoff normalization `PR #631 https://github.com/pypsa-meets-earth/pypsa-earth/pull/631`__
+
 PyPSA-Earth 0.1.0
 =================
 

@@ -190,7 +190,7 @@ def get_GADM_layer(
     return geodf_GADM
 
 
-def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
+def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
@@ -301,7 +301,16 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
+def eez(
+    countries,
+    geo_crs,
+    country_shapes,
+    EEZ_gpkg,
+    out_logging=False,
+    distance=0.01,
+    minarea=0.01,
+    tolerance=0.01,
+):
     """
     Creates offshore shapes by
     - buffer smooth countryshape (=offset country shape)
@@ -328,7 +337,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     ).set_index("name")
 
     ret_df = ret_df.geometry.map(
-        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+        lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
     )
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
@@ -340,7 +349,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     ret_df_new = ret_df_new.map(
         lambda x: x
         if x is None
-        else _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+        else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
     )
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 

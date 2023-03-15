@@ -17,6 +17,7 @@ dependencies:
 - dask
 - powerplantmatching>=0.5.6
 - earth-osm>=0.0.8  # until 0.1.0
+- atlite
 
   # Dependencies of the workflow itself
 - xlrd
@@ -78,7 +79,6 @@ dependencies:
 
 - pip:
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
-  - git+https://github.com/davide-f/atlite.git@master
   - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
