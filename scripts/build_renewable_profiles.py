@@ -233,7 +233,7 @@ def get_eia_annual_hydro_generation(fn, countries):
     return df
 
 
-def get_hydro_capacity_annual_hydro_generation(fn, countries, year):
+def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
         pd.read_csv(
             fn,
@@ -306,14 +306,14 @@ def filter_cutout_region(cutout, regions):
     return cutout
 
 
-def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
+def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     """
-    Function used to normalize the inflows of the hydro capacities to match country statistics
+    Function used to rescale the inflows of the hydro capacities to match country statistics
 
     Parameters
     ----------
     plants : DataFrame
-        Run-of-river plants or dams with lon, lat, countries, installed_hydro columns.
+        Run-of-river plants orf dams with lon, lat, countries, installed_hydro columns.
         Countries and installed_hydro column are only used with normalize_using_yearly
         installed_hydro column shall be a boolean vector specifying whether that plant
         is currently installed and used to normalize the inflows
@@ -336,7 +336,6 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         years_statistics = years_statistics.astype(int)
 
     years_statistics = years_statistics.unique()
-    years_runoff = pd.to_datetime(runoff.time).year.unique()
 
     if normalization_year not in set(years_statistics):
         logger.warning(
@@ -347,9 +346,16 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         # the normalization
         normalization_buses = plants[plants.installed_hydro == True].index
 
+        # check nans
+        share_nans = float(runoff.isnull().sum() / runoff.shape[0] / runoff.shape[1])
+        if share_nans > 1e-4:
+            logger.warning(
+                "Share of NaN values in hydro cutout: {:.2f}%".format(100 * share_nans)
+            )
+
         # average yearly runoff by plant
         yearlyavg_runoff_by_plant = (
-            runoff.rename("runoff").mean("time").to_dataframe()
+            runoff.rename("runoff").mean("time", skipna=True).to_dataframe()
         ) * 8760.0
 
         yearlyavg_runoff_by_plant["country"] = plants.loc[
@@ -441,7 +447,7 @@ def normalize_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         # Check all buses to be in the final dataset
         missing_buses = plants.index.difference(scaling_matrix.plant)
         if len(missing_buses) > 0:
-            logger.warning(f"Missing hydro inflows for buse {missing_buses}")
+            logger.warning(f"Missing hydro inflows for buses: {missing_buses}")
 
         runoff *= scaling_matrix
 
@@ -586,19 +592,23 @@ if __name__ == "__main__":
 
             # check if normalization field belongs to the settings and it is not false
             if normalization:
-                method, norm_year = normalization["method"], normalization["year"]
+                method = normalization["method"]
+                norm_year = normalization.get("year", int(inflow.time[0].dt.year))
                 if method == "hydro_capacities":
                     path_hydro_capacities = snakemake.input.hydro_capacities
-                    normalize_using_yearly = get_hydro_capacity_annual_hydro_generation(
-                        path_hydro_capacities, countries, norm_year
-                    ) * config.get("multiplier", 1.0)
+                    normalize_using_yearly = (
+                        get_hydro_capacities_annual_hydro_generation(
+                            path_hydro_capacities, countries, norm_year
+                        )
+                        * config.get("multiplier", 1.0)
+                    )
                 elif method == "eia":
                     path_eia_stats = snakemake.input.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
                         path_eia_stats, countries
                     ) * config.get("multiplier", 1.0)
 
-                inflow = normalize_hydro(
+                inflow = rescale_hydro(
                     resource["plants"], inflow, normalize_using_yearly, norm_year
                 )
                 logger.info(
