@@ -26,9 +26,7 @@ To do that, you may want to do a reserve copy of your current configuration file
     .../pypsa-earth (pypsa-earth) % cp config.tutorial.yaml config.yaml
 
 
-In the configuration file `config.yaml` there is a flag `retrieve_databundle` which triggers data loading and a `tutorial` flag which determines that the loaded data belong to the tutorial kit. Currently the tutorial can be run only for Nigeria ("NG"), Benin ("BJ"), Bostwana ("BW") and Morocco ("MA").
-
-:
+In the configuration file `config.yaml` there is a flag `retrieve_databundle` which triggers data loading and a `tutorial` flag which determines that the loaded data belong to the tutorial kit. Currently the tutorial can be run only for Nigeria ("NG"), Benin ("BJ"), Botswana ("BW") and Morocco ("MA").
 
 .. code:: yaml
 
@@ -85,7 +83,7 @@ Just open in our `notebooks repository <https://github.com/pypsa-meets-earth/doc
 the file `sample-network-analysis.ipynb`. For further inspiration on what you can analyse and do with PyPSA,
 you can explore the `examples section in the PyPSA framework documentation <https://pypsa.readthedocs.io/en/latest/examples-basic.html>`_.
 
-After playing with the tutorial model and before playing with different fucntions,
+After playing with the tutorial model and before playing with different functions,
 it's important to clean-up data in your model folder before to proceed further to avoid data conflicts.
 You may use the `clean` rule for making so:
 
@@ -93,7 +91,9 @@ You may use the `clean` rule for making so:
 
     .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean
 
-Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed.
+Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed to avoid conflicts between run settings corresponding to different scenarios.
+
+It is also possible to make manual clean-up removing folders "resources", "networks" and "results". Those folders store the intermediate output of the workflow and if you don't need them anymore it is safe to delete them.
 
 .. note::
 

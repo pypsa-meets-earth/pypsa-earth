@@ -34,6 +34,19 @@ Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
         end: "2013-03-7"
         inclusive: "left" # end is not inclusive
 
+
+Year-related parameters are also being used  when specifying `load_options`:
+
+.. code:: yaml
+
+    load_options:
+      ssp: "ssp2-2.6"
+      weather_year: 2013
+      prediction_year: 2030
+      scale: 1
+
+The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` correspond to the point of a ssp trajectory. The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
+
 It is also possible to allow less or more carbon-dioxide emissions, while defining the current emissions.
 It is possible to model a net-zero target by setting the `co2limit` to zero:
 
@@ -69,6 +82,9 @@ It is advisable to adapt the required range of coordinates to the selection of c
                     dx: 0.3  # cutout resolution
                     dy: 0.3  # cutout resolution
                     # The cutout time is automatically set by the snapshot range.
+
+
+Note please that a temporal dimension of the cutout should be consistent with the values set for `snapshots` parameter. A time range of the cutout is determined by the parameters set when building this cutout while the time resolution corresponds to those of the used climate archives. In case of ERA5 dataset used in PyPSA-Earth by default, hourly resolution is implied.
 
 It is also possible to decide which weather data source should be used to calculate potentials and capacity factor time-series for each carrier.
 For example, we may want to use the ERA-5 dataset for solar and not the default SARAH-2 dataset.
@@ -156,10 +172,12 @@ It could be helpful to keep in mind the following points:
 
 The cutout is the main concept of climate data management in PyPSA ecosystem introduced in `atlite <https://atlite.readthedocs.io/en/latest/>`_ package. The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since such datasets are typically global and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing concepts are contained in `JOSS paper <https://joss.theoj.org/papers/10.21105/joss.03294>`_.
 
-.. note::
-    Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
+Generally, the spatial and time resolution of the cutout data is determined by parameters of an underlying dataset. That is 30 km x 30 km grid and houtly resolution for ERA5 recommended for usage in PyPSA-Earth.
 
 The pre-built cutout for Africa is available for 2013 year and can be loaded directly from zenodo through the rule `retrieve_cutout`. There is also a smaller cutout for Africa built for a two-weeks time span; it is automatically downloaded when retrieving common data with `retrieve_databundle_light`.
+
+.. note::
+    Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
 
 In case you are interested in other parts of the world you have to generate a cutout yourself using the `build_cutouts` rule. To run it you will need to: 
 
@@ -171,21 +189,34 @@ In case you are interested in other parts of the world you have to generate a cu
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 
+The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident. The `snapshots` values set when generating the cutout, will determine the temporal parameters of the cutout. Accessible years which can be used to build a cutout depend on ERA5 data availability. `ERA5 page <https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5>`_ explains that the data is available from 1950 and updated continuously with about 3 month delay while the data on 1950-1978 should be treated as preliminary as that is a rather recent development.
+
+After the first run, if you don't change country and don't need to increase a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
+
+Spatial extent
+^^^^^^^^^^^^^^
+
 Normally cutout extent is calculated from the shape of the requested region defined by the `countries` parameter in the configuration file `config.yaml`. It could make sense to set the countries list as big as it's feasible when generating a cutout. A considered area can be narrowed anytime when building a specific model by adjusting content of the `countries` list.
 
 There is also option to set the cutout extent specifying `x` and `y` values directly. However, these values will overwrite values extracted from the countries shape. Which means that nothing prevents `build_cutout` to extract data which has no relation to the requested countries. Please use direct definition of `x` and `y` only if you really understand what and why you are doing.
 
-The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident.
+Temporal extent
+^^^^^^^^^^^^^^^
 
-3. Build a natura.tiff raster
+If you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of this year, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of 2013. The workflow will automatically subset the cutout archive to extract data for the particular timeframe of interest. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed. 
+
+In case you need model a number of years, a convenient approach may be to create the cutout for the whole period under interest (e.g. 2013-2015) so that you don't need to build any additional cutouts. Note, however, that the disk requirements increase in this case.
+
+3. Check natura.tiff raster
 -----------------------------
 
-A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles`.
+A raster file `natura.tiff` is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the renewable potential with `build_renewable_profiles` by switching-on `natura` option:
 
-.. note::
-    Skip this recommendation if the region of your interest is within Africa
+.. code:: bash
 
-A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. Currently this raster is valid for Africa, global `natura.tiff` raster is under development. You may generate the `natura.tiff` for a region of interest using `build_natura_raster` rule which aggregates data on protected areas along the cutout extent.
+    natura: true
+
+A pre-built `natura.tiff` is loaded along with other data needed to run a model with `retrieve_databundle_light` rule. This raster file contains data on the on protected areas around the world where areas no (renewable) assets can be installed. The `natura.tiff` raster has now global coverage so you don't need to create it locally.
 
 How to validate?
 ================
@@ -238,7 +269,7 @@ The following validation notebooks are worth a look when validating your energy 
 
 1. A detailed `network validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb>`_.
  
-2. Analys of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
+2. Analysis of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
 
 3. Validation of `the power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
 
