@@ -1149,9 +1149,7 @@ def add_industry(n, costs):
         carrier="H2 for industry",
         p_set=industrial_demand["hydrogen"].apply(
             lambda frac: frac / 8760
-        )  # *n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),),
+        )  
     )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -1163,9 +1161,7 @@ def add_industry(n, costs):
         carrier="naphtha for industry",
         p_set=industrial_demand["oil"].apply(
             lambda frac: frac / 8760
-        )  # *n.snapshot_weightings.objective[0]), #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),),
+        )  
     )
 
     #     #NB: CO2 gets released again to atmosphere when plastics decay or kerosene is burned
@@ -1179,9 +1175,7 @@ def add_industry(n, costs):
         n.loads.loc[nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
         # - industrial_demand["process emission from feedstock"].sum()
-        / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),
+        / 8760  
     )
 
     n.add(
@@ -1206,9 +1200,7 @@ def add_industry(n, costs):
         ],
         carrier="low-temperature heat for industry",
         p_set=industrial_demand.loc[nodes, "low-temperature heat"]
-        / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),,
+        / 8760  
     )
 
     ################################################## CARRIER = ELECTRICITY
@@ -1248,10 +1240,7 @@ def add_industry(n, costs):
         suffix=" industry electricity",
         bus=nodes,
         carrier="industry electricity",
-        p_set=industrial_elec  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),
-        ,  # TODO Multiply by demand and find true fraction
+        p_set=industrial_elec,
     )
 
     n.add("Bus", "process emissions", location="Africa", carrier="process emissions")
@@ -1268,9 +1257,7 @@ def add_industry(n, costs):
             #    industrial_demand["process emission from feedstock"]+
             industrial_demand["process emission"]
         )
-        / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it),,
+        / 8760 
     )
 
     n.add(
@@ -1464,9 +1451,7 @@ def add_land_transport(n, costs):
             ice_share
             / ice_efficiency
             * transport[nodes].sum().sum()
-            / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-            # the current way leads to inaccuracies in the last timestep in case
-            # the timestep if 8760 is not divisble by it),
+            / 8760 
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -1707,7 +1692,6 @@ def add_heat(n, costs):
                 "Link",
                 nodes[name] + f" {name} gas boiler",
                 p_nom_extendable=True,
-                # bus0="Africa gas",
                 bus0=spatial.gas.nodes,
                 bus1=nodes[name] + f" {name} heat",
                 bus2="co2 atmosphere",
@@ -1738,7 +1722,6 @@ def add_heat(n, costs):
             n.madd(
                 "Link",
                 nodes[name] + " urban central gas CHP",
-                # bus0="Africa gas",
                 bus0=spatial.gas.nodes,
                 bus1=nodes[name],
                 bus2=nodes[name] + " urban central heat",
@@ -1898,9 +1881,7 @@ def add_services(n, costs):
     )
     co2 = (
         p_set_biomass.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
-    ) / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-    # the current way leads to inaccuracies in the last timestep in case
-    # the timestep if 8760 is not divisble by it
+    ) / 8760  
 
     n.add(
         "Load",
@@ -1933,9 +1914,7 @@ def add_agriculture(n, costs):
         nodal_energy_totals.loc[nodes, "agriculture oil"]
         * 1e6
         * costs.at["oil", "CO2 intensity"]
-    )  # / 8760 #*n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-    # the current way leads to inaccuracies in the last timestep in case
-    # the timestep if 8760 is not divisble by it
+    )  
 
     n.add(
         "Load",
@@ -2027,9 +2006,7 @@ def add_residential(n, costs):
         )
         co2 = (
             p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]
-        ) / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it
+        ) / 8760 
 
         n.add(
             "Load",
@@ -2049,9 +2026,7 @@ def add_residential(n, costs):
 
         co2 = (
             p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
-        ) / 8760  # *n.snapshot_weightings.objective[0] #TODO change the way pset is sampled here
-        # the current way leads to inaccuracies in the last timestep in case
-        # the timestep if 8760 is not divisble by it
+        ) / 8760  
 
         n.add(
             "Load",
