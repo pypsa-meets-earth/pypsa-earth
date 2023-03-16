@@ -81,7 +81,6 @@ rule prepare_sector_network:
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
-
         nodal_energy_totals="resources/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         transport="resources/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         avail_profile="resources/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -169,13 +168,11 @@ rule prepare_transport_data:
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
         temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
     output:
-
         # nodal_energy_totals="resources/nodal_energy_totals_s{simpl}_{clusters}.csv",
         transport="resources/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         avail_profile="resources/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         dsm_profile="resources/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         nodal_transport_data="resources/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-
     script:
         "scripts/prepare_transport_data.py"
 
@@ -509,7 +506,7 @@ rule clean:
 if config["custom_data"].get("industry_demand", False) == True:
 
     rule build_industrial_distribution_key:  #custom data
-        input:        
+        input:
             regions_onshore=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
