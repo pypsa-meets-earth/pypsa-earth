@@ -1,0 +1,9 @@
+,Industry Steel Primary Blast Furnace Open Hearth Furnace,Industry Steel Primary Blast Furnace Basic Oxygen Furnace,Industry Steel Primary DRI,Industry Steel Secondary EAF,Industry Steel Casting Rolling Finishing,Industry Steel Other,Industry Chemical Ammonia SMR,Industry Chemical Ammonia Other conventional,Industry Chemical Ammonia Renewable,Industry Chemical HVC Naphtha,Industry Chemical HVC LPG,Industry Chemical HVC Methanol,Industry Chemical Other,Industry NMM Cement,Industry NMM Other,Industry Food and tobacco,Industry Construction,Industry Mining,Industry Non ferrous metals Aluminium Primary,Industry Non ferrous metals Aluminium Secondary,Industry Non ferrous metals Other,Industry Paper and pulp Pulp Primary,Industry Paper and pulp Pulp Secondary,Industry Paper and pulp Paper,Industry Paper and pulp Other,Industry Transport equipment,Industry Textiles and leather,Industry Wood,Industry Miscellaneous
+oil,0,0,0,0.16,0,2,0,3.52,0,4.55,5.2,0,310143,1.18,17968,1600257,541532,3220424,5.57,2.07,600620,0.58,0.12,0.78,1366,38486,346145,0,204340
+gas,0,0,0,0,0,0,2.63,0,0,0,0,0,0,0.02,49910,0,0,0,0,0,0,1.85,0,0.07,3375,27490,0,0,0
+electricity,0.27,0.23,0.51,0.57,0,0,0.23,1.17,1.8,0.29,0.34,0.97,1329186,0.33,79856,2046841,370279,3252954,16.7,0.7,1449772,1.65,0.37,1.31,3214,206173,862283,35612,255426
+coal,4.15,3.45,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+heat,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+biomass,0,0,0,0,0,0,0,0,0,0,0,0,97474,0.1,49910,37215,9257,0,0,0,0,0,0,0,0,0,11086,1874,0
+hydrogen,1.1,0.92,2.35,0,0,0,0,0,0,0.05,0.06,0,35445,0.02,1996,37215,4628,32530,0,0.03,20711,0.04,0,0.02,80,2749,12318,0,4644
+process emission,0.216388525,0.216388525,0.027663169349199,0.027663169349199,0,0,0,0,0,0.024489586623069,0.024489586623069,0.024489586623069,6.86721429642211E-05,0.542433217279835,0.031681531903839,0,0,0,1.49134585796386,0,0.169966661912688,0,0,0,0,0,0,0,0

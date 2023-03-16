@@ -64,7 +64,6 @@ def calculate_nodal_cfs(n, label, nodal_cfs):
 
 
 def calculate_cfs(n, label, cfs):
-
     for c in n.iterate_components(
         n.branch_components
         | n.controllable_one_port_components ^ {"Load", "StorageUnit"}
@@ -138,7 +137,6 @@ def calculate_nodal_costs(n, label, nodal_costs):
 
 
 def calculate_costs(n, label, costs):
-
     for c in n.iterate_components(
         n.branch_components | n.controllable_one_port_components ^ {"Load"}
     ):
@@ -241,7 +239,6 @@ def calculate_nodal_capacities(n, label, nodal_capacities):
 
 
 def calculate_capacities(n, label, capacities):
-
     for c in n.iterate_components(
         n.branch_components | n.controllable_one_port_components ^ {"Load"}
     ):
@@ -260,7 +257,6 @@ def calculate_capacities(n, label, capacities):
 
 
 def calculate_curtailment(n, label, curtailment):
-
     avail = (
         n.generators_t.p_max_pu.multiply(n.generators.p_nom_opt)
         .sum()
@@ -275,9 +271,7 @@ def calculate_curtailment(n, label, curtailment):
 
 
 def calculate_energy(n, label, energy):
-
     for c in n.iterate_components(n.one_port_components | n.branch_components):
-
         if c.name in n.one_port_components:
             c_energies = (
                 c.pnl.p.multiply(n.snapshot_weightings.generators, axis=0)
@@ -320,7 +314,6 @@ def calculate_supply(n, label, supply):
         bus_map.at[""] = False
 
         for c in n.iterate_components(n.one_port_components):
-
             items = c.df.index[c.df.bus.map(bus_map).fillna(False)]
 
             if len(items) == 0:
@@ -340,11 +333,10 @@ def calculate_supply(n, label, supply):
             supply.loc[s.index, label] = s
 
         for c in n.iterate_components(n.branch_components):
-
             for end in [col[3:] for col in c.df.columns if col[:3] == "bus"]:
                 print(c.name, end)
                 items = c.df.index[
-                    c.df["bus" + end].map(bus_map, na_action=False)
+                    c.df["bus" + end].map(bus_map, na_action=None)
                 ]  # .fillna(False)]
 
                 if len(items) == 0:
@@ -374,7 +366,6 @@ def calculate_supply_energy(n, label, supply_energy):
         bus_map.at[""] = False
 
         for c in n.iterate_components(n.one_port_components):
-
             items = c.df.index[c.df.bus.map(bus_map).fillna(False)]
 
             if len(items) == 0:
@@ -395,10 +386,8 @@ def calculate_supply_energy(n, label, supply_energy):
             supply_energy.loc[s.index, label] = s
 
         for c in n.iterate_components(n.branch_components):
-
             for end in [col[3:] for col in c.df.columns if col[:3] == "bus"]:
-
-                items = c.df.index[c.df["bus" + str(end)].map(bus_map, na_action=False)]
+                items = c.df.index[c.df["bus" + str(end)].map(bus_map, na_action=None)]
 
                 if len(items) == 0:
                     continue
@@ -420,7 +409,6 @@ def calculate_supply_energy(n, label, supply_energy):
 
 
 def calculate_metrics(n, label, metrics):
-
     metrics_list = [
         "line_volume",
         "line_volume_limit",
@@ -451,7 +439,6 @@ def calculate_metrics(n, label, metrics):
 
 
 def calculate_prices(n, label, prices):
-
     prices = prices.reindex(prices.index.union(n.buses.carrier.unique()))
 
     # WARNING: this is time-averaged, see weighted_prices for load-weighted average
@@ -493,7 +480,6 @@ def calculate_weighted_prices(n, label, weighted_prices):
     }
 
     for carrier in link_loads:
-
         if carrier == "electricity":
             suffix = ""
         elif carrier[:5] == "space":
@@ -508,15 +494,15 @@ def calculate_weighted_prices(n, label, weighted_prices):
 
         if carrier in ["H2", "gas"]:
             load = pd.DataFrame(index=n.snapshots, columns=buses, data=0.0)
-        elif carrier[:5] == "space":
-            load = heat_demand_df[buses.str[:2]].rename(
-                columns=lambda i: str(i) + suffix
-            )
+        # elif carrier[:5] == "space":
+        #     load = heat_demand_df[buses.str[:2]].rename( # TODO heat demand df not defined
+
+        #         columns=lambda i: str(i) + suffix
+        #     )
         else:
             load = n.loads_t.p_set[buses]
 
         for tech in link_loads[carrier]:
-
             names = n.links.index[n.links.index.to_series().str[-len(tech) :] == tech]
 
             if names.empty:
@@ -598,7 +584,6 @@ def calculate_market_values(n, label, market_values):
 
 
 def calculate_price_statistics(n, label, price_statistics):
-
     price_statistics = price_statistics.reindex(
         price_statistics.index.union(
             pd.Index(["zero_hours", "mean", "standard_deviation"])
@@ -629,7 +614,6 @@ def calculate_price_statistics(n, label, price_statistics):
 
 
 def make_summaries(networks_dict):
-
     outputs = [
         "nodal_costs",
         "nodal_capacities",
@@ -649,7 +633,16 @@ def make_summaries(networks_dict):
     ]
 
     columns = pd.MultiIndex.from_tuples(
-        networks_dict.keys(), names=["cluster", "ll", "opt", "planning_horizon"]
+        networks_dict.keys(),
+        names=[
+            "cluster",
+            "ll",
+            "opt",
+            "planning_horizon",
+            "discount_rate",
+            "demand",
+            "export",
+        ],
     )
 
     df = {}
@@ -661,7 +654,7 @@ def make_summaries(networks_dict):
         print(label, filename)
 
         overrides = override_component_attrs(snakemake.input.overrides)
-        n = pypsa.Network("../" + filename, override_component_attrs=overrides)
+        n = pypsa.Network(filename, override_component_attrs=overrides)
 
         assign_carriers(n)
         assign_locations(n)
@@ -693,17 +686,26 @@ if __name__ == "__main__":
 
     networks_dict = {
         # (cluster, lv, opt+sector_opt, planning_horizon) :
-        (cluster, ll, opt + "-" + sopt, planning_horizon): snakemake.config[
-            "results_dir"
-        ]
+        (
+            cluster,
+            ll,
+            opt + "-" + sopt,
+            planning_horizon,
+            discountrate,
+            demand,
+            export,
+        ): snakemake.config["results_dir"]
         + snakemake.config["run"]
-        + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
+        + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}_{discountrate}_{demand}_{export}export.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
         for simpl in snakemake.config["scenario"]["simpl"]
         for cluster in snakemake.config["scenario"]["clusters"]
         for ll in snakemake.config["scenario"]["ll"]
         for opt in snakemake.config["scenario"]["opts"]
         for sopt in snakemake.config["scenario"]["sopts"]
         for planning_horizon in snakemake.config["scenario"]["planning_horizons"]
+        for discountrate in snakemake.config["costs"]["discountrate"]
+        for demand in snakemake.config["scenario"]["demand"]
+        for export in snakemake.config["export"]["h2export"]
     }
 
     print(networks_dict)
@@ -713,7 +715,7 @@ if __name__ == "__main__":
     costs_db = prepare_costs(
         snakemake.input.costs,
         snakemake.config["costs"]["USD2013_to_EUR2013"],
-        snakemake.config["costs"]["discountrate"],
+        snakemake.config["costs"]["discountrate"][0],
         Nyears,
         snakemake.config["costs"]["lifetime"],
     )

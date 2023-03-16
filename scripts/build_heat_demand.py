@@ -10,7 +10,6 @@ import pandas as pd
 import xarray as xr
 
 if __name__ == "__main__":
-
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
 
@@ -32,7 +31,6 @@ if __name__ == "__main__":
     I = cutout.indicatormatrix(clustered_regions)
 
     for area in ["rural", "urban", "total"]:
-
         pop_layout = xr.open_dataarray(snakemake.input[f"pop_layout_{area}"])
 
         stacked_pop = pop_layout.stack(spatial=("y", "x"))

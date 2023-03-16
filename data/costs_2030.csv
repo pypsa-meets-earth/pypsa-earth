@@ -1,14 +1,32 @@
 technology,parameter,value,unit,source,further description
-Ammonia cracker,FOM,3.0,%/year,-,
-Ammonia cracker,investment,1400083.71,EUR/MW_H2,ENGIE et al (2020): Ammonia to Green Hydrogen Feasibility Study (https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/880826/HS420_-_Ecuity_-_Ammonia_to_Green_Hydrogen.pdf).,
-Ammonia cracker,lifetime,30.0,years,-,
-CCGT,FOM,3.35,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Fixed O&M"
-CCGT,VOM,4.2,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Variable O&M"
-CCGT,c_b,2.0,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Cb coefficient"
-CCGT,c_v,0.15,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Cv coefficient"
-CCGT,efficiency,0.58,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Electricity efficiency, annual average"
-CCGT,investment,830.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Nominal investment"
-CCGT,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","05 Gas turb. CC, steam extract.:  Technical lifetime"
+Ammonia cracker,FOM,4.3,%/year,"Ishimoto et al. (2020): 10.1016/j.ijhydene.2020.09.017 , table 7.",
+Ammonia cracker,investment,1062107.74,EUR/MW_H2,"Ishimoto et al. (2020): 10.1016/j.ijhydene.2020.09.017 , table 6.",
+Ammonia cracker,lifetime,25.0,years,"Ishimoto et al. (2020): 10.1016/j.ijhydene.2020.09.017 , table 7.",
+BioSNG,C in fuel,0.34,per unit,Stoichiometric calculation,
+BioSNG,C stored,0.66,per unit,Stoichiometric calculation,
+BioSNG,CO2 stored,0.24,tCO2/MWh_th,Stoichiometric calculation,
+BioSNG,FOM,1.64,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","84 Gasif. CFB, Bio-SNG:  Fixed O&M"
+BioSNG,VOM,1.7,EUR/MWh_th,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","84 Gasif. CFB, Bio-SNG:  Variable O&M"
+BioSNG,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+BioSNG,efficiency,0.63,per unit,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","84 Gasif. CFB, Bio-SNG:  Bio SNG"
+BioSNG,investment,1600.0,EUR/kW_th,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","84 Gasif. CFB, Bio-SNG:  Specific investment"
+BioSNG,lifetime,25.0,years,TODO,"84 Gasif. CFB, Bio-SNG:  Technical lifetime"
+BtL,C in fuel,0.27,per unit,Stoichiometric calculation,
+BtL,C stored,0.73,per unit,Stoichiometric calculation,
+BtL,CO2 stored,0.27,tCO2/MWh_th,Stoichiometric calculation,
+BtL,FOM,2.67,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","85 Gasif. Ent. Flow FT, liq fu :  Fixed O&M"
+BtL,VOM,1.06,EUR/MWh_FT,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","85 Gasif. Ent. Flow FT, liq fu :  Variable O&M"
+BtL,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+BtL,efficiency,0.38,per unit,doi:10.1016/j.enpol.2017.05.013,
+BtL,investment,3000.0,EUR/kW_th,doi:10.1016/j.enpol.2017.05.013,"85 Gasif. Ent. Flow FT, liq fu :  Specific investment"
+BtL,lifetime,25.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","85 Gasif. Ent. Flow FT, liq fu :  Technical lifetime"
+CCGT,FOM,3.35,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Fixed O&M"
+CCGT,VOM,4.2,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Variable O&M"
+CCGT,c_b,2.0,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Cb coefficient"
+CCGT,c_v,0.15,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Cv coefficient"
+CCGT,efficiency,0.58,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Electricity efficiency, annual average"
+CCGT,investment,830.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Nominal investment"
+CCGT,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","05 Gas turb. CC, steam extract.:  Technical lifetime"
 CH4 (g) fill compressor station,FOM,1.7,%/year,Assume same as for H2 (g) fill compressor station.,
 CH4 (g) fill compressor station,investment,1498.95,EUR/MW_CH4,"Guesstimate, based on H2 (g) pipeline and fill compressor station cost.",
 CH4 (g) fill compressor station,lifetime,20.0,years,Assume same as for H2 (g) fill compressor station.,
@@ -22,11 +40,11 @@ CH4 (l) transport ship,FOM,3.5,%/year,"Fasihi et al 2017, table 1, https://www.m
 CH4 (l) transport ship,capacity,58300.0,t_CH4,"Calculated, based on Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
 CH4 (l) transport ship,investment,151000000.0,EUR,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
 CH4 (l) transport ship,lifetime,25.0,years,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
-CH4 evaporation,FOM,3.5,%/year,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
-CH4 evaporation,investment,0.28,EUR/kW_CH4,"Calculated, based on Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
+CH4 evaporation,FOM,3.5,%/year,"Lochner and Bothe (2009): https://doi.org/10.1016/j.enpol.2008.12.012 and Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
+CH4 evaporation,investment,87.6,EUR/kW_CH4,"Calculated, based on Lochner and Bothe (2009): https://doi.org/10.1016/j.enpol.2008.12.012 and Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
 CH4 evaporation,lifetime,30.0,years,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
 CH4 liquefaction,FOM,3.5,%/year,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
-CH4 liquefaction,investment,0.74,EUR/kW_CH4,"Calculated, based on Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
+CH4 liquefaction,investment,232.13,EUR/kW_CH4,"Calculated, based on Lochner and Bothe (2009): https://doi.org/10.1016/j.enpol.2008.12.012 and Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
 CH4 liquefaction,lifetime,25.0,years,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
 CO2 liquefaction,FOM,5.0,%/year,Mitsubish Heavy Industries Ltd. and IEA (2004): https://ieaghg.org/docs/General_Docs/Reports/PH4-30%20Ship%20Transport.pdf .,
 CO2 liquefaction,investment,16.03,EUR/t_CO2/h,Mitsubish Heavy Industries Ltd. and IEA (2004): https://ieaghg.org/docs/General_Docs/Reports/PH4-30%20Ship%20Transport.pdf .,
@@ -43,11 +61,11 @@ FT fuel transport ship,FOM,5.0,%/year,"Assume comparable tanker as for LOHC tran
 FT fuel transport ship,capacity,75000.0,t_FTfuel,"Assume comparable tanker as for LOHC transport above, c.f. Runge et al 2020, Table 10, https://papers.ssrn.com/abstract=3623514 .",
 FT fuel transport ship,investment,31700578.34,EUR,"Assume comparable tanker as for LOHC transport above, c.f. Runge et al 2020, Table 10, https://papers.ssrn.com/abstract=3623514 .",
 FT fuel transport ship,lifetime,15.0,years,"Assume comparable tanker as for LOHC transport above, c.f. Runge et al 2020, Table 10, https://papers.ssrn.com/abstract=3623514 .",
-Fischer-Tropsch,FOM,3.0,%/year,doi:10.3390/su9020306, from old pypsa cost assumptions
-Fischer-Tropsch,VOM,4.2,EUR/MWh_FT,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",102 Hydrogen to Jet:  Variable O&M
-Fischer-Tropsch,efficiency,0.7,per unit,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","102 Hydrogen to Jet:  FT Liquids Output, MWh/MWh Total Input"
-Fischer-Tropsch,investment,1600.0,EUR/kW_FT/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",102 Hydrogen to Jet:  Specific investment
-Fischer-Tropsch,lifetime,25.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",102 Hydrogen to Jet:  Technical lifetime
+Fischer-Tropsch,FOM,3.0,%/year,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), section 6.3.2.1.",
+Fischer-Tropsch,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+Fischer-Tropsch,efficiency,0.8,per unit,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), section 6.3.2.2.",
+Fischer-Tropsch,investment,650711.26,EUR/MW_FT,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), table 8: “Reference scenario”.",
+Fischer-Tropsch,lifetime,20.0,years,"Danish Energy Agency, Technology Data for Renewable Fuels (04/2022), Data sheet “Methanol to Power”.",
 Gasnetz,FOM,2.5,%,"WEGE ZU EINEM KLIMANEUTRALEN ENERGIESYSEM, Anhang zur Studie, Fraunhofer-Institut für Solare Energiesysteme ISE, Freiburg",Gasnetz
 Gasnetz,investment,28.0,EUR/kWGas,"WEGE ZU EINEM KLIMANEUTRALEN ENERGIESYSEM, Anhang zur Studie, Fraunhofer-Institut für Solare Energiesysteme ISE, Freiburg",Gasnetz
 Gasnetz,lifetime,30.0,years,"WEGE ZU EINEM KLIMANEUTRALEN ENERGIESYSEM, Anhang zur Studie, Fraunhofer-Institut für Solare Energiesysteme ISE, Freiburg",Gasnetz
@@ -61,13 +79,13 @@ H2 (g) fill compressor station,FOM,1.7,%/year,"Guidehouse 2020: European Hydroge
 H2 (g) fill compressor station,investment,4478.0,EUR/MW_H2,"Danish Energy Agency, Technology Data for Energy Transport (2021), pg. 164, Figure 14 (Fill compressor).",
 H2 (g) fill compressor station,lifetime,20.0,years,"Danish Energy Agency, Technology Data for Energy Transport (2021), pg. 168, Figure 24 (Fill compressor).",
 H2 (g) pipeline,FOM,3.17,%/year,"Danish Energy Agency, Technology Data for Energy Transport (2021), Excel datasheet: H2 140.",
-H2 (g) pipeline,investment,236.0,EUR/MW/km,"Danish Energy Agency, Technology Data for Energy Transport (2021), Excel datasheet: H2 140.",
+H2 (g) pipeline,investment,226.47,EUR/MW/km,European Hydrogen Backbone Report (June 2021): https://gasforclimate2050.eu/wp-content/uploads/2021/06/EHB_Analysing-the-future-demand-supply-and-transport-of-hydrogen_June-2021.pdf.,
 H2 (g) pipeline,lifetime,50.0,years,"Danish Energy Agency, Technology Data for Energy Transport (2021), Excel datasheet: H2 140.",
 H2 (g) pipeline repurposed,FOM,3.17,%/year,"Danish Energy Agency, Technology Data for Energy Transport (2021), Excel datasheet: H2 140.",
-H2 (g) pipeline repurposed,investment,42.9,EUR/MW/km,"Danish Energy Agency, Technology Data for Energy Transport (2021), Excel datasheet: H2 140; European Hydrogen Backbone, Analysing future demand, supply, and transport of hydrogen (June 2021): https://gasforclimate2050.eu/wp-content/uploads/2021/06/EHB_Analysing-the-future-demand-supply-and-transport-of-hydrogen_June-2021.pdf.",
+H2 (g) pipeline repurposed,investment,105.88,EUR/MW/km,European Hydrogen Backbone Report (June 2021): https://gasforclimate2050.eu/wp-content/uploads/2021/06/EHB_Analysing-the-future-demand-supply-and-transport-of-hydrogen_June-2021.pdf.,
 H2 (g) pipeline repurposed,lifetime,50.0,years,"Danish Energy Agency, Technology Data for Energy Transport (2021), Excel datasheet: H2 140.",
 H2 (g) submarine pipeline,FOM,3.0,%/year,Assume same as for CH4 (g) submarine pipeline.,
-H2 (g) submarine pipeline,investment,310.88,EUR/MW/km,"Assume similar cost as for CH4 (g) submarine pipeline but with the same factor as between onland CH4 (g) pipeline and H2 (g) pipeline (2.7). This estimate is comparable to a 36in diameter pipeline calaculated based on d’Amore-Domenech et al (2021): 10.1016/j.apenergy.2021.116625 , supplementary material (=251 EUR/MW/km).",
+H2 (g) submarine pipeline,investment,329.37,EUR/MW/km,"Assume similar cost as for CH4 (g) submarine pipeline but with the same factor as between onland CH4 (g) pipeline and H2 (g) pipeline (2.86). This estimate is comparable to a 36in diameter pipeline calaculated based on d’Amore-Domenech et al (2021): 10.1016/j.apenergy.2021.116625 , supplementary material (=251 EUR/MW/km).",
 H2 (g) submarine pipeline,lifetime,30.0,years,Assume same as for CH4 (g) submarine pipeline.,
 H2 (l) storage tank,FOM,2.0,%/year,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 6.",
 H2 (l) storage tank,investment,750.08,EUR/MWh_H2,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 6.",
@@ -76,41 +94,45 @@ H2 (l) transport ship,FOM,4.0,%/year,"Cihlar et al 2020: http://op.europa.eu/en/
 H2 (l) transport ship,capacity,11000.0,t_H2,"Cihlar et al 2020: http://op.europa.eu/en/publication-detail/-/publication/7e4afa7d-d077-11ea-adf7-01aa75ed71a1/language-en , Table 3-B, based on IEA 2019.",
 H2 (l) transport ship,investment,361223561.58,EUR,"Cihlar et al 2020: http://op.europa.eu/en/publication-detail/-/publication/7e4afa7d-d077-11ea-adf7-01aa75ed71a1/language-en , Table 3-B, based on IEA 2019.",
 H2 (l) transport ship,lifetime,20.0,years,"Cihlar et al 2020: http://op.europa.eu/en/publication-detail/-/publication/7e4afa7d-d077-11ea-adf7-01aa75ed71a1/language-en , Table 3-B, based on IEA 2019.",
-H2 evaporation,FOM,3.0,%/year,"Reuß et al 2017: https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9 and equation in sec 3.0.",
-H2 evaporation,investment,4320.43,EUR/MW_H2,"Reuß et al 2017: https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9 and equation in sec 3.0.",
-H2 evaporation,lifetime,10.0,years,"Reuß et al 2017: https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9 and equation in sec 3.0.",
-H2 liquefaction,FOM,8.0,%/year,"Reuß et al 2017: https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9 and equation in sec 3.0.",
-H2 liquefaction,investment,1497967.32,EUR/MW_H2,"Reuß et al 2017: https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9 and equation in sec 3.0.",
-H2 liquefaction,lifetime,20.0,years,"Reuß et al 2017: https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9 and equation in sec 3.0.",
+H2 evaporation,FOM,2.5,%/year,"DNV GL (2020): Study on the Import of Liquid Renewable Energy: Technology Cost Assessment, https://www.gie.eu/wp-content/uploads/filr/2598/DNV-GL_Study-GLE-Technologies-and-costs-analysis-on-imports-of-liquid-renewable-energy.pdf .",
+H2 evaporation,investment,143.64,EUR/kW_H2,"IRENA (2022): Global Hydrogen Trade to Meet the 1.5° Climate Goal: Technology Review of Hydrogen Carriers, https://www.irena.org/publications/2022/Apr/Global-hydrogen-trade-Part-II , pg. 62f.",
+H2 evaporation,lifetime,20.0,years,Guesstimate.,
+H2 liquefaction,FOM,2.5,%/year,"DNV GL (2020): Study on the Import of Liquid Renewable Energy: Technology Cost Assessment, https://www.gie.eu/wp-content/uploads/filr/2598/DNV-GL_Study-GLE-Technologies-and-costs-analysis-on-imports-of-liquid-renewable-energy.pdf .",
+H2 liquefaction,investment,870.56,EUR/kW_H2,"IRENA (2022): Global Hydrogen Trade to Meet the 1.5° Climate Goal: Technology Review of Hydrogen Carriers, https://www.irena.org/publications/2022/Apr/Global-hydrogen-trade-Part-II , pg. 62f.",
+H2 liquefaction,lifetime,20.0,years,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
 H2 pipeline,FOM,3.0,%/year,TODO, from old pypsa cost assumptions
 H2 pipeline,investment,267.0,EUR/MW/km,Welder et al https://doi.org/10.1016/j.energy.2018.05.059, from old pypsa cost assumptions
 H2 pipeline,lifetime,40.0,years,TODO, from old pypsa cost assumptions
-HVAC overhead,FOM,2.0,%/year,Hagspiel, from old pypsa cost assumptions
-HVAC overhead,investment,400.0,EUR/MW/km,Hagspiel, from old pypsa cost assumptions
-HVAC overhead,lifetime,40.0,years,Hagspiel, from old pypsa cost assumptions
-HVDC inverter pair,FOM,2.0,%/year,Hagspiel, from old pypsa cost assumptions
-HVDC inverter pair,investment,150000.0,EUR/MW,Hagspiel, from old pypsa cost assumptions
-HVDC inverter pair,lifetime,40.0,years,Hagspiel, from old pypsa cost assumptions
-HVDC overhead,FOM,2.0,%/year,Hagspiel, from old pypsa cost assumptions
-HVDC overhead,investment,400.0,EUR/MW/km,Hagspiel, from old pypsa cost assumptions
-HVDC overhead,lifetime,40.0,years,Hagspiel, from old pypsa cost assumptions
+HVAC overhead,FOM,2.0,%/year,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVAC overhead,investment,432.97,EUR/MW/km,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVAC overhead,lifetime,40.0,years,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVDC inverter pair,FOM,2.0,%/year,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVDC inverter pair,investment,162364.82,EUR/MW,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVDC inverter pair,lifetime,40.0,years,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVDC overhead,FOM,2.0,%/year,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVDC overhead,investment,432.97,EUR/MW/km,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
+HVDC overhead,lifetime,40.0,years,"Hagspiel et al. (2014): doi:10.1016/j.energy.2014.01.025 , table A.2 .",
 HVDC submarine,FOM,0.35,%/year,Purvins et al. (2018): https://doi.org/10.1016/j.jclepro.2018.03.095 .,
 HVDC submarine,investment,471.16,EUR/MW/km,Purvins et al. (2018): https://doi.org/10.1016/j.jclepro.2018.03.095 .,
 HVDC submarine,lifetime,40.0,years,Purvins et al. (2018): https://doi.org/10.1016/j.jclepro.2018.03.095 .,
-Haber-Bosch synthesis,FOM,4.0,%/year,"Estimate, based on methanation plant.",
-Haber-Bosch synthesis,investment,5310107.51,EUR/MW,"Calculated based on Morgan E. 2013: doi:10.7275/11KT-3F59 , Fig. 56, Fig. 58, pg. 207, pg. 210.",
-Haber-Bosch synthesis,lifetime,20.0,years,"Morgan E. 2013: doi:10.7275/11KT-3F59 , pg. 290",
+Haber-Bosch,FOM,3.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Fixed O&M
+Haber-Bosch,VOM,0.02,EUR/MWh_NH3,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Variable O&M
+Haber-Bosch,investment,1297.43,EUR/kW_NH3,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Specific investment
+Haber-Bosch,lifetime,30.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Technical lifetime
 LNG storage tank,FOM,2.0,%/year,"Guesstimate, based on H2 (l) storage tank with comparable requirements.",
 LNG storage tank,investment,611.59,EUR/m^3,"Hurskainen 2019, https://cris.vtt.fi/en/publications/liquid-organic-hydrogen-carriers-lohc-concept-evaluation-and-tech pg. 46 (59).",
 LNG storage tank,lifetime,20.0,years,"Guesstimate, based on H2 (l) storage tank with comparable requirements.",
 LOHC chemical,investment,2264.33,EUR/t,"Runge et al 2020, pg.7, https://papers.ssrn.com/abstract=3623514",
 LOHC chemical,lifetime,20.0,years,"Runge et al 2020, pg.7, https://papers.ssrn.com/abstract=3623514",
-LOHC dehydrogenation,FOM,3.0,%/year,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
-LOHC dehydrogenation,investment,759908.15,EUR/MW_H2,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
-LOHC dehydrogenation,lifetime,20.0,years,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
-LOHC hydrogenation,FOM,3.0,%/year,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
-LOHC hydrogenation,investment,46471.24,EUR/MW_H2,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
-LOHC hydrogenation,lifetime,20.0,years,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
+LOHC dehydrogenation,FOM,3.0,%/year,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
+LOHC dehydrogenation,investment,50728.03,EUR/MW_H2,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
+LOHC dehydrogenation,lifetime,20.0,years,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
+LOHC dehydrogenation (small scale),FOM,3.0,%/year,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
+LOHC dehydrogenation (small scale),investment,759908.15,EUR/MW_H2,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
+LOHC dehydrogenation (small scale),lifetime,20.0,years,"Runge et al 2020, pg.8, https://papers.ssrn.com/abstract=3623514",
+LOHC hydrogenation,FOM,3.0,%/year,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
+LOHC hydrogenation,investment,51259.54,EUR/MW_H2,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
+LOHC hydrogenation,lifetime,20.0,years,"Reuß et al 2017, https://doi.org/10.1016/j.apenergy.2017.05.050 , Table 9.",
 LOHC loaded DBT storage,FOM,6.25,%/year,,
 LOHC loaded DBT storage,investment,149.27,EUR/t,"Density via Wissenschaftliche Dienste des Deutschen Bundestages 2020, https://www.bundestag.de/resource/blob/816048/454e182d5956d45a664da9eb85486f76/WD-8-058-20-pdf-data.pdf , pg. 11.",
 LOHC loaded DBT storage,lifetime,30.0,years,,
@@ -135,36 +157,46 @@ NH3 (l) transport ship,FOM,4.0,%/year,"Cihlar et al 2020 based on IEA 2019, Tabl
 NH3 (l) transport ship,capacity,53000.0,t_NH3,"Cihlar et al 2020 based on IEA 2019, Table 3-B",
 NH3 (l) transport ship,investment,74461941.34,EUR,"Cihlar et al 2020 based on IEA 2019, Table 3-B",
 NH3 (l) transport ship,lifetime,20.0,years,"Guess estimated based on H2 (l) tanker, but more mature technology",
-OCGT,FOM,1.78,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",52 OCGT - Natural gas:  Fixed O&M
-OCGT,VOM,4.5,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",52 OCGT - Natural gas:  Variable O&M
-OCGT,efficiency,0.41,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","52 OCGT - Natural gas:  Electricity efficiency, annual average"
-OCGT,investment,435.24,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",52 OCGT - Natural gas:  Specific investment
-OCGT,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",52 OCGT - Natural gas:  Technical lifetime
+OCGT,FOM,1.78,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",52 OCGT - Natural gas:  Fixed O&M
+OCGT,VOM,4.5,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",52 OCGT - Natural gas:  Variable O&M
+OCGT,efficiency,0.41,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","52 OCGT - Natural gas:  Electricity efficiency, annual average"
+OCGT,investment,435.24,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",52 OCGT - Natural gas:  Specific investment
+OCGT,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",52 OCGT - Natural gas:  Technical lifetime
 PHS,FOM,1.0,%/year,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 PHS,efficiency,0.75,per unit,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 PHS,investment,2208.16,EUR/kWel,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 PHS,lifetime,80.0,years,IEA2010, from old pypsa cost assumptions
-SMR,FOM,5.4,%/year,https://www.gov.uk/government/publications/hydrogen-supply-chain-evidence-base; slide 42 assumption for 2030, from old pypsa cost assumptions
-SMR,efficiency,0.74,per unit,https://www.gov.uk/government/publications/hydrogen-supply-chain-evidence-base; slide 42 assumption for 2030, from old pypsa cost assumptions
-SMR,investment,540.56,EUR/kWCH4,https://www.gov.uk/government/publications/hydrogen-supply-chain-evidence-base; slide 42 assumption for 2030; GBP 466 exchange 1.16, from old pypsa cost assumptions
-SMR,lifetime,25.0,years,TODO, from old pypsa cost assumptions
-SMR CC,FOM,5.4,%/year,https://www.gov.uk/government/publications/hydrogen-supply-chain-evidence-base; slide 42 assumption for 2030, from old pypsa cost assumptions
-SMR CC,efficiency,0.67,per unit,https://www.gov.uk/government/publications/hydrogen-supply-chain-evidence-base; slide 42 assumption for 2030; CC uses 10% of gas, from old pypsa cost assumptions
-SMR CC,investment,1032.0,EUR/kWCH4,https://www.gov.uk/government/publications/hydrogen-supply-chain-evidence-base; slide 42 assumption for 2030; GBP 466 exchange 1.16; CC costed at 300 EUR/tCO2/a, from old pypsa cost assumptions
-SMR CC,lifetime,25.0,years,TODO, from old pypsa cost assumptions
+SMR,FOM,5.0,%/year,Danish Energy Agency,"Technology data for renewable fuels, in pdf on table 3 p.311"
+SMR,efficiency,0.76,per unit (in LHV),"IEA Global average levelised cost of hydrogen production by energy source and technology, 2019 and 2050 (2020), https://www.iea.org/data-and-statistics/charts/global-average-levelised-cost-of-hydrogen-production-by-energy-source-and-technology-2019-and-2050",
+SMR,investment,493470.4,EUR/MW_CH4,Danish Energy Agency,"Technology data for renewable fuels, in pdf on table 3 p.311"
+SMR,lifetime,30.0,years,"IEA Global average levelised cost of hydrogen production by energy source and technology, 2019 and 2050 (2020), https://www.iea.org/data-and-statistics/charts/global-average-levelised-cost-of-hydrogen-production-by-energy-source-and-technology-2019-and-2050",
+SMR CC,FOM,5.0,%/year,Danish Energy Agency,"Technology data for renewable fuels, in pdf on table 3 p.311"
+SMR CC,capture_rate,0.9,EUR/MW_CH4,"IEA Global average levelised cost of hydrogen production by energy source and technology, 2019 and 2050 (2020), https://www.iea.org/data-and-statistics/charts/global-average-levelised-cost-of-hydrogen-production-by-energy-source-and-technology-2019-and-2050",wide range: capture rates betwen 54%-90%
+SMR CC,efficiency,0.69,per unit (in LHV),"IEA Global average levelised cost of hydrogen production by energy source and technology, 2019 and 2050 (2020), https://www.iea.org/data-and-statistics/charts/global-average-levelised-cost-of-hydrogen-production-by-energy-source-and-technology-2019-and-2050",
+SMR CC,investment,572425.66,EUR/MW_CH4,Danish Energy Agency,"Technology data for renewable fuels, in pdf on table 3 p.311"
+SMR CC,lifetime,30.0,years,"IEA Global average levelised cost of hydrogen production by energy source and technology, 2019 and 2050 (2020), https://www.iea.org/data-and-statistics/charts/global-average-levelised-cost-of-hydrogen-production-by-energy-source-and-technology-2019-and-2050",
 Steam methane reforming,FOM,3.0,%/year,"International Energy Agency (2015): Technology Roadmap Hydrogen and Fuel Cells , table 15.",
 Steam methane reforming,investment,470085.47,EUR/MW_H2,"International Energy Agency (2015): Technology Roadmap Hydrogen and Fuel Cells , table 15.",
 Steam methane reforming,lifetime,30.0,years,"International Energy Agency (2015): Technology Roadmap Hydrogen and Fuel Cells , table 15.",
-air separation unit,FOM,4.0,%/year,"Estimate, based on methanation plant.",
-air separation unit,investment,10942205.1,EUR/MW,"Calculated based on Morgan E. 2013: doi:10.7275/11KT-3F59 , Fig. 56, Fig. 58, pg. 207, pg. 210.",
-air separation unit,lifetime,20.0,years,"Morgan E. 2013: doi:10.7275/11KT-3F59 , pg. 290",
+air separation unit,FOM,3.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Fixed O&M
+air separation unit,investment,729306.18,EUR/t_N2/h,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Specific investment
+air separation unit,lifetime,30.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",103 Hydrogen to Ammonia:  Technical lifetime
 battery inverter,FOM,0.34,%/year,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  Fixed O&M
 battery inverter,efficiency,0.96,per unit,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  Round trip efficiency DC
 battery inverter,investment,160.0,EUR/kW,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  Output capacity expansion cost investment
 battery inverter,lifetime,10.0,years,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx, Note K.",:  Technical lifetime
 battery storage,investment,142.0,EUR/kWh,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  Energy storage expansion cost investment
 battery storage,lifetime,25.0,years,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  Technical lifetime
+biogas,CO2 stored,0.09,tCO2/MWh_th,Stoichiometric calculation,
+biogas,FOM,12.84,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","81 Biogas Plant, Basic conf.:  Total O&M"
+biogas,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+biogas,efficiency,1.0,per unit,Assuming input biomass is already given in biogas output,
 biogas,fuel,59.0,EUR/MWhth,JRC and Zappa, from old pypsa cost assumptions
+biogas,investment,1539.62,EUR/kW,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","81 Biogas Plant, Basic conf.:  Specific investment"
+biogas,lifetime,20.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","81 Biogas Plant, Basic conf.:  Technical lifetime"
+biogas plus hydrogen,FOM,4.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",99 SNG from methan. of biogas:  Fixed O&M
+biogas plus hydrogen,investment,756.0,EUR/kW_CH4,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",99 SNG from methan. of biogas:  Specific investment
+biogas plus hydrogen,lifetime,25.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",99 SNG from methan. of biogas:  Technical lifetime
 biogas upgrading,FOM,2.49,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","82 Biogas, upgrading:  Fixed O&M "
 biogas upgrading,VOM,3.18,EUR/MWh input,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","82 Biogas, upgrading:  Variable O&M"
 biogas upgrading,investment,381.0,EUR/kW input,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx","82 Biogas, upgrading:  investment (upgrading, methane redution and grid injection)"
@@ -174,91 +206,95 @@ biomass,efficiency,0.47,per unit,DIW DataDoc http://hdl.handle.net/10419/80348, 
 biomass,fuel,7.0,EUR/MWhth,IEA2011b, from old pypsa cost assumptions
 biomass,investment,2209.0,EUR/kWel,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 biomass,lifetime,30.0,years,ECF2010 in DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
-biomass CHP,FOM,3.58,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Fixed O&M"
-biomass CHP,VOM,2.1,EUR/MWh_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Variable O&M "
-biomass CHP,c_b,0.46,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Cb coefficient"
-biomass CHP,c_v,1.0,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Cv coefficient"
-biomass CHP,efficiency,0.3,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Electricity efficiency, net, annual average"
-biomass CHP,efficiency-heat,0.71,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Heat efficiency, net, annual average"
-biomass CHP,investment,3210.28,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Nominal investment "
-biomass CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Technical lifetime"
-biomass CHP capture,FOM,3.0,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,capture_rate,0.9,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,compression-electricity-input,0.08,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,compression-heat-output,0.14,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,electricity-input,0.02,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,heat-input,0.72,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,heat-output,0.72,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,investment,2700000.0,EUR/(tCO2/h),"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass CHP capture,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.a Post comb - small CHP
-biomass EOP,FOM,3.58,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Fixed O&M"
-biomass EOP,VOM,2.1,EUR/MWh_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Variable O&M "
-biomass EOP,c_b,0.46,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Cb coefficient"
-biomass EOP,c_v,1.0,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Cv coefficient"
-biomass EOP,efficiency,0.3,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Electricity efficiency, net, annual average"
-biomass EOP,efficiency-heat,0.71,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Heat efficiency, net, annual average"
-biomass EOP,investment,3210.28,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Nominal investment "
-biomass EOP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw, Large, 40 degree:  Technical lifetime"
-biomass HOP,FOM,5.75,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw HOP:  Fixed O&M, heat output"
-biomass HOP,VOM,2.78,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Variable O&M heat output
-biomass HOP,efficiency,1.03,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09c Straw HOP:  Total efficiency , net, annual average"
-biomass HOP,investment,832.63,EUR/kW_th - heat output,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Nominal investment
-biomass HOP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",09c Straw HOP:  Technical lifetime
-cement capture,FOM,3.0,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,capture_rate,0.9,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,compression-electricity-input,0.08,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,compression-heat-output,0.14,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,electricity-input,0.02,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,heat-input,0.72,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,heat-output,1.54,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,investment,2600000.0,EUR/(tCO2/h),"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-cement capture,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",401.c Post comb - Cement kiln
-central air-sourced heat pump,FOM,0.23,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Comp. hp, airsource 3 MW:  Fixed O&M"
-central air-sourced heat pump,VOM,2.51,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Comp. hp, airsource 3 MW:  Variable O&M"
-central air-sourced heat pump,efficiency,3.6,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Comp. hp, airsource 3 MW:  Total efficiency , net, annual average"
-central air-sourced heat pump,investment,856.25,EUR/kW_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Comp. hp, airsource 3 MW:  Specific investment"
-central air-sourced heat pump,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Comp. hp, airsource 3 MW:  Technical lifetime"
-central coal CHP,FOM,1.63,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",01 Coal CHP:  Fixed O&M
-central coal CHP,VOM,2.84,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",01 Coal CHP:  Variable O&M
-central coal CHP,c_b,1.01,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",01 Coal CHP:  Cb coefficient
-central coal CHP,c_v,0.15,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",01 Coal CHP:  Cv coefficient
-central coal CHP,efficiency,0.52,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","01 Coal CHP:  Electricity efficiency, condensation mode, net"
-central coal CHP,investment,1860.47,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",01 Coal CHP:  Nominal investment
-central coal CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",01 Coal CHP:  Technical lifetime
-central gas CHP,FOM,3.32,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","04 Gas turb. simple cycle, L:  Fixed O&M"
-central gas CHP,VOM,4.2,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","04 Gas turb. simple cycle, L:  Variable O&M"
-central gas CHP,c_b,1.0,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","04 Gas turb. simple cycle, L:  Cb coefficient"
+biomass CHP,FOM,3.58,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Fixed O&M"
+biomass CHP,VOM,2.1,EUR/MWh_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Variable O&M "
+biomass CHP,c_b,0.46,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Cb coefficient"
+biomass CHP,c_v,1.0,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Cv coefficient"
+biomass CHP,efficiency,0.3,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Electricity efficiency, net, annual average"
+biomass CHP,efficiency-heat,0.71,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Heat efficiency, net, annual average"
+biomass CHP,investment,3210.28,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Nominal investment "
+biomass CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Technical lifetime"
+biomass CHP capture,FOM,3.0,%/year,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,capture_rate,0.9,per unit,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,compression-electricity-input,0.08,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,compression-heat-output,0.14,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,electricity-input,0.02,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,heat-input,0.72,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,heat-output,0.72,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,investment,2700000.0,EUR/(tCO2/h),"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass CHP capture,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.a Post comb - small CHP
+biomass EOP,FOM,3.58,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Fixed O&M"
+biomass EOP,VOM,2.1,EUR/MWh_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Variable O&M "
+biomass EOP,c_b,0.46,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Cb coefficient"
+biomass EOP,c_v,1.0,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Cv coefficient"
+biomass EOP,efficiency,0.3,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Electricity efficiency, net, annual average"
+biomass EOP,efficiency-heat,0.71,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Heat efficiency, net, annual average"
+biomass EOP,investment,3210.28,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Nominal investment "
+biomass EOP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw, Large, 40 degree:  Technical lifetime"
+biomass HOP,FOM,5.75,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw HOP:  Fixed O&M, heat output"
+biomass HOP,VOM,2.78,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",09c Straw HOP:  Variable O&M heat output
+biomass HOP,efficiency,1.03,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09c Straw HOP:  Total efficiency , net, annual average"
+biomass HOP,investment,832.63,EUR/kW_th - heat output,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",09c Straw HOP:  Nominal investment 
+biomass HOP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",09c Straw HOP:  Technical lifetime
+biomass boiler,FOM,7.49,%/year,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx","204 Biomass boiler, automatic:  Fixed O&M"
+biomass boiler,efficiency,0.86,per unit,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx","204 Biomass boiler, automatic:  Heat efficiency, annual average, net"
+biomass boiler,investment,649.3,EUR/kW_th,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx","204 Biomass boiler, automatic:  Specific investment"
+biomass boiler,lifetime,20.0,years,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx","204 Biomass boiler, automatic:  Technical lifetime"
+cement capture,FOM,3.0,%/year,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,capture_rate,0.9,per unit,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,compression-electricity-input,0.08,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,compression-heat-output,0.14,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,electricity-input,0.02,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,heat-input,0.72,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,heat-output,1.54,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,investment,2600000.0,EUR/(tCO2/h),"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+cement capture,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",401.c Post comb - Cement kiln
+central air-sourced heat pump,FOM,0.23,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Comp. hp, airsource 3 MW:  Fixed O&M"
+central air-sourced heat pump,VOM,2.51,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Comp. hp, airsource 3 MW:  Variable O&M"
+central air-sourced heat pump,efficiency,3.6,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Comp. hp, airsource 3 MW:  Total efficiency , net, annual average"
+central air-sourced heat pump,investment,856.25,EUR/kW_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Comp. hp, airsource 3 MW:  Specific investment"
+central air-sourced heat pump,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Comp. hp, airsource 3 MW:  Technical lifetime"
+central coal CHP,FOM,1.63,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",01 Coal CHP:  Fixed O&M
+central coal CHP,VOM,2.84,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",01 Coal CHP:  Variable O&M
+central coal CHP,c_b,1.01,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",01 Coal CHP:  Cb coefficient
+central coal CHP,c_v,0.15,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",01 Coal CHP:  Cv coefficient
+central coal CHP,efficiency,0.52,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","01 Coal CHP:  Electricity efficiency, condensation mode, net"
+central coal CHP,investment,1860.47,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",01 Coal CHP:  Nominal investment
+central coal CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",01 Coal CHP:  Technical lifetime
+central gas CHP,FOM,3.32,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","04 Gas turb. simple cycle, L:  Fixed O&M"
+central gas CHP,VOM,4.2,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","04 Gas turb. simple cycle, L:  Variable O&M"
+central gas CHP,c_b,1.0,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","04 Gas turb. simple cycle, L:  Cb coefficient"
 central gas CHP,c_v,0.17,per unit,DEA (loss of fuel for additional heat), from old pypsa cost assumptions
-central gas CHP,efficiency,0.41,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","04 Gas turb. simple cycle, L:  Electricity efficiency, annual average"
-central gas CHP,investment,560.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","04 Gas turb. simple cycle, L:  Nominal investment"
-central gas CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","04 Gas turb. simple cycle, L:  Technical lifetime"
+central gas CHP,efficiency,0.41,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","04 Gas turb. simple cycle, L:  Electricity efficiency, annual average"
+central gas CHP,investment,560.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","04 Gas turb. simple cycle, L:  Nominal investment"
+central gas CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","04 Gas turb. simple cycle, L:  Technical lifetime"
 central gas CHP,p_nom_ratio,1.0,per unit,, from old pypsa cost assumptions
-central gas boiler,FOM,3.8,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",44 Natural Gas DH Only:  Fixed O&M
-central gas boiler,VOM,1.0,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",44 Natural Gas DH Only:  Variable O&M
-central gas boiler,efficiency,1.04,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","44 Natural Gas DH Only:  Total efficiency , net, annual average"
-central gas boiler,investment,50.0,EUR/kW_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",44 Natural Gas DH Only:  Nominal investment
-central gas boiler,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",44 Natural Gas DH Only:  Technical lifetime
-central ground-sourced heat pump,FOM,0.39,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Absorption heat pump, DH:  Fixed O&M"
-central ground-sourced heat pump,VOM,1.25,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Absorption heat pump, DH:  Variable O&M"
-central ground-sourced heat pump,efficiency,1.73,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Absorption heat pump, DH:  Total efficiency , net, annual average"
-central ground-sourced heat pump,investment,507.6,EUR/kW_th excluding drive energy,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Absorption heat pump, DH:  Nominal investment"
-central ground-sourced heat pump,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","40 Absorption heat pump, DH:  Technical lifetime"
-central resistive heater,FOM,1.7,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",41 Electric Boilers:  Fixed O&M
-central resistive heater,VOM,1.0,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",41 Electric Boilers:  Variable O&M
-central resistive heater,efficiency,0.99,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","41 Electric Boilers:  Total efficiency , net, annual average"
-central resistive heater,investment,60.0,EUR/kW_th,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",41 Electric Boilers:  Nominal investment; 10/15 kV; >10 MW
-central resistive heater,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",41 Electric Boilers:  Technical lifetime
+central gas boiler,FOM,3.8,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",44 Natural Gas DH Only:  Fixed O&M
+central gas boiler,VOM,1.0,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",44 Natural Gas DH Only:  Variable O&M
+central gas boiler,efficiency,1.04,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","44 Natural Gas DH Only:  Total efficiency , net, annual average"
+central gas boiler,investment,50.0,EUR/kW_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",44 Natural Gas DH Only:  Nominal investment
+central gas boiler,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",44 Natural Gas DH Only:  Technical lifetime
+central ground-sourced heat pump,FOM,0.39,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Absorption heat pump, DH:  Fixed O&M"
+central ground-sourced heat pump,VOM,1.25,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Absorption heat pump, DH:  Variable O&M"
+central ground-sourced heat pump,efficiency,1.73,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Absorption heat pump, DH:  Total efficiency , net, annual average"
+central ground-sourced heat pump,investment,507.6,EUR/kW_th excluding drive energy,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Absorption heat pump, DH:  Nominal investment"
+central ground-sourced heat pump,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","40 Absorption heat pump, DH:  Technical lifetime"
+central resistive heater,FOM,1.7,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",41 Electric Boilers:  Fixed O&M
+central resistive heater,VOM,1.0,EUR/MWh_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",41 Electric Boilers:  Variable O&M
+central resistive heater,efficiency,0.99,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","41 Electric Boilers:  Total efficiency , net, annual average"
+central resistive heater,investment,60.0,EUR/kW_th,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",41 Electric Boilers:  Nominal investment; 10/15 kV; >10 MW
+central resistive heater,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",41 Electric Boilers:  Technical lifetime
 central solar thermal,FOM,1.4,%/year,HP, from old pypsa cost assumptions
 central solar thermal,investment,140000.0,EUR/1000m2,HP, from old pypsa cost assumptions
 central solar thermal,lifetime,20.0,years,HP, from old pypsa cost assumptions
-central solid biomass CHP,FOM,4.1,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Fixed O&M"
-central solid biomass CHP,VOM,1.85,EUR/MWh_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Variable O&M "
-central solid biomass CHP,c_b,0.46,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Cb coefficient"
-central solid biomass CHP,c_v,1.0,40°C/80°C,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Cv coefficient"
-central solid biomass CHP,efficiency,0.29,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Electricity efficiency, net, annual average"
-central solid biomass CHP,efficiency-heat,0.69,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Heat efficiency, net, annual average"
-central solid biomass CHP,investment,2851.41,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Nominal investment "
-central solid biomass CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","09b Wood Pellets, Medium:  Technical lifetime"
+central solid biomass CHP,FOM,2.87,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Fixed O&M"
+central solid biomass CHP,VOM,4.58,EUR/MWh_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Variable O&M "
+central solid biomass CHP,c_b,0.35,50°C/100°C,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Cb coefficient"
+central solid biomass CHP,c_v,1.0,50°C/100°C,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Cv coefficient"
+central solid biomass CHP,efficiency,0.27,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Electricity efficiency, net, annual average"
+central solid biomass CHP,efficiency-heat,0.82,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Heat efficiency, net, annual average"
+central solid biomass CHP,investment,3349.49,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Nominal investment "
+central solid biomass CHP,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","09a Wood Chips, Large 50 degree:  Technical lifetime"
 central solid biomass CHP,p_nom_ratio,1.0,per unit,, from old pypsa cost assumptions
 central water tank storage,FOM,0.55,%/year,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",140 PTES seasonal:  Fixed O&M
 central water tank storage,investment,0.54,EUR/kWhCapacity,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",140 PTES seasonal:  Specific investment
@@ -273,6 +309,15 @@ coal,efficiency,0.33,per unit,Lazard s Levelized Cost of Energy Analysis - Versi
 coal,fuel,8.15,EUR/MWh_th,BP 2019,
 coal,investment,3845.51,EUR/kW_e,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
 coal,lifetime,40.0,years,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
+csp-tower,FOM,1.1,%/year,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power),
+csp-tower,investment,98.15,"EUR/kW_th,dp",ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).,
+csp-tower,lifetime,30.0,years,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power),
+csp-tower TES,FOM,1.1,%/year,see solar-tower.,
+csp-tower TES,investment,13.15,EUR/kWh_th,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).,
+csp-tower TES,lifetime,30.0,years,see solar-tower.,
+csp-tower power block,FOM,1.1,%/year,see solar-tower.,
+csp-tower power block,investment,687.6,EUR/kW_e,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).,
+csp-tower power block,lifetime,30.0,years,see solar-tower.,
 decentral CHP,FOM,3.0,%/year,HP, from old pypsa cost assumptions
 decentral CHP,discount rate,0.04,per unit,Palzer thesis, from old pypsa cost assumptions
 decentral CHP,investment,1400.0,EUR/kWel,HP, from old pypsa cost assumptions
@@ -311,31 +356,46 @@ decentral water tank storage,FOM,1.0,%/year,HP, from old pypsa cost assumptions
 decentral water tank storage,discount rate,0.04,per unit,Palzer thesis, from old pypsa cost assumptions
 decentral water tank storage,investment,18.38,EUR/kWh,IWES Interaktion, from old pypsa cost assumptions
 decentral water tank storage,lifetime,20.0,years,HP, from old pypsa cost assumptions
-direct air capture,FOM,4.95,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,compression-electricity-input,0.15,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,compression-heat-output,0.2,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,electricity-input,0.32,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,heat-input,2.0,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,heat-output,1.0,MWh/tCO2,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,investment,6000000.0,EUR/(tCO2/h),"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
-direct air capture,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",403.a Direct air capture
+digestible biomass,fuel,15.0,EUR/MWh_th,"JRC ENSPRESO ca avg for MINBIOAGRW1, ENS_Ref for 2040",
+digestible biomass to hydrogen,FOM,4.25,%/year,"Zech et.al. DBFZ Report Nr. 19. Hy-NOW - Evaluierung der Verfahren und Technologien für die Bereitstellung von Wasserstoff auf Basis von Biomasse, DBFZ, 2014",
+digestible biomass to hydrogen,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+digestible biomass to hydrogen,efficiency,0.39,per unit,"Zech et.al. DBFZ Report Nr. 19. Hy-NOW - Evaluierung der Verfahren und Technologien für die Bereitstellung von Wasserstoff auf Basis von Biomasse, DBFZ, 2014",
+digestible biomass to hydrogen,investment,2500.0,EUR/kW_th,"Zech et.al. DBFZ Report Nr. 19. Hy-NOW - Evaluierung der Verfahren und Technologien für die Bereitstellung von Wasserstoff auf Basis von Biomasse, DBFZ, 2014",
+direct air capture,FOM,4.95,%/year,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,compression-electricity-input,0.15,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,compression-heat-output,0.2,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,electricity-input,0.32,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,heat-input,2.0,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,heat-output,1.0,MWh/tCO2,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,investment,6000000.0,EUR/(tCO2/h),"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+direct air capture,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_carbon_capture_transport_storage.xlsx",403.a Direct air capture
+electric boiler steam,FOM,1.46,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",310.1 Electric boiler steam  :  Fixed O&M
+electric boiler steam,VOM,0.88,EUR/MWh,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",310.1 Electric boiler steam  :  Variable O&M
+electric boiler steam,efficiency,0.99,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx","310.1 Electric boiler steam  :  Total efficiency, net, annual average"
+electric boiler steam,investment,70.0,EUR/kW,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",310.1 Electric boiler steam  :  Nominal investment
+electric boiler steam,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",310.1 Electric boiler steam  :  Technical lifetime
 electricity distribution grid,FOM,2.0,%/year,TODO, from old pypsa cost assumptions
 electricity distribution grid,investment,500.0,EUR/kW,TODO, from old pypsa cost assumptions
 electricity distribution grid,lifetime,40.0,years,TODO, from old pypsa cost assumptions
 electricity grid connection,FOM,2.0,%/year,TODO, from old pypsa cost assumptions
 electricity grid connection,investment,140.0,EUR/kW,DEA, from old pypsa cost assumptions
 electricity grid connection,lifetime,40.0,years,TODO, from old pypsa cost assumptions
-electrolysis,FOM,2.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Fixed O&M
+electrolysis,FOM,2.0,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Fixed O&M 
 electrolysis,efficiency,0.68,per unit,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Hydrogen
 electrolysis,investment,450.0,EUR/kW_e,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Specific investment
 electrolysis,lifetime,30.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",86 AEC 100MW:  Technical lifetime
-fuel cell,FOM,5.0,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",12 LT-PEMFC CHP:  Fixed O&M
-fuel cell,c_b,1.25,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",12 LT-PEMFC CHP:  Cb coefficient
-fuel cell,efficiency,0.5,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","12 LT-PEMFC CHP:  Electricity efficiency, annual average"
-fuel cell,investment,1100.0,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",12 LT-PEMFC CHP:  Nominal investment
-fuel cell,lifetime,10.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",12 LT-PEMFC CHP:  Technical lifetime
-gas,CO2 intensity,0.2,tCO2/MWh_th,Entwicklung der spezifischen Kohlendioxid-Emissionen des deutschen Strommix in den Jahren 1990 - 2018,
+fuel cell,FOM,5.0,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",12 LT-PEMFC CHP:  Fixed O&M
+fuel cell,c_b,1.25,50oC/100oC,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",12 LT-PEMFC CHP:  Cb coefficient
+fuel cell,efficiency,0.5,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","12 LT-PEMFC CHP:  Electricity efficiency, annual average"
+fuel cell,investment,1100.0,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",12 LT-PEMFC CHP:  Nominal investment
+fuel cell,lifetime,10.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",12 LT-PEMFC CHP:  Technical lifetime
+gas,CO2 intensity,0.2,tCO2/MWh_th,Stoichiometric calculation with 50 GJ/t CH4,
 gas,fuel,20.1,EUR/MWh_th,BP 2019,
+gas boiler steam,FOM,4.18,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1c Steam boiler Gas:  Fixed O&M
+gas boiler steam,VOM,1.0,EUR/MWh,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1c Steam boiler Gas:  Variable O&M
+gas boiler steam,efficiency,0.93,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx","311.1c Steam boiler Gas:  Total efficiency, net, annual average"
+gas boiler steam,investment,45.45,EUR/kW,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1c Steam boiler Gas:  Nominal investment
+gas boiler steam,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1c Steam boiler Gas:  Technical lifetime
 gas storage,FOM,3.59,%,Danish Energy Agency,"150 Underground Storage of Gas, Operation and Maintenace, salt cavern (units converted)"
 gas storage,investment,0.03,EUR/kWh,Danish Energy Agency,"150 Underground Storage of Gas, Establishment of one cavern (units converted)"
 gas storage,lifetime,100.0,years,TODO no source,"estimation: most underground storage are already build, they do have a long lifetime"
@@ -369,11 +429,16 @@ hydrogen storage underground,FOM,0.0,%/year,"Danish Energy Agency, technology_da
 hydrogen storage underground,VOM,0.0,EUR/MWh,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",151c Hydrogen Storage - Caverns:  Variable O&M
 hydrogen storage underground,investment,2.0,EUR/kWh,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",151c Hydrogen Storage - Caverns:  Specific investment
 hydrogen storage underground,lifetime,100.0,years,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",151c Hydrogen Storage - Caverns:  Technical lifetime
-industrial heat pump medium temperature,FOM,0.11,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",302.a High temp. hp Up to 125 C:  Fixed O&M
-industrial heat pump medium temperature,VOM,3.2,EUR/MWh,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",302.a High temp. hp Up to 125 C:  Variable O&M
-industrial heat pump medium temperature,efficiency,2.7,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx","302.a High temp. hp Up to 125 C:  Total efficiency, net, annual average"
-industrial heat pump medium temperature,investment,778.8,EUR/kW,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",302.a High temp. hp Up to 125 C:  Nominal investment
-industrial heat pump medium temperature,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat_0002.xlsx",302.a High temp. hp Up to 125 C:  Technical lifetime
+industrial heat pump high temperature,FOM,0.09,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.b High temp. hp Up to 150:  Fixed O&M
+industrial heat pump high temperature,VOM,3.2,EUR/MWh,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.b High temp. hp Up to 150:  Variable O&M
+industrial heat pump high temperature,efficiency,3.05,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx","302.b High temp. hp Up to 150:  Total efficiency, net, annual average"
+industrial heat pump high temperature,investment,934.56,EUR/kW,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.b High temp. hp Up to 150:  Nominal investment
+industrial heat pump high temperature,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.b High temp. hp Up to 150:  Technical lifetime
+industrial heat pump medium temperature,FOM,0.11,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.a High temp. hp Up to 125 C:  Fixed O&M
+industrial heat pump medium temperature,VOM,3.2,EUR/MWh,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.a High temp. hp Up to 125 C:  Variable O&M
+industrial heat pump medium temperature,efficiency,2.7,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx","302.a High temp. hp Up to 125 C:  Total efficiency, net, annual average"
+industrial heat pump medium temperature,investment,778.8,EUR/kW,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.a High temp. hp Up to 125 C:  Nominal investment
+industrial heat pump medium temperature,lifetime,20.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",302.a High temp. hp Up to 125 C:  Technical lifetime
 lignite,CO2 intensity,0.41,tCO2/MWh_th,Entwicklung der spezifischen Kohlendioxid-Emissionen des deutschen Strommix in den Jahren 1990 - 2018,
 lignite,FOM,1.6,%/year,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
 lignite,VOM,3.5,EUR/MWh_e,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
@@ -381,17 +446,18 @@ lignite,efficiency,0.33,per unit,Lazard s Levelized Cost of Energy Analysis - Ve
 lignite,fuel,2.9,EUR/MWh_th,DIW,
 lignite,investment,3845.51,EUR/kW_e,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
 lignite,lifetime,40.0,years,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
-methanation,FOM,4.0,%/year,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
-methanation,efficiency,0.8,per unit,Palzer and Schaber thesis, from old pypsa cost assumptions
-methanation,investment,278.0,EUR/kW_CH4,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
-methanation,lifetime,30.0,years,"Fasihi et al 2017, table 1, https://www.mdpi.com/2071-1050/9/2/306",
+methanation,FOM,3.0,%/year,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), section 6.2.3.1",
+methanation,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+methanation,efficiency,0.8,per unit,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), section 6.2.3.1",
+methanation,investment,628.6,"EUR/MW_CH4; and
+EUR/kW_CH4","Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), table 6: “Reference scenario”.",
+methanation,lifetime,20.0,years,Guesstimate.,
 methane storage tank incl. compressor,FOM,1.9,%/year,"Guesstimate, based on hydrogen storage tank by DEA.",
 methane storage tank incl. compressor,investment,8629.2,EUR/m^3,Storage costs per l: https://www.compositesworld.com/articles/pressure-vessels-for-alternative-fuels-2014-2023 (2021-02-10).,
 methane storage tank incl. compressor,lifetime,30.0,years,"Guesstimate, based on hydrogen storage tank by DEA.",
-methanolisation,FOM,1.75,%/year,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",98 Methanol from power:  Fixed O&M
-methanolisation,VOM,6.27,EUR/MWh_MeOH,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",98 Methanol from power:  Variable O&M
-methanolisation,investment,3008.96,EUR/kW_MeOH,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",98 Methanol from power:  Specific investment
-methanolisation,lifetime,20.0,years,"Danish Energy Agency, data_sheets_for_renewable_fuels.xlsx",98 Methanol from power:  Technical lifetime
+methanolisation,FOM,3.0,%/year,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), section 6.3.2.1.",
+methanolisation,investment,650711.26,EUR/MW_MeOH,"Agora Energiewende (2018): The Future Cost of Electricity-Based Synthetic Fuels (https://www.agora-energiewende.de/en/publications/the-future-cost-of-electricity-based-synthetic-fuels-1/), table 8: “Reference scenario”.",
+methanolisation,lifetime,20.0,years,"Danish Energy Agency, Technology Data for Renewable Fuels (04/2022), Data sheet “Methanol to Power”.",
 micro CHP,FOM,6.11,%/year,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx",219 LT-PEMFC mCHP - natural gas:  Fixed O&M
 micro CHP,efficiency,0.35,per unit,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx","219 LT-PEMFC mCHP - natural gas:  Electric efficiency, annual average, net"
 micro CHP,efficiency-heat,0.61,per unit,"Danish Energy Agency, technologydatafor_heating_installations_marts_2018.xlsx","219 LT-PEMFC mCHP - natural gas:  Heat efficiency, annual average, net"
@@ -403,27 +469,27 @@ nuclear,efficiency,0.33,per unit,Lazard s Levelized Cost of Energy Analysis - Ve
 nuclear,fuel,2.6,EUR/MWh_th,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
 nuclear,investment,7940.45,EUR/kW_e,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
 nuclear,lifetime,40.0,years,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
-offwind,FOM,2.29,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",21 Offshore turbines:  Fixed O&M
-offwind,VOM,2.67,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",21 Offshore turbines:  Variable O&M
-offwind,investment,1573.21,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",21 Offshore turbines:  Nominal investment grid connection costs substracted from investment costs
-offwind,lifetime,30.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",21 Offshore turbines:  Technical lifetime
+offwind,FOM,2.32,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","21 Offshore turbines:  Fixed O&M [EUR/MW_e/y, 2020]"
+offwind,VOM,0.02,EUR/MWhel,RES costs made up to fix curtailment order, from old pypsa cost assumptions
+offwind,investment,1523.55,"EUR/kW_e, 2020","Danish Energy Agency, technology_data_for_el_and_dh.xlsx","21 Offshore turbines:  Nominal investment [MEUR/MW_e, 2020] grid connection costs substracted from investment costs"
+offwind,lifetime,30.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",21 Offshore turbines:  Technical lifetime [years]
 offwind-ac-connection-submarine,investment,2685.0,EUR/MW/km,DEA https://ens.dk/en/our-services/projections-and-models/technology-data, from old pypsa cost assumptions
 offwind-ac-connection-underground,investment,1342.0,EUR/MW/km,DEA https://ens.dk/en/our-services/projections-and-models/technology-data, from old pypsa cost assumptions
 offwind-ac-station,investment,250.0,EUR/kWel,DEA https://ens.dk/en/our-services/projections-and-models/technology-data, from old pypsa cost assumptions
 offwind-dc-connection-submarine,investment,2000.0,EUR/MW/km,DTU report based on Fig 34 of https://ec.europa.eu/energy/sites/ener/files/documents/2014_nsog_report.pdf, from old pypsa cost assumptions
 offwind-dc-connection-underground,investment,1000.0,EUR/MW/km,Haertel 2017; average + 13% learning reduction, from old pypsa cost assumptions
 offwind-dc-station,investment,400.0,EUR/kWel,Haertel 2017; assuming one onshore and one offshore node + 13% learning reduction, from old pypsa cost assumptions
-oil,CO2 intensity,0.27,tCO2/MWh_th,Entwicklung der spezifischen Kohlendioxid-Emissionen des deutschen Strommix in den Jahren 1990 - 2018,
-oil,FOM,2.46,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",50 Diesel engine farm:  Fixed O&M
-oil,VOM,6.0,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",50 Diesel engine farm:  Variable O&M
-oil,efficiency,0.35,per unit,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","50 Diesel engine farm:  Electricity efficiency, annual average"
+oil,CO2 intensity,0.26,tCO2/MWh_th,Stoichiometric calculation with 44 GJ/t diesel and -CH2- approximation of diesel,
+oil,FOM,2.46,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",50 Diesel engine farm:  Fixed O&M
+oil,VOM,6.0,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",50 Diesel engine farm:  Variable O&M
+oil,efficiency,0.35,per unit,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx","50 Diesel engine farm:  Electricity efficiency, annual average"
 oil,fuel,50.0,EUR/MWhth,IEA WEM2017 97USD/boe = http://www.iea.org/media/weowebsite/2017/WEM_Documentation_WEO2017.pdf, from old pypsa cost assumptions
-oil,investment,343.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",50 Diesel engine farm:  Specific investment
-oil,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",50 Diesel engine farm:  Technical lifetime
-onwind,FOM,1.22,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Fixed O&M
-onwind,VOM,1.35,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Variable O&M
-onwind,investment,1035.56,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Nominal investment
-onwind,lifetime,30.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",20 Onshore turbines:  Technical lifetime
+oil,investment,343.0,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",50 Diesel engine farm:  Specific investment
+oil,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",50 Diesel engine farm:  Technical lifetime
+onwind,FOM,1.22,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",20 Onshore turbines:  Fixed O&M
+onwind,VOM,1.35,EUR/MWh,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",20 Onshore turbines:  Variable O&M
+onwind,investment,1035.56,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",20 Onshore turbines:  Nominal investment 
+onwind,lifetime,30.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",20 Onshore turbines:  Technical lifetime
 ror,FOM,2.0,%/year,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 ror,efficiency,0.9,per unit,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
 ror,investment,3312.24,EUR/kWel,DIW DataDoc http://hdl.handle.net/10419/80348, from old pypsa cost assumptions
@@ -432,19 +498,34 @@ seawater desalination,FOM,4.0,%/year,"Caldera et al 2016: Local cost of seawater
 seawater desalination,electricity-input,3.03,kWh/m^3-H2O,"Caldera et al 2016: Local cost of seawater RO desalination based on solar PV and windenergy: A global estimate. (https://doi.org/10.1016/j.desal.2016.02.004), Fig. 4.",
 seawater desalination,investment,32882.05,EUR/(m^3-H2O/h),"Caldera et al 2017: Learning Curve for Seawater Reverse Osmosis Desalination Plants: Capital Cost Trend of the Past, Present, and Future (https://doi.org/10.1002/2017WR021402), Table 4.",
 seawater desalination,lifetime,30.0,years,"Caldera et al 2016: Local cost of seawater RO desalination based on solar PV and windenergy: A global estimate. (https://doi.org/10.1016/j.desal.2016.02.004), Table 1.",
-solar,FOM,1.46,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",22 Photovoltaics Medium:  Fixed O&M
+solar,FOM,1.95,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Fixed O&M [2020-EUR/MW_e/y]
 solar,VOM,0.01,EUR/MWhel,RES costs made up to fix curtailment order, from old pypsa cost assumptions
-solar,investment,631.69,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx","22 Photovoltaics Medium:  Specific investment, total system"
-solar,lifetime,35.0,years,"Assuming 50% rooftop, 50% utility",22 Photovoltaics Medium:  Technical lifetime of total system
-solar-rooftop,FOM,1.24,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",22 Photovoltaics Small:  Fixed O&M
+solar,investment,492.11,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Nominal investment [2020-MEUR/MW_e]
+solar,lifetime,40.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Technical lifetime [years]
+solar-rooftop,FOM,1.42,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Fixed O&M [2020-EUR/MW_e/y]
 solar-rooftop,discount rate,0.04,per unit,standard for decentral, from old pypsa cost assumptions
-solar-rooftop,investment,784.31,EUR/kW,European PV Technology and Innovation Platform,"22 Photovoltaics Small:  Specific investment, total system"
-solar-rooftop,lifetime,30.0,years,European PV Technology and Innovation Platform,22 Photovoltaics Small:  Technical lifetime of total system
-solar-utility,FOM,1.93,%/year,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",22 Photovoltaics Large:  Fixed O&M
-solar-utility,investment,376.29,EUR/kW,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",22 Photovoltaics Large:  Nominal investment
-solar-utility,lifetime,40.0,years,"Danish Energy Agency, technology_data_for_el_and_dh_-_0009.xlsx",22 Photovoltaics Large:  Technical lifetime
-solid biomass,CO2 intensity,0.3,tCO2/MWh_th,TODO,
-solid biomass,fuel,25.2,EUR/MWh_th,Is a 100% renewable European power system feasible by 2050?,
+solar-rooftop,investment,636.66,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Nominal investment [2020-MEUR/MW_e]
+solar-rooftop,lifetime,40.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Technical lifetime [years]
+solar-rooftop commercial,FOM,1.57,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV commercial:  Fixed O&M [2020-EUR/MW_e/y]
+solar-rooftop commercial,investment,512.47,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV commercial:  Nominal investment [2020-MEUR/MW_e]
+solar-rooftop commercial,lifetime,40.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV commercial:  Technical lifetime [years]
+solar-rooftop residential,FOM,1.27,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Fixed O&M [2020-EUR/MW_e/y]
+solar-rooftop residential,investment,760.86,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Nominal investment [2020-MEUR/MW_e]
+solar-rooftop residential,lifetime,40.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Rooftop PV residential:  Technical lifetime [years]
+solar-utility,FOM,2.48,%/year,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Utility-scale PV:  Fixed O&M [2020-EUR/MW_e/y]
+solar-utility,investment,347.56,EUR/kW_e,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Utility-scale PV:  Nominal investment [2020-MEUR/MW_e]
+solar-utility,lifetime,40.0,years,"Danish Energy Agency, technology_data_for_el_and_dh.xlsx",22 Utility-scale PV:  Technical lifetime [years]
+solid biomass,CO2 intensity,0.37,tCO2/MWh_th,Stoichiometric calculation with 18 GJ/t_DM LHV and 50% C-content for solid biomass,
+solid biomass,fuel,12.0,EUR/MWh_th,"JRC ENSPRESO ca avg for MINBIOWOOW1 (secondary forest residue wood chips), ENS_Ref for 2040",
+solid biomass boiler steam,FOM,6.08,%/year,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1e Steam boiler Wood:  Fixed O&M
+solid biomass boiler steam,VOM,2.82,EUR/MWh,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1e Steam boiler Wood:  Variable O&M
+solid biomass boiler steam,efficiency,0.89,per unit,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx","311.1e Steam boiler Wood:  Total efficiency, net, annual average"
+solid biomass boiler steam,investment,590.91,EUR/kW,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1e Steam boiler Wood:  Nominal investment
+solid biomass boiler steam,lifetime,25.0,years,"Danish Energy Agency, technology_data_for_industrial_process_heat.xlsx",311.1e Steam boiler Wood:  Technical lifetime
+solid biomass to hydrogen,FOM,4.25,%/year,"Zech et.al. DBFZ Report Nr. 19. Hy-NOW - Evaluierung der Verfahren und Technologien für die Bereitstellung von Wasserstoff auf Basis von Biomasse, DBFZ, 2014",
+solid biomass to hydrogen,capture rate,0.98,per unit,Assumption based on doi:10.1016/j.biombioe.2015.01.006,
+solid biomass to hydrogen,efficiency,0.56,per unit,"Zech et.al. DBFZ Report Nr. 19. Hy-NOW - Evaluierung der Verfahren und Technologien für die Bereitstellung von Wasserstoff auf Basis von Biomasse, DBFZ, 2014",
+solid biomass to hydrogen,investment,2500.0,EUR/kW_th,"Zech et.al. DBFZ Report Nr. 19. Hy-NOW - Evaluierung der Verfahren und Technologien für die Bereitstellung von Wasserstoff auf Basis von Biomasse, DBFZ, 2014",
 uranium,fuel,2.6,EUR/MWh_th,Lazard s Levelized Cost of Energy Analysis - Version 13.0,
 water tank charger,efficiency,0.84,per unit,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  efficiency from sqr(Round trip efficiency)
 water tank discharger,efficiency,0.84,per unit,"Danish Energy Agency, technology_data_catalogue_for_energy_storage.xlsx",:  efficiency from sqr(Round trip efficiency)

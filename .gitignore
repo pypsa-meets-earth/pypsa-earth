@@ -6,7 +6,9 @@
 __pycache__
 gurobi.log
 .vscode
-#config.yaml
+config.yaml
+data/energy_totals_NZ_2030.csv
+gadm_shapes.geojson
 
 # Folders
 /bak
@@ -30,7 +32,7 @@ gurobi.log
 /data/transport_data.csv
 /data/switzerland*
 /data/.nfs*
-/data/Industrial_Database.csv
+#/data/Industrial_Database.csv
 /data/retro/tabula-calculator-calcsetbuilding.csv
 /data/nuts*
 /scripts/old
@@ -39,6 +41,8 @@ doc/_build
 /tmp
 /pypsa
 /notes_Leon
+/scripts/data
+/sample_pypsa_eur
 
 # File extensions
 *.org

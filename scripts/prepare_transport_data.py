@@ -62,7 +62,8 @@ def prepare_transport_data(n):
     """
 
     energy_totals = pd.read_csv(
-        snakemake.input.energy_totals_name, index_col=0
+        snakemake.input.energy_totals_name,
+        index_col=0,
     )  # TODO change with real numbers
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
@@ -83,6 +84,8 @@ def prepare_transport_data(n):
         nodes=pop_layout.index,
         weekly_profile=traffic.values,
     )
+
+    nodal_transport_shape = transport_shape / transport_shape.sum().sum()
     transport_shape = transport_shape / transport_shape.sum()
 
     transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
@@ -133,17 +136,21 @@ def prepare_transport_data(n):
     # and multiply back in the heating/cooling demand for EVs
     ice_correction = (transport_shape * (1 + dd_ICE)).sum() / transport_shape.sum()
 
-    energy_totals_transport = (
-        nodal_energy_totals["total road"]
-        + nodal_energy_totals["total rail"]
-        - nodal_energy_totals["electricity rail"]
-    )
+    if snakemake.config["custom_data"]["transport_demand"]:
+        energy_totals_transport = nodal_energy_totals["total road"]
 
-    transport = (
-        (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
-        .divide(efficiency_gain * ice_correction)
-        .multiply(1 + dd_EV)
-    )
+        transport = transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears
+    else:
+        energy_totals_transport = (
+            nodal_energy_totals["total road"]
+            + nodal_energy_totals["total rail"]
+            - nodal_energy_totals["electricity rail"]
+        )
+        transport = (
+            (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
+            .divide(efficiency_gain * ice_correction)
+            .multiply(1 + dd_EV)
+        )
 
     # derive plugged-in availability for PKW's (cars)
 
@@ -191,12 +198,19 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-        snakemake = mock_snakemake("prepare_transport_data", simpl="", clusters="111")
+        snakemake = mock_snakemake(
+            "prepare_transport_data",
+            simpl="",
+            clusters="189",
+            demand="AP",
+            planning_horizons=2030,
+        )
+
         sets_path_to_root("pypsa-earth-sec")
 
     n = pypsa.Network(snakemake.input.network)
 
-    # Get pop_layout
+    # Get population layout
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Add options
@@ -215,8 +229,15 @@ if __name__ == "__main__":
     ) = prepare_transport_data(n)
 
     # Save the generated output files to snakemake paths
-    nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
+
+    # Transport demand per node per timestep
     transport.to_csv(snakemake.output.transport)
+
+    # Available share of the battery to be used by the grid
     avail_profile.to_csv(snakemake.output.avail_profile)
+
+    # Restrictions on state of charge of EVs
     dsm_profile.to_csv(snakemake.output.dsm_profile)
+
+    # Nodal data on number of cars
     nodal_transport_data.to_csv(snakemake.output.nodal_transport_data)

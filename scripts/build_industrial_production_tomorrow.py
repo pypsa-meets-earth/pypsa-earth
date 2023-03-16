@@ -12,7 +12,6 @@ from prepare_sector_network import get
 
 
 def industry_prod_tomorrow(production):
-
     production_tomorrow = production.copy()
     # Steel production
 
@@ -96,16 +95,21 @@ if __name__ == "__main__":
         from helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_industrial_production_per_country_tomorrow", planning_horizons=2030
+            "build_industrial_production_per_country_tomorrow",
+            planning_horizons=2030,
+            demand="DF",
         )
 
     config = snakemake.config
     config_ind = snakemake.config["industry"]
 
     investment_year = int(snakemake.wildcards.planning_horizons)
+    demand_sc = snakemake.wildcards.demand
 
     production = pd.read_csv(
-        snakemake.input.industrial_production_per_country, index_col=0
+        snakemake.input.industrial_production_per_country,
+        index_col=0,
+        keep_default_na=False,
     ).filter(config["countries"], axis=0)
 
     prod_tomorrow = industry_prod_tomorrow(production)
