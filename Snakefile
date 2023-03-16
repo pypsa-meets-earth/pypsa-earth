@@ -87,7 +87,7 @@ rule prepare_sector_network:
         dsm_profile="resources/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         nodal_transport_data="resources/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         overrides="data/override_component_attrs",
-        clustered_pop_layout="resources/poppulation_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
         industrial_demand="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
         airports="data/airports.csv",
@@ -204,7 +204,7 @@ rule prepare_heat_data:
     input:
         network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
-        clustered_pop_layout="resources/population_shares/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
         temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
         cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
         cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}.nc",
