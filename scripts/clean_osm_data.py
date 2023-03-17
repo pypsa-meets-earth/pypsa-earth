@@ -718,7 +718,10 @@ def prepare_generators_df(df_all_generators):
         df_all_generators["power_output_MW"].astype(str).str.contains("MW")
     ]
     df_all_generators["power_output_MW"] = (
-        df_all_generators["power_output_MW"].str.extract("(\\d+)").astype(float)
+        df_all_generators["power_output_MW"]
+        .astype(str)
+        .str.extract("(\\d+)")
+        .astype(float)
     )
 
     return df_all_generators
@@ -875,6 +878,9 @@ def clean_data(
         df_all_substations = df_all_substations[
             df_all_substations["tag_substation"] == tag_substation
         ]
+
+    # clean voltage and make sure it is string
+    df_all_substations = clean_voltage(df_all_substations)
 
     df_all_substations = gpd.GeoDataFrame(
         split_cells(pd.DataFrame(df_all_substations)),
