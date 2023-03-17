@@ -75,7 +75,8 @@ def generate_scenario_by_country(
 
     df_landlocked = pd.read_csv(
         "https://raw.githubusercontent.com/openclimatedata/countrygroups/main/data/lldc.csv"
-    )
+    ).reset_index(drop=True)
+    df_landlocked.loc[df_landlocked.shape[0], ["Code", "Name"]] = ["AND", "Andorra"]
     df_landlocked["countries"] = df_landlocked.Code.map(three_2_two_digits_country)
 
     n_clusters = {
