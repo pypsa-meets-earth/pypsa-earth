@@ -309,7 +309,7 @@ def clean_frequency(df, default_frequency="50"):
 
     # TODO: default frequency may be by country
     df["tag_frequency"] = (
-        df["tag_frequency"].replace(repl_freq).fillna(default_frequency)
+        df["tag_frequency"].fillna(default_frequency).astype(str).replace(repl_freq)
     )
 
     return df
@@ -329,8 +329,11 @@ def clean_voltage(df):
         "KV30": "30kV",
     }
 
+    df.dropna(subset=["voltage"], inplace=True)
+
     df["voltage"] = (
         df["voltage"]
+        .astype(str)
         .replace(repl_voltage)
         .str.lower()
         .str.replace(" ", "")
@@ -340,8 +343,6 @@ def clean_voltage(df):
         # .str.replace("/", ";")  # few OSM entries are separated by / instead of ;
         # this line can be a fix for that if relevant
     )
-
-    df.dropna(subset=["voltage"], inplace=True)
 
     return df
 
@@ -367,7 +368,11 @@ def clean_circuits(df):
         "1.": "1",
     }
 
-    df["circuits"] = df["circuits"].replace(repl_circuits).str.replace(" ", "")
+    df["circuits"] = (
+        df["circuits"]
+        .replace(repl_circuits)
+        .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
+    )
 
     return df
 
@@ -399,7 +404,9 @@ def clean_cables(df):
         "line": "1",
     }
 
-    df["cables"] = df["cables"].replace(repl_cables).str.replace(" ", "")
+    df["cables"] = df["cables"].map(
+        lambda x: x.replace(" ", "") if isinstance(x, str) else x
+    )
 
     return df
 
@@ -491,9 +498,13 @@ def fill_circuits(df):
 
     def _get_circuits_status(df):
         len_f = df["tag_frequency"].map(len)
-        len_c = df["circuits"].str.count(";") + 1
+        len_c = df["circuits"].map(
+            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
+        )
         isna_c = df["circuits"].isna()
-        len_cab = df["cables"].str.count(";") + 1
+        len_cab = df["cables"].map(
+            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
+        )
         isna_cab = df["cables"].isna()
         return len_f, len_c, isna_c, len_cab, isna_cab
 
@@ -518,16 +529,20 @@ def fill_circuits(df):
 
     len_f, len_c, isna_c, len_cab, isna_cab = _get_circuits_status(df)
 
+    is_numeric_cables = ~pd.to_numeric(df["cables"], errors="coerce").isna()
+
     to_fill = isna_c | (len_f != len_c)
     to_fill_direct = to_fill & (len_cab == len_f)
     to_fill_merge = to_fill & (len_cab > len_f)
-    to_fill_indirect = to_fill & ~to_fill_direct & df["cables"].str.isnumeric()
+    to_fill_indirect = to_fill & ~to_fill_direct & is_numeric_cables
     to_fill_default = to_fill & ~to_fill_merge & ~to_fill_direct & ~to_fill_indirect
 
     # length of cables match the frequency one
     # matching uses directly only the cables series
     df_match_by_cables = df[to_fill_direct][["tag_frequency", "cables"]].copy()
-    df_match_by_cables["cables"] = df_match_by_cables["cables"].str.split(";")
+    df_match_by_cables["cables"] = (
+        df_match_by_cables["cables"].astype(str).str.split(";")
+    )
 
     def _filter_cables(row):
         return ";".join(
@@ -543,7 +558,9 @@ def fill_circuits(df):
 
     # length of cables elements is larger than frequency; the last cable data are merged to match
     df_merge_by_cables = df[to_fill_merge][["tag_frequency", "cables"]].copy()
-    df_merge_by_cables["cables"] = df_merge_by_cables["cables"].str.split(";")
+    df_merge_by_cables["cables"] = (
+        df_merge_by_cables["cables"].astype(str).str.split(";")
+    )
 
     def _parse_cables_to_len(row):
         lf = len(row["tag_frequency"])
@@ -588,7 +605,7 @@ def fill_circuits(df):
     )
 
     # explode column
-    df["circuits"] = df["circuits"].str.split(";")
+    df["circuits"] = df["circuits"].astype(str).str.split(";")
 
     return df
 
