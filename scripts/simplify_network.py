@@ -565,19 +565,27 @@ def drop_isolated_nodes(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
-    # do not drop isolated buses when an entire country is represented by a single bus
-    i_islands = n.buses[
+    off_buses = n.buses[
         (~n.buses.duplicated(subset=["sub_network"], keep=False))
-        & (~n.buses.duplicated(subset=["country"], keep=False))
         & (n.buses.carrier == "AC")
-    ].index
+    ]
+    i_islands = off_buses.index
+
+    if off_buses.empty:
+        return n
+
+    # skip a isolated bus for countries represented by only isolated nodes
+    for c in off_buses["country"].unique():
+        isc_offbus = off_buses["country"] == c
+        n_bus_off = isc_offbus.sum()
+        n_bus = (n.buses["country"] == c).sum()
+        if n_bus_off == n_bus:
+            i_islands = i_islands[i_islands != off_buses[isc_offbus].index[0]]
 
     i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
 
     # isolated buses without load should be discarded
     isl_no_load = i_islands.difference(i_load_islands)
-    n.mremove("Bus", isl_no_load)
-    n.determine_network_topology()
 
     # isolated buses with load lower than a specified threshold should be discarded as well
     i_small_load = i_load_islands[
@@ -587,10 +595,12 @@ def drop_isolated_nodes(n, threshold):
     if (i_islands.empty) | (len(i_small_load) == 0):
         return n
 
-    i_loads_drop = n.loads[n.loads.bus.isin(i_small_load)].index
-    i_generators_drop = n.generators[n.generators.bus.isin(i_small_load)].index
+    i_to_drop = isl_no_load.to_list() + i_small_load.to_list()
 
-    n.mremove("Bus", i_small_load)
+    i_loads_drop = n.loads[n.loads.bus.isin(i_to_drop)].index
+    i_generators_drop = n.generators[n.generators.bus.isin(i_to_drop)].index
+
+    n.mremove("Bus", i_to_drop)
     n.mremove("Load", i_loads_drop)
     n.mremove("Generator", i_generators_drop)
 
@@ -600,7 +610,7 @@ def drop_isolated_nodes(n, threshold):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Dropped {len(i_small_load)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectivelly"
+        f"Dropped {len(i_to_drop)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectivelly"
     )
 
     return n
