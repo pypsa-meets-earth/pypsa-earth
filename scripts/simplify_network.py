@@ -640,7 +640,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
     ]
 
-    if (i_islands.empty) | (len(i_suffic_load) == 0):
+    if (i_islands.empty) | (len(i_suffic_load) <= 1):
         return n, n.buses.index.to_series()
 
     # all the noded to be merged should be mapped into a single node
