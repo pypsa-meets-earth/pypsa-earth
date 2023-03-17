@@ -642,24 +642,18 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
     ]
 
-    if (i_islands.empty) | (len(i_suffic_load) <= 1):
-        return n, n.buses.index.to_series()
-
     # all the noded to be merged should be mapped into a single node
-    agg_buses_list = []
-    countries_list = n.buses.country.unique()
-    for c in countries_list:
-        buses_in_country = n.buses.loc[i_suffic_load].country == c
-        i_aggreg_bus = n.buses.loc[i_suffic_load][buses_in_country].index[0]
-        agg_buses_list.append(i_aggreg_bus)
-
-    country_to_buses_dict = dict(zip(countries_list, agg_buses_list))
-    n_buses_df = n.buses[["country"]].copy().assign(bus_id=n.buses.index)
-    n_buses_df["agg_bus"] = n_buses_df.loc[i_suffic_load, "country"].map(
-        country_to_buses_dict
+    map_isolated_node_by_country = (
+        n.buses.loc[i_suffic_load].groupby("country")["bus_id"].first().to_dict()
     )
-    n_buses_df["agg_bus"].fillna(n_buses_df.bus_id, inplace=True)
-    busmap = n_buses_df["agg_bus"]
+    isolated_buses_mapping = n.buses.loc[i_suffic_load, "country"].replace(
+        map_isolated_node_by_country
+    )
+    busmap = n.buses.index.to_series().replace(isolated_buses_mapping).rename("busmap")
+
+    # return the original network if no changes are detected
+    if (busmap.index == busmap).all():
+        return n, n.buses.index.to_series()
 
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
