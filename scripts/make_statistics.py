@@ -73,10 +73,9 @@ def generate_scenario_by_country(
 
     clean_country_list = create_country_list(country_list)
 
-    df_landlocked = pd.read_csv(
-        "https://raw.githubusercontent.com/openclimatedata/countrygroups/main/data/lldc.csv"
-    )
-    df_landlocked["countries"] = df_landlocked.Code.map(three_2_two_digits_country)
+    # file available from https://worldpopulationreview.com/country-rankings/landlocked-countries
+    df_landlocked = pd.read_csv("landlocked.csv")
+    df_landlocked["countries"] = df_landlocked.cca2.map(three_2_two_digits_country)
 
     n_clusters = {
         "MG": 3,  # Africa
@@ -87,7 +86,9 @@ def generate_scenario_by_country(
         "GM": 2,
         "LR": 2,
         "LS": 3,
+        "NE": 4,
         "SL": 1,
+        "SZ": 4,
         "TG": 1,
         "CG": 2,
         "GN": 3,
