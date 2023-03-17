@@ -565,8 +565,10 @@ def drop_isolated_nodes(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
+    # do not drop isolated buses when an entire country is represented by a single bus
     i_islands = n.buses[
         (~n.buses.duplicated(subset=["sub_network"], keep=False))
+        & (~n.buses.duplicated(subset=["country"], keep=False))
         & (n.buses.carrier == "AC")
     ].index
 
