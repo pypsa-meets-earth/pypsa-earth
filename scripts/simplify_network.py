@@ -649,7 +649,12 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     isolated_buses_mapping = n.buses.loc[i_suffic_load, "country"].replace(
         map_isolated_node_by_country
     )
-    busmap = n.buses.index.to_series().replace(isolated_buses_mapping).rename("busmap")
+    busmap = (
+        n.buses.index.to_series()
+        .replace(isolated_buses_mapping)
+        .astype(str)
+        .rename("busmap")
+    )
 
     # return the original network if no changes are detected
     if (busmap.index == busmap).all():
