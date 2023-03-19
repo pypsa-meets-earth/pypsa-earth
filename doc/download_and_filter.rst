@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2019-2020 The PyPSA-Africa Authors,
+  SPDX-FileCopyrightText: 2019-2020 The PyPSA-Earth Authors,
   adapted from PyPSA-Eur
 
   SPDX-License-Identifier: CC-BY-4.0
@@ -8,7 +8,7 @@
 Download and filter data
 ##########################################
 
-The download and filtering process of the PyPSA-Africa energy system model consists of a group of ``snakemake`` rules which are briefly outlined and explained in detail in the sections below.
+The download and filtering process of the PyPSA-Earth energy system model consists of a group of ``snakemake`` rules which are briefly outlined and explained in detail in the sections below.
 
 Not all data dependencies are shipped with the git repository. Instead we provide separate data bundles which is loaded automatically when running `solve_all_networks` rule when `retrieve_databundle` flag in the configuration file is on. 
 
