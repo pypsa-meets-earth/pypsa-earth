@@ -25,6 +25,8 @@ You can contribute on the code side in many ways:
 Code
 ====
 
+Linting and pre-commit
+----------------------
 For every code contribution you should run `pre-commit <https://pre-commit.com/index.html>`_.
 This will lint, format and check your code contributions against our guidelines
 (e.g. we use `Black <https://github.com/psf/black>`_ as code style
@@ -35,6 +37,8 @@ and aim for `REUSE compliance <https://reuse.software/>`_):
   * To automatically activate ``pre-commit`` on every ``git commit``: Run ``pre-commit install``
   * To manually run it: ``pre-commit run --all``
 
+Testing
+-------
 Add a new test if you want to contribute new functionality to the config.
 We perform currently *multiple* integration tests which means various workflows need to work.
 All test configs are build by updating the ``config.tutorial.yaml`` with the configs in ``pypysa-earth/test/*.yaml``.
@@ -47,6 +51,14 @@ To contribute a test:
 1. Provide a new test in ``test/<new test>.yaml``, or adjust one of the existing ones. These tests update the config.tutorial.yaml to test other options e.g. landlock countries. 
 2. Add a new test config path to the ``rule build_all_test`` in the ``Snakefile``.
 3. If your functionality should be tested in the CI for every pull request, add a respective code in ``.github/workflows/ci-linux.yaml``. We test all functionalities only for Linux while providing a general test for windows and mac.
+
+Performance-profiling
+---------------------
+Performance profiling is important to understand bottlenecks and
+the accordinly optimize the speed in PyPSA-Earth. We use the Python build-in
+`cProfiler`, custom decorators on single functions and analysis tools
+like `snakeviz <https://jiffyclub.github.io/snakeviz/>`_. See a detailed example
+in `this discussion #557 <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/557>`_.
 
 
 No-Code
