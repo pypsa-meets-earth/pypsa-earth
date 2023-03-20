@@ -225,7 +225,7 @@ def plot_h2_infra(network):
         branch_components=["Link"],
         color_geomap={"ocean": "lightblue", "land": "oldlace"},
         ax=ax,
-        boundaries=(-20, 0, 25, 40),
+        # boundaries=(-20, 0, 25, 40),
     )
 
     handles = make_legend_circles_for(
@@ -324,7 +324,7 @@ def plot_smr(network):
         branch_components=["Link"],
         color_geomap={"ocean": "lightblue", "land": "oldlace"},
         ax=ax,
-        boundaries=(-20, 0, 25, 40),
+        # boundaries=(-20, 0, 25, 40),
     )
 
     handles = make_legend_circles_for(
@@ -388,7 +388,7 @@ def plot_transmission_topology(network):
 
     n.plot(
         branch_components=["Link", "Line"],
-        boundaries=(-20, 0, 25, 40),
+        # boundaries=(-20, 0, 25, 40),
         color_geomap={"ocean": "lightblue", "land": "oldlace"},
         line_colors="darkblue",
         link_colors="turquoise",
@@ -672,7 +672,7 @@ def plot_map(
         line_widths=line_widths / linewidth_factor,
         link_widths=link_widths / linewidth_factor,
         ax=ax,
-        boundaries=(-20, 0, 25, 40),
+        # boundaries=(-20, 0, 25, 40),
         geomap="10m",
         color_geomap={"ocean": "lightblue", "land": "oldlace"},
     )
