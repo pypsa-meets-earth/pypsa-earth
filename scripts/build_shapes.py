@@ -281,7 +281,7 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
             f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}"
         )
 
-    geodf_EEZ = gpd.read_file(EEZ_gpkg).to_crs(geo_crs)
+    geodf_EEZ = gpd.read_file(EEZ_gpkg, engine="pyogrio").to_crs(geo_crs)
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]

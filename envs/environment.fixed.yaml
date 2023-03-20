@@ -302,6 +302,7 @@ dependencies:
 - pyct=0.4.6
 - pyct-core=0.4.6
 - pygments=2.13.0
+- pyogrio=0.5.1
 - pyomo=6.4.2
 - pyopenssl=22.0.0
 - pyparsing=3.0.9
