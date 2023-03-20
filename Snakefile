@@ -81,22 +81,22 @@ rule prepare_sector_network:
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
-        nodal_energy_totals="resources/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        transport="resources/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        avail_profile="resources/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        dsm_profile="resources/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        nodal_transport_data="resources/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        nodal_energy_totals="resources/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        transport="resources/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        avail_profile="resources/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        dsm_profile="resources/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        nodal_transport_data="resources/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         overrides="data/override_component_attrs",
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        industrial_demand="resources/industry/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        industrial_demand="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
         airports="data/airports.csv",
         ports="data/ports.csv",
-        heat_demand="resources/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        ashp_cop="resources/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        gshp_cop="resources/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        solar_thermal="resources/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        district_heat_share="resources/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        heat_demand="resources/demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        ashp_cop="resources/demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        gshp_cop="resources/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        solar_thermal="resources/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
         shapes_path=pypsaearth(
@@ -165,33 +165,33 @@ rule prepare_transport_data:
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
         transport_name="resources/transport_data.csv",
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
     output:
         # nodal_energy_totals="resources/nodal_energy_totals_s{simpl}_{clusters}.csv",
-        transport="resources/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        avail_profile="resources/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        dsm_profile="resources/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        nodal_transport_data="resources/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        transport="resources/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        avail_profile="resources/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        dsm_profile="resources/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        nodal_transport_data="resources/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     script:
         "scripts/prepare_transport_data.py"
 
 
 rule build_cop_profiles:
     input:
-        temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
-        temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
-        temp_soil_urban="resources/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
-        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
-        temp_air_rural="resources/temp_air_rural_elec_s{simpl}_{clusters}.nc",
-        temp_air_urban="resources/temp_air_urban_elec_s{simpl}_{clusters}.nc",
+        temp_soil_total="resources/temperatures/temp_soil_total_elec_s{simpl}_{clusters}.nc",
+        temp_soil_rural="resources/temperatures/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
+        temp_soil_urban="resources/temperatures/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
+        temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        temp_air_rural="resources/temperatures/temp_air_rural_elec_s{simpl}_{clusters}.nc",
+        temp_air_urban="resources/temperatures/temp_air_urban_elec_s{simpl}_{clusters}.nc",
     output:
-        cop_soil_total="resources/cop_soil_total_elec_s{simpl}_{clusters}.nc",
-        cop_soil_rural="resources/cop_soil_rural_elec_s{simpl}_{clusters}.nc",
-        cop_soil_urban="resources/cop_soil_urban_elec_s{simpl}_{clusters}.nc",
-        cop_air_total="resources/cop_air_total_elec_s{simpl}_{clusters}.nc",
-        cop_air_rural="resources/cop_air_rural_elec_s{simpl}_{clusters}.nc",
-        cop_air_urban="resources/cop_air_urban_elec_s{simpl}_{clusters}.nc",
+        cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
+        cop_soil_rural="resources/cops/cop_soil_rural_elec_s{simpl}_{clusters}.nc",
+        cop_soil_urban="resources/cops/cop_soil_urban_elec_s{simpl}_{clusters}.nc",
+        cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}.nc",
+        cop_air_rural="resources/cops/cop_air_rural_elec_s{simpl}_{clusters}.nc",
+        cop_air_urban="resources/cops/cop_air_urban_elec_s{simpl}_{clusters}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -204,37 +204,37 @@ rule prepare_heat_data:
     input:
         network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
-        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
-        cop_soil_total="resources/cop_soil_total_elec_s{simpl}_{clusters}.nc",
-        cop_air_total="resources/cop_air_total_elec_s{simpl}_{clusters}.nc",
-        solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
-        heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
+        cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_total="resources/demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
+        heat_demand_total="resources/demand/heat/heat_demand_total_elec_s{simpl}_{clusters}.nc",
         heat_profile="data/heat_load_profile_BDEW.csv",
     output:
-        nodal_energy_totals="resources/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        heat_demand="resources/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        ashp_cop="resources/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        gshp_cop="resources/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        solar_thermal="resources/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        district_heat_share="resources/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        nodal_energy_totals="resources/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        heat_demand="resources/demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        ashp_cop="resources/demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        gshp_cop="resources/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        solar_thermal="resources/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     script:
         "scripts/prepare_heat_data.py"
 
 
 rule build_solar_thermal_profiles:
     input:
-        pop_layout_total="resources/pop_layout_total.nc",
-        pop_layout_urban="resources/pop_layout_urban.nc",
-        pop_layout_rural="resources/pop_layout_rural.nc",
+        pop_layout_total="resources/population_shares/pop_layout_total.nc",
+        pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
+        pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
-        solar_thermal_total="resources/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
-        solar_thermal_urban="resources/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
-        solar_thermal_rural="resources/solar_thermal_rural_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_total="resources/demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_urban="resources/demand/heat/solar_thermal_urban_elec_s{simpl}_{clusters}.nc",
+        solar_thermal_rural="resources/demand/heat/solar_thermal_rural_elec_s{simpl}_{clusters}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -249,9 +249,9 @@ rule build_population_layouts:
         urban_percent="data/urban_percent.csv",
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
-        pop_layout_total="resources/pop_layout_total.nc",
-        pop_layout_urban="resources/pop_layout_urban.nc",
-        pop_layout_rural="resources/pop_layout_rural.nc",
+        pop_layout_total="resources/population_shares/pop_layout_total.nc",
+        pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
+        pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -274,15 +274,15 @@ rule move_hardcoded_files_temp:
 
 rule build_clustered_population_layouts:
     input:
-        pop_layout_total="resources/pop_layout_total.nc",
-        pop_layout_urban="resources/pop_layout_urban.nc",
-        pop_layout_rural="resources/pop_layout_rural.nc",
+        pop_layout_total="resources/population_shares/pop_layout_total.nc",
+        pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
+        pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
-        clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
     resources:
         mem_mb=10000,
     benchmark:
@@ -293,17 +293,17 @@ rule build_clustered_population_layouts:
 
 rule build_heat_demand:
     input:
-        pop_layout_total="resources/pop_layout_total.nc",
-        pop_layout_urban="resources/pop_layout_urban.nc",
-        pop_layout_rural="resources/pop_layout_rural.nc",
+        pop_layout_total="resources/population_shares/pop_layout_total.nc",
+        pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
+        pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
-        heat_demand_urban="resources/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
-        heat_demand_rural="resources/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
-        heat_demand_total="resources/heat_demand_total_elec_s{simpl}_{clusters}.nc",
+        heat_demand_urban="resources/demand/heat/heat_demand_urban_elec_s{simpl}_{clusters}.nc",
+        heat_demand_rural="resources/demand/heat/heat_demand_rural_elec_s{simpl}_{clusters}.nc",
+        heat_demand_total="resources/demand/heat/heat_demand_total_elec_s{simpl}_{clusters}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -314,20 +314,20 @@ rule build_heat_demand:
 
 rule build_temperature_profiles:
     input:
-        pop_layout_total="resources/pop_layout_total.nc",
-        pop_layout_urban="resources/pop_layout_urban.nc",
-        pop_layout_rural="resources/pop_layout_rural.nc",
+        pop_layout_total="resources/population_shares/pop_layout_total.nc",
+        pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
+        pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
-        temp_soil_total="resources/temp_soil_total_elec_s{simpl}_{clusters}.nc",
-        temp_soil_rural="resources/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
-        temp_soil_urban="resources/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
-        temp_air_total="resources/temp_air_total_elec_s{simpl}_{clusters}.nc",
-        temp_air_rural="resources/temp_air_rural_elec_s{simpl}_{clusters}.nc",
-        temp_air_urban="resources/temp_air_urban_elec_s{simpl}_{clusters}.nc",
+        temp_soil_total="resources/temperatures/temp_soil_total_elec_s{simpl}_{clusters}.nc",
+        temp_soil_rural="resources/temperatures/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
+        temp_soil_urban="resources/temperatures/temp_soil_urban_elec_s{simpl}_{clusters}.nc",
+        temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
+        temp_air_rural="resources/temperatures/temp_air_rural_elec_s{simpl}_{clusters}.nc",
+        temp_air_urban="resources/temperatures/temp_air_urban_elec_s{simpl}_{clusters}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -510,7 +510,7 @@ if config["custom_data"].get("industry_demand", False) == True:
             regions_onshore=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
-            clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="resources/custom_data/industrial_database.csv",
             #shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
             shapes_path="../pypsa-earth/resources/shapes/MAR2.geojson",
@@ -527,12 +527,12 @@ if config["custom_data"].get("industry_demand", False) == True:
     rule build_industry_demand:  #custom data
         input:
             industry_sector_ratios="resources/custom_data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
-            industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/custom_data/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         output:
-            industrial_energy_demand_per_node="resources/industry/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+            industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
@@ -549,13 +549,13 @@ if config["custom_data"].get("industry_demand", False) == False:
             regions_onshore=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
-            clustered_pop_layout="resources/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="data/industrial_database.csv",
             shapes_path=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
         output:
-            industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
         resources:
             mem_mb=1000,
@@ -568,7 +568,7 @@ if config["custom_data"].get("industry_demand", False) == False:
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
         output:
-            industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
@@ -580,13 +580,13 @@ if config["custom_data"].get("industry_demand", False) == False:
     rule build_industry_demand:  #default data
         input:
             industry_sector_ratios="data/industry_sector_ratios.csv",
-            industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
-            industrial_production_per_country_tomorrow="resources/industry/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+            industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             industrial_production_per_country="data/industrial_production_per_country.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         output:
-            industrial_energy_demand_per_node="resources/industry/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+            industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
