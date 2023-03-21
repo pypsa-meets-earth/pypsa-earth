@@ -51,12 +51,12 @@ def prepare_heat_data(n):
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     solar_thermal = options["solar_cf_correction"] * solar_thermal / 1e3
 
-    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0)
+    energy_totals = pd.read_csv(snakemake.input.energy_totals_name, index_col=0, keep_default_na=False, na_values=[''])
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
     # # district heat share not weighted by population
-    district_heat_share = nodal_energy_totals["district heat share"].round(2)
+    district_heat_share = nodal_energy_totals["district heat share"]#.round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
     # copy forward the daily average heat demand into each hour, so it can be multipled by the intraday profile
@@ -130,9 +130,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_heat_data",
             simpl="",
-            clusters="105",
+            clusters="10",
             planning_horizons=2030,
-            demand="NZ",
+            demand="DF",
         )
         sets_path_to_root("pypsa-earth-sec")
 
