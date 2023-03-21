@@ -10,10 +10,10 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
-
+import os
 
 def country_to_nodal(industrial_production, keys):
-    keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
+    #keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
 
     nodal_production = pd.DataFrame(
         index=keys.index, columns=industrial_production.columns, dtype=float
@@ -41,15 +41,20 @@ def country_to_nodal(industrial_production, keys):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake
+        from helpers import mock_snakemake, sets_path_to_root
+        
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=16,
-            planning_horizons="2030",
+            clusters=10,
+            planning_horizons=2030,
             demand="DF",
         )
+
+        sets_path_to_root("pypsa-earth-sec")
+
 
     # Load production per country tomorrow
     prod_tom_path = snakemake.input.industrial_production_per_country_tomorrow
