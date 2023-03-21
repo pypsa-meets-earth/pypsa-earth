@@ -281,7 +281,7 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
             f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {os.path.dirname(EEZ_gpkg)}"
         )
 
-    geodf_EEZ = gpd.read_file(EEZ_gpkg).to_crs(geo_crs)
+    geodf_EEZ = gpd.read_file(EEZ_gpkg, engine="pyogrio").to_crs(geo_crs)
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
@@ -652,7 +652,7 @@ def add_gdp_data(
         logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
 
     # initialize new gdp column
-    df_gadm["gdp"] = 0.0
+    # df_gadm["gdp"] = 0.0
 
     GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
 
@@ -705,6 +705,103 @@ def _process_func_download_pop(c_code):
     )
 
 
+def get_worldpop_features(WorldPop_inputfile):
+    """
+    Function
+
+
+
+    """
+    worldpop_features = []
+    # Open the file using rasterio
+    with rasterio.open(WorldPop_inputfile) as src:
+        # Add affine transform
+        worldpop_features.append(src.meta["transform"])
+        # Add dimensions of image
+        worldpop_features.append(src.shape[0])
+        worldpop_features.append(src.shape[1])
+
+        # --- Process the pixels in the image for population data ---
+        # Read the gray layer (1) to get an np.array of this band
+        np_pop_raster = src.read(1)
+
+        # Set np_pop_valid to all pixels in np_pop_raster that aren't 'nodata'
+        np_pop_valid = np_pop_raster[np_pop_raster != src.nodata]
+
+        # Set 'nodata' values to 0
+        np_pop_raster[np_pop_raster == src.nodata] = 0
+
+        # Set np_pop_xy to pixel locations of non zero values (same order as np_pop_valid)
+        np_pop_xy = np_pop_raster.nonzero()
+
+        # Combine arrays to get [ value, x, y ] array
+        np_pop = np.array([np_pop_valid, np_pop_xy[0], np_pop_xy[1]]).T
+
+    return worldpop_features, np_pop
+
+
+def compute_geomask_country(country_rows, worldpop_features):
+    """
+    Function
+
+
+
+    """
+    affine_transform, y_axis_len, x_axis_len = worldpop_features
+
+    # Set an empty numpy array with the dimensions of the country .tif file
+    # np_map_ID will contain a ID for each location (undefined is 0)
+    # ID corresponds to a specific geometry in country_rows
+    np_map_ID = np.zeros((y_axis_len, x_axis_len))
+
+    # List to contain the mappings of id to GADM_ID
+    id_to_GADM_ID = []
+    # Loop the country_rows geoDataFrame
+    for i in range(len(country_rows)):
+        # Set the current geometry
+        cur_geometry = country_rows["geometry"][i]
+        # Generate a mask for the specific geometry
+        temp_mask = rasterio.features.geometry_mask(
+            [cur_geometry], (y_axis_len, x_axis_len), affine_transform, invert=True
+        )
+
+        # Map the values of counter value to np_map_ID
+        np_map_ID[temp_mask] = i + 1
+
+        # Store the id -> GADM_ID mapping
+        id_to_GADM_ID.append([i + 1, country_rows["GADM_ID"][i]])
+
+    return np_map_ID.astype(int), pd.DataFrame(id_to_GADM_ID).set_index(0)
+
+
+def compute_population(np_pop, country_geomask, id_mapping):
+    """
+    Function
+
+
+
+    """
+    # Declare an array to contain population counts
+    np_pop_count = np.zeros(len(id_mapping) + 1)
+
+    # Loop the population data
+    for i in range(len(np_pop)):
+        cur_value, cur_x, cur_y = np_pop[i]
+
+        # Set the current id to the id at the same coordinate of the geomask
+        cur_id = country_geomask[int(cur_x)][int(cur_y)]
+
+        # Add the current value to the population
+        np_pop_count[cur_id] += cur_value
+
+    df_pop_count = pd.DataFrame(np_pop_count)
+    df_pop_count = pd.DataFrame(df_pop_count).join(id_mapping)
+
+    df_pop_count.columns = ["pop", "GADM_ID"]
+
+    return df_pop_count.drop(0)
+
+
 def add_population_data(
     df_gadm,
     country_codes,
@@ -742,62 +839,83 @@ def add_population_data(
         ascii=False,
         desc="Compute population ",
     )
-    if (nprocesses is None) or (nprocesses == 1):
-        with tqdm(total=df_gadm.shape[0], **tqdm_kwargs) as pbar:
-            for c_code in country_codes:
-                # get subset by country code
-                country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+    with tqdm(total=len(country_codes), **tqdm_kwargs) as pbar:
+        for c_code in country_codes:
+            # get subset by country code
+            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
-                # get worldpop image
-                WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-                    c_code, worldpop_method, year, update, out_logging
-                )
+            # get worldpop image
+            WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+                c_code, worldpop_method, year, update, out_logging
+            )
 
-                with rasterio.open(WorldPop_inputfile) as src:
-                    for i, row in country_rows.iterrows():
-                        df_gadm.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
-                        pbar.update(1)
+            worldpop_features, np_pop = get_worldpop_features(WorldPop_inputfile)
 
-    else:
-        # generator function to split a list ll into n_objs lists
-        def divide_list(ll, n_objs):
-            for i in range(0, len(ll), n_objs):
-                yield ll[i : i + n_objs]
+            # get the geomask with id mappings
+            country_geomask, id_mapping = compute_geomask_country(
+                country_rows, worldpop_features
+            )
 
-        id_parallel_chunks = list(
-            divide_list(df_gadm.index, ceil(len(df_gadm) / nchunks))
-        )
+            df_pop_count = compute_population(np_pop, country_geomask, id_mapping)
 
-        kwargs = {
-            "initializer": _init_process_pop,
-            "initargs": (df_gadm, year, worldpop_method),
-            "processes": nprocesses,
-        }
-        with mp.get_context("spawn").Pool(**kwargs) as pool:
-            if disable_progressbar:
-                list(pool.map(_process_func_download_pop, country_codes))
-                _ = list(pool.map(_process_func_pop, id_parallel_chunks))
-                for elem in _:
-                    df_gadm.loc[elem.index, "pop"] = elem["pop"]
-            else:
-                list(
-                    tqdm(
-                        pool.imap(_process_func_download_pop, country_codes),
-                        total=len(country_codes),
-                        ascii=False,
-                        desc="Download WorldPop ",
-                        unit=" countries",
-                    )
-                )
-                _ = list(
-                    tqdm(
-                        pool.imap(_process_func_pop, id_parallel_chunks),
-                        total=len(id_parallel_chunks),
-                        **tqdm_kwargs,
-                    )
-                )
-                for elem in _:
-                    df_gadm.loc[elem.index, "pop"] = elem["pop"]
+            pbar.update(1)
+
+    # if (nprocesses is None) or (nprocesses == 1):
+    #     with tqdm(total=df_gadm.shape[0], **tqdm_kwargs) as pbar:
+    #         for c_code in country_codes:
+    #             # get subset by country code
+    #             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+
+    #             # get worldpop image
+    #             WorldPop_inputfile, WorldPop_filename = download_WorldPop(
+    #                 c_code, worldpop_method, year, update, out_logging
+    #             )
+
+    #             with rasterio.open(WorldPop_inputfile) as src:
+    #                 for i, row in country_rows.iterrows():
+    #                     df_gadm.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
+    #                     pbar.update(1)
+
+    # else:
+    #     # generator function to split a list ll into n_objs lists
+    #     def divide_list(ll, n_objs):
+    #         for i in range(0, len(ll), n_objs):
+    #             yield ll[i : i + n_objs]
+
+    #     id_parallel_chunks = list(
+    #         divide_list(df_gadm.index, ceil(len(df_gadm) / nchunks))
+    #     )
+
+    #     kwargs = {
+    #         "initializer": _init_process_pop,
+    #         "initargs": (df_gadm, year, worldpop_method),
+    #         "processes": nprocesses,
+    #     }
+    #     with mp.get_context("spawn").Pool(**kwargs) as pool:
+    #         if disable_progressbar:
+    #             list(pool.map(_process_func_download_pop, country_codes))
+    #             _ = list(pool.map(_process_func_pop, id_parallel_chunks))
+    #             for elem in _:
+    #                 df_gadm.loc[elem.index, "pop"] = elem["pop"]
+    #         else:
+    #             list(
+    #                 tqdm(
+    #                     pool.imap(_process_func_download_pop, country_codes),
+    #                     total=len(country_codes),
+    #                     ascii=False,
+    #                     desc="Download WorldPop ",
+    #                     unit=" countries",
+    #                 )
+    #             )
+    #             _ = list(
+    #                 tqdm(
+    #                     pool.imap(_process_func_pop, id_parallel_chunks),
+    #                     total=len(id_parallel_chunks),
+    #                     **tqdm_kwargs,
+    #                 )
+    #             )
+    #             for elem in _:
+    #                 df_gadm.loc[elem.index, "pop"] = elem["pop"]
 
 
 def gadm(
