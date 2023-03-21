@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """Build industrial distribution keys from hotmaps database."""
 
+import os
 import uuid
 from distutils.version import StrictVersion
 from itertools import product
-import os
+
 import geopandas as gpd
 import pandas as pd
 from helpers import locate_bus, three_2_two_digits_country
@@ -47,7 +48,7 @@ def build_nodal_distribution_key(
 
     pop = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
-    #pop["country"] = pop.index.str[:2]
+    # pop["country"] = pop.index.str[:2]
     keys["population"] = pop["total"].values / pop["total"].sum()
 
     for tech, country in product(technology, countries):
@@ -79,6 +80,7 @@ def build_nodal_distribution_key(
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
