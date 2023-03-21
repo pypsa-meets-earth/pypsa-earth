@@ -256,7 +256,8 @@ def add_hydrogen(n, costs):
     if snakemake.config["hydrogen_underground_storage"]:
         if snakemake.config["custom_data"]["h2_underground"]:
             custom_cavern = pd.read_csv("resources/custom_data/h2_underground.csv")
-            countries = n.buses.country.unique().to_list()
+            #countries = n.buses.country.unique().to_list()
+            countries = snakemake.config["countries"]
             custom_cavern = custom_cavern[custom_cavern.country.isin(countries)]
             cavern_nodes = n.buses[n.buses.country.isin(custom_cavern.country.index)]
             h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
@@ -695,7 +696,7 @@ def add_aviation(n, cost):
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
-        energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
+        energy_totals.loc[new_func(), all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
     )
 
     airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
@@ -750,6 +751,9 @@ def add_aviation(n, cost):
         carrier="oil emissions",
         p_set=-co2,
     )
+
+def new_func():
+    return countries
 
 
 def add_storage(n, costs):
@@ -2141,7 +2145,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="16",
+            clusters="10",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
@@ -2161,8 +2165,8 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
     # Fetch the coutry list from the network
-    countries = list(n.buses.country.unique())
-
+    #countries = list(n.buses.country.unique())
+    countries = snakemake.config["countries"]
     # Locate all the AC buses
     nodes = n.buses[
         n.buses.carrier == "AC"
@@ -2193,8 +2197,8 @@ if __name__ == "__main__":
 
     # TODO logging
 
-    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0)
-    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
+    nodal_energy_totals = pd.read_csv(snakemake.input.nodal_energy_totals, index_col=0, keep_default_na=False, na_values=[''])
+    energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0, keep_default_na=False, na_values=[''])
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
     transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
