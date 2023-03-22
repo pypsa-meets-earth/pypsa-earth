@@ -772,7 +772,10 @@ def compute_geomask_country(country_rows, worldpop_features):
         # Store the id -> GADM_ID mapping
         id_to_GADM_ID.append([i + 1, country_rows.iloc[i]["GADM_ID"]])
 
-    return np_map_ID.astype(int), pd.DataFrame(id_to_GADM_ID).set_index(0)
+    # Return np_map_ID as type 'H' np.ushort
+    # 'H' -> https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.ushort
+    # This lowers memory usage, note: ID has to be within the range [0,65535]
+    return np_map_ID.astype("H"), pd.DataFrame(id_to_GADM_ID).set_index(0)
 
 
 def compute_population(np_pop, country_geomask, id_mapping):
