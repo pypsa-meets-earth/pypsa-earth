@@ -756,10 +756,11 @@ def compute_geomask_country(country_rows, worldpop_features):
 
     # List to contain the mappings of id to GADM_ID
     id_to_GADM_ID = []
+
     # Loop the country_rows geoDataFrame
     for i in range(len(country_rows)):
         # Set the current geometry
-        cur_geometry = country_rows["geometry"][i]
+        cur_geometry = country_rows.iloc[i]["geometry"]
         # Generate a mask for the specific geometry
         temp_mask = rasterio.features.geometry_mask(
             [cur_geometry], (y_axis_len, x_axis_len), affine_transform, invert=True
@@ -769,7 +770,7 @@ def compute_geomask_country(country_rows, worldpop_features):
         np_map_ID[temp_mask] = i + 1
 
         # Store the id -> GADM_ID mapping
-        id_to_GADM_ID.append([i + 1, country_rows["GADM_ID"][i]])
+        id_to_GADM_ID.append([i + 1, country_rows.iloc[i]["GADM_ID"]])
 
     return np_map_ID.astype(int), pd.DataFrame(id_to_GADM_ID).set_index(0)
 
@@ -799,7 +800,7 @@ def compute_population(np_pop, country_geomask, id_mapping):
 
     df_pop_count.columns = ["pop", "GADM_ID"]
 
-    return df_pop_count.drop(0)
+    return df_pop_count
 
 
 def add_population_data(
@@ -856,7 +857,13 @@ def add_population_data(
                 country_rows, worldpop_features
             )
 
+            # Calculate the population for each region
             df_pop_count = compute_population(np_pop, country_geomask, id_mapping)
+
+            # Loop the regions and write population to df_gadm
+            for i in range(len(df_pop_count)):
+                pop_count, gadm_id = df_pop_count.iloc[i]
+                df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
 
             pbar.update(1)
 
