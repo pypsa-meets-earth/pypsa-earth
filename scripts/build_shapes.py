@@ -652,7 +652,7 @@ def add_gdp_data(
         logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
 
     # initialize new gdp column
-    # df_gadm["gdp"] = 0.0
+    df_gadm["gdp"] = 0.0
 
     GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
 
