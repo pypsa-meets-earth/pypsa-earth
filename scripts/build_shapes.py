@@ -28,6 +28,7 @@ from _helpers import (
     two_digits_2_name_country,
 )
 from rasterio.mask import mask
+from rasterio.windows import Window
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
@@ -38,6 +39,26 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-earth")
+
+# Imports for profiling [temporary]
+import cProfile
+import os
+
+import psutil
+
+
+# Function for profiling functions [temporary]
+def profile(func):
+    """Decorator for run function profile"""
+
+    def wrapper(*args, **kwargs):
+        profile_filename = func.__name__ + ".prof"
+        profiler = cProfile.Profile()
+        result = profiler.runcall(func, *args, **kwargs)
+        profiler.dump_stats(profile_filename)
+        return result
+
+    return wrapper
 
 
 def download_GADM(country_code, update=False, out_logging=False):
@@ -71,7 +92,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
             logger.warning(
-                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
+                f"Stage 4 of 4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
@@ -422,7 +443,7 @@ def download_WorldPop_standard(
         Name of the file
     """
     if out_logging:
-        logger.info("Stage 3/4: Download WorldPop datasets")
+        logger.info("Stage 3 of 4: Download WorldPop datasets (standard)")
 
     if country_code == "XK":
         WorldPop_filename = f"srb_ppp_{year}_UNadj_constrained.tif"
@@ -445,7 +466,7 @@ def download_WorldPop_standard(
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
             logger.warning(
-                f"Stage 4/4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
+                f"Stage 3 of 4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
@@ -459,7 +480,7 @@ def download_WorldPop_standard(
                         loaded = True
                         break
         if not loaded:
-            logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+            logger.error(f"Stage 3 of 4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -489,7 +510,7 @@ def download_WorldPop_API(
         Name of the file
     """
     if out_logging:
-        logger.info("Stage 3/4: Download WorldPop datasets")
+        logger.info("Stage 3 of 4: Download WorldPop datasets (API)")
 
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
@@ -513,7 +534,7 @@ def download_WorldPop_API(
                     loaded = True
                     break
     if not loaded:
-        logger.error(f"Stage 4/4: Impossible to download {WorldPop_filename}")
+        logger.error(f"Stage 3 of 4: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -525,7 +546,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
 
     if out_logging:
-        logger.info("Stage 4/4: Access to GDP raster data")
+        logger.info("Stage 4 of 4: Access to GDP raster data")
 
     # tif namefile
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -552,7 +573,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     if year not in list_years:
         if out_logging:
             logger.warning(
-                f"Stage 3/4 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+                f"Stage 4 of 4 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
             )
         year = float(list_years[-1])
 
@@ -576,7 +597,7 @@ def load_GDP(
     """
 
     if out_logging:
-        logger.info("Stage 4/4: Access to GDP raster data")
+        logger.info("Stage 4 of 4: Access to GDP raster data")
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -587,7 +608,7 @@ def load_GDP(
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
             logger.warning(
-                f"Stage 4/4: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
+                f"Stage 4 of 4: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
             )
         convert_GDP(name_file_nc, year, out_logging)
 
@@ -649,7 +670,7 @@ def add_gdp_data(
         - Includes a new column ["gdp"]
     """
     if out_logging:
-        logger.info("Stage 4/4: Add gdp data to GADM GeoDataFrame")
+        logger.info("Stage 4 of 4: Add gdp data to GADM GeoDataFrame")
 
     # initialize new gdp column
     df_gadm["gdp"] = 0.0
@@ -707,23 +728,39 @@ def _process_func_download_pop(c_code):
 
 def get_worldpop_features(WorldPop_inputfile):
     """
+    Function to extract data from .tif input file
+    -------
+    Inputs:
+        WorldPop_inputfile: String pointing to location of file
+    --------
+    Outputs:
+        src.meta["transform"]: Representation of the affine transform
+        src.shape: Dimensions of the input image
+    """
+    # Open the file using rasterio
+    with rasterio.open(WorldPop_inputfile) as src:
+        return src.meta["transform"], src.shape
+
+
+def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
+    """
     Function
 
 
 
     """
-    worldpop_features = []
+    col_off, row_off, width, height = window_dimensions
+
+    current_window = Window(col_off, row_off, width, height)
+
     # Open the file using rasterio
     with rasterio.open(WorldPop_inputfile) as src:
-        # Add affine transform
-        worldpop_features.append(src.meta["transform"])
-        # Add dimensions of image
-        worldpop_features.append(src.shape[0])
-        worldpop_features.append(src.shape[1])
-
         # --- Process the pixels in the image for population data ---
         # Read the gray layer (1) to get an np.array of this band
-        np_pop_raster = src.read(1)
+        # Rasterio doesn't support lower than float32 readout
+        # Hence np_pop_raster will have nbytes = 4 * shape[0] * shape[1]
+
+        np_pop_raster = src.read(1, window=current_window)
 
         # Set np_pop_valid to all pixels in np_pop_raster that aren't 'nodata'
         np_pop_valid = np_pop_raster[np_pop_raster != src.nodata]
@@ -734,20 +771,22 @@ def get_worldpop_features(WorldPop_inputfile):
         # Set np_pop_xy to pixel locations of non zero values (same order as np_pop_valid)
         np_pop_xy = np_pop_raster.nonzero()
 
-        # Combine arrays to get [ value, x, y ] array
-        np_pop = np.array([np_pop_valid, np_pop_xy[0], np_pop_xy[1]]).T
+        # Transform to get [ x, y ] array
+        # np_pop_xy as 'I' (uintc), see
+        # https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.uintc
+        np_pop_xy = np.array([np_pop_xy[0], np_pop_xy[1]]).T.astype("I")
 
-    return worldpop_features, np_pop
+    return np_pop_valid, np_pop_xy
 
 
-def compute_geomask_country(country_rows, worldpop_features):
+def compute_geomask_region(country_rows, affine_transform, dimensions):
     """
     Function
 
 
 
     """
-    affine_transform, y_axis_len, x_axis_len = worldpop_features
+    y_axis_len, x_axis_len = dimensions
 
     # Set an empty numpy array with the dimensions of the country .tif file
     # np_map_ID will contain a ID for each location (undefined is 0)
@@ -778,7 +817,140 @@ def compute_geomask_country(country_rows, worldpop_features):
     return np_map_ID.astype("H"), pd.DataFrame(id_to_GADM_ID).set_index(0)
 
 
-def compute_population(np_pop, country_geomask, id_mapping):
+def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
+    """
+    Function computes the population for the given country rows
+
+    Inputs:
+        -------
+        country_rows:
+
+        WorldPop_inputfile:
+
+
+    Outputs:
+        --------
+        df_pop_count: Dataframe with columns
+            - "pop" containing population of GADM_ID region
+            - "GADM_ID"
+
+
+    """
+    # Get the features of the worldpop input file
+    transform, worldpop_dim = get_worldpop_features(WorldPop_inputfile)
+
+    worldpop_y_dim, worldpop_x_dim = worldpop_dim
+
+    # Rasterio doesn't support lower than float32 readout
+    # Hence reading the file will take up: nbytes = 4 * y_dim * x_dim
+    expected_bytes_input_read = 4 * worldpop_y_dim * worldpop_x_dim
+
+    # Introduce a max byte size to avoid overfilling RAM
+    worldpop_byte_limit = 100 * 10**6
+
+    # If the rasterio read will be within byte limit
+    if expected_bytes_input_read < worldpop_byte_limit:
+        # Call functions with input dimensions for window
+        window_dim = [0, 0, worldpop_x_dim, worldpop_y_dim]
+
+        # Get population values and corresponding x,y coords
+        np_pop_val, np_pop_xy = get_worldpop_val_xy(WorldPop_inputfile, window_dim)
+
+        # get the geomask with id mappings
+        country_geomask, id_mapping = compute_geomask_region(
+            country_rows, transform, [worldpop_y_dim, worldpop_x_dim]
+        )
+
+        # Calculate the population for each region
+        df_pop_count = old_compute_population(
+            np_pop_val, np_pop_xy, country_geomask, id_mapping
+        )
+
+    else:
+        if out_logging:
+            logger.info(
+                "Stage 3 of 4: compute_population for "
+                + str(country_rows["country"][0])
+                + ": Expected size of file readout was "
+                + str(expected_bytes_input_read // 10**6)
+                + " Megabytes. As the limit is "
+                + str(worldpop_byte_limit // 10**6)
+                + " Megabytes switching to windowed approach"
+            )
+        # Calculate the population using windows
+        df_pop_count = windowed_compute_population(
+            country_rows, WorldPop_inputfile, worldpop_byte_limit
+        )
+
+    return df_pop_count
+
+
+def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_limit):
+    """
+    Function
+
+
+
+    """
+    # Open the file using rasterio
+    with rasterio.open(WorldPop_inputfile) as src:
+        transform = src.meta["transform"]
+        worldpop_y_dim, worldpop_x_dim = src.shape
+        block_y_dim, block_x_dim = src.block_shapes[0]
+
+    # Calculate the bytes for reading one block from the image (float32)
+    read_block_size = 4 * block_y_dim * block_x_dim
+
+    # Calculate the amount of blocks that fit into the memory budget
+    window_block_count = worldpop_byte_limit // read_block_size
+
+    # The input files have blocks that vary the x dimension and keep y dimension to 512
+    # Hence set the dimension of the windows to the same x dimension (width)
+    window_x_dim = block_x_dim
+    window_col_off = 0
+
+    # Multiply the y_dimension by the amount of blocks in the window
+    # window_y_dim will be height of the window
+    window_y_dim = window_block_count * block_y_dim
+
+    # Calculate the y ranges of the blocks to scan the image
+    # y_range_start will serve as row offset
+    y_range_start = np.arange(0, worldpop_y_dim, window_y_dim)
+
+    print(y_range_start)
+
+    for row_off in y_range_start:
+        window_dimensions = [window_col_off, row_off, window_x_dim, window_y_dim]
+
+        print("Running window: ", window_dimensions)
+
+        np_pop_val, np_pop_xy = get_worldpop_val_xy(
+            WorldPop_inputfile, window_dimensions
+        )
+
+        # get the geomask with id mappings
+        region_geomask, id_mapping = compute_geomask_region(
+            country_rows, transform, [window_y_dim, window_x_dim]
+        )
+
+        print("geo_mask size is (MB) ", region_geomask.nbytes / 10**6)
+        print(
+            "Current RAM usage: ",
+            psutil.Process(os.getpid()).memory_info().rss / 1024**2,
+        )
+
+        print("Running: old_compute_population")
+        # Calculate the population for each region
+        df_pop_count = old_compute_population(
+            np_pop_val, np_pop_xy, region_geomask, id_mapping
+        )
+
+        print(df_pop_count)
+
+    return df_pop_count
+
+
+def old_compute_population(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     """
     Function
 
@@ -789,11 +961,12 @@ def compute_population(np_pop, country_geomask, id_mapping):
     np_pop_count = np.zeros(len(id_mapping) + 1)
 
     # Loop the population data
-    for i in range(len(np_pop)):
-        cur_value, cur_x, cur_y = np_pop[i]
+    for i in range(len(np_pop_val)):
+        cur_value = np_pop_val[i]
+        cur_x, cur_y = np_pop_xy[i]
 
         # Set the current id to the id at the same coordinate of the geomask
-        cur_id = country_geomask[int(cur_x)][int(cur_y)]
+        cur_id = region_geomask[int(cur_x)][int(cur_y)]
 
         # Add the current value to the population
         np_pop_count[cur_id] += cur_value
@@ -834,7 +1007,7 @@ def add_population_data(
     """
 
     if out_logging:
-        logger.info("Stage 4/4 POP: Add population data to GADM GeoDataFrame")
+        logger.info("Stage 3 of 4: Add population data to GADM GeoDataFrame")
 
     # initialize new population column
     df_gadm["pop"] = 0.0
@@ -848,84 +1021,26 @@ def add_population_data(
             # get subset by country code
             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
-            # get worldpop image
+            # Download worldpop image (if required) and get file location
             WorldPop_inputfile, WorldPop_filename = download_WorldPop(
                 c_code, worldpop_method, year, update, out_logging
             )
 
-            worldpop_features, np_pop = get_worldpop_features(WorldPop_inputfile)
+            if out_logging:
+                logger.info("Stage 3 of 4: Calculating population of " + str(c_code))
 
-            # get the geomask with id mappings
-            country_geomask, id_mapping = compute_geomask_country(
-                country_rows, worldpop_features
+            # Calculate the population for each geometry given in country_rows
+            df_pop_count = compute_population(
+                country_rows, WorldPop_inputfile, out_logging
             )
-
-            # Calculate the population for each region
-            df_pop_count = compute_population(np_pop, country_geomask, id_mapping)
 
             # Loop the regions and write population to df_gadm
             for i in range(len(df_pop_count)):
                 pop_count, gadm_id = df_pop_count.iloc[i]
+                # Select the row with the same "GADM_ID" and set the population count
                 df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
 
             pbar.update(1)
-
-    # if (nprocesses is None) or (nprocesses == 1):
-    #     with tqdm(total=df_gadm.shape[0], **tqdm_kwargs) as pbar:
-    #         for c_code in country_codes:
-    #             # get subset by country code
-    #             country_rows = df_gadm.loc[df_gadm["country"] == c_code]
-
-    #             # get worldpop image
-    #             WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-    #                 c_code, worldpop_method, year, update, out_logging
-    #             )
-
-    #             with rasterio.open(WorldPop_inputfile) as src:
-    #                 for i, row in country_rows.iterrows():
-    #                     df_gadm.loc[i, "pop"] = _sum_raster_over_mask(row.geometry, src)
-    #                     pbar.update(1)
-
-    # else:
-    #     # generator function to split a list ll into n_objs lists
-    #     def divide_list(ll, n_objs):
-    #         for i in range(0, len(ll), n_objs):
-    #             yield ll[i : i + n_objs]
-
-    #     id_parallel_chunks = list(
-    #         divide_list(df_gadm.index, ceil(len(df_gadm) / nchunks))
-    #     )
-
-    #     kwargs = {
-    #         "initializer": _init_process_pop,
-    #         "initargs": (df_gadm, year, worldpop_method),
-    #         "processes": nprocesses,
-    #     }
-    #     with mp.get_context("spawn").Pool(**kwargs) as pool:
-    #         if disable_progressbar:
-    #             list(pool.map(_process_func_download_pop, country_codes))
-    #             _ = list(pool.map(_process_func_pop, id_parallel_chunks))
-    #             for elem in _:
-    #                 df_gadm.loc[elem.index, "pop"] = elem["pop"]
-    #         else:
-    #             list(
-    #                 tqdm(
-    #                     pool.imap(_process_func_download_pop, country_codes),
-    #                     total=len(country_codes),
-    #                     ascii=False,
-    #                     desc="Download WorldPop ",
-    #                     unit=" countries",
-    #                 )
-    #             )
-    #             _ = list(
-    #                 tqdm(
-    #                     pool.imap(_process_func_pop, id_parallel_chunks),
-    #                     total=len(id_parallel_chunks),
-    #                     **tqdm_kwargs,
-    #                 )
-    #             )
-    #             for elem in _:
-    #                 df_gadm.loc[elem.index, "pop"] = elem["pop"]
 
 
 def gadm(
@@ -942,7 +1057,7 @@ def gadm(
     nchunks=None,
 ):
     if out_logging:
-        logger.info("Stage 4/4: Creation GADM GeoDataFrame")
+        logger.info("Stage 3 of 4: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
     df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
