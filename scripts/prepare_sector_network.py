@@ -753,8 +753,6 @@ def add_aviation(n, cost):
     )
 
 
-def new_func():
-    return countries
 
 
 def add_storage(n, costs):
