@@ -696,7 +696,7 @@ def add_aviation(n, cost):
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
-        energy_totals.loc[new_func(), all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
+        energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
     )
 
     airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
