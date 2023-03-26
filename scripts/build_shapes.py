@@ -779,14 +779,40 @@ def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
     return np_pop_valid, np_pop_xy
 
 
-def compute_geomask_region(country_rows, affine_transform, dimensions):
+def compute_geomask_region(
+    country_rows, affine_transform, window_dimensions, windowed=False
+):
     """
     Function
 
 
 
     """
-    y_axis_len, x_axis_len = dimensions
+    col_off, row_off, x_axis_len, y_axis_len = window_dimensions
+
+    if windowed:
+        # Declare a transformer with given affine_transform
+        transformer = rasterio.transform.AffineTransformer(affine_transform)
+
+        # Obtain the coordinates of the upper left corner of window
+        window_topleft_longitude, window_topleft_latitude = transformer.xy(
+            row_off, col_off
+        )
+
+        # Obtain the coordinates of the bottom right corner of window
+        window_botright_longitude, window_botright_latitude = transformer.xy(
+            row_off + y_axis_len, col_off + x_axis_len
+        )
+
+        # Set the current transform to the correct lat and long
+        affine_transform = rasterio.Affine(
+            affine_transform[0],
+            affine_transform[1],
+            window_topleft_longitude,
+            affine_transform[3],
+            affine_transform[4],
+            window_topleft_latitude,
+        )
 
     # Set an empty numpy array with the dimensions of the country .tif file
     # np_map_ID will contain a ID for each location (undefined is 0)
@@ -800,9 +826,27 @@ def compute_geomask_region(country_rows, affine_transform, dimensions):
     for i in range(len(country_rows)):
         # Set the current geometry
         cur_geometry = country_rows.iloc[i]["geometry"]
+
+        # In windowed mode we check if bounds of geometry overlap the window
+        if windowed:
+            latitude_min = cur_geometry.bounds[1]
+            latitude_max = cur_geometry.bounds[3]
+
+            # In the following cases we don't have to continue the loop
+            # If the geometry is above the window
+            if latitude_min > window_topleft_latitude:
+                continue
+            # If the geometry is below the window
+            if latitude_max < window_botright_latitude:
+                continue
+
         # Generate a mask for the specific geometry
         temp_mask = rasterio.features.geometry_mask(
-            [cur_geometry], (y_axis_len, x_axis_len), affine_transform, invert=True
+            [cur_geometry],
+            (y_axis_len, x_axis_len),
+            affine_transform,
+            invert=True,
+            all_touched=True,
         )
 
         # Map the values of counter value to np_map_ID
@@ -846,7 +890,7 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
     expected_bytes_input_read = 4 * worldpop_y_dim * worldpop_x_dim
 
     # Introduce a max byte size to avoid overfilling RAM
-    worldpop_byte_limit = 100 * 10**6
+    worldpop_byte_limit = 3096 * 10**6
 
     # If the rasterio read will be within byte limit
     if expected_bytes_input_read < worldpop_byte_limit:
@@ -858,11 +902,11 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
 
         # get the geomask with id mappings
         country_geomask, id_mapping = compute_geomask_region(
-            country_rows, transform, [worldpop_y_dim, worldpop_x_dim]
+            country_rows, transform, window_dim
         )
 
         # Calculate the population for each region
-        df_pop_count = old_compute_population(
+        df_pop_count = sum_values_using_geomask(
             np_pop_val, np_pop_xy, country_geomask, id_mapping
         )
 
@@ -892,6 +936,9 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
 
 
     """
+    # Create a dataframe to store the population data
+    df_pop_count = country_rows.loc[:, ["GADM_ID", "pop"]].copy()
+
     # Open the file using rasterio
     with rasterio.open(WorldPop_inputfile) as src:
         transform = src.meta["transform"]
@@ -917,8 +964,6 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
     # y_range_start will serve as row offset
     y_range_start = np.arange(0, worldpop_y_dim, window_y_dim)
 
-    print(y_range_start)
-
     for row_off in y_range_start:
         window_dimensions = [window_col_off, row_off, window_x_dim, window_y_dim]
 
@@ -930,33 +975,38 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
 
         # get the geomask with id mappings
         region_geomask, id_mapping = compute_geomask_region(
-            country_rows, transform, [window_y_dim, window_x_dim]
+            country_rows, transform, window_dimensions, windowed=True
         )
 
-        print("geo_mask size is (MB) ", region_geomask.nbytes / 10**6)
-        print(
-            "Current RAM usage: ",
-            psutil.Process(os.getpid()).memory_info().rss / 1024**2,
-        )
-
-        print("Running: old_compute_population")
         # Calculate the population for each region
-        df_pop_count = old_compute_population(
+        windowed_pop_count = sum_values_using_geomask(
             np_pop_val, np_pop_xy, region_geomask, id_mapping
         )
 
-        print(df_pop_count)
+        # Loop the regions and write population to df_pop_count
+        for i in range(len(windowed_pop_count)):
+            pop_count, gadm_id = windowed_pop_count.iloc[i]
+            # Select the row with the same "GADM_ID" and set the population count
+            df_pop_count.loc[df_pop_count["GADM_ID"] == gadm_id, "pop"] = pop_count
 
     return df_pop_count
 
 
-def old_compute_population(np_pop_val, np_pop_xy, region_geomask, id_mapping):
+def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     """
     Function
 
 
 
     """
+    # Initialize a dictionary
+    dict_id = {0: 0}
+    counter = 1
+    # Loop over ip mapping and add indicies to the dictionary
+    for ID_index in np.array(id_mapping.index):
+        dict_id[ID_index] = counter
+        counter += 1
+
     # Declare an array to contain population counts
     np_pop_count = np.zeros(len(id_mapping) + 1)
 
@@ -969,12 +1019,10 @@ def old_compute_population(np_pop_val, np_pop_xy, region_geomask, id_mapping):
         cur_id = region_geomask[int(cur_x)][int(cur_y)]
 
         # Add the current value to the population
-        np_pop_count[cur_id] += cur_value
+        np_pop_count[dict_id[cur_id]] += cur_value
 
-    df_pop_count = pd.DataFrame(np_pop_count)
-    df_pop_count = pd.DataFrame(df_pop_count).join(id_mapping)
-
-    df_pop_count.columns = ["pop", "GADM_ID"]
+    df_pop_count = pd.DataFrame(np_pop_count, columns=["pop"])
+    df_pop_count["GADM_ID"] = np.append(np.array("NaN"), id_mapping.values)
 
     return df_pop_count
 
