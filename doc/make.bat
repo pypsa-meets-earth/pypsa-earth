@@ -1,3 +1,7 @@
+REM SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+REM
+REM SPDX-License-Identifier: GPL-3.0-or-later
+
 @ECHO OFF
 
 pushd %~dp0

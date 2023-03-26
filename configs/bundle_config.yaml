@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: : 2021-2022 The PyPSA-Earth Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 # File describing the data bundle configurations that can be downloaded
 # by using the retrieve_databundle fule

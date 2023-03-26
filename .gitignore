@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
 
 # Byte-compiled / optimized / DLL files
 **/__pycache__
@@ -14,6 +17,7 @@
 # Untracked files
 config.yaml
 dag.svg
+scripts/__init__.py
 
 # Untracked folders (and files within)
 img/
