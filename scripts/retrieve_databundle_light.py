@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
