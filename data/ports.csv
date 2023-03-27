@@ -4,8 +4,52 @@ Port of Tanger Med,MA,0.2,35.5324,-5.3036,,
 Port of Kenitra,MA,0.1,34.26101,-6.5802,,
 Port of Casablanca,MA,0.4,33.5999976,-7.6166642,,
 Port of Kenitra,MA,0.1,33.1267,-8.62028,,
-dummy port 1,NG,1,6.455,4.234,,
-dummy port 1,BJ,1,6.47,2.63,,
-dummy port 1,BR,1,-22.9068,-43.1729,,
+dummy port 1,NG,1.0,6.455,4.234,,
+dummy port 1,BJ,1.0,6.47,2.63,,
+dummy port 1,BR,1.0,-22.9068,-43.1729,,
 Luderitz Harbour,NA,0.161817842,-26.6446,15.1444,https://www.namport.com.na/files/documents/e53_Annual%20Report%2012%20months%20ended%2031%20March%202022.pdf, Disaggregated from total freight of 1064174 tonnes in 21/22
 Walvis Bay Harbour,NA,0.838182158,-22.9391,14.48892,https://www.namport.com.na/files/documents/e53_Annual%20Report%2012%20months%20ended%2031%20March%202022.pdf, Disaggregated from total freight of 5512196 tonnes in 21/22
+Port of Almeirim,BR,0.00013479521725395536,-1.5290377,-52.5788111,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 297657.0 tonnes and gross container throughput of 0 units in 2019
+Port of Ananindeua,BR,1.219984637787733e-05,-1.374035,-48.4016623,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 26939.9 tonnes and gross container throughput of 0 units in 2019
+Port of Angra dos Reis,BR,0.023506577904256955,-23.0063966,-44.316326,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 51907609.2 tonnes and gross container throughput of 0 units in 2019
+Port of Aracajú,BR,0.0006380038407490622,-10.9162061,-37.0774655,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 1408850.5 tonnes and gross container throughput of 0 units in 2019
+Port of Aratu - Salvador,BR,0.031780600000502174,-12.7926188,-38.4903857,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 34153758.3 tonnes and gross container throughput of 205222 units in 2019
+Port of Areia Branca,BR,0.0020189158727906133,-4.9506652,-37.1263312,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 4458203.0 tonnes and gross container throughput of 0 units in 2019
+Port of Barra do Riacho,BR,0.004074364352866757,-19.8265461,-40.0636815,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 8997077.9 tonnes and gross container throughput of 0 units in 2019
+Port of Belém,BR,0.0002805098809715786,-1.45056,-48.4682453,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 619426.5 tonnes and gross container throughput of 0 units in 2019
+Port of Cabedelo,BR,0.0005609133412103854,-6.97324,-34.8351609,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 1238618.0 tonnes and gross container throughput of 0 units in 2019
+Port of Canoas,BR,8.926353694897937e-05,-29.9216045,-51.1799525,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 197113.2 tonnes and gross container throughput of 0 units in 2019
+Port of Coari,BR,0.0006099772841350237,-4.0885957,-63.1431166,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 1346961.8 tonnes and gross container throughput of 0 units in 2019
+Port of Corumbá,BR,0.0017522405059377062,-19.0016365,-57.6534316,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 3869326.1 tonnes and gross container throughput of 0 units in 2019
+Port of Cruzeiro do Sul,BR,9.993586088552552e-07,-7.6307956,-72.6703869,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 2206.8 tonnes and gross container throughput of 0 units in 2019
+Port of Foz do Iguaçu,BR,4.382451060964222e-06,-25.5401479,-54.5858139,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 9677.4 tonnes and gross container throughput of 0 units in 2019
+Port of Galinhos,BR,8.006797049996131e-05,-5.0923928,-36.2744827,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 176807.4 tonnes and gross container throughput of 0 units in 2019
+Port of Ilhéus,BR,0.0013980821342086387,-14.792599,-39.0453843,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 3087267.8 tonnes and gross container throughput of 0 units in 2019
+Port of Imbituba,BR,0.006407630265506508,-28.241827,-48.6643444,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 5761427.7 tonnes and gross container throughput of 47784 units in 2019
+Port of Itaguaí,BR,0.05165474939737074,-22.8629597,-43.775322,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 88693179.0 tonnes and gross container throughput of 144535 units in 2019
+Port of Itaituba,BR,0.0032060588913032707,-4.2625218,-55.9878139,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 7079671.6 tonnes and gross container throughput of 0 units in 2019
+Port of Itajaí,BR,0.058969639523390315,-26.9046787,-48.6552979,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 13421441.8 tonnes and gross container throughput of 665354 units in 2019
+Port of Itaqui,BR,0.10403730894745737,-2.557055,-44.3523473,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 229587500.0 tonnes and gross container throughput of 851 units in 2019
+Port of Macapá,BR,0.0007312748654963033,0.0401529,-51.0569588,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 1614813.1 tonnes and gross container throughput of 0 units in 2019
+Port of Maceió,BR,0.0009686750661845393,-9.6476843,-35.7339264,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 2139044.1 tonnes and gross container throughput of 0 units in 2019
+Port of Manaus,BR,0.04311081281230064,-3.1316333,-59.9825041,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 28347958.599999998 tonnes and gross container throughput of 380825 units in 2019
+Port of Natal,BR,0.003483267651641448,-5.805398,-35.2080905,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 3418636.9 tonnes and gross container throughput of 24343 units in 2019
+Port of Paranaguá - Antonina,BR,0.06253069932785872,-25.427116849999997,-48.71130068256013,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 52934377.9 tonnes and gross container throughput of 485057 units in 2019
+Port of Pecém - Fortaleza,BR,0.03035886564628692,-3.60441685,-38.89048344497465,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 22472482.1 tonnes and gross container throughput of 253882 units in 2019
+Port of Porto Alegre,BR,0.008794173231541332,-30.0324999,-51.2303767,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 17140049.299999997 tonnes and gross container throughput of 12985 units in 2019
+Port of Porto Velho,BR,0.005451565487955236,-8.7494525,-63.8735438,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 9960017.200000001 tonnes and gross container throughput of 11839 units in 2019
+Port of Rio Grande,BR,0.050522093358973355,-32.0334252,-52.0991297,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 40683620.699999996 tonnes and gross container throughput of 403783 units in 2019
+Port of Rio de Janeiro -  Niterói,BR,0.030785273533835766,-22.8818386,-43.0631796,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 24333210.7 tonnes and gross container throughput of 248646 units in 2019
+Port of Santa Maria da Serra,BR,8.282798088304548e-05,-22.5691072,-48.157095,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 182902.1 tonnes and gross container throughput of 0 units in 2019
+Port of Santarém,BR,0.005869182707136456,-2.438489,-54.699611,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 12960425.1 tonnes and gross container throughput of 0 units in 2019
+Port of Santos,BR,0.2535498884721381,-23.9335988,-46.3286399,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 129491428.8 tonnes and gross container throughput of 2451871 units in 2019
+Port of Suape - Recife,BR,0.03374749009009438,-8.3539067,-34.9567358,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 25304715.2 tonnes and gross container throughput of 280375 units in 2019
+Port of São Francisco do Sul,BR,0.04621257116930472,-26.2495087,-48.6308087,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 27775302.9 tonnes and gross container throughput of 423106 units in 2019
+Port of São João da Barra,BR,0.01962845446947158,-21.6348588,-41.0487079,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 43343873.7 tonnes and gross container throughput of 0 units in 2019
+Port of São Sebastião,BR,0.019881751572794187,-23.8027866,-45.4070527,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 43903208.5 tonnes and gross container throughput of 0 units in 2019
+Port of São Simão,BR,0.0005190454323795269,-18.9939882,-50.5463828,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 1146164.6 tonnes and gross container throughput of 0 units in 2019
+Port of Tomé Açu,BR,1.5226497303327798e-05,-2.4166306,-48.1522907,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 33623.4 tonnes and gross container throughput of 0 units in 2019
+Port of Vila do Conde - Belém,BR,0.023139365515648696,-1.5666293,-48.7643669,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 37809746.8 tonnes and gross container throughput of 75692 units in 2019
+Port of Vitória,BR,0.06078467156375385,-20.3200917,-40.3376682,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 103746859.80000001 tonnes and gross container throughput of 173629 units in 2019
+Port of Vitória do Xingu,BR,6.450817251867563e-06,-2.8833063,-52.0114889,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 14244.8 tonnes and gross container throughput of 0 units in 2019
+Port of Óbidos,BR,0.008609092206358408,-1.901072,-55.520812,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 19010738.0 tonnes and gross container throughput of 0 units in 2019
