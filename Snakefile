@@ -74,12 +74,14 @@ rule solve_all_networks:
             **config["export"]
         ),
 
+
 rule prepare_ports:
     output:
         ports="data/ports.csv",
         # TODO move from data to resources
     script:
         "scripts/prepare_ports.py"
+
 
 rule prepare_sector_network:
     input:
