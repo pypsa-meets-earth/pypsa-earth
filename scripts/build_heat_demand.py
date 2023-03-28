@@ -14,7 +14,7 @@ if __name__ == "__main__":
         from helpers import mock_snakemake, sets_path_to_root
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="900")
+        snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="10")
         sets_path_to_root("pypsa-earth-sec")
 
     time = pd.date_range(freq="h", **snakemake.config["snapshots"])

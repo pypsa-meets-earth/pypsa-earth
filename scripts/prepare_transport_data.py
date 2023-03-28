@@ -88,7 +88,9 @@ def prepare_transport_data(n):
     nodal_transport_shape = transport_shape / transport_shape.sum().sum()
     transport_shape = transport_shape / transport_shape.sum()
 
-    transport_data = pd.read_csv(snakemake.input.transport_name, index_col=0)
+    transport_data = pd.read_csv(
+        snakemake.input.transport_name, index_col=0, keep_default_na=False
+    )
 
     nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.0)
 
@@ -201,8 +203,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_transport_data",
             simpl="",
-            clusters="189",
-            demand="AP",
+            clusters="10",
+            demand="DF",
             planning_horizons=2030,
         )
 

@@ -6,7 +6,6 @@ Port of Casablanca,MA,0.4,33.5999976,-7.6166642,,
 Port of Kenitra,MA,0.1,33.1267,-8.62028,,
 dummy port 1,NG,1.0,6.455,4.234,,
 dummy port 1,BJ,1.0,6.47,2.63,,
-dummy port 1,BR,1.0,-22.9068,-43.1729,,
 Luderitz Harbour,NA,0.161817842,-26.6446,15.1444,https://www.namport.com.na/files/documents/e53_Annual%20Report%2012%20months%20ended%2031%20March%202022.pdf, Disaggregated from total freight of 1064174 tonnes in 21/22
 Walvis Bay Harbour,NA,0.838182158,-22.9391,14.48892,https://www.namport.com.na/files/documents/e53_Annual%20Report%2012%20months%20ended%2031%20March%202022.pdf, Disaggregated from total freight of 5512196 tonnes in 21/22
 Port of Almeirim,BR,0.00013479521725395536,-1.5290377,-52.5788111,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 297657.0 tonnes and gross container throughput of 0 units in 2019
@@ -53,3 +52,4 @@ Port of Vila do Conde - Belém,BR,0.023139365515648696,-1.5666293,-48.7643669,ht
 Port of Vitória,BR,0.06078467156375385,-20.3200917,-40.3376682,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 103746859.80000001 tonnes and gross container throughput of 173629 units in 2019
 Port of Vitória do Xingu,BR,6.450817251867563e-06,-2.8833063,-52.0114889,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 14244.8 tonnes and gross container throughput of 0 units in 2019
 Port of Óbidos,BR,0.008609092206358408,-1.901072,-55.520812,https://web3.antaq.gov.br/ea/sense/Relatorio.html,Disaggregated from freight of 19010738.0 tonnes and gross container throughput of 0 units in 2019
+dummy port 1,AE,1,25.2048,55.2708,,

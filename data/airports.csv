@@ -19,8 +19,6 @@ Andimba Toivo ya Toivo Airport,NA,0.054722253,-17.5847,15.9526,http://www.airpor
 Luderitz Airport,NA,0.024969263,-26.687,15.2429,http://www.airports.com.na/files/files/Annual%20report.pdf, Disaggregated from total aircraft movement of 1117 in 2015
 Katima Mulilo Airport,NA,0.03073656,-17.6343,24.1767,http://www.airports.com.na/files/files/Annual%20report.pdf, Disaggregated from total aircraft movement of 1375 in 2015
 Keetmanshoop Airport,NA,0.022912708,-26.5398,18.1114,http://www.airports.com.na/files/files/Annual%20report.pdf, Disaggregated from total aircraft movement of 1025 in 2015
-Dummy Airport1,BR,0.7,-22.9068,-43.1729,,
-Dummy Airport2,BR,0.3,-15.7975,-47.8919,,
 Arealva,BR,0.00025176979729572385,-22.15705835,-49.07515943787047,"['https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/dados-estatisticos/arquivos/', 'https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/todos-os-dados-abertos']",Disaggregated from fuel consumption of 1077726.0 in 2019
 Araraquara,BR,9.970562971090514e-07,-21.812670400000002,-48.13305436466936,"['https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/dados-estatisticos/arquivos/', 'https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/todos-os-dados-abertos']",Disaggregated from fuel consumption of 4268.0 in 2019
 Aracaju,BR,0.005775662356044446,-10.98281225,-37.07602527743482,"['https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/dados-estatisticos/arquivos/', 'https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/todos-os-dados-abertos']",Disaggregated from fuel consumption of 24723305.0 in 2019
@@ -173,3 +171,4 @@ Rio Verde,BR,9.896087444492958e-05,-17.834426,-50.9559705443272,"['https://www.g
 Maués,BR,4.016492248405792e-06,-3.3699246499999997,-57.724955102848156,"['https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/dados-estatisticos/arquivos/', 'https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/todos-os-dados-abertos']",Disaggregated from fuel consumption of 17193.0 in 2019
 Rondonópolis,BR,1.1276454419272237e-06,-16.5834324,-54.72481645658263,"['https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/dados-estatisticos/arquivos/', 'https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/todos-os-dados-abertos']",Disaggregated from fuel consumption of 4827.0 in 2019
 Tangará da Serra,BR,9.250804196162447e-06,-14.66279795,-57.44358442390656,"['https://www.gov.br/anac/pt-br/assuntos/dados-e-estatisticas/dados-estatisticos/arquivos/', 'https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/todos-os-dados-abertos']",Disaggregated from fuel consumption of 39599.0 in 2019
+Dummy Airport3,AE,1,24.4539,54.3773,,
