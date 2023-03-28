@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
+import os
 from pathlib import Path
 
-from _helpers import configure_logging
-
+import country_converter as coco
 import numpy as np
 import pandas as pd
-import country_converter as coco
+from _helpers import configure_logging
 
 logger = logging.getLogger(__name__)
 
@@ -31,43 +30,71 @@ def download_ports():
     Downloads the world ports index csv File and NOT as shape or other because it is updated on a monthly basis.
     The following csv file was downloaded from the webpage https://msi.nga.mil/Publications/WPI as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
     """
-    fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv" 
-    storage_options = {'User-Agent': 'Mozilla/5.0'}
+    fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
+    storage_options = {"User-Agent": "Mozilla/5.0"}
     wpi_csv = pd.read_csv(fn, index_col=0, storage_options=storage_options)
 
-    return(wpi_csv)
-    
+    return wpi_csv
+
+
 def prepare_data():
     df = download_ports().copy()
 
     # Add ISO2 country code for each country
-    df = df.rename(columns={"Country Code": "country_full_name", "Latitude": "y", "Longitude": "x", "Main Port Name": "name"})  
-    df["country"] = df.country_full_name.apply(lambda x: coco.convert(names=x, to='ISO2', not_found=None))
+    df = df.rename(
+        columns={
+            "Country Code": "country_full_name",
+            "Latitude": "y",
+            "Longitude": "x",
+            "Main Port Name": "name",
+        }
+    )
+    df["country"] = df.country_full_name.apply(
+        lambda x: coco.convert(names=x, to="ISO2", not_found=None)
+    )
 
     # Drop small islands that have no ISO2:
-    df = df[df.country_full_name != 'Wake Island']
-    df = df[df.country_full_name != 'Johnson Atoll']
-    df = df[df.country_full_name != 'Midway Islands']
+    df = df[df.country_full_name != "Wake Island"]
+    df = df[df.country_full_name != "Johnson Atoll"]
+    df = df[df.country_full_name != "Midway Islands"]
 
     # Select the columns that we need to keep
     df = df.reset_index()
-    df = df[['World Port Index Number','Region Name', 'name', 'Alternate Port Name', 'country', 'World Water Body', 'Liquified Natural Gas Terminal Depth (m)', 'Harbor Size', 'Harbor Type', 'Harbor Use', 'country_full_name', 'y', 'x']]
+    df = df[
+        [
+            "World Port Index Number",
+            "Region Name",
+            "name",
+            "Alternate Port Name",
+            "country",
+            "World Water Body",
+            "Liquified Natural Gas Terminal Depth (m)",
+            "Harbor Size",
+            "Harbor Type",
+            "Harbor Use",
+            "country_full_name",
+            "y",
+            "x",
+        ]
+    ]
 
     # Drop ports that are very small and that have unknown size (Unknown size ports are in total 19 and not suitable for H2 - checked visually)
-    ports = df.loc[df["Harbor Size"].isin(['Small', 'Large', 'Medium'])]
+    ports = df.loc[df["Harbor Size"].isin(["Small", "Large", "Medium"])]
 
     ports.insert(8, "Harbor_size_nr", 1)
-    ports.loc[ports["Harbor Size"].isin(['Small']), 'Harbor_size_nr'] = 1
-    ports.loc[ports["Harbor Size"].isin(['Medium']), 'Harbor_size_nr'] = 2
-    ports.loc[ports["Harbor Size"].isin(['Large']), 'Harbor_size_nr'] = 3
+    ports.loc[ports["Harbor Size"].isin(["Small"]), "Harbor_size_nr"] = 1
+    ports.loc[ports["Harbor Size"].isin(["Medium"]), "Harbor_size_nr"] = 2
+    ports.loc[ports["Harbor Size"].isin(["Large"]), "Harbor_size_nr"] = 3
 
     df1 = ports.copy()
-    df1 = df1.groupby(['country_full_name']).sum('Harbor_size_nr')
-    df1 = df1[['Harbor_size_nr']]
-    df1 = df1.rename(columns={'Harbor_size_nr': "Total_Harbor_size_nr"})
+    df1 = df1.groupby(["country_full_name"]).sum("Harbor_size_nr")
+    df1 = df1[["Harbor_size_nr"]]
+    df1 = df1.rename(columns={"Harbor_size_nr": "Total_Harbor_size_nr"})
 
-    ports = ports.set_index('country_full_name').join(df1, how='left')
+    ports = ports.set_index("country_full_name").join(df1, how="left")
 
-    ports['Harbor_size_weight'] = ports['Harbor_size_nr']/ports['Total_Harbor_size_nr']
+    ports["Harbor_size_weight"] = (
+        ports["Harbor_size_nr"] / ports["Total_Harbor_size_nr"]
+    )
 
-    ports.to_csv(r'./data/ports.csv', sep=',', encoding='utf-8', header='true')
+    ports.to_csv(r"./data/ports.csv", sep=",", encoding="utf-8", header="true")
