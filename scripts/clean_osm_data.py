@@ -914,7 +914,6 @@ def clean_data(
         df_all_substations = set_countryname_by_shape(
             df_all_substations,
             ext_country_shapes,
-            col_country="Country",
         )
 
     # set unique bus ids
