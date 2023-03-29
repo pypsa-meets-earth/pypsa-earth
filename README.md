@@ -2,7 +2,7 @@
 
 # PyPSA-Earth-Sec: A Sector-Coupled Open Optimisation Model of the Global Energy System
 
-## Development Status: Version 0.0.1
+## Development Status: Version 0.0.2
 
 [![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-mac.yaml)
@@ -71,7 +71,7 @@ The diagram below depicts one representative clustered node showing the combinat
   - Make sure `build_cutout` is set to `true`
 - In the terminal run the following commands:
   - Activate the environment: `conda activate pypsa-earth`
-  - Create the base network for the country by running : `snakemake -j a base_network`
+  - Create the base network for the country by running : `snakemake -j 1 base_network`
 
 
 - In the folder *pypsa-earth-sec* open a terminal/command window to be located at this path `~/pypsa-earth-sec/`
