@@ -756,25 +756,25 @@ def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
     # Open the file using rasterio
     with rasterio.open(WorldPop_inputfile) as src:
         # --- Process the pixels in the image for population data ---
+
         # Read the gray layer (1) to get an np.array of this band
         # Rasterio doesn't support lower than float32 readout
-        # Hence np_pop_raster will have nbytes = 4 * shape[0] * shape[1]
-
+        # Hence np_pop_raster will have nbytes = 4 * width * height
         np_pop_raster = src.read(1, window=current_window)
-
-        # Set np_pop_valid to all pixels in np_pop_raster that aren't 'nodata'
-        np_pop_valid = np_pop_raster[np_pop_raster != src.nodata]
 
         # Set 'nodata' values to 0
         np_pop_raster[np_pop_raster == src.nodata] = 0
 
-        # Set np_pop_xy to pixel locations of non zero values (same order as np_pop_valid)
+        # Set np_pop_xy to pixel locations of non zero values
         np_pop_xy = np_pop_raster.nonzero()
 
         # Transform to get [ x, y ] array
         # np_pop_xy as 'I' (uintc), see
         # https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.uintc
         np_pop_xy = np.array([np_pop_xy[0], np_pop_xy[1]]).T.astype("I")
+
+        # Extract the values from the locations of non zero pixels
+        np_pop_valid = np_pop_raster[np_pop_xy.T[0], np_pop_xy.T[1]]
 
     return np_pop_valid, np_pop_xy
 
@@ -890,6 +890,7 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
     expected_bytes_input_read = 4 * worldpop_y_dim * worldpop_x_dim
 
     # Introduce a max byte size to avoid overfilling RAM
+    # Ensure worldpop_byte_limit > 883 * 10**6 (minimum memory for 'US')
     worldpop_byte_limit = 3096 * 10**6
 
     # If the rasterio read will be within byte limit
@@ -914,7 +915,7 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
         if out_logging:
             logger.info(
                 "Stage 3 of 4: compute_population for "
-                + str(country_rows["country"][0])
+                + str(country_rows.iloc[0]["country"])
                 + ": Expected size of file readout was "
                 + str(expected_bytes_input_read // 10**6)
                 + " Megabytes. As the limit is "
@@ -945,16 +946,21 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
         worldpop_y_dim, worldpop_x_dim = src.shape
         block_y_dim, block_x_dim = src.block_shapes[0]
 
-    # Calculate the bytes for reading one block from the image (float32)
-    read_block_size = 4 * block_y_dim * block_x_dim
+    # Set the windows x dimension to the input x dimension (width)
+    window_x_dim = worldpop_x_dim
+    # From testing we can assume max x dimension will always fit in memory:
+    #   Largest memory requirement is 'US' at ~882.1 MB = 4 * 512 * window_x_dim
+    #   Hence worldpop_byte_limit has to be greater than 883 MB
+
+    # As the window spans the x dimension, set column offset to 0
+    window_col_off = 0
+
+    # Calculate the bytes for reading the window using window_x_dim (float32)
+    read_block_size = 4 * block_y_dim * window_x_dim
 
     # Calculate the amount of blocks that fit into the memory budget
+    # Using the calculated x dimension
     window_block_count = worldpop_byte_limit // read_block_size
-
-    # The input files have blocks that vary the x dimension and keep y dimension to 512
-    # Hence set the dimension of the windows to the same x dimension (width)
-    window_x_dim = block_x_dim
-    window_col_off = 0
 
     # Multiply the y_dimension by the amount of blocks in the window
     # window_y_dim will be height of the window
@@ -962,9 +968,9 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
 
     # Calculate the y ranges of the blocks to scan the image
     # y_range_start will serve as row offset
-    y_range_start = np.arange(0, worldpop_y_dim, window_y_dim)
+    window_row_off = np.arange(0, worldpop_y_dim, window_y_dim)
 
-    for row_off in y_range_start:
+    for row_off in window_row_off:
         window_dimensions = [window_col_off, row_off, window_x_dim, window_y_dim]
 
         print("Running window: ", window_dimensions)
@@ -972,6 +978,10 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
         np_pop_val, np_pop_xy = get_worldpop_val_xy(
             WorldPop_inputfile, window_dimensions
         )
+
+        # If no values are present in the current window skip the remaining steps
+        if len(np_pop_val) == 0:
+            continue
 
         # get the geomask with id mappings
         region_geomask, id_mapping = compute_geomask_region(
@@ -985,9 +995,9 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
 
         # Loop the regions and write population to df_pop_count
         for i in range(len(windowed_pop_count)):
-            pop_count, gadm_id = windowed_pop_count.iloc[i]
+            gadm_id, pop_count = windowed_pop_count.iloc[i]
             # Select the row with the same "GADM_ID" and set the population count
-            df_pop_count.loc[df_pop_count["GADM_ID"] == gadm_id, "pop"] = pop_count
+            df_pop_count.loc[df_pop_count["GADM_ID"] == gadm_id, "pop"] += pop_count
 
     return df_pop_count
 
@@ -1023,6 +1033,7 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
 
     df_pop_count = pd.DataFrame(np_pop_count, columns=["pop"])
     df_pop_count["GADM_ID"] = np.append(np.array("NaN"), id_mapping.values)
+    df_pop_count = df_pop_count[["GADM_ID", "pop"]]
 
     return df_pop_count
 
@@ -1084,7 +1095,7 @@ def add_population_data(
 
             # Loop the regions and write population to df_gadm
             for i in range(len(df_pop_count)):
-                pop_count, gadm_id = df_pop_count.iloc[i]
+                gadm_id, pop_count = df_pop_count.iloc[i]
                 # Select the row with the same "GADM_ID" and set the population count
                 df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
 
