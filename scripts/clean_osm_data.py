@@ -370,6 +370,7 @@ def clean_circuits(df):
 
     df["circuits"] = (
         df["circuits"]
+        .astype(str)
         .replace(repl_circuits)
         .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
     )
@@ -682,6 +683,8 @@ def integrate_lines_df(df_all_lines, distance_crs):
 
 
 def filter_lines_by_geometry(df_all_lines):
+    if df_all_lines.empty:
+        return df_all_lines
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
