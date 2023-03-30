@@ -145,7 +145,9 @@ def plot_costs():
         df.index.difference(preferred_order)
     )
 
-    new_columns = df.sum().sort_values().index
+    # Sort columns by sum
+    new_columns = df.columns # If you want to sort by values, then use: new_columns = df.columns.sort_values()
+
 
     fig, ax = plt.subplots(figsize=(12, 8))
 
@@ -172,7 +174,7 @@ def plot_costs():
     ax.legend(
         handles, labels, ncol=1, loc="upper left", bbox_to_anchor=[1, 1], frameon=False
     )
-    plt.xticks(rotation=0)
+    plt.xticks(rotation=45, ha="right")
 
     fig.savefig(snakemake.output.costs, bbox_inches="tight")
 
@@ -207,7 +209,7 @@ def plot_energy():
         df.index.difference(preferred_order)
     )
 
-    new_columns = df.columns.sort_values()
+    new_columns = df.columns # If you want to sort by values, then use: new_columns = df.columns.sort_values()
 
     fig, ax = plt.subplots(figsize=(12, 8))
 
@@ -235,7 +237,8 @@ def plot_energy():
     ax.legend(
         handles, labels, ncol=1, loc="upper left", bbox_to_anchor=[1, 1], frameon=False
     )
-    plt.xticks(rotation=0)
+    plt.xticks(rotation=45, ha="right")
+
 
     fig.savefig(snakemake.output.energy, bbox_inches="tight")
 
@@ -288,7 +291,7 @@ def plot_balances():
             df.index.difference(preferred_order)
         )
 
-        new_columns = df.columns.sort_values()
+        new_columns = df.columns # If you want to sort by values, then use: new_columns = df.columns.sort_values()()
 
         fig, ax = plt.subplots(figsize=(12, 8))
 
@@ -322,7 +325,7 @@ def plot_balances():
             bbox_to_anchor=[1, 1],
             frameon=False,
         )
-        plt.xticks(rotation=0)
+        plt.xticks(rotation=45, ha="right")
 
         fig.savefig(snakemake.output.balances[:-10] + k + ".pdf", bbox_inches="tight")
 
