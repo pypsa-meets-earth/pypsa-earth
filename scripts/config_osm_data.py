@@ -426,7 +426,7 @@ world_iso = {
         "CL": "chile",
         "CO": "colombia",
         "EC": "ecuador",
-        # "FK": "falkland-islands", #Islands
+        "FK": "falkland-islands",  # Islands
         "GF": "french-guiana",
         "GY": "guyana",  # No Data
         "PE": "peru",
