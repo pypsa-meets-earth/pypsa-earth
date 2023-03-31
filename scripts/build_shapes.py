@@ -77,8 +77,11 @@ def download_GADM(country_code, update=False, out_logging=False):
     gpkg file per country
 
     """
+    if country_code == "XK":
+        GADM_filename = f"gadm41_XKO"
+    else:
+        GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
 
-    GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
