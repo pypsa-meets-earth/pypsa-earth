@@ -15,7 +15,7 @@
 *.zip
 
 # Untracked files
-config.yaml
+#config.yaml
 dag.svg
 scripts/__init__.py
 
