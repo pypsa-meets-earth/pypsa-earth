@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA-Earth Authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 ##########################################
 Release Notes
@@ -78,6 +77,8 @@ Upcoming Release
 * Fix isolated buses when simplifying the network and add clustering by networks `PR #632 https://github.com/pypsa-meets-earth/pypsa-earth/pull/632`__
 
 * Include hydro runoff normalization `PR #631 https://github.com/pypsa-meets-earth/pypsa-earth/pull/631`__
+
+* Add REUSE compatability `PR #651 https://github.com/pypsa-meets-earth/pypsa-earth/pull/651`__
 
 PyPSA-Earth 0.1.0
 =================

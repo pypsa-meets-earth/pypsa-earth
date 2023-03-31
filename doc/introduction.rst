@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 .. _introduction:
 
@@ -81,7 +80,8 @@ PyPSA-Earth work is released under multiple licenses:
 * Configuration files are mostly licensed under `CC0-1.0 <https://creativecommons.org/publicdomain/zero/1.0/>`_.
 * Data files are licensed under different licenses as noted below.
 
-Licenses and urls of the data used in PyPSA-Earth:
+Invididual files contain license information in the header or in the `dep5 <.reuse/dep5>`_.
+Additional licenses and urls of the data used in PyPSA-Earth:
 
 .. csv-table::
    :header-rows: 1

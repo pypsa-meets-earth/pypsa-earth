@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+..
+.. SPDX-License-Identifier: CC-BY-4.0
+
 .. PyPSA meets Earth documentation master file, created by
    sphinx-quickstart on Sat May 15 22:52:54 2021.
    You can adapt this file completely to your liking, but it should at least
@@ -12,12 +16,15 @@ Welcome to the PyPSA-Earth documentation!
 
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+    :alt: CI Linux
 
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+    :alt: CI Mac
 
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+    :alt: CI Windows
 
 .. image:: https://readthedocs.org/projects/pypsa-earth/badge/?version=latest
     :target: https://pypsa-earth.readthedocs.io/en/latest/?badge=latest
@@ -28,6 +35,11 @@ Welcome to the PyPSA-Earth documentation!
 
 .. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
     :target: https://www.gnu.org/licenses/gpl-3.0
+    :alt: License
+
+.. image:: https://api.reuse.software/badge/github.com/pypsa/pypsa-eur
+    :target: https://api.reuse.software/info/github.com/pypsa/pypsa-eur
+    :alt: REUSE
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
