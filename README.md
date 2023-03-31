@@ -162,8 +162,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 <table>
 <tr>
     <td align="center">
-        <a href="https://github.com/hazemakhalek">
-            <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemakhalek"/>
+        <a href="https://github.com/hazemful">
+            <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemful"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
@@ -255,10 +255,10 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/Hazem-IEG">
-            <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="Hazem-IEG"/>
+        <a href="https://github.com/hazemakhalek">
+            <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Hazem-IEG</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
