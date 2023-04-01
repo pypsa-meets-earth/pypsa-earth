@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
-
 ---
 name: Feature request
 about: Suggest an idea for this project

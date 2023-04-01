@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
-
 ---
 name: Bug report
 about: Create a report if something doesn't work quite right.
