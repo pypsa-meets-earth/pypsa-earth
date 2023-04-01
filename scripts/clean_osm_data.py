@@ -368,9 +368,9 @@ def clean_circuits(df):
         "1.": "1",
     }
 
+    # note: no string conversion here to! it is performed later on
     df["circuits"] = (
         df["circuits"]
-        .astype(str)
         .replace(repl_circuits)
         .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
     )
