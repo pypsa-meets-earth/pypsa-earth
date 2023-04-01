@@ -80,6 +80,8 @@ Upcoming Release
 
 * Add REUSE compatability `PR #651 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/651>`__
 
+* Fix bug of missing GitHub issue template `PR #660 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/660>`__
+
 PyPSA-Earth 0.1.0
 =================
 
