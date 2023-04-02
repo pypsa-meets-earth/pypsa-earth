@@ -17,7 +17,6 @@
 # Untracked files
 config.yaml
 dag.svg
-scripts/__init__.py
 
 # Untracked folders (and files within)
 img/

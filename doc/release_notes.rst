@@ -78,7 +78,7 @@ Upcoming Release
 
 * Include hydro runoff normalization `PR #631 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/631>`__
 
-* Add REUSE compatability `PR #651 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/651>`__
+* Add REUSE compatibility `PR #651 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/651>`__
 
 * Fix bug of missing GitHub issue template `PR #660 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/660>`__
 
