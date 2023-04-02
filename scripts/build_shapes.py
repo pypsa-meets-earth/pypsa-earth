@@ -44,7 +44,9 @@ sets_path_to_root("pypsa-earth")
 import cProfile
 import os
 
-import psutil
+from numba import njit
+from numba.core import types
+from numba.typed import Dict
 
 
 # Function for profiling functions [temporary]
@@ -1016,7 +1018,11 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
 
     """
     # Initialize a dictionary
-    dict_id = {0: 0}
+    dict_id = Dict.empty(
+        key_type=types.int64,
+        value_type=types.int64,
+    )
+    dict_id[0] = 0
     counter = 1
     # Loop over ip mapping and add indicies to the dictionary
     for ID_index in np.array(id_mapping.index):
@@ -1025,6 +1031,28 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
 
     # Declare an array to contain population counts
     np_pop_count = np.zeros(len(id_mapping) + 1)
+
+    np_pop_count = loop_and_extact_val_x_y(
+        np_pop_count, np_pop_val, np_pop_xy, region_geomask, dict_id
+    )
+
+    df_pop_count = pd.DataFrame(np_pop_count, columns=["pop"])
+    df_pop_count["GADM_ID"] = np.append(np.array("NaN"), id_mapping.values)
+    df_pop_count = df_pop_count[["GADM_ID", "pop"]]
+
+    return df_pop_count
+
+
+@njit
+def loop_and_extact_val_x_y(
+    np_pop_count, np_pop_val, np_pop_xy, region_geomask, dict_id
+):
+    """
+    Function
+
+
+
+    """
 
     # Loop the population data
     for i in range(len(np_pop_val)):
@@ -1037,11 +1065,7 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
         # Add the current value to the population
         np_pop_count[dict_id[cur_id]] += cur_value
 
-    df_pop_count = pd.DataFrame(np_pop_count, columns=["pop"])
-    df_pop_count["GADM_ID"] = np.append(np.array("NaN"), id_mapping.values)
-    df_pop_count = df_pop_count[["GADM_ID", "pop"]]
-
-    return df_pop_count
+    return np_pop_count
 
 
 def add_population_data(
