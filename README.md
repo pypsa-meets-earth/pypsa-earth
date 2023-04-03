@@ -158,7 +158,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 
 <!-- https://github.com/marketplace/actions/contribute-list -->
 
-<!-- readme: collaborators,contributors -start -->
+<!-- readme: collaborators,contributors,restyled-commits/- -start -->
 <table>
 <tr>
     <td align="center">
@@ -276,10 +276,10 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/restyled-commits">
-            <img src="https://avatars.githubusercontent.com/u/65077583?v=4" width="100;" alt="restyled-commits"/>
+        <a href="https://github.com/stephenjlee">
+            <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
             <br />
-            <sub><b>Restyled Commits</b></sub>
+            <sub><b>Stephen J Lee</b></sub>
         </a>
     </td>
     <td align="center">
@@ -346,13 +346,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/stephenjlee">
-            <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
-            <br />
-            <sub><b>Stephen J Lee</b></sub>
-        </a>
     </td></tr>
 </table>
-<!-- readme: collaborators,contributors -end -->
+<!-- readme: collaborators,contributors,restyled-commits/- -end -->
