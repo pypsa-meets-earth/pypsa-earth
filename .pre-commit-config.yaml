@@ -36,7 +36,7 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 23.1.0
+  rev: 23.3.0
   hooks:
   # Format Python files
   - id: black
@@ -65,6 +65,6 @@ repos:
 
 # # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v1.0.0
+  rev: v1.1.2
   hooks:
   - id: reuse
