@@ -745,17 +745,21 @@ def get_worldpop_features(WorldPop_inputfile):
         src.meta["transform"]: Representation of the affine transform
         src.shape: Dimensions of the input image
     """
-    # Open the file using rasterio
     with rasterio.open(WorldPop_inputfile) as src:
         return src.meta["transform"], src.shape
 
 
 def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
     """
-    Function
-
-
-
+    Function to extract data from .tif input file
+    -------
+    Inputs:
+        WorldPop_inputfile: file location of worldpop file
+        window_dimensions: dimensions of window used when reading file
+    --------
+    Outputs:
+        np_pop_valid: array filled with values for each nonzero pixel in the worldpop file
+        np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
     """
     col_off, row_off, width, height = window_dimensions
 
@@ -791,10 +795,19 @@ def compute_geomask_region(
     country_rows, affine_transform, window_dimensions, windowed=False
 ):
     """
-    Function
-
-
-
+    Function to mask geometries into np_map_ID using an incrementing counter
+    -------
+    Inputs:
+        country_rows: geoDataFrame filled with geometries and their GADM_ID
+        affine_transform: affine transform of current image
+        window_dimensions: dimensions of window used when reading file
+        windowed: True if called during windowed processing (default = False)
+    --------
+    Outputs:
+        np_map_ID.astype("H"): np_map_ID contains an ID for each location (undefined is 0)
+            dimensions are taken from window_dimensions, .astype("H") for memory savings
+        pd.DataFrame(id_to_GADM_ID).set_index(0):
+            DataFrame of the mapping from id (from counter) to GADM_ID
     """
     col_off, row_off, x_axis_len, y_axis_len = window_dimensions
 
@@ -823,7 +836,7 @@ def compute_geomask_region(
         )
 
     # Set an empty numpy array with the dimensions of the country .tif file
-    # np_map_ID will contain a ID for each location (undefined is 0)
+    # np_map_ID will contain an ID for each location (undefined is 0)
     # ID corresponds to a specific geometry in country_rows
     np_map_ID = np.zeros((y_axis_len, x_axis_len))
 
@@ -872,21 +885,16 @@ def compute_geomask_region(
 def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
     """
     Function computes the population for the given country rows
-
+    -------
     Inputs:
-        -------
-        country_rows:
-
-        WorldPop_inputfile:
-
-
+        country_rows: geoDataFrame filled with geometries and their GADM_ID
+        WorldPop_inputfile: file location of worldpop file
+        out_logging: Boolean to enable logging
+    --------
     Outputs:
-        --------
         df_pop_count: Dataframe with columns
             - "pop" containing population of GADM_ID region
             - "GADM_ID"
-
-
     """
     # Get the features of the worldpop input file
     transform, worldpop_dim = get_worldpop_features(WorldPop_inputfile)
@@ -941,8 +949,16 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
 def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_limit):
     """
     Function
-
-
+    -------
+    Inputs:
+        country_rows: geoDataFrame filled with geometries and their GADM_ID
+        WorldPop_inputfile: file location of worldpop file
+        worldpop_byte_limit: Memory limit which determines the window size
+    --------
+    Outputs:
+        df_pop_count: Dataframe with columns
+            - "pop" containing population of GADM_ID region
+            - "GADM_ID"
 
     """
     # Create a dataframe to store the population data
@@ -1013,8 +1029,17 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
 def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     """
     Function
-
-
+    -------
+    Inputs:
+        np_pop_val: array filled with values for each nonzero pixel in the worldpop file
+        np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
+        region_geomask:
+        id_mapping:
+    --------
+    Outputs:
+        df_pop_count: Dataframe with columns
+            - "GADM_ID"
+            - "pop" containing population of GADM_ID region
 
     """
     # Initialize a dictionary
@@ -1049,9 +1074,16 @@ def loop_and_extact_val_x_y(
 ):
     """
     Function
-
-
-
+    -------
+    Inputs:
+        np_pop_count:
+        np_pop_val:
+        np_pop_xy:
+        region_geomask:
+        dict_id:
+    --------
+    Outputs:
+        np_pop_count: np.array containing population counts
     """
 
     # Loop the population data
