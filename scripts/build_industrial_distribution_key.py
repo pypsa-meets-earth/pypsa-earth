@@ -46,7 +46,7 @@ def build_nodal_distribution_key(
 
     keys = pd.DataFrame(index=regions.name, columns=technology, dtype=float)
 
-    pop = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
+    pop = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0, keep_default_na=False, na_values=[""])
 
     # pop["country"] = pop.index.str[:2]
     keys["population"] = pop["total"].values / pop["total"].sum()
