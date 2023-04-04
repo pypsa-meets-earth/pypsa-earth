@@ -46,9 +46,8 @@ if __name__ == "__main__":
             header=None,
             index_col=0,
             names=["fraction"],
-            squeeze=True,
             keep_default_na=False,
-        )
+        ).squeeze()
         / 100.0
     )
 
