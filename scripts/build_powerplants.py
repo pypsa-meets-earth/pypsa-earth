@@ -323,6 +323,7 @@ if __name__ == "__main__":
                 ][
                     "GADM_ID"
                 ].item()  # looks for closest one shape=node
+                # fixing https://github.com/pypsa-meets-earth/pypsa-earth/pull/670
 
         ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
             lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
