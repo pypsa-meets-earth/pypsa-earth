@@ -255,7 +255,7 @@ snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
   end: "2013-03-7"
-  closed: "left" # end is not inclusive
+  inclusive: "left" # end is not inclusive
 
 # atlite:
 #   cutout: ./cutouts/africa-2013-era5.nc
