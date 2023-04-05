@@ -97,4 +97,4 @@ if __name__ == "__main__":
 
     ports["fraction"] = ports["Harbor_size_nr"] / ports["Total_Harbor_size_nr"]
 
-    ports.to_csv(r"./data/ports.csv", sep=",", encoding="utf-8", header="true")
+    ports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
