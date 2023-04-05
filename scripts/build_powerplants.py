@@ -312,8 +312,15 @@ if __name__ == "__main__":
 
             point = Point(coords["lon"], coords["lat"])
 
-            # try:
-            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            try:
+                return gdf_co[gdf_co.contains(point)][
+                    'GADM_ID'
+                    ].item()  # filter gdf_co which contains point and returns the bus
+
+            except ValueError:
+                return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
+                    'GADM_ID'
+                ].item()  # looks for closest one shape=node
 
         ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
             lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1

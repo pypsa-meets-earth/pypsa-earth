@@ -331,7 +331,10 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     if plants.empty or plants.installed_hydro.any() == False:
         logger.info("No bus has installed hydro plants, ignoring normalization.")
         return runoff
-
+    
+    if snakemake.config["cluster_options"]["alternative_clustering"]:
+        plants = plants.set_index('shape_id')
+    
     years_statistics = normalize_using_yearly.index
     if isinstance(years_statistics, pd.DatetimeIndex):
         years_statistics = years_statistics.year
@@ -566,7 +569,7 @@ if __name__ == "__main__":
 
         resource["plants"] = regions.rename(
             columns={"x": "lon", "y": "lat", "country": "countries"}
-        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries"]]
+        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
         resource["plants"]["installed_hydro"] = [
             True if (bus_id in hydro_ppls.bus.values) else False
