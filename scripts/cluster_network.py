@@ -137,8 +137,8 @@ from _helpers import (
     configure_logging,
     get_aggregation_strategies,
     sets_path_to_root,
-    two_2_three_digits_country,
     three_2_two_digits_country,
+    two_2_three_digits_country,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -391,7 +391,7 @@ def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
             gadm_id = gdf_co[
                 gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
             ]["GADM_ID"].item()
-            return three_2_two_digits_country( gadm_id[:3]) + gadm_id[3:]
+            return three_2_two_digits_country(gadm_id[:3]) + gadm_id[3:]
 
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
