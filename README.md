@@ -17,7 +17,7 @@
 
 **Disclaimer: PyPSA-Earth-Sec is still under development.**
 
-The workflow is adaped to work smoothly for the following countries: Morocco, Namibia, Nigeria and Benin. The spatial and temporal resolution of the model are felxible. It's advisable to use more than 3 nodes per country and a timestep not smaller than 3-hours. 
+The workflow is adaped to work smoothly for the following countries: Morocco, Namibia, Nigeria and Benin. The spatial and temporal resolution of the model are flexible. It's advisable to use more than 3 nodes per country and a timestep not smaller than 3-hours.
 
 
 Currently, no real sectoral demand data is used for the country inspected, instead, we use dummy data. The collection, compilation and processing of real data is underway.
@@ -27,7 +27,7 @@ The model now includes the following energy carriers: **electricity**, **hydroge
 
 The demand sectors covered are: **residential**, **industry**, **land transport**, **aviation**, **shipping**, **services** and agriculture.
 
-The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included. 
+The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included.
 
 ![alt text](https://github.com/pypsa-meets-earth/pypsa-earth-sec/blob/main/docs/pes_v0.0.2.png?raw=true)
 
