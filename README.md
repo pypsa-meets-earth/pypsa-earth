@@ -35,19 +35,19 @@ The diagram below depicts one representative clustered node showing the combinat
 
 ## Installation
 
-1. Open your terminal at a location where you want to install pypsa-earth-sec. Type the following in your terminal to download the package and the dependency (pypsa-earth) from GitHub:
+1. Open your terminal at a location where you want to install pypsa-earth-sec. Type the following in your terminal to download the package and the dependency (pypsa-earth) from GitHub.
+   Note that the tag `--recursive-submodules` is needed to automatically clone also the pypsa-earth dependency.
 
 ```bash
-    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
-    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth-sec.git
+    .../some/path/without/spaces % git clone --recurse-submodules https://github.com/pypsa-meets-earth/pypsa-earth-sec.git
 ```
 
-2. The python package requirements are curated in the `envs/environment.yaml` file.
+2. The python package requirements are curated in the `envs/environment.yaml` file of the pypsa-earth repository.
    The environment can be installed using:
 
 ```bash
-    .../some/path/without/spaces % cd pypsa-earth
-    .../pypsa-earth % conda env create -f envs/environment.yaml
+    .../some/path/without/spaces % cd pypsa-earth-sec
+    .../pypsa-earth-sec % conda env create -f pypsa-earth/envs/environment.yaml
 ```
 
 3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
@@ -62,25 +62,12 @@ The diagram below depicts one representative clustered node showing the combinat
 
 ## Test run
 
-- In the folder *pypsa-earth* open a terminal window to be located at this path `~/pypsa-earth/`
-- Rename config.default.yaml to config.yaml. For instance in Linux:
-`mv config.default.yaml config.yaml`
-- Open the file `config.yaml` and 
-  - choose the country you want to model. For example
-    `countries: ["MA"]`
-  - Make sure `build_cutout` is set to `true`
-- In the terminal run the following commands:
-  - Activate the environment: `conda activate pypsa-earth`
-  - Create the base network for the country by running : `snakemake -j 1 base_network`
-
-
-- In the folder *pypsa-earth-sec* open a terminal/command window to be located at this path `~/pypsa-earth-sec/`
+- In the folder *pypsa-earth-sec* open a terminal/command window to be located at this path `./pypsa-earth-sec/`
 - Rename config.default.yaml to config.yaml. For instance in Linux:
 `mv config.default.yaml config.yaml`
 - Open the file `config.yaml` and follow the steps done before in pypsa-earth
   - choose the country you want to model. For example
     `countries: ["MA"]`
- - Open the file `config.pypsa-earth.yaml` and make sure `build_cutout` is set to `true`
 
 - Run a dryrun of the Snakemake workflow by typing simply in the terminal:
   ```bash
