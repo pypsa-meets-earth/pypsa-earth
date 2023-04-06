@@ -11,6 +11,8 @@ if not exists("config.yaml"):
 
 configfile: "config.yaml"
 
+PYPSAEARTH_FOLDER = "./pypsa-earth"
+
 
 SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
@@ -36,9 +38,9 @@ wildcard_constraints:
 
 subworkflow pypsaearth:
     workdir:
-        "../pypsa-earth"
+        PYPSAEARTH_FOLDER
     snakefile:
-        "../pypsa-earth/Snakefile"
+        PYPSAEARTH_FOLDER + "/Snakefile"
     configfile:
         "./config.pypsa-earth.yaml"
 
@@ -492,7 +494,7 @@ rule run_test:
     run:
         import yaml
 
-        with open("../pypsa-earth/config.tutorial.yaml") as file:
+        with open(PYPSAEARTH_FOLDER + "/config.tutorial.yaml") as file:
             config_pypsaearth = yaml.full_load(file)
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
@@ -507,8 +509,8 @@ rule run_test:
 
 rule clean:
     run:
-        shell("rm -r ../pypsa-earth/resources")
-        shell("rm -r ../pypsa-earth/networks")
+        shell("rm -r " + PYPSAEARTH_FOLDER + "/resources")
+        shell("rm -r " + PYPSAEARTH_FOLDER + "/networks")
 
 
 if config["custom_data"].get("industry_demand", False) == True:
@@ -521,7 +523,7 @@ if config["custom_data"].get("industry_demand", False) == True:
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="resources/custom_data/industrial_database.csv",
             #shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
-            shapes_path="../pypsa-earth/resources/shapes/MAR2.geojson",
+            shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
         output:
             industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
