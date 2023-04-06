@@ -40,7 +40,7 @@ jobs:
 
     - name: Fill submodule
       run: |
-        git submodule init
+        git submodule update --init
 
     - name: Copy environment file
       run: |
