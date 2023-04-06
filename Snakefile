@@ -497,6 +497,7 @@ rule run_test:
 
         with open(PYPSAEARTH_FOLDER + "/config.tutorial.yaml") as file:
             config_pypsaearth = yaml.full_load(file)
+            config_pypsaearth["retrieve_databundle"] = {"show_progress": False}
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
             config_pypsaearth["electricity"]["co2limit"] = 7.75e7
