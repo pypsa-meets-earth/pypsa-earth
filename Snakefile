@@ -11,6 +11,7 @@ if not exists("config.yaml"):
 
 configfile: "config.yaml"
 
+
 PYPSAEARTH_FOLDER = "./pypsa-earth"
 
 
