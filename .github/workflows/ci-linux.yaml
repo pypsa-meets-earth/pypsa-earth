@@ -38,13 +38,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Clone pypsa-earth
+    - name: Fill submodule
       run: |
-        git clone https://github.com/pypsa-meets-earth/pypsa-earth ../pypsa-earth
+        git submodule init
 
     - name: Copy environment file
       run: |
-        cp ../pypsa-earth/envs/environment.yaml environment.yaml
+        cp ./pypsa-earth/envs/environment.yaml environment.yaml
 
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
