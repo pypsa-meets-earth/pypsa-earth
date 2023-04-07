@@ -25,6 +25,7 @@ dependencies:
 - seaborn
 - snakemake-minimal
 - memory_profiler
+- ruamel.yaml
 - yaml
 - pytables
 - lxml
@@ -32,7 +33,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas
-  # - xarray  # till the main is not in conda- xarray
+- xarray
 - netcdf4
 - networkx
 - scipy
@@ -51,11 +52,13 @@ dependencies:
 - rasterio
 - geoviews
 - hvplot
+- rioxarray
 
   # PyPSA-Eur-Sec Dependencies
 - geopy
 - tqdm
 - pytz
+- reverse-geocode
 - country_converter
 
 - pip:
