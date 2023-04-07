@@ -73,10 +73,8 @@ import pypsa
 import yaml
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     read_csv_nafix,
     to_csv_nafix,
-    two_2_three_digits_country,
     two_digits_2_name_country,
 )
 from build_shapes import get_GADM_layer
@@ -308,7 +306,7 @@ if __name__ == "__main__":
         gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
         def locate_bus(coords, co):
-            gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
+            gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
 
             point = Point(coords["lon"], coords["lat"])
 

@@ -24,7 +24,6 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -859,6 +858,9 @@ def gadm(
         )
 
     # set index and simplify polygons
+    df_gadm["GADM_ID"] = df_gadm["GADM_ID"].str.split(".").apply(
+        lambda id: three_2_two_digits_country(id[0]) + '.' + id[1]
+        )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(

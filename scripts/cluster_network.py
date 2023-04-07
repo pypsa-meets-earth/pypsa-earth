@@ -137,8 +137,6 @@ from _helpers import (
     configure_logging,
     get_aggregation_strategies,
     sets_path_to_root,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -380,18 +378,16 @@ def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
-        gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
+        gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
         point = Point(coords["x"], coords["y"])
 
         try:
-            gadm_id = gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
-            return three_2_two_digits_country(gadm_id[:3]) + gadm_id[3:]
+            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
 
         except ValueError:
-            gadm_id = gdf_co[
+            return gdf_co[
                 gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
             ]["GADM_ID"].item()
-            return three_2_two_digits_country(gadm_id[:3]) + gadm_id[3:]
 
     buses = n.buses
     buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
@@ -645,7 +641,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="60"
+            "cluster_network", network="elec", simpl="", clusters="10"
         )
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
