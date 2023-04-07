@@ -857,12 +857,11 @@ def gadm(
             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
         )
 
-    # set index and simplify polygons
-    df_gadm["GADM_ID"] = (
-        df_gadm["GADM_ID"]
-        .str.split(".")
-        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-    )
+    # renaming 3 letter to 2 letter ISO code before saving GADM file
+    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
+    df_gadm["GADM_ID"] = df_gadm["GADM_ID"].str.split(".").apply(
+        lambda id: three_2_two_digits_country(id[0]) + '.' + id[1]
+        )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(
