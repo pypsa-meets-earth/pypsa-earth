@@ -45,6 +45,14 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 
+*** Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Columns required: [id,Name,Fueltype,Technology,Set,Country,Capacity,Efficiency,DateIn,DateRetrofit,DateOut,lat,lon,Duration,Volume_Mm3,DamHeight_m,StorageCapacity_MWh,EIC,projectID]
+Tagging considerations for columns in the file:
+    FuelType: 'Natural Gas' has to be tagged either as  'OCGT', 'CCGT'
+    Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
+    Country:  Country name has to be defined with its alpha2 code/format ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
+
+
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:
         'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
