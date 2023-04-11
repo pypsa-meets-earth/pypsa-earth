@@ -6,44 +6,75 @@
 # -*- coding: utf-8 -*-
 """
 Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend the powerplant database with custom entries provided in ``data/custom_powerplants.csv``.
+
 Relevant Settings
 -----------------
+
 .. code:: yaml
+
     electricity:
       powerplants_filter:
       custom_powerplants:
+
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`electricity`
+
 Inputs
 ------
+
 - ``networks/base.nc``: confer :ref:`base`.
 - ``data/custom_powerplants.csv``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as OSM extractor generates
+
 Outputs
 -------
+
 - ``resource/powerplants.csv``: A list of conventional power plants (i.e. neither wind nor solar) with fields for name, fuel type, technology, country, capacity in MW, duration, commissioning year, retrofit year, latitude, longitude, and dam information as documented in the `powerplantmatching README <https://github.com/FRESNA/powerplantmatching/blob/master/README.md>`_; additionally it includes information on the closest substation/bus in ``networks/base.nc``.
+
     .. image:: ../img/powerplantmatching.png
         :scale: 30 %
+
     **Source:** `powerplantmatching on GitHub <https://github.com/FRESNA/powerplantmatching>`_
+
 Description
 -----------
+
 The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendmends. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
 1. Adding all powerplants from custom:
+
     .. code:: yaml
+
         powerplants_filter: false
         custom_powerplants: true
+
 2. Replacing powerplants in e.g. Germany by custom data:
+
     .. code:: yaml
+
         powerplants_filter: Country not in ['Germany']
         custom_powerplants: true
+
     or
+
     .. code:: yaml
+
         powerplants_filter: Country not in ['Germany']
         custom_powerplants: Country in ['Germany']
+
 3. Adding additional built year constraints:
+
     .. code:: yaml
+
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
+
+Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
+
+Tagging considerations for columns in the file:
+    - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
+    - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
+    - Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:
@@ -60,7 +91,6 @@ The following assumptions were done to map custom OSM-extracted power plants wit
         'nuclear': 'Steam Turbine'
 3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
-
 """
 import logging
 import os
