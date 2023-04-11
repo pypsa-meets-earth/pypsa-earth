@@ -165,7 +165,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/hazemful">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemful"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Hazemful</b></sub>
         </a>
     </td>
     <td align="center">
@@ -243,7 +243,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/Cesare-Caputo">
             <img src="https://avatars.githubusercontent.com/u/62548290?v=4" width="100;" alt="Cesare-Caputo"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Cesare-Caputo</b></sub>
         </a>
     </td></tr>
 <tr>
@@ -265,7 +265,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/hazemakhalek">
             <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="hazemakhalek"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Hazem</b></sub>
         </a>
     </td>
     <td align="center">
@@ -286,7 +286,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/DeniseGiub">
             <img src="https://avatars.githubusercontent.com/u/113139589?v=4" width="100;" alt="DeniseGiub"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>DeniseGiub</b></sub>
         </a>
     </td></tr>
 <tr>
@@ -315,14 +315,14 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/cschau-ieg">
             <img src="https://avatars.githubusercontent.com/u/124347782?v=4" width="100;" alt="cschau-ieg"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Cschau-ieg</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
-            <sub><b>Jarrad Wright</b></sub>
+            <sub><b>Tobias</b></sub>
         </a>
     </td>
     <td align="center">
@@ -344,7 +344,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/GridGrapher">
             <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>GridGrapher</b></sub>
         </a>
     </td>
     <td align="center">
@@ -365,7 +365,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/juli-a-ko">
             <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>juli-a-ko</b></sub>
         </a>
     </td>
     <td align="center">
