@@ -13,9 +13,10 @@ Relevant Settings
 -----------------
 
 .. code:: yaml
+
     clustering:
-      simplify:
-      aggregation_strategies:
+        simplify:
+        aggregation_strategies:
 
     costs:
         year:
