@@ -43,9 +43,10 @@ The model is described in the preprint "PyPSA-Earth. A New Global Open Energy Sy
 
 <p align="center">
 <a href="https://star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date">
-    <img src="https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,SGIModel/MUSE_OS,etsap-TIMES/TIMES_model&type=Date" width="60%">
+    <img src="https://star-history.com/embed?secret=Z2hwX2x1VGhoQjh5V1dESEpYSFR3bzUwd2NYaW9Pc1JZMjNQdDlteg==#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date" width="60%">
 <a/>
 
+<iframe style="width:100%;height:auto;min-width:600px;min-height:400px;" src= frameBorder="0"></iframe>
 ## Get involved
 
 There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
