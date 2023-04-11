@@ -42,7 +42,7 @@ The model is described in the preprint "PyPSA-Earth. A New Global Open Energy Sy
 ## Livetracker. Most popular global models:
 
 <p align="center">
-<a href="https://star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date">
+<a href="https://star-history.com/embed?secret=Z2hwX2x1VGhoQjh5V1dESEpYSFR3bzUwd2NYaW9Pc1JZMjNQdDlteg==#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date">
     <img src="https://star-history.com/embed?secret=Z2hwX2x1VGhoQjh5V1dESEpYSFR3bzUwd2NYaW9Pc1JZMjNQdDlteg==#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date" width="60%">
 <a/>
 
