@@ -82,6 +82,8 @@ Upcoming Release
 
 * Fix bug of missing GitHub issue template `PR #660 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/660>`__
 
+* Fix GADM bug when using alternative clustering and store gadm shape with two letter instead of three letter ISO code  `PR #670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/670>`__
+
 PyPSA-Earth 0.1.0
 =================
 

@@ -73,10 +73,8 @@ import pypsa
 import yaml
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     read_csv_nafix,
     to_csv_nafix,
-    two_2_three_digits_country,
     two_digits_2_name_country,
 )
 from build_shapes import get_GADM_layer
@@ -308,12 +306,22 @@ if __name__ == "__main__":
         gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
         def locate_bus(coords, co):
-            gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
+            gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
 
             point = Point(coords["lon"], coords["lat"])
 
-            # try:
-            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            try:
+                return gdf_co[gdf_co.contains(point)][
+                    "GADM_ID"
+                ].item()  # filter gdf_co which contains point and returns the bus
+
+            except ValueError:
+                return gdf_co[
+                    gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
+                ][
+                    "GADM_ID"
+                ].item()  # looks for closest one shape=node
+                # fixing https://github.com/pypsa-meets-earth/pypsa-earth/pull/670
 
         ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
             lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
