@@ -72,9 +72,14 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
-from _helpers import (configure_logging, country_name_2_two_digits,
-                      read_csv_nafix, to_csv_nafix, two_2_three_digits_country,
-                      two_digits_2_name_country)
+from _helpers import (
+    configure_logging,
+    country_name_2_two_digits,
+    read_csv_nafix,
+    to_csv_nafix,
+    two_2_three_digits_country,
+    two_digits_2_name_country,
+)
 from build_shapes import get_GADM_layer
 from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
@@ -240,12 +245,13 @@ if __name__ == "__main__":
     with open(snakemake.input.pm_config, "r") as f:
         config = yaml.safe_load(f)
 
-
     try:
-        print(check_output("java -version", stderr=STDOUT, shell=True).decode('utf-8'))
+        print(check_output("java -version", stderr=STDOUT, shell=True).decode("utf-8"))
     except OSError:
-        print("java not found on path. You need to install openjdk to run build_powerplants.py")
-        sys.exit(1) 
+        print(
+            "java not found on path. You need to install openjdk to run build_powerplants.py"
+        )
+        sys.exit(1)
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
 
