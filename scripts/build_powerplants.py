@@ -94,6 +94,8 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 """
 import logging
 import os
+import sys
+from subprocess import STDOUT, check_output
 
 import geopandas as gpd
 import numpy as np
@@ -294,6 +296,12 @@ if __name__ == "__main__":
         config["main_query"] = ppl_query
     else:
         config["main_query"] = ""
+    try:
+        check_output("java -version", stderr=STDOUT, shell=True).decode("utf-8")
+    except OSError:
+        logger.critical(
+            "java not found on path. You need to install openjdk to run build_powerplants.py"
+        )
 
     ppl = (
         pm.powerplants(from_url=False, update=True, config_update=config)
