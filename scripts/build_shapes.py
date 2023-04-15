@@ -862,7 +862,7 @@ def gadm(
     df_gadm["GADM_ID"] = (
         df_gadm["GADM_ID"]
         .str.split(".")
-        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
     )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
