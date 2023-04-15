@@ -84,6 +84,8 @@ Upcoming Release
 
 * Fix GADM bug when using alternative clustering and store gadm shape with two letter instead of three letter ISO code  `PR #670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/670>`__
 
+* Fix GADM naming bug related to level-2 clustering `PR #684 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/684>`__
+
 PyPSA-Earth 0.1.0
 =================
 
