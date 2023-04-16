@@ -79,7 +79,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
             logger.warning(
-                f"Stage 4 of 4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
+                f"Stage 5 of 5: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
@@ -224,7 +224,7 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     "Create country shapes"
 
     if out_logging:
-        logger.info("Stage 1 of 4: Create country shapes")
+        logger.info("Stage 1 of 5: Create country shapes")
 
     # download data if needed and get the layer id 0, corresponding to the countries
     df_countries = get_GADM_layer(
@@ -252,7 +252,7 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
 
 def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
     if out_logging:
-        logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
+        logger.info("Stage 3 of 5: Merge country shapes to create continent shape")
 
     shapes = country_shapes.apply(lambda x: x.buffer(distance))
     shapes_list = list(shapes)
@@ -331,7 +331,7 @@ def eez(
     """
 
     if out_logging:
-        logger.info("Stage 2 of 4: Create offshore shapes")
+        logger.info("Stage 2 of 5: Create offshore shapes")
 
     # load data
     df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
@@ -432,8 +432,6 @@ def download_WorldPop_standard(
     WorldPop_filename : str
         Name of the file
     """
-    if out_logging:
-        logger.info("Stage 3 of 4: Download WorldPop datasets (standard)")
 
     if country_code == "XK":
         WorldPop_filename = f"srb_ppp_{year}_UNadj_constrained.tif"
@@ -456,7 +454,7 @@ def download_WorldPop_standard(
     if not os.path.exists(WorldPop_inputfile) or update is True:
         if out_logging:
             logger.warning(
-                f"Stage 3 of 4: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
+                f"Stage 3 of 5: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
@@ -470,7 +468,7 @@ def download_WorldPop_standard(
                         loaded = True
                         break
         if not loaded:
-            logger.error(f"Stage 3 of 4: Impossible to download {WorldPop_filename}")
+            logger.error(f"Stage 3 of 5: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -499,8 +497,6 @@ def download_WorldPop_API(
     WorldPop_filename : str
         Name of the file
     """
-    if out_logging:
-        logger.info("Stage 3 of 4: Download WorldPop datasets (API)")
 
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
@@ -524,7 +520,7 @@ def download_WorldPop_API(
                     loaded = True
                     break
     if not loaded:
-        logger.error(f"Stage 3 of 4: Impossible to download {WorldPop_filename}")
+        logger.error(f"Stage 3 of 5: Impossible to download {WorldPop_filename}")
 
     return WorldPop_inputfile, WorldPop_filename
 
@@ -536,7 +532,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
 
     if out_logging:
-        logger.info("Stage 4 of 4: Access to GDP raster data")
+        logger.info("Stage 5 of 5: Access to GDP raster data")
 
     # tif namefile
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -563,7 +559,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     if year not in list_years:
         if out_logging:
             logger.warning(
-                f"Stage 4 of 4 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
+                f"Stage 5 of 5 GDP data of year {year} not found, selected the most recent data ({int(list_years[-1])})"
             )
         year = float(list_years[-1])
 
@@ -587,7 +583,7 @@ def load_GDP(
     """
 
     if out_logging:
-        logger.info("Stage 4 of 4: Access to GDP raster data")
+        logger.info("Stage 5 of 5: Access to GDP raster data")
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
@@ -598,7 +594,7 @@ def load_GDP(
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
             logger.warning(
-                f"Stage 4 of 4: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
+                f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
             )
         convert_GDP(name_file_nc, year, out_logging)
 
@@ -660,7 +656,7 @@ def add_gdp_data(
         - Includes a new column ["gdp"]
     """
     if out_logging:
-        logger.info("Stage 4 of 4: Add gdp data to GADM GeoDataFrame")
+        logger.info("Stage 5 of 5: Add gdp data to GADM GeoDataFrame")
 
     # initialize new gdp column
     df_gadm["gdp"] = 0.0
@@ -912,7 +908,7 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
     else:
         if out_logging:
             logger.info(
-                "Stage 3 of 4: compute_population for "
+                "Stage 4 of 5: compute_population for "
                 + str(country_rows.iloc[0]["country"])
                 + ": Expected size of file readout was "
                 + str(expected_bytes_input_read // 10**6)
@@ -1109,32 +1105,48 @@ def add_population_data(
         - Includes a new column ["pop"]
     """
 
-    if out_logging:
-        logger.info("Stage 3 of 4: Add population data to GADM GeoDataFrame")
-
-    # initialize new population column
+    # Initialize new population column
     df_gadm["pop"] = 0.0
 
-    tqdm_kwargs = dict(
-        ascii=False,
-        desc="Compute population ",
-    )
-    with tqdm(total=len(country_codes), **tqdm_kwargs) as pbar:
-        for c_code in country_codes:
-            # get subset by country code
-            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+    # Initialize new dict to hold worldpop_inputfile strings
+    dict_worldpop_file_locations = {}
 
+    if out_logging:
+        logger.info(
+            "Stage 3 of 5: Download WorldPop datasets, method: " + str(worldpop_method)
+        )
+
+    tqdm_kwargs_download = dict(
+        ascii=False,
+        desc="Downloading worldpop file per country",
+    )
+    with tqdm(total=len(country_codes), **tqdm_kwargs_download) as pbar:
+        for c_code in country_codes:
             # Download worldpop image (if required) and get file location
             WorldPop_inputfile, WorldPop_filename = download_WorldPop(
                 c_code, worldpop_method, year, update, out_logging
             )
+            dict_worldpop_file_locations[c_code] = WorldPop_inputfile
+            pbar.update(1)
+
+    if out_logging:
+        logger.info("Stage 4 of 5: Add population data to GADM GeoDataFrame")
+
+    tqdm_kwargs_compute = dict(
+        ascii=False,
+        desc="Compute population per country",
+    )
+    with tqdm(total=len(country_codes), **tqdm_kwargs_compute) as pbar:
+        for c_code in country_codes:
+            # get subset by country code
+            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
             if out_logging:
-                logger.info("Stage 3 of 4: Calculating population of " + str(c_code))
+                logger.info("Stage 4 of 5: Calculating population of " + str(c_code))
 
             # Calculate the population for each geometry given in country_rows
             df_pop_count = compute_population(
-                country_rows, WorldPop_inputfile, out_logging
+                country_rows, dict_worldpop_file_locations[c_code], out_logging
             )
 
             # Loop the regions and write population to df_gadm
@@ -1160,7 +1172,7 @@ def gadm(
     nchunks=None,
 ):
     if out_logging:
-        logger.info("Stage 3 of 4: Creation GADM GeoDataFrame")
+        logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
 
     # download data if needed and get the desired layer_id
     df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
