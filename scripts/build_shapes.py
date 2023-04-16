@@ -843,9 +843,9 @@ def compute_geomask_region(
         temp_mask = rasterio.features.geometry_mask(
             [cur_geometry],
             (y_axis_len, x_axis_len),
-            affine_transform,
-            invert=True,
+            transform=affine_transform,
             all_touched=True,
+            invert=True,
         )
 
         # Map the values of counter value to np_map_ID
@@ -860,7 +860,7 @@ def compute_geomask_region(
     return np_map_ID.astype("H"), pd.DataFrame(id_to_GADM_ID).set_index(0)
 
 
-def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
+def compute_population(country_rows, WorldPop_inputfile, pbar, out_logging=False):
     """
     Function computes the population for the given country rows
     -------
@@ -904,6 +904,7 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
         df_pop_count = sum_values_using_geomask(
             np_pop_val, np_pop_xy, country_geomask, id_mapping
         )
+        pbar.update(1)
 
     else:
         if out_logging:
@@ -918,13 +919,15 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
             )
         # Calculate the population using windows
         df_pop_count = windowed_compute_population(
-            country_rows, WorldPop_inputfile, worldpop_byte_limit
+            country_rows, WorldPop_inputfile, worldpop_byte_limit, pbar
         )
 
     return df_pop_count
 
 
-def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_limit):
+def windowed_compute_population(
+    country_rows, WorldPop_inputfile, worldpop_byte_limit, pbar
+):
     """
     Function
     -------
@@ -972,10 +975,11 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
     # y_range_start will serve as row offset
     window_row_off = np.arange(0, worldpop_y_dim, window_y_dim)
 
+    # Calculate the percentage each window is of the image for pbar.update
+    window_percentage_of_image = 1 / len(window_row_off)
+
     for row_off in window_row_off:
         window_dimensions = [window_col_off, row_off, window_x_dim, window_y_dim]
-
-        print("Running window: ", window_dimensions)
 
         np_pop_val, np_pop_xy = get_worldpop_val_xy(
             WorldPop_inputfile, window_dimensions
@@ -1000,6 +1004,8 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
             gadm_id, pop_count = windowed_pop_count.iloc[i]
             # Select the row with the same "GADM_ID" and set the population count
             df_pop_count.loc[df_pop_count["GADM_ID"] == gadm_id, "pop"] += pop_count
+
+        pbar.update(window_percentage_of_image)
 
     return df_pop_count
 
@@ -1135,6 +1141,7 @@ def add_population_data(
     tqdm_kwargs_compute = dict(
         ascii=False,
         desc="Compute population per country",
+        bar_format="{desc}: {percentage:.3f}%|{bar}| {n:.3f}/{total_fmt} [{elapsed}<{remaining}",
     )
     with tqdm(total=len(country_codes), **tqdm_kwargs_compute) as pbar:
         for c_code in country_codes:
@@ -1146,7 +1153,7 @@ def add_population_data(
 
             # Calculate the population for each geometry given in country_rows
             df_pop_count = compute_population(
-                country_rows, dict_worldpop_file_locations[c_code], out_logging
+                country_rows, dict_worldpop_file_locations[c_code], pbar, out_logging
             )
 
             # Loop the regions and write population to df_gadm
@@ -1154,8 +1161,6 @@ def add_population_data(
                 gadm_id, pop_count = df_pop_count.iloc[i]
                 # Select the row with the same "GADM_ID" and set the population count
                 df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
-
-            pbar.update(1)
 
 
 def gadm(
