@@ -676,9 +676,13 @@ def add_gdp_data(
     return df_gadm
 
 
-def _init_process_pop(df_gadm_, year_, worldpop_method_):
-    global df_gadm, year, worldpop_method
-    df_gadm, year, worldpop_method = df_gadm_, year_, worldpop_method_
+def _init_process_pop(df_gadm_, dict_worldpop_file_locations_, out_logging_):
+    global df_gadm, dict_worldpop_file_locations, out_logging
+    df_gadm, dict_worldpop_file_locations, out_logging = (
+        df_gadm_,
+        dict_worldpop_file_locations_,
+        out_logging_,
+    )
 
 
 # Auxiliary function to calculate population data in a parallel way
@@ -703,6 +707,20 @@ def _process_func_pop(gadm_idxs):
                 )
 
     return df_gadm_subset
+
+
+def _process_function_population(c_code):
+    # get subset by country code
+    country_rows = df_gadm.loc[df_gadm["country"] == c_code]
+
+    if out_logging:
+        logger.info("Stage 4 of 5: Calculating population of " + str(c_code))
+
+    # Calculate the population for each geometry given in country_rows
+    df_pop_count = compute_population(
+        country_rows, dict_worldpop_file_locations[c_code], out_logging
+    )
+    return df_pop_count
 
 
 # Auxiliary function to download WorldPop data in a parallel way
@@ -860,7 +878,7 @@ def compute_geomask_region(
     return np_map_ID.astype("H"), pd.DataFrame(id_to_GADM_ID).set_index(0)
 
 
-def compute_population(country_rows, WorldPop_inputfile, pbar, out_logging=False):
+def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
     """
     Function computes the population for the given country rows
     -------
@@ -885,7 +903,7 @@ def compute_population(country_rows, WorldPop_inputfile, pbar, out_logging=False
 
     # Introduce a max byte size to avoid overfilling RAM
     # Ensure worldpop_byte_limit > 883 * 10**6 (minimum memory for 'US')
-    worldpop_byte_limit = 3096 * 10**6
+    worldpop_byte_limit = 1024 * 10**6
 
     # If the rasterio read will be within byte limit
     if expected_bytes_input_read < worldpop_byte_limit:
@@ -904,7 +922,6 @@ def compute_population(country_rows, WorldPop_inputfile, pbar, out_logging=False
         df_pop_count = sum_values_using_geomask(
             np_pop_val, np_pop_xy, country_geomask, id_mapping
         )
-        pbar.update(1)
 
     else:
         if out_logging:
@@ -919,15 +936,13 @@ def compute_population(country_rows, WorldPop_inputfile, pbar, out_logging=False
             )
         # Calculate the population using windows
         df_pop_count = windowed_compute_population(
-            country_rows, WorldPop_inputfile, worldpop_byte_limit, pbar
+            country_rows, WorldPop_inputfile, worldpop_byte_limit
         )
 
     return df_pop_count
 
 
-def windowed_compute_population(
-    country_rows, WorldPop_inputfile, worldpop_byte_limit, pbar
-):
+def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_limit):
     """
     Function
     -------
@@ -1004,8 +1019,6 @@ def windowed_compute_population(
             gadm_id, pop_count = windowed_pop_count.iloc[i]
             # Select the row with the same "GADM_ID" and set the population count
             df_pop_count.loc[df_pop_count["GADM_ID"] == gadm_id, "pop"] += pop_count
-
-        pbar.update(window_percentage_of_image)
 
     return df_pop_count
 
@@ -1138,29 +1151,34 @@ def add_population_data(
     if out_logging:
         logger.info("Stage 4 of 5: Add population data to GADM GeoDataFrame")
 
-    tqdm_kwargs_compute = dict(
-        ascii=False,
-        desc="Compute population per country",
-        bar_format="{desc}: {percentage:.3f}%|{bar}| {n:.3f}/{total_fmt} [{elapsed}<{remaining}",
-    )
-    with tqdm(total=len(country_codes), **tqdm_kwargs_compute) as pbar:
-        for c_code in country_codes:
-            # get subset by country code
-            country_rows = df_gadm.loc[df_gadm["country"] == c_code]
-
-            if out_logging:
-                logger.info("Stage 4 of 5: Calculating population of " + str(c_code))
-
-            # Calculate the population for each geometry given in country_rows
-            df_pop_count = compute_population(
-                country_rows, dict_worldpop_file_locations[c_code], pbar, out_logging
-            )
-
-            # Loop the regions and write population to df_gadm
-            for i in range(len(df_pop_count)):
-                gadm_id, pop_count = df_pop_count.iloc[i]
-                # Select the row with the same "GADM_ID" and set the population count
-                df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
+    lock = mp.Lock()
+    kwargs = {
+        "initializer": _init_process_pop,
+        "initargs": (
+            df_gadm,
+            dict_worldpop_file_locations,
+            out_logging,
+        ),
+        "processes": 2,
+    }
+    # Spawn processes with the parameters from kwargs
+    with mp.get_context("spawn").Pool(**kwargs) as pool:
+        # Create a progress bar
+        with tqdm(
+            total=len(country_codes), desc="Compute population per country"
+        ) as pbar:
+            # Give the pool a workload
+            for df_pop_count in pool.imap_unordered(
+                _process_function_population, country_codes
+            ):
+                # Acquire the lock before accessing df_gadm
+                with lock:
+                    # Loop the regions and write population to df_gadm
+                    for i in range(len(df_pop_count)):
+                        gadm_id, pop_count = df_pop_count.iloc[i]
+                        # Select the row with the same "GADM_ID" and set the population count
+                        df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
+                pbar.update(1)
 
 
 def gadm(
