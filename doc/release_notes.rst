@@ -86,6 +86,8 @@ Upcoming Release
 
 * Fix GADM naming bug related to level-2 clustering `PR #684 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/684>`__
 
+* Fix append bug in build_powerplants rule `PR #686 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/686>`__
+
 PyPSA-Earth 0.1.0
 =================
 
