@@ -43,7 +43,7 @@ dependencies:
 - matplotlib<=3.5.2
 - reverse-geocode
 - country_converter
-- pyogyrio
+- pyogrio
 - numba
 
   # Keep in conda environment when calling ipython
