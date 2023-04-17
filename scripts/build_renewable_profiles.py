@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa authors
+
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """Calculates for each network node the
 (i) installable capacity (based on land-use), (ii) the available generation time
 series (based on weather data), and (iii) the average distance from the node for
@@ -329,6 +332,9 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         logger.info("No bus has installed hydro plants, ignoring normalization.")
         return runoff
 
+    if snakemake.config["cluster_options"]["alternative_clustering"]:
+        plants = plants.set_index("shape_id")
+
     years_statistics = normalize_using_yearly.index
     if isinstance(years_statistics, pd.DatetimeIndex):
         years_statistics = years_statistics.year
@@ -563,7 +569,7 @@ if __name__ == "__main__":
 
         resource["plants"] = regions.rename(
             columns={"x": "lon", "y": "lat", "country": "countries"}
-        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries"]]
+        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
         resource["plants"]["installed_hydro"] = [
             True if (bus_id in hydro_ppls.bus.values) else False

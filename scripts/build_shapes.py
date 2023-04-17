@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
+
 import logging
 import multiprocessing as mp
 import os
@@ -21,7 +24,6 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -1233,7 +1235,13 @@ def gadm(
             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
         )
 
-    # set index and simplify polygons
+    # renaming 3 letter to 2 letter ISO code before saving GADM file
+    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
+    df_gadm["GADM_ID"] = (
+        df_gadm["GADM_ID"]
+        .str.split(".")
+        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
+    )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(
