@@ -678,11 +678,14 @@ def add_gdp_data(
     return df_gadm
 
 
-def _init_process_pop(df_gadm_, dict_worldpop_file_locations_, out_logging_):
-    global df_gadm, dict_worldpop_file_locations, out_logging
-    df_gadm, dict_worldpop_file_locations, out_logging = (
+def _init_process_pop(
+    df_gadm_, dict_worldpop_file_locations_, mem_read_limit_per_process_, out_logging_
+):
+    global df_gadm, dict_worldpop_file_locations, mem_read_limit_per_process, out_logging
+    df_gadm, dict_worldpop_file_locations, mem_read_limit_per_process, out_logging = (
         df_gadm_,
         dict_worldpop_file_locations_,
+        mem_read_limit_per_process_,
         out_logging_,
     )
 
@@ -720,7 +723,10 @@ def _process_function_population(c_code):
 
     # Calculate the population for each geometry given in country_rows
     df_pop_count = compute_population(
-        country_rows, dict_worldpop_file_locations[c_code], out_logging
+        country_rows,
+        dict_worldpop_file_locations[c_code],
+        mem_read_limit_per_process,
+        out_logging,
     )
     return df_pop_count
 
@@ -880,7 +886,9 @@ def compute_geomask_region(
     return np_map_ID.astype("H"), pd.DataFrame(id_to_GADM_ID).set_index(0)
 
 
-def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
+def compute_population(
+    country_rows, WorldPop_inputfile, mem_read_limit_per_process, out_logging=False
+):
     """
     Function computes the population for the given country rows
     -------
@@ -905,7 +913,7 @@ def compute_population(country_rows, WorldPop_inputfile, out_logging=False):
 
     # Introduce a max byte size to avoid overfilling RAM
     # Ensure worldpop_byte_limit > 883 * 10**6 (minimum memory for 'US')
-    worldpop_byte_limit = 1024 * 10**6
+    worldpop_byte_limit = max(883, mem_read_limit_per_process) * 10**6
 
     # If the rasterio read will be within byte limit
     if expected_bytes_input_read < worldpop_byte_limit:
@@ -1106,6 +1114,7 @@ def add_population_data(
     year=2020,
     update=False,
     out_logging=False,
+    mem_read_limit_per_process=1024,
     nprocesses=2,
     nchunks=2,
     disable_progressbar=False,
@@ -1159,6 +1168,7 @@ def add_population_data(
         "initargs": (
             df_gadm,
             dict_worldpop_file_locations,
+            mem_read_limit_per_process,
             out_logging,
         ),
         "processes": 2,
@@ -1189,6 +1199,7 @@ def gadm(
     countries,
     geo_crs,
     contended_flag,
+    mem_mb,
     layer_id=2,
     update=False,
     out_logging=False,
@@ -1213,6 +1224,7 @@ def gadm(
     )
 
     if worldpop_method != False:
+        mem_read_limit_per_process = mem_mb / nprocesses
         # add the population data to the dataset
         add_population_data(
             df_gadm,
@@ -1221,6 +1233,7 @@ def gadm(
             year,
             update,
             out_logging,
+            mem_read_limit_per_process,
             nprocesses=nprocesses,
             nchunks=nchunks,
         )
@@ -1263,18 +1276,22 @@ if __name__ == "__main__":
 
     out = snakemake.output
 
-    countries_list = snakemake.config["countries"]
-    layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-    update = snakemake.config["build_shape_options"]["update_file"]
-    out_logging = snakemake.config["build_shape_options"]["out_logging"]
-    year = snakemake.config["build_shape_options"]["year"]
-    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
-    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
     EEZ_gpkg = snakemake.input["eez"]
-    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
-    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
+    mem_mb = snakemake.resources["mem_mb"]
+
+    countries_list = snakemake.config["countries"]
     geo_crs = snakemake.config["crs"]["geo_crs"]
     distance_crs = snakemake.config["crs"]["distance_crs"]
+
+    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
+    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
+    layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
+    out_logging = snakemake.config["build_shape_options"]["out_logging"]
+    update = snakemake.config["build_shape_options"]["update_file"]
+    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
+    year = snakemake.config["build_shape_options"]["year"]
+
     nchunks = snakemake.config["build_shape_options"]["nchunks"]
     if nchunks < nprocesses:
         logger.info(f"build_shapes data chunks set to nprocesses {nprocesses}")
@@ -1306,6 +1323,7 @@ if __name__ == "__main__":
         countries_list,
         geo_crs,
         contended_flag,
+        mem_mb,
         layer_id,
         update,
         out_logging,
