@@ -260,7 +260,7 @@ dependencies:
 - notebook-shim=0.1.0
 - nspr=4.32
 - nss=3.78
-- numba=0.53.1
+- numba=0.56.4
 - numexpr=2.8.3
 - numpy=1.23.2
 - openjpeg=2.4.0
@@ -306,6 +306,7 @@ dependencies:
 - pyct=0.4.6
 - pyct-core=0.4.6
 - pygments=2.13.0
+- pyogrio=0.5.1
 - pyomo=6.4.2
 - pyopenssl=22.0.0
 - pyparsing=3.0.9
