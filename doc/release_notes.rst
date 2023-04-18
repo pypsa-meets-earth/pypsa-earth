@@ -12,7 +12,7 @@ Upcoming Release
 
 **New Features and major Changes**
 
-* Add exception in build_powerplant.py for missing openjdk package. `PR #683 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/683>`__
+* Add exception in build_powerplant.py for missing openjdk package. `PR #690 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/690>`__
 
 * Finalize package restructuring `PR #462 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/462>`__
 
