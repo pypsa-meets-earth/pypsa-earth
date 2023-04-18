@@ -269,6 +269,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     logger.info("Simplifying connected link components")
 
     if n.links.empty:
+        pd.DataFrame({}).to_csv(output.connection_costs)
         return n, n.buses.index.to_series()
 
     # Determine connected link components, ignore all links but DC
