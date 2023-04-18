@@ -47,7 +47,7 @@ Upcoming Release
 
 * Fix None geometries into regions `PR #546 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/546>`__
 
-* Swap OpenStreetMap python download interface from esy-osm to earth-osm `PR #547 https://github.com/pypsa-meets-earth/pypsa-earth/pull/547>`__
+* Swap OpenStreetMap python download interface from esy-osm to earth-osm `PR #547 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/547>`__
 
 * Restore saving of logger outputs `PR #559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/559>`__
 
@@ -78,6 +78,8 @@ Upcoming Release
 * Fix isolated buses when simplifying the network and add clustering by networks `PR #632 https://github.com/pypsa-meets-earth/pypsa-earth/pull/632`__
 
 * Include hydro runoff normalization `PR #631 https://github.com/pypsa-meets-earth/pypsa-earth/pull/631`__
+
+* Improve earth coverage and add improve make_statistics coverage `PR #654 https://github.com/pypsa-meets-earth/pypsa-earth/pull/654`__
 
 PyPSA-Earth 0.1.0
 =================
