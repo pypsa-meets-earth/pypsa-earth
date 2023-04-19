@@ -88,12 +88,12 @@ An exemplary dependency graph (starting from the simplification rules) then look
 ``snapshots``
 =============
 
-Specifies the temporal range to build an energy system model for as arguments to `pandas.date_range <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html>`_
+Specifies the temporal range for the historical weather data, which is used to build the energy system model. It uses arguments to `pandas.date_range <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html>`_. The date range must be in the past (before 2022). A well-tested year is 2013.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: snapshots:
-   :end-before: enable:
+   :end-at: inclusive:
 
 .. csv-table::
    :header-rows: 1
