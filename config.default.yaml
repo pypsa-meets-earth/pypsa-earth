@@ -3,11 +3,25 @@
 # SPDX-License-Identifier: CC0-1.0
 
 version: 1.0.0
+
 tutorial: false
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
+
+countries: ["NG", "BJ"]
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
+
+enable:
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: false  # If True, than an exclusion raster will be build
+  build_cutout: false
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
 run:
   name: "" # use this to keep track of runs with different settings
@@ -20,23 +34,10 @@ scenario:
   clusters: [10]
   opts: [Co2L-3H]
 
-countries: ["NG", "BJ"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
-
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
   inclusive: "left" # end is not inclusive
-
-enable:
-  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false  # If True, than an exclusion raster will be build
-  build_cutout: false
-  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
 # definition of the Coordinate Reference Systems
 crs:
