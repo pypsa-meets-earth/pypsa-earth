@@ -20,6 +20,10 @@ augmented_line_connection:
   new_line_type: ["HVAC", "HVDC"]  # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
 
 cluster_options:
+  simplify_network:
+    algorithm: kmeans
+  cluster_network:
+    algorithm: kmeans     
   alternative_clustering: true  # "False" use Voronoi shapes, "True" use GADM shapes
 
 hydro:
