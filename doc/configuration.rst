@@ -25,7 +25,7 @@ Top-level configuration
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: version:
-   :end-before: run:
+   :end-at:  build_cutout:
 
 
 .. csv-table::
@@ -47,7 +47,7 @@ The ``run`` section is used for running and storing scenarios with different con
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: run:
-   :end-before: scenario:
+   :end-at: shared_cutouts:
 
 .. csv-table::
    :header-rows: 1
