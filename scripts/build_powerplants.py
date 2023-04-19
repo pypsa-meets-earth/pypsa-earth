@@ -262,7 +262,17 @@ def replace_natural_gas_fueltype(df):
     return df.Fueltype.where(df.Fueltype != "Natural Gas", df.Technology)
 
 
+def test_java_availability():
+    try:
+        check_output("java -version", stderr=STDOUT, shell=True).decode("utf-8")
+    except OSError:
+        logger.critical(
+            "java not found on path. You need to install openjdk to run build_powerplants.py"
+        )
+
+
 if __name__ == "__main__":
+    test_java_availability()
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
@@ -296,12 +306,6 @@ if __name__ == "__main__":
         config["main_query"] = ppl_query
     else:
         config["main_query"] = ""
-    try:
-        check_output("java -version", stderr=STDOUT, shell=True).decode("utf-8")
-    except OSError:
-        logger.critical(
-            "java not found on path. You need to install openjdk to run build_powerplants.py"
-        )
 
     ppl = (
         pm.powerplants(from_url=False, update=True, config_update=config)
