@@ -33,7 +33,7 @@ Top-level configuration
    :widths: 25,7,22,30
    :file: configtables/toplevel.csv
 
-.. _scenario:
+.. _run:
 
 ``run``
 =======
@@ -49,6 +49,12 @@ The ``run`` section is used for running and storing scenarios with different con
    :start-at: run:
    :end-before: scenario:
 
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/run.csv
+
+.. _scenario:
 
 ``scenario``
 ============
