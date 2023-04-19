@@ -24,7 +24,8 @@ Top-level configuration
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
-   :lines: 5-12,20,31-38
+   :start-at: version:
+   :end-before: run:
 
 
 .. csv-table::
