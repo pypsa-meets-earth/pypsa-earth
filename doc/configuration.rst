@@ -76,7 +76,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: scenario:
-   :end-before: countries:
+   :end-at: opts:
 
 .. csv-table::
    :header-rows: 1
