@@ -232,7 +232,6 @@ world_iso = {
         "BD": "bangladesh",
         "BT": "bhutan",
         # "IO": "british indian ocean territory",
-        "BN": "brunei darussalam",  # merged with MY
         "KH": "cambodia",
         "CN": "china",
         # "CX": "christmas island", # Island
@@ -255,7 +254,6 @@ world_iso = {
         "KG": "kyrgyzstan",
         "LA": "lao-people's-democratic-republic",
         "LB": "lebanon",
-        # "MO": "macao",  # no more with gadm 4.1
         "MY": "malaysia",
         "SG": "singapore",
         "BN": "brunei",
@@ -593,7 +591,7 @@ iso_to_geofk_dict = {
     "BS": "bahamas",  # Bahamas
     "BB": "central-america",  # Barbados
     "CU": "cuba",  # Cuba
-    "IC": "canary-islands",  # Canary islands
+    # "IC": "canary-islands",  # Canary islands
     "RE": "reunion",  # Reunion island (France)
     "YT": "mayotte",  # "Mayotte island (France)"
     "GG": "guernsey-jersey",  # Guernsey
