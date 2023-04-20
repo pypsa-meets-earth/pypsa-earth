@@ -2,6 +2,11 @@
 # SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+import country_converter as coco
+
+cc = coco.CountryConverter()
+
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
@@ -541,8 +546,8 @@ continent_regions = {
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
     # Australasia
     "AUO": ["AU", "NC", "NZ", "PG"],
-    # Customized test set
-    "TEST": ["NG", "NE", "SL", "MA"],
+    # UnitedNations
+    "UnitedNations": cc.convert(names=cc.UN.name_short, to="ISO2"),
 }
 
 # Geofabrik and iso norm deviate for some countries and domains
