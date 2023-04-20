@@ -117,6 +117,26 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
+
+.. _augmented_line_connection_cf:
+
+``augmented_line_connection``
+=============================
+
+If enabled, it increases the connectivity of the network. It makes the network graph `k-edge-connected <https://en.wikipedia.org/wiki/K-edge-connected_graph>`_, i.e., 
+if fewer than k edges are removed, the network graph stays connected. It uses the `k-edge-augmentation <https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation>`_
+algorithm from the `NetworkX <https://networkx.org/documentation/stable/index.html>`_ Python package.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: augmented_line_connection:
+   :end-at: min_DC_length:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/augmented_line_connection.csv
+
 .. _electricity_cf:
 
 ``electricity``
