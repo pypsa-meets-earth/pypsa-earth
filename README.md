@@ -38,27 +38,40 @@ The diagram below depicts one representative clustered node showing the combinat
 1. Open your terminal at a location where you want to install pypsa-earth-sec. Type the following in your terminal to download the package and the dependency (pypsa-earth) from GitHub.
    Note that the tag `--recursive-submodules` is needed to automatically clone also the pypsa-earth dependency.
 
-```bash
-    .../some/path/without/spaces % git clone --recurse-submodules https://github.com/pypsa-meets-earth/pypsa-earth-sec.git
-```
+   ```bash
+       .../some/path/without/spaces % git clone --recurse-submodules https://github.com/pypsa-meets-earth/pypsa-earth-sec.git
+   ```
 
-2. The python package requirements are curated in the `envs/environment.yaml` file of the pypsa-earth repository.
+2. Move the current directory to the head of the repository.
+   ```bash
+       .../some/path/without/spaces % cd pypsa-earth-sec
+   ```
+
+3. (optional) For reproducibility and compatibility purposes, it is possible to specify a specific version of the pypsa-earth submodule.
+   To do so, feel to reproduce the following lines, yet this is not mandatory.
+   If you desire to run the latest pypsa-earth model, please skip this point 3.
+
+   ```bash
+       .../pypsa-earth-sec % cd pypsa-earth
+       .../pypsa-earth % git reset --hard \{commit id\}
+       .../pypsa-earth % cd ..
+   ```
+
+4. The python package requirements are curated in the `envs/environment.yaml` file of the pypsa-earth repository.
    The environment can be installed using:
 
-```bash
-    .../some/path/without/spaces % cd pypsa-earth-sec
-    .../pypsa-earth-sec % conda env create -f pypsa-earth/envs/environment.yaml
-```
+   ```bash
+       .../pypsa-earth-sec % conda env create -f pypsa-earth/envs/environment.yaml
+   ```
 
-3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
+5. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
 
-4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+6. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
-```bash
-    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
-
-    .../pypsa-earth % jupyter lab
-```
+   ```bash
+       .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
+       .../pypsa-earth % jupyter lab
+   ```
 
 ## Test run
 
