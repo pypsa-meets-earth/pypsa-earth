@@ -813,77 +813,86 @@ def compute_geomask_region(
         pd.DataFrame(id_to_GADM_ID).set_index(0):
             DataFrame of the mapping from id (from counter) to GADM_ID
     """
-    col_off, row_off, x_axis_len, y_axis_len = window_dimensions
+    try:
+        col_off, row_off, x_axis_len, y_axis_len = [int(i) for i in window_dimensions]
 
-    if windowed:
-        # Declare a transformer with given affine_transform
-        transformer = rasterio.transform.AffineTransformer(affine_transform)
-
-        # Obtain the coordinates of the upper left corner of window
-        window_topleft_longitude, window_topleft_latitude = transformer.xy(
-            row_off, col_off
-        )
-
-        # Obtain the coordinates of the bottom right corner of window
-        window_botright_longitude, window_botright_latitude = transformer.xy(
-            row_off + y_axis_len, col_off + x_axis_len
-        )
-
-        # Set the current transform to the correct lat and long
-        affine_transform = rasterio.Affine(
-            affine_transform[0],
-            affine_transform[1],
-            window_topleft_longitude,
-            affine_transform[3],
-            affine_transform[4],
-            window_topleft_latitude,
-        )
-
-    # Set an empty numpy array with the dimensions of the country .tif file
-    # np_map_ID will contain an ID for each location (undefined is 0)
-    # ID corresponds to a specific geometry in country_rows
-    np_map_ID = np.zeros((y_axis_len, x_axis_len))
-
-    # List to contain the mappings of id to GADM_ID
-    id_to_GADM_ID = []
-
-    # Loop the country_rows geoDataFrame
-    for i in range(len(country_rows)):
-        # Set the current geometry
-        cur_geometry = country_rows.iloc[i]["geometry"]
-
-        # In windowed mode we check if bounds of geometry overlap the window
         if windowed:
-            latitude_min = cur_geometry.bounds[1]
-            latitude_max = cur_geometry.bounds[3]
+            # Declare a transformer with given affine_transform
+            transformer = rasterio.transform.AffineTransformer(affine_transform)
 
-            # In the following cases we don't have to continue the loop
-            # If the geometry is above the window
-            if latitude_min > window_topleft_latitude:
-                continue
-            # If the geometry is below the window
-            if latitude_max < window_botright_latitude:
-                continue
+            # Obtain the coordinates of the upper left corner of window
+            window_topleft_longitude, window_topleft_latitude = transformer.xy(
+                row_off, col_off
+            )
 
-        # Generate a mask for the specific geometry
-        temp_mask = rasterio.features.geometry_mask(
-            [cur_geometry],
-            (y_axis_len, x_axis_len),
-            transform=affine_transform,
-            all_touched=True,
-            invert=True,
-        )
+            # Obtain the coordinates of the bottom right corner of window
+            window_botright_longitude, window_botright_latitude = transformer.xy(
+                row_off + y_axis_len, col_off + x_axis_len
+            )
 
-        # Map the values of counter value to np_map_ID
-        np_map_ID[temp_mask] = i + 1
+            # Set the current transform to the correct lat and long
+            affine_transform = rasterio.Affine(
+                affine_transform[0],
+                affine_transform[1],
+                window_topleft_longitude,
+                affine_transform[3],
+                affine_transform[4],
+                window_topleft_latitude,
+            )
 
-        # Store the id -> GADM_ID mapping
-        id_to_GADM_ID.append([i + 1, country_rows.iloc[i]["GADM_ID"]])
+        # Set an empty numpy array with the dimensions of the country .tif file
+        # np_map_ID will contain an ID for each location (undefined is 0)
+        # ID corresponds to a specific geometry in country_rows
+        np_map_ID = np.zeros((y_axis_len, x_axis_len))
 
-    # Return np_map_ID as type 'H' np.ushort
-    # 'H' -> https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.ushort
-    # This lowers memory usage, note: ID has to be within the range [0,65535]
-    return np_map_ID.astype("H"), pd.DataFrame(id_to_GADM_ID).set_index(0)
+        # List to contain the mappings of id to GADM_ID
+        id_to_GADM_ID = []
+
+        # Loop the country_rows geoDataFrame
+        for i in range(len(country_rows)):
+            # Set the current geometry
+            cur_geometry = country_rows.iloc[i]["geometry"]
+
+            # In windowed mode we check if bounds of geometry overlap the window
+            if windowed:
+                latitude_min = cur_geometry.bounds[1]
+                latitude_max = cur_geometry.bounds[3]
+
+                # In the following cases we don't have to continue the loop
+                # If the geometry is above the window
+                if latitude_min > window_topleft_latitude:
+                    continue
+                # If the geometry is below the window
+                if latitude_max < window_botright_latitude:
+                    continue
+
+            # Generate a mask for the specific geometry
+            temp_mask = rasterio.features.geometry_mask(
+                [cur_geometry],
+                (y_axis_len, x_axis_len),
+                transform=affine_transform,
+                all_touched=True,
+                invert=True,
+            )
+
+            # Map the values of counter value to np_map_ID
+            np_map_ID[temp_mask] = i + 1
+
+            # Store the id -> GADM_ID mapping
+            id_to_GADM_ID.append([i + 1, country_rows.iloc[i]["GADM_ID"]])
+
+        if len(id_to_GADM_ID) > 0:
+            id_result = pd.DataFrame(id_to_GADM_ID).set_index(0)
+        else:
+            id_result = pd.DataFrame()
+
+        # Return np_map_ID as type 'H' np.ushort
+        # 'H' -> https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.ushort
+        # This lowers memory usage, note: ID has to be within the range [0,65535]
+        return np_map_ID.astype("H"), id_result
+    except:
+        print(country_rows, affine_transform, window_dimensions, windowed)
+        raise
 
 
 def compute_population(
@@ -1018,6 +1027,10 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
         region_geomask, id_mapping = compute_geomask_region(
             country_rows, transform, window_dimensions, windowed=True
         )
+
+        # If no values are present in the id_mapping skip the remaining steps
+        if len(id_mapping) == 0:
+            continue
 
         # Calculate the population for each region
         windowed_pop_count = sum_values_using_geomask(
