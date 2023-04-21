@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
+
 import logging
 import os
 
@@ -39,7 +42,7 @@ def prepare_substation_df(df_all_substations):
         }
     )
 
-    # Add longitute (lon) and latitude (lat) coordinates in the dataset
+    # Add longitude (lon) and latitude (lat) coordinates in the dataset
     df_all_substations["lon"] = df_all_substations["geometry"].x
     df_all_substations["lat"] = df_all_substations["geometry"].y
 

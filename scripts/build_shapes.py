@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
+
 import logging
 import multiprocessing as mp
 import os
@@ -21,7 +24,6 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -139,7 +141,7 @@ def filter_gadm(
     # force GID_0 to be the country code for the relevant countries
     geodf["GID_0"] = cc
 
-    # country shape should have a single geomerty
+    # country shape should have a single geometry
     if (layer == 0) and (geodf.shape[0] > 1):
         logger.warning(
             f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
@@ -181,6 +183,9 @@ def get_GADM_layer(
     geodf_list = []
 
     for country_code in country_list:
+        # Set the current layer id (cur_layer_id) to global layer_id
+        cur_layer_id = layer_id
+
         # download file gpkg
         file_gpkg, name_file = download_GADM(country_code, update, outlogging)
 
@@ -188,18 +193,18 @@ def get_GADM_layer(
         list_layers = fiona.listlayers(file_gpkg)
 
         # get layer name
-        if (layer_id < 0) or (layer_id >= len(list_layers)):
+        if (cur_layer_id < 0) or (cur_layer_id >= len(list_layers)):
             # when layer id is negative or larger than the number of layers, select the last layer
-            layer_id = len(list_layers) - 1
+            cur_layer_id = len(list_layers) - 1
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
-            geo_crs
-        )
+        geodf_temp = gpd.read_file(
+            file_gpkg, layer="ADM_ADM_" + str(cur_layer_id)
+        ).to_crs(geo_crs)
 
         geodf_temp = filter_gadm(
             geodf=geodf_temp,
-            layer=layer_id,
+            layer=cur_layer_id,
             cc=country_code,
             contended_flag=contended_flag,
             output_nonstd_to_csv=False,
@@ -207,7 +212,7 @@ def get_GADM_layer(
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"]
 
         # append geodataframes
         geodf_list.append(geodf_temp)
@@ -549,7 +554,7 @@ def download_WorldPop_API(
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -600,7 +605,7 @@ def load_GDP(
 ):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -880,7 +885,13 @@ def gadm(
             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
         )
 
-    # set index and simplify polygons
+    # renaming 3 letter to 2 letter ISO code before saving GADM file
+    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
+    df_gadm["GADM_ID"] = (
+        df_gadm["GADM_ID"]
+        .str.split(".")
+        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
+    )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(

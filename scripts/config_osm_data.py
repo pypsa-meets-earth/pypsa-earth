@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+# -*- coding: utf-8 -*-
 
 import country_converter as coco
-
 cc = coco.CountryConverter()
 
 # ===============================
@@ -450,21 +450,21 @@ world_iso = {
 # Australasia region includes New Caledonia and Papua New Guinea
 continent_regions = {
     # European regions
-    "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
-    # EASTREN EUROPIAN REGION
+    "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDINAVIAN REGION
+    # EASTERN EUROPEAN REGION
     "EER": ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "FI", "MD"],
-    # CENTRAL EUROPIAN REGION
+    # CENTRAL EUROPEAN REGION
     "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK", "LI"],
     # BALKAN PENISULAN REGION
     "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
-    # WESTREN EUROPE
+    # WESTERN EUROPE
     "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD"],
-    # SOUTHERN EUROPAIN REGION
+    # SOUTHERN EUROPEAN REGION
     "SER": ["ES", "AD", "IT", "PT", "SM", "MT"],
     # African regions
     # NORTHERN AFRICAN REGION
     "NAR": ["EG", "LY", "TN", "DZ", "MA", "EH", "SD", "SS"],
-    # WESTREN AFRICAN REGION
+    # WESTERN AFRICAN REGION
     # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
     "WAR": [
         "MR",
@@ -484,7 +484,7 @@ continent_regions = {
     ],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
-    # EASTREN AFRICAN REGION
+    # EASTERN AFRICAN REGION
     # Somalia ["SO"] belongs to the region but power data are NA in OSM)
     "EAR": ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
@@ -511,15 +511,15 @@ continent_regions = {
         "AE",
         "YE",
     ],
-    # FAR EASTREN AISIAN REGION
+    # FAR EASTERN ASIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN"],  # , "HK", "MO"],
-    # SOUTHEASTREN AISIAN REGION
+    # SOUTHEASTERN ASIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
-    # CENTRAL AISIAN REGION
+    # CENTRAL ASIAN REGION
     "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],
-    # SOUTHERN AISIAN REGION
+    # SOUTHERN ASIAN REGION
     "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
-    # MIDDLE EASTREN ASIAN REGION
+    # MIDDLE EASTERN ASIAN REGION
     "MEAR": [
         "TR",
         "SY",
@@ -539,7 +539,7 @@ continent_regions = {
         "OM",
     ],
     # American continent regions
-    "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
+    "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERICAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
     # CENTRAL AMERICAN REGION
@@ -552,7 +552,7 @@ continent_regions = {
 
 # Geofabrik and iso norm deviate for some countries and domains
 
-# dictionary of correspondance between iso country codes and geofabrik codes containing those information
+# dictionary of correspondence between iso country codes and geofabrik codes containing those information
 # This dictionary instructs the script download_osm_data about how to successfully download data
 # from countries that are aggregated into osm.
 # For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SN-GM

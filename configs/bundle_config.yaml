@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: : 2021-2022 The PyPSA-Earth Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 # File describing the data bundle configurations that can be downloaded
 # by using the retrieve_databundle fule
@@ -36,6 +36,7 @@ databundles:
     category: data
     destination: "data"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1BSxmm3AG5TTOxrLG0ki8IdlL2n3hEviq/view
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -48,6 +49,7 @@ databundles:
     category: data
     destination: "data"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1aXqbCxEpe0aNI6EYuCLtFS6CbdXurTn7/view
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -60,6 +62,7 @@ databundles:
     category: data
     destination: "data"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1zY3WnKqwBF0derS4ncRIPpdTdNn978xw/view
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -72,6 +75,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1N6wJb-dBTqWZX1Tlf5y979lEPtqcVEfQ/view
     output: [cutouts/africa-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -84,6 +88,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1vtckYOZeSugDXrE0PGqxFwsVkdHNimhV/view
     output: [cutouts/africa-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -96,6 +101,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1ouIhGQ4e2M2FLzPUZgcKu5GSpRPZotqw/view
     output: [cutouts/africa-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -108,6 +114,7 @@ databundles:
     category: common
     destination: "data"
     urls:
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_general.zip?download=1
       gdrive: https://drive.google.com/file/d/1nRLrs_kP0qVl-IHC4BFLjpoKa3HLk2Py/view
     output:
     - data/costs.csv
@@ -129,7 +136,7 @@ databundles:
     category: common
     destination: "data"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1016540/files/common_data.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/data_v0.1.zip?download=1
       gdrive: https://drive.google.com/file/d/1jN5iV_iaRa5lc1XOaEtletKPUgPNOVuf/view
     output:
     - data/costs.csv
@@ -147,7 +154,7 @@ databundles:
     category: natura
     destination: "data"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1016878/files/resources_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/natura_global.zip?download=1
       gdrive: https://drive.google.com/file/d/1WmAAwY0TAcHg8YZyAGof0bPewFacm7my/view
     output:
     - data/natura.tiff
@@ -158,7 +165,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1qnJ0HAWZ4z_9q3PtDEUrFmZWBZYg-WNW/view
     output: [data/landcover/*]
 
@@ -168,7 +175,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_asiapacific.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_asiapacific.zip?download=1
       gdrive: https://drive.google.com/file/d/163Uc9F1DPs2pRgDzkTivnblhXCw4nfd5/view
     output: [data/landcover/*]
 
@@ -178,7 +185,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_latinamerica_caribbean.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_latinamerica_caribbean.zip?download=1
       gdrive: https://drive.google.com/file/d/1d3l9qxPnM9XbXODWkP4kWxK_t5cDcEIZ/view
     output: [data/landcover/*]
 
@@ -188,7 +195,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016042/files/landcover_westasia.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_westasia.zip?download=1
       gdrive: https://drive.google.com/file/d/1XsZVZDORUFMKyHfAkzqxDVBENiuy4jEM/view
     output: [data/landcover/*]
 
@@ -198,7 +205,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_europe.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_europe.zip?download=1
       gdrive: https://drive.google.com/file/d/1MfT3cwHJbNTtTjRLzW2T19f9qBNAxdhw/view
     output: [data/landcover/*]
 
@@ -208,7 +215,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_northamerica.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_northamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Dc11J2BZQQeJWxwCC6GiiPd_GWMCN0uF/view
     output: [data/landcover/*]
 
@@ -218,7 +225,7 @@ databundles:
     category: landcover
     destination: "data/landcover"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1018640/files/landcover_polar.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_polar.zip?download=1
       gdrive: https://drive.google.com/file/d/18uODyONQZJGoL15P-URPl0lJs7sphQhX/view
     output: [data/landcover/*]
 
@@ -271,7 +278,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1016042/files/cutouts_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1uCn7S5EHnPuaZHG5sWEVx2lT6Ve2r5dk/view
     output: [cutouts/africa-2013-era5.nc]
     disable_by_opt:

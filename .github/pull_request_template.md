@@ -5,6 +5,7 @@
 
 ## Checklist
 
+- [ ] I consent to the release of this PR's code under the GPLv3 license and non-code contributions under CC0-1.0 and CC-BY-4.0.
 - [ ] I tested my contribution locally and it seems to work fine.
 - [ ] Code and workflow changes are sufficiently documented.
 - [ ] Newly introduced dependencies are added to `envs/environment.yaml` and `envs/environment.docs.yaml`.
