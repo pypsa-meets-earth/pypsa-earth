@@ -559,7 +559,7 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
         set([config_bundles[conf]["category"] for conf in config_bundles])
     )
 
-    # idenfify matched countries for every bundle
+    # identify matched countries for every bundle
     for bname in config_bundles:
         config_bundles[bname]["matched_countries"] = [
             c for c in config_bundles[bname]["countries"] if c in countries

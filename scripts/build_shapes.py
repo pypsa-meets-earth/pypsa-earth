@@ -113,7 +113,7 @@ def filter_gadm(
     # force GID_0 to be the country code for the relevant countries
     geodf["GID_0"] = cc
 
-    # country shape should have a single geomerty
+    # country shape should have a single geometry
     if (layer == 0) and (geodf.shape[0] > 1):
         logger.warning(
             f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
@@ -526,7 +526,7 @@ def download_WorldPop_API(
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -577,7 +577,7 @@ def load_GDP(
 ):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:

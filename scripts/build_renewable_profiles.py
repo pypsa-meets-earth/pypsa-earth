@@ -186,7 +186,7 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
   overestimate production since it is assumed the geographical distribution is
   proportional to capacity factor.
 
-- ``conservative`` assertains the nodal limit by increasing capacities
+- ``conservative`` ascertains the nodal limit by increasing capacities
   proportional to the layout until the limit of an individual grid cell is
   reached.
 
@@ -263,7 +263,7 @@ def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
 def check_cutout_completness(cf):
     """
     Check if a cutout contains missed values.
-    That may be the case due to some issues witht accessibility of ERA5 data
+    That may be the case due to some issues with accessibility of ERA5 data
     See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
     Returns share of cutout cells with missed data
     """
