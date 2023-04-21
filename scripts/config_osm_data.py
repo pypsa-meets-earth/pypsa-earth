@@ -5,6 +5,7 @@
 # -*- coding: utf-8 -*-
 
 import country_converter as coco
+
 cc = coco.CountryConverter()
 
 # ===============================
