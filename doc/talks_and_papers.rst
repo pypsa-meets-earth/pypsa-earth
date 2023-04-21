@@ -9,10 +9,10 @@ Talks and papers
 ##########################################
 
 
-.. _PyPSA_Africa:
+.. _PyPSA_Earth:
 
 PyPSA-Earth
-====================
+===========
 
 Video
 -------
@@ -25,18 +25,22 @@ Video
 - `More user and developer tutorial on the PyPSA-Earth YouTube channel <https://www.youtube.com/channel/UCxLy648Np5B0mX1m4XPBrcg?app=desktop&cbrd=1>`_
 
 Publications:
---------------------
+-------------
 
-Parzen et al., "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663.
+Parzen et al., "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.12109.
 Please use the following BibTeX: ::
 
-  @misc{PyPSAEarth,
-  author = {Parzen, Maximilian and Abdel-Khalek, Hazem and Fedorova, Ekaterina and Mahmood, Matin and Frysztacki, Martha Maria and Hampp, Johannes and Franken, Lukas and Schumm, Leon and Neumann, Fabian and Poli, Davide and Kiprakis, Aristides and Fioriti, Davide},
-  title = {PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa},
-  publisher = {arXiv},
-  year = {2022},
-  url = {https://arxiv.org/abs/2209.04663},
-  doi = {10.48550/ARXIV.2209.04663},
+  @article{PyPSAEarth2023,
+  author = {Maximilian Parzen and Hazem Abdel-Khalek and Ekaterina Fedotova and Matin Mahmood and Martha Maria Frysztacki and Johannes Hampp and Lukas Franken and Leon Schumm and Fabian Neumann and Davide Poli and Aristides Kiprakis and Davide Fioriti},
+  title = {PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa},
+  journal = {Applied Energy},
+  volume = {341},
+  pages = {121096},
+  year = {2023},
+  issn = {0306-2619},
+  doi = {https://doi.org/10.1016/j.apenergy.2023.121096},
+  url = {https://www.sciencedirect.com/science/article/pii/S0306261923004609},
+  keywords = {Macro-energy systems, Optimization, OpenStreetMap, PyPSA-Earth, PyPSA-Africa, PyPSA meets Earth},
   }
 
 .. _PyPSA_Eur:
