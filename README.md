@@ -112,7 +112,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
       .../pypsa-earth % jupyter lab
    ```
 5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
-   To verify the successfull installation the following code can be tested from bash:
+   To verify the successful installation the following code can be tested from bash:
 
    ```bash
       .../pypsa-earth % java -version
