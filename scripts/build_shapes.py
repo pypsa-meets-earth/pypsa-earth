@@ -1215,11 +1215,9 @@ def gadm(
         )
 
     # renaming 3 letter to 2 letter ISO code before saving GADM file
-    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
-    df_gadm["GADM_ID"] = (
-        df_gadm["GADM_ID"]
-        .str.split(".")
-        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
+    # In the case of a contested territory in the form 'Z00.00_0', save 'AA.Z00.00_0'
+    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].apply(
+        lambda x: "." + x if x[0] == "Z" else x[3:]
     )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
