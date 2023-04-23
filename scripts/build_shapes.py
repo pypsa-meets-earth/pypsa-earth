@@ -678,45 +678,52 @@ def add_gdp_data(
     return df_gadm
 
 
-def _init_process_pop(
-    df_gadm_, dict_worldpop_file_locations_, mem_read_limit_per_process_, out_logging_
-):
-    global df_gadm, dict_worldpop_file_locations, mem_read_limit_per_process, out_logging
-    df_gadm, dict_worldpop_file_locations, mem_read_limit_per_process, out_logging = (
-        df_gadm_,
+def _init_process_pop(df_gadm_, df_tasks_, dict_worldpop_file_locations_):
+    global df_gadm, df_tasks
+    df_gadm, df_tasks = df_gadm_, df_tasks_
+
+    global dict_worldpop_file_locations, out_logging
+    dict_worldpop_file_locations, out_logging = (
         dict_worldpop_file_locations_,
-        mem_read_limit_per_process_,
-        out_logging_,
+        False,
     )
 
 
-def _process_function_population(c_code):
+def new_process_function_population(row_id):
+    # Get the current task values
+    current_row = df_tasks.iloc[row_id]
+
+    c_code = current_row["c_code"]
+    window_dimensions = current_row["window_dimensions"]
+    transform = current_row["affine_transform"]
+    latlong_topleft = current_row["latlong_coordinate_topleft"]
+    latlong_botright = current_row["latlong_coordinate_botright"]
+
+    # Obtain the inputfile location from dict
+    WorldPop_inputfile = dict_worldpop_file_locations[c_code]
     # get subset by country code
     country_rows = df_gadm.loc[df_gadm["country"] == c_code]
 
-    # Calculate the population for each geometry given in country_rows
-    df_pop_count = compute_population(
-        country_rows,
-        dict_worldpop_file_locations[c_code],
-        mem_read_limit_per_process,
-        out_logging,
+    np_pop_val, np_pop_xy = get_worldpop_val_xy(WorldPop_inputfile, window_dimensions)
+
+    # If no values are present in the current window skip the remaining steps
+    if len(np_pop_val) == 0:
+        return []
+
+    # get the geomask with id mappings
+    region_geomask, id_mapping = compute_geomask_region(
+        country_rows, transform, window_dimensions, latlong_topleft, latlong_botright
     )
-    return df_pop_count
 
+    # If no values are present in the id_mapping skip the remaining steps
+    if len(id_mapping) == 0:
+        return []
 
-def get_worldpop_features(WorldPop_inputfile):
-    """
-    Function to extract data from .tif input file
-    -------
-    Inputs:
-        WorldPop_inputfile: String pointing to location of file
-    --------
-    Outputs:
-        src.meta["transform"]: Representation of the affine transform
-        src.shape: Dimensions of the input image
-    """
-    with rasterio.open(WorldPop_inputfile) as src:
-        return src.meta["transform"], src.shape
+    # Calculate the population for each region
+    windowed_pop_count = sum_values_using_geomask(
+        np_pop_val, np_pop_xy, region_geomask, id_mapping
+    )
+    return windowed_pop_count
 
 
 def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
@@ -762,7 +769,7 @@ def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
 
 
 def compute_geomask_region(
-    country_rows, affine_transform, window_dimensions, windowed=False
+    country_rows, affine_transform, window_dimensions, latlong_topleft, latlong_botright
 ):
     """
     Function to mask geometries into np_map_ID using an incrementing counter
@@ -776,230 +783,60 @@ def compute_geomask_region(
     Outputs:
         np_map_ID.astype("H"): np_map_ID contains an ID for each location (undefined is 0)
             dimensions are taken from window_dimensions, .astype("H") for memory savings
-        pd.DataFrame(id_to_GADM_ID).set_index(0):
+        id_result:
             DataFrame of the mapping from id (from counter) to GADM_ID
     """
-    try:
-        col_offset, row_offset, x_axis_len, y_axis_len = [
-            int(i) for i in window_dimensions
-        ]
+    col_offset, row_offset, x_axis_len, y_axis_len = window_dimensions
 
-        if windowed:
-            # Declare a transformer with given affine_transform
-            transformer = rasterio.transform.AffineTransformer(affine_transform)
+    # Set an empty numpy array with the dimensions of the country .tif file
+    # np_map_ID will contain an ID for each location (undefined is 0)
+    # ID corresponds to a specific geometry in country_rows
+    np_map_ID = np.zeros((y_axis_len, x_axis_len))
 
-            # Obtain the coordinates of the upper left corner of window
-            window_topleft_longitude, window_topleft_latitude = transformer.xy(
-                row_offset, col_offset
-            )
+    # List to contain the mappings of id to GADM_ID
+    id_to_GADM_ID = []
 
-            # Obtain the coordinates of the bottom right corner of window
-            window_botright_longitude, window_botright_latitude = transformer.xy(
-                row_offset + y_axis_len, col_offset + x_axis_len
-            )
+    # Loop the country_rows geoDataFrame
+    for i in range(len(country_rows)):
+        # Set the current geometry
+        cur_geometry = country_rows.iloc[i]["geometry"]
 
-            # Set the current transform to the correct lat and long
-            affine_transform = rasterio.Affine(
-                affine_transform[0],
-                affine_transform[1],
-                window_topleft_longitude,
-                affine_transform[3],
-                affine_transform[4],
-                window_topleft_latitude,
-            )
+        # Check if bounds of geometry overlap the window
+        latitude_min = cur_geometry.bounds[1]
+        latitude_max = cur_geometry.bounds[3]
 
-        # Set an empty numpy array with the dimensions of the country .tif file
-        # np_map_ID will contain an ID for each location (undefined is 0)
-        # ID corresponds to a specific geometry in country_rows
-        np_map_ID = np.zeros((y_axis_len, x_axis_len))
+        # In the following cases we don't have to continue the loop
+        # If the geometry is above the window
+        if latitude_min > latlong_topleft[0]:
+            continue
+        # If the geometry is below the window
+        if latitude_max < latlong_botright[0]:
+            continue
 
-        # List to contain the mappings of id to GADM_ID
-        id_to_GADM_ID = []
-
-        # Loop the country_rows geoDataFrame
-        for i in range(len(country_rows)):
-            # Set the current geometry
-            cur_geometry = country_rows.iloc[i]["geometry"]
-
-            # In windowed mode we check if bounds of geometry overlap the window
-            if windowed:
-                latitude_min = cur_geometry.bounds[1]
-                latitude_max = cur_geometry.bounds[3]
-
-                # In the following cases we don't have to continue the loop
-                # If the geometry is above the window
-                if latitude_min > window_topleft_latitude:
-                    continue
-                # If the geometry is below the window
-                if latitude_max < window_botright_latitude:
-                    continue
-
-            # Generate a mask for the specific geometry
-            temp_mask = rasterio.features.geometry_mask(
-                [cur_geometry],
-                (y_axis_len, x_axis_len),
-                transform=affine_transform,
-                all_touched=True,
-                invert=True,
-            )
-
-            # Map the values of counter value to np_map_ID
-            np_map_ID[temp_mask] = i + 1
-
-            # Store the id -> GADM_ID mapping
-            id_to_GADM_ID.append([i + 1, country_rows.iloc[i]["GADM_ID"]])
-
-        if len(id_to_GADM_ID) > 0:
-            id_result = pd.DataFrame(id_to_GADM_ID).set_index(0)
-        else:
-            id_result = pd.DataFrame()
-
-        # Return np_map_ID as type 'H' np.ushort
-        # 'H' -> https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.ushort
-        # This lowers memory usage, note: ID has to be within the range [0,65535]
-        return np_map_ID.astype("H"), id_result
-    except:
-        print(country_rows, affine_transform, window_dimensions, windowed)
-        raise
-
-
-def compute_population(
-    country_rows, WorldPop_inputfile, mem_read_limit_per_process, out_logging=False
-):
-    """
-    Function computes the population for the given country rows
-    -------
-    Inputs:
-        country_rows: geoDataFrame filled with geometries and their GADM_ID
-        WorldPop_inputfile: file location of worldpop file
-        out_logging: Boolean to enable logging
-    --------
-    Outputs:
-        df_pop_count: Dataframe with columns
-            - "pop" containing population of GADM_ID region
-            - "GADM_ID"
-    """
-    # Get the features of the worldpop input file
-    transform, worldpop_dim = get_worldpop_features(WorldPop_inputfile)
-
-    worldpop_y_dim, worldpop_x_dim = worldpop_dim
-
-    # Rasterio doesn't support lower than float32 readout
-    # Hence reading the file will take up: nbytes = 4 * y_dim * x_dim
-    expected_bytes_input_read = 4 * worldpop_y_dim * worldpop_x_dim
-
-    # Introduce a max byte size to avoid overfilling RAM
-    # Ensure worldpop_byte_limit >= 883 * 10**6 (minimum memory for 'US')
-    worldpop_byte_limit = max(883, mem_read_limit_per_process) * 10**6
-
-    # If the rasterio read will be within byte limit
-    if expected_bytes_input_read < worldpop_byte_limit:
-        # Call functions with input dimensions for window
-        window_dim = [0, 0, worldpop_x_dim, worldpop_y_dim]
-
-        # Get population values and corresponding x,y coords
-        np_pop_val, np_pop_xy = get_worldpop_val_xy(WorldPop_inputfile, window_dim)
-
-        # get the geomask with id mappings
-        country_geomask, id_mapping = compute_geomask_region(
-            country_rows, transform, window_dim
+        # Generate a mask for the specific geometry
+        temp_mask = rasterio.features.geometry_mask(
+            [cur_geometry],
+            (y_axis_len, x_axis_len),
+            transform=affine_transform,
+            all_touched=True,
+            invert=True,
         )
 
-        # Calculate the population for each region
-        df_pop_count = sum_values_using_geomask(
-            np_pop_val, np_pop_xy, country_geomask, id_mapping
-        )
+        # Map the values of counter value to np_map_ID
+        np_map_ID[temp_mask] = i + 1
 
+        # Store the id -> GADM_ID mapping
+        id_to_GADM_ID.append([i + 1, country_rows.iloc[i]["GADM_ID"]])
+
+    if len(id_to_GADM_ID) > 0:
+        id_result = pd.DataFrame(id_to_GADM_ID).set_index(0)
     else:
-        # Calculate the population using windows
-        df_pop_count = windowed_compute_population(
-            country_rows, WorldPop_inputfile, worldpop_byte_limit
-        )
+        id_result = pd.DataFrame()
 
-    return df_pop_count
-
-
-def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_limit):
-    """
-    Function
-    -------
-    Inputs:
-        country_rows: geoDataFrame filled with geometries and their GADM_ID
-        WorldPop_inputfile: file location of worldpop file
-        worldpop_byte_limit: Memory limit which determines the window size
-    --------
-    Outputs:
-        df_pop_count: Dataframe with columns
-            - "pop" containing population of GADM_ID region
-            - "GADM_ID"
-
-    """
-    # Create a dataframe to store the population data
-    df_pop_count = country_rows.loc[:, ["GADM_ID", "pop"]].copy()
-
-    # Open the file using rasterio
-    with rasterio.open(WorldPop_inputfile) as src:
-        transform = src.meta["transform"]
-        worldpop_y_dim, worldpop_x_dim = src.shape
-        block_y_dim, block_x_dim = src.block_shapes[0]
-
-    # Set the windows x dimension to the input x dimension (width)
-    window_x_dim = worldpop_x_dim
-    # From testing we can assume max x dimension will always fit in memory:
-    #   Largest memory requirement is 'US' at ~882.1 MB = 4 * 512 * window_x_dim
-    #   Hence worldpop_byte_limit has to be greater than 883 MB
-
-    # As the window spans the x dimension, set column offset to 0
-    window_col_offset = 0
-
-    # Calculate the bytes for reading the window using window_x_dim (float32)
-    read_block_size = 4 * block_y_dim * window_x_dim
-
-    # Calculate the amount of blocks that fit into the memory budget
-    # Using the calculated x dimension
-    window_block_count = worldpop_byte_limit // read_block_size
-
-    # Multiply the y_dimension by the amount of blocks in the window
-    # window_y_dim will be height of the window
-    window_y_dim = window_block_count * block_y_dim
-
-    # Calculate the y ranges of the blocks to scan the image
-    # y_range_start will serve as row offset
-    window_row_offset = np.arange(0, worldpop_y_dim, window_y_dim)
-
-    # Loop the windows
-    for row_offset in window_row_offset:
-        window_dimensions = [window_col_offset, row_offset, window_x_dim, window_y_dim]
-
-        np_pop_val, np_pop_xy = get_worldpop_val_xy(
-            WorldPop_inputfile, window_dimensions
-        )
-
-        # If no values are present in the current window skip the remaining steps
-        if len(np_pop_val) == 0:
-            continue
-
-        # get the geomask with id mappings
-        region_geomask, id_mapping = compute_geomask_region(
-            country_rows, transform, window_dimensions, windowed=True
-        )
-
-        # If no values are present in the id_mapping skip the remaining steps
-        if len(id_mapping) == 0:
-            continue
-
-        # Calculate the population for each region
-        windowed_pop_count = sum_values_using_geomask(
-            np_pop_val, np_pop_xy, region_geomask, id_mapping
-        )
-
-        # Loop the regions and write population to df_pop_count
-        for i in range(len(windowed_pop_count)):
-            gadm_id, pop_count = windowed_pop_count.iloc[i]
-            # Select the row with the same "GADM_ID" and set the population count
-            df_pop_count.loc[df_pop_count["GADM_ID"] == gadm_id, "pop"] += pop_count
-
-    return df_pop_count
+    # Return np_map_ID as type 'H' np.ushort
+    # 'H' -> https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.ushort
+    # This lowers memory usage, note: ID has to be within the range [0,65535]
+    return np_map_ID.astype("H"), id_result
 
 
 def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
@@ -1076,6 +913,124 @@ def loop_and_extact_val_x_y(
     return np_pop_count
 
 
+def calculate_transform_and_coords_for_window(
+    current_transform, window_dimensions, original_window=False
+):
+    col_offset, row_offset, x_axis_len, y_axis_len = window_dimensions
+
+    # Declare a transformer with given affine_transform
+    transformer = rasterio.transform.AffineTransformer(current_transform)
+
+    # Obtain the coordinates of the upper left corner of window
+    window_topleft_longitude, window_topleft_latitude = transformer.xy(
+        row_offset, col_offset
+    )
+
+    # Obtain the coordinates of the bottom right corner of window
+    window_botright_longitude, window_botright_latitude = transformer.xy(
+        row_offset + y_axis_len, col_offset + x_axis_len
+    )
+
+    if original_window:
+        adjusted_transform = current_transform
+    else:
+        # Set the adjusted transform to the correct lat and long
+        adjusted_transform = rasterio.Affine(
+            current_transform[0],
+            current_transform[1],
+            window_topleft_longitude,
+            current_transform[3],
+            current_transform[4],
+            window_topleft_latitude,
+        )
+
+    coordinate_topleft = [window_topleft_latitude, window_topleft_longitude]
+    coordinate_botright = [window_botright_latitude, window_botright_longitude]
+
+    return [adjusted_transform, coordinate_topleft, coordinate_botright]
+
+
+def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
+    """
+    Function to generate a list of tasks based on the memory constraints
+    One task represents a single window of the image
+    -------
+    Inputs:
+        c_code: country code
+        mem_read_limit_per_process: memory limit for src.read() operation
+    --------
+    Outputs:
+        Dataframe of task_list
+    """
+    task_list = []
+
+    # Read out dimensions and transform of image
+    with rasterio.open(WorldPop_inputfile) as src:
+        worldpop_y_dim, worldpop_x_dim = src.shape
+        transform = src.meta["transform"]
+        block_y_dim, block_x_dim = [int(i) for i in src.block_shapes[0]]
+
+    # Rasterio doesn't support lower than float32 readout
+    # Hence reading the file will take up: nbytes = 4 * y_dim * x_dim
+    expected_bytes_input_read = 4 * worldpop_y_dim * worldpop_x_dim
+
+    # Introduce a limit that avoids overfilling RAM during readout
+    # Ensure worldpop_byte_limit >= 883 * 10**6 (minimum memory for 'US')
+    worldpop_byte_limit = max(883, mem_read_limit_per_process) * 10**6
+
+    if expected_bytes_input_read < worldpop_byte_limit:
+        # If the rasterio read will be within byte limit
+        bool_original_window = True
+        # Set the window to entire image dimensions
+        current_window = [0, 0, worldpop_x_dim, worldpop_y_dim]
+        # Get latlong coordinates of window
+        transform_and_coords = calculate_transform_and_coords_for_window(
+            transform, current_window, bool_original_window
+        )
+        task_list.append(
+            [c_code, current_window, bool_original_window] + transform_and_coords
+        )
+    else:
+        # Reading operation has to be split up into multiple windows
+        bool_original_window = False
+        # Set the windows x dimension to the input x dimension (width)
+        window_x_dim = worldpop_x_dim
+        # From testing we can assume max x dimension will always fit in memory:
+        #   Largest memory requirement is 'US' at ~882.1 MB = 4 * 512 * window_x_dim
+        #   Hence worldpop_byte_limit has to be greater than 883 MB
+
+        # As the window spans the x dimension, set column offset to 0
+        window_col_offset = 0
+
+        # Calculate the bytes for reading the window using window_x_dim (float32)
+        read_block_size = 4 * block_y_dim * window_x_dim
+
+        # Calculate the amount of blocks that fit into the memory budget
+        # Using the calculated x dimension
+        window_block_count = int(worldpop_byte_limit // read_block_size)
+
+        # Multiply the y_dimension by the amount of blocks in the window
+        # window_y_dim will be height of the window
+        window_y_dim = window_block_count * block_y_dim
+
+        # Calculate row offsets for all windows
+        window_row_offset = np.arange(0, worldpop_y_dim, window_y_dim)
+
+        # Loop the windows and add task for each one to task_list
+        for row_offset in window_row_offset:
+            current_window = [window_col_offset, row_offset, window_x_dim, window_y_dim]
+
+            transform_and_coords = calculate_transform_and_coords_for_window(
+                transform, current_window, bool_original_window
+            )
+
+            task_list.append(
+                [c_code, current_window, bool_original_window] + transform_and_coords
+            )
+
+    return pd.DataFrame(task_list)
+
+
 def add_population_data(
     df_gadm,
     country_codes,
@@ -1109,6 +1064,9 @@ def add_population_data(
     # Initialize new dict to hold worldpop_inputfile strings
     dict_worldpop_file_locations = {}
 
+    # Initialize new dataframe to hold tasks for processing
+    df_tasks = pd.DataFrame()
+
     if out_logging:
         logger.info(
             "Stage 3 of 5: Download WorldPop datasets, method: " + str(worldpop_method)
@@ -1116,7 +1074,7 @@ def add_population_data(
 
     tqdm_kwargs_download = dict(
         ascii=False,
-        desc="Downloading worldpop file per country",
+        desc="Downloading worldpop file per country and assigning tasks",
     )
     with tqdm(total=len(country_codes), **tqdm_kwargs_download) as pbar:
         for c_code in country_codes:
@@ -1125,31 +1083,50 @@ def add_population_data(
                 c_code, worldpop_method, year, update, out_logging
             )
             dict_worldpop_file_locations[c_code] = WorldPop_inputfile
+
+            df_new_tasks = generate_df_tasks(
+                c_code, mem_read_limit_per_process, WorldPop_inputfile
+            )
+
+            df_tasks = pd.concat([df_tasks, df_new_tasks], ignore_index=True)
+
             pbar.update(1)
+
+    df_tasks.columns = [
+        "c_code",
+        "window_dimensions",
+        "is_original_window",
+        "affine_transform",
+        "latlong_coordinate_topleft",
+        "latlong_coordinate_botright",
+    ]
 
     if out_logging:
         logger.info("Stage 4 of 5: Add population data to GADM GeoDataFrame")
 
+    if out_logging:
+        logger.info("Stage 4 of 5: Starting multiprocessing")
+
+    tqdm_kwargs_compute = dict(
+        ascii=False, desc="Compute population per window", unit=" window"
+    )
     lock = mp.Lock()
     kwargs = {
         "initializer": _init_process_pop,
         "initargs": (
             df_gadm,
+            df_tasks,
             dict_worldpop_file_locations,
-            mem_read_limit_per_process,
-            out_logging,
         ),
         "processes": nprocesses,
     }
     # Spawn processes with the parameters from kwargs
     with mp.get_context("spawn").Pool(**kwargs) as pool:
         # Create a progress bar
-        with tqdm(
-            total=len(country_codes), desc="Compute population per country"
-        ) as pbar:
+        with tqdm(total=len(df_tasks), **tqdm_kwargs_compute) as pbar:
             # Give the pool a workload
             for df_pop_count in pool.imap_unordered(
-                _process_function_population, country_codes
+                new_process_function_population, range(len(df_tasks))
             ):
                 # Acquire the lock before accessing df_gadm
                 with lock:
@@ -1157,7 +1134,7 @@ def add_population_data(
                     for i in range(len(df_pop_count)):
                         gadm_id, pop_count = df_pop_count.iloc[i]
                         # Select the row with the same "GADM_ID" and set the population count
-                        df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] = pop_count
+                        df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] += pop_count
                 pbar.update(1)
 
 
