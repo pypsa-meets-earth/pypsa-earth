@@ -731,9 +731,9 @@ def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
         np_pop_valid: array filled with values for each nonzero pixel in the worldpop file
         np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
     """
-    col_off, row_off, width, height = window_dimensions
+    col_offset, row_offset, width, height = window_dimensions
 
-    current_window = Window(col_off, row_off, width, height)
+    current_window = Window(col_offset, row_offset, width, height)
 
     # Open the file using rasterio
     with rasterio.open(WorldPop_inputfile) as src:
@@ -780,7 +780,9 @@ def compute_geomask_region(
             DataFrame of the mapping from id (from counter) to GADM_ID
     """
     try:
-        col_off, row_off, x_axis_len, y_axis_len = [int(i) for i in window_dimensions]
+        col_offset, row_offset, x_axis_len, y_axis_len = [
+            int(i) for i in window_dimensions
+        ]
 
         if windowed:
             # Declare a transformer with given affine_transform
@@ -788,12 +790,12 @@ def compute_geomask_region(
 
             # Obtain the coordinates of the upper left corner of window
             window_topleft_longitude, window_topleft_latitude = transformer.xy(
-                row_off, col_off
+                row_offset, col_offset
             )
 
             # Obtain the coordinates of the bottom right corner of window
             window_botright_longitude, window_botright_latitude = transformer.xy(
-                row_off + y_axis_len, col_off + x_axis_len
+                row_offset + y_axis_len, col_offset + x_axis_len
             )
 
             # Set the current transform to the correct lat and long
@@ -887,7 +889,7 @@ def compute_population(
     expected_bytes_input_read = 4 * worldpop_y_dim * worldpop_x_dim
 
     # Introduce a max byte size to avoid overfilling RAM
-    # Ensure worldpop_byte_limit > 883 * 10**6 (minimum memory for 'US')
+    # Ensure worldpop_byte_limit >= 883 * 10**6 (minimum memory for 'US')
     worldpop_byte_limit = max(883, mem_read_limit_per_process) * 10**6
 
     # If the rasterio read will be within byte limit
@@ -948,7 +950,7 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
     #   Hence worldpop_byte_limit has to be greater than 883 MB
 
     # As the window spans the x dimension, set column offset to 0
-    window_col_off = 0
+    window_col_offset = 0
 
     # Calculate the bytes for reading the window using window_x_dim (float32)
     read_block_size = 4 * block_y_dim * window_x_dim
@@ -963,13 +965,11 @@ def windowed_compute_population(country_rows, WorldPop_inputfile, worldpop_byte_
 
     # Calculate the y ranges of the blocks to scan the image
     # y_range_start will serve as row offset
-    window_row_off = np.arange(0, worldpop_y_dim, window_y_dim)
+    window_row_offset = np.arange(0, worldpop_y_dim, window_y_dim)
 
-    # Calculate the percentage each window is of the image for pbar.update
-    window_percentage_of_image = 1 / len(window_row_off)
-
-    for row_off in window_row_off:
-        window_dimensions = [window_col_off, row_off, window_x_dim, window_y_dim]
+    # Loop the windows
+    for row_offset in window_row_offset:
+        window_dimensions = [window_col_offset, row_offset, window_x_dim, window_y_dim]
 
         np_pop_val, np_pop_xy = get_worldpop_val_xy(
             WorldPop_inputfile, window_dimensions
