@@ -690,36 +690,9 @@ def _init_process_pop(
     )
 
 
-# Auxiliary function to calculate population data in a parallel way
-def _process_func_pop(gadm_idxs):
-    # get subset by country code
-    df_gadm_subset = df_gadm.loc[gadm_idxs].copy()
-
-    country_sublist = df_gadm_subset["country"].unique()
-
-    for c_code in country_sublist:
-        # get worldpop image
-        WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-            c_code, worldpop_method, year, False, False
-        )
-
-        idxs_country = df_gadm_subset[df_gadm_subset["country"] == c_code].index
-
-        with rasterio.open(WorldPop_inputfile) as src:
-            for i in idxs_country:
-                df_gadm_subset.loc[i, "pop"] = _sum_raster_over_mask(
-                    df_gadm_subset.geometry.loc[i], src
-                )
-
-    return df_gadm_subset
-
-
 def _process_function_population(c_code):
     # get subset by country code
     country_rows = df_gadm.loc[df_gadm["country"] == c_code]
-
-    if out_logging:
-        logger.info("Stage 4 of 5: Calculating population of " + str(c_code))
 
     # Calculate the population for each geometry given in country_rows
     df_pop_count = compute_population(
@@ -729,13 +702,6 @@ def _process_function_population(c_code):
         out_logging,
     )
     return df_pop_count
-
-
-# Auxiliary function to download WorldPop data in a parallel way
-def _process_func_download_pop(c_code):
-    WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-        c_code, worldpop_method, year, False, False
-    )
 
 
 def get_worldpop_features(WorldPop_inputfile):
@@ -943,16 +909,6 @@ def compute_population(
         )
 
     else:
-        if out_logging:
-            logger.info(
-                "Stage 4 of 5: compute_population for "
-                + str(country_rows.iloc[0]["country"])
-                + ": Expected size of file readout was "
-                + str(expected_bytes_input_read // 10**6)
-                + " Megabytes. As the limit is "
-                + str(worldpop_byte_limit // 10**6)
-                + " Megabytes switching to windowed approach"
-            )
         # Calculate the population using windows
         df_pop_count = windowed_compute_population(
             country_rows, WorldPop_inputfile, worldpop_byte_limit
@@ -1129,7 +1085,6 @@ def add_population_data(
     out_logging=False,
     mem_read_limit_per_process=1024,
     nprocesses=2,
-    nchunks=2,
     disable_progressbar=False,
 ):
     """
@@ -1184,7 +1139,7 @@ def add_population_data(
             mem_read_limit_per_process,
             out_logging,
         ),
-        "processes": 2,
+        "processes": nprocesses,
     }
     # Spawn processes with the parameters from kwargs
     with mp.get_context("spawn").Pool(**kwargs) as pool:
@@ -1218,7 +1173,6 @@ def gadm(
     out_logging=False,
     year=2020,
     nprocesses=None,
-    nchunks=None,
 ):
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
@@ -1248,7 +1202,6 @@ def gadm(
             out_logging,
             mem_read_limit_per_process,
             nprocesses=nprocesses,
-            nchunks=nchunks,
         )
 
     if gdp_method != False:
@@ -1305,11 +1258,6 @@ if __name__ == "__main__":
     worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
     year = snakemake.config["build_shape_options"]["year"]
 
-    nchunks = snakemake.config["build_shape_options"]["nchunks"]
-    if nchunks < nprocesses:
-        logger.info(f"build_shapes data chunks set to nprocesses {nprocesses}")
-        nchunks = nprocesses
-
     country_shapes = countries(
         countries_list,
         geo_crs,
@@ -1342,6 +1290,5 @@ if __name__ == "__main__":
         out_logging,
         year,
         nprocesses=nprocesses,
-        nchunks=nchunks,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
