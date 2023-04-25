@@ -682,14 +682,23 @@ def _init_process_pop(df_gadm_, df_tasks_, dict_worldpop_file_locations_):
     global df_gadm, df_tasks
     df_gadm, df_tasks = df_gadm_, df_tasks_
 
-    global dict_worldpop_file_locations, out_logging
-    dict_worldpop_file_locations, out_logging = (
-        dict_worldpop_file_locations_,
-        False,
-    )
+    global dict_worldpop_file_locations
+    dict_worldpop_file_locations = dict_worldpop_file_locations_
 
 
-def new_process_function_population(row_id):
+def process_function_population(row_id):
+    """
+    Function that reads the task from df_tasks and executes all the methods
+    to obtain population values for the specified region
+    -------
+    Inputs:
+        row_id: integer which indicates a specific row of df_tasks
+    --------
+    Outputs:
+        windowed_pop_count: Dataframe containing "GADM_ID" and "pop" columns
+        It represents the amount of population per region (GADM_ID),
+        for the settings given by the row in df_tasks
+    """
     # Get the current task values
     current_row = df_tasks.iloc[row_id]
 
@@ -776,9 +785,10 @@ def compute_geomask_region(
     -------
     Inputs:
         country_rows: geoDataFrame filled with geometries and their GADM_ID
-        affine_transform: affine transform of current image
+        affine_transform: affine transform of current window
         window_dimensions: dimensions of window used when reading file
-        windowed: True if called during windowed processing (default = False)
+        latlong_topleft: [latitude, longitude] of top left corner of the window
+        latlong_botright: [latitude, longitude] of bottom right corner of the window
     --------
     Outputs:
         np_map_ID.astype("H"): np_map_ID contains an ID for each location (undefined is 0)
@@ -801,11 +811,11 @@ def compute_geomask_region(
         # Set the current geometry
         cur_geometry = country_rows.iloc[i]["geometry"]
 
-        # Check if bounds of geometry overlap the window
         latitude_min = cur_geometry.bounds[1]
         latitude_max = cur_geometry.bounds[3]
 
-        # In the following cases we don't have to continue the loop
+        # Check if bounds of geometry overlap the window
+        # In the following cases we can skip the rest of the loop
         # If the geometry is above the window
         if latitude_min > latlong_topleft[0]:
             continue
@@ -841,13 +851,15 @@ def compute_geomask_region(
 
 def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     """
-    Function
+    Function that sums all the population values in np_pop_val into the correct GADM_ID
+    It uses np_pop_xy to access the key stored in region_geomask[x][y]
+    The relation of this key to GADM_ID is stored in id_mapping
     -------
     Inputs:
         np_pop_val: array filled with values for each nonzero pixel in the worldpop file
         np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
-        region_geomask:
-        id_mapping:
+        region_geomask: array with dimensions of window, values are keys that map to GADM_ID using id_mapping
+        id_mapping: Dataframe that contains mappings of region_geomask values to GADM_IDs
     --------
     Outputs:
         df_pop_count: Dataframe with columns
@@ -870,6 +882,7 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     # Declare an array to contain population counts
     np_pop_count = np.zeros(len(id_mapping) + 1)
 
+    # Calculate population count of region using a numba njit compiled function
     np_pop_count = loop_and_extact_val_x_y(
         np_pop_count, np_pop_val, np_pop_xy, region_geomask, dict_id
     )
@@ -886,14 +899,16 @@ def loop_and_extact_val_x_y(
     np_pop_count, np_pop_val, np_pop_xy, region_geomask, dict_id
 ):
     """
-    Function
+    Function that will be compiled using @njit (numba)
+    It takes all the population values from np_pop_val and stores them in np_pop_count
+    where each location in np_pop_count is mapped to a GADM_ID through dict_id (id_mapping by extension)
     -------
     Inputs:
-        np_pop_count:
-        np_pop_val:
-        np_pop_xy:
-        region_geomask:
-        dict_id:
+        np_pop_count: np.zeros array, which will store population counts
+        np_pop_val: array filled with values for each nonzero pixel in the worldpop file
+        np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
+        region_geomask: array with dimensions of window, values are keys that map to GADM_ID using id_mapping
+        dict_id: numba typed.dict containing id_mapping.index -> location in np_pop_count
     --------
     Outputs:
         np_pop_count: np.array containing population counts
@@ -916,9 +931,26 @@ def loop_and_extact_val_x_y(
 def calculate_transform_and_coords_for_window(
     current_transform, window_dimensions, original_window=False
 ):
+    """
+    Function which calculates the [lat,long] corners of the window given window_dimensions,
+    if not(original_window) it also changes the affine transform to match the window
+    -------
+    Inputs:
+        current_transform: affine transform of source image
+        window_dimensions: dimensions of window used when reading file
+        original_window: boolean to track if window covers entire country
+    --------
+    Outputs:
+        A list of: [
+            adjusted_transform: affine transform adjusted to window
+            coordinate_topleft: [latitude, longitude] of top left corner of the window
+            coordinate_botright: [latitude, longitude] of bottom right corner of the window
+        ]
+
+    """
     col_offset, row_offset, x_axis_len, y_axis_len = window_dimensions
 
-    # Declare a transformer with given affine_transform
+    # Declare a affine transformer with given current_transform
     transformer = rasterio.transform.AffineTransformer(current_transform)
 
     # Obtain the coordinates of the upper left corner of window
@@ -932,6 +964,7 @@ def calculate_transform_and_coords_for_window(
     )
 
     if original_window:
+        # If the window covers the entire country then use original affine transform
         adjusted_transform = current_transform
     else:
         # Set the adjusted transform to the correct lat and long
@@ -958,6 +991,7 @@ def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
     Inputs:
         c_code: country code
         mem_read_limit_per_process: memory limit for src.read() operation
+        WorldPop_inputfile: file location of worldpop file
     --------
     Outputs:
         Dataframe of task_list
@@ -1002,7 +1036,7 @@ def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
         # As the window spans the x dimension, set column offset to 0
         window_col_offset = 0
 
-        # Calculate the bytes for reading the window using window_x_dim (float32)
+        # Calculate the bytes for reading the window using window_x_dim (readout is float32)
         read_block_size = 4 * block_y_dim * window_x_dim
 
         # Calculate the amount of blocks that fit into the memory budget
@@ -1084,6 +1118,7 @@ def add_population_data(
             )
             dict_worldpop_file_locations[c_code] = WorldPop_inputfile
 
+            # Given the memory constraint, generate a task for all windows to cover the country (c_code)
             df_new_tasks = generate_df_tasks(
                 c_code, mem_read_limit_per_process, WorldPop_inputfile
             )
@@ -1126,7 +1161,7 @@ def add_population_data(
         with tqdm(total=len(df_tasks), **tqdm_kwargs_compute) as pbar:
             # Give the pool a workload
             for df_pop_count in pool.imap_unordered(
-                new_process_function_population, range(len(df_tasks))
+                process_function_population, range(len(df_tasks))
             ):
                 # Acquire the lock before accessing df_gadm
                 with lock:
