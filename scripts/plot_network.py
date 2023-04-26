@@ -179,7 +179,7 @@ def plot_h2_infra(network):
     # assign_location(n)
 
     bus_size_factor = 1e5
-    linewidth_factor = 1e3
+    linewidth_factor = 4e2
     # MW below which not drawn
     line_lower_threshold = 1e2
     bus_color = "m"
@@ -772,13 +772,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_network",
             simpl="",
-            clusters="23",
+            clusters="4",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L0.10",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="6H",
             discountrate=0.071,
-            demand="NZ",
+            demand="DF",
+            h2export="120",
         )
 
     n = pypsa.Network(snakemake.input.network)
