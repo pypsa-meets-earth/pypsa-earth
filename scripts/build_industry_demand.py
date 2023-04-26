@@ -62,15 +62,17 @@ if __name__ == "__main__":
         prod_tom_path, header=0, index_col=0, keep_default_na=False
     )
 
-    if snakemake.config["custom_data"]["industry_demand"]:
-        production_tom.drop("Industry Machinery", axis=1, inplace=True)
+    # if snakemake.config["custom_data"]["industry_demand"]:
+    #     production_tom.drop("Industry Machinery", axis=1, inplace=True)
 
     # to_drop=production_tom.sum()[production_tom.sum()==0].index
     # production_tom.drop(to_drop, axis=1, inplace=True)
 
     # Load distribution keys
     keys_path = snakemake.input.industrial_distribution_key
-    dist_keys = pd.read_csv(keys_path, index_col=0)
+    dist_keys = pd.read_csv(
+        keys_path, index_col=0, keep_default_na=False, na_values=[""]
+    )
 
     # material demand per node and industry (kton/a)
     nodal_production = country_to_nodal(production_tom, dist_keys)
