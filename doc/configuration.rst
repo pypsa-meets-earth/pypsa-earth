@@ -154,6 +154,23 @@ Specifies the options to simplify and cluster the network.
    :widths: 25,10,22,27
    :file: configtables/cluster_options.csv
 
+.. _build_shape_options_cf:
+
+``build_shape_options``
+=============================
+
+Specifies the options to build the shapes in which the region of interest (``countries``) is divided.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: build_shape_options:
+   :end-at: contended_flag:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/build_shape_options.csv
+
 
 .. _electricity_cf:
 
