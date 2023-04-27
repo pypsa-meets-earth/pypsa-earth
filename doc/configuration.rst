@@ -137,6 +137,24 @@ algorithm from the `NetworkX <https://networkx.org/documentation/stable/index.ht
    :widths: 25,10,22,27
    :file: configtables/augmented_line_connection.csv
 
+.. _cluster_options_cf:
+
+``cluster_options``
+=============================
+
+Specifies the options to simplify and cluster the network.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: cluster_options:
+   :end-at: efficiency:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/cluster_options.csv
+
+
 .. _electricity_cf:
 
 ``electricity``
