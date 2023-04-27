@@ -205,7 +205,7 @@ Specifies the options to build the `OpenStreetMap <https://wiki.osmfoundation.or
    :widths: 25,10,22,27
    :file: configtables/build_osm_network.csv
 
-.. _build_osm_network_cf:
+.. _base_network_cf:
 
 ``base_network``
 =============================
@@ -221,7 +221,6 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
    :header-rows: 1
    :widths: 25,10,22,27
    :file: configtables/base_network.csv
-
 
 .. _electricity_cf:
 
