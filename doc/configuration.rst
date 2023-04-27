@@ -188,8 +188,39 @@ Specifies the options to clean the `OpenStreetMap <https://wiki.osmfoundation.or
    :widths: 25,10,22,27
    :file: configtables/clean_osm_data_options.csv
 
+.. _build_osm_network_cf:
 
+``build_osm_network``
+=============================
 
+Specifies the options to build the `OpenStreetMap <https://wiki.osmfoundation.org/wiki/Main_Page>`_ (OSM) network.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: build_osm_network:
+   :end-at: force_ac:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/build_osm_network.csv
+
+.. _build_osm_network_cf:
+
+``base_network``
+=============================
+
+Specifies the minimum voltage magnitude in the base network and the offshore substations.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: base_network:
+   :end-at: min_voltage_rebase_voltage:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/base_network.csv
 
 
 .. _electricity_cf:
