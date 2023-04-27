@@ -171,6 +171,26 @@ Specifies the options to build the shapes in which the region of interest (``cou
    :widths: 25,10,22,27
    :file: configtables/build_shape_options.csv
 
+.. _clean_osm_data_options_cf:
+
+``clean_osm_data_options``
+=============================
+
+Specifies the options to clean the `OpenStreetMap <https://wiki.osmfoundation.org/wiki/Main_Page>`_ (OSM) data.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: clean_osm_data_options:
+   :end-at: generator_name_method:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/clean_osm_data_options.csv
+
+
+
+
 
 .. _electricity_cf:
 
