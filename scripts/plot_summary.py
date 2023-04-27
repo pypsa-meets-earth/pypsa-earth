@@ -148,7 +148,7 @@ def plot_costs():
     # Sort columns by sum
     new_columns = (
         df.columns
-    )  # If you want to sort by values, then use: new_columns = df.columns.sort_values()
+    )  # If you want to sort by values, then use: new_columns = df.sum().sort_values().index
 
     fig, ax = plt.subplots(figsize=(12, 8))
 
