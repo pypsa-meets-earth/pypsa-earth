@@ -222,6 +222,26 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
    :widths: 25,10,22,27
    :file: configtables/base_network.csv
 
+.. _load_options_cf:
+
+``load_options``
+=============================
+
+Specifies the options to estimate future electricity demand (load).
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: load_options:
+   :end-at: scale:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/load_options.csv
+
+.. warning::
+    The snapshots date range (``snapshots\start`` - ``snapshots\end``) must be in the ``weather_year``.
+
 .. _electricity_cf:
 
 ``electricity``
