@@ -142,7 +142,7 @@ algorithm from the `NetworkX <https://networkx.org/documentation/stable/index.ht
 ``cluster_options``
 =============================
 
-Specifies the options to simplify and cluster the network.
+Specifies the options to simplify and cluster the network. This is done in two stages, first using the rule ``simplify_network`` and then using the rule ``cluster_network``. For more details on this process, see the `PyPSA-Earth paper <https://www.sciencedirect.com/science/article/pii/S0306261923004609>`_, section 3.7.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
