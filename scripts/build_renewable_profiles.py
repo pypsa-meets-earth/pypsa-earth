@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa authors
+
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """Calculates for each network node the
 (i) installable capacity (based on land-use), (ii) the available generation time
 series (based on weather data), and (iii) the average distance from the node for
@@ -183,7 +186,7 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
   overestimate production since it is assumed the geographical distribution is
   proportional to capacity factor.
 
-- ``conservative`` assertains the nodal limit by increasing capacities
+- ``conservative`` ascertains the nodal limit by increasing capacities
   proportional to the layout until the limit of an individual grid cell is
   reached.
 
@@ -260,7 +263,7 @@ def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
 def check_cutout_completness(cf):
     """
     Check if a cutout contains missed values.
-    That may be the case due to some issues witht accessibility of ERA5 data
+    That may be the case due to some issues with accessibility of ERA5 data
     See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
     Returns share of cutout cells with missed data
     """
@@ -328,6 +331,9 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     if plants.empty or plants.installed_hydro.any() == False:
         logger.info("No bus has installed hydro plants, ignoring normalization.")
         return runoff
+
+    if snakemake.config["cluster_options"]["alternative_clustering"]:
+        plants = plants.set_index("shape_id")
 
     years_statistics = normalize_using_yearly.index
     if isinstance(years_statistics, pd.DatetimeIndex):
@@ -563,7 +569,7 @@ if __name__ == "__main__":
 
         resource["plants"] = regions.rename(
             columns={"x": "lon", "y": "lat", "country": "countries"}
-        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries"]]
+        ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
         resource["plants"]["installed_hydro"] = [
             True if (bus_id in hydro_ppls.bus.values) else False

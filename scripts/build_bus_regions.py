@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Creates Voronoi shapes for each bus representing both onshore and offshore regions.
 
@@ -47,7 +49,7 @@ import geopandas as gpd
 import numpy
 import pandas as pd
 import pypsa
-from _helpers import REGION_COLS, configure_logging, two_2_three_digits_country
+from _helpers import REGION_COLS, configure_logging
 from shapely.geometry import Point, Polygon
 from shapely.ops import unary_union
 from vresutils.graph import voronoi_partition_pts
@@ -133,9 +135,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 def get_gadm_shape(onshore_locs, gadm_shapes):
     def locate_bus(coords):
         point = Point(Point(coords["x"], coords["y"]))
-        gadm_shapes_country = gadm_shapes.filter(
-            like=two_2_three_digits_country(country), axis=0
-        )
+        gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)
 
         try:
             return gadm_shapes[gadm_shapes.contains(point)].item()
@@ -146,9 +146,7 @@ def get_gadm_shape(onshore_locs, gadm_shapes):
 
     def get_id(coords):
         point = Point(Point(coords["x"], coords["y"]))
-        gadm_shapes_country = gadm_shapes.filter(
-            like=two_2_three_digits_country(country), axis=0
-        )
+        gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)
 
         try:
             return gadm_shapes[gadm_shapes.contains(point)].index.item()

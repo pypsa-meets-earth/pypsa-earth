@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# coding: utf-8
+
+# -*- coding: utf-8 -*-
 """
 Lifts electrical transmission network to a single 380 kV voltage layer,
 removes dead-ends of the network,
@@ -12,9 +13,10 @@ Relevant Settings
 -----------------
 
 .. code:: yaml
+
     clustering:
-      simplify:
-      aggregation_strategies:
+        simplify:
+        aggregation_strategies:
 
     costs:
         year:
@@ -76,7 +78,7 @@ The rule :mod:`simplify_network` does up to four things:
 
 1. Create an equivalent transmission network in which all voltage levels are mapped to the 380 kV level by the function ``simplify_network(...)``.
 
-2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the captial costs of the generator.
+2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the capital costs of the generator.
 
 3. Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
 
@@ -114,7 +116,7 @@ def simplify_network_to_380(n, linetype):
     The function preserves the transmission capacity for each line while updating
     its voltage level, line type and number of parallel bundles (num_parallel).
     Transformers are removed and connected components are moved from their
-    starting bus to their ending bus. The corresponing starting buses are
+    starting bus to their ending bus. The corresponding starting buses are
     removed as well.
     """
     logger.info("Mapping all network lines onto a single 380kV layer")
@@ -267,6 +269,8 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     logger.info("Simplifying connected link components")
 
     if n.links.empty:
+        with open(output.connection_costs, "w") as fp:
+            pass
         return n, n.buses.index.to_series()
 
     # Determine connected link components, ignore all links but DC
@@ -456,12 +460,12 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         buses_i
     ] = np.inf  # bus in buses_i should not be assigned to different bus in buses_i
 
-    # avoid assignnment a bus to a wrong country
+    # avoid assignment a bus to a wrong country
     for c in n.buses.country.unique():
         incountry_b = n.buses.country == c
         dist.loc[incountry_b, ~incountry_b] = np.inf
 
-    # avoid assignnment DC buses to AC ones
+    # avoid assignment DC buses to AC ones
     for c in n.buses.carrier.unique():
         incarrier_b = n.buses.carrier == c
         dist.loc[incarrier_b, ~incarrier_b] = np.inf
@@ -652,7 +656,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
     ]
 
-    # all the noded to be merged should be mapped into a single node
+    # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
         n.buses.loc[i_suffic_load].groupby("country")["bus_id"].first().to_dict()
     )
@@ -775,7 +779,7 @@ if __name__ == "__main__":
                 - set(n.generators.query("carrier == @carrier").bus)
             )
             logger.info(
-                f"clustering preparaton (hac): aggregating {len(buses_i)} buses of type {carrier}."
+                f"clustering preparation (hac): aggregating {len(buses_i)} buses of type {carrier}."
             )
             n, busmap_hac = aggregate_to_substations(n, aggregation_strategies, buses_i)
             busmaps.append(busmap_hac)

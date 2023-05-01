@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
-# SPDX-FileCopyrightText: : 2022 PyPSA-Earth, 2021-2022 PyPSA-Africa, 2017-2020 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5894972.svg
    :target: https://doi.org/10.5281/zenodo.5894972
@@ -558,7 +559,7 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
         set([config_bundles[conf]["category"] for conf in config_bundles])
     )
 
-    # idenfify matched countries for every bundle
+    # identify matched countries for every bundle
     for bname in config_bundles:
         config_bundles[bname]["matched_countries"] = [
             c for c in config_bundles[bname]["countries"] if c in countries

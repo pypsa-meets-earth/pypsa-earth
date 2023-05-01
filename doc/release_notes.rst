@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA-Earth Authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 ##########################################
 Release Notes
@@ -67,17 +66,31 @@ Upcoming Release
 
 * Fix rule run_test, remove code duplication, add gitstars to readme `PR #593 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/593>`
 
-* Add new build_demand_profiles.py. It builds demand_profiles.csv and allow easier interfacing of new data `PR #582 https://github.com/pypsa-meets-earth/pypsa-earth/pull/582`__
+* Add new build_demand_profiles.py. It builds demand_profiles.csv and allow easier interfacing of new data `PR #582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/582>`__
 
-* Upgrade technology data to v0.5.0 `PR #600 https://github.com/pypsa-meets-earth/pypsa-earth/pull/600`__
+* Upgrade technology data to v0.5.0 `PR #600 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/600>`__
 
-* Update simplify_network and cluster_network according to PyPSA-Eur developments `PR #597 https://github.com/pypsa-meets-earth/pypsa-earth/pull/597`__
+* Update simplify_network and cluster_network according to PyPSA-Eur developments `PR #597 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/597>`__
 
-* Revise OSM cleaning to improve the cleaning process and error resilience `PR #620 https://github.com/pypsa-meets-earth/pypsa-earth/pull/620`__
+* Revise OSM cleaning to improve the cleaning process and error resilience `PR #620 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/620>`__
 
-* Fix isolated buses when simplifying the network and add clustering by networks `PR #632 https://github.com/pypsa-meets-earth/pypsa-earth/pull/632`__
+* Fix isolated buses when simplifying the network and add clustering by networks `PR #632 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/632>`__
 
-* Include hydro runoff normalization `PR #631 https://github.com/pypsa-meets-earth/pypsa-earth/pull/631`__
+* Include hydro runoff normalization `PR #631 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/631>`__
+
+* Add REUSE compatibility `PR #651 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/651>`__
+
+* Fix bug of missing GitHub issue template `PR #660 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/660>`__
+
+* Fix GADM bug when using alternative clustering and store gadm shape with two letter instead of three letter ISO code  `PR #670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/670>`__
+
+* Fix GADM naming bug related to level-2 clustering `PR #684 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/684>`__
+
+* Fix append bug in build_powerplants rule `PR #686 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/686>`__
+
+* Add *zenodo_handler.py* to update and upload files via code `PR #688 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/688>`__
+
+* Fix a few typos in docstrings `PR #695 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/695>`__
 
 * Improve earth coverage and add improve make_statistics coverage `PR #654 https://github.com/pypsa-meets-earth/pypsa-earth/pull/654`__
 

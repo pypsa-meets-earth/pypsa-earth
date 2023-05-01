@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# coding: utf-8
+
+# -*- coding: utf-8 -*-
 """
 Creates networks clustered to ``{cluster}`` number of zones with aggregated buses, generators and transmission corridors.
 
@@ -136,7 +137,6 @@ from _helpers import (
     configure_logging,
     get_aggregation_strategies,
     sets_path_to_root,
-    two_2_three_digits_country,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -378,7 +378,7 @@ def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
-        gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
+        gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
         point = Point(coords["x"], coords["y"])
 
         try:
@@ -641,7 +641,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="60"
+            "cluster_network", network="elec", simpl="", clusters="10"
         )
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

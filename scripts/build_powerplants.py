@@ -1,48 +1,80 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
-# coding: utf-8
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend the powerplant database with custom entries provided in ``data/custom_powerplants.csv``.
+
 Relevant Settings
 -----------------
+
 .. code:: yaml
+
     electricity:
       powerplants_filter:
       custom_powerplants:
+
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`electricity`
+
 Inputs
 ------
+
 - ``networks/base.nc``: confer :ref:`base`.
 - ``data/custom_powerplants.csv``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as OSM extractor generates
+
 Outputs
 -------
+
 - ``resource/powerplants.csv``: A list of conventional power plants (i.e. neither wind nor solar) with fields for name, fuel type, technology, country, capacity in MW, duration, commissioning year, retrofit year, latitude, longitude, and dam information as documented in the `powerplantmatching README <https://github.com/FRESNA/powerplantmatching/blob/master/README.md>`_; additionally it includes information on the closest substation/bus in ``networks/base.nc``.
+
     .. image:: ../img/powerplantmatching.png
         :scale: 30 %
+
     **Source:** `powerplantmatching on GitHub <https://github.com/FRESNA/powerplantmatching>`_
+
 Description
 -----------
+
 The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendmends. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
 1. Adding all powerplants from custom:
+
     .. code:: yaml
+
         powerplants_filter: false
         custom_powerplants: true
+
 2. Replacing powerplants in e.g. Germany by custom data:
+
     .. code:: yaml
+
         powerplants_filter: Country not in ['Germany']
         custom_powerplants: true
+
     or
+
     .. code:: yaml
+
         powerplants_filter: Country not in ['Germany']
         custom_powerplants: Country in ['Germany']
+
 3. Adding additional built year constraints:
+
     .. code:: yaml
+
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
+
+Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
+
+Tagging considerations for columns in the file:
+    - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
+    - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
+    - Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:
@@ -59,7 +91,6 @@ The following assumptions were done to map custom OSM-extracted power plants wit
         'nuclear': 'Steam Turbine'
 3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
-
 """
 import logging
 import os
@@ -72,10 +103,8 @@ import pypsa
 import yaml
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     read_csv_nafix,
     to_csv_nafix,
-    two_2_three_digits_country,
     two_digits_2_name_country,
 )
 from build_shapes import get_GADM_layer
@@ -218,7 +247,9 @@ def add_custom_powerplants(ppl, inputs, config):
     # if isinstance(custom_ppl_query, str):
     #     add_ppls.query(custom_ppl_query, inplace=True)
 
-    return ppl.append(add_ppls, sort=False, ignore_index=True, verify_integrity=True)
+    return pd.concat(
+        [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
+    )
 
 
 def replace_natural_gas_technology(df):
@@ -307,12 +338,22 @@ if __name__ == "__main__":
         gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
         def locate_bus(coords, co):
-            gdf_co = gdf[gdf["GADM_ID"].str.contains(two_2_three_digits_country(co))]
+            gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
 
             point = Point(coords["lon"], coords["lat"])
 
-            # try:
-            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
+            try:
+                return gdf_co[gdf_co.contains(point)][
+                    "GADM_ID"
+                ].item()  # filter gdf_co which contains point and returns the bus
+
+            except ValueError:
+                return gdf_co[
+                    gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
+                ][
+                    "GADM_ID"
+                ].item()  # looks for closest one shape=node
+                # fixing https://github.com/pypsa-meets-earth/pypsa-earth/pull/670
 
         ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
             lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1

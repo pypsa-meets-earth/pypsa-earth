@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Converts vectordata or known as shapefiles (i.e. used for geopandas/shapely) to our cutout rasters. The `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_ on protected areas is aggregated to all cutout regions.
 
@@ -114,7 +116,7 @@ def get_transform_and_shape(bounds, res, out_logging):
 
 def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     """
-    Iterates thorugh all snakemake rule inputs and unifies shapefiles (.shp) only.
+    Iterates through all snakemake rule inputs and unifies shapefiles (.shp) only.
 
     The input is given in the Snakefile and shapefiles are given by .shp
 

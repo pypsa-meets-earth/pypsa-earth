@@ -1,0 +1,20 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: pypsa-earth
+Upstream-Contact: The PyPSA-Earth and PyPSA-Eur Authors <pypsameetsearth@gmail.com>
+Source: https://github.com/pypsa-meets-earth/pypsa-earth
+
+Files: doc/data.csv
+Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
+License: CC-BY-4.0
+
+Files: doc/configtables/*
+Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
+License: CC-BY-4.0
+
+Files: data/*
+Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
+License: CC-BY-4.0
+
+Files: .github/*
+Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
+License: CC0-1.0

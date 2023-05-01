@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2022 The PyPSA meets Earth authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 .. _learning_materials:
 

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2022 The PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# coding: utf-8
+
+# -*- coding: utf-8 -*-
 """
 Prepares network files with monte-carlo parameter sweeps for solving process.
 
@@ -41,23 +42,23 @@ Description
 -----------
 PyPSA-Earth is deterministic which means that a set of inputs give a set of outputs.
 Parameter sweeps can help to explore the uncertainty of the outputs cause by parameter changes.
-Many are familar with the classical "sensitvity analysis" that can be applied by varying the
+Many are familiar with the classical "sensitivity analysis" that can be applied by varying the
 input of only one feature, while exploring its outputs changes. Here implemented is a
-"global sensitvity analysis" that can help to explore the multi-dimensional uncertainty space
+"global sensitivity analysis" that can help to explore the multi-dimensional uncertainty space
 when more than one feature are changed at the same time. 
 
 To do so, the scripts is separated in two building blocks: One creates the experimental design,
 the other, modifies and outputs the network file. Building the experimental design is currently
 supported by the packages pyDOE2, chaospy and scipy. This should give users the freedom to
 explore alternative approaches. The orthogonal latin hypercube sampling is thereby found as most
-performant, hence, implemented here. Sampling the mutli-dimensional uncertainty space is relatively
+performant, hence, implemented here. Sampling the multi-dimensional uncertainty space is relatively
 easy. It only requires two things: The number of *samples* (e.g. PyPSA networks) and *features* (e.g.
-load or solar timeseries). This results in an experimental design of the dimenson (samples X features).
+load or solar timeseries). This results in an experimental design of the dimension (samples X features).
 
 Additionally, upper and lower bounds *per feature* need to be provided such that the experimental
 design can be scaled accordingly. Currently the user can define uncertainty ranges e.g. bounds,
 for all PyPSA objects that are `int` or `float`. Boolean values could be used but require testing.
-The experimental design `lhs_scaled` (dimension: samplex X features) is then used to modify the PyPSA
+The experimental design `lhs_scaled` (dimension: sample X features) is then used to modify the PyPSA
 networks. Thereby, this script creates samples x amount of networks. The iterators comes from the
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
 0 to (total number of) SAMPLES. 
@@ -229,7 +230,7 @@ if __name__ == "__main__":
         # this loop sets in one scenario each "i" feature assumption
         # k is the config input key "loads_t.p_set"
         # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
-        # i, j interation number to pick values of experimental setup
+        # i, j interaction number to pick values of experimental setup
         # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh_scaled[0,0]
         exec(f"n.{k} = n.{k} * {lh_scaled[i,j]}")
         logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")

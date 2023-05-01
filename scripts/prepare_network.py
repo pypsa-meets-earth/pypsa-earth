@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
-# coding: utf-8
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such as
 
