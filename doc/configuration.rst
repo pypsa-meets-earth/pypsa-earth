@@ -250,7 +250,7 @@ Specifies the options to estimate future electricity demand (load).
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: electricity:
-   :end-before: lines:
+   :end-at: PV:
 
 .. csv-table::
    :header-rows: 1
