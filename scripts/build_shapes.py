@@ -267,7 +267,7 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.0):
     if out_logging:
         logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
