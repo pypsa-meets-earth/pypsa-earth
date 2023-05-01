@@ -604,6 +604,7 @@ iso_to_geofk_dict = {
     "IM": "isle-of-man",  # Isle of man
     "GP": "guadeloupe",  # guadeloupe
     "JM": "jamaica",  # jamaica
+    "TT": "central-america",  # Trinidad and Tobago
 }
 
 # data for some islands seem to be merged with some other areas data
