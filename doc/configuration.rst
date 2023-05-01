@@ -247,6 +247,8 @@ Specifies the options to estimate future electricity demand (load).
 ``electricity``
 ===============
 
+Specifies the options for the rule ``add_electricity``. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, CO2 emission limits, operational reserve, storage parameters. See the table below for more details.
+
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: electricity:
