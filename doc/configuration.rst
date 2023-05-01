@@ -260,6 +260,25 @@ Specifies the options to estimate future electricity demand (load).
 .. warning::
     Carriers in ``conventional_carriers`` must not also be in ``extendable_carriers``.
 
+.. _lines_cf:
+
+``lines``
+=============
+
+Specifies electricity line parameters.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-after: PV:
+   :end-at: under_construction:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/lines.csv
+
+.. _links_cf:
+
 .. _atlite_cf:
 
 ``atlite``
@@ -346,23 +365,6 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
-
-.. _lines_cf:
-
-``lines``
-=============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: lines:
-   :end-before: links:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/lines.csv
-
-.. _links_cf:
 
 ``links``
 =============
