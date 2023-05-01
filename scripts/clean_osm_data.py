@@ -812,12 +812,17 @@ def clean_data(
     generator_name_method="OSM",
 ):
     logger.info("Process OSM lines")
-    # Load raw data lines
-    df_lines = gpd.read_file(input_files["lines"])
 
-    # prepare lines dataframe and data types
-    df_lines = prepare_lines_df(df_lines)
-    df_lines = finalize_lines_type(df_lines)
+    if os.path.getsize(input_files["lines"]) > 0:
+        # Load raw data lines
+        df_lines = gpd.read_file(input_files["lines"])
+
+        # prepare lines dataframe and data types
+        df_lines = prepare_lines_df(df_lines)
+        df_lines = finalize_lines_type(df_lines)
+    else:
+        logger.info("No OSM lines")
+        df_lines = gpd.GeoDataFrame()
 
     # initialize name of the final dataframe
     df_all_lines = df_lines
@@ -837,34 +842,37 @@ def clean_data(
     else:
         logger.info("No OSM cables to add: skipping")
 
-    # Add underground, under_construction, frequency and circuits columns to the dataframe
-    # and drop corresponding unused columns
-    df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
+    if not df_all_lines.empty:
+        # Add underground, under_construction, frequency and circuits columns to the dataframe
+        # and drop corresponding unused columns
+        df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
 
-    logger.info("Filter lines by voltage, frequency, circuits and geometry")
+        logger.info("Filter lines by voltage, frequency, circuits and geometry")
 
-    # filter lines
-    df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
-    df_all_lines = filter_frequency(df_all_lines)
-    df_all_lines = filter_circuits(df_all_lines)
-    df_all_lines = filter_lines_by_geometry(df_all_lines)
+        # filter lines
+        df_all_lines = filter_voltage(df_all_lines, threshold_voltage)
+        df_all_lines = filter_frequency(df_all_lines)
+        df_all_lines = filter_circuits(df_all_lines)
+        df_all_lines = filter_lines_by_geometry(df_all_lines)
 
-    logger.info("Select lines and cables in the region of interest")
+        logger.info("Select lines and cables in the region of interest")
 
-    # drop lines crossing regions with and without the region under interest
-    df_all_lines = df_all_lines[
-        df_all_lines.apply(lambda x: africa_shape.contains(x.geometry.boundary), axis=1)
-    ]
+        # drop lines crossing regions with and without the region under interest
+        df_all_lines = df_all_lines[
+            df_all_lines.apply(
+                lambda x: africa_shape.contains(x.geometry.boundary), axis=1
+            )
+        ]
 
-    df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
+        df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
-    # set the country name by the shape
-    if names_by_shapes:
-        logger.info("Setting lines country name using the GADM shapes")
-        df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
+        # set the country name by the shape
+        if names_by_shapes:
+            logger.info("Setting lines country name using the GADM shapes")
+            df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
 
-    # set unique line ids
-    df_all_lines = set_unique_id(df_all_lines, "line_id")
+        # set unique line ids
+        df_all_lines = set_unique_id(df_all_lines, "line_id")
 
     # save lines output
     logger.info("Saving lines output")
@@ -874,53 +882,57 @@ def clean_data(
 
     logger.info("Process OSM substations")
 
-    df_all_substations = gpd.read_file(input_files["substations"])
+    if os.path.getsize(input_files["substations"]) > 0:
+        df_all_substations = gpd.read_file(input_files["substations"])
 
-    # prepare dataset for substations
-    df_all_substations = prepare_substation_df(df_all_substations)
+        # prepare dataset for substations
+        df_all_substations = prepare_substation_df(df_all_substations)
 
-    # filter substations by tag
-    if tag_substation:  # if the string is not empty check it
-        df_all_substations = df_all_substations[
-            df_all_substations["tag_substation"] == tag_substation
-        ]
+        # filter substations by tag
+        if tag_substation:  # if the string is not empty check it
+            df_all_substations = df_all_substations[
+                df_all_substations["tag_substation"] == tag_substation
+            ]
 
-    # clean voltage and make sure it is string
-    df_all_substations = clean_voltage(df_all_substations)
+        # clean voltage and make sure it is string
+        df_all_substations = clean_voltage(df_all_substations)
 
-    df_all_substations = gpd.GeoDataFrame(
-        split_cells(pd.DataFrame(df_all_substations)),
-        crs=df_all_substations.crs,
-    )
-
-    # add line endings if option is enabled
-    if add_line_endings:
-        df_all_substations = add_line_endings_tosubstations(
-            df_all_substations, df_all_lines
+        df_all_substations = gpd.GeoDataFrame(
+            split_cells(pd.DataFrame(df_all_substations)),
+            crs=df_all_substations.crs,
         )
 
-    # drop substations with nan geometry
-    df_all_substations.dropna(subset=["geometry"], axis=0, inplace=True)
+        # add line endings if option is enabled
+        if add_line_endings:
+            df_all_substations = add_line_endings_tosubstations(
+                df_all_substations, df_all_lines
+            )
 
-    # filter substation by voltage
-    df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
+        # drop substations with nan geometry
+        df_all_substations.dropna(subset=["geometry"], axis=0, inplace=True)
 
-    # finalize dataframe types
-    df_all_substations = finalize_substation_types(df_all_substations)
+        # filter substation by voltage
+        df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
 
-    # save to geojson file
-    df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
+        # finalize dataframe types
+        df_all_substations = finalize_substation_types(df_all_substations)
 
-    if names_by_shapes:
-        # set the country name by the shape
-        logger.info("Setting substations country name using the GADM shapes")
-        df_all_substations = set_countryname_by_shape(
-            df_all_substations,
-            ext_country_shapes,
-        )
+        # save to geojson file
+        df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
 
-    # set unique bus ids
-    df_all_substations = set_unique_id(df_all_substations, "bus_id")
+        if names_by_shapes:
+            # set the country name by the shape
+            logger.info("Setting substations country name using the GADM shapes")
+            df_all_substations = set_countryname_by_shape(
+                df_all_substations,
+                ext_country_shapes,
+            )
+
+        # set unique bus ids
+        df_all_substations = set_unique_id(df_all_substations, "bus_id")
+    else:
+        logger.info("No OSM substations")
+        df_all_substations = gpd.GeoDataFrame()
 
     # save substations output
     logger.info("Saving substations output")
@@ -930,24 +942,28 @@ def clean_data(
 
     logger.info("Process OSM generators")
 
-    df_all_generators = gpd.read_file(input_files["generators"])
+    if os.path.getsize(input_files["generators"]) > 0:
+        df_all_generators = gpd.read_file(input_files["generators"])
 
-    # prepare the generator dataset
-    df_all_generators = prepare_generators_df(df_all_generators)
+        # prepare the generator dataset
+        df_all_generators = prepare_generators_df(df_all_generators)
 
-    if names_by_shapes:
-        # set the country name by the shape
-        logger.info("Setting generators country name using the GADM shapes")
-        df_all_generators = set_countryname_by_shape(
-            df_all_generators,
-            ext_country_shapes,
-            col_country="Country",
-        )
+        if names_by_shapes:
+            # set the country name by the shape
+            logger.info("Setting generators country name using the GADM shapes")
+            df_all_generators = set_countryname_by_shape(
+                df_all_generators,
+                ext_country_shapes,
+                col_country="Country",
+            )
 
-    # set name tag by closest city when the value is nan
-    if generator_name_method == "closest_city":
-        logger.info("Setting unknown generators name using the closest city")
-        df_all_generators = set_name_by_closestcity(df_all_generators)
+        # set name tag by closest city when the value is nan
+        if generator_name_method == "closest_city":
+            logger.info("Setting unknown generators name using the closest city")
+            df_all_generators = set_name_by_closestcity(df_all_generators)
+    else:
+        logger.info("No OSM generators")
+        df_all_generators = gpd.GeoDataFrame()
 
     # save to csv
     to_csv_nafix(df_all_generators, output_files["generators_csv"])
