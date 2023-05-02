@@ -445,6 +445,8 @@ Specifies the options for Monte Carlo sampling.
 ``solving``
 =============
 
+Specify linear power flow formulation and optimization solver settings.
+
 ``options``
 -----------
 
