@@ -402,21 +402,6 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
 
-.. _load_cf:
-
-``load``
-=============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: load:
-   :end-before: costs:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/load.csv
-
 .. _costs_cf:
 
 ``costs``
