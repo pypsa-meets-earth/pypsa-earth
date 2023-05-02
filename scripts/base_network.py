@@ -249,6 +249,10 @@ def _load_transformers_from_osm(fp_osm_transformers, buses):
 
 
 def _set_electrical_parameters_lines(config, lines):
+    if lines.empty:
+        lines["type"] = []
+        return lines
+    
     v_noms = config["electricity"]["voltages"]
     linetypes = config["lines"]["types"]
 

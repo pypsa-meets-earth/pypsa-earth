@@ -628,7 +628,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
         # else return an empty GeoDataFrame
         df = gpd.GeoDataFrame(columns=cols, geometry=[], crs=crs)
         if isinstance(dtype, dict):
-            for (k, v) in dtype.items():
+            for k, v in dtype.items():
                 df[k] = df[k].astype(v)
         return df
 
