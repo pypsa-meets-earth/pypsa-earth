@@ -318,6 +318,8 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 ``renewable``
 =============
 
+Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (``onwind``), offshore wind with AC connection (``offwind-ac``), offshore wind with DC connection (``offwind-dc``), solar (``solar``), and hydropower (``hydro``).
+
 ``onwind``
 ----------
 
@@ -376,7 +378,7 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at:   hydro:
-   :end-before: costs:
+   :end-at: multiplier:
 
 .. csv-table::
    :header-rows: 1
