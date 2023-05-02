@@ -407,10 +407,12 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 ``costs``
 =============
 
+Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file ``data/costs.csv``, which can also be modified manually.
+
 .. literalinclude:: ../config.default.yaml
    :language: yaml
-   :start-after: scaling_factor:
-   :end-before: monte_carlo:
+   :start-after: Costs Configuration
+   :end-at: co2:
 
 .. csv-table::
    :header-rows: 1
@@ -418,7 +420,7 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
    :file: configtables/costs.csv
 
 .. note::
-    To change cost assumptions in more detail (i.e. other than ``marginal_cost`` and ``capital_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
+    To change cost assumptions in more detail (i.e. other than ``marginal_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
     You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
 
 

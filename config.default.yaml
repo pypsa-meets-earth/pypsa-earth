@@ -297,7 +297,8 @@ renewable:
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
     multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
 
-# TODO: Needs to be adjusted for Africa
+# TODO: Needs to be adjusted for Africa.
+# Costs Configuration (Do not remove, needed for Sphynx documentation).
 costs:
   year: 2030
   version: v0.5.0
