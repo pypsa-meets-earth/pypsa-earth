@@ -12,6 +12,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
+from config_osm_data import osm_clean_columns
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
@@ -726,9 +727,9 @@ def force_ac_lines(df, col="tag_frequency"):
 def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False):
     logger.info("Stage 1/5: Read input data")
 
-    buses = gpd.read_file(inputs["substations"])
-    lines = gpd.read_file(inputs["lines"])
-    generators = read_geojson(inputs["generators"])
+    buses = read_geojson(inputs["substations"], osm_clean_columns["substation"])
+    lines = read_geojson(inputs["lines"], osm_clean_columns["line"])
+    generators = read_geojson(inputs["generators"], osm_clean_columns["generator"])
 
     lines = line_endings_to_bus_conversion(lines)
 

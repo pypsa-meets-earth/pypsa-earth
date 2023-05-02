@@ -604,13 +604,13 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def read_geojson(fn):
+def read_geojson(fn, cols=[]):
     # if the file is non-zero, read the geodataframe and return it
     if os.path.getsize(fn) > 0:
         return gpd.read_file(fn)
     else:
         # else return an empty GeoDataFrame
-        return gpd.GeoDataFrame(geometry=[])
+        return gpd.GeoDataFrame(columns=cols, geometry=[])
 
 
 def create_country_list(input, iso_coding=True):

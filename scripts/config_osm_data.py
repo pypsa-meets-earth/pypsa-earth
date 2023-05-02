@@ -149,6 +149,54 @@ feature_columns = {
     "tower": columns_basic + columns_tower,
 }
 
+# Columns of CLEAN OSM DATA
+
+osm_clean_columns = {
+    "substation": [
+        "bus_id",
+        "station_id",
+        "voltage",
+        "dc",
+        "symbol",
+        "under_construction",
+        "tag_substation",
+        "tag_area",
+        "lon",
+        "lat",
+        "country",
+        "Country",
+        "geometry",
+    ],
+    "generator": [
+        "id",
+        "tags.power",
+        "Type",
+        "Country",
+        "Area",
+        "name",
+        "tags.generator:type",
+        "tags.generator:method",
+        "tags.generator:source",
+        "power_output_MW",
+        "geometry",
+    ],
+    "line": [
+        "line_id",
+        "bus0",
+        "bus1",
+        "voltage",
+        "circuits",
+        "length",
+        "underground",
+        "under_construction",
+        "tag_type",
+        "tag_frequency",
+        "dc",
+        "country",
+        "geometry",
+    ],
+}
+
 # Python dictionary of ISO 3166-1-alpha-2 codes, as per publicly
 # available data on official ISO site in July 2015.
 #
