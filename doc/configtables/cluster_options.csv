@@ -22,7 +22,7 @@ aggregation_strategies,,,
 -- -- p_nom_min,, "{min, mean, max, sum}", "Indicates how the p_nom_min of the aggregated generator is computed from the original p_nom_min values."
 -- -- p_min_pu,, "{min, mean, max, sum}", "Indicates how the p_min_pu of the aggregated generator is computed from the original p_min_pu values."
 -- -- marginal_cost,, "{min, mean, max, sum}", "Indicates how the marginal_cost of the aggregated generator is computed from the original marginal_cost values."
--- -- commitable,,,
+-- -- commitable,,"{any}", "Indicates how the commit status of the aggregated generator is set depending on the original values of the generators. Unit Commitment is currently under development, so should be left to ``any``."
 -- -- ramp_limit_up,, "{min, mean, max, sum}", "Indicates how the ramp_limit_up of the aggregated generator is computed from the original ramp_limit_up values."
 -- -- ramp_limit_down,, "{min, mean, max, sum}", "Indicates how the ramp_limit_down of the aggregated generator is computed from the original ramp_limit_down values."
 -- -- efficiency,, "{min, mean, max, sum}", "Indicates how the efficiency of the aggregated generator is computed from the original efficiency values."
