@@ -77,6 +77,9 @@ def prepare_substation_df(df_all_substations):
 
 
 def add_line_endings_tosubstations(substations, lines):
+    if lines.empty:
+        return substations
+
     # extract columns from substation df
     bus_s = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
     bus_e = gpd.GeoDataFrame(columns=substations.columns, crs=substations.crs)
