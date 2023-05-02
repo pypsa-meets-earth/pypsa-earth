@@ -281,6 +281,21 @@ Specifies electricity line parameters.
 
 .. _links_cf:
 
+``links``
+=============
+
+Specifies Link parameters. Links are a fundamental component of `PyPSA <https://pypsa.readthedocs.io/en/latest/components.html>`_ .
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: links:
+   :end-before: transformers:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/links.csv
+
 .. _atlite_cf:
 
 ``atlite``
@@ -367,19 +382,6 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
-
-``links``
-=============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: links:
-   :end-before: transformers:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/links.csv
 
 .. _transformers_cf:
 
