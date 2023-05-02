@@ -296,6 +296,23 @@ Specifies Link parameters. Links are a fundamental component of `PyPSA <https://
    :widths: 25,7,22,30
    :file: configtables/links.csv
 
+.. _transformers_cf:
+
+``transformers``
+================
+
+Specifies transformers parameters and types.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: transformers:
+   :end-before: atlite:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/transformers.csv
+
 .. _atlite_cf:
 
 ``atlite``
@@ -384,21 +401,6 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
-
-.. _transformers_cf:
-
-``transformers``
-================
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: transformers:
-   :end-before: load:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/transformers.csv
 
 .. _load_cf:
 
