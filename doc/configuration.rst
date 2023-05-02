@@ -478,6 +478,8 @@ Specify linear power flow formulation and optimization solver settings.
 ``plotting``
 =============
 
+Specifies plotting options.
+
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: plotting:
