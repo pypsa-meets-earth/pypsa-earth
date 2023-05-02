@@ -428,8 +428,7 @@ Specifies the cost assumptions of the technologies considered. Cost information 
 ``monte_carlo``
 ===============
 
-``options``
------------
+Specifies the options for Monte Carlo sampling.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
