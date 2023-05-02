@@ -613,6 +613,7 @@ iso_to_geofk_dict = {
     "EH": "MA",  # Western Sahara -> Morocco
     "SN": "SN-GM",  # Senegal -> Senegal-Gambia
     "GM": "SN-GM",  # Gambia -> Senegal-Gambia
+    "KM": "comores",  # Comores
     # "HK": "CN",  # Hong Kong  -> China  # no more with gadm 4.1
     # "MO": "CN",  # Macao  -> China  # no more with gadm 4.1
     "SG": "MY",  # Singapore -> Malaysia-Singapore-Brunei
@@ -654,6 +655,13 @@ iso_to_geofk_dict = {
     "GP": "guadeloupe",  # guadeloupe
     "JM": "jamaica",  # jamaica
     "TT": "central-america",  # Trinidad and Tobago
+    "AG": "central-america",  # Antigua e Barbuda
+    "DM": "central-america",  # Dominique
+    "LC": "central-america",  # Santa Lucia
+    "VC": "central-america",  # Saint Vincent e Grenadine
+    "KN": "central-america",  # Saint Kitts e Nevis
+    "GD": "central-america",  # Grenada
+    # "PM": "north-america",  # Saint-Pierre e Miquelon
 }
 
 # data for some islands seem to be merged with some other areas data
