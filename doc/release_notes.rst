@@ -92,6 +92,8 @@ Upcoming Release
 
 * Fix a few typos in docstrings `PR #695 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/695>`__
 
+* Update and improve configuration section in documentation `PR #694 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/694>`__
+
 PyPSA-Earth 0.1.0
 =================
 
