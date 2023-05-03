@@ -471,7 +471,8 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         dist.loc[incarrier_b, ~incarrier_b] = np.inf
 
     busmap = n.buses.index.to_series()
-    busmap.loc[buses_i] = dist.idxmin(1)
+    if not dist.empty:
+        busmap.loc[buses_i] = dist.idxmin(1)
 
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
