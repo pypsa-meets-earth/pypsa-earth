@@ -778,6 +778,9 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
             crs=buses.crs,
         )
 
+        # update country list by buses dataframe
+        bus_country_list = buses["country"].unique().tolist()
+
     non_allocated_countries = list(
         set(country_list).symmetric_difference(set(bus_country_list))
     )
