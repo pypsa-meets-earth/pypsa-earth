@@ -28,9 +28,6 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 configfile: "configs/bundle_config.yaml"
 
 
-DEFAULT_CONFIG = "config.tutorial.yaml" if config["tutorial"] else "config.default.yaml"
-
-
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
@@ -872,7 +869,6 @@ rule make_statistics:
 
 rule run_scenario:
     input:
-        default_config=DEFAULT_CONFIG,
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touchfile=touch("results/{scenario_name}/scenario.done"),
@@ -882,18 +878,28 @@ rule run_scenario:
         mem_mb=5000,
     run:
         from scripts.build_test_configs import create_test_config
+        import yaml
 
-        # Ensure the scenario name matches the name of the configuration
+        # get base configuration file from diff config
+        with open(input.diff_config) as f:
+            base_config_path = (
+                yaml.full_load(f)
+                .get("run", {})
+                .get("base_config", "config.tutorial.yaml")
+            )
+
+            # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
             {"run": {"name": wildcards.scenario_name}},
             input.diff_config,
         )
         # merge the default config file with the difference
-        create_test_config(input.default_config, input.diff_config, "config.yaml")
+        create_test_config(base_config_pathg, input.diff_config, "config.yaml")
         os.system("snakemake -j all solve_all_networks --rerun-incomplete")
         os.system("snakemake -j1 make_statistics --force")
         copyfile("config.yaml", output.copyconfig)
+
 
 
 rule run_all_scenarios:
