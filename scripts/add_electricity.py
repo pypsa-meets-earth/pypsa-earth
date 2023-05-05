@@ -779,5 +779,8 @@ if __name__ == "__main__":
     update_p_nom_max(n)
     add_nice_carrier_names(n, snakemake.config)
 
+    if not ("weight" in n.generators.columns):
+        n.generators["weight"] = pd.Series()
+
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])
