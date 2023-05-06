@@ -9,16 +9,6 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
-run:
-  name: ""
-  shared_cutouts: true # set to true to share the default cutout(s) across runs
-
-scenario:
-  simpl: ['']
-  ll: ['copt']
-  clusters: [6]
-  opts: [Co2L-4H]
-
 countries: ["NG", "BJ"]
 
   # ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CM', 'CF', 'TD', 'CG', 'CD',
@@ -32,13 +22,6 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
-summary_dir: results
-
-snapshots:
-  start: "2013-03-1"
-  end: "2013-03-7"
-  inclusive: "left" # end is not inclusive
-
 enable:
   # prepare_links_p_nom: false
   retrieve_databundle: true
@@ -48,6 +31,22 @@ enable:
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
+
+run:
+  name: ""
+
+scenario:
+  simpl: ['']
+  ll: ['copt']
+  clusters: [6]
+  opts: [Co2L-4H]
+
+summary_dir: results
+
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-7"
+  inclusive: "left" # end is not inclusive
 
 # definition of the Coordinate Reference Systems
 crs:
@@ -76,7 +75,7 @@ cluster_options:
     remove_stubs: true
     remove_stubs_across_borders: true
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is above the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time

@@ -1,0 +1,28 @@
+,Unit,Values,Description
+simplify_network,,,
+-- to_substations, bool, "{True, False}", "False: network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)."
+-- algorithm,, "{hac, kmeans, modularity}", "Clustering algorithm used in the simplify_network rule. Options available are Hierarchical Agglomerative Clustering (HAC), k-means, or greedy modularity."
+-- feature,, "Str in the format ‘carrier1+carrier2+...+carrierN-X’, where CarrierI can be from {‘solar’, ‘onwind’, ‘offwind’, ‘ror’} and X is one of {‘cap’, ‘time’}. Examples: solar+offwind-cap, solar-time", "Only for Hierarchical Agglomerative Clustering (HAC). Feature(s) used to do the clustering."
+-- exclude_carriers,, "List of Str like [ 'solar', 'onwind'] or empy list []", "Carriers not considered in the simplify_network rule. Can be any set of carriers (conventional or renewable)."
+-- remove_stubs, bool, "{True, False}", "True: Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network."
+-- remove_stubs_across_borders, bool, "{True, False}", "True: Stub lines and links can be removed across borders."
+-- p_threshold_drop_isolated, MW, positive number, "Isolated buses are discarded if bus mean power is below the `p_threshold_drop_isolated`."
+-- p_threshold_merge_isolated, MW, positive number, "Isolated buses are merged into a single isolated bus if bus mean power is below `p_threshold_merge_isolated`."
+cluster_network,,,
+-- algorithm,,"{hac, kmeans}", "Clustering algorithm used in the cluster_network rule. Options available are Hierarchical Agglomerative Clustering (HAC) or k-means."
+-- feature,,"Str in the format ‘carrier1+carrier2+...+carrierN-X’, where CarrierI can be from {‘solar’, ‘onwind’, ‘offwind’, ‘ror’} and X is one of {‘cap’, ‘time’}. Examples: solar+offwind-cap, solar-time", "Only for Hierarchical Agglomerative Clustering (HAC). Feature(s) used to do the clustering."
+-- exclude_carriers,, "List of Str like [ 'solar', 'onwind'] or empy list []", "Carriers not considered in the cluster_network rule. Can be any set of carriers (conventional or renewable)."
+alternative_clustering, bool, "{True, False}", "False: use Voronoi shapes in the clustering. True: use GADM shapes in the clustering."
+distribute_cluster,, "{['load'], ['pop'], ['gdp']}", "Distributes cluster nodes per country according to load (['load']), population (['pop']) or GDP (['gdp'])."
+out_logging, bool, "{True, False}", "True: Logging is printed to the console."
+aggregation_strategies,,,
+-- generators,,,
+-- -- p_nom,, "{min, mean, max, sum}", "Indicates how the p_nom of the aggregated generator is computed from the original p_nom values. For example, if sum, then all values within each cluster are summed to represent the new generator."
+-- -- p_nom_max,, "{min, mean, max, sum}", "Indicates how the p_nom_max of the aggregated generator is computed from the original p_nom_max values."
+-- -- p_nom_min,, "{min, mean, max, sum}", "Indicates how the p_nom_min of the aggregated generator is computed from the original p_nom_min values."
+-- -- p_min_pu,, "{min, mean, max, sum}", "Indicates how the p_min_pu of the aggregated generator is computed from the original p_min_pu values."
+-- -- marginal_cost,, "{min, mean, max, sum}", "Indicates how the marginal_cost of the aggregated generator is computed from the original marginal_cost values."
+-- -- commitable,,"{any}", "Indicates how the commit status of the aggregated generator is set depending on the original values of the generators. Unit Commitment is currently under development, so should be left to ``any``."
+-- -- ramp_limit_up,, "{min, mean, max, sum}", "Indicates how the ramp_limit_up of the aggregated generator is computed from the original ramp_limit_up values."
+-- -- ramp_limit_down,, "{min, mean, max, sum}", "Indicates how the ramp_limit_down of the aggregated generator is computed from the original ramp_limit_down values."
+-- -- efficiency,, "{min, mean, max, sum}", "Indicates how the efficiency of the aggregated generator is computed from the original efficiency values."
