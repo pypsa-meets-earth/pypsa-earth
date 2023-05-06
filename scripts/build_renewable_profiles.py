@@ -52,13 +52,13 @@ Inputs
 
 - ``data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif``: `Copernicus Land Service <https://land.copernicus.eu/global/products/lc>`_ inventory on 23 land use classes (e.g. forests, arable land, industrial, urban areas) based on UN-FAO classification. See `Table 4 in the PUM <https://land.copernicus.eu/global/sites/cgls.vito.be/files/products/CGLOPS1_PUM_LC100m-V3_I3.4.pdf>`_ for a list of all classes.
 
-    .. image:: ../img/copernicus.png
-        :scale: 33 %
+    .. image:: /img/copernicus.png
+        :width: 33 %
 
 - ``data/gebco/GEBCO_2021_TID.nc``: A `bathymetric <https://en.wikipedia.org/wiki/Bathymetry>`_ data set with a global terrain model for ocean and land at 15 arc-second intervals by the `General Bathymetric Chart of the Oceans (GEBCO) <https://www.gebco.net/data_and_products/gridded_bathymetry_data/>`_.
 
-    .. image:: ../img/gebco_2021_grid_image.jpg
-        :scale: 50 %
+    .. image:: /img/gebco_2021_grid_image.jpg
+        :width: 50 %
 
     **Source:** `GEBCO <https://www.gebco.net/data_and_products/images/gebco_2019_grid_image.jpg>`_
 
@@ -104,32 +104,32 @@ Outputs
 
     - **profile**
 
-    .. image:: ../img/profile_ts.png
-        :scale: 33 %
+    .. image:: /img/profile_ts.png
+        :width: 33 %
         :align: center
 
     - **p_nom_max**
 
-    .. image:: ../img/p_nom_max_hist.png
-        :scale: 33 %
+    .. image:: /img/p_nom_max_hist.png
+        :width: 33 %
         :align: center
 
     - **potential**
 
-    .. image:: ../img/potential_heatmap.png
-        :scale: 33 %
+    .. image:: /img/potential_heatmap.png
+        :width: 33 %
         :align: center
 
     - **average_distance**
 
-    .. image:: ../img/distance_hist.png
-        :scale: 33 %
+    .. image:: /img/distance_hist.png
+        :width: 33 %
         :align: center
 
     - **underwater_fraction**
 
-    .. image:: ../img/underwater_hist.png
-        :scale: 33 %
+    .. image:: /img/underwater_hist.png
+        :width: 33 %
         :align: center
 
 Description
@@ -150,8 +150,8 @@ capacity factor there.
 This uses the Copernicus land use data,
 Natura2000 nature reserves and GEBCO bathymetry data.
 
-.. image:: ../img/eligibility.png
-    :scale: 50 %
+.. image:: /img/eligibility.png
+    :width: 50 %
     :align: center
 
 To compute the layout of generators in each node's Voronoi cell, the
@@ -159,20 +159,20 @@ installable potential in each grid cell is multiplied with the capacity factor
 at each grid cell. This is done since we assume more generators are installed
 at cells with a higher capacity factor.
 
-.. image:: ../img/offwinddc-gridcell.png
-    :scale: 50 %
+.. image:: /img/offwinddc-gridcell.png
+    :width: 50 %
     :align: center
 
-.. image:: ../img/offwindac-gridcell.png
-    :scale: 50 %
+.. image:: /img/offwindac-gridcell.png
+    :width: 50 %
     :align: center
 
-.. image:: ../img/onwind-gridcell.png
-    :scale: 50 %
+.. image:: /img/onwind-gridcell.png
+    :width: 50 %
     :align: center
 
-.. image:: ../img/solar-gridcell.png
-    :scale: 50 %
+.. image:: /img/solar-gridcell.png
+    :width: 50 %
     :align: center
 
 This layout is then used to compute the generation availability time series

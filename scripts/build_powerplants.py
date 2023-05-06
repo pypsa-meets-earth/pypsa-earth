@@ -31,8 +31,8 @@ Outputs
 
 - ``resource/powerplants.csv``: A list of conventional power plants (i.e. neither wind nor solar) with fields for name, fuel type, technology, country, capacity in MW, duration, commissioning year, retrofit year, latitude, longitude, and dam information as documented in the `powerplantmatching README <https://github.com/FRESNA/powerplantmatching/blob/master/README.md>`_; additionally it includes information on the closest substation/bus in ``networks/base.nc``.
 
-    .. image:: ../img/powerplantmatching.png
-        :scale: 30 %
+    .. image:: /img/powerplantmatching.png
+        :width: 30 %
 
     **Source:** `powerplantmatching on GitHub <https://github.com/FRESNA/powerplantmatching>`_
 
@@ -72,9 +72,9 @@ Format required for the custom_powerplants.csv should be similar to the powerpla
 Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
 
 Tagging considerations for columns in the file:
-    - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
-    - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
-    - Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
+- FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
+- Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
+- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:

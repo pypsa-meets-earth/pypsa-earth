@@ -19,7 +19,7 @@ Relevant statistics that are created are:
 - Execution time for the rules, when benchmark is available
 
 Outputs
-------
+-------
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
 import os
