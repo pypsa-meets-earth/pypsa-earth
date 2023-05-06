@@ -11,6 +11,7 @@ logging:
 
 run:
   name: ""
+  shared_cutouts: true # set to true to share the default cutout(s) across runs
 
 scenario:
   simpl: ['']
