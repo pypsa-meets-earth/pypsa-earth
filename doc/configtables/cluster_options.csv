@@ -7,7 +7,7 @@ simplify_network,,,
 -- remove_stubs, bool, "{True, False}", "True: Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network."
 -- remove_stubs_across_borders, bool, "{True, False}", "True: Stub lines and links can be removed across borders."
 -- p_threshold_drop_isolated, MW, positive number, "Isolated buses are discarded if bus mean power is below the `p_threshold_drop_isolated`."
--- p_threshold_merge_isolated, MW, positive number, "Isolated buses are merged into a single isolated bus if bus mean power is above `p_threshold_merge_isolated`."
+-- p_threshold_merge_isolated, MW, positive number, "Isolated buses are merged into a single isolated bus if bus mean power is below `p_threshold_merge_isolated`."
 cluster_network,,,
 -- algorithm,,"{hac, kmeans}", "Clustering algorithm used in the cluster_network rule. Options available are Hierarchical Agglomerative Clustering (HAC) or k-means."
 -- feature,,"Str in the format ‘carrier1+carrier2+...+carrierN-X’, where CarrierI can be from {‘solar’, ‘onwind’, ‘offwind’, ‘ror’} and X is one of {‘cap’, ‘time’}. Examples: solar+offwind-cap, solar-time", "Only for Hierarchical Agglomerative Clustering (HAC). Feature(s) used to do the clustering."
