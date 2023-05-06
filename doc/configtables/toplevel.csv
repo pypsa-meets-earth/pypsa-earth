@@ -1,5 +1,5 @@
 ,Unit,Values,Description
-version,--,0.x.x,"Version of PyPSA-Eur"
+version,--,0.x.x,"Version of PyPSA-Earth"
 tutorial,bool,"{True, False}","Switch to retrieve the tutorial data set instead of the full data set."
 logging,,,
 -- level,--,"Any of {'INFO', 'WARNING', 'ERROR'}","Restrict console outputs to all infos, warning or errors only"
