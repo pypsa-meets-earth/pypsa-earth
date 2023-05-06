@@ -77,7 +77,9 @@ rule run_tests:
         directory = "test/tmp"  # assign directory
         for filename in os.scandir(directory):  # iterate over files in that directory
             if filename.is_file():
-                print(f"Running test: config name '{filename.name}'' and path name '{filename.path}'")
+                print(
+                    f"Running test: config name '{filename.name}'' and path name '{filename.path}'"
+                )
                 if "custom" in filename.name:
                     shell("mkdir -p configs/scenarios")
                     shell("cp {filename.path} configs/scenarios/config.custom.yaml")
