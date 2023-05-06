@@ -12,7 +12,7 @@ PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur
 The options here described are collected in a ``config.yaml`` file located in the root directory.
 Users should copy the provided default configuration (``config.default.yaml``) and amend 
 their own modifications and assumptions in the user-specific configuration file (``config.yaml``); 
-confer installation instructions at :ref:`defaultconfig`.
+confer installation instructions at :ref:`installation`.
 
 .. note::
   Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
@@ -420,8 +420,16 @@ Specifies the cost assumptions of the technologies considered. Cost information 
    :file: configtables/costs.csv
 
 .. note::
-    To change cost assumptions in more detail (i.e. other than ``marginal_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
-    You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
+   To change cost assumptions in more detail (i.e. other than ``marginal_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
+   You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
+
+.. note::
+   The ``marginal costs`` or in this context ``variable costs`` of operating the assets is important for realistic operational model outputs.
+   It can define the curtailment order of renewable generators, the dispatch order of generators, and the dispatch of storage units.
+   If not approapriate set, the model might output unrealistic results. Learn more about this in
+   `Parzen et al. 2023 <https://www.sciencedirect.com/science/article/pii/S2589004222020028>`_ and in
+   `Kittel et al. 2022 <https://www.sciencedirect.com/science/article/pii/S2589004222002723>`_.
+
 
 .. _monte_cf:
 

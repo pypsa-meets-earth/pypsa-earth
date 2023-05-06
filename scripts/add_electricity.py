@@ -41,7 +41,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
-    :ref:`electricity_cf`, :ref:`load_cf`, :ref:`renewable_cf`, :ref:`lines_cf`
+    :ref:`electricity_cf`, :ref:`load_options_cf`, :ref:`renewable_cf`, :ref:`lines_cf`
 
 Inputs
 ------
@@ -49,8 +49,7 @@ Inputs
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
 - ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
 
-    .. image:: ../img/hydrocapacities.png
-        :scale: 34 %
+    .. image:: /img/hydrocapacities.png
 
 - ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
 - ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
@@ -64,8 +63,9 @@ Outputs
 
 - ``networks/elec.nc``:
 
-    .. image:: ../img/elec.png
-            :scale: 33 %
+    .. image:: /img/elec.png
+            :width: 75 %
+            :align: center
 
 Description
 -----------
