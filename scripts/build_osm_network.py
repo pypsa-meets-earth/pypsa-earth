@@ -321,9 +321,8 @@ def get_transformers(buses, lines):
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
     if not df_transformers.empty:
-        df_transformers.set_index(
-            lines.index[-1] + df_transformers.index + 1, inplace=True
-        )
+        init_index = 0 if lines.empty else lines.index[-1] + 1
+        df_transformers.set_index(init_index + df_transformers.index, inplace=True)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
 
