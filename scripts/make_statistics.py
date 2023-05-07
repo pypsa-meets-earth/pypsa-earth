@@ -228,6 +228,36 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
     return df_clean_osm_stats
 
 
+def collect_bus_regions_stats(bus_region_rule="build_bus_regions"):
+    """
+    Collect statistics on bus regions
+    - number of onshore regions
+    - number of offshore regions
+    """
+    snakemake = _mock_snakemake(bus_region_rule)
+
+    fp_onshore = snakemake.output.regions_onshore
+    fp_offshore = snakemake.output.regions_offshore
+
+    df = pd.DataFrame()
+
+    if Path(fp_onshore).is_file() and Path(fp_offshore).is_file():
+        gdf_onshore = gpd.read_file(fp_onshore)
+        gdf_offshore = gpd.read_file(fp_offshore)
+
+        df = pd.DataFrame(
+            [[gdf_onshore.shape[0], gdf_offshore.shape[0]]],
+            columns=_multi_index_scen(
+                bus_region_rule,
+                ["n_onshore", "n_offshore"],
+            ),
+        )
+
+    add_computational_stats(df, snakemake)
+
+    return df
+
+
 def collect_network_stats(network_rule, config):
     """
     Collect statistics on pypsa networks:
@@ -278,6 +308,12 @@ def collect_network_stats(network_rule, config):
         gen_stats = pd.concat(
             [capacity_stats(n.generators), capacity_stats(n.storage_units)], axis=0
         )
+
+        # add demand to statistics
+        tot_demand = n.loads_t.p_set.sum().sum()
+        df_demand = pd.DataFrame({"demand": [tot_demand]})
+        df_demand.columns = _multi_index_scen(network_rule, df_demand.columns)
+        network_stats = pd.concat([network_stats, df_demand], axis=1)
 
         if not gen_stats.empty:
             df_gen_stats = gen_stats.to_frame().transpose().reset_index(drop=True)
@@ -335,6 +371,16 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     return df_shapes_stats
 
 
+def collect_only_computational(rulename):
+    """
+    Rule to create only computational statistics of rule rulename
+    """
+    snakemake = _mock_snakemake(rulename)
+    df = pd.DataFrame()
+    add_computational_stats(df, snakemake)
+    return df
+
+
 def collect_snakemake_stats(name, dict_dfs, config):
     """
     Collect statistics on what rules have been successful
@@ -349,6 +395,10 @@ def collect_snakemake_stats(name, dict_dfs, config):
         "download_osm_data",
         "clean_osm_data",
         "build_shapes",
+        "build_osm_network",
+        "build_bus_regions",
+        "build_demand_profiles",
+        "build_powerplants",
         *[f"build_renewable_profiles_{rtech}" for rtech in ren_techs],
         "base_network",
         "add_electricity",
@@ -450,14 +500,17 @@ def add_computational_stats(df, snakemake, column_name=None):
 
         bench_data = pd.read_csv(snakemake.benchmark, delimiter="\t")
 
-        comp_data = bench_data[["s", "mean_load", "max_vms"]].iloc[0]
+        comp_data = bench_data[["s", "mean_load", "max_vms"]].iloc[0].values
 
     if column_name is None:
         column_name = snakemake.rule
 
     new_cols = _multi_index_scen(column_name, ["total_time", "mean_load", "max_memory"])
 
-    df[new_cols] = comp_data
+    df[new_cols] = [comp_data]
+
+    if len(df.columns) == len(new_cols):
+        df.columns = new_cols
 
     return df
 
@@ -467,6 +520,12 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
     df_shapes = collect_shape_stats(area_crs=area_crs)
+    df_build_bus_regions = collect_bus_regions_stats()
+
+    df_only_computational = {
+        rname: collect_only_computational(rname)
+        for rname in ["build_osm_network", "build_demand_profiles", "build_powerplants"]
+    }
 
     network_dict = {
         network_rule: collect_network_stats(network_rule, config)
@@ -492,6 +551,8 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         "download_osm_data": df_osm_raw,
         "clean_osm_data": df_osm_clean,
         "build_shapes": df_shapes,
+        "build_bus_regions": df_build_bus_regions,
+        **df_only_computational,
         **renewables_dict,
         **network_dict,
     }

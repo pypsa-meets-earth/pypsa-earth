@@ -122,6 +122,11 @@ databundles:
     - data/custom_powerplants.csv
     - data/eez/eez_v11.gpkg
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
+    - data/ssp2-2.6/2030/era5_2013/Asia.nc
+    - data/ssp2-2.6/2030/era5_2013/Europe.nc
+    - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
+    - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
+    - data/ssp2-2.6/2030/era5_2013/Oceania.nc
     - data/hydrobasins/hybas_world_lev04_v1c.shp
     - data/hydrobasins/hybas_world_lev05_v1c.shp
 

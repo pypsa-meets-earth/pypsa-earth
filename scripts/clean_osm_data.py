@@ -371,6 +371,7 @@ def clean_circuits(df):
         "1.": "1",
     }
 
+    # note: no string conversion here! it is performed later on
     df["circuits"] = (
         df["circuits"]
         .replace(repl_circuits)
@@ -685,6 +686,8 @@ def integrate_lines_df(df_all_lines, distance_crs):
 
 
 def filter_lines_by_geometry(df_all_lines):
+    if df_all_lines.empty:
+        return df_all_lines
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
@@ -914,7 +917,6 @@ def clean_data(
         df_all_substations = set_countryname_by_shape(
             df_all_substations,
             ext_country_shapes,
-            col_country="Country",
         )
 
     # set unique bus ids
