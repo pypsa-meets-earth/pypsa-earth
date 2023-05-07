@@ -780,6 +780,7 @@ if __name__ == "__main__":
     add_nice_carrier_names(n, snakemake.config)
 
     if not ("weight" in n.generators.columns):
+        logger.warning("Unexpected missing 'weight' column; typical when no generators are detected. Manually added.")
         n.generators["weight"] = pd.Series()
 
     n.meta = snakemake.config
