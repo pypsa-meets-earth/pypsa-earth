@@ -428,20 +428,33 @@ def attach_hydro(n, costs, ppl):
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            inflow_stations = pd.Index(bus_id[inflow_idx])
-            missing_c = inflow_stations.unique().difference(inflow.indexes["plant"])
-            assert missing_c.empty, (
-                f"'{snakemake.input.profile_hydro}' is missing "
-                f"inflow time-series for at least one bus: {', '.join(missing_c)}"
+            inflow_stations = bus_id[inflow_idx]
+            missing_c = pd.Index(inflow_stations.unique()).difference(
+                inflow.indexes["plant"]
             )
+            intersection_c = inflow.indexes["plant"].intersection(inflow_stations)
 
-            inflow_t = (
-                inflow.sel(plant=inflow_stations)
-                .rename({"plant": "name"})
-                .assign_coords(name=inflow_idx)
-                .transpose("time", "name")
-                .to_pandas()
-            )
+            # if missing time series are found, notify the user and exclude missing hydro plants
+            if not missing_c.empty:
+                idxs_to_keep = inflow_stations[
+                    inflow_stations.isin(intersection_c)
+                ].index
+                ror = ror.loc[ror.index.intersection(idxs_to_keep)]
+                hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+
+                logger.warning(
+                    f"'{snakemake.input.profile_hydro}' is missing "
+                    f"inflow time-series for at least one bus: {', '.join(missing_c)}. Corresponding hydro plants are dropped."
+                )
+
+            if not intersection_c.empty:
+                inflow_t = (
+                    inflow.sel(plant=intersection_c)
+                    .rename({"plant": "name"})
+                    .assign_coords(name=inflow_idx)
+                    .transpose("time", "name")
+                    .to_pandas()
+                )
 
     if "ror" in carriers and not ror.empty:
         n.madd(
@@ -780,7 +793,9 @@ if __name__ == "__main__":
     add_nice_carrier_names(n, snakemake.config)
 
     if not ("weight" in n.generators.columns):
-        logger.warning("Unexpected missing 'weight' column; typical when no generators are detected. Manually added.")
+        logger.warning(
+            "Unexpected missing 'weight' column; typical when no generators are detected. Manually added."
+        )
         n.generators["weight"] = pd.Series()
 
     n.meta = snakemake.config
