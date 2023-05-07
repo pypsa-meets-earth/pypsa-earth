@@ -660,6 +660,7 @@ iso_to_geofk_dict = {
     "KN": "central-america",  # Saint Kitts e Nevis
     "GD": "central-america",  # Grenada
     # "PM": "north-america",  # Saint-Pierre e Miquelon
+    "FK": "south-america",  # Falkland islands
 }
 
 # data for some islands seem to be merged with some other areas data

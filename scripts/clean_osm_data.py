@@ -374,7 +374,7 @@ def clean_circuits(df):
         "1.": "1",
     }
 
-    # note: no string conversion here to! it is performed later on
+    # note: no string conversion here! it is performed later on
     df["circuits"] = (
         df["circuits"]
         .replace(repl_circuits)

@@ -18,6 +18,10 @@
 config.yaml
 dag.svg
 
+# Files appear for tests
+configs/scenarios/config.custom.yaml
+data/*.csv
+
 # Untracked folders (and files within)
 img/
 .snakemake/
@@ -27,8 +31,7 @@ data/
 data/osm/
 data/raw/
 data/base_network/
-results/summaries/
-results/plots/
+results/
 networks/
 resources/
 scripts/temp
