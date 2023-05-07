@@ -225,7 +225,7 @@ world_iso = {
         "CV": "cape-verde",  # Island
         "CF": "central-african-republic",
         "TD": "chad",
-        # "KM": "comoros", # Island
+        "KM": "comoros",  # Island
         "CG": "congo-brazzaville",
         "CD": "congo-democratic-republic",
         "DJ": "djibouti",
@@ -307,7 +307,6 @@ world_iso = {
         "LA": "lao-people's-democratic-republic",
         "LB": "lebanon",
         "MY": "malaysia",
-        "SG": "singapore",
         "BN": "brunei",
         "MV": "maldives",  # Island
         "MN": "mongolia",
@@ -427,7 +426,7 @@ world_iso = {
     },
     "NorthAmerica": {
         # "AI": "anguilla", #Island
-        # "AG": "antigua-and-barbuda", # Islands
+        "AG": "antigua-and-barbuda",  # Islands
         # "AW": "aruba", # Islands
         "BS": "bahamas",  # Islands
         "BB": "barbados",  # Islands
@@ -438,7 +437,7 @@ world_iso = {
         # "KY": "cayman-islands", # Islands
         "CU": "cuba",  # Islands
         # "CW": "curacao", # Islands
-        # "DM": "dominica", # Islands
+        "DM": "dominica",  # Islands
         "DO": "dominican-republic",
         "GL": "greenland",
         "GD": "grenada",  # Islands
@@ -451,13 +450,13 @@ world_iso = {
         "US": "united-states-of-america",
         "PR": "puerto-rico",  # Islands
         # "BL": "saint-barthelemy", # Islands
-        # "KN": "saint-kitts-and-nevis", # Islands
-        # "LC": "saint-lucia", # Islands
+        "KN": "saint-kitts-and-nevis",  # Islands
+        "LC": "saint-lucia",  # Islands
         # "MF": "saint-martin", # Islands
         # "PM": "saint-pierre-and-miquelon", # Islands
-        # "VC": "saint-vincent-and-the-grenadines", # Islands
+        "VC": "saint-vincent-and-the-grenadines",  # Islands
         # "SX": "saint-marteen", # Islands
-        # "TT": "trinidad-and-tobago", # Islands
+        "TT": "trinidad-and-tobago",  # Islands
         # "TC": "turks-and-caicos", # Islands
         # "UM": "united-states-minor-outlying-islands", #Islands
         # "VI": "united-states-virgin-islands", #Islands
