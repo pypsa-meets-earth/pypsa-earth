@@ -499,7 +499,11 @@ if __name__ == "__main__":
     regions = regions.set_index("name").rename_axis("bus")
 
     cutout = atlite.Cutout(paths["cutout"])
-    cutout = filter_cutout_region(cutout, regions)
+    if not snakemake.wildcards.technology.startswith("hydro"):
+        # if technology is not hydro, restrict the region of the cutout
+        # hydrobasins may span beyond the region of the country, so
+        # it is unsafe to restrict the region for hydro
+        cutout = filter_cutout_region(cutout, regions)
 
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(
