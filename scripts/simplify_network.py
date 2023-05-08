@@ -659,7 +659,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
-        n.buses.assign(bus_id=n.buses.index.get_level_values(0))
+        n.buses.assign(bus_id=n.buses.index)
         .loc[i_suffic_load]
         .groupby("country")["bus_id"]
         .first()
