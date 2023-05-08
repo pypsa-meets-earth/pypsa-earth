@@ -428,20 +428,37 @@ def attach_hydro(n, costs, ppl):
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            inflow_stations = pd.Index(bus_id[inflow_idx])
-            missing_c = inflow_stations.unique().difference(inflow.indexes["plant"])
-            assert missing_c.empty, (
-                f"'{snakemake.input.profile_hydro}' is missing "
-                f"inflow time-series for at least one bus: {', '.join(missing_c)}"
+            inflow_buses = bus_id[inflow_idx]
+            missing_plants = pd.Index(inflow_buses.unique()).difference(
+                inflow.indexes["plant"]
             )
+            intersection_plants = inflow.indexes["plant"].intersection(inflow_buses)
 
-            inflow_t = (
-                inflow.sel(plant=inflow_stations)
-                .rename({"plant": "name"})
-                .assign_coords(name=inflow_idx)
-                .transpose("time", "name")
-                .to_pandas()
-            )
+            # if missing time series are found, notify the user and exclude missing hydro plants
+            if not missing_plants.empty:
+                # original total p_nom
+                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
+                idxs_to_keep = inflow_buses[
+                    inflow_buses.isin(intersection_plants)
+                ].index
+                ror = ror.loc[ror.index.intersection(idxs_to_keep)]
+                hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+                # loss of p_nom
+                loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
+
+                logger.warning(
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
+                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom}MW out of {total_p_nom}MW."
+                )
+
+            if not intersection_plants.empty:
+                inflow_t = (
+                    inflow.sel(plant=intersection_plants)
+                    .rename({"plant": "name"})
+                    .assign_coords(name=inflow_idx)
+                    .transpose("time", "name")
+                    .to_pandas()
+                )
 
     if "ror" in carriers and not ror.empty:
         n.madd(
@@ -778,6 +795,12 @@ if __name__ == "__main__":
 
     update_p_nom_max(n)
     add_nice_carrier_names(n, snakemake.config)
+
+    if not ("weight" in n.generators.columns):
+        logger.warning(
+            "Unexpected missing 'weight' column, which has been manually added. It may be due to missing generators."
+        )
+        n.generators["weight"] = pd.Series()
 
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])

@@ -465,7 +465,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
@@ -499,7 +499,9 @@ if __name__ == "__main__":
     regions = regions.set_index("name").rename_axis("bus")
 
     cutout = atlite.Cutout(paths["cutout"])
-    cutout = filter_cutout_region(cutout, regions)
+    if not snakemake.wildcards.technology.startswith("hydro"):
+        # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
+        cutout = filter_cutout_region(cutout, regions)
 
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         regions = gpd.GeoDataFrame(
@@ -594,7 +596,7 @@ if __name__ == "__main__":
                 inflow["plant"] = regions.shape_id.loc[inflow["plant"]].values
 
             if "clip_min_inflow" in config:
-                inflow = inflow.where(inflow > config["clip_min_inflow"], 0)
+                inflow = inflow.where(inflow >= config["clip_min_inflow"], 0)
 
             # check if normalization field belongs to the settings and it is not false
             if normalization:
@@ -783,8 +785,8 @@ if __name__ == "__main__":
         # select only buses with some capacity and minimal capacity factor
         ds = ds.sel(
             bus=(
-                (ds["profile"].mean("time") > config.get("min_p_max_pu", 0.0))
-                & (ds["p_nom_max"] > config.get("min_p_nom_max", 0.0))
+                (ds["profile"].mean("time") >= config.get("min_p_max_pu", 0.0))
+                & (ds["p_nom_max"] >= config.get("min_p_nom_max", 0.0))
             )
         )
 
