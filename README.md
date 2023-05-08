@@ -41,6 +41,10 @@ The diagram below depicts one representative clustered node showing the combinat
    ```bash
        .../some/path/without/spaces % git clone --recurse-submodules https://github.com/pypsa-meets-earth/pypsa-earth-sec.git
    ```
+   To make sure you run the latest version of the submodule (if desired), run the following command to update the git submodules:
+   ```bash
+       .../some/path/without/spaces % git submodule update
+   ```
 
 2. Move the current directory to the head of the repository.
    ```bash
