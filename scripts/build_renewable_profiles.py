@@ -500,9 +500,7 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
     if not snakemake.wildcards.technology.startswith("hydro"):
-        # if technology is not hydro, restrict the region of the cutout
-        # hydrobasins may span beyond the region of the country, so
-        # it is unsafe to restrict the region for hydro
+        # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
         cutout = filter_cutout_region(cutout, regions)
 
     if snakemake.config["cluster_options"]["alternative_clustering"]:
