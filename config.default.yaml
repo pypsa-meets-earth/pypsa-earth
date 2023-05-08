@@ -26,7 +26,7 @@ scenario:
   - "DF"
 
 policy_config:
-  policy: "H2_export_yearly_constraint"
+  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint" or "H2_export_monthly_constraint" # TODO check wether "export" is required here or misleading
 
 clustering_options:
   alternative_clustering: true
