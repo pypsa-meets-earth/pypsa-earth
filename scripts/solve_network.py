@@ -199,7 +199,9 @@ def H2_export_yearly_constraint(n):
 
     lhs = res
 
-    rhs = h2_export * (1 / 0.7) + load  # 0.7 is approximation of electrloyzer capacity
+    rhs = (
+        h2_export * (1 / 0.7) + load
+    )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
 
     con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
 
@@ -414,14 +416,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="165",
+            clusters="4",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L1.0",
             planning_horizons="2030",
-            sopts="168H",
+            sopts="6H",
             discountrate=0.071,
-            demand="AP",
-            h2export=1,
+            demand="DF",
+            h2export=20,
         )
         sets_path_to_root("pypsa-earth-sec")
 
