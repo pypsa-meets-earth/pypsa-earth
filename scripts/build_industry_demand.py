@@ -67,7 +67,9 @@ if __name__ == "__main__":
 
     # Load distribution keys
     keys_path = snakemake.input.industrial_distribution_key
-    dist_keys = pd.read_csv(keys_path, index_col=0)
+    dist_keys = pd.read_csv(
+        keys_path, index_col=0, keep_default_na=False, na_values=[""]
+    )
 
     # material demand per node and industry (kton/a)
     nodal_production = country_to_nodal(production_tom, dist_keys)
