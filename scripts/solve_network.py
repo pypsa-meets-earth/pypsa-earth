@@ -204,6 +204,36 @@ def H2_export_yearly_constraint(n):
     con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
 
 
+def monthly_constraints(n):
+    ci = snakemake.config["ci"]
+    name = ci["name"]
+
+    res_gens = [name + " " + g for g in ci["res_techs"]]
+
+    weightings = pd.DataFrame(
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_gens)),
+        index=n.snapshots,
+        columns=res_gens,
+    )
+    res = linexpr((weightings, get_var(n, "Generator", "p")[res_gens])).sum(
+        axis=1
+    )  # single line sum
+    res = res.groupby(res.index.month).sum()
+
+    electrolysis = get_var(n, "Link", "p")[f"{name} H2 Electrolysis"]
+
+    # allowed_excess = float(policy.replace("monthly","").replace("p","."))
+    allowed_excess = 1
+    load = linexpr(
+        (-allowed_excess * n.snapshot_weightings["generators"], electrolysis)
+    )
+
+    load = load.groupby(load.index.month).sum()
+
+    for i in range(len(res.index)):
+        lhs = res.iloc[i] + "\n" + load.iloc[i]
+
+
 def add_chp_constraints(n):
     electric_bool = (
         n.links.index.str.contains("urban central")
@@ -321,7 +351,7 @@ def solve_network(n, config, opts="", **kwargs):
             solver_name=solver_name,
             solver_options=solver_options,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     else:
         ilopf(
@@ -332,7 +362,7 @@ def solve_network(n, config, opts="", **kwargs):
             min_iterations=min_iterations,
             max_iterations=max_iterations,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     return n
 
