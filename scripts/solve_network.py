@@ -324,8 +324,15 @@ def add_co2_sequestration_limit(n, sns):
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
     if snakemake.config["policy_config"]["policy"] == "H2_export_yearly_constraint":
-        print("setting h2 export to greenness constraint")
+        logger.info("setting h2 export to yearly greenness constraint")
         H2_export_yearly_constraint(n)
+
+    elif snakemake.config["policy_config"]["policy"] == "H2_export_monthly_constraint":
+        logger.info("setting h2 export to monthly greenness constraint")
+        monthly_constraints(n)
+
+    else:
+        logger.info("no valid h2 export constraint set")
 
     if snakemake.config["H2_network"]:
         if snakemake.config["H2_network_limit"]:
