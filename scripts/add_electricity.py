@@ -428,28 +428,32 @@ def attach_hydro(n, costs, ppl):
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            inflow_stations = bus_id[inflow_idx]
-            missing_c = pd.Index(inflow_stations.unique()).difference(
+            inflow_buses = bus_id[inflow_idx]
+            missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            intersection_c = inflow.indexes["plant"].intersection(inflow_stations)
+            intersection_plants = inflow.indexes["plant"].intersection(inflow_buses)
 
             # if missing time series are found, notify the user and exclude missing hydro plants
-            if not missing_c.empty:
-                idxs_to_keep = inflow_stations[
-                    inflow_stations.isin(intersection_c)
+            if not missing_plants.empty:
+                # original total p_nom
+                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
+                idxs_to_keep = inflow_buses[
+                    inflow_buses.isin(intersection_plants)
                 ].index
                 ror = ror.loc[ror.index.intersection(idxs_to_keep)]
                 hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+                # loss of p_nom
+                loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
 
                 logger.warning(
-                    f"'{snakemake.input.profile_hydro}' is missing "
-                    f"inflow time-series for at least one bus: {', '.join(missing_c)}. Corresponding hydro plants are dropped."
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
+                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom}MW out of {total_p_nom}MW."
                 )
 
-            if not intersection_c.empty:
+            if not intersection_plants.empty:
                 inflow_t = (
-                    inflow.sel(plant=intersection_c)
+                    inflow.sel(plant=intersection_plants)
                     .rename({"plant": "name"})
                     .assign_coords(name=inflow_idx)
                     .transpose("time", "name")
@@ -794,7 +798,7 @@ if __name__ == "__main__":
 
     if not ("weight" in n.generators.columns):
         logger.warning(
-            "Unexpected missing 'weight' column; typical when no generators are detected. Manually added."
+            "Unexpected missing 'weight' column, which has been manually added. It may be due to missing generators."
         )
         n.generators["weight"] = pd.Series()
 
