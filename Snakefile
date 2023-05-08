@@ -527,7 +527,7 @@ if config["custom_data"].get("industry_demand", False) == True:
             #shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
             shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
         output:
-            industrial_distribution_key="resources/industry/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
         resources:
             mem_mb=1000,

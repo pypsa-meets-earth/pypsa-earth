@@ -62,9 +62,6 @@ if __name__ == "__main__":
         prod_tom_path, header=0, index_col=0, keep_default_na=False
     )
 
-    # if snakemake.config["custom_data"]["industry_demand"]:
-    #     production_tom.drop("Industry Machinery", axis=1, inplace=True)
-
     # to_drop=production_tom.sum()[production_tom.sum()==0].index
     # production_tom.drop(to_drop, axis=1, inplace=True)
 

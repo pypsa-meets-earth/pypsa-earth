@@ -284,6 +284,7 @@ def plot_balances():
         if df.empty:
             continue
 
+        df.index = df.index.str.strip()
         new_index = preferred_order.intersection(df.index).append(
             df.index.difference(preferred_order)
         )
@@ -526,8 +527,11 @@ def plot_carbon_budget_distribution():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        import os
+
         from helpers import mock_snakemake
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("plot_summary")
 
     n_header = 7  # Header lines in the csv files
