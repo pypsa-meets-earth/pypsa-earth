@@ -29,7 +29,7 @@ clustering_options:
   alternative_clustering: true
 
 policy_config:
-  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint" or "H2_export_monthly_constraint" # TODO check wether "export" is required here or misleading
+  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching" # TODO check wether "export" is required here or misleading
 
 countries: ['NG', 'BJ']
 H2_network: false
