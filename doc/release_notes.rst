@@ -108,6 +108,8 @@ PyPSA-Earth 0.2.0
 
 * Fix bug for missing renewable profiles and generators `PR #714 https://github.com/pypsa-meets-earth/pypsa-earth/pull/714`__
 
+* Enable workflow to run including countries with empty OSM data, test on all UN countries `PR #701 https://github.com/pypsa-meets-earth/pypsa-earth/pull/701`__
+
 PyPSA-Earth 0.1.0
 =================
 
