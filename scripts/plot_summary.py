@@ -545,8 +545,16 @@ if __name__ == "__main__":
 
     plot_balances()
 
+<<<<<<< HEAD
     # for sector_opts in snakemake.config["scenario"]:
     #     opts = sector_opts.split("-")
     #     for o in opts:
     #         if "cb" in o:
     #            plot_carbon_budget_distribution()
+=======
+    for sector_opts in snakemake.config["scenario"]:
+        opts = sector_opts.split("-")
+        for o in opts:
+            if "cb" in o:
+                # plot_carbon_budget_distribution()
+>>>>>>> ff305f8ad16b9a66529666701010c6ad5634b404
