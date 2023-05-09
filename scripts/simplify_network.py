@@ -471,7 +471,8 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         dist.loc[incarrier_b, ~incarrier_b] = np.inf
 
     busmap = n.buses.index.to_series()
-    busmap.loc[buses_i] = dist.idxmin(1)
+    if not dist.empty:
+        busmap.loc[buses_i] = dist.idxmin(1)
 
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
@@ -658,7 +659,11 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
-        n.buses.loc[i_suffic_load].groupby("country")["bus_id"].first().to_dict()
+        n.buses.assign(bus_id=n.buses.index)
+        .loc[i_suffic_load]
+        .groupby("country")["bus_id"]
+        .first()
+        .to_dict()
     )
     isolated_buses_mapping = n.buses.loc[i_suffic_load, "country"].replace(
         map_isolated_node_by_country
