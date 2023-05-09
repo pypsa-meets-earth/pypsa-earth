@@ -67,6 +67,7 @@ This will create html files in `pypsa-earth/doc/_build/html`.
 VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
 
 .. note::
+    
     To build the documentation, Windows users might need to replace the last command by:
     
         .../pypsa-earth/doc (pypsa-earth-docs) % ./make html
