@@ -502,8 +502,8 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         # in the GADM processing of sub-national zones
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
 
-        # append geodataframes
-        geodf_list.append(geodf_temp)
+        # concatenate geodataframes
+        geodf_list = pd.concat([geodf_list, geodf_temp])
 
     geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
     geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
