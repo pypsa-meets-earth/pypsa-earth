@@ -6,10 +6,6 @@ import pandas as pd
 
 plt.style.use("ggplot")
 
-# from prepare_sector_network_eur_sec import (
-#     co2_emissions_year,  # Currently not required, only for carbon budget plotting
-# )
-
 
 # consolidate and rename
 def rename_techs(label):
@@ -423,112 +419,112 @@ def historical_emissions(cts):
     return emissions
 
 
-def plot_carbon_budget_distribution():
-    """
-    Plot historical carbon emissions in the EU and decarbonization path
-    """
+# def plot_carbon_budget_distribution():
+#     """
+#     Plot historical carbon emissions in the EU and decarbonization path
+#     """
 
-    import matplotlib.gridspec as gridspec
-    import seaborn as sns
+#     import matplotlib.gridspec as gridspec
+#     import seaborn as sns
 
-    sns.set()
-    sns.set_style("ticks")
-    plt.style.use("seaborn-ticks")
-    plt.rcParams["xtick.direction"] = "in"
-    plt.rcParams["ytick.direction"] = "in"
-    plt.rcParams["xtick.labelsize"] = 20
-    plt.rcParams["ytick.labelsize"] = 20
+#     sns.set()
+#     sns.set_style("ticks")
+#     plt.style.use("seaborn-ticks")
+#     plt.rcParams["xtick.direction"] = "in"
+#     plt.rcParams["ytick.direction"] = "in"
+#     plt.rcParams["xtick.labelsize"] = 20
+#     plt.rcParams["ytick.labelsize"] = 20
 
-    plt.figure(figsize=(10, 7))
-    gs1 = gridspec.GridSpec(1, 1)
-    ax1 = plt.subplot(gs1[0, 0])
-    ax1.set_ylabel("CO$_2$ emissions (Gt per year)", fontsize=22)
-    ax1.set_ylim([0, 5])
-    ax1.set_xlim([1990, snakemake.config["scenario"]["planning_horizons"][-1] + 1])
+#     plt.figure(figsize=(10, 7))
+#     gs1 = gridspec.GridSpec(1, 1)
+#     ax1 = plt.subplot(gs1[0, 0])
+#     ax1.set_ylabel("CO$_2$ emissions (Gt per year)", fontsize=22)
+#     ax1.set_ylim([0, 5])
+#     ax1.set_xlim([1990, snakemake.config["scenario"]["planning_horizons"][-1] + 1])
 
-    path_cb = snakemake.config["results_dir"] + snakemake.config["run"] + "/csvs/"
-    countries = pd.read_csv(path_cb + "countries.csv", index_col=1)
-    cts = countries.index.to_list()
-    e_1990 = co2_emissions_year(cts, opts, year=1990)
-    CO2_CAP = pd.read_csv(path_cb + "carbon_budget_distribution.csv", index_col=0)
+#     path_cb = snakemake.config["results_dir"] + snakemake.config["run"] + "/csvs/"
+#     countries = pd.read_csv(path_cb + "countries.csv", index_col=1)
+#     cts = countries.index.to_list()
+#     e_1990 = co2_emissions_year(cts, opts, year=1990)
+#     CO2_CAP = pd.read_csv(path_cb + "carbon_budget_distribution.csv", index_col=0)
 
-    ax1.plot(e_1990 * CO2_CAP[o], linewidth=3, color="dodgerblue", label=None)
+#     ax1.plot(e_1990 * CO2_CAP[o], linewidth=3, color="dodgerblue", label=None)
 
-    emissions = historical_emissions(cts)
+#     emissions = historical_emissions(cts)
 
-    ax1.plot(emissions, color="black", linewidth=3, label=None)
+#     ax1.plot(emissions, color="black", linewidth=3, label=None)
 
-    # plot commited and uder-discussion targets
-    # (notice that historical emissions include all countries in the
-    # network, but targets refer to EU)
-    ax1.plot(
-        [2020],
-        [0.8 * emissions[1990]],
-        marker="*",
-        markersize=12,
-        markerfacecolor="black",
-        markeredgecolor="black",
-    )
+#     # plot commited and uder-discussion targets
+#     # (notice that historical emissions include all countries in the
+#     # network, but targets refer to EU)
+#     ax1.plot(
+#         [2020],
+#         [0.8 * emissions[1990]],
+#         marker="*",
+#         markersize=12,
+#         markerfacecolor="black",
+#         markeredgecolor="black",
+#     )
 
-    ax1.plot(
-        [2030],
-        [0.45 * emissions[1990]],
-        marker="*",
-        markersize=12,
-        markerfacecolor="white",
-        markeredgecolor="black",
-    )
+#     ax1.plot(
+#         [2030],
+#         [0.45 * emissions[1990]],
+#         marker="*",
+#         markersize=12,
+#         markerfacecolor="white",
+#         markeredgecolor="black",
+#     )
 
-    ax1.plot(
-        [2030],
-        [0.6 * emissions[1990]],
-        marker="*",
-        markersize=12,
-        markerfacecolor="black",
-        markeredgecolor="black",
-    )
+#     ax1.plot(
+#         [2030],
+#         [0.6 * emissions[1990]],
+#         marker="*",
+#         markersize=12,
+#         markerfacecolor="black",
+#         markeredgecolor="black",
+#     )
 
-    ax1.plot(
-        [2050, 2050],
-        [x * emissions[1990] for x in [0.2, 0.05]],
-        color="gray",
-        linewidth=2,
-        marker="_",
-        alpha=0.5,
-    )
+#     ax1.plot(
+#         [2050, 2050],
+#         [x * emissions[1990] for x in [0.2, 0.05]],
+#         color="gray",
+#         linewidth=2,
+#         marker="_",
+#         alpha=0.5,
+#     )
 
-    ax1.plot(
-        [2050],
-        [0.01 * emissions[1990]],
-        marker="*",
-        markersize=12,
-        markerfacecolor="white",
-        linewidth=0,
-        markeredgecolor="black",
-        label="EU under-discussion target",
-        zorder=10,
-        clip_on=False,
-    )
+#     ax1.plot(
+#         [2050],
+#         [0.01 * emissions[1990]],
+#         marker="*",
+#         markersize=12,
+#         markerfacecolor="white",
+#         linewidth=0,
+#         markeredgecolor="black",
+#         label="EU under-discussion target",
+#         zorder=10,
+#         clip_on=False,
+#     )
 
-    ax1.plot(
-        [2050],
-        [0.125 * emissions[1990]],
-        "ro",
-        marker="*",
-        markersize=12,
-        markerfacecolor="black",
-        markeredgecolor="black",
-        label="EU commited target",
-    )
+#     ax1.plot(
+#         [2050],
+#         [0.125 * emissions[1990]],
+#         "ro",
+#         marker="*",
+#         markersize=12,
+#         markerfacecolor="black",
+#         markeredgecolor="black",
+#         label="EU commited target",
+#     )
 
-    ax1.legend(
-        fancybox=True, fontsize=18, loc=(0.01, 0.01), facecolor="white", frameon=True
-    )
+#     ax1.legend(
+#         fancybox=True, fontsize=18, loc=(0.01, 0.01), facecolor="white", frameon=True
+#     )
 
-    path_cb_plot = (
-        snakemake.config["results_dir"] + snakemake.config["run"] + "/graphs/"
-    )
-    plt.savefig(path_cb_plot + "carbon_budget_plot.pdf", dpi=300)
+#     path_cb_plot = (
+#         snakemake.config["results_dir"] + snakemake.config["run"] + "/graphs/"
+#     )
+#     plt.savefig(path_cb_plot + "carbon_budget_plot.pdf", dpi=300)
 
 
 if __name__ == "__main__":
