@@ -278,8 +278,8 @@ def add_hydrogen(n, costs):
 
         else:
             h2_salt_cavern_potential = pd.read_csv(
-                snakemake.input.h2_cavern, index_col=0, squeeze=True
-            )
+                snakemake.input.h2_cavern, index_col=0
+            ).squeeze()
             h2_cavern_ct = h2_salt_cavern_potential[~h2_salt_cavern_potential.isna()]
             cavern_nodes = n.buses[n.buses.country.isin(h2_cavern_ct.index)]
 
@@ -487,9 +487,8 @@ def add_biomass(n, costs):
         transport_costs = pd.read_csv(
             snakemake.input.biomass_transport_costs,
             index_col=0,
-            squeeze=True,
             keep_default_na=False,
-        )
+        ).squeeze()
 
         # add biomass transport
         biomass_transport = create_network_topology(
@@ -875,8 +874,8 @@ def h2_hc_conversions(n, costs):
 
 def add_shipping(n, costs):
     ports = pd.read_csv(
-        snakemake.input.ports, index_col=None, squeeze=True, keep_default_na=False
-    )
+        snakemake.input.ports, index_col=None, keep_default_na=False
+    ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
     gadm_level = options["gadm_level"]
@@ -2250,12 +2249,6 @@ if __name__ == "__main__":
     # Load industry demand data
     industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
     print(industrial_demand)
-    if (
-        len(industrial_demand["TWh/a (MtCO2/a)"][0]) > 6
-    ):  # TODO do it nicely, this is done to catch the custom gadm
-        industrial_demand["TWh/a (MtCO2/a)"] = industrial_demand[
-            "TWh/a (MtCO2/a)"
-        ].apply(lambda cocode: two_2_three_digits_country(cocode[:2]) + cocode[2:])
 
     industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 

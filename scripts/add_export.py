@@ -30,9 +30,8 @@ def select_ports(n):
     ports = pd.read_csv(
         snakemake.input.export_ports,
         index_col=None,
-        squeeze=True,
         keep_default_na=False,
-    )
+    ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
     gadm_level = snakemake.config["sector"]["gadm_level"]
