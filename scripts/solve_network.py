@@ -358,10 +358,12 @@ def extra_functionality(n, snapshots):
         monthly_constraints(n)
 
     elif snakemake.config["policy_config"]["policy"] == "no_res_matching":
-        logger.info("no valid h2 export constraint set")
+        logger.info("no h2 export constraint set")
 
     else:
-        logger.info("h2 export constraint is invalid")
+        raise ValueError(
+            'H2 export constraint is invalid, check config["policy_config"]["policy"]'
+        )
 
     if snakemake.config["H2_network"]:
         if snakemake.config["H2_network_limit"]:
