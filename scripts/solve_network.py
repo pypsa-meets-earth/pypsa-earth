@@ -207,33 +207,57 @@ def H2_export_yearly_constraint(n):
 
 
 def monthly_constraints(n):
-    ci = snakemake.config["ci"]
-    name = ci["name"]
-
-    res_gens = [name + " " + g for g in ci["res_techs"]]
+    res = [
+        "csp",
+        "rooftop-solar",
+        "solar",
+        "onwind",
+        "onwind2",
+        "offwind",
+        "offwind2",
+        "ror",
+    ]
+    res_index = n.generators.loc[n.generators.carrier.isin(res)].index
 
     weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_gens)),
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
         index=n.snapshots,
-        columns=res_gens,
+        columns=res_index,
     )
-    res = linexpr((weightings, get_var(n, "Generator", "p")[res_gens])).sum(
+
+    res = linexpr((weightings, get_var(n, "Generator", "p")[res_index])).sum(
         axis=1
     )  # single line sum
     res = res.groupby(res.index.month).sum()
 
-    electrolysis = get_var(n, "Link", "p")[f"{name} H2 Electrolysis"]
+    # electrolysis = get_var(n, "Link", "p")[f"{name} H2 Electrolysis"]
+    electrolysis = get_var(n, "Link", "p")[
+        n.links.index[n.links.index.str.contains("H2 Electrolysis")]
+    ]
 
     # allowed_excess = float(policy.replace("monthly","").replace("p","."))
     allowed_excess = 1
-    load = linexpr(
-        (-allowed_excess * n.snapshot_weightings["generators"], electrolysis)
+    # load = linexpr(
+    #     (-allowed_excess * n.snapshot_weightings["generators"], electrolysis)
+    # )
+    weightings_electrolysis = pd.DataFrame(
+        np.outer(
+            n.snapshot_weightings["generators"], [1.0] * len(electrolysis.columns)
+        ),
+        index=n.snapshots,
+        columns=electrolysis.columns,
     )
+
+    load = linexpr((-allowed_excess * weightings_electrolysis, electrolysis))
 
     load = load.groupby(load.index.month).sum()
 
     for i in range(len(res.index)):
         lhs = res.iloc[i] + "\n" + load.iloc[i]
+
+        con = define_constraints(
+            n, lhs, "<=", 0.0, f"RESconstraints_{i}", f"REStarget_{i}"
+        )
 
 
 def add_chp_constraints(n):
