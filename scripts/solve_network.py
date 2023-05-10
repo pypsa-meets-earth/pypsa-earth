@@ -248,7 +248,9 @@ def monthly_constraints(n):
         columns=electrolysis.columns,
     )
 
-    load = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum(axis=1)
+    load = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum(
+        axis=1
+    )
 
     load = load.groupby(load.index.month).sum()
 
