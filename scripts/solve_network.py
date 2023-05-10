@@ -248,7 +248,7 @@ def monthly_constraints(n):
         columns=electrolysis.columns,
     )
 
-    load = linexpr((-allowed_excess * weightings_electrolysis, electrolysis))
+    load = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum(axis=1)
 
     load = load.groupby(load.index.month).sum()
 
@@ -447,12 +447,12 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             ll="c1.0",
-            opts="Co2L1.0",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="6H",
+            sopts="200H",
             discountrate=0.071,
             demand="DF",
-            h2export=20,
+            h2export=40,
         )
         sets_path_to_root("pypsa-earth-sec")
 
