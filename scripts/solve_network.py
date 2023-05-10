@@ -236,7 +236,7 @@ def monthly_constraints(n):
     ]
 
     # allowed_excess = float(policy.replace("monthly","").replace("p","."))
-    allowed_excess = 1
+    allowed_excess = float(snakemake.config["policy_config"]["allowed_excess"])
     # load = linexpr(
     #     (-allowed_excess * n.snapshot_weightings["generators"], electrolysis)
     # )
