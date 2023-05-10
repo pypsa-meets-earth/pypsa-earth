@@ -205,8 +205,6 @@ def create_network_topology(
         topo_reverse.index = topo_reverse.apply(make_index, axis=1)
         topo = pd.concat([topo, topo_reverse])
 
-
-
     return topo
 
 
@@ -504,7 +502,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         # in the GADM processing of sub-national zones
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
 
-       # concatenate geodataframes
+        # concatenate geodataframes
         geodf_list = pd.concat([geodf_list, geodf_temp])
 
     geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
