@@ -68,6 +68,6 @@ VScode provides a so called Liveserver extension such that the html file can be 
 
 .. note::
     
-    To build the documentation, Windows users might need to replace the last command by:
-    
-        .../pypsa-earth/doc (pypsa-earth-docs) % ./make html
+    Windows users might face some challenges when building the documentation locally using `make`. A workaround can be found, but might be time consuming. For instance:
+
+    1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow. 
