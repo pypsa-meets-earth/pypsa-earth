@@ -106,7 +106,9 @@ PyPSA-Earth 0.2.0
 
 * Improve earth coverage and add improve make_statistics coverage `PR #654 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/654>`__
 
-* Fix bug for missing renewable profiles and generators `PR #714 https://github.com/pypsa-meets-earth/pypsa-earth/pull/714`__
+* Fix bug for missing renewable profiles and generators `PR #714 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/714>`__
+
+* Update instructions on how to write documentation. `PR #720 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/720>`__
 
 PyPSA-Earth 0.1.0
 =================
