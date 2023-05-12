@@ -32,7 +32,7 @@ policy_config:
   policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching" # TODO check wether "export" is required here or misleading
   reference_case: true
   allowed_excess: 1.0
-  
+
 countries: ['NG', 'BJ']
 H2_network: false
 H2_network_limit: 2000 #GWkm

@@ -234,7 +234,7 @@ def monthly_constraints(n, n_ref):
 
     electrolysis = get_var(n, "Link", "p")[
         n.links.index[n.links.index.str.contains("H2 Electrolysis")]
-    ]  
+    ]
     weightings_electrolysis = pd.DataFrame(
         np.outer(
             n.snapshot_weightings["generators"], [1.0] * len(electrolysis.columns)
@@ -247,28 +247,35 @@ def monthly_constraints(n, n_ref):
         axis=1
     )
 
-    elec_input =  elec_input.groupby(elec_input.index.month).sum()
+    elec_input = elec_input.groupby(elec_input.index.month).sum()
 
-
-    if snakemake.config["policy_config"]["reference_case"] and eval(snakemake.wildcards["h2export"]) != 0:
-                
+    if (
+        snakemake.config["policy_config"]["reference_case"]
+        and eval(snakemake.wildcards["h2export"]) != 0
+    ):
         res_ref = n_ref.generators_t.p[res_index] * weightings
         res_ref = res_ref.groupby(n_ref.generators_t.p.index.month).sum().sum(axis=1)
 
-        elec_input_ref = n_ref.links_t.p0.loc[:,n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")] * weightings_electrolysis
-        elec_input_ref = -elec_input_ref.groupby(elec_input_ref.index.month).sum().sum(axis=1)
+        elec_input_ref = (
+            n_ref.links_t.p0.loc[
+                :, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")
+            ]
+            * weightings_electrolysis
+        )
+        elec_input_ref = (
+            -elec_input_ref.groupby(elec_input_ref.index.month).sum().sum(axis=1)
+        )
 
         for i in range(len(res.index)):
-            lhs = res.iloc[i] + "\n" + elec_input.iloc[i] 
-            rhs =  res_ref.iloc[i] + elec_input_ref.iloc[i]
+            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
+            rhs = res_ref.iloc[i] + elec_input_ref.iloc[i]
             con = define_constraints(
                 n, lhs, ">=", rhs, f"RESconstraints_{i}", f"REStarget_{i}"
             )
 
     elif eval(snakemake.wildcards["h2export"]) != 0:
-        
         for i in range(len(res.index)):
-            lhs = res.iloc[i] + "\n" + elec_input.iloc[i] 
+            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
 
             con = define_constraints(
                 n, lhs, ">=", 0.0, f"RESconstraints_{i}", f"REStarget_{i}"
@@ -494,11 +501,18 @@ if __name__ == "__main__":
         ):
             add_existing(n)
 
-        if snakemake.config["policy_config"]["reference_case"] and eval(snakemake.wildcards["h2export"]) != 0:
-                n_ref_path = snakemake.output[0].replace(snakemake.output[0].split("_")[-1], "0export.nc")
-                n_ref = pypsa.Network("../../../" + n_ref_path) #TODO better do it in a neater way
+        if (
+            snakemake.config["policy_config"]["reference_case"]
+            and eval(snakemake.wildcards["h2export"]) != 0
+        ):
+            n_ref_path = snakemake.output[0].replace(
+                snakemake.output[0].split("_")[-1], "0export.nc"
+            )
+            n_ref = pypsa.Network(
+                "../../../" + n_ref_path
+            )  # TODO better do it in a neater way
         else:
-                n_ref = None
+            n_ref = None
 
         n = prepare_network(n, solve_opts)
 
