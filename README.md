@@ -4,7 +4,6 @@ To install and run the model, follow these steps:
 
 1. Open your terminal and run the following commands:
 
-   ```
    sudo DOCKER_BUILDKIT=0 docker build -t pypsa-earth .
    docker run -it pypsa-earth:latest
    ```
@@ -15,12 +14,11 @@ To install and run the model, follow these steps:
 
 4. Click on "Attach Visual Studio Code". This should open a new window.
 
-5. Now, open the terminal and run the following command:
-
    ```
    snakemake c4 -j2 solve_all_networks
    ```
 
    This should run the tutorial for you.
+
 
 That's it! You should now be able to install and run the model with ease.

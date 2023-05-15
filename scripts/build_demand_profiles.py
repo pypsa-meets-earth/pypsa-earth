@@ -23,7 +23,7 @@ Inputs
 ------
 
 - ``networks/base.nc``: confer :ref:`base`, a base PyPSA Network 
-- ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`bus regions` 
+- ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`build_bus_regions`
 - ``load_data_paths``: paths to load profiles, e.g. hourly country load profiles produced by GEGIS
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`, file containing the gadm shapes
 

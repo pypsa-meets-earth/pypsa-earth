@@ -1,0 +1,5 @@
+,Unit,Values,Description
+ssp,,, "Scenario considered for shared socio-economic pathway (GDP and population growth)."
+weather_year,, "past year; e.g. YYYY", "Year from which weather data is taken. Must be a year in the past. Well-tested years are 2011, 2013, and 2018."
+prediction_year,, year (can be in the future); e.g. YYYY", "Year for which the load scenario is computed (GDP and population). Well-tested years are 2030, 2040, 2050, and 2100."
+scale, float,, "Scale for all the load time-series. For example, '2' doubles the load."
