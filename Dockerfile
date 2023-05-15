@@ -1,6 +1,6 @@
 FROM mambaorg/micromamba
 
-WORKDIR /pypsa-earth
+WORKDIR /feo-esmod-pypsa
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER envs/environment.yaml /tmp/env.yaml
 
@@ -24,4 +24,4 @@ RUN python -c 'import uuid; print(uuid.uuid4())' > /tmp/my_uuid
 
 RUN python -c "import pypsa"
 
-COPY . /pypsa-earth
+COPY . /feo-esmod-pypsa

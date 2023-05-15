@@ -22,13 +22,9 @@ import rasterio
 import requests
 import rioxarray as rx
 import xarray as xr
-from _helpers import (
-    configure_logging,
-    sets_path_to_root,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
-    two_digits_2_name_country,
-)
+from _helpers import (configure_logging, sets_path_to_root,
+                      three_2_two_digits_country, two_2_three_digits_country,
+                      two_digits_2_name_country)
 from rasterio.mask import mask
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.base import BaseGeometry
@@ -39,7 +35,7 @@ from tqdm import tqdm
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-sets_path_to_root("pypsa-earth")
+sets_path_to_root("feo-esmod-pypsa")
 
 
 def get_GADM_filename(country_code):
@@ -908,7 +904,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_shapes")
-        sets_path_to_root("pypsa-earth")
+        sets_path_to_root("feo-esmod-pypsa")
     configure_logging(snakemake)
 
     out = snakemake.output

@@ -45,7 +45,7 @@ def _multi_index_scen(rulename, keys):
 def _mock_snakemake(rule, **kwargs):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     snakemake = mock_snakemake(rule, **kwargs)
-    sets_path_to_root("pypsa-earth")
+    sets_path_to_root("feo-esmod-pypsa")
     return snakemake
 
 
@@ -574,7 +574,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("make_statistics")
 
-    sets_path_to_root("pypsa-earth")
+    sets_path_to_root("feo-esmod-pypsa")
 
     fp_stats = snakemake.output["stats"]
     config = snakemake.config

@@ -87,12 +87,8 @@ import re
 from zipfile import ZipFile
 
 import yaml
-from _helpers import (
-    configure_logging,
-    create_country_list,
-    progress_retrieve,
-    sets_path_to_root,
-)
+from _helpers import (configure_logging, create_country_list,
+                      progress_retrieve, sets_path_to_root)
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
 logger = logging.getLogger(__name__)
@@ -628,7 +624,7 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
-    sets_path_to_root("pypsa-earth")
+    sets_path_to_root("feo-esmod-pypsa")
 
     rootpath = os.getcwd()
     tutorial = snakemake.config["tutorial"]

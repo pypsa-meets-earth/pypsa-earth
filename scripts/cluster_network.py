@@ -132,21 +132,14 @@ import pyomo.environ as po
 import pypsa
 import seaborn as sns
 import shapely
-from _helpers import (
-    REGION_COLS,
-    configure_logging,
-    get_aggregation_strategies,
-    sets_path_to_root,
-    update_p_nom_max,
-)
+from _helpers import (REGION_COLS, configure_logging,
+                      get_aggregation_strategies, sets_path_to_root,
+                      update_p_nom_max)
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
-from pypsa.networkclustering import (
-    busmap_by_greedy_modularity,
-    busmap_by_hac,
-    busmap_by_kmeans,
-    get_clustering_from_busmap,
-)
+from pypsa.networkclustering import (busmap_by_greedy_modularity,
+                                     busmap_by_hac, busmap_by_kmeans,
+                                     get_clustering_from_busmap)
 from shapely.geometry import Point
 
 idx = pd.IndexSlice
@@ -643,7 +636,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="10"
         )
-        sets_path_to_root("pypsa-earth")
+        sets_path_to_root("feo-esmod-pypsa")
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config

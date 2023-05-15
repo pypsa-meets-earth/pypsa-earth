@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("download_osm_data")
-        sets_path_to_root("pypsa-earth")
+        sets_path_to_root("feo-esmod-pypsa")
     configure_logging(snakemake)
 
     run = snakemake.config.get("run", {})

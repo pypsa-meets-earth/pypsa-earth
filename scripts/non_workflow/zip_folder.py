@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Set path to this file
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     # Required to set path to pypsa-earth
-    sets_path_to_root("pypsa-earth")
+    sets_path_to_root("feo-esmod-pypsa")
 
 # Execute zip function
 # zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)

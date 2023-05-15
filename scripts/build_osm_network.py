@@ -11,7 +11,8 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
+from _helpers import (configure_logging, read_geojson, sets_path_to_root,
+                      to_csv_nafix)
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
@@ -852,7 +853,7 @@ if __name__ == "__main__":
     distance_crs = snakemake.config["crs"]["distance_crs"]
     force_ac = snakemake.config["build_osm_network"].get("force_ac", False)
 
-    sets_path_to_root("pypsa-earth")
+    sets_path_to_root("feo-esmod-pypsa")
 
     built_network(
         snakemake.input,
