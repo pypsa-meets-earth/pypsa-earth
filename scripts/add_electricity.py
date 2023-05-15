@@ -432,7 +432,9 @@ def attach_hydro(n, costs, ppl):
             missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            intersection_plants = inflow.indexes["plant"].intersection(inflow_buses)
+            intersection_plants = pd.Index(
+                inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
+            )
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants.empty:
