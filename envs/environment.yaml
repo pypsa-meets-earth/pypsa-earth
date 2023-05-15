@@ -2,83 +2,82 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-name: pypsa-earth
+name: pypsa-earth-docker
 channels:
-- conda-forge
-- bioconda
-- gurobi
+  - conda-forge
+  - bioconda
+  - gurobi
 dependencies:
-- python>=3.8
-- pip
-- mamba   # esp for windows build
+  - python>=3.8
+  - pip
+  - mamba # esp for windows build
+  # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
+  - dask
+  - powerplantmatching>=0.5.6
+  - earth-osm>=0.0.8 # until 0.1.0
+  - atlite
+    # Dependencies of the workflow itself
+  - xlrd
+  - openpyxl
+  - seaborn
+  - snakemake-minimal
+  - memory_profiler
+  - ruamel.yaml
+  - pytables
+  - lxml
+  - numpy
+  - pandas
+  - geopandas>=0.11.0
+  - fiona!=1.8.22
+  - xarray
+  - netcdf4
+  - networkx
+  - scipy
+  - pydoe2
+  - shapely>=2
+  - pre-commit
+  - matplotlib<=3.5.2
+  - reverse-geocode
+  - country_converter
 
-- pypsa>=0.21.3
-# - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
-- dask
-- powerplantmatching>=0.5.6
-- earth-osm>=0.1.0
-- atlite
+    # Keep in conda environment when calling ipython
+  - ipython
+    # Jupyter notebook requirement
+  - ipykernel
+  - jupyterlab
 
-  # Dependencies of the workflow itself
-- xlrd
-- openpyxl
-- seaborn
-- snakemake-minimal
-- memory_profiler
-- ruamel.yaml
-- pytables
-- lxml
-- numpy
-- pandas
-- geopandas>=0.11.0
-- fiona!=1.8.22
-- xarray
-- netcdf4
-- networkx
-- scipy
-- pydoe2
-- shapely>=2
-- pre-commit
-- pyomo
-- matplotlib<=3.5.2
-- reverse-geocode
-- country_converter
+    # GIS dependencies:
+  - cartopy
+  - descartes
+  - rasterio!=1.2.10
+  - rioxarray
 
-  # Keep in conda environment when calling ipython
-- ipython
-  # Jupyter notebook requirement
-- ipykernel
-- jupyterlab
+    # Plotting
+  - geoviews
+  - hvplot
+  - graphviz
+  - contextily
+  - graphviz
+  - ipopt
+    # PyPSA-Eur-Sec Dependencies
+  - geopy
+  - tqdm
+  - pytz
+  - country_converter
+  - tabulate==0.8.10
+  - openjdk
 
-  # GIS dependencies:
-- cartopy
-- descartes
-- rasterio!=1.2.10
-- rioxarray
+    # Cloud download
+  # - googledrivedownloader  # Commented until https://github.com/ndrplz/google-drive-downloader/pull/28 is merged: PR installed using pip
 
- # Plotting
-- geoviews
-- hvplot
-- graphviz
-- contextily
-- graphviz
+  # Default solver for tests (required for CI)
+  - glpk
+  - gurobi
 
-  # PyPSA-Eur-Sec Dependencies
-- geopy
-- tqdm
-- pytz
-- country_converter
-
-  # Cloud download
-# - googledrivedownloader  # Commented until https://github.com/ndrplz/google-drive-downloader/pull/28 is merged: PR installed using pip
-
-# Default solver for tests (required for CI)
-- glpk
-- ipopt<3.13.3
-- gurobi
-
-- pip:
-  - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
-  - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
-  - tsam>=1.1.0
-  - chaospy  # lastest version only available on pip
+  - pip:
+      - git+https://github.com/davide-f/google-drive-downloader@master # google drive with fix for virus scan
+      - git+https://github.com/FRESNA/vresutils@master # until new pip release > 0.3.1 (strictly)
+      - tsam>=1.1.0
+      - chaospy # lastest version only available on pip
+      - pyomo
+      - pypsa>=0.21.3
