@@ -42,6 +42,34 @@ logger.setLevel(logging.INFO)
 sets_path_to_root("pypsa-earth")
 
 
+def get_GADM_filename(country_code):
+    """
+    Function to get the GADM filename given the country code
+    """
+    special_codes_GADM = {
+        "XK": "XKO",  # kosovo
+        "CP": "XCL",  # clipperton island
+        "SX": "MAF",  # sint maartin
+        "TF": "ATF",  # french southern territories
+        "AX": "ALA",  # aland
+        "IO": "IOT",  # british indian ocean territory
+        "CC": "CCK",  # cocos island
+        "NF": "NFK",  # norfolk
+        "PN": "PCN",  # pitcairn islands
+        "JE": "JEY",  # jersey
+        "XS": "XSP",  # spratly
+        "GG": "GGY",  # guernsey
+        "UM": "UMI",  # united states minor outlying islands
+        "SJ": "SJM",  # svalbard
+        "CX": "CXR",  # Christmas island
+    }
+
+    if country_code in special_codes_GADM:
+        return f"gadm41_{special_codes_GADM[country_code]}"
+    else:
+        return f"gadm41_{two_2_three_digits_country(country_code)}"
+
+
 def download_GADM(country_code, update=False, out_logging=False):
     """
     Download gpkg file from GADM for a given country code
@@ -59,7 +87,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     """
 
-    GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
+    GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
@@ -73,7 +101,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
             logger.warning(
-                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
+                f"Stage 4/4: {GADM_filename} of country code {country_code} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
@@ -113,7 +141,7 @@ def filter_gadm(
     # force GID_0 to be the country code for the relevant countries
     geodf["GID_0"] = cc
 
-    # country shape should have a single geomerty
+    # country shape should have a single geometry
     if (layer == 0) and (geodf.shape[0] > 1):
         logger.warning(
             f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
@@ -244,7 +272,7 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.0):
     if out_logging:
         logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
@@ -526,7 +554,7 @@ def download_WorldPop_API(
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -577,7 +605,7 @@ def load_GDP(
 ):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -862,7 +890,7 @@ def gadm(
     df_gadm["GADM_ID"] = (
         df_gadm["GADM_ID"]
         .str.split(".")
-        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
     )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)

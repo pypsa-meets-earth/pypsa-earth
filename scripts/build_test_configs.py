@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Write option files (configs) for the Continous Integration tests
+Write option files (configs) for the Continuous Integration tests
 
 The config.tutorial.yaml has all options.
 The test/* config files have only key/value strings that are different from the tutorial config.
@@ -49,10 +49,10 @@ def create_test_config(default_config, diff_config, output_path):
     Inputs
     ------
     default_config : dict or path-like
-        Default dictionray-like object provided as
+        Default dictionary-like object provided as
         a dictionary or a path to a yaml file
     diff_config : dict or path-like
-        Difference dictionray-like object provided as
+        Difference dictionary-like object provided as
         a dictionary or a path to a yaml file
     output_path : path-like
         Output path where the merged dictionary is saved

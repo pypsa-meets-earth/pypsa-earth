@@ -30,13 +30,13 @@ Outputs
 
 - ``resources/regions_onshore.geojson``:
 
-    .. image:: ../img/regions_onshore.png
-        :scale: 33 %
+    .. image:: /img/regions_onshore.png
+        :width: 33 %
 
 - ``resources/regions_offshore.geojson``:
 
-    .. image:: ../img/regions_offshore.png
-        :scale: 33 %
+    .. image:: /img/regions_offshore.png
+        :width: 33 %
 
 Description
 -----------

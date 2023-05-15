@@ -28,12 +28,8 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 configfile: "configs/bundle_config.yaml"
 
 
-DEFAULT_CONFIG = "config.tutorial.yaml" if config["tutorial"] else "config.default.yaml"
-
-
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
-
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
@@ -62,8 +58,13 @@ wildcard_constraints:
 
 
 rule clean:
-    shell:
-        "snakemake -j 1 solve_all_networks --delete-all-output"
+    run:
+        shell("snakemake -j 1 solve_all_networks --delete-all-output")
+        try:
+            shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
+        except:
+            pass
+        shell("snakemake -j 1 run_all_scenarios --delete-all-output")
 
 
 rule run_tests:
@@ -76,11 +77,18 @@ rule run_tests:
         directory = "test/tmp"  # assign directory
         for filename in os.scandir(directory):  # iterate over files in that directory
             if filename.is_file():
-                print(filename.path)
-                shell("cp {filename.path} config.yaml")
+                print(
+                    f"Running test: config name '{filename.name}'' and path name '{filename.path}'"
+                )
+                if "custom" in filename.name:
+                    shell("mkdir -p configs/scenarios")
+                    shell("cp {filename.path} configs/scenarios/config.custom.yaml")
+                    shell("snakemake --cores 1 run_all_scenarios --forceall")
                 if "monte" in filename.name:
+                    shell("cp {filename.path} config.yaml")
                     shell("snakemake --cores all solve_all_networks_monte --forceall")
                 else:
+                    shell("cp {filename.path} config.yaml")
                     shell("snakemake --cores all solve_all_networks --forceall")
         print("Tests are successful.")
 
@@ -872,7 +880,6 @@ rule make_statistics:
 
 rule run_scenario:
     input:
-        default_config=DEFAULT_CONFIG,
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touchfile=touch("results/{scenario_name}/scenario.done"),
@@ -882,18 +889,28 @@ rule run_scenario:
         mem_mb=5000,
     run:
         from scripts.build_test_configs import create_test_config
+        import yaml
 
-        # Ensure the scenario name matches the name of the configuration
+        # get base configuration file from diff config
+        with open(input.diff_config) as f:
+            base_config_path = (
+                yaml.full_load(f)
+                .get("run", {})
+                .get("base_config", "config.tutorial.yaml")
+            )
+
+            # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
             {"run": {"name": wildcards.scenario_name}},
             input.diff_config,
         )
         # merge the default config file with the difference
-        create_test_config(input.default_config, input.diff_config, "config.yaml")
+        create_test_config(base_config_path, input.diff_config, "config.yaml")
         os.system("snakemake -j all solve_all_networks --rerun-incomplete")
         os.system("snakemake -j1 make_statistics --force")
         copyfile("config.yaml", output.copyconfig)
+
 
 
 rule run_all_scenarios:
