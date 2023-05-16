@@ -29,7 +29,7 @@ policy_config:
   policy: "H2_export_monthly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching" # TODO check wether "export" is required here or misleading
   allowed_excess: 1.0 # currently only implemented for the monthly constraint
   reference_case: true
-  
+
 
 clustering_options:
   alternative_clustering: true
