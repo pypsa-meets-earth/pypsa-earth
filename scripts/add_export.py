@@ -19,7 +19,7 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 import pypsa
-from helpers import locate_bus, override_component_attrs
+from helpers import locate_bus, override_component_attrs, prepare_costs
 
 logger = logging.getLogger(__name__)
 
@@ -87,17 +87,32 @@ def add_export(n, hydrogen_buses_ports, export_h2):
     export_links = n.links[n.links.index.str.contains("export")]
     logger.info(export_links)
 
-    # add store
-    n.add(
-        "Store",
-        "H2 export store",
-        bus="H2 export bus",
-        e_nom_extendable=True,
-        carrier="H2",
-        e_initial=0,
-        marginal_cost=0,
-        capital_cost=0,
-    )
+    # add store depending on config settings
+
+
+
+    if snakemake.config["export"]["store"] == True:
+
+        if snakemake.config["export"]["store_capital_costs"] == "no_costs":
+            capital_cost = 0
+        elif snakemake.config["export"]["store_capital_costs"] == "standard_costs":
+            capital_cost = costs.at["hydrogen storage tank type 1 including compressor", "fixed"]
+        else:
+            logger.error(f"Value {snakemake.config['export']['store_capital_costs']} for ['export']['store_capital_costs'] is not valid")
+
+        n.add(
+            "Store",
+            "H2 export store",
+            bus="H2 export bus",
+            e_nom_extendable=True,
+            carrier="H2",
+            e_initial=0,
+            marginal_cost=0,
+            capital_cost=capital_cost,
+        )
+
+    elif snakemake.config["export"]["store"] == False:
+        pass
 
     # add load
     n.add(
@@ -139,6 +154,17 @@ if __name__ == "__main__":
     export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
     logger.info(
         f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
+    )
+
+    # Prepare the costs dataframe
+    Nyears = n.snapshot_weightings.generators.sum() / 8760
+
+    costs = prepare_costs(
+        snakemake.input.costs,
+        snakemake.config["costs"]["USD2013_to_EUR2013"],
+        eval(snakemake.wildcards.discountrate),
+        Nyears,
+        snakemake.config["costs"]["lifetime"],
     )
 
     # get hydrogen export buses/ports

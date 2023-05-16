@@ -30,10 +30,10 @@ snapshots:
   inclusive: "left" # end is not inclusive
 
 enable:
-  retrieve_databundle: false  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: false  # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false  # If True, than an exclusion raster will be build
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: true  # If True, than an exclusion raster will be build
   build_cutout: true
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
@@ -66,7 +66,7 @@ cluster_options:
     algorithm: kmeans
     feature: solar+onwind-time
     exclude_carriers: []
-  alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
+  alternative_clustering: True  # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true  # When "True", logging is printed to console
   aggregation_strategies:
@@ -116,8 +116,8 @@ load_options:
 
 electricity:
   voltages: [220., 300., 380.]
-  co2limit: 4.0e+3  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 1.487e+8  # European default, adjustment to Africa necessary
+  co2limit: 40.0e+6  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
+  co2base: 40.0e+6  # European default, adjustment to Africa necessary
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
 
