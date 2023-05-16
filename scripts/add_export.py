@@ -94,7 +94,7 @@ def add_export(n, hydrogen_buses_ports, export_h2):
             capital_cost = 0
         elif snakemake.config["export"]["store_capital_costs"] == "standard_costs":
             capital_cost = costs.at[
-                "hydrogen storage tank type 1 including compressor", "fixed"
+                "hydrogen storage tank incl. compressor", "fixed"
             ]
         else:
             logger.error(
@@ -135,14 +135,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="16",
+            clusters="10",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L0.10",
             planning_horizons="2030",
-            sopts="144H",
-            discountrate=0.071,
+            sopts="6H",
+            discountrate="0.071",
             demand="DF",
-            h2export=[0],
+            h2export="120",
         )
         sets_path_to_root("pypsa-earth-sec")
 
