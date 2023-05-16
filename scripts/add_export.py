@@ -93,9 +93,7 @@ def add_export(n, hydrogen_buses_ports, export_h2):
         if snakemake.config["export"]["store_capital_costs"] == "no_costs":
             capital_cost = 0
         elif snakemake.config["export"]["store_capital_costs"] == "standard_costs":
-            capital_cost = costs.at[
-                "hydrogen storage tank incl. compressor", "fixed"
-            ]
+            capital_cost = costs.at["hydrogen storage tank incl. compressor", "fixed"]
         else:
             logger.error(
                 f"Value {snakemake.config['export']['store_capital_costs']} for ['export']['store_capital_costs'] is not valid"
