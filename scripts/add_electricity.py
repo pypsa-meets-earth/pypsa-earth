@@ -429,7 +429,7 @@ def attach_hydro(n, costs, ppl):
     hydro = hydro[~bus_id[hydro.index].duplicated()]
     ror = ror[~bus_id[ror.index].duplicated()]
     inflow_idx = ror.index.union(hydro.index)
-    inflow_idx = inflow_idx[~bus_id[inflow_idx].duplicated()] 
+    inflow_idx = inflow_idx[~bus_id[inflow_idx].duplicated()]
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             inflow_buses = bus_id[inflow_idx]
