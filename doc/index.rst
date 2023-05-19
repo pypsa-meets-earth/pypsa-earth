@@ -33,8 +33,8 @@ Welcome to the PyPSA-Earth documentation!
 .. image:: https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth
     :alt: GitHub repo size
 
-.. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
-    :target: https://www.gnu.org/licenses/gpl-3.0
+.. image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
+    :target: https://www.gnu.org/licenses/agpl-3.0
     :alt: License
 
 .. image:: https://api.reuse.software/badge/github.com/pypsa/pypsa-eur
