@@ -121,10 +121,9 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     """
     logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
 
-    linetype_base = linetype
-    n.lines["type"] = linetype_base
+    n.lines["type"] = linetype
     n.lines["v_nom"] = base_voltage
-    n.lines["i_nom"] = n.line_types.i_nom[linetype_base]
+    n.lines["i_nom"] = n.line_types.i_nom[linetype]
     # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
