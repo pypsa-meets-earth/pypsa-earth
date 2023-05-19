@@ -206,9 +206,9 @@ import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
+from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
 from shapely.geometry import LineString, Point
-from dask.distributed import Client, LocalCluster
 
 cc = coco.CountryConverter()
 
