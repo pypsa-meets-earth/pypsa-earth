@@ -714,7 +714,7 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    base_voltage = max(snakemake.config["electricity"]["voltages"])
+    base_voltage = snakemake.config["electricity"]["base_voltage"]
     linetype = snakemake.config["lines"]["types"][base_voltage]
 
     aggregation_strategies = snakemake.config["cluster_options"].get(
