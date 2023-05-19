@@ -208,6 +208,7 @@ from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from pypsa.geo import haversine
 from shapely.geometry import LineString, Point
+from dask.distributed import Client, LocalCluster
 
 cc = coco.CountryConverter()
 
@@ -498,6 +499,9 @@ if __name__ == "__main__":
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
 
+    cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
+    client = Client(cluster, asynchronous=True)
+
     cutout = atlite.Cutout(paths["cutout"])
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
@@ -524,7 +528,7 @@ if __name__ == "__main__":
     buses = regions.index
 
     func = getattr(cutout, resource.pop("method"))
-    resource["dask_kwargs"] = {"num_workers": nprocesses}
+    resource["dask_kwargs"] = {"scheduler": client}
 
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
