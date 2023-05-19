@@ -110,21 +110,21 @@ sys.settrace
 logger = logging.getLogger(__name__)
 
 
-def simplify_network_to_380(n, linetype):
+def simplify_network_to_base_voltage(n, linetype, base_voltage):
     """
-    Fix all lines to a voltage level of 380 kV and remove all transformers.
+    Fix all lines to a voltage level of base voltage level and remove all transformers.
     The function preserves the transmission capacity for each line while updating
     its voltage level, line type and number of parallel bundles (num_parallel).
     Transformers are removed and connected components are moved from their
     starting bus to their ending bus. The corresponding starting buses are
     removed as well.
     """
-    logger.info("Mapping all network lines onto a single 380kV layer")
+    logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
 
-    linetype_380 = linetype
-    n.lines["type"] = linetype_380
-    n.lines["v_nom"] = 380
-    n.lines["i_nom"] = n.line_types.i_nom[linetype_380]
+    linetype_base = linetype
+    n.lines["type"] = linetype_base
+    n.lines["v_nom"] = base_voltage
+    n.lines["i_nom"] = n.line_types.i_nom[linetype_base]
     # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
@@ -715,7 +715,8 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    linetype = snakemake.config["lines"]["types"][380.0]
+    base_voltage = max(snakemake.config["electricity"]["voltages"])
+    linetype = snakemake.config["lines"]["types"][base_voltage]
 
     aggregation_strategies = snakemake.config["cluster_options"].get(
         "aggregation_strategies", {}
@@ -725,7 +726,7 @@ if __name__ == "__main__":
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
-    n, trafo_map = simplify_network_to_380(n, linetype)
+    n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 
