@@ -111,6 +111,8 @@ PyPSA-Earth 0.2.0
 
 * Update instructions on how to write documentation. `PR #720 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/720>`__
 
+* Fix hard-coded simplification of lines to 380kV. `PR #732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/732>`__
+
 PyPSA-Earth 0.1.0
 =================
 
