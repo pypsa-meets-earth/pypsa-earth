@@ -12,11 +12,18 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
+PyPSA-Earth 0.2.1
+=================
+
 **New Features and major Changes**
 
-- Fix bug. Add graphviz to docs to compile workflows in the documentation and adapt release notes `PR #719 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/719>`__
+* Fix bug. Add graphviz to docs to compile workflows in the documentation and adapt release notes `PR #719 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/719>`__
 
-- License change from GPL to AGPL as voted `here <https://github.com/pypsa-meets-earth/pypsa-earth/issues/693>`_
+* License change from GPL to AGPL as voted `here <https://github.com/pypsa-meets-earth/pypsa-earth/issues/693>`__
+
+* Fix hard-coded simplification of lines to 380kV `PR #732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/732>`__.
+  It is now possible to simplify the network to any other voltage level with config option `base_voltage`.
+
 
 PyPSA-Earth 0.2.0
 =================
@@ -110,8 +117,6 @@ PyPSA-Earth 0.2.0
 * Fix bug for missing renewable profiles and generators `PR #714 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/714>`__
 
 * Update instructions on how to write documentation. `PR #720 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/720>`__
-
-* Fix hard-coded simplification of lines to 380kV. `PR #732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/732>`__
 
 PyPSA-Earth 0.1.0
 =================
