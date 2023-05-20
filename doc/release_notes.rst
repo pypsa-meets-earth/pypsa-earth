@@ -16,6 +16,7 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 - Fix bug. Add graphviz to docs to compile workflows in the documentation and adapt release notes `PR #719 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/719>`__
 
+- License change from GPL to AGPL as voted `here <https://github.com/pypsa-meets-earth/pypsa-earth/issues/693>`_
 
 PyPSA-Earth 0.2.0
 =================
