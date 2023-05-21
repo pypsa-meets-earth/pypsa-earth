@@ -244,12 +244,13 @@ def add_custom_powerplants(ppl, inputs, config):
     add_ppls = read_csv_nafix(
         inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
     )
-    # if isinstance(custom_ppl_query, str):
-    #     add_ppls.query(custom_ppl_query, inplace=True)
 
-    return pd.concat(
-        [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
-    )
+    if custom_ppl_query == "merge":
+        return pd.concat(
+            [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
+        )
+    elif custom_ppl_query == "replace":
+        return add_ppls
 
 
 def replace_natural_gas_technology(df):
