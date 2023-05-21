@@ -24,6 +24,7 @@ PyPSA-Earth 0.2.1
 * Fix hard-coded simplification of lines to 380kV `PR #732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/732>`__.
   It is now possible to simplify the network to any other voltage level with config option `base_voltage`.
 
+* Add merge and replace functionalities while adding custom powerplants `PR #739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/739>`__
 
 PyPSA-Earth 0.2.0
 =================
