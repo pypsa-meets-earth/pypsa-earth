@@ -59,13 +59,13 @@ Description
 import logging
 import os
 import re
-
-import requests
 from zipfile import ZipFile
+
 import country_converter as coco
 import numpy as np
 import pandas as pd
 import pypsa
+import requests
 from _helpers import configure_logging, create_country_list
 from add_electricity import load_costs, update_transmission_costs
 from config_osm_data import continent_regions, world_iso
@@ -74,41 +74,41 @@ idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
+
 def download_emission_data():
     try:
-        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"     
+        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
         with requests.get(url) as rq:
-            with open('data/co2.zip','wb') as file:
+            with open("data/co2.zip", "wb") as file:
                 file.write(rq.content)
         rootpath = os.getcwd()
-        file_path = os.path.join(rootpath,"data/co2.zip")
+        file_path = os.path.join(rootpath, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath+"/data")
+            zipObj.extract(
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
+            )
         os.remove(file_path)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
     except:
         logger.warning(f"Failed download resource from '{url}'.")
         return False
 
+
 def emission_extractor(filename):
     country_names = create_country_list(snakemake.config["countries"])
     # data reading process
-    datapath  = os.path.join(
-            os.getcwd(),
-            "data",
-            filename
-        )
+    datapath = os.path.join(os.getcwd(), "data", filename)
     emission_of_countries = []
     df = pd.ExcelFile(datapath)
     df = pd.read_excel(df, 1)
-    #NEPAL
-    df.iloc[3293,27] = df.iloc[3293,28]
-    #GREENLAND 
-    df.iloc[2045,27] = df.iloc[2045,41] 
+    # NEPAL
+    df.iloc[3293, 27] = df.iloc[3293, 28]
+    # GREENLAND
+    df.iloc[2045, 27] = df.iloc[2045, 41]
     # GHANA
-    df.iloc[1107,27] = df.iloc[1107,30] 
+    df.iloc[1107, 27] = df.iloc[1107, 30]
     # Turks and Cacao Islands
-    df.iloc[499,27] = df.iloc[499,32]
+    df.iloc[499, 27] = df.iloc[499, 32]
     for j in country_names:
         j = coco.convert(j, to="ISO3")
         for i in range(9, 3918):
@@ -119,6 +119,7 @@ def emission_extractor(filename):
                 if df.loc[i][5] == "Public electricity and heat production":
                     emission_of_countries.append(df.loc[i][27])
     return emission_of_countries
+
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
     n.add(
@@ -326,7 +327,7 @@ if __name__ == "__main__":
             solver_name = snakemake.config["solving"]["solver"]["name"]
             n = apply_time_segmentation(n, m.group(0)[:-3], solver_name)
             break
-    
+
     for o in opts:
         if "Co2L" in o:
             if snakemake.config["electricity"]["automatic_emission_base_year"]:
