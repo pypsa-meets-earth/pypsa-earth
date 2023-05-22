@@ -1,22 +1,13 @@
-# SPDX-FileCopyrightText: : 2021 The PyPSA-Earth Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 1.0.0
+version: 0.2.1
 tutorial: true
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
-
-run:
-  name: ""
-
-scenario:
-  simpl: ['']
-  ll: ['copt']
-  clusters: [6]
-  opts: [Co2L-4H]
 
 countries: ["NG", "BJ"]
 
@@ -31,13 +22,6 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
-summary_dir: results
-
-snapshots:
-  start: "2013-03-1"
-  end: "2013-03-7"
-  inclusive: "left" # end is not inclusive
-
 enable:
   # prepare_links_p_nom: false
   retrieve_databundle: true
@@ -47,6 +31,22 @@ enable:
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
+
+run:
+  name: ""
+
+scenario:
+  simpl: ['']
+  ll: ['copt']
+  clusters: [6]
+  opts: [Co2L-4H]
+
+summary_dir: results
+
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-7"
+  inclusive: "left" # end is not inclusive
 
 # definition of the Coordinate Reference Systems
 crs:
@@ -74,6 +74,8 @@ cluster_options:
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: true
+    p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -104,6 +106,7 @@ build_shape_options:
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
+
 clean_osm_data_options:
   names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
@@ -113,9 +116,10 @@ clean_osm_data_options:
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  group_tolerance_buses: 5000  # [m] (default 5000) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+  force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
@@ -128,6 +132,7 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
+  base_voltage: 380.
   voltages: [220., 300., 380.]
   co2limit: 1.487e+9
   co2base: 1.487e+9
@@ -151,7 +156,7 @@ electricity:
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -180,7 +185,6 @@ lines:
 links:
   p_max_pu: 1.0
   p_nom_max: .inf
-  include_tyndp: true
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 transformers:
@@ -282,12 +286,14 @@ renewable:
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
-      normalization: hydro_capacities # 'hydro_capacities' to normalize country production by using hydro_capacities, 'eia' to normalize by eia data, false for no normalization
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
     clip_min_inflow: 1.0
-    normalization_multiplier: 1.1  # multiplier applied after the normalization of the hydro production
+    normalization:
+      method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
+      year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
+    multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
 
 # TODO: Needs to be adjusted for Africa
 costs:

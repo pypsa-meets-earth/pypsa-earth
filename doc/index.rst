@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+..
+.. SPDX-License-Identifier: CC-BY-4.0
+
 .. PyPSA meets Earth documentation master file, created by
    sphinx-quickstart on Sat May 15 22:52:54 2021.
    You can adapt this file completely to your liking, but it should at least
@@ -12,12 +16,15 @@ Welcome to the PyPSA-Earth documentation!
 
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+    :alt: CI Linux
 
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+    :alt: CI Mac
 
 .. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg
     :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
+    :alt: CI Windows
 
 .. image:: https://readthedocs.org/projects/pypsa-earth/badge/?version=latest
     :target: https://pypsa-earth.readthedocs.io/en/latest/?badge=latest
@@ -26,8 +33,13 @@ Welcome to the PyPSA-Earth documentation!
 .. image:: https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth
     :alt: GitHub repo size
 
-.. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
-    :target: https://www.gnu.org/licenses/gpl-3.0
+.. image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
+    :target: https://www.gnu.org/licenses/agpl-3.0
+    :alt: License
+
+.. image:: https://api.reuse.software/badge/github.com/pypsa/pypsa-eur
+    :target: https://api.reuse.software/info/github.com/pypsa/pypsa-eur
+    :alt: REUSE
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
@@ -76,7 +88,7 @@ The PyPSA meets Earth team is currently running four types of meetings:
 
 - **General code meeting (Open)**
 
-  - every forth Thursday each month 16-17:00 (UK time) `download .ics file <https://drive.google.com/file/d/1ggFg_vq8orjOdTIgj-DjGQ1t7Wv7qraJ/view?usp=sharing>`_
+  - every forth Thursday each month 16-17:00 (UK time) `download .ics file <https://drive.google.com/file/d/1naH4WwW9drkOkOJ3PLO4fyWdkZQi5-_w/view?usp=share_link>`_
   - updates on overall project and code blocks
   - meeting hosted on `Discord <https://discord.gg/AnuJBk23FU>`_; join us, we are waiting for you!
   - `open agenda <https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing>`_. See what we will discuss. Invited members have edit rights.
@@ -88,8 +100,8 @@ The PyPSA meets Earth team is currently running four types of meetings:
   
     1. Demand creation and prediction meeting, on demand basis
     2. AI asset detection meeting, on demand basis
-    3. Sector coupling meeting, every Thursday 09:00 (UK time), `download .ics file <https://drive.google.com/file/d/1TzUcilUdcsnsre7jTEcvyizftET93DQS/view?usp=sharing>`__
-    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), `download .ics file <https://drive.google.com/file/d/1yq6LEW6nYVJv2tRHWeKELSkx26ld6EQS/view?usp=sharing>`__
+    3. Sector coupling meeting, every Thursday 09:00 (UK time), `download .ics file <https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link>`__
+    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), `download .ics file <https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link>`__
 
 - **Outreach meeting (by invitation)**
 
@@ -99,8 +111,7 @@ The PyPSA meets Earth team is currently running four types of meetings:
 - **Buddy talk (Open)**
 
   - book a 30min meeting with Max to discuss anything you like
-  - booking link: `calendly.com/pypsa-meets-earth <https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min>`_ (developed by @mnm-matin)
-calendly.com/pypsa-meets-earth
+  - booking link: `calendly.com/pypsa-meets-earth <https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min>`_
 
 =============
 Documentation

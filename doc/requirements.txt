@@ -1,12 +1,12 @@
-# SPDX-FileCopyrightText: : 2019-2021 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
 setuptools
-
 sphinx
-sphinx_rtd_theme
-setuptools<58.3.0
+sphinx_book_theme
+sphinxcontrib-bibtex
+myst-parser  # recommark is deprecated, https://stackoverflow.com/a/71660856/13573820
 
 pypsa
 vresutils>=0.3.1
@@ -26,5 +26,6 @@ descartes
 esy-osm-pbf
 esy-osmfilter
 rioxarray
+git+https://github.com/davide-f/google-drive-downloader@master  # if not included will create error in docs `make html`
 
 gitpython

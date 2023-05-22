@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2019-2023 The PyPSA-Eur and Earth Authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 ##################
 Cost Assumptions

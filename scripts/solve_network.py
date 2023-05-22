@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Solves linear optimal power flow for a network iteratively while updating reactances.
 
@@ -39,8 +41,8 @@ Outputs
 
 - ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Solved PyPSA network including optimisation results
 
-    .. image:: ../img/results.png
-        :scale: 40 %
+    .. image:: /img/results.png
+        :width: 40 %
 
 Description
 -----------

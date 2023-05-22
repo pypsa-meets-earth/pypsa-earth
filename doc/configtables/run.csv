@@ -1,0 +1,3 @@
+,Unit,Values,Description
+name,string,,"Keeps track of runs with different settings."
+shared_cutouts,bool,"{True, False}","True: shares the default cutout(s) across runs. Note: value false requires build_cutout to be enabled."
