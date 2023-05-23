@@ -13,6 +13,8 @@ Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPS
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
 * Add merge and replace functionalities when adding custom powerplants `PR #739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/739>`__. "Merge" combined the powerplantmatching data with new custom data. "Replace" allows to use fully self-collected data.
+  
+* Add functionality of attaching existing renewable caapcities from custom_powerplants.csv `PR #742 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/742>`__. If custom_powerplants are enabled and electricity:estimate_renewable_capacities:stats are set to False, then p_nom and p_nom_min for renewables are extracted from custom_powerplants.csv.
 
 PyPSA-Earth 0.2.1
 =================
