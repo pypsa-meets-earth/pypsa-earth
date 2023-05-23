@@ -95,6 +95,7 @@ import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
+from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
@@ -622,6 +623,31 @@ def attach_extendable_generators(n, costs, ppl):
             )
 
 
+def attach_custom_renewables(n, tech_map, ppl):
+    tech_string = ", ".join(sum(tech_map.values(), []))
+    logger.info(f"Using custom renewable capacities for carriers {tech_string}.")
+
+    df = ppl
+    technology_b = ~df.technology.isin(["Onshore", "Offshore"])
+    df["Fueltype"] = df.carrier.where(technology_b, df.technology).replace(
+        {"solar": "PV"})
+    df.rename(columns={"country":"Country"}, inplace=True)
+    df = df.query("Fueltype in @tech_map").powerplant.convert_country_to_alpha2()
+
+    for fueltype, carriers in tech_map.items():
+        gens = n.generators[lambda df: df.carrier.isin(carriers)]
+        buses = n.buses.loc[gens.bus.unique()]
+        gens_per_bus = gens.groupby("bus").p_nom.count()
+
+        if not gens.empty:
+            caps = map_country_bus(df.query("Fueltype == @fueltype"), buses)
+            caps = caps.groupby(["bus"]).p_nom.sum()
+            caps = caps / gens_per_bus.reindex(caps.index, fill_value=1)
+
+            n.generators.p_nom.update(gens.bus.map(caps).dropna())
+            n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
+
+
 def estimate_renewable_capacities_irena(n, config):
     if not config["electricity"].get("estimate_renewable_capacities"):
         return
@@ -794,6 +820,12 @@ if __name__ == "__main__":
     attach_hydro(n, costs, ppl)
 
     estimate_renewable_capacities_irena(n, snakemake.config)
+
+    if snakemake.config["electricity"]["custom_powerplants"] and \
+        snakemake.config["electricity"]["estimate_renewable_capacities"]["stats"] !='irena':
+        tech_map = snakemake.config["electricity"]["estimate_renewable_capacities"][
+                    "technology_mapping"]
+        attach_custom_renewables(n, tech_map, ppl)
 
     update_p_nom_max(n)
     add_nice_carrier_names(n, snakemake.config)
