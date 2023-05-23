@@ -274,8 +274,11 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     # Determine connected link components, ignore all links but DC
     adjacency_matrix = n.adjacency_matrix(
-        branch_components=["Link"],
-        weights=dict(Link=(n.links.carrier == "DC").astype(float)),
+        branch_components=["Link", "Line"],
+        weights=dict(
+            Link=(n.links.carrier == "DC").astype(float),
+            Line=(n.lines.carrier == "DC").astype(float),
+        ),
     )
 
     _, labels = connected_components(adjacency_matrix, directed=False)
@@ -342,24 +345,32 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 n, busmap, costs, config, connection_costs_per_link, buses
             )
 
-            all_links = [i for _, i in sum(links, [])]
+            all_dc = [i for _, i in sum(links, [])]
+            all_links = list(set(n.links.index).intersection(all_dc))
+            all_dc_lines = list(set(n.lines.index).intersection(all_dc))
 
             p_max_pu = config["links"].get("p_max_pu", 1.0)
-            lengths = n.links.loc[all_links, "length"]
+            lengths = pd.concat(
+                [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
+            )
             name = lengths.idxmax() + "+{}".format(len(links) - 1)
             params = dict(
                 carrier="DC",
                 bus0=b[0],
                 bus1=b[1],
-                length=sum(
-                    n.links.loc[[i for _, i in l], "length"].mean() for l in links
-                ),
-                p_nom=min(n.links.loc[[i for _, i in l], "p_nom"].sum() for l in links),
-                underwater_fraction=sum(
-                    lengths
-                    / lengths.sum()
-                    * n.links.loc[all_links, "underwater_fraction"]
-                ),
+                # TODO Re-implement equivalence calculations
+                length=1,
+                p_nom=1,
+                underwater_fraction=0,
+                # length=sum(
+                #     n.links.loc[[i for _, i in l], "length"].mean() for l in links
+                # ),
+                # p_nom=min(n.links.loc[[i for _, i in l], "p_nom"].sum() for l in links),
+                # underwater_fraction=sum(
+                #     lengths
+                #     / lengths.sum()
+                #     * n.links.loc[all_links, "underwater_fraction"]
+                # ),
                 p_max_pu=p_max_pu,
                 p_min_pu=-p_max_pu,
                 underground=False,
@@ -367,13 +378,15 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             )
 
             logger.info(
-                "Joining the links {} connecting the buses {} to simple link {}".format(
-                    ", ".join(all_links), ", ".join(buses), name
+                "Joining the links and DC lines {} connecting the buses {} to simple link {}".format(
+                    ", ".join(all_dc), ", ".join(buses), name
                 )
             )
 
             n.mremove("Link", all_links)
+            n.mremove("Line", all_dc_lines)
 
+            # TODO Revise to include DC lines
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.items():
                 params.setdefault(attr, default)
