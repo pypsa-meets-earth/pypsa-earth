@@ -300,7 +300,13 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 while m not in (supernodes | seen):
                     seen.add(m)
                     for m2, ls in G.adj[m].items():
-                        if m2 in seen or m2 == u:
+                        # there may be AC lines which connect ends of DC chains
+                        ls_is_ac = (
+                            n.lines.loc[n.lines.index == list(ls)[0][1]].tag_frequency
+                            != 0
+                        )
+                        # in case ls is a link, all() on empty series gives True
+                        if m2 in seen or m2 == u or ls_is_ac.all():
                             continue
                         buses.append(m2)
                         links.append(list(ls))  # [name for name in ls])
