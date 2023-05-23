@@ -93,9 +93,9 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
-from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
@@ -630,8 +630,9 @@ def attach_custom_renewables(n, tech_map, ppl):
     df = ppl
     technology_b = ~df.technology.isin(["Onshore", "Offshore"])
     df["Fueltype"] = df.carrier.where(technology_b, df.technology).replace(
-        {"solar": "PV"})
-    df.rename(columns={"country":"Country"}, inplace=True)
+        {"solar": "PV"}
+    )
+    df.rename(columns={"country": "Country"}, inplace=True)
     df = df.query("Fueltype in @tech_map").powerplant.convert_country_to_alpha2()
 
     for fueltype, carriers in tech_map.items():
@@ -821,10 +822,14 @@ if __name__ == "__main__":
 
     estimate_renewable_capacities_irena(n, snakemake.config)
 
-    if snakemake.config["electricity"]["custom_powerplants"] and \
-        snakemake.config["electricity"]["estimate_renewable_capacities"]["stats"] !='irena':
+    if (
+        snakemake.config["electricity"]["custom_powerplants"]
+        and snakemake.config["electricity"]["estimate_renewable_capacities"]["stats"]
+        != "irena"
+    ):
         tech_map = snakemake.config["electricity"]["estimate_renewable_capacities"][
-                    "technology_mapping"]
+            "technology_mapping"
+        ]
         attach_custom_renewables(n, tech_map, ppl)
 
     update_p_nom_max(n)
