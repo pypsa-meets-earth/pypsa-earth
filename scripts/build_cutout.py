@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2021 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Create cutouts with `atlite <https://atlite.readthedocs.io/en/latest/>`_.
 
@@ -78,14 +80,14 @@ Outputs
     wnd100m              time, y, x  ms**-1      Wind speeds at 100 meters (regardless of direction)
     ===================  ==========  ==========  =========================================================
 
-    .. image:: ../img/era5.png
-        :scale: 40 %
+    .. image:: /img/era5.png
+        :width: 40 %
 
 A **SARAH-2 cutout** can be used to amend the fields ``temperature``, ``influx_toa``, ``influx_direct``, ``albedo``,
 ``influx_diffuse`` of ERA5 using satellite-based radiation observations.
 
-    .. image:: ../img/sarah.png
-        :scale: 40 %
+    .. image:: /img/sarah.png
+        :width: 40 %
 
 Description
 -----------

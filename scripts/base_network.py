@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 The PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
-# coding: utf-8
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Creates the network topology from a OpenStreetMap
 
@@ -25,8 +26,8 @@ Relevant Settings
 
     links:
         p_max_pu:
+        p_nom_max:
         under_construction:
-        include_tyndp:
 
     transformers:
         x:
@@ -35,7 +36,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`snapshots_cf`, :ref:`toplevel_cf`, :ref:`electricity_cf`, :ref:`load_cf`,
+    :ref:`snapshots_cf`, :ref:`toplevel_cf`, :ref:`electricity_cf`, :ref:`load_options_cf`,
     :ref:`lines_cf`, :ref:`links_cf`, :ref:`transformers_cf`
 
 Inputs
@@ -48,8 +49,8 @@ Outputs
 
 - ``networks/base.nc``
 
-    .. image:: ../img/base.png
-        :scale: 33 %
+    .. image:: /img/base.png
+        :width: 33 %
 
 Description
 -----------

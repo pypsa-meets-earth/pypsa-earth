@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
 
 # Byte-compiled / optimized / DLL files
 **/__pycache__
@@ -15,6 +18,10 @@
 config.yaml
 dag.svg
 
+# Files appear for tests
+configs/scenarios/config.custom.yaml
+data/*.csv
+
 # Untracked folders (and files within)
 img/
 .snakemake/
@@ -24,8 +31,7 @@ data/
 data/osm/
 data/raw/
 data/base_network/
-results/summaries/
-results/plots/
+results/
 networks/
 resources/
 scripts/temp

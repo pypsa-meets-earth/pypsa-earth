@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 .. _installation:
 
@@ -77,6 +76,7 @@ PyPSA-Earth currently needs Java redistribution to work properly. To check if Ja
 The expected output should resemble the following:
    
    .. code:: bash
+    
       java version "1.8.0_341"
       Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
       Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)

@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2019-2020 The PyPSA-Eur Authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 ##########################################
 Populate data
@@ -17,6 +16,7 @@ The following list of rules apply:
 - :mod:`build_powerplants` for today's thermal power plant capacities using `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ allocating these to the closest substation for each powerplant
 - :mod:`build_natura_raster` for rasterising `World Database on Protected Areas (WDPA) <https://www.protectedplanet.net/en/resources/wdpa-manual>`_
 - :mod:`build_renewable_profiles` for the hourly capacity factors and installation potentials constrained by land-use in each substation's Voronoi cell for PV, onshore and offshore wind
+- :mod:`build_demand_profiles` for the hourly demand profiles for each substation
 
 Index:
 
@@ -28,3 +28,4 @@ Index:
    populate/build_powerplants
    populate/build_natura_raster
    populate/build_renewable_profiles
+   populate/build_demand_profiles

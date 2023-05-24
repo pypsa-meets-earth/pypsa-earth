@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+..
+.. SPDX-License-Identifier: CC-BY-4.0
+
 .. _api:
 
 #########################
@@ -32,6 +36,12 @@ build_cutout
 -------------------------------
 
 .. automodule:: build_cutout
+    :members:
+
+build_demand_profiles
+-------------------------------
+
+.. automodule:: build_demand_profiles
     :members:
 
 build_natura_raster
@@ -86,4 +96,10 @@ simplify_network
 -------------------------------
 
 .. automodule:: simplify_network
+    :members:
+
+make_statistics
+-------------------------------
+
+.. automodule:: make_statistics
     :members:

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2017-2020 The PyPSA-Eur Authors, 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
-# coding: utf-8
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 """
 Adds electrical generators, load and existing hydro storage units to a base network.
 
@@ -29,14 +30,6 @@ Relevant Settings
         include_renewable_capacities_from_OPSD:
         estimate_renewable_capacities_from_capacity_stats:
 
-    load:
-        scale:
-        ssp:
-        weather_year:
-        prediction_year:
-        region_load:
-
-
     renewable:
         hydro:
             carriers:
@@ -48,7 +41,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
-    :ref:`electricity_cf`, :ref:`load_cf`, :ref:`renewable_cf`, :ref:`lines_cf`
+    :ref:`electricity_cf`, :ref:`load_options_cf`, :ref:`renewable_cf`, :ref:`lines_cf`
 
 Inputs
 ------
@@ -56,15 +49,13 @@ Inputs
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
 - ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
 
-    .. image:: ../img/hydrocapacities.png
-        :scale: 34 %
+    .. image:: /img/hydrocapacities.png
 
 - ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
-- ``resources/ssp2-2.6/2030/era5_2013/Africa.nc`` Hourly country load profiles produced by GEGIS
-- ``resources/regions_onshore.geojson``: confer :ref:`busregions`
-- ``resources/gadm_shapes.geojson``: confer :ref:`shapes`
+- ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
+- ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
-- ``resources/profile_{}.nc``: all technologies in ``config["renewables"].keys()``, confer :ref:`renewableprofiles`.
+- ``resources/profile_{}.nc``: all technologies in ``config["renewables"].keys()``, confer :ref:`renewableprofiles`
 - ``networks/base.nc``: confer :ref:`base`
 
 Outputs
@@ -72,8 +63,9 @@ Outputs
 
 - ``networks/elec.nc``:
 
-    .. image:: ../img/elec.png
-            :scale: 33 %
+    .. image:: /img/elec.png
+            :width: 75 %
+            :align: center
 
 Description
 -----------
@@ -177,11 +169,13 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
 
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
-    # because technology data & pypsa earth costs.csv use different names
+    # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
     costs = costs.rename(
         {
             "hydrogen storage": "hydrogen storage tank",
+            "hydrogen storage tank": "hydrogen storage tank",
+            "hydrogen storage tank type 1": "hydrogen storage tank",
             "hydrogen underground storage": "hydrogen storage underground",
         },
     )
@@ -264,120 +258,26 @@ def load_powerplants(ppl_fn):
     )
 
 
-def get_load_paths_gegis(ssp_parentfolder, config):
+def attach_load(n, demand_profiles):
     """
-    Creates load paths for the GEGIS outputs
-
-    The paths are created automatically according to included country,
-    weather year, prediction year and ssp scenario
-
-    Example
-    -------
-    ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
-    """
-    countries = config.get("countries")
-    region_load = getContinent(countries)
-    weather_year = config.get("load_options")["weather_year"]
-    prediction_year = config.get("load_options")["prediction_year"]
-    ssp = config.get("load_options")["ssp"]
-
-    load_paths = []
-    for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
-        )
-        load_paths.append(load_path)
-
-    return load_paths
-
-
-def attach_load(
-    n,
-    load_paths,
-    regions,
-    admin_shapes,
-    countries,
-    scale,
-):
-    """
-    Add load to the network and distributes them according GDP and population.
+    Add load profiles to network buses
 
     Parameters
     ----------
-    n : pypsa network
-    regions : .geojson
-        Contains bus_id of low voltage substations and
-        bus region shapes (voronoi cells)
-    load_paths: paths of the load files
-    admin_shapes : .geojson
-        contains subregional gdp, population and shape data
-    countries : list
-        List of countries that is config input
-    scale : float
-        The scale factor is multiplied with the load (1.3 = 30% more load)
+    n: pypsa network
+
+    demand_profiles: str
+        Path to csv file of elecric demand time series, e.g. "resources/demand_profiles.csv"
+        Demand profile has snapshots as rows and bus names as columns.
 
     Returns
     -------
     n : pypsa network
         Now attached with load time series
     """
-    substation_lv_i = n.buses.index[n.buses["substation_lv"]]
-    regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
+    demand_df = pd.read_csv(demand_profiles, index_col=0, parse_dates=True)
 
-    load_paths = load_paths
-    # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-    gegis_load = xr.open_mfdataset(load_paths, combine="nested")
-    gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
-    # filter load for analysed countries
-    gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
-    logger.info(f"Load data scaled with scalling factor {scale}.")
-    gegis_load["Electricity demand"] *= scale
-    shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
-    shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
-
-    def upsample(cntry, group):
-        """
-        Distributes load in country according to population and gdp
-        """
-        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
-        if len(group) == 1:
-            return pd.DataFrame({group.index[0]: l})
-        else:
-            shapes_cntry = shapes.loc[shapes.country == cntry]
-            transfer = vtransfer.Shapes2Shapes(
-                group, shapes_cntry.geometry, normed=False
-            ).T.tocsr()
-            gdp_n = pd.Series(
-                transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
-            )
-            pop_n = pd.Series(
-                transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
-            )
-
-            # relative factors 0.6 and 0.4 have been determined from a linear
-            # regression on the country to EU continent load data
-            # (refer to vresutils.load._upsampling_weights)
-            # TODO: require adjustment for Africa
-            factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
-            return pd.DataFrame(
-                factors.values * l.values[:, np.newaxis],
-                index=l.index,
-                columns=factors.index,
-            )
-
-    load = pd.concat(
-        [
-            upsample(cntry, group)
-            for cntry, group in regions.geometry.groupby(regions.country)
-        ],
-        axis=1,
-    )
-
-    n.madd("Load", substation_lv_i, bus=substation_lv_i, p_set=load)
+    n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
 def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
@@ -557,20 +457,39 @@ def attach_hydro(n, costs, ppl):
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            inflow_stations = pd.Index(bus_id[inflow_idx])
-            missing_c = inflow_stations.unique().difference(inflow.indexes["plant"])
-            assert missing_c.empty, (
-                f"'{snakemake.input.profile_hydro}' is missing "
-                f"inflow time-series for at least one bus: {', '.join(missing_c)}"
+            inflow_buses = bus_id[inflow_idx]
+            missing_plants = pd.Index(inflow_buses.unique()).difference(
+                inflow.indexes["plant"]
+            )
+            intersection_plants = pd.Index(
+                inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
             )
 
-            inflow_t = (
-                inflow.sel(plant=inflow_stations)
-                .rename({"plant": "name"})
-                .assign_coords(name=inflow_idx)
-                .transpose("time", "name")
-                .to_pandas()
-            )
+            # if missing time series are found, notify the user and exclude missing hydro plants
+            if not missing_plants.empty:
+                # original total p_nom
+                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
+                idxs_to_keep = inflow_buses[
+                    inflow_buses.isin(intersection_plants)
+                ].index
+                ror = ror.loc[ror.index.intersection(idxs_to_keep)]
+                hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+                # loss of p_nom
+                loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
+
+                logger.warning(
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
+                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom}MW out of {total_p_nom}MW."
+                )
+
+            if not intersection_plants.empty:
+                inflow_t = (
+                    inflow.sel(plant=intersection_plants)
+                    .rename({"plant": "name"})
+                    .assign_coords(name=inflow_idx)
+                    .transpose("time", "name")
+                    .to_pandas()
+                )
 
     if "ror" in carriers and not ror.empty:
         n.madd(
@@ -851,12 +770,7 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
 
     # Snakemake imports:
-    regions = snakemake.input.regions
-
-    load_paths = snakemake.input["load"]
-    countries = snakemake.config["countries"]
-    admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.config["load_options"]["scale"]
+    demand_profiles = snakemake.input["demand_profiles"]
 
     costs = load_costs(
         snakemake.input.tech_costs,
@@ -884,8 +798,7 @@ if __name__ == "__main__":
         )
 
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
-
-    attach_load(n, load_paths, regions, admin_shapes, countries, scale)
+    attach_load(n, demand_profiles)
     update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
     conventional_inputs = {
         k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
@@ -913,6 +826,12 @@ if __name__ == "__main__":
 
     update_p_nom_max(n)
     add_nice_carrier_names(n, snakemake.config)
+
+    if not ("weight" in n.generators.columns):
+        logger.warning(
+            "Unexpected missing 'weight' column, which has been manually added. It may be due to missing generators."
+        )
+        n.generators["weight"] = pd.Series()
 
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])

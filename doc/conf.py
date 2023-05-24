@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -60,7 +65,10 @@ author = "Max Parzen"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.2.1"
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = "sphinx"
 
 # -- General configuration ---------------------------------------------------
 
@@ -68,6 +76,7 @@ release = "0.1.0"
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 extensions = [
+    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
@@ -120,12 +129,32 @@ master_doc = "index"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
+
+# Theme options are theme-specific and customize the look and feel of a theme
+# further.  For a list of options available for each theme, see the
+# documentation.
+html_theme_options = {
+    "repository_url": "https://github.com/pypsa-meets-earth/pypsa-earth",
+    "use_repository_button": True,
+    "show_navbar_depth": 1,
+}
+
+# The name for this set of Sphinx documents.  If None, it defaults to
+# "<project> v<release> documentation".
+html_title = "PyPSA-Earth"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
+
+# A shorter title for the navigation bar.  Default is the same as html_title.
+html_short_title = "PyPSA-Earth"
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = "https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png"
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -135,10 +164,10 @@ html_static_path = ["_static"]
 texinfo_documents = [
     (
         master_doc,
-        "pypsa_earth",
-        "pypsa-earth Documentation",
+        "PyPSA-Earth",
+        "PyPSA-Earth Documentation",
         author,
-        "pypsa-earth",
+        "PyPSA-Earth",
         "One line description of project.",
         "Miscellaneous",
     ),

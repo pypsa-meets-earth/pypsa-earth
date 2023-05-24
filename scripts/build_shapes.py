@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
+
 import logging
 import multiprocessing as mp
 import os
@@ -21,7 +24,6 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
-    country_name_2_two_digits,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -38,6 +40,34 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 sets_path_to_root("pypsa-earth")
+
+
+def get_GADM_filename(country_code):
+    """
+    Function to get the GADM filename given the country code
+    """
+    special_codes_GADM = {
+        "XK": "XKO",  # kosovo
+        "CP": "XCL",  # clipperton island
+        "SX": "MAF",  # sint maartin
+        "TF": "ATF",  # french southern territories
+        "AX": "ALA",  # aland
+        "IO": "IOT",  # british indian ocean territory
+        "CC": "CCK",  # cocos island
+        "NF": "NFK",  # norfolk
+        "PN": "PCN",  # pitcairn islands
+        "JE": "JEY",  # jersey
+        "XS": "XSP",  # spratly
+        "GG": "GGY",  # guernsey
+        "UM": "UMI",  # united states minor outlying islands
+        "SJ": "SJM",  # svalbard
+        "CX": "CXR",  # Christmas island
+    }
+
+    if country_code in special_codes_GADM:
+        return f"gadm41_{special_codes_GADM[country_code]}"
+    else:
+        return f"gadm41_{two_2_three_digits_country(country_code)}"
 
 
 def download_GADM(country_code, update=False, out_logging=False):
@@ -57,7 +87,7 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     """
 
-    GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
+    GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
@@ -71,7 +101,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     if not os.path.exists(GADM_inputfile_gpkg) or update is True:
         if out_logging:
             logger.warning(
-                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
+                f"Stage 4/4: {GADM_filename} of country code {country_code} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
@@ -111,7 +141,7 @@ def filter_gadm(
     # force GID_0 to be the country code for the relevant countries
     geodf["GID_0"] = cc
 
-    # country shape should have a single geomerty
+    # country shape should have a single geometry
     if (layer == 0) and (geodf.shape[0] > 1):
         logger.warning(
             f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
@@ -153,6 +183,9 @@ def get_GADM_layer(
     geodf_list = []
 
     for country_code in country_list:
+        # Set the current layer id (cur_layer_id) to global layer_id
+        cur_layer_id = layer_id
+
         # download file gpkg
         file_gpkg, name_file = download_GADM(country_code, update, outlogging)
 
@@ -160,18 +193,18 @@ def get_GADM_layer(
         list_layers = fiona.listlayers(file_gpkg)
 
         # get layer name
-        if (layer_id < 0) or (layer_id >= len(list_layers)):
+        if (cur_layer_id < 0) or (cur_layer_id >= len(list_layers)):
             # when layer id is negative or larger than the number of layers, select the last layer
-            layer_id = len(list_layers) - 1
+            cur_layer_id = len(list_layers) - 1
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer="ADM_ADM_" + str(layer_id)).to_crs(
-            geo_crs
-        )
+        geodf_temp = gpd.read_file(
+            file_gpkg, layer="ADM_ADM_" + str(cur_layer_id)
+        ).to_crs(geo_crs)
 
         geodf_temp = filter_gadm(
             geodf=geodf_temp,
-            layer=layer_id,
+            layer=cur_layer_id,
             cc=country_code,
             contended_flag=contended_flag,
             output_nonstd_to_csv=False,
@@ -179,7 +212,7 @@ def get_GADM_layer(
 
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{layer_id}"]
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"]
 
         # append geodataframes
         geodf_list.append(geodf_temp)
@@ -190,7 +223,7 @@ def get_GADM_layer(
     return geodf_GADM
 
 
-def _simplify_polys(polys, minarea=0.0001, tolerance=0.008, filterremote=False):
+def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
     "Function to simplify the shape polygons"
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
@@ -239,7 +272,7 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.0):
     if out_logging:
         logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
@@ -301,7 +334,16 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distance=0.01):
+def eez(
+    countries,
+    geo_crs,
+    country_shapes,
+    EEZ_gpkg,
+    out_logging=False,
+    distance=0.01,
+    minarea=0.01,
+    tolerance=0.01,
+):
     """
     Creates offshore shapes by
     - buffer smooth countryshape (=offset country shape)
@@ -328,7 +370,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     ).set_index("name")
 
     ret_df = ret_df.geometry.map(
-        lambda x: _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+        lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
     )
 
     ret_df = ret_df.apply(lambda x: make_valid(x))
@@ -340,7 +382,7 @@ def eez(countries, geo_crs, country_shapes, EEZ_gpkg, out_logging=False, distanc
     ret_df_new = ret_df_new.map(
         lambda x: x
         if x is None
-        else _simplify_polys(x, minarea=0.001, tolerance=0.0001)
+        else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
     )
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
@@ -512,7 +554,7 @@ def download_WorldPop_API(
 def convert_GDP(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -563,7 +605,7 @@ def load_GDP(
 ):
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
-    The dataset shall be downloaded independently by the user (see guide) or toghether with pypsa-earth package.
+    The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
     """
 
     if out_logging:
@@ -741,7 +783,7 @@ def add_population_data(
 
                 # get worldpop image
                 WorldPop_inputfile, WorldPop_filename = download_WorldPop(
-                    worldpop_method, c_code, year, update, out_logging
+                    c_code, worldpop_method, year, update, out_logging
                 )
 
                 with rasterio.open(WorldPop_inputfile) as src:
@@ -843,7 +885,13 @@ def gadm(
             name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
         )
 
-    # set index and simplify polygons
+    # renaming 3 letter to 2 letter ISO code before saving GADM file
+    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
+    df_gadm["GADM_ID"] = (
+        df_gadm["GADM_ID"]
+        .str.split(".")
+        .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
+    )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(

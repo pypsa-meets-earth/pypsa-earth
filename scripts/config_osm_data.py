@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021 PyPSA-Africa Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# -*- coding: utf-8 -*-
+
+import country_converter as coco
+
+cc = coco.CountryConverter()
+
 # ===============================
 # OSM FEATURE COLUMNS
 # ===============================
@@ -169,8 +175,8 @@ world_iso = {
         "BF": "burkina-faso",
         "BI": "burundi",
         "CM": "cameroon",
-        # "IC": "canary-islands"    # Island
-        # "CV": "cape-verde", # Island
+        "IC": "canary-islands",  # Island
+        "CV": "cape-verde",  # Island
         "CF": "central-african-republic",
         "TD": "chad",
         # "KM": "comoros", # Island
@@ -195,20 +201,20 @@ world_iso = {
         "MW": "malawi",
         "ML": "mali",
         "MR": "mauritania",
-        # "MU": "mauritius", # Island
-        # "YT": "mayotte",  # Island
+        "MU": "mauritius",  # Island
+        "YT": "mayotte",  # Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
         "NE": "niger",
         "NG": "nigeria",
-        # "RE": "reunion",  # Island
+        "RE": "reunion",  # Island
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
-        # "ST": "sao-tome-and-principe", # Island
+        "ST": "sao-tome-and-principe",  # Island
         "SN": "senegal",
         "GM": "gambia",
-        # "SC": "seychelles", #Island
+        "SC": "seychelles",  # Island
         "SL": "sierra-leone",
         "SO": "somalia",  # No Data
         # south-africa-and-lesotho
@@ -232,7 +238,6 @@ world_iso = {
         "BD": "bangladesh",
         "BT": "bhutan",
         # "IO": "british indian ocean territory",
-        # "BN": "brunei darussalam", # merged with MY
         "KH": "cambodia",
         "CN": "china",
         # "CX": "christmas island", # Island
@@ -255,11 +260,10 @@ world_iso = {
         "KG": "kyrgyzstan",
         "LA": "lao-people's-democratic-republic",
         "LB": "lebanon",
-        # "MO": "macao",  # no more with gadm 4.1
         "MY": "malaysia",
         "SG": "singapore",
         "BN": "brunei",
-        # "MV": "maldives",  # Island
+        "MV": "maldives",  # Island
         "MN": "mongolia",
         "MM": "myanmar",
         "NP": "nepal",
@@ -281,7 +285,7 @@ world_iso = {
         "TR": "turkey",
         "TM": "turkmenistan",
         "AE": "united-arab-emirates",
-        # "XD": "united-nations-neutral-zone"
+        # "XD": "united-nations-neutral-zone",
         "UZ": "uzbekistan",
         "VN": "vietnam",
         "YE": "yemen",
@@ -289,11 +293,11 @@ world_iso = {
     "Oceania": {
         "AS": "american-samoa",  # Island
         "AU": "australia",
-        # "CP": "ile-de-clipperton",  # Island  In gadm as XCL
+        "CP": "ile-de-clipperton",  # Island  In gadm as XCL
         "CK": "cook-islands",  # Island
         "FJ": "fiji",  # Island
         "PF": "french-polynesia",  # Island
-        # "GU": "guam",  # Island
+        "GU": "guam",  # Island
         "KI": "kiribati",  # Island
         "MH": "marshall-islands",  # Island
         "FM": "micronesia",  # Island
@@ -316,7 +320,7 @@ world_iso = {
         "WF": "wallis-and-futuna",  # Island
     },
     "Europe": {
-        # "AX":"aland-islands", # Island
+        # "AX": "aland-islands", # Island
         "AL": "albania",
         "AD": "andorra",
         "AM": "armenia",
@@ -331,20 +335,20 @@ world_iso = {
         "CZ": "czech-republic",
         "DK": "denmark",
         "EE": "estonia",
-        # "FO": "faroe islands", # Islands
+        "FO": "faroe islands",  # Islands
         "FI": "finland",
         "FR": "france",
         "GE": "georgia",
         "DE": "germany",
         # "GI": "gibraltar", # Island ?
         "GR": "greece",
-        # "GG": "guernsey", # Island
+        "GG": "guernsey",  # Island
         "HU": "hungary",
         "IS": "iceland",
         "IE": "ireland-and-northern-ireland",
-        # "IM": "isle of man", # Island
+        "IM": "isle of man",  # Island
         "IT": "italy",
-        # "JE": "jersey", # Island
+        "JE": "jersey",  # Island
         "KZ": "kazakhstan",
         "XK": "kosovo",
         "LV": "latvia",
@@ -379,27 +383,27 @@ world_iso = {
         # "AI": "anguilla", #Island
         # "AG": "antigua-and-barbuda", # Islands
         # "AW": "aruba", # Islands
-        # "BS": "bahamas", # Islands
-        # "BB": "barbados", # Islands
+        "BS": "bahamas",  # Islands
+        "BB": "barbados",  # Islands
         # "BM": "bermuda", # Islands
         # "BQ": "bonaire", # Islands
         # "VG": "british-virgin-islands", # Islands
         "CA": "canada",
         # "KY": "cayman-islands", # Islands
-        # "CU": "cuba", # Islands
+        "CU": "cuba",  # Islands
         # "CW": "curacao", # Islands
         # "DM": "dominica", # Islands
         "DO": "dominican-republic",
         "GL": "greenland",
-        # "GD": "grenada", # Islands
-        # "GP": "guadeloupe", # Islands
+        "GD": "grenada",  # Islands
+        "GP": "guadeloupe",  # Islands
         "HT": "haiti",
-        # "JM": "jamaica", # Islands
+        "JM": "jamaica",  # Islands
         # "MQ": "martinique", # Islands
         "MX": "mexico",
         # "MS": "montserrat", # Islands
         "US": "united-states-of-america",
-        # "PR": "puerto-rico", # Islands
+        "PR": "puerto-rico",  # Islands
         # "BL": "saint-barthelemy", # Islands
         # "KN": "saint-kitts-and-nevis", # Islands
         # "LC": "saint-lucia", # Islands
@@ -426,7 +430,7 @@ world_iso = {
         "CL": "chile",
         "CO": "colombia",
         "EC": "ecuador",
-        # "FK": "falkland-islands", #Islands
+        "FK": "falkland-islands",  # Islands
         "GF": "french-guiana",
         "GY": "guyana",  # No Data
         "PE": "peru",
@@ -447,21 +451,21 @@ world_iso = {
 # Australasia region includes New Caledonia and Papua New Guinea
 continent_regions = {
     # European regions
-    "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDANAVIAN REGION
-    # EASTREN EUROPIAN REGION
+    "SCR": ["DK", "NO", "SE", "FI", "IS"],  # SCANDINAVIAN REGION
+    # EASTERN EUROPEAN REGION
     "EER": ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "FI", "MD"],
-    # CENTRAL EUROPIAN REGION
+    # CENTRAL EUROPEAN REGION
     "CER": ["AT", "CH", "CZ", "DE", "HU", "PL", "SK", "LI"],
     # BALKAN PENISULAN REGION
     "BPR": ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"],
-    # WESTREN EUROPE
+    # WESTERN EUROPE
     "WER": ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD"],
-    # SOUTHERN EUROPAIN REGION
+    # SOUTHERN EUROPEAN REGION
     "SER": ["ES", "AD", "IT", "PT", "SM", "MT"],
     # African regions
     # NORTHERN AFRICAN REGION
     "NAR": ["EG", "LY", "TN", "DZ", "MA", "EH", "SD", "SS"],
-    # WESTREN AFRICAN REGION
+    # WESTERN AFRICAN REGION
     # Guinea-Bissau ["GW"] belongs to the region but power data are NA in OSM)
     "WAR": [
         "MR",
@@ -481,7 +485,7 @@ continent_regions = {
     ],
     # CENTRAL AFRICAN REGION
     "CAR": ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"],
-    # EASTREN AFRICAN REGION
+    # EASTERN AFRICAN REGION
     # Somalia ["SO"] belongs to the region but power data are NA in OSM)
     "EAR": ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"],
     # SOUTHERN AFRICAN REGION
@@ -508,15 +512,15 @@ continent_regions = {
         "AE",
         "YE",
     ],
-    # FAR EASTREN AISIAN REGION
+    # FAR EASTERN ASIAN REGION
     "FEAR": ["JP", "KP", "KR", "CN", "TW", "MN"],  # , "HK", "MO"],
-    # SOUTHEASTREN AISIAN REGION
+    # SOUTHEASTERN ASIAN REGION
     "SEAR": ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"],
-    # CENTRAL AISIAN REGION
+    # CENTRAL ASIAN REGION
     "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],
-    # SOUTHERN AISIAN REGION
+    # SOUTHERN ASIAN REGION
     "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
-    # MIDDLE EASTREN ASIAN REGION
+    # MIDDLE EASTERN ASIAN REGION
     "MEAR": [
         "TR",
         "SY",
@@ -536,283 +540,85 @@ continent_regions = {
         "OM",
     ],
     # American continent regions
-    "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERCAN CONTINENT REGION
+    "NACR": ["CA", "GL", "MX", "US"],  # NORTHERN AMERICAN CONTINENT REGION
     # SOUTHERN LATIN AMERICAN REGION
     "LACR": ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"],
     # CENTRAL AMERICAN REGION
     "CACR": ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"],
     # Australasia
     "AUO": ["AU", "NC", "NZ", "PG"],
-    # Customized test set
-    "TEST": ["NG", "NE", "SL", "MA"],
+    # UnitedNations
+    "UnitedNations": cc.convert(names=cc.UN.name_short, to="ISO2"),
 }
 
 # Geofabrik and iso norm deviate for some countries and domains
 
-# dictionary of correspondance between iso country codes and geofabrik codes containing those information
+# dictionary of correspondence between iso country codes and geofabrik codes containing those information
 # This dictionary instructs the script download_osm_data about how to successfully download data
 # from countries that are aggregated into osm.
-# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SNGM
+# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SN-GM
 #   That's the reason why in this dictionary they can be found the following entries:
-#       "SN": "SNGM"
-#       "GM": "SNGM"
-#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SNGM" file
+#       "SN": "SN-GM"
+#       "GM": "SN-GM"
+#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SN-GM" file
 iso_to_geofk_dict = {
     "EH": "MA",  # Western Sahara -> Morocco
-    "SN": "SNGM",  # Senegal -> Senegal-Gambia
-    "GM": "SNGM",  # Gambia -> Senegal-Gambia
+    "SN": "SN-GM",  # Senegal -> Senegal-Gambia
+    "GM": "SN-GM",  # Gambia -> Senegal-Gambia
+    "KM": "comores",  # Comores
     # "HK": "CN",  # Hong Kong  -> China  # no more with gadm 4.1
     # "MO": "CN",  # Macao  -> China  # no more with gadm 4.1
-    "SG": "MY-SG-BN",  # Singapore -> Malaysia-Singapore-Brunei
-    "BN": "MY-SG-BN",  # Brunei -> Malaysia-Singapore-Brunei
-    "MY": "MY-SG-BN",  # Malaysia -> Malaysia-Singapore-Brunei
-    "SA": "GCC",  # Saudi Arabia -> Gulf Cooperation Council
-    "KW": "GCC",  # Kuwait -> Gulf Cooperation Council
-    "BH": "GCC",  # Bahrain -> Gulf Cooperation Council
-    "QA": "GCC",  # Qatar -> Gulf Cooperation Council
-    "AE": "GCC",  # United Arab Emirates -> Gulf Cooperation Council
-    "OM": "GCC",  # Oman -> Gulf Cooperation Council
-    "PS": "IL-PL",  # Israel and Palestine are merged in OSM
-    "IL": "IL-PL",  # Israel and Palestine are merged in OSM
+    "SG": "MY",  # Singapore -> Malaysia-Singapore-Brunei
+    "BN": "MY",  # Brunei -> Malaysia-Singapore-Brunei
+    "SA": "QA-AE-OM-BH-KW",  # Saudi Arabia -> Gulf Cooperation Council
+    "KW": "QA-AE-OM-BH-KW",  # Kuwait -> Gulf Cooperation Council
+    "BH": "QA-AE-OM-BH-KW",  # Bahrain -> Gulf Cooperation Council
+    "QA": "QA-AE-OM-BH-KW",  # Qatar -> Gulf Cooperation Council
+    "AE": "QA-AE-OM-BH-KW",  # United Arab Emirates -> Gulf Cooperation Council
+    "OM": "QA-AE-OM-BH-KW",  # Oman -> Gulf Cooperation Council
+    "PS": "PS-IL",  # Israel and Palestine are merged in OSM
+    "IL": "PS-IL",  # Israel and Palestine are merged in OSM
     "SM": "IT",  # San-Marino is merged to Italy
     "VA": "IT",  # Vatican is merged to Italy
-    "HT": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
-    "DO": "HT-DO",  # Haiti and Dominican Republic are merged in OSM
+    "HT": "haiti-and-domrep",  # Haiti and Dominican Republic are merged in OSM
+    "DO": "haiti-and-domrep",  # Haiti and Dominican Republic are merged in OSM
+    "PA": "panama",  # Panama
     "NF": "AU",  # norfolk island is an AU territory
-    "MP": "USOC",  # northern mariana islands are US territory
-    "GU": "USOC",  # Guam is a US territory
-    "AS": "USOC",  # American Samoa is a US territory
+    "MP": "american-oceania",  # northern mariana islands are US territory
+    "GU": "american-oceania",  # Guam is a US territory
+    "AS": "american-oceania",  # American Samoa is a US territory
+    "CP": "ile-de-clipperton",  # Ile de clipperton
+    "PF": "polynesie-francaise",  # Polynesie Francaise
+    "VU": "vanuatu",  #  Vanuatu
+    "TK": "tokelau",  # Tokelau
+    "MH": "marshall-islands",  # Marshal islands
+    "PN": "pitcairn-islands",  # Pitcairn
+    "WF": "wallis-et-futuna",  # Wallis et Fortnuna
+    "XK": "RS-KM",  # Kosovo
+    "BS": "bahamas",  # Bahamas
+    "BB": "central-america",  # Barbados
+    "CU": "cuba",  # Cuba
+    # "IC": "canary-islands",  # Canary islands
+    "RE": "reunion",  # Reunion island (France)
+    "YT": "mayotte",  # "Mayotte island (France)"
+    "GG": "guernsey-jersey",  # Guernsey
+    "JE": "guernsey-jersey",  # Jersey
+    "IM": "isle-of-man",  # Isle of man
+    "GP": "guadeloupe",  # guadeloupe
+    "JM": "jamaica",  # jamaica
+    "TT": "central-america",  # Trinidad and Tobago
+    "AG": "central-america",  # Antigua e Barbuda
+    "DM": "central-america",  # Dominique
+    "LC": "central-america",  # Santa Lucia
+    "VC": "central-america",  # Saint Vincent e Grenadine
+    "KN": "central-america",  # Saint Kitts e Nevis
+    "GD": "central-america",  # Grenada
+    # "PM": "north-america",  # Saint-Pierre e Miquelon
+    "FK": "south-america",  # Falkland islands
 }
-
-# Cyprus and Georgia -> European domain
-# Russia -> a separate domain
 
 # data for some islands seem to be merged with some other areas data
 # "FO": "faroe islands"
 # "NF": "norfolk island",
 # "PF": "french-polynesia"
 # "GU": "guam"
-
-# "latin_america" -> "south-america"
-
-world_geofk = {
-    "africa": {
-        "DZ": "algeria",
-        "AO": "angola",
-        "BJ": "benin",
-        "BW": "botswana",
-        "BF": "burkina-faso",
-        "BI": "burundi",
-        "CM": "cameroon",
-        # canary-islands, # Island
-        # "CV": "cape-verde", # Island
-        "CF": "central-african-republic",
-        "TD": "chad",
-        # "KM": "comores", # Island
-        "CG": "congo-brazzaville",
-        "CD": "congo-democratic-republic",
-        "DJ": "djibouti",
-        "EG": "egypt",
-        "GQ": "equatorial-guinea",
-        "ER": "eritrea",
-        "ET": "ethiopia",
-        "GA": "gabon",
-        "GH": "ghana",
-        "GW": "guinea-bissau",  # No Data
-        "GN": "guinea",
-        "CI": "ivory-coast",
-        "KE": "kenya",
-        "LS": "lesotho",
-        "LR": "liberia",
-        "LY": "libya",
-        "MG": "madagascar",
-        "MW": "malawi",
-        "ML": "mali",
-        "MR": "mauritania",
-        # "MU": "mauritius", # Island
-        "MA": "morocco",
-        "MZ": "mozambique",
-        "NA": "namibia",
-        "NE": "niger",
-        "NG": "nigeria",
-        "RW": "rwanda",
-        # saint-helena-ascension-and-tristan-da-cunha # Islands
-        # "ST": "sao-tome-and-principe", # Island
-        "SNGM": "senegal-and-gambia",  # Geofk shortcurt
-        # "SC": "seychelles", # Island
-        "SL": "sierra-leone",
-        "SO": "somalia",  # No Data
-        # south-africa-and-lesotho
-        "ZA": "south-africa",
-        "SS": "south-sudan",
-        "SD": "sudan",
-        "SZ": "swaziland",
-        "TZ": "tanzania",
-        "TG": "togo",
-        "TN": "tunisia",
-        "UG": "uganda",
-        "ZM": "zambia",
-        "ZW": "zimbabwe",
-    },
-    "asia": {
-        "AF": "afghanistan",
-        "AM": "armenia",
-        "AZ": "azerbaijan",
-        "BD": "bangladesh",
-        "BT": "bhutan",
-        "KH": "cambodia",
-        "CN": "china",
-        "GCC": "gcc-states",  # Geofk shortcurt for SA, KW, BH, QA, AE, OM
-        "IN": "india",
-        "ID": "indonesia",
-        "IR": "iran",
-        "IQ": "iraq",
-        "IL-PL": "israel-and-palestine",
-        "JP": "japan",
-        "JO": "jordan",
-        "KZ": "kazakhstan",
-        "KP": "north-korea",
-        "KR": "south-korea",
-        "KG": "kyrgyzstan",
-        "LA": "laos",
-        "LB": "lebanon",
-        "MY-SG-BN": "malaysia-singapore-brunei",  # Geofk shortcurt
-        "MN": "mongolia",
-        "MM": "myanmar",
-        "NP": "nepal",
-        "PK": "pakistan",
-        "PH": "philippines",
-        "LK": "sri-lanka",
-        "SY": "syria",
-        "TL": "east-timor",
-        "TW": "taiwan",
-        "TJ": "tajikistan",
-        "TH": "thailand",
-        "TM": "turkmenistan",
-        "UZ": "uzbekistan",
-        "VN": "vietnam",
-        "YE": "yemen",
-    },
-    "australia-oceania": {
-        "AU": "australia",
-        "CK": "cook-islands",  # Island
-        "CP": "ile-de-clipperton",  # Island
-        "FJ": "fiji",  # Islands
-        "PF": "polynesie-francaise",  # Islands
-        # "GU": "guam",  # Island
-        "KI": "kiribati",  # Islands
-        "MH": "marshall-islands",  # Islands
-        "FM": "micronesia",  # Islands
-        "NR": "nauru",  # Islands
-        "NC": "new-caledonia",
-        "NZ": "new-zealand",
-        "NU": "niue",  # Island
-        # "NF": "norfolk island",  # Island
-        # "MP": "northern mariana islands",  # Islands
-        "PN": "pitcairn-islands",  # Islands
-        "PW": "palau",  # Islands
-        "PG": "papua-new-guinea",
-        "WS": "samoa",  # Islands
-        "SB": "solomon-islands",  # Islands
-        "TK": "tokelau",  # Islands
-        "TO": "tonga",  # Islands
-        "TV": "tuvalu",  # Islands
-        "VU": "vanuatu",  # Islands
-        "WF": "wallis-et-futuna",  # Islands
-        "USOC": "american-oceania",
-    },
-    "europe": {
-        "AL": "albania",
-        "AD": "andorra",
-        "AT": "austria",
-        "BY": "belarus",
-        "BE": "belgium",
-        "BA": "bosnia-herzegovina",
-        "BG": "bulgaria",
-        "HR": "croatia",
-        "CZ": "czech-republic",
-        "CY": "cyprus",
-        "DK": "denmark",
-        "EE": "estonia",
-        # "FO": "faroe islands", # Islands
-        "FI": "finland",
-        "FR": "france",
-        "GE": "georgia",
-        "DE": "germany",
-        # "GI": "gibraltar", # Peninsula; Isolated PS?
-        "GR": "greece",
-        # "GG": "guernsey", # Island
-        "HU": "hungary",
-        "IS": "iceland",
-        "IE": "ireland-and-northern-ireland",
-        # "IM": "isle of man", # Island
-        "IT": "italy",
-        # "JE": "jersey", # Island
-        "LV": "latvia",
-        "LI": "liechtenstein",
-        "LT": "lithuania",
-        "LU": "luxembourg",
-        "MK": "macedonia",
-        "MT": "malta",
-        "MD": "moldova",
-        "MC": "monaco",
-        "ME": "montenegro",
-        "NL": "netherlands",
-        "NO": "norway",
-        "PL": "poland",
-        "PT": "portugal",
-        "RO": "romania",
-        "RS": "serbia",
-        "SK": "slovakia",
-        "SI": "slovenia",
-        "ES": "spain",
-        # "SJ": "svalbard-and-jan-mayen", # Islands
-        "SE": "sweden",
-        "CH": "switzerland",
-        "UA": "ukraine",
-        "GB": "great-britain",
-        "TR": "turkey",
-        "XK": "kosovo",
-    },
-    "russia": {
-        "RU": "russia",
-    },
-    "north-america": {
-        "CA": "canada",
-        "GL": "greenland",
-        "MX": "mexico",
-        "US": "us",
-    },
-    "south-america": {
-        "AR": "argentina",
-        "BO": "bolivia",
-        "BR": "brazil",
-        "CL": "chile",
-        "CO": "colombia",
-        "EC": "ecuador",
-        "PE": "peru",
-        "SR": "suriname",
-        "PY": "paraguay",
-        "UY": "uruguay",
-        "VE": "venezuela",
-    },
-    "central-america": {
-        "BZ": "belize",
-        "GT": "guatemala",
-        "SV": "el-salvador",
-        "HN": "honduras",
-        "NI": "nicaragua",
-        "CR": "costa-rica",
-        "PA": "panama",
-        "HT-DO": "haiti-and-domrep",
-    },
-    "europe/france": {
-        "GF": "guyane",
-    },
-}
-
-world_countries = {
-    country_2D: country_name
-    for d in world_geofk.values()
-    for (country_2D, country_name) in d.items()
-}

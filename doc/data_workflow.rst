@@ -1,7 +1,6 @@
+.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 ..
-  SPDX-FileCopyrightText: 2021 The PyPSA meets Earth authors
-
-  SPDX-License-Identifier: CC-BY-4.0
+.. SPDX-License-Identifier: CC-BY-4.0
 
 .. _data_workflow:
 
@@ -63,7 +62,7 @@ These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.
 
 * **hydrobasins** datasets on watershed boundaries and basins, as available from HydroBASINS. These data are used to estimate the hydropower generation in the `build_renewable_profiles` rule.
 
-* **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. Currently are used to generate a `natura.tiff` raster. Will be deprecated once the global `natura.tiff` will be available.
+* **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. The `landcover` dataset was used to generate a `natura.tiff` raster. Nowadays the pre-compiled `natura.tiff` raster has global coverage, so there is no need to re-calculate it locally to being able run the modeling workflow.
 
 Economical
 ------------------------------------
