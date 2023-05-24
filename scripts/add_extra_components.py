@@ -71,9 +71,10 @@ logger = logging.getLogger(__name__)
 
 
 def attach_storageunits(n, costs, config):
-    elec_opts = config["electricity"]
-    carriers = elec_opts["extendable_carriers"]["StorageUnit"]
-    max_hours = elec_opts["max_hours"]
+    carriers = config["electricity"]["extendable_carriers"]["StorageUnit"]
+    carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
+    carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
+    max_hours = config["electricity"]["max_hours"]
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
@@ -82,7 +83,9 @@ def attach_storageunits(n, costs, config):
     lookup_store = {"H2": "electrolysis", "battery": "battery inverter"}
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
-    for carrier in carriers:
+    # TODO: add metadata to H2 and battery to only read in over database interface
+    for carrier in carriers_classic:
+        roundtrip_correction = 0.5 if carrier == "battery" else 1
         n.madd(
             "StorageUnit",
             buses_i,
@@ -92,23 +95,61 @@ def attach_storageunits(n, costs, config):
             p_nom_extendable=True,
             capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
-            efficiency_store=costs.at[lookup_store[carrier], "efficiency"],
-            efficiency_dispatch=costs.at[lookup_dispatch[carrier], "efficiency"],
+            efficiency_store=costs.at[lookup_store[carrier], "efficiency"]
+            ** roundtrip_correction,
+            efficiency_dispatch=costs.at[lookup_dispatch[carrier], "efficiency"]
+            ** roundtrip_correction,
+            max_hours=max_hours[carrier],
+            cyclic_state_of_charge=True,
+        )
+
+    # automated attach of storage_units from database
+    for carrier in carriers_database:
+        tech_type = costs.technology_type
+        charger_or_bicharger_filter = (costs.carrier == carrier) & (
+            (tech_type == "charger") | (tech_type == "bicharger")
+        )
+        discharger_or_bicharger_filter = (costs.carrier == carrier) & (
+            (tech_type == "discharger") | (tech_type == "bicharger")
+        )
+        n.madd(
+            "StorageUnit",
+            buses_i,
+            " " + carrier,
+            bus=buses_i,
+            carrier=carrier,
+            p_nom_extendable=True,
+            capital_cost=costs.at[carrier, "capital_cost"],
+            marginal_cost=costs.at[carrier, "marginal_cost"],
+            efficiency_store=float(
+                costs.loc[charger_or_bicharger_filter, "efficiency"]
+            ),
+            efficiency_dispatch=float(
+                costs.loc[discharger_or_bicharger_filter, "efficiency"]
+            ),
             max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
 
 
 def attach_stores(n, costs, config):
-    elec_opts = config["electricity"]
-    carriers = elec_opts["extendable_carriers"]["Store"]
+    """
+    Add storage units as store and links.
 
+    Two types of storage exists:
+    1. where every components can be independently sized e.g. hydrogen
+    2. where charger and discharger are the same component e.g. Li-battery (inverter)
+    """
+    carriers = config["electricity"]["extendable_carriers"]["Store"]
+    carriers_classic = [x for x in carriers if x == "H2" or x == "battery"]
+    carriers_database = [x for x in carriers if x != "H2" and x != "battery"]
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     buses_i = n.buses.index
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
-    if "H2" in carriers:
+    # TODO: add metadata to H2 and battery to only read in over database interface
+    if "H2" in carriers_classic:
         h2_buses_i = n.madd("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
 
         n.madd(
@@ -141,12 +182,11 @@ def attach_stores(n, costs, config):
             carrier="H2 fuel cell",
             p_nom_extendable=True,
             efficiency=costs.at["fuel cell", "efficiency"],
-            capital_cost=costs.at["fuel cell", "capital_cost"]
-            * costs.at["fuel cell", "efficiency"],
+            capital_cost=costs.at["fuel cell", "capital_cost"],
             marginal_cost=costs.at["fuel cell", "marginal_cost"],
         )
 
-    if "battery" in carriers:
+    if "battery" in carriers_classic:
         b_buses_i = n.madd(
             "Bus", buses_i + " battery", carrier="battery", **bus_sub_dict
         )
@@ -168,6 +208,7 @@ def attach_stores(n, costs, config):
             bus0=buses_i,
             bus1=b_buses_i,
             carrier="battery charger",
+            # NB: the efficiencies are "round trip efficiencies"
             efficiency=costs.at["battery inverter", "efficiency"],
             capital_cost=costs.at["battery inverter", "capital_cost"],
             p_nom_extendable=True,
@@ -180,15 +221,78 @@ def attach_stores(n, costs, config):
             bus0=b_buses_i,
             bus1=buses_i,
             carrier="battery discharger",
+            # NB: the efficiencies are "round trip efficiencies"
             efficiency=costs.at["battery inverter", "efficiency"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
+    # automated attach of store-link storages from database
+    for c in carriers_database:
+        carrier_buses_i = n.madd("Bus", buses_i + f" {c}", carrier=c, **bus_sub_dict)
+        tech_type = costs.technology_type
+        carrier = costs.carrier
+        # filters for pypsa store
+        store_filter = (carrier == c) & (tech_type == "store")
+        # filters for pypsa charger or bicharger
+        charger_or_bicharger_filter = (carrier == c) & (
+            (tech_type == "charger") | (tech_type == "bicharger")
+        )
+        # filters for pypsa discharger or bicharger
+        discharger_or_bicharger_filter = (carrier == c) & (
+            (tech_type == "discharger") | (tech_type == "bicharger")
+        )
+        n.madd(
+            "Store",
+            carrier_buses_i,
+            bus=carrier_buses_i,
+            carrier=c,
+            e_nom_extendable=True,
+            e_cyclic=True,
+            capital_cost=float(costs.loc[store_filter, "capital_cost"]),
+        )
+
+        n.madd(
+            "Link",
+            carrier_buses_i + " charger",
+            bus0=buses_i,
+            bus1=carrier_buses_i,
+            carrier=f"{c} charger",
+            p_nom_extendable=True,
+            efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+            capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
+            marginal_cost=float(
+                costs.loc[charger_or_bicharger_filter, "marginal_cost"]
+            ),
+        )
+
+        # capital cost of discharger is None if bicharger since already added in previous link
+        if (
+            costs.loc[discharger_or_bicharger_filter].technology_type.item()
+            == "bicharger"
+        ):
+            zero_or_value = 0
+        else:
+            zero_or_value = float(
+                costs.loc[discharger_or_bicharger_filter, "capital_cost"]
+            )
+        n.madd(
+            "Link",
+            carrier_buses_i + " discharger",
+            bus0=carrier_buses_i,
+            bus1=buses_i,
+            carrier=f"{c} discharger",
+            p_nom_extendable=True,
+            efficiency=float(costs.loc[discharger_or_bicharger_filter, "efficiency"]),
+            capital_cost=zero_or_value,
+            marginal_cost=float(
+                costs.loc[discharger_or_bicharger_filter, "marginal_cost"]
+            ),
+        )
+
 
 def attach_hydrogen_pipelines(n, costs, config):
-    elec_opts = config["electricity"]
-    ext_carriers = elec_opts["extendable_carriers"]
+    ext_carriers = config["electricity"]["extendable_carriers"]
     as_stores = ext_carriers.get("Store", [])
 
     if "H2 pipeline" not in ext_carriers.get("Link", []):
@@ -250,7 +354,7 @@ if __name__ == "__main__":
     attach_stores(n, costs, config)
     attach_hydrogen_pipelines(n, costs, config)
 
-    add_nice_carrier_names(n, config=snakemake.config)
+    add_nice_carrier_names(n, config=config)
 
-    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    n.meta = dict(config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

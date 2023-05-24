@@ -14,6 +14,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 from scripts._helpers import create_country_list
 from scripts.build_demand_profiles import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
+from scripts.monte_carlo import wildcard_creator
 from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
@@ -33,9 +34,8 @@ config["countries"] = create_country_list(config["countries"])
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
-config["scenario"]["unc"] = [
-    f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
-]
+if config["monte_carlo"].get("add_to_snakefile", False) == True:
+    config["scenario"]["unc"] = wildcard_creator(config)
 
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
@@ -666,41 +666,7 @@ def memory(w):
         return int(factor * (10000 + 195 * int(w.clusters)))
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
-
-    rule solve_network:
-        input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        output:
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        log:
-            solver=normpath(
-                "logs/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
-            ),
-            python="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
-            memory="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
-        benchmark:
-            (
-                "benchmarks/"
-                + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
-            )
-        threads: 20
-        resources:
-            mem=memory,
-        shadow:
-            "shallow"
-        script:
-            "scripts/solve_network.py"
-
-
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+if config["monte_carlo"].get("add_to_snakefile", False) == True:
 
     rule monte_carlo:
         input:
@@ -723,18 +689,10 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         script:
             "scripts/monte_carlo.py"
 
-    rule solve_monte:
-        input:
-            expand(
-                "networks/"
-                + RDIR
-                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
-            ),
-
     rule solve_network:
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            tech_costs=COSTS,
         output:
             "results/"
             + RDIR
@@ -773,6 +731,40 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
                 **config["scenario"]
             ),
+
+else:
+
+    rule solve_network:
+        input:
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            tech_costs=COSTS,
+        output:
+            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        log:
+            solver=normpath(
+                "logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+            ),
+            python="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+            memory="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+            )
+        threads: 20
+        resources:
+            mem=memory,
+        shadow:
+            "shallow"
+        script:
+            "scripts/solve_network.py"
 
 
 def input_make_summary(w):
@@ -888,26 +880,29 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from scripts.build_test_configs import create_test_config
-        import yaml
+        from scripts.build_test_configs import (
+            create_test_config,
+            _parse_inputconfig,
+        )
+        from ruamel.yaml import YAML
 
-        # get base configuration file from diff config
-        with open(input.diff_config) as f:
-            base_config_path = (
-                yaml.full_load(f)
-                .get("run", {})
-                .get("base_config", "config.tutorial.yaml")
-            )
-
-            # Ensure the scenario name matches the name of the configuration
+        # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
             {"run": {"name": wildcards.scenario_name}},
             input.diff_config,
         )
         # merge the default config file with the difference
-        create_test_config(base_config_path, input.diff_config, "config.yaml")
-        os.system("snakemake -j all solve_all_networks --rerun-incomplete")
+        create_test_config(input.default_config, input.diff_config, "config.yaml")
+        config = _parse_inputconfig("config.yaml", YAML())
+        if config["monte_carlo"].get("add_to_snakefile", False) == True:
+            os.system(
+                "snakemake -j all solve_all_networks_monte --forceall --rerun-incomplete"
+            )
+        else:
+            os.system(
+                "snakemake -j all solve_all_networks --forceall --rerun-incomplete"
+            )
         os.system("snakemake -j1 make_statistics --force")
         copyfile("config.yaml", output.copyconfig)
 

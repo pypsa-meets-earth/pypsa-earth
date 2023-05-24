@@ -613,6 +613,104 @@ def read_geojson(fn):
         return gpd.GeoDataFrame(geometry=[])
 
 
+def nested_storage_dict(tech_costs):
+    """
+    Create a nested dictionary with a storage index and meta data relation.
+
+    The costs.csv file from the technology_data interface contains metadata
+    for storage technologies when the PNNL data extractions is activated PR #67.
+    The metadata is stored in a csv as a nested dictionary value which is
+    read out by this function and converted to a nested dictionary for further
+    use. One example use the metadata enables is the automatic energy storage
+    creation in the model from the config.yaml.
+
+    Input:
+    ------
+    tech_costs: str, path to technology costs.csv file
+
+    Output:
+    -------
+    nested_dict: dict, nested dictionary with storage index and meta data relation
+    storage_techs: list, list of unique storage technologies
+
+    Example:
+    --------
+    Data format in Input:
+    costs['further description'][0] -> {'carrier': ['elec', 'nizn', 'elec'], 'technology_type': ['bicharger'], 'type': ['electrochemical']} with index 'Ni-Zn-bicharger'
+    costs['further description'][1] -> {'carrier': ['nizn'], 'technology_type': ['store'], 'type': ['electrochemical']} with index 'Ni-Zn-store'
+
+    Output:
+    .. code-block:: python
+        {
+        'Ni-Zn-bicharger': {'carrier': ['elec', 'nizn', 'elec'], 'technology_type': ['bicharger'], 'type': ['electrochemical']}
+        'Ni-Zn-store': {'carrier': ['nizn'], 'technology_type': ['store'], 'type': ['electrochemical']}
+        ...
+        }
+    """
+    import ast
+
+    df = pd.read_csv(
+        tech_costs,
+        index_col=["technology"],
+        usecols=["technology", "further description"],
+    ).sort_index()
+    df = df[df["further description"].str.contains("{'carrier':", na=False)]
+    storage_techs = df.index.unique()
+    nested_storage_dict = {}
+    if df.empty:
+        print("No storage technology found in costs.csv")
+    else:
+        for i in range(len(df)):
+            storage_dict = ast.literal_eval(
+                df.iloc[i, 0]
+            )  # https://stackoverflow.com/a/988251/13573820
+            storage_dict.pop("note", None)
+            nested_storage_dict[df.index[i]] = storage_dict
+    return [nested_storage_dict, storage_techs]
+
+
+def add_storage_col_to_costs(costs, storage_meta_dict, storage_techs):
+    """
+    Add storage specific columns e.g. "carrier", "type", "technology_type" to costs.csv
+
+    Input:
+    ------
+    costs: pd.DataFrame, costs.csv
+    storage_meta_dict: dict, nested dictionary with storage index and meta data relation
+    storage_techs: list, list of unique storage technologies
+
+    Output:
+    -------
+    costs: pd.DataFrame, costs.csv with added storage specific columns
+
+    Example:
+    --------
+    From the nested dictionary:
+    {
+        'Ni-Zn-bicharger': {'carrier': ['elec', 'nizn', 'elec'], 'technology_type': ['bicharger'], 'type': ['electrochemical']}
+        ...
+        }
+    The columns "carrier", "type", "technology_type" will be added to costs.csv
+    """
+    # add storage specific columns to costs.csv
+    for c in ["carrier", "technology_type", "type"]:
+        costs.loc[storage_techs, c] = [
+            storage_meta_dict[X][c] for X in costs.loc[storage_techs].index
+        ]
+    # remove all 'elec's from carrier columns and read carrier as string
+    for i in range(len(costs.loc[storage_techs])):
+        costs.loc[storage_techs[i], "carrier"] = "".join(
+            [e for e in costs.loc[storage_techs].carrier.iloc[i] if e != "elec"]
+        )
+        costs.loc[storage_techs[i], "technology_type"] = "".join(
+            costs.loc[storage_techs].technology_type.iloc[i]
+        )
+        costs.loc[storage_techs[i], "type"] = "".join(
+            costs.loc[storage_techs].type.iloc[i]
+        )
+    return costs
+
+
 def create_country_list(input, iso_coding=True):
     """
     Create a country list for defined regions in config_osm_data.py

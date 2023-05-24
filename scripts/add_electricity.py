@@ -92,7 +92,13 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, getContinent, update_p_nom_max
+from _helpers import (
+    add_storage_col_to_costs,
+    configure_logging,
+    getContinent,
+    nested_storage_dict,
+    update_p_nom_max,
+)
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 
@@ -147,6 +153,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
+    # set marginal cost to all components generators, charger, discharger, store, ...
     costs["capital_cost"] = (
         (
             calculate_annuity(costs["lifetime"], costs["discount rate"])
@@ -181,26 +188,48 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         + (1 - config["rooftop_share"]) * costs.at["solar-utility", "capital_cost"]
     )
 
-    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
-        if link2 is not None:
-            capital_cost += link2["capital_cost"]
+    def costs_for_storageunit(store, link1, link2=pd.DataFrame(), max_hours=1.0):
+        capital_cost = float(link1["capital_cost"]) + float(max_hours) * float(
+            store["capital_cost"]
+        )
+        if not link2.empty:
+            capital_cost += float(link2["capital_cost"])
         return pd.Series(
             dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
         )
 
     max_hours = elec_config["max_hours"]
-    costs.loc["battery"] = costs_for_storage(
+    costs.loc["battery"] = costs_for_storageunit(
         costs.loc["battery storage"],
         costs.loc["battery inverter"],
         max_hours=max_hours["battery"],
     )
-    costs.loc["H2"] = costs_for_storage(
+    costs.loc["H2"] = costs_for_storageunit(
         costs.loc["hydrogen storage tank"],
         costs.loc["fuel cell"],
         costs.loc["electrolysis"],
         max_hours=max_hours["H2"],
     )
+
+    storage_meta_dict, storage_techs = nested_storage_dict(tech_costs)
+    costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
+
+    # add capital_cost to all storage_units indexed by carrier e.g. "lead" or "concrete"
+    for c in costs.loc[storage_techs, "carrier"].unique():
+        carrier = costs.carrier
+        tech_type = costs.technology_type
+        store_filter = (carrier == c) & (tech_type == "store")
+        charger_or_bicharger_filter = (carrier == c) & (
+            (tech_type == "bicharger") | (tech_type == "charger")
+        )
+        discharger_filter = (carrier == c) & (tech_type == "discharger")
+        costs.loc[c] = costs_for_storageunit(
+            costs.loc[store_filter],
+            costs.loc[charger_or_bicharger_filter],
+            costs.loc[discharger_filter],
+            max_hours=max_hours["battery"],
+            # TODO: max_hours data should be read as costs.loc[carrier==c,max_hours] (easy possible)
+        )
 
     for attr in ("marginal_cost", "capital_cost"):
         overwrites = config.get(attr)
