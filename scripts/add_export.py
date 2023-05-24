@@ -107,9 +107,10 @@ def add_export(n, hydrogen_buses_ports, export_h2):
             bus="H2 export bus",
             e_nom_extendable=True,
             carrier="H2",
-            e_initial=0,
+            e_initial=0, # actually not required, since e_cyclic=True
             marginal_cost=0,
             capital_cost=capital_cost,
+            e_cyclic=True,
         )
 
     elif snakemake.config["export"]["store"] == False:
