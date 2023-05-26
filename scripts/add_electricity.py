@@ -361,9 +361,6 @@ def attach_wind_and_solar(
             n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
-        print(tech)
-
-
 def attach_conventional_generators(
     n,
     costs,
