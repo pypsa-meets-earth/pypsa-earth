@@ -352,7 +352,7 @@ def attach_wind_and_solar(
         buses = n.buses.loc[gens.bus.unique()]
         gens_per_bus = gens.groupby("bus").p_nom.count()
 
-        if not gens.empty:
+        if not gens.empty and not df.query("carrier == @tech").empty:
             caps = map_country_bus(df.query("carrier == @tech"), buses)
             caps = caps.groupby(["bus"]).p_nom.sum()
             caps = caps / gens_per_bus.reindex(caps.index, fill_value=1)
