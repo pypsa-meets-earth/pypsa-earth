@@ -93,9 +93,9 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
-from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
@@ -289,13 +289,19 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
 
 
 def attach_wind_and_solar(
-    n, costs, ppl, input_profiles, technologies, extendable_carriers, line_length_factor=1
+    n,
+    costs,
+    ppl,
+    input_profiles,
+    technologies,
+    extendable_carriers,
+    line_length_factor=1,
 ):
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
     df = ppl.copy()
-    df.rename(columns={"country":"Country"}, inplace=True)
+    df.rename(columns={"country": "Country"}, inplace=True)
 
     for tech in technologies:
         if tech == "hydro":
@@ -341,12 +347,12 @@ def attach_wind_and_solar(
                 efficiency=costs.at[suptech, "efficiency"],
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
             )
-        
+
         if suptech == "offwind":
             continue
             # df.carrier.mask(df.technology=="Offshore", "offwind-ac",inplace=True)
 
-        df.carrier.mask(df.technology=="Onshore", "onwind",inplace=True)
+        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
         gens = n.generators[lambda df: df.carrier == tech]
         buses = n.buses.loc[gens.bus.unique()]
