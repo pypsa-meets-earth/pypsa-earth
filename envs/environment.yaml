@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-name: pypsa-earth
+name: pypsa-earth-upd11
 channels:
 - conda-forge
 - bioconda

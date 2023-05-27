@@ -283,6 +283,16 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     G = n.graph()
 
+    # AC lines should not be included into DC part
+    def is_ac(ls):
+        ls_is_ac = n.lines.loc[n.lines.index == list(ls)[0][1]].tag_frequency != 0
+        if ls_is_ac.empty:
+            ac_flag = False
+        else:
+            ac_flag = ls_is_ac.any()
+        return ac_flag
+
+    # Split DC part by supernodes
     def split_links(nodes):
         nodes = frozenset(nodes)
 
@@ -291,7 +301,11 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
         for u in supernodes:
             for m, ls in G.adj[u].items():
-                if m not in nodes or m in seen:
+                # AC lines can be captured in case of complicated network topologies
+                # even despite using `nodes` defined by links
+                # if is_ac(ls):
+                #    continue
+                if m not in nodes or m in seen or is_ac(ls):
                     continue
 
                 buses = [u, m]
@@ -299,17 +313,12 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
                 while m not in (supernodes | seen):
                     seen.add(m)
-                    for m2, ls in G.adj[m].items():
+                    for m2, ls2 in G.adj[m].items():
                         # there may be AC lines which connect ends of DC chains
-                        ls_is_ac = (
-                            n.lines.loc[n.lines.index == list(ls)[0][1]].tag_frequency
-                            != 0
-                        )
-                        # in case ls is a link, all() on empty series gives True
-                        if m2 in seen or m2 == u or ls_is_ac.all():
+                        if m2 in seen or m2 == u or is_ac(ls2):
                             continue
                         buses.append(m2)
-                        links.append(list(ls))  # [name for name in ls])
+                        links.append(list(ls2))  # [name for name in ls])
                         break
                     else:
                         # stub
