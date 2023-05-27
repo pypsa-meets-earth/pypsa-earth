@@ -303,8 +303,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             for m, ls in G.adj[u].items():
                 # AC lines can be captured in case of complicated network topologies
                 # even despite using `nodes` defined by links
-                # if is_ac(ls):
-                #    continue
                 if m not in nodes or m in seen or is_ac(ls):
                     continue
 
