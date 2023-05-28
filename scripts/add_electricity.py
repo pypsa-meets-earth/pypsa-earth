@@ -300,12 +300,17 @@ def attach_wind_and_solar(
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
-    df = ppl.copy()
-    df.rename(columns={"country": "Country"}, inplace=True)
+    df = ppl.rename(columns={"country": "Country"})
 
     for tech in technologies:
         if tech == "hydro":
             continue
+
+        if tech == "offwind-ac": 
+            # add all offwind wind power plants by default as offwind-ac
+            df.carrier.mask(df.technology=="Offshore", "offwind-ac",inplace=True)
+
+        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
         with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
@@ -332,6 +337,14 @@ def attach_wind_and_solar(
                 #     format(connection_cost.min(), connection_cost.max(), tech))
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
+            
+            if not df.query("carrier == @tech").empty:
+                buses = n.buses.loc[ds.indexes["bus"]]
+                caps = map_country_bus(df.query("carrier == @tech"), buses)
+                caps = caps.groupby(["bus"]).p_nom.sum()
+                caps = pd.Series(data = caps, index = ds.indexes["bus"]).fillna(0)
+            else:
+                caps = pd.Series(index = ds.indexes["bus"]).fillna(0)
 
             n.madd(
                 "Generator",
@@ -346,25 +359,9 @@ def attach_wind_and_solar(
                 capital_cost=capital_cost,
                 efficiency=costs.at[suptech, "efficiency"],
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
+                p_nom=caps,
+                p_nom_min=caps,
             )
-
-        if suptech == "offwind":
-            continue
-            # df.carrier.mask(df.technology=="Offshore", "offwind-ac",inplace=True)
-
-        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
-
-        gens = n.generators[lambda df: df.carrier == tech]
-        buses = n.buses.loc[gens.bus.unique()]
-        gens_per_bus = gens.groupby("bus").p_nom.count()
-
-        if not gens.empty and not df.query("carrier == @tech").empty:
-            caps = map_country_bus(df.query("carrier == @tech"), buses)
-            caps = caps.groupby(["bus"]).p_nom.sum()
-            caps = caps / gens_per_bus.reindex(caps.index, fill_value=1)
-
-            n.generators.p_nom.update(gens.bus.map(caps).dropna())
-            n.generators.p_nom_min.update(gens.bus.map(caps).dropna())
 
 
 def attach_conventional_generators(
