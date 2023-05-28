@@ -14,6 +14,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add merge and replace functionalities when adding custom powerplants `PR #739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/739>`__. "Merge" combined the powerplantmatching data with new custom data. "Replace" allows to use fully self-collected data.
 
+* Add functionality of attaching existing renewable caapcities from custom_powerplants.csv. `PR #744 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/744>`__. If custom_powerplants are enabled and custom_powerplants.csv contains wind or solar powerplants, then p_nom and p_nom_min for renewables are extracted from custom_powerplants.csv, aggregated for eacg bus, and set.
+
 PyPSA-Earth 0.2.1
 =================
 
