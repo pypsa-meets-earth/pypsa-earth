@@ -230,6 +230,7 @@ def _load_converters_from_osm(fp_osm_converters, buses):
     # converters = _remove_dangling_branches(converters, buses)
 
     converters["carrier"] = "B2B"
+    converters["dc"] = True
 
     return converters
 
