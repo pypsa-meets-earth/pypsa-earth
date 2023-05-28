@@ -306,9 +306,9 @@ def attach_wind_and_solar(
         if tech == "hydro":
             continue
 
-        if tech == "offwind-ac": 
+        if tech == "offwind-ac":
             # add all offwind wind power plants by default as offwind-ac
-            df.carrier.mask(df.technology=="Offshore", "offwind-ac",inplace=True)
+            df.carrier.mask(df.technology == "Offshore", "offwind-ac", inplace=True)
 
         df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
@@ -337,14 +337,14 @@ def attach_wind_and_solar(
                 #     format(connection_cost.min(), connection_cost.max(), tech))
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
-            
+
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
                 caps = map_country_bus(df.query("carrier == @tech"), buses)
                 caps = caps.groupby(["bus"]).p_nom.sum()
-                caps = pd.Series(data = caps, index = ds.indexes["bus"]).fillna(0)
+                caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
             else:
-                caps = pd.Series(index = ds.indexes["bus"]).fillna(0)
+                caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
 
             n.madd(
                 "Generator",
