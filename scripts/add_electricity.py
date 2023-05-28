@@ -352,15 +352,15 @@ def attach_wind_and_solar(
                 " " + tech,
                 bus=ds.indexes["bus"],
                 carrier=tech,
+                p_nom=caps,
                 p_nom_extendable=tech in extendable_carriers["Generator"],
+                p_nom_min=caps,
                 p_nom_max=ds["p_nom_max"].to_pandas(),
+                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
                 marginal_cost=costs.at[suptech, "marginal_cost"],
                 capital_cost=capital_cost,
                 efficiency=costs.at[suptech, "efficiency"],
-                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
-                p_nom=caps,
-                p_nom_min=caps,
             )
 
 
