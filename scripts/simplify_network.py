@@ -263,6 +263,16 @@ def _aggregate_and_move_components(
         n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
 
+# Filter AC lines to avoid mixing with DC part when processing links
+def is_ac(ls):
+    ls_is_ac = n.lines.loc[n.lines.index == list(ls)[0][1]].carrier == "AC"
+    if ls_is_ac.empty:
+        ac_flag = False
+    else:
+        ac_flag = ls_is_ac.any()
+    return ac_flag
+
+
 def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
@@ -282,15 +292,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     labels = pd.Series(labels, n.buses.index)
 
     G = n.graph()
-
-    # AC lines should not be included into DC part
-    def is_ac(ls):
-        ls_is_ac = n.lines.loc[n.lines.index == list(ls)[0][1]].tag_frequency != 0
-        if ls_is_ac.empty:
-            ac_flag = False
-        else:
-            ac_flag = ls_is_ac.any()
-        return ac_flag
 
     # Split DC part by supernodes
     def split_links(nodes):
