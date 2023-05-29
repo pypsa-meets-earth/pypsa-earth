@@ -265,7 +265,7 @@ def _aggregate_and_move_components(
 
 # Filter AC lines to avoid mixing with DC part when processing links
 def contains_ac(ls):
-    def capture_ac(x):
+    def is_ac_branch(x):
         if x[0] == "Link":
             return n.links.loc[x[1]].dc != True
         elif x[0] == "Line":
@@ -273,7 +273,7 @@ def contains_ac(ls):
         else:
             logger.error("Unknown branch type for the instance {x}")
 
-    return any(list(map(lambda x: capture_ac(x), ls)))
+    return any(list(map(lambda x: is_ac_branch(x), ls)))
 
 
 def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
