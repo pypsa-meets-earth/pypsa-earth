@@ -28,6 +28,8 @@ PyPSA-Earth 0.2.1
 * Fix hard-coded simplification of lines to 380kV `PR #732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/732>`__.
   It is now possible to simplify the network to any other voltage level with config option `base_voltage`.
 
+* Fix a KeyError in simplify_links caused by misinterpretation of AC lines as DC ones `PR #740 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/740>`__.  
+
 PyPSA-Earth 0.2.0
 =================
 
