@@ -97,27 +97,32 @@ def download_emission_data():
 def emission_extractor(filename):
     country_names = create_country_list(snakemake.config["countries"])
     # data reading process
-    datapath = os.path.join(os.getcwd(), "data", filename)
+    datapath  = os.path.join(
+            os.getcwd(),
+            "data",
+            filename
+        )
     emission_of_countries = []
     df = pd.ExcelFile(datapath)
-    df = pd.read_excel(df, 1)
-    # NEPAL
-    df.iloc[3293, 27] = df.iloc[3293, 28]
-    # GREENLAND
-    df.iloc[2045, 27] = df.iloc[2045, 41]
+    df = pd.read_excel(df, sheet_name='v6.0_EM_CO2_fossil_IPCC1996', skiprows=8)
+    df.columns = df.iloc[0]
+    #NEPAL
+    df.loc[3285,'Y_1990'] = df.loc[3285,'Y_1988']
+    #GREENLAND 
+    df.loc[2037,'Y_1990'] = df.loc[2037,'Y_2004']
     # GHANA
-    df.iloc[1107, 27] = df.iloc[1107, 30]
-    # Turks and Cacao Islands
-    df.iloc[499, 27] = df.iloc[499, 32]
+    df.loc[1099,'Y_1990'] = df.loc[1099,'Y_1986']
+    # TURKS AND CAICOS ISLANDS
+    df.loc[491,'Y_1990'] = df.loc[491,'Y_1995']
     for j in country_names:
         j = coco.convert(j, to="ISO3")
-        for i in range(9, 3918):
+        for i in range(1, 3909):
             # 2 represents Country_Code_A3 column of the dataframe
-            three_digits = df.loc[i][2]
+            three_digits = df.loc[i]['Country_code_A3']
             if j == three_digits:
                 # 27 represents Y_1990 column of the dataframe
-                if df.loc[i][5] == "Public electricity and heat production":
-                    emission_of_countries.append(df.loc[i][27])
+                if df.loc[i]['IPCC_for_std_report_desc'] == "Public electricity and heat production":
+                    emission_of_countries.append(df.loc[i]['Y_1990'])
     return emission_of_countries
 
 
