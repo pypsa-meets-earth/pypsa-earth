@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -93,6 +93,7 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 
@@ -288,14 +289,28 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
 
 
 def attach_wind_and_solar(
-    n, costs, input_profiles, technologies, extendable_carriers, line_length_factor=1
+    n,
+    costs,
+    ppl,
+    input_profiles,
+    technologies,
+    extendable_carriers,
+    line_length_factor=1,
 ):
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
+    df = ppl.rename(columns={"country": "Country"})
+
     for tech in technologies:
         if tech == "hydro":
             continue
+
+        if tech == "offwind-ac":
+            # add all offwind wind power plants by default as offwind-ac
+            df.carrier.mask(df.technology == "Offshore", "offwind-ac", inplace=True)
+
+        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
         with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
@@ -323,19 +338,29 @@ def attach_wind_and_solar(
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
+            if not df.query("carrier == @tech").empty:
+                buses = n.buses.loc[ds.indexes["bus"]]
+                caps = map_country_bus(df.query("carrier == @tech"), buses)
+                caps = caps.groupby(["bus"]).p_nom.sum()
+                caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
+            else:
+                caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
+
             n.madd(
                 "Generator",
                 ds.indexes["bus"],
                 " " + tech,
                 bus=ds.indexes["bus"],
                 carrier=tech,
+                p_nom=caps,
                 p_nom_extendable=tech in extendable_carriers["Generator"],
+                p_nom_min=caps,
                 p_nom_max=ds["p_nom_max"].to_pandas(),
+                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
                 marginal_cost=costs.at[suptech, "marginal_cost"],
                 capital_cost=capital_cost,
                 efficiency=costs.at[suptech, "efficiency"],
-                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
             )
 
 
@@ -786,6 +811,7 @@ if __name__ == "__main__":
     attach_wind_and_solar(
         n,
         costs,
+        ppl,
         snakemake.input,
         renewable_carriers,
         extendable_carriers,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -230,6 +230,7 @@ def _load_converters_from_osm(fp_osm_converters, buses):
     # converters = _remove_dangling_branches(converters, buses)
 
     converters["carrier"] = "B2B"
+    converters["dc"] = True
 
     return converters
 
@@ -254,6 +255,8 @@ def _set_electrical_parameters_lines(config, lines):
         return lines
 
     v_noms = config["electricity"]["voltages"]
+    lines["carrier"] = "AC"
+    lines["dc"] = False
     linetypes = config["lines"]["types"]
 
     for v_nom in v_noms:
@@ -267,6 +270,7 @@ def _set_electrical_parameters_lines(config, lines):
 def _set_electrical_parameters_dc_lines(config, lines):
     v_noms = config["electricity"]["voltages"]
     lines["carrier"] = "DC"
+    lines["dc"] = True
 
     lines["type"] = config["lines"]["dc_type"]
 
@@ -284,6 +288,7 @@ def _set_electrical_parameters_links(config, links):
     links["p_min_pu"] = -p_max_pu
 
     links["carrier"] = "DC"
+    links["dc"] = True
 
     return links
 
