@@ -120,6 +120,7 @@ def emission_extractor(filename):
                     emission_of_countries.append(df.loc[i]["Y_1990"])
     return emission_of_countries
 
+
 def add_co2limit(n, annual_emissions, Nyears=1.0):
     n.add(
         "GlobalConstraint",
