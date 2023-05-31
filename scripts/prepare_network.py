@@ -59,17 +59,66 @@ Description
 import logging
 import os
 import re
+from zipfile import ZipFile
 
+import country_converter as coco
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+import requests
+from _helpers import configure_logging, create_country_list
 from add_electricity import load_costs, update_transmission_costs
+from config_osm_data import continent_regions, world_iso
 
-idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+def download_emission_data():
+    try:
+        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
+        with requests.get(url) as rq:
+            with open("data/co2.zip", "wb") as file:
+                file.write(rq.content)
+        rootpath = os.getcwd()
+        file_path = os.path.join(rootpath, "data/co2.zip")
+        with ZipFile(file_path, "r") as zipObj:
+            zipObj.extract(
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
+            )
+        os.remove(file_path)
+        return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
+    except:
+        logger.warning(f"Failed download resource from '{url}'.")
+        return False
 
+
+def emission_extractor(filename):
+    country_names = create_country_list(snakemake.config["countries"])
+    # data reading process
+    datapath = os.path.join(os.getcwd(), "data", filename)
+    emission_of_countries = []
+    df = pd.ExcelFile(datapath)
+    df = pd.read_excel(df, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
+    df.columns = df.iloc[0]
+    # NEPAL
+    df.loc[3285, "Y_1990"] = df.loc[3285, "Y_1988"]
+    # GREENLAND
+    df.loc[2037, "Y_1990"] = df.loc[2037, "Y_2004"]
+    # GHANA
+    df.loc[1099, "Y_1990"] = df.loc[1099, "Y_1986"]
+    # TURKS AND CAICOS ISLANDS
+    df.loc[491, "Y_1990"] = df.loc[491, "Y_1995"]
+    for j in country_names:
+        j = coco.convert(j, to="ISO3")
+        for i in range(1, 3909):
+            # 2 represents Country_Code_A3 column of the dataframe
+            three_digits = df.loc[i]["Country_code_A3"]
+            if j == three_digits:
+                # 27 represents Y_1990 column of the dataframe
+                if (
+                    df.loc[i]["IPCC_for_std_report_desc"]
+                    == "Public electricity and heat production"
+                ):
+                    emission_of_countries.append(df.loc[i]["Y_1990"])
+    return emission_of_countries
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
     n.add(
@@ -282,13 +331,24 @@ if __name__ == "__main__":
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
-                co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
-                add_co2limit(n, co2limit, Nyears)
-                logger.info("Setting CO2 limit according to wildcard value.")
+                if snakemake.config["electricity"]["automatic_emission_base_year"]:
+                    filename = download_emission_data()
+                    co2limit = emission_extractor(filename)
+                    co2limit = [i * float(m[0]) for i in co2limit]
+                    add_co2limit(n, co2limit, Nyears)
+                else:
+                    co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
+                    add_co2limit(n, co2limit, Nyears)
+                    logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.config["electricity"]["co2limit"]
-                add_co2limit(n, co2limit, Nyears)
-                logger.info("Setting CO2 limit according to config value.")
+                if snakemake.config["electricity"]["automatic_emission_base_year"]:
+                    filename = download_emission_data()
+                    co2limit = emission_extractor(filename)
+                    add_co2limit(n, co2limit, Nyears)
+                else:
+                    co2limit = snakemake.config["electricity"]["co2limit"]
+                    add_co2limit(n, co2limit, Nyears)
+                    logger.info("Setting CO2 limit according to config value.")
             break
 
     for o in opts:
