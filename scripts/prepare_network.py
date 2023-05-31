@@ -335,18 +335,26 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Co2L" in o:
-            if snakemake.config["electricity"]["automatic_emission_base_year"]:
-                filename = download_emission_data()
-                co2limit = emission_extractor(filename)
-                add_co2limit(n, co2limit, Nyears)
-            elif len(m) > 0:
-                co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
-                add_co2limit(n, co2limit, Nyears)
-                logger.info("Setting CO2 limit according to wildcard value.")
+            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            if len(m) > 0:
+                if snakemake.config["electricity"]["automatic_emission_base_year"]:
+                    filename = download_emission_data()     
+                    co2limit = emission_extractor(filename)
+                    co2limit = [i*float(m[0]) for i in co2limit]
+                    add_co2limit(n, co2limit, Nyears)
+                else:
+                    co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
+                    add_co2limit(n, co2limit, Nyears)
+                    logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.config["electricity"]["co2limit"]
-                add_co2limit(n, co2limit, Nyears)
-                logger.info("Setting CO2 limit according to config value.")
+                if snakemake.config["electricity"]["automatic_emission_base_year"]:
+                    filename = download_emission_data()     
+                    co2limit = emission_extractor(filename)
+                    add_co2limit(n, co2limit, Nyears)
+                else:
+                    co2limit = snakemake.config["electricity"]["co2limit"]
+                    add_co2limit(n, co2limit, Nyears)
+                    logger.info("Setting CO2 limit according to config value.")
             break
 
     for o in opts:
