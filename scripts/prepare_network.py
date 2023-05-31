@@ -70,6 +70,9 @@ from _helpers import configure_logging, create_country_list
 from add_electricity import load_costs, update_transmission_costs
 from config_osm_data import continent_regions, world_iso
 
+idx = pd.IndexSlice
+
+logger = logging.getLogger(__name__)
 
 def download_emission_data():
     try:
