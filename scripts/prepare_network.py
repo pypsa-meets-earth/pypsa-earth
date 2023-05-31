@@ -337,9 +337,9 @@ if __name__ == "__main__":
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 if snakemake.config["electricity"]["automatic_emission_base_year"]:
-                    filename = download_emission_data()     
+                    filename = download_emission_data()
                     co2limit = emission_extractor(filename)
-                    co2limit = [i*float(m[0]) for i in co2limit]
+                    co2limit = [i * float(m[0]) for i in co2limit]
                     add_co2limit(n, co2limit, Nyears)
                 else:
                     co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
@@ -347,7 +347,7 @@ if __name__ == "__main__":
                     logger.info("Setting CO2 limit according to wildcard value.")
             else:
                 if snakemake.config["electricity"]["automatic_emission_base_year"]:
-                    filename = download_emission_data()     
+                    filename = download_emission_data()
                     co2limit = emission_extractor(filename)
                     add_co2limit(n, co2limit, Nyears)
                 else:
