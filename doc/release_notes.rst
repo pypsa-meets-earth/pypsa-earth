@@ -12,6 +12,8 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
+* Add GEM datasets to the powerplantmatching config `PR #750 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/750>`__. 
+
 * Add merge and replace functionalities when adding custom powerplants `PR #739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/739>`__. "Merge" combined the powerplantmatching data with new custom data. "Replace" allows to use fully self-collected data.
 
 * Add functionality of attaching existing renewable caapcities from custom_powerplants.csv. `PR #744 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/744>`__. If custom_powerplants are enabled and custom_powerplants.csv contains wind or solar powerplants, then p_nom and p_nom_min for renewables are extracted from custom_powerplants.csv, aggregated for eacg bus, and set.
