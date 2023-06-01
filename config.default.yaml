@@ -95,7 +95,7 @@ build_shape_options:
 
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
-  threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
+  threshold_voltage: 51000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
   tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true  # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
@@ -108,8 +108,8 @@ build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetM
   force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 base_network:
-  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 35000  # [V] minimum voltage in base network
+  min_voltage_substation_offshore: 51000  # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 51000  # [V] minimum voltage in base network
 
 load_options:
   ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider

@@ -896,7 +896,7 @@ rule run_scenario:
             base_config_path = (
                 yaml.full_load(f)
                 .get("run", {})
-                .get("base_config", "config.tutorial.yaml")
+                .get("base_config", "config.default.yaml")
             )
 
             # Ensure the scenario name matches the name of the configuration
