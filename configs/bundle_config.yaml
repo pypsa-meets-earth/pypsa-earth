@@ -107,7 +107,7 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
-#tutorial bundle for all African countries
+  #tutorial bundle for all African countries
   bundle_tutorial_data_common:
     countries: [Africa]
     tutorial: true
@@ -159,6 +159,14 @@ databundles:
     output:
     - data/natura.tiff
 
+  bundle_cutout_sea:
+    countries: [ASEAN]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo:
+      gdrive:
+
   # data bundle of the data folder for the african continent
   bundle_landcover_africa:
     countries: [Africa]
@@ -169,7 +177,7 @@ databundles:
       gdrive: https://drive.google.com/file/d/1qnJ0HAWZ4z_9q3PtDEUrFmZWBZYg-WNW/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for the african continent
+  # data bundle of the data folder for the asia pacific region
   bundle_landcover_asiapacific:
     countries: [Asia, Oceania]
     category: landcover
@@ -179,8 +187,8 @@ databundles:
       gdrive: https://drive.google.com/file/d/163Uc9F1DPs2pRgDzkTivnblhXCw4nfd5/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for the african continent
-  bundle_landcover_latinamerica_caribbean:  # excludes north america
+  # data bundle of the data folder for Latin America and the Caribbean
+  bundle_landcover_latinamerica_caribbean: # excludes north america
     countries: [SouthAmerica, NorthAmerica]
     category: landcover
     destination: "data/landcover"
@@ -189,7 +197,7 @@ databundles:
       gdrive: https://drive.google.com/file/d/1d3l9qxPnM9XbXODWkP4kWxK_t5cDcEIZ/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for the african continent
+  # data bundle of the data folder for West Asia
   bundle_landcover_westasia:
     countries: [WAS]
     category: landcover
@@ -199,7 +207,7 @@ databundles:
       gdrive: https://drive.google.com/file/d/1XsZVZDORUFMKyHfAkzqxDVBENiuy4jEM/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for europe
+  # data bundle of the data folder for Europe
   bundle_landcover_europe:
     countries: [Europe]
     category: landcover
@@ -211,7 +219,7 @@ databundles:
 
   # data bundle of the data folder for the poles
   bundle_landcover_northamerica:
-    countries: [NorthAmerica]  # Greenland and antartica
+    countries: [NorthAmerica] # Greenland and antartica
     category: landcover
     destination: "data/landcover"
     urls:
@@ -221,7 +229,7 @@ databundles:
 
   # data bundle of the data folder for the poles
   bundle_landcover_poles:
-    countries: [GL, ATA]  # Greenland and antartica
+    countries: [GL, ATA] # Greenland and antartica
     category: landcover
     destination: "data/landcover"
     urls:
