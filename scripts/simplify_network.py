@@ -320,7 +320,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                     seen.add(m)
                     for m2, ls2 in G.adj[m].items():
                         # there may be AC lines which connect ends of DC chains
-                        # TODO remove after debug
                         if m2 in seen or m2 == u or contains_ac(ls2):
                             continue
                         buses.append(m2)
