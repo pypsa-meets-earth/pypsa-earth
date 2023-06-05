@@ -112,10 +112,8 @@ def emission_extractor(filename):
     for j in country_names:
         j = coco.convert(j, to="ISO3")
         for i in range(1, 3909):
-            # 2 represents Country_Code_A3 column of the dataframe
             three_digits = df.loc[i]["Country_code_A3"]
             if j == three_digits:
-                # 27 represents Y_1990 column of the dataframe
                 if (
                     df.loc[i]["IPCC_for_std_report_desc"]
                     == "Public electricity and heat production"
@@ -339,7 +337,9 @@ if __name__ == "__main__":
                     filename = download_emission_data()
                     co2limit = emission_extractor(filename)
                     co2limit = [i * float(m[0]) for i in co2limit]
+                    co2limit = sum(co2limit)
                     add_co2limit(n, co2limit, Nyears)
+                    logger.info("Setting CO2 limit according to 1990 base year.")
                 else:
                     co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
                     add_co2limit(n, co2limit, Nyears)
@@ -348,7 +348,9 @@ if __name__ == "__main__":
                 if snakemake.config["electricity"]["automatic_emission_base_year"]:
                     filename = download_emission_data()
                     co2limit = emission_extractor(filename)
+                    co2limit = sum(co2limit)
                     add_co2limit(n, co2limit, Nyears)
+                    logger.info("Setting CO2 limit according to 1990 base year.")
                 else:
                     co2limit = snakemake.config["electricity"]["co2limit"]
                     add_co2limit(n, co2limit, Nyears)
