@@ -333,7 +333,13 @@ def get_aggregation_strategies(aggregation_strategies):
     when custom values are specified in the config.
     """
     import numpy as np
-    from pypsa.networkclustering import _make_consense
+
+    # to handle the new version of PyPSA.
+    try:
+        from pypsa.clustering.spatial import _make_consense
+    except Exception:
+        # TODO: remove after new release and update minimum pypsa version
+        from pypsa.networkclustering import _make_consense
 
     bus_strategies = dict(country=_make_consense("Bus", "country"))
     bus_strategies.update(aggregation_strategies.get("buses", {}))
@@ -375,7 +381,9 @@ def mock_snakemake(rulename, **wildcards):
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
+    workflow = sm.Workflow(
+        snakefile, overwrite_configfiles=[], rerun_triggers=[]
+    )  # overwrite_config=config
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
