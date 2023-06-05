@@ -74,6 +74,7 @@ idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
+
 def download_emission_data():
     try:
         url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
