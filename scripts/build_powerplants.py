@@ -253,6 +253,16 @@ def add_custom_powerplants(ppl, inputs, config):
         return add_ppls
 
 
+def replace_natural_gas_technology(df):
+    mapping = {"Steam Turbine": "CCGT", "Combustion Engine": "OCGT"}
+    tech = df.Technology.replace(mapping).fillna("CCGT")
+    return df.Technology.where(df.Fueltype != "Natural Gas", tech)
+
+
+def replace_natural_gas_fueltype(df):
+    return df.Fueltype.where(df.Technology != "OCGT", "Natural Gas")
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -293,6 +303,10 @@ if __name__ == "__main__":
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
         .powerplant.convert_country_to_alpha2()
+        .assign(
+            Technology=replace_natural_gas_technology,
+            Fueltype=replace_natural_gas_fueltype,
+        )
     )
 
     ppl = add_custom_powerplants(
