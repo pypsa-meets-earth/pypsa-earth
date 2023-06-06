@@ -260,7 +260,9 @@ def replace_natural_gas_technology(df):
 
 
 def replace_natural_gas_fueltype(df):
-    return df.Fueltype.where(df.Technology != "OCGT", "Natural Gas")
+    return df.Fueltype.where(
+        (df.Technology != "OCGT") | (df.Technology != "CCGT"), "Natural Gas"
+    )
 
 
 if __name__ == "__main__":
