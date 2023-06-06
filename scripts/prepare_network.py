@@ -120,6 +120,7 @@ def emission_extractor(filename):
                     == "Public electricity and heat production"
                 ):
                     emission_of_countries.append(df.loc[i]["Y_1990"])
+    emission_of_countries = sum(emission_of_countries)
     return emission_of_countries
 
 
@@ -337,8 +338,7 @@ if __name__ == "__main__":
                 if snakemake.config["electricity"]["automatic_emission_base_year"]:
                     filename = download_emission_data()
                     co2limit = emission_extractor(filename)
-                    co2limit = [i * float(m[0]) for i in co2limit]
-                    co2limit = sum(co2limit)
+                    co2limit = co2limit * float(m[0])
                     add_co2limit(n, co2limit, Nyears)
                     logger.info("Setting CO2 limit according to 1990 base year.")
                 else:
@@ -349,7 +349,6 @@ if __name__ == "__main__":
                 if snakemake.config["electricity"]["automatic_emission_base_year"]:
                     filename = download_emission_data()
                     co2limit = emission_extractor(filename)
-                    co2limit = sum(co2limit)
                     add_co2limit(n, co2limit, Nyears)
                     logger.info("Setting CO2 limit according to 1990 base year.")
                 else:
