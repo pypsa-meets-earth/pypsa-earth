@@ -59,6 +59,7 @@ wildcard_constraints:
 
 if config["custom_rules"] is not []:
     for rule in config["custom_rules"]:
+
         include: rule
 
 
