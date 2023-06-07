@@ -32,6 +32,8 @@ enable:
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
 
+custom_rules: []
+
 run:
   name: ""
 

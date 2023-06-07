@@ -57,6 +57,11 @@ wildcard_constraints:
     unc="[-+a-zA-Z0-9\.]*",
 
 
+if config["custom_rules"] is not []:
+    for rule in config["custom_rules"]:
+        include: rule
+
+
 rule clean:
     run:
         shell("snakemake -j 1 solve_all_networks --delete-all-output")
