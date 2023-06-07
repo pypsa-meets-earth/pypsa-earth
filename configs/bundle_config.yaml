@@ -39,8 +39,8 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1BSxmm3AG5TTOxrLG0ki8IdlL2n3hEviq/view
     output:
-    - data/gebco/GEBCO_2021_TID.nc
-    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+      - data/gebco/GEBCO_2021_TID.nc
+      - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
@@ -52,8 +52,8 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1aXqbCxEpe0aNI6EYuCLtFS6CbdXurTn7/view
     output:
-    - data/gebco/GEBCO_2021_TID.nc
-    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+      - data/gebco/GEBCO_2021_TID.nc
+      - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
   # tutorial bundle specific for Morocco only
   bundle_tutorial_MA:
@@ -65,8 +65,8 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1zY3WnKqwBF0derS4ncRIPpdTdNn978xw/view
     output:
-    - data/gebco/GEBCO_2021_TID.nc
-    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+      - data/gebco/GEBCO_2021_TID.nc
+      - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
@@ -117,18 +117,18 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_general.zip?download=1
       gdrive: https://drive.google.com/file/d/1nRLrs_kP0qVl-IHC4BFLjpoKa3HLk2Py/view
     output:
-    - data/costs.csv
-    - data/hydro_capacities.csv
-    - data/custom_powerplants.csv
-    - data/eez/eez_v11.gpkg
-    - data/ssp2-2.6/2030/era5_2013/Africa.nc
-    - data/ssp2-2.6/2030/era5_2013/Asia.nc
-    - data/ssp2-2.6/2030/era5_2013/Europe.nc
-    - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
-    - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
-    - data/ssp2-2.6/2030/era5_2013/Oceania.nc
-    - data/hydrobasins/hybas_world_lev04_v1c.shp
-    - data/hydrobasins/hybas_world_lev05_v1c.shp
+      - data/costs.csv
+      - data/hydro_capacities.csv
+      - data/custom_powerplants.csv
+      - data/eez/eez_v11.gpkg
+      - data/ssp2-2.6/2030/era5_2013/Africa.nc
+      - data/ssp2-2.6/2030/era5_2013/Asia.nc
+      - data/ssp2-2.6/2030/era5_2013/Europe.nc
+      - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
+      - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
+      - data/ssp2-2.6/2030/era5_2013/Oceania.nc
+      - data/hydrobasins/hybas_world_lev04_v1c.shp
+      - data/hydrobasins/hybas_world_lev05_v1c.shp
 
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
@@ -139,14 +139,14 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1183583/files/data_v0.1.zip?download=1
       gdrive: https://drive.google.com/file/d/1jN5iV_iaRa5lc1XOaEtletKPUgPNOVuf/view
     output:
-    - data/costs.csv
-    - data/hydro_capacities.csv
-    - data/custom_powerplants.csv
-    - data/eia_hydro_annual_generation.csv
-    - data/eez/eez_v11.gpkg
-    - data/gebco/GEBCO_2021_TID.nc
-    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/ssp2-2.6/2030/era5_2013/Africa.nc
+      - data/costs.csv
+      - data/hydro_capacities.csv
+      - data/custom_powerplants.csv
+      - data/eia_hydro_annual_generation.csv
+      - data/eez/eez_v11.gpkg
+      - data/gebco/GEBCO_2021_TID.nc
+      - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+      - data/ssp2-2.6/2030/era5_2013/Africa.nc
 
   # resources bundle containing the resources folder for africa only
   bundle_natura_earth:
@@ -157,7 +157,7 @@ databundles:
       zenodo: https://sandbox.zenodo.org/record/1183583/files/natura_global.zip?download=1
       gdrive: https://drive.google.com/file/d/1WmAAwY0TAcHg8YZyAGof0bPewFacm7my/view
     output:
-    - data/natura.tiff
+      - data/natura.tiff
 
   bundle_cutout_sea:
     countries: [ASEAN]
@@ -166,6 +166,8 @@ databundles:
     urls:
       zenodo:
       gdrive:
+    output:
+      - [cutouts/sear-2013-era5.nc]
 
   # data bundle of the data folder for the african continent
   bundle_landcover_africa:
