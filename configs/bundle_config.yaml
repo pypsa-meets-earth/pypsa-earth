@@ -283,3 +283,13 @@ databundles:
     output: [cutouts/africa-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+
+  bundle_cutouts_westernasia:
+    countries: [WAS]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/1OpL4KXciXzGqZPwGtz3cecu-YYz8othz/view
+    output: [cutouts/western-asia-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
