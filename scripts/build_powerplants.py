@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -244,22 +244,25 @@ def add_custom_powerplants(ppl, inputs, config):
     add_ppls = read_csv_nafix(
         inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
     )
-    # if isinstance(custom_ppl_query, str):
-    #     add_ppls.query(custom_ppl_query, inplace=True)
 
-    return pd.concat(
-        [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
-    )
+    if custom_ppl_query == "merge":
+        return pd.concat(
+            [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
+        )
+    elif custom_ppl_query == "replace":
+        return add_ppls
 
 
 def replace_natural_gas_technology(df):
-    mapping = {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}
-    tech = df.Technology.replace(mapping).fillna("OCGT")
-    return df.Technology.where(df.Fueltype != "Natural Gas", tech)
+    mapping = {"Steam Turbine": "CCGT", "Combustion Engine": "OCGT"}
+    tech = df.Technology.replace(mapping).fillna("CCGT")
+    return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
 
 
 def replace_natural_gas_fueltype(df):
-    return df.Fueltype.where(df.Fueltype != "Natural Gas", df.Technology)
+    return df.Fueltype.mask(
+        (df.Technology == "OCGT") | (df.Technology == "CCGT"), "Natural Gas"
+    )
 
 
 if __name__ == "__main__":
@@ -301,7 +304,6 @@ if __name__ == "__main__":
         pm.powerplants(from_url=False, update=True, config_update=config)
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
         .powerplant.convert_country_to_alpha2()
         .assign(
             Technology=replace_natural_gas_technology,

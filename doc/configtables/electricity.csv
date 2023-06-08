@@ -1,4 +1,5 @@
 ,Unit,Values,Description
+base_voltage, kV, float, "Base voltage to which all lines are simplified/aggregated. Simplification preserves transmission capacities."
 voltages, kV, "Any subset of {220., 300., 380.}", "Voltage levels considered."
 co2limit,:math:`t_{CO_2-eq}/a`, float, "Cap on system total annual carbon dioxide equivalent emissions."
 co2base,:math:`t_{CO_2-eq}/a`, float, "Reference value of system total annual carbon dioxide equivalent emissions. Used only if relative emission reduction target is specified in ``{opts}`` wildcard."
@@ -18,7 +19,7 @@ extendable_carriers,,,
 -- Store,--,"Any subset of {battery,H2}", "Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity."
 -- Link,--, "Any subset of {H2 pipeline}", "Adds extendable links (H2 pipelines only) at every connection where there are lines or HVDC links without capacity limits and with zero initial capacity. Hydrogen pipelines require hydrogen storage to be modelled as ``Store``."
 powerplants_filter,--,"use `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ strings here, e.g. Country not in ['Germany']", "Filter query for the default powerplant database."
-custom_powerplants,--,"use `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ strings here, e.g. Country in ['Germany']", "Filter query for the custom powerplant database."
+custom_powerplants,--,"{false, merge, replace}", "Adds custom powerplants from ``custom_powerplants.csv``: false - use only powerplantmatching (ppm) data, merge - combines ppm and custom powerplants, replace - use only custom powerplants."
 conventional_carriers,--,"Any subset of {nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass}", "List of conventional power plants to include in the model from ``resources/powerplants.csv``."
 renewable_carriers,--, "Any subset of {solar, onwind, offwind-ac, offwind-dc, hydro}", "List of renewable power plants to include in the model from ``resources/powerplants.csv``."
 estimate_renewable_capacities,,,
