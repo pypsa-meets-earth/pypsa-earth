@@ -289,7 +289,8 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/1OpL4KXciXzGqZPwGtz3cecu-YYz8othz/view
+      gdrive: https://drive.google.com/file/d/110UA0WQnmRV-20cXxYNR8WHLnLti6Qip/view?usp=drive_link
     output: [cutouts/western-asia-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+
