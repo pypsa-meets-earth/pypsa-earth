@@ -32,7 +32,7 @@ enable:
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
 
-custom_rules: []
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
   name: ""
