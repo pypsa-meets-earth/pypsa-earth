@@ -45,7 +45,7 @@ hydrogen_underground_storage: false
 export:
   h2export: [120] # Yearly export demand in TWh
   store: true # [True, False] # specifies wether an export store to balance demand is implemented
-  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store
+  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank incl. compressor"
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
