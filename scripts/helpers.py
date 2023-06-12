@@ -203,7 +203,7 @@ def create_network_topology(
         topo_reverse = topo.copy()
         topo_reverse.rename(columns=swap_buses, inplace=True)
         topo_reverse.index = topo_reverse.apply(make_index, axis=1)
-        topo = topo.append(topo_reverse)
+        topo = pd.concat([topo, topo_reverse])
 
     return topo
 
