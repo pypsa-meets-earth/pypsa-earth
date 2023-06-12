@@ -477,6 +477,8 @@ def attach_hydro(n, costs, ppl):
                     f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
                     f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
                 )
+            else:
+                idxs_to_keep = inflow_idx
 
             if not intersection_plants.empty:
                 inflow_t = (
