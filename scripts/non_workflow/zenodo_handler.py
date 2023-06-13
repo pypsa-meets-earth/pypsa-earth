@@ -48,7 +48,7 @@ METADATA = {
     "access_right": "open",
     "license": {"id": "cc-by-4.0"},
     "keywords": ["Macro Energy Systems", "Power Systems"],
-}  # more opton visisble at Zenodo REST API https://developers.zenodo.org/#introduction
+}  # more options visible at Zenodo REST API https://developers.zenodo.org/#introduction
 
 
 #############

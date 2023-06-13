@@ -126,7 +126,7 @@ def add_line_endings_tosubstations(substations, lines):
 def set_unique_id(df, col):
     """
     Create unique id's, where id is specified by the column "col"
-    The steps below create unique bus id's without loosing the original OSM bus_id
+    The steps below create unique bus id's without losing the original OSM bus_id
 
     Unique bus_id are created by simply adding -1,-2,-3 to the original bus_id
     Every unique id gets a -1
@@ -662,7 +662,7 @@ def integrate_lines_df(df_all_lines, distance_crs):
     clean_circuits(df)
     clean_cables(df)
 
-    # analyse each row of voltage and requency and match their content
+    # analyse each row of voltage and frequency and match their content
     split_and_match_voltage_frequency_size(df)
 
     # fill the circuits column for explode

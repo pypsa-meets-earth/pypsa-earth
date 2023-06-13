@@ -374,7 +374,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
             yearlyavg_runoff_by_plant.loc[normalization_buses].groupby("country").sum()
         )
 
-        # common country indeces
+        # common country indices
         common_countries = normalize_using_yearly.columns.intersection(
             grouped_runoffs.index
         )

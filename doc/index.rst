@@ -188,4 +188,3 @@ Documentation
    learning_materials
    project_structure_and_credits
    talks_and_papers
-
