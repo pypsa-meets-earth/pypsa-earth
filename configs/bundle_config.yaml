@@ -167,7 +167,7 @@ databundles:
       zenodo:
       gdrive:
     output:
-    - [cutouts/sear-2013-era5.nc]
+    - [cutouts/cutout-2013-era5.nc]
 
   # data bundle of the data folder for the african continent
   bundle_landcover_africa:
