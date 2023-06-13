@@ -37,6 +37,7 @@ resources/
 scripts/temp
 scripts/test.py
 test/tmp/
+dask-worker-space/
 
 # Untrack some Jupyter changes
 .ipynb_checkpoints
