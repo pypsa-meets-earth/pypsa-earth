@@ -18,11 +18,11 @@ Relevant Settings
         weather_year:
         prediction_year:
         region_load:
-        
+
 Inputs
 ------
 
-- ``networks/base.nc``: confer :ref:`base`, a base PyPSA Network 
+- ``networks/base.nc``: confer :ref:`base`, a base PyPSA Network
 - ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`build_bus_regions`
 - ``load_data_paths``: paths to load profiles, e.g. hourly country load profiles produced by GEGIS
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`, file containing the gadm shapes
@@ -30,7 +30,7 @@ Inputs
 Outputs
 -------
 
-- ``resources/demand_profiles.csv``: the content of the file is the electric demand profile associated to each bus. The file has the snapshots as rows and the buses of the network as columns. 
+- ``resources/demand_profiles.csv``: the content of the file is the electric demand profile associated to each bus. The file has the snapshots as rows and the buses of the network as columns.
 
 Description
 -----------

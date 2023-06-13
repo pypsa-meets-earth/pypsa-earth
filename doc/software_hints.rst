@@ -26,18 +26,18 @@ To refresh your knowledge, you may use plenty of online courses free-of-charge, 
 Conda
 -----------------------------------
 
-In order to use packages in python, it is highly recommended to use a `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ package manager, such as `Anaconda <https://docs.anaconda.com/>`_ 
+In order to use packages in python, it is highly recommended to use a `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>`_ package manager, such as `Anaconda <https://docs.anaconda.com/>`_
 
-You may check if ``conda`` is already installed on your system with `conda -V`. In case it's not we recommend to install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ and includes only ``conda`` and its dependencies. 
+You may check if ``conda`` is already installed on your system with `conda -V`. In case it's not we recommend to install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ and includes only ``conda`` and its dependencies.
 
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
-We recommend to install `mamba <https://github.com/QuantStack/mamba>`_ in `conda` base environment as that makes dependencies management much faster. 
+We recommend to install `mamba <https://github.com/QuantStack/mamba>`_ in `conda` base environment as that makes dependencies management much faster.
 
 Useful hints on installing Anaconda and setting up Ubuntu terminal with VSCode in Windows is available `here <https://gist.github.com/kauffmanes/5e74916617f9993bc3479f401dfec7da>`_.
 
 There are many things which could go wrong with conda. `This article <https://towardsdatascience.com/conda-essential-concepts-and-tricks-e478ed53b5b>`_ provides you a crystal clear explanation of conda (**excellent read**).
- 
+
 Git
 -----------------------------------
 
@@ -48,7 +48,7 @@ It is highly recommended to `learn the git basics <https://git-scm.com/doc>`_.
 .. TODO Add Git tutorials
 
 
-.. Not sure if it's needed 
+.. Not sure if it's needed
 .. Java
 .. ----------------------
 
@@ -62,7 +62,7 @@ Useful instructions of installation and setup:
 * `HiGHS solver <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_;
 
 * `Gurobi solver <https://www.youtube.com/watch?v=yNmeG6Wom1o>`_.
- 
+
 Integrated Development Environment
 -----------------------------------
 
