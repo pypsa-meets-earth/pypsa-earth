@@ -28,7 +28,7 @@ PyPSA Introduction (essential)
 - `Watch <https://www.youtube.com/watch?v=mAwhQnNRIvs>`_ and put your hands on to make PyPSA-Eur work on your computer (1-3h)
 - While watching these PyPSA videos always have a look into the excellent `PyPSA-Eur documentation <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_
 - To see what data we can extract we work usually closely with the `basic PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html>`_
-- Follow the `PyPSA-Earth hackathon <https://github.com/pypsa-meets-earth/documentation#1-hackathon-material>`_. Check the videos from this `Youtube series <https://www.youtube.com/watch?v=2nakM174CME&list=PLz1RcE1NdLlEzCT8G_v-sJKOeHOhZvw5R&index=7>`_ since it explains and applies partially the hackathon material. 
+- Follow the `PyPSA-Earth hackathon <https://github.com/pypsa-meets-earth/documentation#1-hackathon-material>`_. Check the videos from this `Youtube series <https://www.youtube.com/watch?v=2nakM174CME&list=PLz1RcE1NdLlEzCT8G_v-sJKOeHOhZvw5R&index=7>`_ since it explains and applies partially the hackathon material.
 
 Data science basics (essential)
 --------------------------------
@@ -50,7 +50,7 @@ For code collaboration we use GitHub. Which is a common source control tool that
 - This `cheatsheet <https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet>`_ might help using the Git commands
 
 
-Snakemake and advanced changes 
+Snakemake and advanced changes
 ------------------------------
 
 Snakemake is our brain in PyPSA.

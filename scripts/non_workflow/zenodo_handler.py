@@ -9,7 +9,7 @@ Uploads local files to Zenodo or sandbox.Zenodo.
 
 Requirements
 ------------
-- Install zenodopy: pip git+https://github.com/pz-max/zenodopy@patch-4 
+- Install zenodopy: pip git+https://github.com/pz-max/zenodopy@patch-4
 
 - Setup zenodopy (token): https://github.com/pz-max/zenodopy/tree/patch-4#using-the-package
 
