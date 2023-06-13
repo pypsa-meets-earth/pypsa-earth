@@ -46,7 +46,7 @@ if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
     COSTS = "data/costs.csv"
-ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 10)
+ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
 wildcard_constraints:
