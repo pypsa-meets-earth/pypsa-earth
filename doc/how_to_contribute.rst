@@ -54,7 +54,7 @@ To contribute a test:
 Performance-profiling
 ---------------------
 Performance profiling is important to understand bottlenecks and
-the accordinly optimize the speed in PyPSA-Earth. We use the Python build-in
+the accordingly optimize the speed in PyPSA-Earth. We use the Python built-in
 `cProfiler`, custom decorators on single functions and analysis tools
 like `snakeviz <https://jiffyclub.github.io/snakeviz/>`_. See a detailed example
 in `this discussion #557 <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/557>`_.

@@ -35,7 +35,7 @@ Outputs
 Description
 -----------
 
-The rule :mod:`build_demand` creates load demand profiles in correspondance of the buses of the network.
+The rule :mod:`build_demand` creates load demand profiles in correspondence of the buses of the network.
 It creates the load paths for GEGIS outputs by combining the input parameters of the countries, weather year, prediction year, and SSP scenario.
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.

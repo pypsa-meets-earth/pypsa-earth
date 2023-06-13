@@ -142,7 +142,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     "wave": "Other",
                     "geothermal": "Geothermal",
                     "solar": "Solar",
-                    # "Hard Coal" follows defauls of PPM
+                    # "Hard Coal" follows defaults of PPM
                     "coal": "Hard Coal",
                     "gas": "Natural Gas",
                     "biomass": "Bioenergy",
@@ -200,7 +200,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
-    # However, everithing extracted from OSM seems to belong
+    # However, everything extracted from OSM seems to belong
     # to power plants with "tags.power" == "generator" only
     osm_ppm_df = pd.DataFrame(
         data={
