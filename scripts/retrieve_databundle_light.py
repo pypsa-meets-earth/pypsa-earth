@@ -496,7 +496,7 @@ def get_best_bundles_by_category(
     # check if non-empty dictionary
     if dict_n_matched:
         # if non-empty, then pick bundles until all countries are selected
-        # or no mor bundles are found
+        # or no more bundles are found
         dict_sort = sorted(dict_n_matched.items(), key=lambda d: d[1])
 
         current_matched_countries = []

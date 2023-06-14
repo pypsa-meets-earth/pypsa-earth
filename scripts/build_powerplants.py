@@ -68,7 +68,7 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 
-Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
 Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
 
 Tagging considerations for columns in the file:
@@ -142,7 +142,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     "wave": "Other",
                     "geothermal": "Geothermal",
                     "solar": "Solar",
-                    # "Hard Coal" follows defauls of PPM
+                    # "Hard Coal" follows defaults of PPM
                     "coal": "Hard Coal",
                     "gas": "Natural Gas",
                     "biomass": "Bioenergy",
@@ -200,7 +200,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
-    # However, everithing extracted from OSM seems to belong
+    # However, everything extracted from OSM seems to belong
     # to power plants with "tags.power" == "generator" only
     osm_ppm_df = pd.DataFrame(
         data={

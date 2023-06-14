@@ -791,7 +791,7 @@ if __name__ == "__main__":
     if not (set(renewable_carriers) & set(extendable_carriers["Generator"])):
         logger.warning(
             "No renewables found in config entry `extendable_carriers`. "
-            "In future versions, these have to be explicitely listed. "
+            "In future versions, these have to be explicitly listed. "
             "Falling back to all renewables."
         )
 
