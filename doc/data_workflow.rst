@@ -42,7 +42,7 @@ There are a number datasets applied in PyPSA-Earth to build a realistic model. O
 Environmental
 ------------------------------------
 
-* **copernicus** contains the raw data on the land covering as available from the Copernicus database. 
+* **copernicus** contains the raw data on the land covering as available from the Copernicus database.
 
 .. image:: img/copernicus.png
     :height: 150 px
@@ -52,7 +52,7 @@ It is used in the build_renewable_profiles rule to quantify what are the land re
 
 * **eez** is the dataset of the Exclusive Economic Zones (EEZ) available from Marine Regions. This file is used in the rule build_shapes to identify the marine region by country and provide shapes of the maritime regions to be possibly used to estimate off-shore renewable potential, for example.
 
-* **gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain. 
+* **gebco** gridded bathymetric data which can be translated into depths and shapes of underwater terrain.
 
 .. image:: img/gebco_2021_grid_image.jpg
     :height: 150 px
@@ -67,7 +67,7 @@ These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.
 Economical
 ------------------------------------
 
-* **costs.csv** file contains the default costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adjustments may be needed. 
+* **costs.csv** file contains the default costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adjustments may be needed.
 
 * **gadm** folder contains data of the shapes of administrative zones by country (e.g. regions, districts, provinces, ...), depending on the level of resolution desired by the configuration file. The data in this folder are automatically populated by the `build_shapes` rule that download such data from the gadm website.
 
@@ -83,11 +83,11 @@ Technological
 4. Pre-calculated datasets
 ===================================
 
-There are some datasets which were prepared to ensure smooth run of the model. However, they may (and in some cases) must be replaced by custom ones. 
+There are some datasets which were prepared to ensure smooth run of the model. However, they may (and in some cases) must be replaced by custom ones.
 
-* **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as mask the exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model. 
+* **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as mask the exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
 
-Currently the pre-build file is calculated for Africa, global `natura.tiff` raster is under development. 
+Currently the pre-build file is calculated for Africa, global `natura.tiff` raster is under development.
 
 * **electricity demand profiles** are provided by PyPSA-Earth as globally hourly demand loads corresponding to Shared Socioeconomic Pathways `SSP <http://dx.doi.org/https://doi.org/10.1016/j.gloenvcha.2016.05.009>`_ for 2030, 2040, 2050 and 2100 and weather conditions years of 2011, 2013 and 2018. Pre-calculated data on electricity demand are placed in `data/{ssp_scenario_id}/{ssp_year}/era5_2013/{continent_name}.nc` folder and loaded automatically during the model run.
 

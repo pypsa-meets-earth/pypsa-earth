@@ -18,11 +18,11 @@ Relevant Settings
         weather_year:
         prediction_year:
         region_load:
-        
+
 Inputs
 ------
 
-- ``networks/base.nc``: confer :ref:`base`, a base PyPSA Network 
+- ``networks/base.nc``: confer :ref:`base`, a base PyPSA Network
 - ``resources/bus_regions/regions_onshore.geojson``: confer :ref:`build_bus_regions`
 - ``load_data_paths``: paths to load profiles, e.g. hourly country load profiles produced by GEGIS
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`, file containing the gadm shapes
@@ -30,12 +30,12 @@ Inputs
 Outputs
 -------
 
-- ``resources/demand_profiles.csv``: the content of the file is the electric demand profile associated to each bus. The file has the snapshots as rows and the buses of the network as columns. 
+- ``resources/demand_profiles.csv``: the content of the file is the electric demand profile associated to each bus. The file has the snapshots as rows and the buses of the network as columns.
 
 Description
 -----------
 
-The rule :mod:`build_demand` creates load demand profiles in correspondance of the buses of the network.
+The rule :mod:`build_demand` creates load demand profiles in correspondence of the buses of the network.
 It creates the load paths for GEGIS outputs by combining the input parameters of the countries, weather year, prediction year, and SSP scenario.
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
