@@ -148,7 +148,7 @@ databundles:
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
 
-  # resources bundle containing the resources folder for africa only
+  # resources bundle containing the resources folder for Africa only
   bundle_natura_earth:
     countries: [Earth]
     category: natura
@@ -159,18 +159,7 @@ databundles:
     output:
     - data/natura.tiff
 
-  # Cutout bundle for South East Asian countries
-  bundle_cutout_sea:
-    countries: [ASEAN]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      zenodo:
-      gdrive: https://drive.google.com/file/d/18P94LQNyL4S4DH4PblVmqk7H6UPGuxRL/view
-    output:
-    - [cutouts/cutout-2013-era5.nc]
-
-  # data bundle of the data folder for the african continent
+  # data bundle of the data folder for the African continent
   bundle_landcover_africa:
     countries: [Africa]
     category: landcover
@@ -180,7 +169,7 @@ databundles:
       gdrive: https://drive.google.com/file/d/1qnJ0HAWZ4z_9q3PtDEUrFmZWBZYg-WNW/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for the asia pacific region
+  # data bundle of the data folder for the african continent
   bundle_landcover_asiapacific:
     countries: [Asia, Oceania]
     category: landcover
@@ -190,7 +179,7 @@ databundles:
       gdrive: https://drive.google.com/file/d/163Uc9F1DPs2pRgDzkTivnblhXCw4nfd5/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for Latin America and the Caribbean
+  # data bundle of the data folder for the African continent
   bundle_landcover_latinamerica_caribbean: # excludes north america
     countries: [SouthAmerica, NorthAmerica]
     category: landcover
@@ -200,7 +189,7 @@ databundles:
       gdrive: https://drive.google.com/file/d/1d3l9qxPnM9XbXODWkP4kWxK_t5cDcEIZ/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for West Asia
+  # data bundle of the data folder for the African continent
   bundle_landcover_westasia:
     countries: [WAS]
     category: landcover
@@ -220,9 +209,9 @@ databundles:
       gdrive: https://drive.google.com/file/d/1MfT3cwHJbNTtTjRLzW2T19f9qBNAxdhw/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for the poles
+  # data bundle of the data folder for the Poles
   bundle_landcover_northamerica:
-    countries: [NorthAmerica] # Greenland and antartica
+    countries: [NorthAmerica] # Greenland and Antartica
     category: landcover
     destination: "data/landcover"
     urls:
@@ -230,9 +219,9 @@ databundles:
       gdrive: https://drive.google.com/file/d/1Dc11J2BZQQeJWxwCC6GiiPd_GWMCN0uF/view
     output: [data/landcover/*]
 
-  # data bundle of the data folder for the poles
+  # data bundle of the data folder for the Poles
   bundle_landcover_poles:
-    countries: [GL, ATA] # Greenland and antartica
+    countries: [GL, ATA] # Greenland and Antartica
     category: landcover
     destination: "data/landcover"
     urls:
@@ -283,7 +272,7 @@ databundles:
   #       agree: 1
   #   output: [data/gebco/GEBCO_2021_TID.nc]
 
-  # cutouts bundle of the cutouts folder for the african continent
+  # cutouts bundle of the cutouts folder for the African continent
   bundle_cutouts_africa:
     countries: [Africa]
     category: cutouts
