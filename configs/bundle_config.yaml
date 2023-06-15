@@ -107,7 +107,7 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
-  #tutorial bundle for all African countries
+  # tutorial bundle for all African countries
   bundle_tutorial_data_common:
     countries: [Africa]
     tutorial: true
@@ -159,6 +159,7 @@ databundles:
     output:
     - data/natura.tiff
 
+  # Cutout bundle for South East Asian countries
   bundle_cutout_sea:
     countries: [ASEAN]
     category: cutouts
