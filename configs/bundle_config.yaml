@@ -180,7 +180,7 @@ databundles:
     output: [data/landcover/*]
 
   # data bundle of the data folder for the African continent
-  bundle_landcover_latinamerica_caribbean: # excludes north america
+  bundle_landcover_latinamerica_caribbean:  # excludes North America
     countries: [SouthAmerica, NorthAmerica]
     category: landcover
     destination: "data/landcover"
@@ -211,7 +211,7 @@ databundles:
 
   # data bundle of the data folder for the Poles
   bundle_landcover_northamerica:
-    countries: [NorthAmerica] # Greenland and Antartica
+    countries: [NorthAmerica]  # Greenland and Antartica
     category: landcover
     destination: "data/landcover"
     urls:
@@ -221,7 +221,7 @@ databundles:
 
   # data bundle of the data folder for the Poles
   bundle_landcover_poles:
-    countries: [GL, ATA] # Greenland and Antartica
+    countries: [GL, ATA]  # Greenland and Antartica
     category: landcover
     destination: "data/landcover"
     urls:
