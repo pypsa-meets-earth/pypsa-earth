@@ -272,7 +272,7 @@ if __name__ == "__main__":
     )
 
     if offshore_regions:
-        # if a offshore_regions exists excute below
+        # if a offshore_regions exists execute below
         pd.concat(offshore_regions, ignore_index=True).to_file(
             snakemake.output.regions_offshore
         )

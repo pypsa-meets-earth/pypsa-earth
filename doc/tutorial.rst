@@ -124,12 +124,12 @@ The snakemake included in the conda environment pypsa-earth can be used to execu
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake < your custom rule >  
+    .../pypsa-earth (pypsa-earth) % snakemake < your custom rule >
 
 Starting with essential usability features, the implemented PyPSA-Earth `Snakemake procedure <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile>`_ that allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
 
 You can execute some parts of the workflow in case you are interested in some specific it's parts.
-E.g. power grid topology may be extracted and cleaned with the following command which refers to the script name: 
+E.g. power grid topology may be extracted and cleaned with the following command which refers to the script name:
 
 .. code:: bash
 
@@ -139,7 +139,7 @@ Solar profile for the requested area may be calculated using the output name:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake -j 1 resources/renewable_profiles/profile_solar.nc 
+    .../pypsa-earth (pypsa-earth) % snakemake -j 1 resources/renewable_profiles/profile_solar.nc
 
 
 How to use PyPSA-Earth for your energy problem?
@@ -178,7 +178,7 @@ The pre-built cutout for Africa is available for 2013 year and can be loaded dir
 .. note::
     Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
 
-In case you are interested in other parts of the world you have to generate a cutout yourself using the `build_cutouts` rule. To run it you will need to: 
+In case you are interested in other parts of the world you have to generate a cutout yourself using the `build_cutouts` rule. To run it you will need to:
 
 1. be registered on  the `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_;
 
@@ -202,7 +202,7 @@ There is also option to set the cutout extent specifying `x` and `y` values dire
 Temporal extent
 ^^^^^^^^^^^^^^^
 
-If you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of this year, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of 2013. The workflow will automatically subset the cutout archive to extract data for the particular timeframe of interest. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed. 
+If you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of this year, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of 2013. The workflow will automatically subset the cutout archive to extract data for the particular timeframe of interest. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed.
 
 In case you need model a number of years, a convenient approach may be to create the cutout for the whole period under interest (e.g. 2013-2015) so that you don't need to build any additional cutouts. Note, however, that the disk requirements increase in this case.
 
@@ -245,7 +245,7 @@ It may be recommended to check the following quantities the validation:
 
 Where to look for reference data
 --------------------------------
- 
+
 Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exhaustive list of helpful sources:
 
 * `World Bank <https://energydata.info/>`_;
@@ -267,8 +267,8 @@ Advanced validation examples
 The following validation notebooks are worth a look when validating your energy model:
 
 1. A detailed `network validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/network_validation.ipynb>`_.
- 
-2. Analysis of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area. 
+
+2. Analysis of `the installed capacity <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/capacity_validation.ipynb>`_ for the considered area.
 
 3. Validation of `the power demand <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/demand_validation.ipynb>`_ values and profile.
 

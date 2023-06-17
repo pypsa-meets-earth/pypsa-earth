@@ -45,7 +45,7 @@ Parameter sweeps can help to explore the uncertainty of the outputs cause by par
 Many are familiar with the classical "sensitivity analysis" that can be applied by varying the
 input of only one feature, while exploring its outputs changes. Here implemented is a
 "global sensitivity analysis" that can help to explore the multi-dimensional uncertainty space
-when more than one feature are changed at the same time. 
+when more than one feature are changed at the same time.
 
 To do so, the scripts is separated in two building blocks: One creates the experimental design,
 the other, modifies and outputs the network file. Building the experimental design is currently
@@ -61,7 +61,7 @@ for all PyPSA objects that are `int` or `float`. Boolean values could be used bu
 The experimental design `lhs_scaled` (dimension: sample X features) is then used to modify the PyPSA
 networks. Thereby, this script creates samples x amount of networks. The iterators comes from the
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
-0 to (total number of) SAMPLES. 
+0 to (total number of) SAMPLES.
 """
 import logging
 import os
