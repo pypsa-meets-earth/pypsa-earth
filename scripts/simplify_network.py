@@ -301,6 +301,15 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     # Split DC part by supernodes
     def split_links(nodes):
+        # only DC nodes are of interest for further supernodes treatment
+        nodes_links = n.links["bus0"].to_list() + n.links["bus1"].to_list()
+        nodes_dc_lines = [
+            d
+            for d in nodes
+            if n.lines.loc[(n.lines.bus0 == d) | (n.lines.bus1 == d)].dc.any()
+        ]
+        nodes = nodes_links + nodes_dc_lines
+
         nodes = frozenset(nodes)
 
         seen = set()
