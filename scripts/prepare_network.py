@@ -61,14 +61,13 @@ import os
 import re
 from zipfile import ZipFile
 
-import country_converter as coco
+import country_converter as cc
 import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging, create_country_list
+from _helpers import configure_logging
 from add_electricity import load_costs, update_transmission_costs
-from config_osm_data import continent_regions, world_iso
 
 idx = pd.IndexSlice
 
@@ -94,32 +93,23 @@ def download_emission_data():
         return False
 
 
-def emission_extractor(filename):
-    country_names = create_country_list(snakemake.config["countries"])
+def emission_extractor(filename, emission_year):
+    country_names = n.buses.country.unique() 
     # data reading process
     datapath = os.path.join(os.getcwd(), "data", filename)
     emission_of_countries = []
-    df = pd.ExcelFile(datapath)
-    df = pd.read_excel(df, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
+    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
-    # NEPAL
-    df.loc[3285, "Y_1990"] = df.loc[3285, "Y_1988"]
-    # GREENLAND
-    df.loc[2037, "Y_1990"] = df.loc[2037, "Y_2004"]
-    # GHANA
-    df.loc[1099, "Y_1990"] = df.loc[1099, "Y_1986"]
-    # TURKS AND CAICOS ISLANDS
-    df.loc[491, "Y_1990"] = df.loc[491, "Y_1995"]
+    df = df.set_index('Country_code_A3')
+    df = df.loc[df['IPCC_for_std_report_desc'] == "Public electricity and heat production"]
+    df = df.loc[:,'Y_1970':'Y_2018'].ffill(axis = 1)
+    df = df.loc[:,'Y_1970':'Y_2018'].bfill(axis = 1)
     for j in country_names:
-        j = coco.convert(j, to="ISO3")
-        for i in range(1, 3909):
-            three_digits = df.loc[i]["Country_code_A3"]
-            if j == three_digits:
-                if (
-                    df.loc[i]["IPCC_for_std_report_desc"]
-                    == "Public electricity and heat production"
-                ):
-                    emission_of_countries.append(df.loc[i]["Y_1990"])
+        j = cc.convert(j, to="ISO3")
+        try:
+            emission_of_countries.append(df.loc[j]['Y_'+str(emission_year)])
+        except KeyError:
+            print(f"The emission value for {cc.convert(j, to='name_short', not_found=None)} is not found.")
     emission_of_countries = sum(emission_of_countries)
     return emission_of_countries
 
@@ -335,9 +325,10 @@ if __name__ == "__main__":
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
-                if snakemake.config["electricity"]["automatic_emission_base_year"]:
+                if snakemake.config["electricity"]["automatic_emission"]:
+                    emission_year = snakemake.config["electricity"]["automatic_emission_base_year"]
                     filename = download_emission_data()
-                    co2limit = emission_extractor(filename)
+                    co2limit = emission_extractor(filename, emission_year)
                     co2limit = co2limit * float(m[0])
                     add_co2limit(n, co2limit, Nyears)
                     logger.info("Setting CO2 limit according to 1990 base year.")
@@ -346,9 +337,10 @@ if __name__ == "__main__":
                     add_co2limit(n, co2limit, Nyears)
                     logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                if snakemake.config["electricity"]["automatic_emission_base_year"]:
+                if snakemake.config["electricity"]["automatic_emission"]:
+                    emission_year = snakemake.config["electricity"]["automatic_emission_base_year"]
                     filename = download_emission_data()
-                    co2limit = emission_extractor(filename)
+                    co2limit = emission_extractor(filename, emission_year)
                     add_co2limit(n, co2limit, Nyears)
                     logger.info("Setting CO2 limit according to 1990 base year.")
                 else:
