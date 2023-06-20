@@ -457,7 +457,7 @@ def attach_hydro(n, costs, ppl):
             missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            intersection_plants = pd.Index(
+            plants_with_data = pd.Index(
                 inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
             )
 
@@ -465,9 +465,7 @@ def attach_hydro(n, costs, ppl):
             if not missing_plants.empty:
                 # original total p_nom
                 total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
-                idxs_to_keep = inflow_buses[
-                    inflow_buses.isin(intersection_plants)
-                ].index
+                idxs_to_keep = inflow_buses[inflow_buses.isin(plants_with_data)].index
                 ror = ror.loc[ror.index.intersection(idxs_to_keep)]
                 hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
                 # loss of p_nom
@@ -480,9 +478,10 @@ def attach_hydro(n, costs, ppl):
             else:
                 idxs_to_keep = inflow_idx
 
-            if not intersection_plants.empty:
+            # if there are any plants for which runoff data are available
+            if not plants_with_data.empty:
                 inflow_t = (
-                    inflow.sel(plant=intersection_plants)
+                    inflow.sel(plant=plants_with_data)
                     .rename({"plant": "name"})
                     .assign_coords(name=idxs_to_keep)
                     .transpose("time", "name")
