@@ -93,6 +93,7 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from config_osm_data import world_iso
 from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
@@ -122,25 +123,48 @@ def calculate_annuity(n, r):
 
 
 def _add_missing_carriers_from_costs(n, costs, carriers):
-    missing_carriers = pd.Index(carriers).difference(n.carriers.index)
-    if missing_carriers.empty:
-        return
+    countries = costs.index.get_level_values("country").unique()
 
-    emissions_cols = (
-        costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
-    )
-    suptechs = missing_carriers.str.split("-").str[0]
-    emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)
-    emissions.index = missing_carriers
-    n.import_components_from_dataframe(emissions, "Carrier")
+    for country in countries:
+        country_mask = costs.index.get_level_values("country") == country
+        missing_carriers = pd.Index(carriers).difference(n.carriers.index)
+        if missing_carriers.empty:
+            continue
+
+        emissions_cols = (
+            costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
+        )
+        suptechs = missing_carriers.str.split("-").str[0]
+        emissions = costs.loc[(country, suptechs), emissions_cols].fillna(0.0)
+        new_row = pd.DataFrame(
+            {"co2_emissions": [0.0]},
+            index=pd.MultiIndex.from_tuples(
+                [(country, "offwind-dc")], names=["country", "technology"]
+            ),
+        )
+        emissions = pd.concat([emissions, new_row])
+        emissions.index = missing_carriers
+        n.import_components_from_dataframe(emissions, "Carrier")
 
 
 def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     set all asset costs and other parameters
     """
-    costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
+    costs = pd.read_csv(
+        tech_costs, index_col=["country", "technology", "parameter"]
+    ).sort_index()
+    # rename because technology data & pypsa earth costs.csv use different names
+    # TODO: rename the technologies in hosted tutorial data to match technology data
+    costs = costs.rename(
+        {
+            "hydrogen storage": "hydrogen storage tank",
+            "hydrogen storage tank": "hydrogen storage tank",
+            "hydrogen storage tank type 1": "hydrogen storage tank",
+            "hydrogen underground storage": "hydrogen storage underground",
+        },
+    )
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
@@ -157,32 +181,8 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         * Nyears
     )
 
-    costs.at["OCGT", "fuel"] = costs.at["gas", "fuel"]
-    costs.at["CCGT", "fuel"] = costs.at["gas", "fuel"]
-
-    costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
-
-    costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
-    # rename because technology data & pypsa earth costs.csv use different names
-    # TODO: rename the technologies in hosted tutorial data to match technology data
-    costs = costs.rename(
-        {
-            "hydrogen storage": "hydrogen storage tank",
-            "hydrogen storage tank": "hydrogen storage tank",
-            "hydrogen storage tank type 1": "hydrogen storage tank",
-            "hydrogen underground storage": "hydrogen storage underground",
-        },
-    )
-
-    costs.at["OCGT", "co2_emissions"] = costs.at["gas", "co2_emissions"]
-    costs.at["CCGT", "co2_emissions"] = costs.at["gas", "co2_emissions"]
-
-    costs.at["solar", "capital_cost"] = (
-        config["rooftop_share"] * costs.at["solar-rooftop", "capital_cost"]
-        + (1 - config["rooftop_share"]) * costs.at["solar-utility", "capital_cost"]
-    )
-
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
+        # TODO reduce verbosity and duplication
         capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
@@ -190,24 +190,57 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
             dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
         )
 
+    costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
     max_hours = elec_config["max_hours"]
-    costs.loc["battery"] = costs_for_storage(
-        costs.loc["battery storage"],
-        costs.loc["battery inverter"],
-        max_hours=max_hours["battery"],
-    )
-    costs.loc["H2"] = costs_for_storage(
-        costs.loc["hydrogen storage tank"],
-        costs.loc["fuel cell"],
-        costs.loc["electrolysis"],
-        max_hours=max_hours["H2"],
-    )
-
-    for attr in ("marginal_cost", "capital_cost"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            costs.loc[overwrites.index, attr] = overwrites
+    countries = costs.index.get_level_values("country").unique()
+    for country in countries:
+        country_mask = costs.index.get_level_values("country") == country
+        mask_ocgt = (costs.index.get_level_values("country") == country) & (
+            costs.index.get_level_values("technology") == "OCGT"
+        )
+        mask_ccgt = (costs.index.get_level_values("country") == country) & (
+            costs.index.get_level_values("technology") == "CCGT"
+        )
+        mask_gas = (costs.index.get_level_values("country") == country) & (
+            costs.index.get_level_values("technology") == "gas"
+        )
+        costs.loc[mask_ocgt, "fuel"] = costs.loc[mask_gas, "fuel"].values
+        costs.loc[mask_ocgt, "co2_emissions"] = costs.loc[
+            mask_gas, "co2_emissions"
+        ].values
+        costs.loc[mask_ccgt, "fuel"] = costs.loc[mask_gas, "fuel"].values
+        costs.loc[mask_ccgt, "co2_emissions"] = costs.loc[
+            mask_gas, "co2_emissions"
+        ].values
+        costs.loc[country_mask, "marginal_cost"] = (
+            costs.loc[country_mask, "VOM"]
+            + costs.loc[country_mask, "fuel"] / costs.loc[country_mask, "efficiency"]
+        )
+        solar_rooftop_cost = costs.loc[(country, "solar-rooftop"), "capital_cost"]
+        solar_utility_cost = costs.loc[(country, "solar-utility"), "capital_cost"]
+        rooftop_share = config.get(country, {}).get("rooftop_share", 0.0)
+        utility_share = 1 - rooftop_share
+        costs.loc[
+            country_mask & (costs.index.get_level_values("technology") == "solar"),
+            "capital_cost",
+        ] = (
+            rooftop_share * solar_rooftop_cost + utility_share * solar_utility_cost
+        )
+        battery_storage_cost = costs.loc[(country, "battery storage")]
+        battery_inverter_cost = costs.loc[(country, "battery inverter")]
+        max_hours = elec_config["max_hours"]
+        battery_cost = costs_for_storage(
+            battery_storage_cost, battery_inverter_cost, max_hours=max_hours["battery"]
+        )
+        costs.loc[(country, "battery")] = battery_cost
+        # TODO  check that lines below are functioning as desired
+        for attr in ("marginal_cost", "capital_cost"):
+            overwrites = config.get(attr)
+            if overwrites is not None:
+                overwrites = pd.Series(overwrites)
+                costs.loc[country_mask, attr] = overwrites.get(
+                    country, costs.loc[country_mask, attr]
+                )
 
     return costs
 
@@ -253,39 +286,44 @@ def attach_load(n, demand_profiles):
 
 
 def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
-    n.lines["capital_cost"] = (
-        n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
-    )
-
-    if n.links.empty:
-        return
-
-    dc_b = n.links.carrier == "DC"
-    # If there are no "DC" links, then the 'underwater_fraction' column
-    # may be missing. Therefore we have to return here.
-    # TODO: Require fix
-    if n.links.loc[n.links.carrier == "DC"].empty:
-        return
-
-    if simple_hvdc_costs:
-        costs = (
-            n.links.loc[dc_b, "length"]
-            * length_factor
-            * costs.at["HVDC overhead", "capital_cost"]
+    countries = costs.index.get_level_values("country").unique()
+    # TODO check that code works as expected
+    for country in countries:
+        country_mask = n.lines["country"] == country
+        hvac_overhead_cost = costs.loc[(country, "HVAC overhead"), "capital_cost"]
+        n.lines.loc[country_mask, "capital_cost"] = (
+            n.lines.loc[country_mask, "length"] * length_factor * hvac_overhead_cost
         )
-    else:
-        costs = (
-            n.links.loc[dc_b, "length"]
-            * length_factor
-            * (
-                (1.0 - n.links.loc[dc_b, "underwater_fraction"])
-                * costs.at["HVDC overhead", "capital_cost"]
-                + n.links.loc[dc_b, "underwater_fraction"]
-                * costs.at["HVDC submarine", "capital_cost"]
+        if n.links.empty:
+            return
+
+        dc_b = (n.links["carrier"] == "DC") & country_mask
+        # If there are no "DC" links, then the 'underwater_fraction' column
+        # may be missing. Therefore we have to return here.
+        # TODO: Require fix
+        if n.links.loc[dc_b].empty:
+            return
+
+        if simple_hvdc_costs:
+            hdvc_overhead_cost = costs.loc[(country, "HVDC overhead"), "capital_cost"]
+            costs = n.links.loc[dc_b, "length"] * length_factor * hdvc_overhead_cost
+        else:
+            underwater_fraction = n.links.loc[dc_b, "underwater_fraction"]
+            hvdc_overhead_cost = costs.loc[("HVDC overhead", country), "capital_cost"]
+            hvdc_submarine_cost = costs.loc[("HVDC submarine", country), "capital_cost"]
+            hvdc_inverter_pair_cost = costs.loc[
+                ("HVDC inverter pair", country), "capital_cost"
+            ]
+            costs = (
+                n.links.loc[dc_b, "length"]
+                * length_factor
+                * (
+                    (1.0 - underwater_fraction) * hvdc_overhead_cost
+                    + underwater_fraction * hvdc_submarine_cost
+                )
+                + hvdc_inverter_pair_cost
             )
-            + costs.at["HVDC inverter pair", "capital_cost"]
-        )
-    n.links.loc[dc_b, "capital_cost"] = costs
+        n.links.loc[dc_b, "capital_cost"] = costs
 
 
 def attach_wind_and_solar(
@@ -364,6 +402,13 @@ def attach_wind_and_solar(
             )
 
 
+def find_parent_key(dictionary, target_key):
+    for parent_key, child_dict in dictionary.items():
+        if target_key in child_dict:
+            return parent_key
+    return None  # Return None if the target key is not found
+
+
 def attach_conventional_generators(
     n,
     costs,
@@ -376,9 +421,32 @@ def attach_conventional_generators(
     carriers = set(conventional_carriers) | set(extendable_carriers["Generator"])
     _add_missing_carriers_from_costs(n, costs, carriers)
 
+    countries = ppl.country.unique()
+
+    for country in countries:
+        continent = find_parent_key(world_iso, country)
+        if country in costs.index.levels[0].unique():
+            pass
+        elif continent in costs.index.levels[0].unique():
+            # apply continent specific costs
+            country_costs = costs.loc[continent].pipe(
+                lambda x: x.assign(country=country)
+                .set_index("country", append=True)
+                .swaplevel(0, 1)
+            )
+            costs = pd.concat([costs, country_costs])
+        else:
+            country_costs = costs.loc["global"].pipe(
+                lambda x: x.assign(country=country)
+                .set_index("country", append=True)
+                .swaplevel(0, 1)
+            )
+            costs = pd.concat([costs, country_costs])
+    costs = costs.loc[costs.index.get_level_values(0).isin(countries.tolist())]
+
     ppl = (
         ppl.query("carrier in @carriers")
-        .join(costs, on="carrier", rsuffix="_r")
+        .join(costs, on=["country", "carrier"], rsuffix="_r")
         .rename(index=lambda s: "C" + str(s))
     )
     ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
