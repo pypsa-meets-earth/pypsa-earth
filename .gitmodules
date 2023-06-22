@@ -1,3 +1,4 @@
 [submodule "pypsa-earth"]
 	path = pypsa-earth
 	url = https://github.com/pypsa-meets-earth/pypsa-earth
+	branch = main
