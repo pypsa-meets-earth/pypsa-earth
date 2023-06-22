@@ -199,9 +199,89 @@ def H2_export_yearly_constraint(n):
 
     lhs = res
 
-    rhs = h2_export * (1 / 0.7) + load  # 0.7 is approximation of electrloyzer capacity
+    rhs = (
+        h2_export * (1 / 0.7) + load
+    )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
 
     con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
+
+
+def monthly_constraints(n, n_ref):
+    res_techs = [
+        "csp",
+        "rooftop-solar",
+        "solar",
+        "onwind",
+        "onwind2",
+        "offwind",
+        "offwind2",
+        "ror",
+    ]
+    allowed_excess = snakemake.config["policy_config"]["allowed_excess"]
+
+    res_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+
+    weightings = pd.DataFrame(
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
+        index=n.snapshots,
+        columns=res_index,
+    )
+
+    res = linexpr((weightings, get_var(n, "Generator", "p")[res_index])).sum(
+        axis=1
+    )  # single line sum
+    res = res.groupby(res.index.month).sum()
+
+    electrolysis = get_var(n, "Link", "p")[
+        n.links.index[n.links.index.str.contains("H2 Electrolysis")]
+    ]
+    weightings_electrolysis = pd.DataFrame(
+        np.outer(
+            n.snapshot_weightings["generators"], [1.0] * len(electrolysis.columns)
+        ),
+        index=n.snapshots,
+        columns=electrolysis.columns,
+    )
+
+    elec_input = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum(
+        axis=1
+    )
+
+    elec_input = elec_input.groupby(elec_input.index.month).sum()
+
+    if (
+        snakemake.config["policy_config"]["reference_case"]
+        and eval(snakemake.wildcards["h2export"]) != 0
+    ):
+        res_ref = n_ref.generators_t.p[res_index] * weightings
+        res_ref = res_ref.groupby(n_ref.generators_t.p.index.month).sum().sum(axis=1)
+
+        elec_input_ref = (
+            n_ref.links_t.p0.loc[
+                :, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")
+            ]
+            * weightings_electrolysis
+        )
+        elec_input_ref = (
+            -elec_input_ref.groupby(elec_input_ref.index.month).sum().sum(axis=1)
+        )
+
+        for i in range(len(res.index)):
+            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
+            rhs = res_ref.iloc[i] + elec_input_ref.iloc[i]
+            con = define_constraints(
+                n, lhs, ">=", rhs, f"RESconstraints_{i}", f"REStarget_{i}"
+            )
+
+    elif eval(snakemake.wildcards["h2export"]) != 0:
+        for i in range(len(res.index)):
+            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
+
+            con = define_constraints(
+                n, lhs, ">=", 0.0, f"RESconstraints_{i}", f"REStarget_{i}"
+            )
+    else:
+        logger.info("ignoring H2 export constraint as wildcard is set to 0")
 
 
 def add_chp_constraints(n):
@@ -294,8 +374,20 @@ def add_co2_sequestration_limit(n, sns):
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
     if snakemake.config["policy_config"]["policy"] == "H2_export_yearly_constraint":
-        print("setting h2 export to greenness constraint")
+        logger.info("setting h2 export to yearly greenness constraint")
         H2_export_yearly_constraint(n)
+
+    elif snakemake.config["policy_config"]["policy"] == "H2_export_monthly_constraint":
+        logger.info("setting h2 export to monthly greenness constraint")
+        monthly_constraints(n, n_ref)
+
+    elif snakemake.config["policy_config"]["policy"] == "no_res_matching":
+        logger.info("no h2 export constraint set")
+
+    else:
+        raise ValueError(
+            'H2 export constraint is invalid, check config["policy_config"]["policy"]'
+        )
 
     if snakemake.config["H2_network"]:
         if snakemake.config["H2_network_limit"]:
@@ -321,7 +413,7 @@ def solve_network(n, config, opts="", **kwargs):
             solver_name=solver_name,
             solver_options=solver_options,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     else:
         ilopf(
@@ -332,7 +424,7 @@ def solve_network(n, config, opts="", **kwargs):
             min_iterations=min_iterations,
             max_iterations=max_iterations,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     return n
 
@@ -377,14 +469,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="165",
+            clusters="26",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="168H",
+            sopts="144H",
             discountrate=0.071,
-            demand="AP",
-            h2export=1,
+            demand="DF",
+            h2export="5",
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -408,6 +500,20 @@ if __name__ == "__main__":
             and snakemake.wildcards.planning_horizons == "2050"
         ):
             add_existing(n)
+
+        if (
+            snakemake.config["policy_config"]["reference_case"]
+            and eval(snakemake.wildcards["h2export"]) != 0
+        ):
+            n_ref_path = snakemake.output[0].replace(
+                snakemake.output[0].split("_")[-1], "0export.nc"
+            )
+            n_ref = pypsa.Network(
+                "../../../" + n_ref_path
+            )  # TODO better do it in a neater way
+        else:
+            n_ref = None
+
         n = prepare_network(n, solve_opts)
 
         n = solve_network(
