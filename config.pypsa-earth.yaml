@@ -22,6 +22,8 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
+
 run:
   name: "" # use this to keep track of runs with different settings
   shared_cutouts: true  # set to true to share the default cutout(s) across runs
@@ -120,8 +122,8 @@ load_options:
 electricity:
   base_voltage: 380.
   voltages: [220., 300., 380.]
-  co2limit: 40.0e+6  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 40.0e+6  # European default, adjustment to Africa necessary
+  co2limit: 72.0e+6  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
+  co2base: 72.0e+6  # European default, adjustment to Africa necessary
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
 
