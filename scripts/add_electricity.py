@@ -494,11 +494,14 @@ def attach_conventional_generators(
     ppl,
     conventional_carriers,
     extendable_carriers,
+    renewable_carriers,
     conventional_config,
     conventional_inputs,
     countries,
 ):
-    carriers = set(conventional_carriers) | set(extendable_carriers["Generator"])
+    carriers = set(conventional_carriers) | set(extendable_carriers["Generator"]) - set(
+        renewable_carriers
+    )
     _add_missing_carriers_from_costs(n, costs, carriers, countries)
 
     ppl = (
@@ -934,6 +937,7 @@ if __name__ == "__main__":
         ppl,
         conventional_carriers,
         extendable_carriers,
+        renewable_carriers,
         snakemake.config.get("conventional", {}),
         conventional_inputs,
         countries,
