@@ -85,6 +85,7 @@ It further adds extendable ``generators`` with **zero** capacity for
 
 import logging
 import os
+from typing import Dict, List
 
 import geopandas as gpd
 import numpy as np
@@ -122,28 +123,27 @@ def calculate_annuity(n, r):
         return 1 / n
 
 
-def _add_missing_carriers_from_costs(n, costs, carriers):
-    countries = costs.index.get_level_values("country").unique()
-
+def _add_missing_carriers_from_costs(n, costs, carriers, countries):
     for country in countries:
         country_mask = costs.index.get_level_values("country") == country
         missing_carriers = pd.Index(carriers).difference(n.carriers.index)
         if missing_carriers.empty:
             continue
-
+        costs_filtered = costs.loc[country]
         emissions_cols = (
-            costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
+            costs_filtered.columns.to_series()
+            .loc[lambda s: s.str.endswith("_emissions")]
+            .values
         )
         suptechs = missing_carriers.str.split("-").str[0]
-        emissions = costs.loc[(country, suptechs), emissions_cols].fillna(0.0)
-        new_row = pd.DataFrame(
-            {"co2_emissions": [0.0]},
-            index=pd.MultiIndex.from_tuples(
-                [(country, "offwind-dc")], names=["country", "technology"]
-            ),
-        )
-        emissions = pd.concat([emissions, new_row])
+        emissions = costs_filtered.loc[suptechs, emissions_cols].fillna(0.0)
+
         emissions.index = missing_carriers
+        emissions.pipe(
+            lambda x: x.assign(country=country)
+            .set_index("country", append=True)
+            .swaplevel(0, 1)
+        )
         n.import_components_from_dataframe(emissions, "Carrier")
 
 
@@ -285,45 +285,68 @@ def attach_load(n, demand_profiles):
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
-def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
-    countries = costs.index.get_level_values("country").unique()
-    # TODO check that code works as expected
+def update_transmission_costs(
+    n, costs, countries: List[str], length_factor=1.0, simple_hvdc_costs=False
+):
+    lines_mask = n.lines["country"].isin(countries)
+    lines_filtered = n.lines.loc[lines_mask]
+
+    hvac_overhead_costs = costs.loc[
+        (countries, "HVAC overhead"), "capital_cost"
+    ].to_dict()
+    hvdc_overhead_costs = costs.loc[
+        (countries, "HVDC overhead"), "capital_cost"
+    ].to_dict()
+
     for country in countries:
-        country_mask = n.lines["country"] == country
-        hvac_overhead_cost = costs.loc[(country, "HVAC overhead"), "capital_cost"]
+        country_mask = lines_filtered["country"] == country
+        hvac_overhead_cost = hvac_overhead_costs.get(country, 0.0)
+
         n.lines.loc[country_mask, "capital_cost"] = (
-            n.lines.loc[country_mask, "length"] * length_factor * hvac_overhead_cost
+            lines_filtered.loc[country_mask, "length"].values
+            * length_factor
+            * hvac_overhead_cost
         )
-        if n.links.empty:
-            return
+    if n.links.empty:
+        return
 
-        dc_b = (n.links["carrier"] == "DC") & country_mask
-        # If there are no "DC" links, then the 'underwater_fraction' column
-        # may be missing. Therefore we have to return here.
-        # TODO: Require fix
-        if n.links.loc[dc_b].empty:
-            return
+    dc_mask = (n.links["carrier"] == "DC") & n.links["country"].isin(countries)
+    links_dc_filtered = n.links.loc[dc_mask]
+    # If there are no "DC" links, then the 'underwater_fraction' column
+    # may be missing. Therefore we have to return here.
+    # TODO: Require fix
+    if links_dc_filtered.empty:
+        return
 
-        if simple_hvdc_costs:
-            hdvc_overhead_cost = costs.loc[(country, "HVDC overhead"), "capital_cost"]
-            costs = n.links.loc[dc_b, "length"] * length_factor * hdvc_overhead_cost
-        else:
-            underwater_fraction = n.links.loc[dc_b, "underwater_fraction"]
-            hvdc_overhead_cost = costs.loc[("HVDC overhead", country), "capital_cost"]
-            hvdc_submarine_cost = costs.loc[("HVDC submarine", country), "capital_cost"]
-            hvdc_inverter_pair_cost = costs.loc[
-                ("HVDC inverter pair", country), "capital_cost"
-            ]
-            costs = (
-                n.links.loc[dc_b, "length"]
-                * length_factor
-                * (
-                    (1.0 - underwater_fraction) * hvdc_overhead_cost
-                    + underwater_fraction * hvdc_submarine_cost
-                )
-                + hvdc_inverter_pair_cost
-            )
-        n.links.loc[dc_b, "capital_cost"] = costs
+    if simple_hvdc_costs:
+        hdvc_overhead_costs = costs.loc[
+            (countries, "HVDC overhead"), "capital_cost"
+        ].to_dict()
+
+        n.links.loc[dc_mask, "capital_cost"] = (
+            links_dc_filtered["length"].values * length_factor * hdvc_overhead_costs
+        )
+    else:
+        underwater_fraction = links_dc_filtered["underwater_fraction"].values
+        hvdc_submarine_costs = costs.loc[
+            (
+                countries,
+                "HVDC submarine",
+            ),
+            "capital_cost",
+        ].to_dict()
+        hvdc_inverter_pair_costs = costs.loc[
+            (countries, "HVDC inverter pair"), "capital_cost"
+        ].to_dict()
+
+        n.links.loc[dc_mask, "capital_cost"] = links_dc_filtered[
+            "length"
+        ].values * length_factor * (
+            (1.0 - underwater_fraction) * hvdc_overhead_costs.get(country, 0.0)
+            + underwater_fraction * hvdc_submarine_costs.get(country, 0.0)
+        ) + hvdc_inverter_pair_costs.get(
+            country, 0.0
+        )
 
 
 def attach_wind_and_solar(
@@ -331,16 +354,21 @@ def attach_wind_and_solar(
     costs,
     ppl,
     input_profiles,
+    countries,
     technologies,
     extendable_carriers,
     line_length_factor=1,
 ):
     # TODO: rename tech -> carrier, technologies -> carriers
-    _add_missing_carriers_from_costs(n, costs, technologies)
+    _add_missing_carriers_from_costs(n, costs, technologies, countries)
 
     df = ppl.rename(columns={"country": "Country"})
 
     for tech in technologies:
+        costs_filtered = costs.loc[
+            costs.index.get_level_values("technology") == tech
+        ].droplevel("technology")
+
         if tech == "hydro":
             continue
 
@@ -353,7 +381,10 @@ def attach_wind_and_solar(
         with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
                 continue
-
+            geo_costs = n.buses.loc[ds.indexes["bus"]].country
+            costs_by_bus = pd.DataFrame(geo_costs).join(
+                costs_filtered, on="country", rsuffix="_r"
+            )
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
                 continue
@@ -373,9 +404,6 @@ def attach_wind_and_solar(
                 # logger.info(
                 #     "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".
                 #     format(connection_cost.min(), connection_cost.max(), tech))
-            else:
-                capital_cost = costs.at[tech, "capital_cost"]
-
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
                 caps = map_country_bus(df.query("carrier == @tech"), buses)
@@ -396,13 +424,64 @@ def attach_wind_and_solar(
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[suptech, "marginal_cost"],
-                capital_cost=capital_cost,
-                efficiency=costs.at[suptech, "efficiency"],
+                marginal_cost=costs_by_bus["marginal_cost"].values,
+                capital_cost=costs_by_bus["capital_cost"].values,
+                efficiency=costs_by_bus["efficiency"].values,
             )
 
 
-def find_parent_key(dictionary, target_key):
+def transform_country_costs(
+    costs: pd.DataFrame, countries: List[str], world_dict: Dict[str, str]
+):
+    """Transforms global or regional index strings into relevant country ones.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        _description_
+    countries : List[str]
+        _description_
+    world_iso : Dict[str]
+        _description_
+    """
+
+    cost_index = costs.index.get_level_values("country")
+    transformed_costs = []
+    for country in countries:
+        continent = find_parent_key(world_iso, country)
+        if country in cost_index:
+            pass
+        elif continent in cost_index:
+            country_costs = costs.loc[continent].assign(country=country)
+        else:
+            country_costs = costs.loc["global"].assign(country=country)
+
+        transformed_costs.append(country_costs)
+
+    transformed_df = (
+        pd.concat(transformed_costs).set_index("country", append=True).swaplevel(0, 1)
+    )
+    transformed_df = transformed_df.loc[
+        transformed_df.index.isin(countries, level="country")
+    ]
+
+    return transformed_df
+
+
+def find_parent_key(dictionary: Dict[str, str], target_key: str):
+    """Looks for country key inside continent.
+
+    Parameters
+    ----------
+    dictionary : Dict[str, str]
+        dictionary of continents and countries
+    target_key : str
+        country iso2
+
+    Returns
+    -------
+        continent key
+    """
     for parent_key, child_dict in dictionary.items():
         if target_key in child_dict:
             return parent_key
@@ -417,32 +496,10 @@ def attach_conventional_generators(
     extendable_carriers,
     conventional_config,
     conventional_inputs,
+    countries,
 ):
     carriers = set(conventional_carriers) | set(extendable_carriers["Generator"])
-    _add_missing_carriers_from_costs(n, costs, carriers)
-
-    countries = ppl.country.unique()
-
-    for country in countries:
-        continent = find_parent_key(world_iso, country)
-        if country in costs.index.levels[0].unique():
-            pass
-        elif continent in costs.index.levels[0].unique():
-            # apply continent specific costs
-            country_costs = costs.loc[continent].pipe(
-                lambda x: x.assign(country=country)
-                .set_index("country", append=True)
-                .swaplevel(0, 1)
-            )
-            costs = pd.concat([costs, country_costs])
-        else:
-            country_costs = costs.loc["global"].pipe(
-                lambda x: x.assign(country=country)
-                .set_index("country", append=True)
-                .swaplevel(0, 1)
-            )
-            costs = pd.concat([costs, country_costs])
-    costs = costs.loc[costs.index.get_level_values(0).isin(countries.tolist())]
+    _add_missing_carriers_from_costs(n, costs, carriers, countries)
 
     ppl = (
         ppl.query("carrier in @carriers")
@@ -492,19 +549,19 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
-def attach_hydro(n, costs, ppl):
+def attach_hydro(n, costs, ppl, countries):
     if "hydro" not in snakemake.config["renewable"]:
         return
     c = snakemake.config["renewable"]["hydro"]
     carriers = c.get("carriers", ["ror", "PHS", "hydro"])
 
-    _add_missing_carriers_from_costs(n, costs, carriers)
+    _add_missing_carriers_from_costs(n, costs, carriers, countries)
 
     ppl = (
         ppl.query('carrier == "hydro"')
         .reset_index(drop=True)
         .rename(index=lambda s: str(s) + " hydro")
-    )
+    ).join(costs, on=["country", "carrier"], rsuffix="_r")
 
     # TODO: remove this line to address nan when powerplantmatching is stable
     # Current fix, NaN technologies set to ROR
@@ -513,6 +570,7 @@ def attach_hydro(n, costs, ppl):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
+
     if snakemake.config["cluster_options"]["alternative_clustering"]:
         bus_id = ppl["region_id"]
     else:
@@ -562,8 +620,8 @@ def attach_hydro(n, costs, ppl):
             carrier="ror",
             bus=ror["bus"],
             p_nom=ror["p_nom"],
-            efficiency=costs.at["ror", "efficiency"],
-            capital_cost=costs.at["ror", "capital_cost"],
+            efficiency=ror["efficiency"],
+            capital_cost=ror["capital_cost"],
             weight=ror["p_nom"],
             p_max_pu=(
                 inflow_t[ror.index]
@@ -582,10 +640,10 @@ def attach_hydro(n, costs, ppl):
             carrier="PHS",
             bus=phs["bus"],
             p_nom=phs["p_nom"],
-            capital_cost=costs.at["PHS", "capital_cost"],
+            capital_cost=phs["capital_cost"],
             max_hours=phs["max_hours"],
-            efficiency_store=np.sqrt(costs.at["PHS", "efficiency"]),
-            efficiency_dispatch=np.sqrt(costs.at["PHS", "efficiency"]),
+            efficiency_store=np.sqrt(phs["efficiency"]),
+            efficiency_dispatch=np.sqrt(phs["efficiency"]),
             cyclic_state_of_charge=True,
         )
 
@@ -634,10 +692,10 @@ def attach_hydro(n, costs, ppl):
                 if c.get("hydro_capital_cost")
                 else 0.0
             ),
-            marginal_cost=costs.at["hydro", "marginal_cost"],
+            marginal_cost=hydro["marginal_cost"],
             p_max_pu=1.0,  # dispatch
             p_min_pu=0.0,  # store
-            efficiency_dispatch=costs.at["hydro", "efficiency"],
+            efficiency_dispatch=hydro["efficiency"],
             efficiency_store=0.0,
             cyclic_state_of_charge=True,
             inflow=inflow_t.loc[:, hydro.index],
@@ -835,13 +893,14 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     demand_profiles = snakemake.input["demand_profiles"]
-
+    countries = snakemake.config["countries"]
     costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.config["costs"],
         snakemake.config["electricity"],
         Nyears,
-    )
+    ).pipe(transform_country_costs, countries, world_iso)
+
     ppl = load_powerplants(snakemake.input.powerplants)
     if "renewable_carriers" in snakemake.config["electricity"]:
         renewable_carriers = set(snakemake.config["electricity"]["renewable_carriers"])
@@ -863,7 +922,9 @@ if __name__ == "__main__":
 
     conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
     attach_load(n, demand_profiles)
-    update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
+    update_transmission_costs(
+        n, costs, countries, snakemake.config["lines"]["length_factor"]
+    )
     conventional_inputs = {
         k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
     }
@@ -875,17 +936,19 @@ if __name__ == "__main__":
         extendable_carriers,
         snakemake.config.get("conventional", {}),
         conventional_inputs,
+        countries,
     )
     attach_wind_and_solar(
         n,
         costs,
         ppl,
         snakemake.input,
+        countries,
         renewable_carriers,
         extendable_carriers,
         snakemake.config["lines"]["length_factor"],
     )
-    attach_hydro(n, costs, ppl)
+    attach_hydro(n, costs, ppl, countries)
 
     estimate_renewable_capacities_irena(n, snakemake.config)
 
