@@ -45,8 +45,8 @@ def sets_path_to_root(root_directory_name):
             break
         # if repo_name NOT current folder name for 5 levels then stop
         if n == 0:
-            print("Cant find the repo path.")
-        # if repo_name NOT current folder name, go one dir higher
+            print("Can't find the repo path.")
+        # if repo_name NOT current folder name, go one directory higher
         else:
             upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
             os.chdir(upper_path)

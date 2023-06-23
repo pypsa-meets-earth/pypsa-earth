@@ -167,7 +167,7 @@ def get_GADM_layer(
     outlogging=False,
 ):
     """
-    Function to retrive a specific layer id of a geopackage for a selection of countries
+    Function to retrieve a specific layer id of a geopackage for a selection of countries
 
     Parameters
     ----------
