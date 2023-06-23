@@ -68,7 +68,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - book a 30min meeting with Max to discuss anything you like
-  - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min)
+  - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min)
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
