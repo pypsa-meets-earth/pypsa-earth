@@ -143,14 +143,11 @@ def _load_buses_from_osm(fp_buses, config):
     return buses
 
 
-def _set_links_underwater_fraction(fp_offshore_shapes, n):
-    if n.links.empty:
-        return
-
+def add_underwater_links(n, shapes):
     if not hasattr(n.links, "geometry"):
         n.links["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
+        offshore_shape = gpd.read_file(shapes).unary_union
         if offshore_shape is None or offshore_shape.is_empty:
             n.links["underwater_fraction"] = 0.0
         else:
@@ -158,6 +155,33 @@ def _set_links_underwater_fraction(fp_offshore_shapes, n):
             n.links["underwater_fraction"] = (
                 links.intersection(offshore_shape).length / links.length
             )
+
+
+# TODO would be nice to join both the add_underwater* functions
+def add_underwater_lines(n, shapes):
+    if not hasattr(n.lines, "geometry"):
+        n["lines", "underwater_fraction"] = 0.0
+    else:
+        offshore_shape = gpd.read_file(shapes).unary_union
+        if offshore_shape is None or offshore_shape.is_empty:
+            n["lines", "underwater_fraction"] = 0.0
+        else:
+            lines = gpd.GeoSeries(n.lines.geometry.dropna().map(shapely.wkt.loads))
+            n.lines["underwater_fraction"] = (
+                lines.intersection(offshore_shape).length / lines.length
+            )
+
+
+def _set_links_underwater_fraction(fp_offshore_shapes, n):
+    # HVDC part always has some links as converters
+    # excluding probably purely DC networks which are currently somewhat exotic
+    if n.links.empty:
+        return
+
+    if not n.links.loc[n.links.carrier == "DC"].empty:
+        add_underwater_links(n, fp_offshore_shapes)
+    elif not n.lines.loc[n.lines.carrier == "DC"].empty:
+        add_underwater_lines(n, fp_offshore_shapes)
 
 
 def _load_lines_from_osm(fp_osm_lines, config, buses):
