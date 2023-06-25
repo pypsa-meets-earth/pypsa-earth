@@ -148,20 +148,28 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
 
 
 def _prepare_connection_costs_per_link(n, costs, config):
-    if n.links.empty:
+    #    if n.links.empty:
+    if (not n.links.dc.any()) or (not n.links.dc.any()):
         return {}
 
     connection_costs_per_link = {}
 
+    if not n.links.loc[n.links.carrier == "DC"].empty:
+        dc_lengths = n.links.length
+        unterwater_fractions = n.links.underwater_fraction
+    elif not n.lines.loc[n.lines.carrier == "DC"].empty:
+        dc_lengths = n.lines.length
+        unterwater_fractions = n.lines.underwater_fraction
+
     for tech in config["renewable"]:
         if tech.startswith("offwind"):
             connection_costs_per_link[tech] = (
-                n.links.length
+                dc_lengths
                 * config["lines"]["length_factor"]
                 * (
-                    n.links.underwater_fraction
+                    unterwater_fractions
                     * costs.at[tech + "-connection-submarine", "capital_cost"]
-                    + (1.0 - n.links.underwater_fraction)
+                    + (1.0 - unterwater_fractions)
                     * costs.at[tech + "-connection-underground", "capital_cost"]
                 )
             )
