@@ -148,8 +148,7 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
 
 
 def _prepare_connection_costs_per_link(n, costs, config):
-    #    if n.links.empty:
-    if (not n.links.dc.any()) or (not n.links.dc.any()):
+    if n.links.empty:
         return {}
 
     connection_costs_per_link = {}
