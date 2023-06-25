@@ -252,21 +252,8 @@ def attach_load(n, demand_profiles):
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
-def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
-    n.lines["capital_cost"] = (
-        n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
-    )
-
-    if n.links.empty:
-        return
-
+def attach_dc_costs_links(n, costs, length_factor=1.0, simple_hvdc_costs=False):
     dc_b = n.links.carrier == "DC"
-    # If there are no "DC" links, then the 'underwater_fraction' column
-    # may be missing. Therefore we have to return here.
-    # TODO: Require fix
-    if n.links.loc[n.links.carrier == "DC"].empty:
-        return
-
     if simple_hvdc_costs:
         costs = (
             n.links.loc[dc_b, "length"]
@@ -286,6 +273,67 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
             + costs.at["HVDC inverter pair", "capital_cost"]
         )
     n.links.loc[dc_b, "capital_cost"] = costs
+    return n
+
+
+def attach_dc_costs_lines(n, costs, length_factor=1.0, simple_hvdc_costs=False):
+    dc_b = n.lines.carrier == "DC"
+    if simple_hvdc_costs:
+        costs = (
+            n.lines.loc[dc_b, "length"]
+            * length_factor
+            * costs.at["HVDC overhead", "capital_cost"]
+        )
+    else:
+        costs = (
+            n.lines.loc[dc_b, "length"]
+            * length_factor
+            * (
+                (1.0 - n.lines.loc[dc_b, "underwater_fraction"])
+                * costs.at["HVDC overhead", "capital_cost"]
+                + n.lines.loc[dc_b, "underwater_fraction"]
+                * costs.at["HVDC submarine", "capital_cost"]
+            )
+            + costs.at["HVDC inverter pair", "capital_cost"]
+        )
+    n.lines.loc[dc_b, "capital_cost"] = costs
+    return n
+
+
+def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
+    n.lines["capital_cost"] = (
+        n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
+    )
+
+    if n.links.empty:
+        return
+
+    # If there are no "DC" links, then the 'underwater_fraction' column
+    # may be missing. Therefore we have to return here.
+    # TODO: Require fix
+    if (
+        n.links.loc[n.links.carrier == "DC"].empty
+        and n.lines.loc[n.lines.carrier == "DC"].empty
+    ):
+        return
+
+    # HVDC implemented as links
+    if not n.links.loc[n.links.carrier == "DC"].empty:
+        attach_dc_costs_links(
+            n,
+            costs=costs,
+            length_factor=length_factor,
+            simple_hvdc_costs=simple_hvdc_costs,
+        )
+
+    # HVDC implemented as lines
+    if not n.lines.loc[n.lines.carrier == "DC"].empty:
+        attach_dc_costs_lines(
+            n,
+            costs=costs,
+            length_factor=length_factor,
+            simple_hvdc_costs=simple_hvdc_costs,
+        )
 
 
 def attach_wind_and_solar(
