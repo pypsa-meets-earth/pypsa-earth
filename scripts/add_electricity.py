@@ -103,6 +103,23 @@ idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
 
+carrier_pypsa_mapping = {
+    "ocgt": "OCGT",
+    "ccgt": "CCGT",
+    "bioenergy": "biomass",
+    "ccgt, thermal": "CCGT",
+    "hard coal": "coal",
+}
+# rename because technology data & pypsa earth costs.csv use different names
+# TODO: rename the technologies in hosted tutorial data to match technology data
+
+hydrogen_pypsa_mapping = {
+    "hydrogen storage": "hydrogen storage tank",
+    "hydrogen storage tank": "hydrogen storage tank",
+    "hydrogen storage tank type 1": "hydrogen storage tank",
+    "hydrogen underground storage": "hydrogen storage underground",
+}
+
 
 def normed(s):
     return s / s.sum()
@@ -147,30 +164,178 @@ def _add_missing_carriers_from_costs(n, costs, carriers, countries):
         n.import_components_from_dataframe(emissions, "Carrier")
 
 
-def load_costs(tech_costs, config, elec_config, Nyears=1):
+def load_costs(
+    tech_costs_path: str,
+    config_costs: Dict,
+    elec_config: Dict,
+    countries: List[str],
+    country_mapping: Dict[str, str],
+    hydrogen_mapping: Dict[str, str],
+    Nyears: int = 1,
+) -> pd.DataFrame:
     """
-    set all asset costs and other parameters
-    """
+    Set all asset costs and formats them according to preferences.
 
-    costs = pd.read_csv(
-        tech_costs, index_col=["country", "technology", "parameter"]
-    ).sort_index()
-    # rename because technology data & pypsa earth costs.csv use different names
-    # TODO: rename the technologies in hosted tutorial data to match technology data
-    costs = costs.rename(
-        {
-            "hydrogen storage": "hydrogen storage tank",
-            "hydrogen storage tank": "hydrogen storage tank",
-            "hydrogen storage tank type 1": "hydrogen storage tank",
-            "hydrogen underground storage": "hydrogen storage underground",
-        },
+    Parameters
+    ----------
+    tech_costs_path : str
+        Path to the technology costs file.
+    config_costs : Dict
+        Dictionary of costs section defined in the config.yaml.
+    elec_config : Dict
+        Dictionary of electricity section defined in the config.yaml.
+    countries : List[str]
+        List of country ISO2 codes based on the countries defined in the config.
+    country_mapping : Dict[str,str]
+       Dictionary of country ISO2 keys organised by continent.
+    Nyears : int, optional
+        _description_, by default 1
+
+    Returns
+    -------
+    pd.DataFrame
+        Processed cost data.
+
+    """
+    max_hours = elec_config["max_hours"]
+
+    costs = (
+        pd.read_csv(tech_costs_path, index_col=["country", "technology", "parameter"])
+        .sort_index()
+        .rename(hydrogen_mapping)
+        .pipe(correct_units, config_costs)
+        .pipe(fill_nas_with_config_costs, config_costs)
+        .pipe(annualise_capital_costs, Nyears)
+        .rename(columns={"CO2 intensity": "co2_emissions"})
+        .pipe(transform_country_costs, countries, country_mapping)
+        .pipe(update_gas_costs, countries)
+        .pipe(calculate_solar_capital_costs, config_costs, countries)
+        .pipe(apply_countrywise_battery_costs, max_hours, countries)
+        .pipe(apply_overwrites_from_config, countries, config_costs)
     )
-    # correct units to MW and EUR
+
+    return costs
+
+
+def apply_overwrites_from_config(
+    costs: pd.DataFrame, countries: List[str], config_costs: Dict
+) -> pd.DataFrame:
+    """Applies overwrites from the config file for marginal and capital costs if defined.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+         Technology-costs dataframe.
+    countries : List[str]
+       List of country ISO2 codes based on the countries defined in the config.
+    config_costs : Dict
+        Dictionary of costs section defined in the config.yaml.
+
+    Returns
+    -------
+    pd.DataFrame
+       Technology costs dataframe with overwrites applied.
+    """
+    for country in countries:
+        country_mask = costs.index.get_level_values("country") == country
+        # TODO  check that lines below are functioning as desired
+        for attr in ("marginal_cost", "capital_cost"):
+            overwrites = config_costs.get(attr)
+            if overwrites is not None:
+                overwrites = pd.Series(overwrites)
+                costs.loc[country_mask, attr] = overwrites.get(
+                    country, costs.loc[country_mask, attr]
+                )
+    return costs
+
+
+def apply_countrywise_battery_costs(
+    costs: pd.DataFrame, max_hours: Dict, countries: List[str]
+) -> pd.DataFrame:
+    """Applies battery costs by country.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        Technology-costs dataframe.
+    max_hours : Dict
+        _description_
+    countries : List[str]
+        List of country ISO2 codes based on the countries defined in the config.
+
+    Returns
+    -------
+    pd.DataFrame
+       Costs dataframe with country specific battery costs applied.
+    """
+    for country in countries:
+        battery_storage_cost = costs.loc[(country, "battery storage")]
+        battery_inverter_cost = costs.loc[(country, "battery inverter")]
+        battery_cost = costs_for_storage(
+            battery_storage_cost, battery_inverter_cost, max_hours=max_hours["battery"]
+        )
+        costs.loc[(country, "battery")] = battery_cost
+    return costs
+
+
+def correct_units(costs: pd.DataFrame, config_costs: Dict) -> pd.DataFrame:
+    """Corrects units to MW and EUR
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        Technology-costs dataframe.
+    config_costs : Dict
+        Dictionary of costs section defined in the config.yaml.
+
+    Returns
+    -------
+    pd.DataFrame
+        _description_
+    """
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
-    costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
+    costs.loc[costs.unit.str.contains("USD"), "value"] *= config_costs[
+        "USD2013_to_EUR2013"
+    ]  # TODO #777 generalise currency conversion
 
-    costs = costs.value.unstack().fillna(config["fill_values"])
+    return costs
+
+
+def fill_nas_with_config_costs(costs: pd.DataFrame, config_costs: Dict) -> pd.DataFrame:
+    """Fills any NA values in costs with the fill_values defined in the config.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+       Technology-costs dataframe.
+    config_costs : Dict
+        Dictionary of costs section defined in the config.yaml.
+
+    Returns
+    -------
+    pd.DataFrame
+        costs dataframe updated with config fill values.
+    """
+    costs = costs.value.unstack().fillna(config_costs["fill_values"])
+    return costs
+
+
+def annualise_capital_costs(costs: pd.DataFrame, Nyears: float) -> pd.DataFrame:
+    """Annualises capital costs.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        Technology-costs dataframe.
+    Nyears : float
+        _description_
+
+    Returns
+    -------
+    pd.DataFrame
+        costs dataframe with annualised capital costs.
+    """
 
     costs["capital_cost"] = (
         (
@@ -180,19 +345,25 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         * costs["investment"]
         * Nyears
     )
+    return costs
 
-    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        # TODO reduce verbosity and duplication
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
-        if link2 is not None:
-            capital_cost += link2["capital_cost"]
-        return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
-        )
 
-    costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
-    max_hours = elec_config["max_hours"]
-    countries = costs.index.get_level_values("country").unique()
+def update_gas_costs(costs: pd.DataFrame, countries: List[str]) -> pd.DataFrame:
+    """
+    Updates gas costs and emissions based on the gas technology and the country of origin.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        Technology-costs dataframe.
+    countries : List[str]
+        List of countries defined in the config.
+
+    Returns
+    -------
+    pd.DataFrame
+         Updated costs dataframe with solar capital costs.
+    """
     for country in countries:
         country_mask = costs.index.get_level_values("country") == country
         mask_ocgt = (costs.index.get_level_values("country") == country) & (
@@ -216,9 +387,35 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
             costs.loc[country_mask, "VOM"]
             + costs.loc[country_mask, "fuel"] / costs.loc[country_mask, "efficiency"]
         )
+
+    return costs
+
+
+def calculate_solar_capital_costs(
+    costs: pd.DataFrame, config_costs: Dict, countries: List[str]
+) -> pd.DataFrame:
+    """
+    Calculates capital costs for solar-rooftop and solar-utility based on the country of origin and the share of each technology
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+    Technology-costs dataframe.
+    config_costs : Dict
+        Dictionary of costs section defined in the config.yaml.
+    countries : List[str]
+        List of countries defined in the config.
+
+    Returns
+    -------
+    pd.DataFrame
+        Updated costs dataframe with solar capital costs.
+    """
+    for country in countries:
+        rooftop_share = config_costs.get(country, {}).get("rooftop_share", 0.0)
+        country_mask = costs.index.get_level_values("country") == country
         solar_rooftop_cost = costs.loc[(country, "solar-rooftop"), "capital_cost"]
         solar_utility_cost = costs.loc[(country, "solar-utility"), "capital_cost"]
-        rooftop_share = config.get(country, {}).get("rooftop_share", 0.0)
         utility_share = 1 - rooftop_share
         costs.loc[
             country_mask & (costs.index.get_level_values("technology") == "solar"),
@@ -226,61 +423,73 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         ] = (
             rooftop_share * solar_rooftop_cost + utility_share * solar_utility_cost
         )
-        battery_storage_cost = costs.loc[(country, "battery storage")]
-        battery_inverter_cost = costs.loc[(country, "battery inverter")]
-        max_hours = elec_config["max_hours"]
-        battery_cost = costs_for_storage(
-            battery_storage_cost, battery_inverter_cost, max_hours=max_hours["battery"]
-        )
-        costs.loc[(country, "battery")] = battery_cost
-        # TODO  check that lines below are functioning as desired
-        for attr in ("marginal_cost", "capital_cost"):
-            overwrites = config.get(attr)
-            if overwrites is not None:
-                overwrites = pd.Series(overwrites)
-                costs.loc[country_mask, attr] = overwrites.get(
-                    country, costs.loc[country_mask, attr]
-                )
-
     return costs
 
 
-def load_powerplants(ppl_fn):
-    carrier_dict = {
-        "ocgt": "OCGT",
-        "ccgt": "CCGT",
-        "bioenergy": "biomass",
-        "ccgt, thermal": "CCGT",
-        "hard coal": "coal",
-    }
-    return (
-        pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
-        .powerplant.to_pypsa_names()
-        .powerplant.convert_country_to_alpha2()
-        .rename(columns=str.lower)
-        .drop(columns=["efficiency"])
-        .replace({"carrier": carrier_dict})
+def costs_for_storage(store, link1, link2=None, max_hours=1.0):
+    # TODO reduce verbosity and duplication
+    capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+    if link2 is not None:
+        capital_cost += link2["capital_cost"]
+    return pd.Series(
+        dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
     )
 
 
-def attach_load(n, demand_profiles):
+def load_powerplants(file_path: str, carrier_mapping: Dict[str, str]) -> pd.DataFrame:
     """
-    Add load profiles to network buses
+    Load power plant data from a CSV file and perform data transformations.
 
     Parameters
     ----------
-    n: pypsa network
+    file_path : str
+        Path to the CSV file containing power plant data.
+
+    carrier_mapping : Dict[str, str]
+        A dictionary mapping carrier values to their replacements based on technology data.
+
+    Returns
+    -------
+    pd.DataFrame
+        Processed power plant data.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified file_path does not exist.
+    """
+
+    try:
+        powerplants = pd.read_csv(file_path, index_col=0, dtype={"bus": "str"})
+    except FileNotFoundError:
+        raise FileNotFoundError("File not found: {}".format(file_path))
+
+    powerplants = (
+        powerplants.powerplant.to_pypsa_names()
+        .powerplant.convert_country_to_alpha2()
+        .rename(columns=str.lower)
+        .drop(columns=["efficiency"])
+        .replace({"carrier": carrier_mapping})
+    )
+    return powerplants
+
+
+def attach_load(n: pypsa.Network, demand_profiles_path: str) -> None:
+    """
+    Add load profiles to network buses.
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network object.
 
     demand_profiles: str
         Path to csv file of elecric demand time series, e.g. "resources/demand_profiles.csv"
         Demand profile has snapshots as rows and bus names as columns.
 
-    Returns
-    -------
-    n : pypsa network
-        Now attached with load time series
+
     """
-    demand_df = pd.read_csv(demand_profiles, index_col=0, parse_dates=True)
+    demand_df = pd.read_csv(demand_profiles_path, index_col=0, parse_dates=True)
 
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
@@ -431,35 +640,37 @@ def attach_wind_and_solar(
 
 
 def transform_country_costs(
-    costs: pd.DataFrame, countries: List[str], world_dict: Dict[str, str]
-):
+    costs: pd.DataFrame, countries: List[str], country_mapping: Dict[str, str]
+) -> pd.DataFrame:
     """Transforms global or regional index strings into relevant country ones.
 
     Parameters
     ----------
     costs : pd.DataFrame
-        _description_
+        Pandas dataframe of costs.
     countries : List[str]
-        _description_
-    world_iso : Dict[str]
-        _description_
+        List of country ISO2 codes based on the countries defined in the config.
+    country_mapping : Dict[str,str]
+        Dictionary of country ISO2 keys organised by continent.
     """
 
     cost_index = costs.index.get_level_values("country")
-    transformed_costs = []
+    transformed_costs_dfs = []
     for country in countries:
-        continent = find_parent_key(world_iso, country)
+        continent = find_parent_key(country_mapping, country)
         if country in cost_index:
-            pass
+            country_costs = costs.loc[country].assign(country=country)
         elif continent in cost_index:
             country_costs = costs.loc[continent].assign(country=country)
         else:
             country_costs = costs.loc["global"].assign(country=country)
 
-        transformed_costs.append(country_costs)
+        transformed_costs_dfs.append(country_costs)
 
     transformed_df = (
-        pd.concat(transformed_costs).set_index("country", append=True).swaplevel(0, 1)
+        pd.concat(transformed_costs_dfs)
+        .set_index("country", append=True)
+        .swaplevel(0, 1)
     )
     transformed_df = transformed_df.loc[
         transformed_df.index.isin(countries, level="country")
@@ -898,13 +1109,18 @@ if __name__ == "__main__":
     demand_profiles = snakemake.input["demand_profiles"]
     countries = snakemake.config["countries"]
     costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
-        Nyears,
-    ).pipe(transform_country_costs, countries, world_iso)
+        tech_costs_path=snakemake.input.tech_costs,
+        config_costs=snakemake.config["costs"],
+        elec_config=snakemake.config["electricity"],
+        countries=countries,
+        country_mapping=world_iso,
+        hydrogen_mapping=hydrogen_pypsa_mapping,
+        Nyears=Nyears,
+    )
 
-    ppl = load_powerplants(snakemake.input.powerplants)
+    ppl = load_powerplants(
+        file_path=snakemake.input.powerplants, carrier_mapping=carrier_pypsa_mapping
+    )
     if "renewable_carriers" in snakemake.config["electricity"]:
         renewable_carriers = set(snakemake.config["electricity"]["renewable_carriers"])
     else:
