@@ -15,6 +15,7 @@ repos:
   - id: end-of-file-fixer
   - id: fix-encoding-pragma
   - id: mixed-line-ending
+  - id: trailing-whitespace
 #   - id: check-added-large-files
 #     args: ['--maxkb=2000']
 
@@ -25,14 +26,14 @@ repos:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
 
-# # Find common spelling mistakes in comments and docstrings
-# - repo: https://github.com/codespell-project/codespell
-#   rev: v2.2.1
-#   hooks:
-#   - id: codespell
-#     args: ['--ignore-regex="\b[A-Z]+\b"'] # Ignore capital case words, e.g. country codes
-#     types_or: [python, rst, markdown]
-#     files: ^(actions|doc)/
+  # Find common spelling mistakes in comments and docstrings
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.2.5
+  hooks:
+  - id: codespell
+    args: ['--ignore-regex="(\b[A-Z]+\b)"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore'] # Ignore capital case words, e.g. country codes
+    types_or: [python, rst, markdown]
+    files: ^(scripts|doc)/
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
@@ -65,6 +66,6 @@ repos:
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v1.1.2
+  rev: v2.0.0
   hooks:
   - id: reuse

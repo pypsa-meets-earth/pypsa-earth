@@ -191,7 +191,7 @@ def merge_stations_same_station_id(
     # initialize list of cleaned buses
     buses_clean = []
 
-    # initalize the number of buses
+    # initialize the number of buses
     n_buses = 0
 
     for g_name, g_value in buses.groupby(by="station_id"):
@@ -592,7 +592,7 @@ def _split_linestring_by_point(linestring, points):
     Parameters
     ----------
     lstring : LineString
-        Linestring of the line to be splitted
+        Linestring of the line to be split
     points : list
         List of points to split the linestring
 
@@ -626,11 +626,11 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         Geodataframe of substations
     tol : float
         Tolerance in meters of the distance between the substation and the line
-        below which the line will be splitted
+        below which the line will be split
     """
 
     lines_to_add = []  # list of lines to be added
-    lines_to_split = []  # list of lines that have been splitted
+    lines_to_split = []  # list of lines that have been split
 
     lines_epsgmod = lines.to_crs(distance_crs)
     buses_epsgmod = buses.to_crs(distance_crs)
@@ -738,7 +738,7 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
     bus_country_list = buses["country"].unique().tolist()
 
     # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
-    # difference can't give negative values; the following will return only releant country names
+    # difference can't give negative values; the following will return only relevant country names
     no_data_countries = list(set(country_list).difference(set(bus_country_list)))
 
     if len(no_data_countries) > 0:

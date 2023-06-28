@@ -13,6 +13,7 @@
 **/pbf
 *.pbf
 *.zip
+*.png
 
 # Untracked files
 config.yaml
@@ -39,6 +40,7 @@ scripts/test.py
 test/tmp/
 configs/scenarios/config.*.yaml
 !configs/scenarios/config.NG.yaml
+dask-worker-space/
 
 # Untrack some Jupyter changes
 .ipynb_checkpoints

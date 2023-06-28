@@ -364,7 +364,7 @@ def _set_countries_and_substations(inputs, config, n):
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
 
-    # Busses without country tag are removed OR get a country tag if close to country
+    # Buses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:
         c_tag = get_country(buses.loc[c_nan_b])

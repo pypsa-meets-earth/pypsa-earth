@@ -68,7 +68,7 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 
-Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
 Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
 
 Tagging considerations for columns in the file:
@@ -142,7 +142,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     "wave": "Other",
                     "geothermal": "Geothermal",
                     "solar": "Solar",
-                    # "Hard Coal" follows defauls of PPM
+                    # "Hard Coal" follows defaults of PPM
                     "coal": "Hard Coal",
                     "gas": "Natural Gas",
                     "biomass": "Bioenergy",
@@ -200,7 +200,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
-    # However, everithing extracted from OSM seems to belong
+    # However, everything extracted from OSM seems to belong
     # to power plants with "tags.power" == "generator" only
     osm_ppm_df = pd.DataFrame(
         data={
@@ -254,13 +254,15 @@ def add_custom_powerplants(ppl, inputs, config):
 
 
 def replace_natural_gas_technology(df):
-    mapping = {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}
-    tech = df.Technology.replace(mapping).fillna("OCGT")
-    return df.Technology.where(df.Fueltype != "Natural Gas", tech)
+    mapping = {"Steam Turbine": "CCGT", "Combustion Engine": "OCGT"}
+    tech = df.Technology.replace(mapping).fillna("CCGT")
+    return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
 
 
 def replace_natural_gas_fueltype(df):
-    return df.Fueltype.where(df.Fueltype != "Natural Gas", df.Technology)
+    return df.Fueltype.mask(
+        (df.Technology == "OCGT") | (df.Technology == "CCGT"), "Natural Gas"
+    )
 
 
 if __name__ == "__main__":
@@ -302,7 +304,6 @@ if __name__ == "__main__":
         pm.powerplants(from_url=False, update=True, config_update=config)
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
         .powerplant.convert_country_to_alpha2()
         .assign(
             Technology=replace_natural_gas_technology,

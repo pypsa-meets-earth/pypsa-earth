@@ -206,6 +206,7 @@ import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
+from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
 from shapely.geometry import LineString, Point
 
@@ -373,7 +374,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
             yearlyavg_runoff_by_plant.loc[normalization_buses].groupby("country").sum()
         )
 
-        # common country indeces
+        # common country indices
         common_countries = normalize_using_yearly.columns.intersection(
             grouped_runoffs.index
         )
@@ -472,7 +473,7 @@ if __name__ == "__main__":
     pgb.streams.wrap_stderr()
     countries = snakemake.config["countries"]
     paths = snakemake.input
-    nprocesses = snakemake.config["atlite"].get("nprocesses")
+    nprocesses = int(snakemake.threads)
     noprogress = not snakemake.config["atlite"].get("show_progress", False)
     config = snakemake.config["renewable"][snakemake.wildcards.technology]
     resource = config["resource"]
@@ -497,6 +498,9 @@ if __name__ == "__main__":
 
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
+
+    cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
+    client = Client(cluster, asynchronous=True)
 
     cutout = atlite.Cutout(paths["cutout"])
     if not snakemake.wildcards.technology.startswith("hydro"):
@@ -524,7 +528,7 @@ if __name__ == "__main__":
     buses = regions.index
 
     func = getattr(cutout, resource.pop("method"))
-    resource["dask_kwargs"] = {"num_workers": nprocesses}
+    resource["dask_kwargs"] = {"scheduler": client}
 
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
@@ -795,3 +799,4 @@ if __name__ == "__main__":
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
         ds.to_netcdf(snakemake.output.profile)
+    client.shutdown()

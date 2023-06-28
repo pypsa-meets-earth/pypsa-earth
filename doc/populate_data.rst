@@ -6,7 +6,7 @@
 Populate data
 ##########################################
 
-Once the download and filtering process is complete, the clean data are then processed through 
+Once the download and filtering process is complete, the clean data are then processed through
 a set of ``snakemake`` rules to identify the main data inputs for the network modelling.
 
 The following list of rules apply:

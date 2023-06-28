@@ -565,6 +565,8 @@ continent_regions = {
     "CASR": ["KZ", "KG", "UZ", "TM", "TJ"],
     # SOUTHERN ASIAN REGION
     "SASR": ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"],
+    # ASEAN: Political denomination of Southeast Asian countries
+    "ASEAN": ["VN", "TH", "ID", "PH", "MY", "MM", "KH", "LA", "SG", "BN"],
     # MIDDLE EASTERN ASIAN REGION
     "MEAR": [
         "TR",

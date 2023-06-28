@@ -46,7 +46,7 @@ if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
     COSTS = "data/costs.csv"
-ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 10)
+ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
 wildcard_constraints:
@@ -55,6 +55,12 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
+
+
+if config["custom_rules"] is not []:
+    for rule in config["custom_rules"]:
+
+        include: rule
 
 
 rule clean:
@@ -354,7 +360,7 @@ rule build_demand_profiles:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         load=load_data_paths,
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
@@ -447,7 +453,7 @@ rule add_electricity:
         base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
         powerplants="resources/" + RDIR + "powerplants.csv",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM

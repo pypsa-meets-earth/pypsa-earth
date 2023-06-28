@@ -523,14 +523,21 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",
-            clusters="10",
+            clusters="5",
             ll="copt",
-            opts="Co2L-24H",
-            country="NG",
+            opts="Co2L-3H",
+            country="all",
         )
-        network_dir = os.path.join("..", "results", "networks")
+        network_dir = ".."
     else:
-        network_dir = os.path.join("results", "networks")
+        network_dir = "."
+
+    scenario_name = snakemake.config.get("run", {}).get("name", "")
+    if scenario_name:
+        network_dir = os.path.join(network_dir, "results", scenario_name, "networks")
+    else:
+        network_dir = os.path.join(network_dir, "results", "networks")
+
     configure_logging(snakemake)
 
     def expand_from_wildcard(key):
