@@ -436,7 +436,7 @@ def costs_for_storage(store, link1, link2=None, max_hours=1.0):
     )
 
 
-def load_powerplants(file_path: str, carrier_mapping: Dict[str, str]) -> pd.DataFrame:
+def load_powerplants(file_path: str) -> pd.DataFrame:
     """
     Load power plant data from a CSV file and perform data transformations.
 
@@ -469,8 +469,15 @@ def load_powerplants(file_path: str, carrier_mapping: Dict[str, str]) -> pd.Data
         .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
         .drop(columns=["efficiency"])
-        .replace({"carrier": carrier_mapping})
     )
+    return powerplants
+
+
+def map_carriers(
+    powerplants: pd.DataFrame, carrier_mapping: Dict[str, str]
+) -> pd.DataFrame:
+    powerplants = powerplants.replace({"carrier": carrier_mapping})
+
     return powerplants
 
 
@@ -1118,8 +1125,8 @@ if __name__ == "__main__":
         Nyears=Nyears,
     )
 
-    ppl = load_powerplants(
-        file_path=snakemake.input.powerplants, carrier_mapping=carrier_pypsa_mapping
+    ppl = load_powerplants(file_path=snakemake.input.powerplants).pipe(
+        map_carriers, carrier_mapping=carrier_pypsa_mapping
     )
     if "renewable_carriers" in snakemake.config["electricity"]:
         renewable_carriers = set(snakemake.config["electricity"]["renewable_carriers"])
