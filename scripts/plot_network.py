@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 """
 Plots map with pie charts and cost box bar charts.
+
 Relevant Settings
 -----------------
 Inputs

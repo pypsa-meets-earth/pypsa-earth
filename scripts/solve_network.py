@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Solves linear optimal power flow for a network iteratively while updating reactances.
+Solves linear optimal power flow for a network iteratively while updating
+reactances.
 
 Relevant Settings
 -----------------

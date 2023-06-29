@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates Voronoi shapes for each bus representing both onshore and offshore regions.
+Creates Voronoi shapes for each bus representing both onshore and offshore
+regions.
 
 Relevant Settings
 -----------------
@@ -40,7 +41,6 @@ Outputs
 
 Description
 -----------
-
 """
 import logging
 import os
