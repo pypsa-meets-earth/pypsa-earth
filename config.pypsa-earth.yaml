@@ -1,14 +1,28 @@
-# SPDX-FileCopyrightText: : 2021 The PyPSA-Earth Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: CC0-1.0
 
-
-version: 1.0.0
+version: 0.2.1
 tutorial: false
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
+
+countries: ["MA"]
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
+
+enable:
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: true  # If True, than an exclusion raster will be build
+  build_cutout: true
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
   name: "" # use this to keep track of runs with different settings
@@ -21,23 +35,10 @@ scenario:
   clusters: [10]
   opts: [Co2L1-144H]
 
-countries: ["MA"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
-
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
   inclusive: "left" # end is not inclusive
-
-enable:
-  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: false  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false  # If True, than an exclusion raster will be build
-  build_cutout: true
-  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
 # definition of the Coordinate Reference Systems
 crs:
@@ -56,12 +57,14 @@ augmented_line_connection:
 
 cluster_options:
   simplify_network:
-    to_substations: false   # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
-    algorithm: kmeans   # choose from: [hac, kmeans]
-    feature: solar+onwind-time   # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
+    to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
+    algorithm: kmeans # choose from: [hac, kmeans]
+    feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
     exclude_carriers: []
     remove_stubs: false
     remove_stubs_across_borders: true
+    p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -91,6 +94,7 @@ build_shape_options:
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
+
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
   threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
@@ -100,9 +104,10 @@ clean_osm_data_options:  # osm = OpenStreetMap
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 500  # [m] (default 500) Tolerance in meters of the close buses to merge
+  group_tolerance_buses: 5000  # [m] (default 5000) Tolerance in meters of the close buses to merge
   split_overpassing_lines: true  # When True, lines overpassing buses are splitted and connected to the bueses
   overpassing_lines_tolerance: 1  # [m] (default 1) Tolerance to identify lines overpassing buses
+  force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 base_network:
   min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
@@ -115,9 +120,10 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
+  base_voltage: 380.
   voltages: [220., 300., 380.]
-  co2limit: 40.0e+6  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 40.0e+6  # European default, adjustment to Africa necessary
+  co2limit: 72.0e+6  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
+  co2base: 72.0e+6  # European default, adjustment to Africa necessary
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: true # should HVDC lines be modeled as `Line` or as `Link` component?
 
@@ -138,7 +144,7 @@ electricity:
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -168,7 +174,6 @@ lines:
 links:
   p_max_pu: 1.0
   p_nom_max: .inf
-  include_tyndp: true
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 transformers:
@@ -294,10 +299,11 @@ renewable:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
     multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
-# TODO: Needs to be adjusted for Africa
+
+# TODO: Needs to be adjusted for Africa.
+# Costs Configuration (Do not remove, needed for Sphynx documentation).
 costs:
   year: 2030
-
   version: v0.5.0
   rooftop_share: 0.14  # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
@@ -309,7 +315,7 @@ costs:
     investment: 0
     lifetime: 25
     CO2 intensity: 0
-    discount rate: 0.07
+    discount rate: 0.15
   marginal_cost: # EUR/MWh
     solar: 0.01
     onwind: 0.015

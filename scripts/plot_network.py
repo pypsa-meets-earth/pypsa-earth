@@ -379,7 +379,7 @@ def plot_transmission_topology(network):
     n.links.bus0 = n.links.bus0.str.replace(" H2", "")
     n.links.bus1 = n.links.bus1.str.replace(" H2", "")
 
-    n.lines.append(DC_lines[["bus0", "bus1"]])
+    n.lines = pd.concat([n.lines, DC_lines[["bus0", "bus1"]]])
 
     n.madd("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
 
