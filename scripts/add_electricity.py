@@ -170,7 +170,6 @@ def load_costs(
     elec_config: Dict,
     countries: List[str],
     country_mapping: Dict[str, str],
-    hydrogen_mapping: Dict[str, str],
     Nyears: int = 1,
 ) -> pd.DataFrame:
     """
@@ -202,7 +201,6 @@ def load_costs(
     costs = (
         pd.read_csv(tech_costs_path, index_col=["country", "technology", "parameter"])
         .sort_index()
-        .rename(hydrogen_mapping)
         .pipe(correct_units, config_costs)
         .pipe(fill_nas_with_config_costs, config_costs)
         .pipe(annualise_capital_costs, Nyears)
@@ -213,6 +211,51 @@ def load_costs(
         .pipe(apply_countrywise_battery_costs, max_hours, countries)
         .pipe(apply_overwrites_from_config, countries, config_costs)
     )
+
+    return costs
+
+
+def load_global_costs(
+    tech_costs_path: str,
+    Nyears: float,
+    config_costs: Dict,
+    countries: List[str] = ["global"],
+) -> pd.DataFrame:
+    """Specific function to only retrieve global costs. Used for simplify network cost calculations.
+
+    Parameters
+    ----------
+    tech_costs_path : str
+        Path to the technology costs file.
+    Nyears : float
+        _description_
+    config_costs : Dict
+        Dictionary of costs section defined in the config.yaml.
+    countries : List[str], optional
+        list with global., by default ["global"]
+
+    Returns
+    -------
+    pd.DataFrame
+       cost database specifically for calculating offshore wind costs in simplify network.
+    """
+    costs = (
+        pd.read_csv(tech_costs_path, index_col=["country", "technology", "parameter"])
+        .sort_index()
+        .pipe(correct_units, config_costs)
+        .pipe(fill_nas_with_config_costs, config_costs)
+        .pipe(annualise_capital_costs, Nyears)
+        .rename(columns={"CO2 intensity": "co2_emissions"})
+        .pipe(update_gas_costs, countries)
+        .pipe(calculate_solar_capital_costs, config_costs, countries)
+        .pipe(apply_overwrites_from_config, countries, config_costs)
+    )
+
+    return costs
+
+
+def rename_technologies(costs: pd.DataFrame, mapping: Dict[str, str]) -> pd.DataFrame:
+    costs = costs.rename(mapping)
 
     return costs
 
@@ -1121,9 +1164,8 @@ if __name__ == "__main__":
         elec_config=snakemake.config["electricity"],
         countries=countries,
         country_mapping=world_iso,
-        hydrogen_mapping=hydrogen_pypsa_mapping,
         Nyears=Nyears,
-    )
+    ).pipe(rename_technologies, hydrogen_pypsa_mapping)
 
     ppl = load_powerplants(file_path=snakemake.input.powerplants).pipe(
         map_carriers, carrier_mapping=carrier_pypsa_mapping
