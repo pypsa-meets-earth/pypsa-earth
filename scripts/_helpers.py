@@ -333,7 +333,13 @@ def get_aggregation_strategies(aggregation_strategies):
     when custom values are specified in the config.
     """
     import numpy as np
-    from pypsa.networkclustering import _make_consense
+
+    # to handle the new version of PyPSA.
+    try:
+        from pypsa.clustering.spatial import _make_consense
+    except Exception:
+        # TODO: remove after new release and update minimum pypsa version
+        from pypsa.networkclustering import _make_consense
 
     bus_strategies = dict(country=_make_consense("Bus", "country"))
     bus_strategies.update(aggregation_strategies.get("buses", {}))
@@ -375,7 +381,9 @@ def mock_snakemake(rulename, **wildcards):
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
+    workflow = sm.Workflow(
+        snakefile, overwrite_configfiles=[], rerun_triggers=[]
+    )  # overwrite_config=config
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
@@ -604,13 +612,33 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def read_geojson(fn):
+def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
+    """
+    Function to read a geojson file fn.
+    When the file is empty, then an empty GeoDataFrame is returned having columns cols,
+    the specified crs and the columns specified by the dtype dictionary it not none
+
+    Parameters:
+    ----------
+    fn : str
+        Path to the file to read
+    cols : list
+        List of columns of the GeoDataFrame
+    dtype : dict
+        Dictionary of the type of the object by column
+    crs : str
+        CRS of the GeoDataFrame
+    """
     # if the file is non-zero, read the geodataframe and return it
     if os.path.getsize(fn) > 0:
         return gpd.read_file(fn)
     else:
         # else return an empty GeoDataFrame
-        return gpd.GeoDataFrame(geometry=[])
+        df = gpd.GeoDataFrame(columns=cols, geometry=[], crs=crs)
+        if isinstance(dtype, dict):
+            for k, v in dtype.items():
+                df[k] = df[k].astype(v)
+        return df
 
 
 def create_country_list(input, iso_coding=True):

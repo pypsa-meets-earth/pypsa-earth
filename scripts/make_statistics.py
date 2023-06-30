@@ -310,7 +310,7 @@ def collect_network_stats(network_rule, config):
         )
 
         # add demand to statistics
-        tot_demand = n.loads_t.p_set.sum().sum()
+        tot_demand = float(n.loads_t.p_set.sum(axis=1).mean()) * 8760
         df_demand = pd.DataFrame({"demand": [tot_demand]})
         df_demand.columns = _multi_index_scen(network_rule, df_demand.columns)
         network_stats = pd.concat([network_stats, df_demand], axis=1)
