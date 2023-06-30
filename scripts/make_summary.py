@@ -215,7 +215,10 @@ def calculate_capacity(n, label, capacity):
 
 
 def calculate_supply(n, label, supply):
-    """calculate the max dispatch of each component at the buses where the loads are attached"""
+    """
+    Calculate the max dispatch of each component at the buses where the loads
+    are attached.
+    """
 
     load_types = n.loads.carrier.value_counts().index
 
@@ -269,7 +272,10 @@ def calculate_supply(n, label, supply):
 
 
 def calculate_supply_energy(n, label, supply_energy):
-    """calculate the total dispatch of each component at the buses where the loads are attached"""
+    """
+    Calculate the total dispatch of each component at the buses where the loads
+    are attached.
+    """
 
     load_types = n.loads.carrier.value_counts().index
 

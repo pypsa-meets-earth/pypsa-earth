@@ -68,6 +68,7 @@ The solved networks can be analysed just like any other PyPSA network (e.g. in J
 .. code:: python
 
     import pypsa
+
     network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc")
 
 The video below shows how to analyse solved PyPSA-Eur networks in Jupyter Notebooks.
