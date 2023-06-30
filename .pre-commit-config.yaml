@@ -35,17 +35,17 @@ repos:
     types_or: [python, rst, markdown]
     files: ^(scripts|doc)/
 
-# # Make docstrings PEP 257 compliant
-# - repo: https://github.com/PyCQA/docformatter
-#   rev: v1.7.3
-#   hooks:
-#   - id: docformatter
-#     args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
+# Make docstrings PEP 257 compliant
+- repo: https://github.com/PyCQA/docformatter
+  rev: v1.7.3
+  hooks:
+  - id: docformatter
+    args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
 
-# - repo: https://github.com/keewis/blackdoc
-#   rev: v0.3.8
-#   hooks:
-#   - id: blackdoc
+- repo: https://github.com/keewis/blackdoc
+  rev: v0.3.8
+  hooks:
+  - id: blackdoc
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black

@@ -5,9 +5,9 @@
 
 # -*- coding: utf-8 -*-
 """
-Lifts electrical transmission network to a single 380 kV voltage layer,
-removes dead-ends of the network,
-and reduces multi-hop HVDC connections to a single link.
+Lifts electrical transmission network to a single 380 kV voltage layer, removes
+dead-ends of the network, and reduces multi-hop HVDC connections to a single
+link.
 
 Relevant Settings
 -----------------
@@ -112,12 +112,14 @@ logger = logging.getLogger(__name__)
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):
     """
-    Fix all lines to a voltage level of base voltage level and remove all transformers.
-    The function preserves the transmission capacity for each line while updating
-    its voltage level, line type and number of parallel bundles (num_parallel).
-    Transformers are removed and connected components are moved from their
-    starting bus to their ending bus. The corresponding starting buses are
-    removed as well.
+    Fix all lines to a voltage level of base voltage level and remove all
+    transformers.
+
+    The function preserves the transmission capacity for each line while
+    updating its voltage level, line type and number of parallel bundles
+    (num_parallel). Transformers are removed and connected components
+    are moved from their starting bus to their ending bus. The
+    corresponding starting buses are removed as well.
     """
     logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
 
@@ -566,7 +568,7 @@ def cluster(
 def drop_isolated_nodes(n, threshold):
     """
     Find isolated nodes in the network and drop those of them which don't have
-    load or have a load value lower than a threshold
+    load or have a load value lower than a threshold.
 
     Parameters
     ----------
@@ -640,9 +642,9 @@ def drop_isolated_nodes(n, threshold):
 
 def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     """
-    Find isolated nodes in the network and merge those of them which have
-    load value below than a specified threshold into a single isolated node
-    which represents all the remote generation
+    Find isolated nodes in the network and merge those of them which have load
+    value below than a specified threshold into a single isolated node which
+    represents all the remote generation.
 
     Parameters
     ----------

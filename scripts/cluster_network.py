@@ -232,7 +232,9 @@ def get_feature_for_hac(n, buses_i=None, feature=None):
 def distribute_clusters(
     inputs, config, n, n_clusters, focus_weights=None, solver_name=None
 ):
-    """Determine the number of clusters per country"""
+    """
+    Determine the number of clusters per country.
+    """
 
     distribution_cluster = config["cluster_options"]["distribute_cluster"]
     country_list = config["countries"]
@@ -334,7 +336,7 @@ def distribute_clusters(
 
     def n_bounds(model, *n_id):
         """
-        Create a function that makes a bound pair for pyomo
+        Create a function that makes a bound pair for pyomo.
 
         Use n_bounds(model, n_id) if N is Single-Index
         Use n_bounds(model, *n_id) if N is Multi-Index

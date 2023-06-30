@@ -40,7 +40,8 @@ def line_endings_to_bus_conversion(lines):
 # tol in m
 def set_substations_ids(buses, distance_crs, tol=2000):
     """
-    Function to set substations ids to buses, accounting for location tolerance
+    Function to set substations ids to buses, accounting for location
+    tolerance.
 
     The algorithm is as follows:
 
@@ -110,7 +111,7 @@ def set_substations_ids(buses, distance_crs, tol=2000):
 
 def set_lines_ids(lines, buses, distance_crs):
     """
-    Function to set line buses ids to the closest bus in the list
+    Function to set line buses ids to the closest bus in the list.
     """
     # set tqdm options for set lines ids
     tqdm_kwargs_line_ids = dict(
@@ -184,9 +185,12 @@ def merge_stations_same_station_id(
     buses, delta_lon=0.001, delta_lat=0.001, precision=4
 ):
     """
-    Function to merge buses with same voltage and station_id
-    This function iterates over all substation ids and creates a bus_id for every substation and voltage level.
-    Therefore, a substation with multiple voltage levels is represented with different buses, one per voltage level
+    Function to merge buses with same voltage and station_id This function
+    iterates over all substation ids and creates a bus_id for every substation
+    and voltage level.
+
+    Therefore, a substation with multiple voltage levels is represented
+    with different buses, one per voltage level
     """
     # initialize list of cleaned buses
     buses_clean = []
@@ -256,7 +260,10 @@ def merge_stations_same_station_id(
 
 def get_ac_frequency(df, fr_col="tag_frequency"):
     """
-    # Function to define a default frequency value. Attempts to find the most usual non-zero frequency across the dataframe; 50 Hz is assumed as a back-up value
+    # Function to define a default frequency value.
+
+    Attempts to find the most usual non-zero frequency across the
+    dataframe; 50 Hz is assumed as a back-up value
     """
 
     # Initialize a default frequency value
@@ -275,7 +282,8 @@ def get_ac_frequency(df, fr_col="tag_frequency"):
 
 def get_transformers(buses, lines):
     """
-    Function to create fake transformer lines that connect buses of the same station_id at different voltage
+    Function to create fake transformer lines that connect buses of the same
+    station_id at different voltage.
     """
 
     ac_freq = get_ac_frequency(lines)
@@ -331,7 +339,8 @@ def get_transformers(buses, lines):
 
 def get_converters(buses, lines):
     """
-    Function to create fake converter lines that connect buses of the same station_id of different polarities
+    Function to create fake converter lines that connect buses of the same
+    station_id of different polarities.
     """
 
     df_converters = []
@@ -387,7 +396,8 @@ def get_converters(buses, lines):
 
 def connect_stations_same_station_id(lines, buses):
     """
-    Function to create fake links between substations with the same substation_id
+    Function to create fake links between substations with the same
+    substation_id.
     """
     ac_freq = get_ac_frequency(lines)
     station_id_list = buses.station_id.unique()
@@ -465,9 +475,9 @@ def connect_stations_same_station_id(lines, buses):
 
 def set_lv_substations(buses):
     """
-    Function to set what nodes are lv, thereby setting substation_lv
-    The current methodology is to set lv nodes to buses where multiple voltage level are found,
-    hence when the station_id is duplicated
+    Function to set what nodes are lv, thereby setting substation_lv The
+    current methodology is to set lv nodes to buses where multiple voltage
+    level are found, hence when the station_id is duplicated.
     """
     # initialize column substation_lv to true
     buses["substation_lv"] = True
@@ -501,8 +511,8 @@ def merge_stations_lines_by_station_id_and_voltage(
     lines, buses, geo_crs, distance_crs, tol=2000
 ):
     """
-    Function to merge close stations and adapt the line datasets to adhere to the merged dataset
-
+    Function to merge close stations and adapt the line datasets to adhere to
+    the merged dataset.
     """
 
     logger.info(
@@ -587,7 +597,7 @@ def create_station_at_equal_bus_locations(
 
 def _split_linestring_by_point(linestring, points):
     """
-    Function to split a linestring geometry by multiple inner points
+    Function to split a linestring geometry by multiple inner points.
 
     Parameters
     ----------
@@ -615,8 +625,8 @@ def _split_linestring_by_point(linestring, points):
 
 def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     """
-    Function to avoid buses overpassing lines with no connection
-    when the bus is within a given tolerance from the line
+    Function to avoid buses overpassing lines with no connection when the bus
+    is within a given tolerance from the line.
 
     Parameters
     ----------
@@ -716,10 +726,11 @@ def force_ac_lines(df, col="tag_frequency"):
     """
     Function that forces all PyPSA lines to be AC lines.
 
-    A network can contain AC and DC power lines that are modelled as PyPSA "Line" component.
-    When DC lines are available, their power flow can be controlled by their converter.
-    When it is artificially converted into AC, this feature is lost.
-    However, for debugging and preliminary analysis, it can be useful to bypass problems.
+    A network can contain AC and DC power lines that are modelled as
+    PyPSA "Line" component. When DC lines are available, their power
+    flow can be controlled by their converter. When it is artificially
+    converted into AC, this feature is lost. However, for debugging and
+    preliminary analysis, it can be useful to bypass problems.
     """
     # TODO: default frequency may be by country
     default_ac_frequency = 50
@@ -732,7 +743,7 @@ def force_ac_lines(df, col="tag_frequency"):
 
 def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
     """
-    Function to add a bus for countries missing substation data
+    Function to add a bus for countries missing substation data.
     """
     country_shapes = gpd.read_file(fp_country_shapes).set_index("name")["geometry"]
     bus_country_list = buses["country"].unique().tolist()
