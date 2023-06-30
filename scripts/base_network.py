@@ -160,7 +160,7 @@ def add_underwater_links(n, shapes):
 # TODO would be nice to join both the add_underwater* functions
 def add_underwater_lines(n, shapes):
     if not hasattr(n.lines, "geometry"):
-        n["lines", "underwater_fraction"] = 0.0
+        n.lines["underwater_fraction"] = 0.0
     else:
         offshore_shape = gpd.read_file(shapes).unary_union
         if offshore_shape is None or offshore_shape.is_empty:
@@ -180,7 +180,11 @@ def _set_links_underwater_fraction(fp_offshore_shapes, n):
 
     if not n.links.loc[n.links.carrier == "DC"].empty:
         add_underwater_links(n, fp_offshore_shapes)
-    elif not n.lines.loc[n.lines.carrier == "DC"].empty:
+    else:
+        # TODO n.links is supposed to have "underwater_fraction" by clustering_network
+        n.links["underwater_fraction"] = 0.0
+
+    if not n.lines.loc[n.lines.carrier == "DC"].empty:
         add_underwater_lines(n, fp_offshore_shapes)
 
 

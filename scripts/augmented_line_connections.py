@@ -88,6 +88,7 @@ if __name__ == "__main__":
 
     # TODO: Currently only AC lines are read in and meshed. One need to combine
     # AC & DC lines and then move on.
+    # rather there is a need to filter-out DC lines
     network_lines = n.lines
     sel = network_lines.s_nom > 100  # TODO: Check, should be all selected or filtered?
     attrs = ["bus0", "bus1", "length"]
