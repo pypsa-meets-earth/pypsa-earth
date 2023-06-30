@@ -103,7 +103,7 @@ def monte_carlo_sampling_pydoe2(
         correlation_matrix=correlation_matrix,
     )
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
@@ -121,9 +121,9 @@ def monte_carlo_sampling_chaospy(N_FEATURES, SAMPLES, rule="latin_hypercube", se
     uniform_cube = eval(
         f"chaospy.J({N_FEATURES})"
     )  # writes Nfeatures times the chaospy.uniform... command)
-    lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T
+    lh = np.atleast_2d(uniform_cube.sample(SAMPLES, rule=rule, seed=seed)).T
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
@@ -154,7 +154,7 @@ def monte_carlo_sampling_scipy(
     )
     lh = sampler.random(n=SAMPLES)
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 

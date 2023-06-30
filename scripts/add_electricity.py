@@ -374,7 +374,9 @@ def attach_conventional_generators(
     conventional_config,
     conventional_inputs,
 ):
-    carriers = set(conventional_carriers) | (set(extendable_carriers["Generator"]) - set(renewable_carriers))
+    carriers = set(conventional_carriers) | (
+        set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    )
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     ppl = (

@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # PyPSA-Earth
 
-<p align="left"> 
+<p align="left">
 by
 <a href="https://pypsa-meets-earth.github.io">
     <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" width="150">
