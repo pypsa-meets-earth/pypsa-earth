@@ -292,6 +292,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             pass
         return n, n.buses.index.to_series()
 
+    dc_as_links = not n.links.loc[n.links.carrier == "DC"].empty
+    dc_as_lines = not n.lines.loc[n.lines.carrier == "DC"].empty
+
     # Determine connected link components, ignore all links but DC
     adjacency_matrix = n.adjacency_matrix(
         branch_components=["Link", "Line"],
@@ -382,15 +385,48 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             all_dc_lengths = pd.concat(
                 [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
             )
-            name = lengths.idxmax() + "+{}".format(len(links) - 1)
+            name = all_dc_lengths.idxmax() + "+{}".format(len(all_dc) - 1)
+
+            # HVDC part is represented as "Link" component
+            if dc_as_links:
+                p_max_pu = config["links"].get("p_max_pu", 1.0)
+                lengths = n.links.loc[all_links, "length"]
+                length = sum(
+                    n.links.loc[[i for _, i in l if _ == "Link"], "length"].mean()
+                    for l in links
+                )
+                p_nom = (
+                    min(
+                        n.links.loc[[i for _, i in l if _ == "Link"], "p_nom"].sum()
+                        for l in links
+                    ),
+                )
+                underwater_fraction = sum(
+                    lengths
+                    / lengths.sum()
+                    * n.links.loc[all_links, "underwater_fraction"]
+                )
+            # HVDC part is represented as "Line" component
+            elif dc_as_lines:
+                p_max_pu = config["lines"].get("p_max_pu", 1.0)
+                lengths = n.lines.loc[all_dc_lines, "length"]
+                length = sum(
+                    n.lines.loc[[i for _, i in l if _ == "Line"], "length"].mean()
+                    for l in links
+                )
+                # TODO How to calculate p_nom for lines?
+                # p_nom=min(n.lines.loc[[i for _, i in l], "p_nom"].sum() for l in links),
+                p_nom = 1
+                underwater_fraction = sum(
+                    lengths
+                    / lengths.sum()
+                    * n.lines.loc[all_dc_lines, "underwater_fraction"]
+                )
+
             params = dict(
                 carrier="DC",
                 bus0=b[0],
                 bus1=b[1],
-                # TODO Re-implement equivalence calculations
-                length=1,
-                p_nom=1,
-                underwater_fraction=0,
                 # length=sum(
                 #     n.links.loc[[i for _, i in l], "length"].mean() for l in links
                 # ),
@@ -400,6 +436,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 #     / lengths.sum()
                 #     * n.links.loc[all_links, "underwater_fraction"]
                 # ),
+                length=length,
+                p_nom=p_nom,
+                underwater_fraction=underwater_fraction,
                 p_max_pu=p_max_pu,
                 p_min_pu=-p_max_pu,
                 underground=False,
