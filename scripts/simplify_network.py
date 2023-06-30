@@ -88,13 +88,14 @@ import logging
 import os
 import sys
 from functools import reduce
+from typing import Dict
 
 import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
 from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
-from add_electricity import load_costs
+from add_electricity import load_global_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from pypsa.networkclustering import (
@@ -152,7 +153,6 @@ def _prepare_connection_costs_per_link(n, costs, config):
         return {}
 
     connection_costs_per_link = {}
-
     for tech in config["renewable"]:
         if tech.startswith("offwind"):
             connection_costs_per_link[tech] = (
@@ -179,7 +179,6 @@ def _compute_connection_costs_to_bus(
         buses = busmap.index[busmap.index != busmap.values]
 
     connection_costs_to_bus = pd.DataFrame(index=buses)
-
     for tech in connection_costs_per_link:
         adj = n.adjacency_matrix(
             weights=pd.concat(
@@ -747,12 +746,12 @@ if __name__ == "__main__":
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 
-    technology_costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
-        Nyears,
-    )
+    technology_costs = load_global_costs(
+        tech_costs_path=snakemake.input.tech_costs,
+        config_costs=snakemake.config["costs"],
+        countries=["global"],
+        Nyears=Nyears,
+    ).loc["global"]
 
     n, simplify_links_map = simplify_links(
         n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
