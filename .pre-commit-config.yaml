@@ -4,7 +4,7 @@
 
 # Copied from https://github.com/PyPSA/pypsa-eur/pull/302/files
 
-exclude: ^(LICENSES|README.md)
+exclude: ^(LICENSES)
 
 
 repos:
@@ -26,7 +26,7 @@ repos:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
 
-  # Find common spelling mistakes in comments and docstrings
+# Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
   rev: v2.2.5
   hooks:
@@ -34,6 +34,18 @@ repos:
     args: ['--ignore-regex="(\b[A-Z]+\b)"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore'] # Ignore capital case words, e.g. country codes
     types_or: [python, rst, markdown]
     files: ^(scripts|doc)/
+
+# Make docstrings PEP 257 compliant
+- repo: https://github.com/PyCQA/docformatter
+  rev: v1.7.3
+  hooks:
+  - id: docformatter
+    args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
+
+- repo: https://github.com/keewis/blackdoc
+  rev: v0.3.8
+  hooks:
+  - id: blackdoc
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black

@@ -26,7 +26,6 @@ def sets_path_to_root(root_directory_name):
         Name of the root directory.
     n : int
         Number of folders the function will check upwards/root directed.
-
     """
     import os
 
@@ -294,7 +293,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
     """
-    Function to download data from a url with a progress bar progress in retrieving data
+    Function to download data from a url with a progress bar progress in
+    retrieving data.
 
     Parameters
     ----------
@@ -328,9 +328,10 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
 
 def get_aggregation_strategies(aggregation_strategies):
     """
-    default aggregation strategies that cannot be defined in .yaml format must be specified within
-    the function, otherwise (when defaults are passed in the function's definition) they get lost
-    when custom values are specified in the config.
+    Default aggregation strategies that cannot be defined in .yaml format must
+    be specified within the function, otherwise (when defaults are passed in
+    the function's definition) they get lost when custom values are specified
+    in the config.
     """
     import numpy as np
 
@@ -429,7 +430,7 @@ def mock_snakemake(rulename, **wildcards):
 
 def getContinent(code):
     """
-    Returns continent names that contains list of iso-code countries
+    Returns continent names that contains list of iso-code countries.
 
     Parameters
     ----------
@@ -549,7 +550,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
 
 def country_name_2_two_digits(country_name):
     """
-    Convert full country name to 2-digit country code
+    Convert full country name to 2-digit country code.
 
     Parameters
     ----------
@@ -614,9 +615,9 @@ def save_to_geojson(df, fn):
 
 def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
     """
-    Function to read a geojson file fn.
-    When the file is empty, then an empty GeoDataFrame is returned having columns cols,
-    the specified crs and the columns specified by the dtype dictionary it not none
+    Function to read a geojson file fn. When the file is empty, then an empty
+    GeoDataFrame is returned having columns cols, the specified crs and the
+    columns specified by the dtype dictionary it not none.
 
     Parameters:
     ----------
@@ -643,7 +644,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
 
 def create_country_list(input, iso_coding=True):
     """
-    Create a country list for defined regions in config_osm_data.py
+    Create a country list for defined regions in config_osm_data.py.
 
     Parameters
     ----------
@@ -672,8 +673,10 @@ def create_country_list(input, iso_coding=True):
     def filter_codes(c_list, iso_coding=True):
         """
         Filter list according to the specified coding.
-        When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
-        When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
+
+        When iso code are implemented (iso_coding=True), then remove the
+        geofabrik-specific ones. When geofabrik codes are
+        selected(iso_coding=False), ignore iso-specific names.
         """
         if (
             iso_coding

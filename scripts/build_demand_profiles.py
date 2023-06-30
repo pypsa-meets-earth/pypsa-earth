@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates electric demand profile csv
+Creates electric demand profile csv.
 
 Relevant Settings
 -----------------
@@ -39,7 +39,6 @@ The rule :mod:`build_demand` creates load demand profiles in correspondence of t
 It creates the load paths for GEGIS outputs by combining the input parameters of the countries, weather year, prediction year, and SSP scenario.
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
-
 """
 import logging
 import os
@@ -63,7 +62,7 @@ def normed(s):
 
 def get_load_paths_gegis(ssp_parentfolder, config):
     """
-    Create load paths for GEGIS outputs
+    Create load paths for GEGIS outputs.
 
     The paths are created automatically according to included country,
     weather year, prediction year and ssp scenario
@@ -143,7 +142,7 @@ def build_demand_profiles(
 
     def upsample(cntry, group):
         """
-        Distributes load in country according to population and gdp
+        Distributes load in country according to population and gdp.
         """
         l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
         if len(group) == 1:

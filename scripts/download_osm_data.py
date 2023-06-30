@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 def country_list_to_geofk(country_list):
     """
-    Convert the requested country list into geofk norm
+    Convert the requested country list into geofk norm.
 
     Parameters
     ----------
@@ -64,11 +64,11 @@ def country_list_to_geofk(country_list):
 
 def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_dict):
     """
-    Function to convert the iso code name of a country into the corresponding geofabrik
-    In Geofabrik, some countries are aggregated, thus if a single country is requested,
-    then all the agglomeration shall be downloaded
-    For example, Senegal (SN) and Gambia (GM) cannot be found alone in geofabrik,
-    but they can be downloaded as a whole SNGM
+    Function to convert the iso code name of a country into the corresponding
+    geofabrik In Geofabrik, some countries are aggregated, thus if a single
+    country is requested, then all the agglomeration shall be downloaded For
+    example, Senegal (SN) and Gambia (GM) cannot be found alone in geofabrik,
+    but they can be downloaded as a whole SNGM.
 
     The conversion directory, initialized to iso_to_geofk_dict is used to perform such conversion
     When a two-letter code country is found in convert_dict, and iso_coding is enabled,

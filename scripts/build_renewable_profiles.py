@@ -6,13 +6,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
-"""Calculates for each network node the
-(i) installable capacity (based on land-use), (ii) the available generation time
-series (based on weather data), and (iii) the average distance from the node for
-onshore wind, AC-connected offshore wind, DC-connected offshore wind and solar
-PV generators. For hydro generators, it calculates the expected inflows.
-In addition for offshore wind it calculates the fraction of the grid connection
-which is under water.
+"""
+Calculates for each network node the (i) installable capacity (based on land-
+use), (ii) the available generation time series (based on weather data), and
+(iii) the average distance from the node for onshore wind, AC-connected
+offshore wind, DC-connected offshore wind and solar PV generators. For hydro
+generators, it calculates the expected inflows. In addition for offshore wind
+it calculates the fraction of the grid connection which is under water.
 
 Relevant settings
 -----------------
@@ -189,7 +189,6 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 - ``conservative`` ascertains the nodal limit by increasing capacities
   proportional to the layout until the limit of an individual grid cell is
   reached.
-
 """
 import functools
 import logging
@@ -264,8 +263,10 @@ def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
 def check_cutout_completness(cf):
     """
     Check if a cutout contains missed values.
-    That may be the case due to some issues with accessibility of ERA5 data
-    See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
+
+    That may be the case due to some issues with accessibility of ERA5
+    data See for details
+    https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
     Returns share of cutout cells with missed data
     """
     n_missed_cells = pd.isnull(cf).sum()
@@ -281,6 +282,7 @@ def check_cutout_completness(cf):
 def estimate_bus_loss(data_column, tech):
     """
     Calculated share of buses with data loss due to flaws in the cutout data.
+
     Returns share of the buses with missed data
     """
     n_weights_initial = len(data_column)
@@ -300,7 +302,7 @@ def estimate_bus_loss(data_column, tech):
 
 def filter_cutout_region(cutout, regions):
     """
-    Filter the cutout to focus on the region of interest
+    Filter the cutout to focus on the region of interest.
     """
     # filter cutout regions to focus on the region of interest
     minx, miny, maxx, maxy = regions.total_bounds
@@ -312,7 +314,8 @@ def filter_cutout_region(cutout, regions):
 
 def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     """
-    Function used to rescale the inflows of the hydro capacities to match country statistics
+    Function used to rescale the inflows of the hydro capacities to match
+    country statistics.
 
     Parameters
     ----------
