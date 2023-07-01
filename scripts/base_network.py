@@ -158,17 +158,32 @@ def add_underwater_links(n, shapes):
 
 
 # TODO would be nice to join both the add_underwater* functions
-def add_underwater_lines(n, shapes):
-    if not hasattr(n.lines, "geometry"):
-        n.lines["underwater_fraction"] = 0.0
+def add_underwater_part(n, lines_or_links, shapes):
+    # TODO would it make sense to add a check on allowed keywords value?
+    if lines_or_links == "lines":
+        df_to_modify = n.lines
+    elif lines_or_links == "links":
+        df_to_modify = n.links
+
+    if df_to_modify.loc[df_to_modify.carrier == "DC"].empty:
+        # Add "underwater_fraction" both to lines and links
+        df_to_modify["underwater_fraction"] = 0.0
+        return
+
+    if not hasattr(df_to_modify, "geometry"):
+        df_to_modify["underwater_fraction"] = 0.0
     else:
         offshore_shape = gpd.read_file(shapes).unary_union
         if offshore_shape is None or offshore_shape.is_empty:
-            n["lines", "underwater_fraction"] = 0.0
+            df_to_modify["underwater_fraction"] = 0.0
         else:
-            lines = gpd.GeoSeries(n.lines.geometry.dropna().map(shapely.wkt.loads))
-            n.lines["underwater_fraction"] = (
-                lines.intersection(offshore_shape).length / lines.length
+            branches = gpd.GeoSeries(
+                df_to_modify.geometry.dropna().map(shapely.wkt.loads)
+            )
+            df_to_modify["underwater_fraction"] = (
+                # TODO Check assumption that all underwater lines are DC
+                branches.intersection(offshore_shape).length
+                / branches.length
             )
 
 
@@ -178,14 +193,8 @@ def _set_links_underwater_fraction(fp_offshore_shapes, n):
     if n.links.empty:
         return
 
-    if not n.links.loc[n.links.carrier == "DC"].empty:
-        add_underwater_links(n, fp_offshore_shapes)
-    else:
-        # TODO n.links is supposed to have "underwater_fraction" by clustering_network
-        n.links["underwater_fraction"] = 0.0
-
-    if not n.lines.loc[n.lines.carrier == "DC"].empty:
-        add_underwater_lines(n, fp_offshore_shapes)
+    add_underwater_part(n=n, lines_or_links="links", shapes=fp_offshore_shapes)
+    add_underwater_part(n=n, lines_or_links="lines", shapes=fp_offshore_shapes)
 
 
 def _load_lines_from_osm(fp_osm_lines, config, buses):
