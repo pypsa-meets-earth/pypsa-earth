@@ -408,32 +408,24 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             elif dc_as_lines:
                 p_max_pu = config["lines"].get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
-                length = sum(
-                    n.lines.loc[[i for _, i in l if _ == "Line"], "length"].mean()
-                    for l in links
-                )
+                length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
                 # TODO How to calculate p_nom for lines?
                 # p_nom=min(n.lines.loc[[i for _, i in l], "p_nom"].sum() for l in links),
                 p_nom = 1
-                underwater_fraction = sum(
-                    lengths
-                    / lengths.sum()
-                    * n.lines.loc[all_dc_lines, "underwater_fraction"]
+                underwater_fraction = (
+                    sum(
+                        lengths
+                        / lengths.sum()
+                        * n.lines.loc[all_dc_lines, "underwater_fraction"]
+                    )
+                    if len(lengths) > 0
+                    else 0
                 )
 
             params = dict(
                 carrier="DC",
                 bus0=b[0],
                 bus1=b[1],
-                # length=sum(
-                #     n.links.loc[[i for _, i in l], "length"].mean() for l in links
-                # ),
-                # p_nom=min(n.links.loc[[i for _, i in l], "p_nom"].sum() for l in links),
-                # underwater_fraction=sum(
-                #     lengths
-                #     / lengths.sum()
-                #     * n.links.loc[all_links, "underwater_fraction"]
-                # ),
                 length=length,
                 p_nom=p_nom,
                 underwater_fraction=underwater_fraction,
@@ -452,7 +444,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             n.mremove("Link", all_links)
             n.mremove("Line", all_dc_lines)
 
-            # TODO Revise to include DC lines
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.items():
                 params.setdefault(attr, default)
