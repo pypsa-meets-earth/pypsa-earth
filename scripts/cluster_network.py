@@ -609,6 +609,10 @@ def clustering_for_n_clusters(
             (nc.links.length - n.links.length).clip(lower=0).mul(extended_link_costs),
             fill_value=0,
         )
+    if not n.lines.loc[n.lines.carrier == "DC"].empty:
+        nc = clustering.network
+
+        nc.lines["underwater_fraction"] = 0
 
     return clustering
 
