@@ -470,6 +470,7 @@ def attach_hydro(n, costs, ppl):
                 # update plants_with_data to ensure proper match between "plant" index and bus_id
                 plants_with_data = inflow_buses[inflow_buses.isin(plants_to_keep)]
                 network_buses_to_keep = plants_with_data.index
+                plants_to_keep = plants_with_data.to_numpy()
 
                 ror = ror.loc[ror.index.intersection(network_buses_to_keep)]
                 hydro = hydro.loc[hydro.index.intersection(network_buses_to_keep)]
