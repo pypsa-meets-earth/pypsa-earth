@@ -33,8 +33,8 @@ Welcome to the PyPSA-Earth documentation!
 .. image:: https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth
     :alt: GitHub repo size
 
-.. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
-    :target: https://www.gnu.org/licenses/gpl-3.0
+.. image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
+    :target: https://www.gnu.org/licenses/agpl-3.0
     :alt: License
 
 .. image:: https://api.reuse.software/badge/github.com/pypsa/pypsa-eur
@@ -69,7 +69,7 @@ storage and transmission expansion studies. We work hard to extend the PyPSA-Ear
 myopic and perfect pathway expansion capabilities.
 
 *PyPSA meets Earth initiative* members are maintaining the *PyPSA-Earth* repository as well as many other tools.
-The `website <https://pypsa-meets-earth.github.io/>`_ provides more context of the initiative and the associated projects. 
+The `website <https://pypsa-meets-earth.github.io/>`_ provides more context of the initiative and the associated projects.
 
 .. image:: img/africa_osm_map.png
     :width: 60%
@@ -97,7 +97,7 @@ The PyPSA meets Earth team is currently running four types of meetings:
 
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
-  
+
     1. Demand creation and prediction meeting, on demand basis
     2. AI asset detection meeting, on demand basis
     3. Sector coupling meeting, every Thursday 09:00 (UK time), `download .ics file <https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link>`__
@@ -107,11 +107,11 @@ The PyPSA meets Earth team is currently running four types of meetings:
 
   - every second week
   - planning, discussing events, workshops, communication, community activities
-  
+
 - **Buddy talk (Open)**
 
   - book a 30min meeting with Max to discuss anything you like
-  - booking link: `calendly.com/pypsa-meets-earth <https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min>`_
+  - booking link: `calendly.com/pypsa-meets-earth <https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min>`_
 
 =============
 Documentation
@@ -132,10 +132,10 @@ Documentation
    :caption: Getting Started
 
    introduction
-   installation  
+   installation
    short_tutorial
    tutorial
-   data_workflow    
+   data_workflow
    notebooks
 
 **Configuration**
@@ -188,4 +188,3 @@ Documentation
    learning_materials
    project_structure_and_credits
    talks_and_papers
-   

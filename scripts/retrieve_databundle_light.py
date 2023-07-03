@@ -2,8 +2,7 @@
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
-
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5894972.svg
    :target: https://doi.org/10.5281/zenodo.5894972
@@ -114,7 +113,8 @@ def load_databundle_config(config):
 
 def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+    download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True,
+    disable_progress=False)
 
     Function to download and unzip the data from zenodo
 
@@ -133,7 +133,6 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     Outputs
     -------
     True when download is successful, False otherwise
-
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
@@ -158,7 +157,8 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
 
 def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+    download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True,
+    disable_progress=False)
 
     Function to download and unzip the data from google drive
 
@@ -177,7 +177,6 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     Outputs
     -------
     True when download is successful, False otherwise
-
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
@@ -233,7 +232,8 @@ def download_and_unzip_protectedplanet(
     config, rootpath, hot_run=True, disable_progress=False
 ):
     """
-        download_and_unzip_protectedplanet(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+    download_and_unzip_protectedplanet(config, rootpath, dest_path,
+    hot_run=True, disable_progress=False)
 
     Function to download and unzip the data by category from protectedplanet
 
@@ -252,7 +252,6 @@ def download_and_unzip_protectedplanet(
     Outputs
     -------
     True when download is successful, False otherwise
-
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile_wpda.zip")
@@ -300,7 +299,8 @@ def download_and_unzip_protectedplanet(
 
 def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_direct(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+    download_and_unzip_direct(config, rootpath, dest_path, hot_run=True,
+    disable_progress=False)
 
     Function to download the data by category from a direct url with no processing.
     If in the configuration file the unzip is specified True, then the downloaded data is unzipped.
@@ -320,7 +320,6 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     Outputs
     -------
     True when download is successful, False otherwise
-
     """
     resource = config["category"]
     url = config["urls"]["direct"]
@@ -352,7 +351,8 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
 
 def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
     """
-        download_and_unzip_post(config, rootpath, dest_path, hot_run=True, disable_progress=False)
+    download_and_unzip_post(config, rootpath, dest_path, hot_run=True,
+    disable_progress=False)
 
     Function to download the data by category from a post request.
 
@@ -371,7 +371,6 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
     Outputs
     -------
     True when download is successful, False otherwise
-
     """
     resource = config["category"]
 
@@ -410,7 +409,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
 
 def _check_disabled_by_opt(config_bundle, config_enable):
     """
-    Checks if the configbundle has conflicts with the enable configuration
+    Checks if the configbundle has conflicts with the enable configuration.
 
     Returns
     -------
@@ -447,7 +446,8 @@ def get_best_bundles_by_category(
     country_list, category, config_bundles, tutorial, config_enable
 ):
     """
-        get_best_bundles_by_category(country_list, category, config_bundles, tutorial)
+    get_best_bundles_by_category(country_list, category, config_bundles,
+    tutorial)
 
     Function to get the best bundles that download the data for selected countries,
     given category and tutorial characteristics.
@@ -476,7 +476,6 @@ def get_best_bundles_by_category(
     -------
     returned_bundles : list
         List of bundles to download
-
     """
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
     dict_n_matched = {
@@ -492,7 +491,7 @@ def get_best_bundles_by_category(
     # check if non-empty dictionary
     if dict_n_matched:
         # if non-empty, then pick bundles until all countries are selected
-        # or no mor bundles are found
+        # or no more bundles are found
         dict_sort = sorted(dict_n_matched.items(), key=lambda d: d[1])
 
         current_matched_countries = []
@@ -517,7 +516,7 @@ def get_best_bundles_by_category(
 
 def get_best_bundles(countries, config_bundles, tutorial, config_enable):
     """
-        get_best_bundles(countries, category, config_bundles, tutorial)
+    get_best_bundles(countries, category, config_bundles, tutorial)
 
     Function to get the best bundles that download the data for selected countries,
     given tutorial characteristics.
@@ -547,7 +546,6 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
     -------
     returned_bundles : list
         List of bundles to download
-
     """
 
     # categories of data to download
@@ -586,8 +584,8 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
 
 def datafiles_retrivedatabundle(config):
     """
-    Function to get the output files from the bundles,
-    given the target countries, tutorial settings, etc.
+    Function to get the output files from the bundles, given the target
+    countries, tutorial settings, etc.
     """
 
     tutorial = config["tutorial"]

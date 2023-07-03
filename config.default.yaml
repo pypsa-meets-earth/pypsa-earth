@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.2.0
+version: 0.2.1
 tutorial: false
 
 logging:
@@ -21,6 +21,8 @@ enable:
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
   name: "" # use this to keep track of runs with different settings
@@ -95,7 +97,7 @@ build_shape_options:
 
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
-  threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
+  threshold_voltage: 51000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
   tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true  # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
@@ -108,8 +110,8 @@ build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetM
   force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 base_network:
-  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 35000  # [V] minimum voltage in base network
+  min_voltage_substation_offshore: 51000  # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 51000  # [V] minimum voltage in base network
 
 load_options:
   ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
@@ -118,6 +120,7 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
+  base_voltage: 380.
   voltages: [220., 300., 380.]
   co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9  # European default, adjustment to Africa necessary
@@ -141,7 +144,7 @@ electricity:
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -338,8 +341,8 @@ monte_carlo:
       # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
       # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
     loads_t.p_set: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
 
 
 solving:

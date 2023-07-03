@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # ---------------------------------------------------------------------------- #
 #                                   IO Config                                  #
@@ -12,28 +12,42 @@ google_api_key:
 #                                Matching Config                               #
 # ---------------------------------------------------------------------------- #
 
-
 #matching config
 matching_sources:
-# - CARMA  # deprecated as no more public
+  # - CARMA  # deprecated as no more public
 - GEO
 - GPD
+- GBPT
+- GGPT
+- GCPT
+- GGTPT
+- GNPT
+- GSPT
+- GWPT
+- GHPT
+
 # - GEM_GGPT  # to be enabled once GEM_GGPT is working
 # - EXTERNAL_DATABASE
 
 fully_included_sources:
-# - CARMA  # deprecated as no more public
+  # - CARMA  # deprecated as no more public
 - GEO
 - GPD
+- GBPT
+- GGPT
+- GCPT
+- GGTPT
+- GNPT
+- GSPT
+- GWPT
+- GHPT
 # - GEM_GGPT  # to be enabled once GEM_GGPT is working
 # - EXTERNAL_DATABASE
-
 
 EXTERNAL_DATABASE:
   reliability_score: 5
   store_locally: false
-  fn: /data/davidef/git/pypsa-earth/resources/powerplants_osm2pm.csv  # MODIFIED_BY_WORKFLOW
-
+  fn: /data/davidef/git/pypsa-earth/resources/powerplants_osm2pm.csv # MODIFIED_BY_WORKFLOW
 
 parallel_duke_processes: false
 process_limit: 2

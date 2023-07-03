@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
-Creates the network topology from a OpenStreetMap
+Creates the network topology from a OpenStreetMap.
 
 Relevant Settings
 -----------------
@@ -54,7 +54,6 @@ Outputs
 
 Description
 -----------
-
 """
 import logging
 import os
@@ -230,6 +229,7 @@ def _load_converters_from_osm(fp_osm_converters, buses):
     # converters = _remove_dangling_branches(converters, buses)
 
     converters["carrier"] = "B2B"
+    converters["dc"] = True
 
     return converters
 
@@ -249,7 +249,13 @@ def _load_transformers_from_osm(fp_osm_transformers, buses):
 
 
 def _set_electrical_parameters_lines(config, lines):
+    if lines.empty:
+        lines["type"] = []
+        return lines
+
     v_noms = config["electricity"]["voltages"]
+    lines["carrier"] = "AC"
+    lines["dc"] = False
     linetypes = config["lines"]["types"]
 
     for v_nom in v_noms:
@@ -263,6 +269,7 @@ def _set_electrical_parameters_lines(config, lines):
 def _set_electrical_parameters_dc_lines(config, lines):
     v_noms = config["electricity"]["voltages"]
     lines["carrier"] = "DC"
+    lines["dc"] = True
 
     lines["type"] = config["lines"]["dc_type"]
 
@@ -280,6 +287,7 @@ def _set_electrical_parameters_links(config, links):
     links["p_min_pu"] = -p_max_pu
 
     links["carrier"] = "DC"
+    links["dc"] = True
 
     return links
 
@@ -355,7 +363,7 @@ def _set_countries_and_substations(inputs, config, n):
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
 
-    # Busses without country tag are removed OR get a country tag if close to country
+    # Buses without country tag are removed OR get a country tag if close to country
     c_nan_b = buses.country.isnull()
     if c_nan_b.sum() > 0:
         c_tag = get_country(buses.loc[c_nan_b])
@@ -402,7 +410,7 @@ def _set_countries_and_substations(inputs, config, n):
 
 def _rebase_voltage_to_config(config, component):
     """
-    Rebase the voltage of components to the config.yaml input
+    Rebase the voltage of components to the config.yaml input.
 
     Components such as line and buses have voltage levels between
     110 kV up to around 850 kV. PyPSA-Africa uses 3 voltages as config input.

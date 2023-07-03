@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.2.0
+version: 0.2.1
 tutorial: true
 
 logging:
@@ -31,6 +31,8 @@ enable:
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
+
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
   name: ""
@@ -132,6 +134,7 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
+  base_voltage: 380.
   voltages: [220., 300., 380.]
   co2limit: 1.487e+9
   co2base: 1.487e+9
@@ -155,7 +158,7 @@ electricity:
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -334,8 +337,8 @@ monte_carlo:
       # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
       # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
     loads_t.p_set: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
 
 
 solving:

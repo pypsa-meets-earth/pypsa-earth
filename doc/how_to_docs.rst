@@ -7,7 +7,7 @@
 How to docs?
 ============
 
-We add the code documentation along the way. 
+We add the code documentation along the way.
 You might think that cost a lot of time and is not efficient - but that's not really true anymore!
 Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speed up the overall process.
 Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add
@@ -67,7 +67,7 @@ This will create html files in `pypsa-earth/doc/_build/html`.
 VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
 
 .. note::
-    
+
     Windows users might face some challenges when building the documentation locally using `make`. A workaround can be found, but might be time consuming. For instance:
 
-    1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow. 
+    1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow.

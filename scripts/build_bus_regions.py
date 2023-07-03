@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
-Creates Voronoi shapes for each bus representing both onshore and offshore regions.
+Creates Voronoi shapes for each bus representing both onshore and offshore
+regions.
 
 Relevant Settings
 -----------------
@@ -40,7 +41,6 @@ Outputs
 
 Description
 -----------
-
 """
 import logging
 import os
@@ -272,7 +272,7 @@ if __name__ == "__main__":
     )
 
     if offshore_regions:
-        # if a offshore_regions exists excute below
+        # if a offshore_regions exists execute below
         pd.concat(offshore_regions, ignore_index=True).to_file(
             snakemake.output.regions_offshore
         )

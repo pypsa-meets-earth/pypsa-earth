@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -225,7 +225,9 @@ def get_feature_for_hac(n, buses_i=None, feature=None):
 def distribute_clusters(
     inputs, config, n, n_clusters, focus_weights=None, solver_name=None
 ):
-    """Determine the number of clusters per country"""
+    """
+    Determine the number of clusters per country.
+    """
 
     distribution_cluster = config["cluster_options"]["distribute_cluster"]
     country_list = config["countries"]
@@ -327,7 +329,7 @@ def distribute_clusters(
 
     def n_bounds(model, *n_id):
         """
-        Create a function that makes a bound pair for pyomo
+        Create a function that makes a bound pair for pyomo.
 
         Use n_bounds(model, n_id) if N is Single-Index
         Use n_bounds(model, *n_id) if N is Multi-Index
@@ -599,7 +601,10 @@ def clustering_for_n_clusters(
             n.links.eval("underwater_fraction * length").div(nc.links.length).dropna()
         )
         nc.links["capital_cost"] = nc.links["capital_cost"].add(
-            (nc.links.length - n.links.length).clip(lower=0).mul(extended_link_costs),
+            (nc.links.length - n.links.length)
+            .clip(lower=0)
+            .mul(extended_link_costs)
+            .dropna(),
             fill_value=0,
         )
 

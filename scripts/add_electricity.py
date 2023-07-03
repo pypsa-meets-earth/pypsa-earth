@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
-Adds electrical generators, load and existing hydro storage units to a base network.
+Adds electrical generators, load and existing hydro storage units to a base
+network.
 
 Relevant Settings
 -----------------
@@ -93,6 +94,7 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from powerplantmatching.export import map_country_bus
 from shapely.validation import make_valid
 from vresutils import transfer as vtransfer
 
@@ -108,7 +110,7 @@ def normed(s):
 def calculate_annuity(n, r):
     """
     Calculate the annuity factor for an asset with lifetime n years and
-    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6.
     """
     if isinstance(r, pd.Series):
         return pd.Series(1 / n, index=r.index).where(
@@ -136,7 +138,7 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
 
 def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
-    set all asset costs and other parameters
+    Set all asset costs and other parameters.
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
@@ -231,7 +233,7 @@ def load_powerplants(ppl_fn):
 
 def attach_load(n, demand_profiles):
     """
-    Add load profiles to network buses
+    Add load profiles to network buses.
 
     Parameters
     ----------
@@ -288,14 +290,28 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
 
 
 def attach_wind_and_solar(
-    n, costs, input_profiles, technologies, extendable_carriers, line_length_factor=1
+    n,
+    costs,
+    ppl,
+    input_profiles,
+    technologies,
+    extendable_carriers,
+    line_length_factor=1,
 ):
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
+    df = ppl.rename(columns={"country": "Country"})
+
     for tech in technologies:
         if tech == "hydro":
             continue
+
+        if tech == "offwind-ac":
+            # add all offwind wind power plants by default as offwind-ac
+            df.carrier.mask(df.technology == "Offshore", "offwind-ac", inplace=True)
+
+        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
         with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
@@ -323,19 +339,29 @@ def attach_wind_and_solar(
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
+            if not df.query("carrier == @tech").empty:
+                buses = n.buses.loc[ds.indexes["bus"]]
+                caps = map_country_bus(df.query("carrier == @tech"), buses)
+                caps = caps.groupby(["bus"]).p_nom.sum()
+                caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
+            else:
+                caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
+
             n.madd(
                 "Generator",
                 ds.indexes["bus"],
                 " " + tech,
                 bus=ds.indexes["bus"],
                 carrier=tech,
+                p_nom=caps,
                 p_nom_extendable=tech in extendable_carriers["Generator"],
+                p_nom_min=caps,
                 p_nom_max=ds["p_nom_max"].to_pandas(),
+                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
                 marginal_cost=costs.at[suptech, "marginal_cost"],
                 capital_cost=capital_cost,
                 efficiency=costs.at[suptech, "efficiency"],
-                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
             )
 
 
@@ -345,10 +371,13 @@ def attach_conventional_generators(
     ppl,
     conventional_carriers,
     extendable_carriers,
+    renewable_carriers,
     conventional_config,
     conventional_inputs,
 ):
-    carriers = set(conventional_carriers) | set(extendable_carriers["Generator"])
+    carriers = set(conventional_carriers) | (
+        set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    )
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     ppl = (
@@ -432,7 +461,9 @@ def attach_hydro(n, costs, ppl):
             missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            intersection_plants = inflow.indexes["plant"].intersection(inflow_buses)
+            intersection_plants = pd.Index(
+                inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
+            )
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants.empty:
@@ -762,7 +793,7 @@ if __name__ == "__main__":
     if not (set(renewable_carriers) & set(extendable_carriers["Generator"])):
         logger.warning(
             "No renewables found in config entry `extendable_carriers`. "
-            "In future versions, these have to be explicitely listed. "
+            "In future versions, these have to be explicitly listed. "
             "Falling back to all renewables."
         )
 
@@ -778,12 +809,14 @@ if __name__ == "__main__":
         ppl,
         conventional_carriers,
         extendable_carriers,
+        renewable_carriers,
         snakemake.config.get("conventional", {}),
         conventional_inputs,
     )
     attach_wind_and_solar(
         n,
         costs,
+        ppl,
         snakemake.input,
         renewable_carriers,
         extendable_carriers,
