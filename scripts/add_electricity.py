@@ -457,17 +457,22 @@ def attach_hydro(n, costs, ppl):
             missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            plants_with_data = pd.Index(
-                inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
-            )
+            # map power plants index (regions_onshore) into power plants ids (powerplants.csv)
+            # plants_to_keep correspond to "plant" index of regions_onshore
+            # plants_to_keep.index corresponds to bus_id of PyPSA network
+            plants_with_data = inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
+            plants_to_keep = plants_with_data.to_numpy()
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants.empty:
                 # original total p_nom
                 total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
-                idxs_to_keep = inflow_buses[inflow_buses.isin(plants_with_data)].index
-                ror = ror.loc[ror.index.intersection(idxs_to_keep)]
-                hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+                # update plants_with_data to ensure proper match between "plant" index and bus_id
+                plants_with_data = inflow_buses[inflow_buses.isin(plants_to_keep)]
+                network_buses_to_keep = plants_with_data.index
+
+                ror = ror.loc[ror.index.intersection(network_buses_to_keep)]
+                hydro = hydro.loc[hydro.index.intersection(network_buses_to_keep)]
                 # loss of p_nom
                 loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
 
@@ -475,15 +480,16 @@ def attach_hydro(n, costs, ppl):
                     f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
                     f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
                 )
-            else:
-                idxs_to_keep = inflow_idx
 
             # if there are any plants for which runoff data are available
             if not plants_with_data.empty:
+                network_buses_to_keep = plants_with_data.index
+                plants_to_keep = plants_with_data.to_numpy()
+
                 inflow_t = (
-                    inflow.sel(plant=plants_with_data)
+                    inflow.sel(plant=plants_to_keep)
                     .rename({"plant": "name"})
-                    .assign_coords(name=idxs_to_keep)
+                    .assign_coords(name=network_buses_to_keep)
                     .transpose("time", "name")
                     .to_pandas()
                 )
