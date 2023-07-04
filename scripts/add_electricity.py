@@ -252,38 +252,33 @@ def attach_load(n, demand_profiles):
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
-def attach_dc_costs(
-    n, lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False
-):
-    # TODO would it make sense to add a check on allowed keywords value?
-    if lines_or_links == "lines":
-        df_to_modify = n.lines
-    elif lines_or_links == "links":
-        df_to_modify = n.links
-
-    if df_to_modify.loc[df_to_modify.carrier == "DC"].empty:
+def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
+    if lines_or_links.empty:
         return
 
-    dc_b = df_to_modify.carrier == "DC"
+    if lines_or_links.loc[lines_or_links.carrier == "DC"].empty:
+        return
+
+    dc_b = lines_or_links.carrier == "DC"
     if simple_hvdc_costs:
         costs = (
-            df_to_modify.loc[dc_b, "length"]
+            lines_or_links.loc[dc_b, "length"]
             * length_factor
             * costs.at["HVDC overhead", "capital_cost"]
         )
     else:
         costs = (
-            df_to_modify.loc[dc_b, "length"]
+            lines_or_links.loc[dc_b, "length"]
             * length_factor
             * (
-                (1.0 - df_to_modify.loc[dc_b, "underwater_fraction"])
+                (1.0 - lines_or_links.loc[dc_b, "underwater_fraction"])
                 * costs.at["HVDC overhead", "capital_cost"]
-                + df_to_modify.loc[dc_b, "underwater_fraction"]
+                + lines_or_links.loc[dc_b, "underwater_fraction"]
                 * costs.at["HVDC submarine", "capital_cost"]
             )
             + costs.at["HVDC inverter pair", "capital_cost"]
         )
-    df_to_modify.loc[dc_b, "capital_cost"] = costs
+    lines_or_links.loc[dc_b, "capital_cost"] = costs
 
 
 def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
@@ -291,22 +286,17 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
         n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
     )
 
-    if n.links.empty:
-        return
-
     # If there are no "DC" links, then the 'underwater_fraction' column
     # may be missing. Therefore we have to return here.
     # TODO: Require fix
     attach_dc_costs(
-        n=n,
-        lines_or_links="links",
+        lines_or_links=n.links,
         costs=costs,
         length_factor=length_factor,
         simple_hvdc_costs=simple_hvdc_costs,
     )
     attach_dc_costs(
-        n=n,
-        lines_or_links="lines",
+        lines_or_links=n.lines,
         costs=costs,
         length_factor=length_factor,
         simple_hvdc_costs=simple_hvdc_costs,
