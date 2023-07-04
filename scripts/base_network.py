@@ -157,44 +157,32 @@ def add_underwater_links(n, fp_offshore_shapes):
             )
 
 
-# TODO would be nice to join both the add_underwater* functions
-def add_underwater_part(n, lines_or_links, shapes):
-    # TODO would it make sense to add a check on allowed keywords value?
-    if lines_or_links == "lines":
-        df_to_modify = n.lines
-    elif lines_or_links == "links":
-        df_to_modify = n.links
-
-    if df_to_modify.loc[df_to_modify.carrier == "DC"].empty:
-        # Add "underwater_fraction" both to lines and links
-        df_to_modify["underwater_fraction"] = 0.0
+def _set_links_underwater_fraction(lines_or_links, fp_offshore_shapes):
+    # HVDC part always has some links as converters
+    # excluding probably purely DC networks which are currently somewhat exotic
+    if lines_or_links.empty:
         return
 
-    if not hasattr(df_to_modify, "geometry"):
-        df_to_modify["underwater_fraction"] = 0.0
+    if lines_or_links.loc[lines_or_links.carrier == "DC"].empty:
+        # Add "underwater_fraction" both to lines and links
+        lines_or_links["underwater_fraction"] = 0.0
+        return
+
+    if not hasattr(lines_or_links, "geometry"):
+        lines_or_links["underwater_fraction"] = 0.0
     else:
         offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
         if offshore_shape is None or offshore_shape.is_empty:
-            df_to_modify["underwater_fraction"] = 0.0
+            lines_or_links["underwater_fraction"] = 0.0
         else:
             branches = gpd.GeoSeries(
-                df_to_modify.geometry.dropna().map(shapely.wkt.loads)
+                lines_or_links.geometry.dropna().map(shapely.wkt.loads)
             )
-            df_to_modify["underwater_fraction"] = (
+            lines_or_links["underwater_fraction"] = (
                 # TODO Check assumption that all underwater lines are DC
                 branches.intersection(offshore_shape).length
                 / branches.length
             )
-
-
-def _set_links_underwater_fraction(fp_offshore_shapes, n):
-    # HVDC part always has some links as converters
-    # excluding probably purely DC networks which are currently somewhat exotic
-    if n.links.empty:
-        return
-
-    add_underwater_part(n=n, lines_or_links="links", shapes=fp_offshore_shapes)
-    add_underwater_part(n=n, lines_or_links="lines", shapes=fp_offshore_shapes)
 
 
 def _load_lines_from_osm(fp_osm_lines, config, buses):
@@ -533,7 +521,8 @@ def base_network(inputs, config):
 
     _set_countries_and_substations(inputs, config, n)
 
-    _set_links_underwater_fraction(inputs.offshore_shapes, n)
+    _set_links_underwater_fraction(n.lines, inputs.offshore_shapes)
+    _set_links_underwater_fraction(n.links, inputs.offshore_shapes)
 
     return n
 
