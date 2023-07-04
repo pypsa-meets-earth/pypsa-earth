@@ -143,11 +143,11 @@ def _load_buses_from_osm(fp_buses, config):
     return buses
 
 
-def add_underwater_links(n, shapes):
+def add_underwater_links(n, fp_offshore_shapes):
     if not hasattr(n.links, "geometry"):
         n.links["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(shapes).unary_union
+        offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
         if offshore_shape is None or offshore_shape.is_empty:
             n.links["underwater_fraction"] = 0.0
         else:
@@ -173,7 +173,7 @@ def add_underwater_part(n, lines_or_links, shapes):
     if not hasattr(df_to_modify, "geometry"):
         df_to_modify["underwater_fraction"] = 0.0
     else:
-        offshore_shape = gpd.read_file(shapes).unary_union
+        offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
         if offshore_shape is None or offshore_shape.is_empty:
             df_to_modify["underwater_fraction"] = 0.0
         else:
