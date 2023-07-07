@@ -178,11 +178,15 @@ def _set_links_underwater_fraction(lines_or_links, fp_offshore_shapes):
             branches = gpd.GeoSeries(
                 lines_or_links.geometry.dropna().map(shapely.wkt.loads)
             )
-            lines_or_links["underwater_fraction"] = (
-                # TODO Check assumption that all underwater lines are DC
-                branches.intersection(offshore_shape).length
-                / branches.length
-            )
+            # fix to avoid NaN for links during augmentation
+            if branches.empty:
+                lines_or_links["underwater_fraction"] = 0
+            else:
+                lines_or_links["underwater_fraction"] = (
+                    # TODO Check assumption that all underwater lines are DC
+                    branches.intersection(offshore_shape).length
+                    / branches.length
+                )
 
 
 def _load_lines_from_osm(fp_osm_lines, config, buses):
