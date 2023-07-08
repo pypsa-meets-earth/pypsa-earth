@@ -156,7 +156,7 @@ def add_underwater_links(n, fp_offshore_shapes):
             )
 
 
-def _set_links_underwater_fraction(lines_or_links, fp_offshore_shapes):
+def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
     # HVDC part always has some links as converters
     # excluding probably purely DC networks which are currently somewhat exotic
     if lines_or_links.empty:
@@ -528,8 +528,8 @@ def base_network(inputs, config):
 
     _set_countries_and_substations(inputs, config, n)
 
-    _set_links_underwater_fraction(n.lines, inputs.offshore_shapes)
-    _set_links_underwater_fraction(n.links, inputs.offshore_shapes)
+    _set_dc_underwater_fraction(n.lines, inputs.offshore_shapes)
+    _set_dc_underwater_fraction(n.links, inputs.offshore_shapes)
 
     return n
 
