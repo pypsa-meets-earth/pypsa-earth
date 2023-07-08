@@ -324,12 +324,13 @@ Release Process
 
 * Update ``envs/environment.fixed.yaml`` via
   ``conda env export -n pypsa-earth -f envs/environment.fixed.yaml --no-builds``
-  from an up-to-date `pypsa-earth` environment.
+  from an up-to-date `pypsa-earth` environment. Add license note at the top of the new yaml.
 
 * Update version number in ``doc/conf.py`` and ``*config.*.yaml``.
 
 * Open, review and merge pull request for branch ``release-v0.x.x``.
   Make sure to close issues and PRs or the release milestone with it (e.g. closes #X).
+  Run ``pre-commit run --all`` locally and fix any issues.
 
 * Tag a release on Github via ``git tag v0.x.x``, ``git push``, ``git push --tags``. Include release notes in the tag message.
 
