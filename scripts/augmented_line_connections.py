@@ -37,7 +37,7 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging
 from add_electricity import load_costs
-from base_network import _set_links_underwater_fraction
+from base_network import _set_dc_underwater_fraction
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
