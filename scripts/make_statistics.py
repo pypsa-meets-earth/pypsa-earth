@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Create statistics for a given scenario run
+Create statistics for a given scenario run.
 
 This script contains functions to create statistics of the workflow for the current execution
 
@@ -53,9 +53,9 @@ def generate_scenario_by_country(
     path_base, country_list, out_dir="configs/scenarios", pre="config."
 ):
     """
-    Utility function to create copies of a standard yaml file available in path_base
-    for every country in country_list.
-    Copies are saved into the output directory out_dir
+    Utility function to create copies of a standard yaml file available in
+    path_base for every country in country_list. Copies are saved into the
+    output directory out_dir.
 
     Note:
     - the clusters are automatically modified for selected countries with limited data
@@ -173,8 +173,10 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
 def collect_osm_stats(rulename, **kwargs):
     """
     Collect statistics on OSM data.
-    When lines and cables are considered, then network-related statistics are collected
-    (collect_network_osm_stats), otherwise basic statistics are (collect_basic_osm_stats)
+
+    When lines and cables are considered, then network-related
+    statistics are collected (collect_network_osm_stats), otherwise
+    basic statistics are (collect_basic_osm_stats)
     """
     metric_crs = kwargs.pop("metric_crs", "EPSG:3857")
     only_basic = kwargs.pop("only_basic", False)
@@ -230,7 +232,8 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
 
 def collect_bus_regions_stats(bus_region_rule="build_bus_regions"):
     """
-    Collect statistics on bus regions
+    Collect statistics on bus regions.
+
     - number of onshore regions
     - number of offshore regions
     """
@@ -310,7 +313,7 @@ def collect_network_stats(network_rule, config):
         )
 
         # add demand to statistics
-        tot_demand = n.loads_t.p_set.sum().sum()
+        tot_demand = float(n.loads_t.p_set.sum(axis=1).mean()) * 8760
         df_demand = pd.DataFrame({"demand": [tot_demand]})
         df_demand.columns = _multi_index_scen(network_rule, df_demand.columns)
         network_stats = pd.concat([network_stats, df_demand], axis=1)
@@ -373,7 +376,7 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
 
 def collect_only_computational(rulename):
     """
-    Rule to create only computational statistics of rule rulename
+    Rule to create only computational statistics of rule rulename.
     """
     snakemake = _mock_snakemake(rulename)
     df = pd.DataFrame()
@@ -383,7 +386,7 @@ def collect_only_computational(rulename):
 
 def collect_snakemake_stats(name, dict_dfs, config):
     """
-    Collect statistics on what rules have been successful
+    Collect statistics on what rules have been successful.
     """
     ren_techs = [
         tech
@@ -419,7 +422,9 @@ def collect_snakemake_stats(name, dict_dfs, config):
 
 
 def aggregate_computational_stats(name, dict_dfs):
-    """Function to aggregate the total computational statistics of the rules"""
+    """
+    Function to aggregate the total computational statistics of the rules.
+    """
     cols_comp = ["total_time", "mean_load", "max_memory"]
 
     def get_selected_cols(df, level=1, lvl_cols=cols_comp):
@@ -490,7 +495,8 @@ def collect_renewable_stats(rulename, technology):
 
 def add_computational_stats(df, snakemake, column_name=None):
     """
-    Add the major computational information of a given rule into the existing dataframe
+    Add the major computational information of a given rule into the existing
+    dataframe.
     """
     comp_data = [np.nan] * 3  # total_time, mean_load and max_memory
 

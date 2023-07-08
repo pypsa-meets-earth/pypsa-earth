@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Adds electrical generators, load and existing hydro storage units to a base network.
+Adds electrical generators, load and existing hydro storage units to a base
+network.
 
 Relevant Settings
 -----------------
@@ -109,7 +110,7 @@ def normed(s):
 def calculate_annuity(n, r):
     """
     Calculate the annuity factor for an asset with lifetime n years and
-    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6.
     """
     if isinstance(r, pd.Series):
         return pd.Series(1 / n, index=r.index).where(
@@ -137,7 +138,7 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
 
 def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
-    set all asset costs and other parameters
+    Set all asset costs and other parameters.
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
@@ -232,7 +233,7 @@ def load_powerplants(ppl_fn):
 
 def attach_load(n, demand_profiles):
     """
-    Add load profiles to network buses
+    Add load profiles to network buses.
 
     Parameters
     ----------
@@ -385,10 +386,13 @@ def attach_conventional_generators(
     ppl,
     conventional_carriers,
     extendable_carriers,
+    renewable_carriers,
     conventional_config,
     conventional_inputs,
 ):
-    carriers = set(conventional_carriers) | set(extendable_carriers["Generator"])
+    carriers = set(conventional_carriers) | (
+        set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    )
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     ppl = (
@@ -472,32 +476,40 @@ def attach_hydro(n, costs, ppl):
             missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            intersection_plants = pd.Index(
-                inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
-            )
+            # map power plants index (regions_onshore) into power plants ids (powerplants.csv)
+            # plants_to_keep correspond to "plant" index of regions_onshore
+            # plants_to_keep.index corresponds to bus_id of PyPSA network
+            plants_with_data = inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
+            plants_to_keep = plants_with_data.to_numpy()
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants.empty:
                 # original total p_nom
                 total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
-                idxs_to_keep = inflow_buses[
-                    inflow_buses.isin(intersection_plants)
-                ].index
-                ror = ror.loc[ror.index.intersection(idxs_to_keep)]
-                hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+                # update plants_with_data to ensure proper match between "plant" index and bus_id
+                plants_with_data = inflow_buses[inflow_buses.isin(plants_to_keep)]
+                network_buses_to_keep = plants_with_data.index
+                plants_to_keep = plants_with_data.to_numpy()
+
+                ror = ror.loc[ror.index.intersection(network_buses_to_keep)]
+                hydro = hydro.loc[hydro.index.intersection(network_buses_to_keep)]
                 # loss of p_nom
                 loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
 
                 logger.warning(
                     f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
-                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom}MW out of {total_p_nom}MW."
+                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
                 )
 
-            if not intersection_plants.empty:
+            # if there are any plants for which runoff data are available
+            if not plants_with_data.empty:
+                network_buses_to_keep = plants_with_data.index
+                plants_to_keep = plants_with_data.to_numpy()
+
                 inflow_t = (
-                    inflow.sel(plant=intersection_plants)
+                    inflow.sel(plant=plants_to_keep)
                     .rename({"plant": "name"})
-                    .assign_coords(name=inflow_idx)
+                    .assign_coords(name=network_buses_to_keep)
                     .transpose("time", "name")
                     .to_pandas()
                 )
@@ -820,6 +832,7 @@ if __name__ == "__main__":
         ppl,
         conventional_carriers,
         extendable_carriers,
+        renewable_carriers,
         snakemake.config.get("conventional", {}),
         conventional_inputs,
     )

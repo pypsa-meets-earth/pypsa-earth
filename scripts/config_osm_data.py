@@ -149,6 +149,52 @@ feature_columns = {
     "tower": columns_basic + columns_tower,
 }
 
+# Columns of CLEAN OSM DATA names and dtypes
+osm_clean_columns = {
+    "substation": {
+        "bus_id": object,
+        "station_id": float,
+        "voltage": float,
+        "dc": bool,
+        "symbol": object,
+        "under_construction": bool,
+        "tag_substation": str,
+        "tag_area": str,
+        "lon": float,
+        "lat": float,
+        "country": str,
+        "geometry": object,
+    },
+    "generator": {
+        "id": object,
+        "tags.power": object,
+        "Type": object,
+        "Country": str,
+        "Area": object,
+        "name": object,
+        "tags.generator:type": object,
+        "tags.generator:method": object,
+        "tags.generator:source": object,
+        "power_output_MW": object,
+        "geometry": object,
+    },
+    "line": {
+        "line_id": object,
+        "bus0": object,
+        "bus1": object,
+        "voltage": float,
+        "circuits": float,
+        "length": float,
+        "underground": bool,
+        "under_construction": bool,
+        "tag_type": str,
+        "tag_frequency": float,
+        "dc": bool,
+        "country": object,
+        "geometry": object,
+    },
+}
+
 # Python dictionary of ISO 3166-1-alpha-2 codes, as per publicly
 # available data on official ISO site in July 2015.
 #
@@ -179,7 +225,7 @@ world_iso = {
         "CV": "cape-verde",  # Island
         "CF": "central-african-republic",
         "TD": "chad",
-        # "KM": "comoros", # Island
+        "KM": "comoros",  # Island
         "CG": "congo-brazzaville",
         "CD": "congo-democratic-republic",
         "DJ": "djibouti",
@@ -261,7 +307,6 @@ world_iso = {
         "LA": "lao-people's-democratic-republic",
         "LB": "lebanon",
         "MY": "malaysia",
-        "SG": "singapore",
         "BN": "brunei",
         "MV": "maldives",  # Island
         "MN": "mongolia",
@@ -381,7 +426,7 @@ world_iso = {
     },
     "NorthAmerica": {
         # "AI": "anguilla", #Island
-        # "AG": "antigua-and-barbuda", # Islands
+        "AG": "antigua-and-barbuda",  # Islands
         # "AW": "aruba", # Islands
         "BS": "bahamas",  # Islands
         "BB": "barbados",  # Islands
@@ -392,7 +437,7 @@ world_iso = {
         # "KY": "cayman-islands", # Islands
         "CU": "cuba",  # Islands
         # "CW": "curacao", # Islands
-        # "DM": "dominica", # Islands
+        "DM": "dominica",  # Islands
         "DO": "dominican-republic",
         "GL": "greenland",
         "GD": "grenada",  # Islands
@@ -405,13 +450,13 @@ world_iso = {
         "US": "united-states-of-america",
         "PR": "puerto-rico",  # Islands
         # "BL": "saint-barthelemy", # Islands
-        # "KN": "saint-kitts-and-nevis", # Islands
-        # "LC": "saint-lucia", # Islands
+        "KN": "saint-kitts-and-nevis",  # Islands
+        "LC": "saint-lucia",  # Islands
         # "MF": "saint-martin", # Islands
         # "PM": "saint-pierre-and-miquelon", # Islands
-        # "VC": "saint-vincent-and-the-grenadines", # Islands
+        "VC": "saint-vincent-and-the-grenadines",  # Islands
         # "SX": "saint-marteen", # Islands
-        # "TT": "trinidad-and-tobago", # Islands
+        "TT": "trinidad-and-tobago",  # Islands
         # "TC": "turks-and-caicos", # Islands
         # "UM": "united-states-minor-outlying-islands", #Islands
         # "VI": "united-states-virgin-islands", #Islands

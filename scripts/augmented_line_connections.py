@@ -27,8 +27,6 @@ Outputs
 
 Description
 -----------
-
-
 """
 import logging
 import os

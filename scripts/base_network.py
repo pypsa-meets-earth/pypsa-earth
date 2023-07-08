@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates the network topology from a OpenStreetMap
+Creates the network topology from a OpenStreetMap.
 
 Relevant Settings
 -----------------
@@ -54,7 +54,6 @@ Outputs
 
 Description
 -----------
-
 """
 import logging
 import os
@@ -279,6 +278,10 @@ def _load_transformers_from_osm(fp_osm_transformers, buses):
 
 
 def _set_electrical_parameters_lines(config, lines):
+    if lines.empty:
+        lines["type"] = []
+        return lines
+
     v_noms = config["electricity"]["voltages"]
     lines["carrier"] = "AC"
     lines["dc"] = False
@@ -436,7 +439,7 @@ def _set_countries_and_substations(inputs, config, n):
 
 def _rebase_voltage_to_config(config, component):
     """
-    Rebase the voltage of components to the config.yaml input
+    Rebase the voltage of components to the config.yaml input.
 
     Components such as line and buses have voltage levels between
     110 kV up to around 850 kV. PyPSA-Africa uses 3 voltages as config input.
