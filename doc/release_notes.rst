@@ -12,6 +12,13 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
+**New Features and major Changes**
+
+PyPSA-Earth 0.2.2
+=================
+
+**New Features and major Changes (8th July 2023)**
+
 * Fix Natural Gas assignment bug in build_powerplants rule `PR #754 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/754>`__.
 
 * Add GEM datasets to the powerplantmatching config `PR #750 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/750>`__.
@@ -33,7 +40,7 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 PyPSA-Earth 0.2.1
 =================
 
-**New Features and major Changes**
+**New Features and major Changes (20th May 2023)**
 
 * Fix bug. Add graphviz to docs to compile workflows in the documentation and adapt release notes `PR #719 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/719>`__
 
@@ -47,7 +54,7 @@ PyPSA-Earth 0.2.1
 PyPSA-Earth 0.2.0
 =================
 
-**New Features and major Changes**
+**New Features and major Changes (7th May 2023)**
 
 * Finalize package restructuring `PR #462 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/462>`__
 
