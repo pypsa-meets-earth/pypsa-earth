@@ -396,11 +396,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 i_links = [i for _, i in l if _ == "Link"]
                 length = sum(n.links.loc[i_links, "length"].mean() for l in links)
                 p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in links)
-                underwater_fraction = sum(
-                    lengths
-                    / lengths.sum()
-                    * n.links.loc[all_links, "underwater_fraction"]
-                )
+                underwater_fraction = (
+                    lengths * n.links.loc[all_links, "underwater_fraction"]
+                ).sum() / lengths.sum()
             # HVDC part is represented as "Line" component
             elif dc_as_lines:
                 p_max_pu = config["lines"].get("p_max_pu", 1.0)
@@ -416,11 +414,8 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                     .min()
                 )
                 underwater_fraction = (
-                    sum(
-                        lengths
-                        / lengths.sum()
-                        * n.lines.loc[all_dc_lines, "underwater_fraction"]
-                    )
+                    (lengths * n.lines.loc[all_dc_lines, "underwater_fraction"]).sum()
+                    / lengths.sum()
                     if len(lengths) > 0
                     else 0
                 )
