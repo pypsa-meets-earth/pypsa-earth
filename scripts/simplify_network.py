@@ -378,16 +378,16 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             )
 
             # TODO revise a variable name for `links` variable
-            # `links` is a list which contains dc-relevant graph elements
-            all_dc = [i for _, i in sum(links, [])]
-            all_links = list(set(n.links.index).intersection(all_dc))
-            all_dc_lines = list(set(n.lines.index).intersection(all_dc))
+            # `links` is a list containing dc-relevant graph elements like [('Line', '712308316-1_0')]
+            all_dc_branches = [i for _, i in sum(links, [])]
+            all_links = list(set(n.links.index).intersection(all_dc_branches))
+            all_dc_lines = list(set(n.lines.index).intersection(all_dc_branches))
 
             # p_max_pu = config["links"].get("p_max_pu", 1.0)
             all_dc_lengths = pd.concat(
                 [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
             )
-            name = all_dc_lengths.idxmax() + "+{}".format(len(all_dc) - 1)
+            name = all_dc_lengths.idxmax() + "+{}".format(len(all_dc_branches) - 1)
 
             # HVDC part is represented as "Link" component
             if dc_as_links:
@@ -445,7 +445,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
             logger.info(
                 "Joining the links and DC lines {} connecting the buses {} to simple link {}".format(
-                    ", ".join(all_dc), ", ".join(buses), name
+                    ", ".join(all_dc_branches), ", ".join(buses), name
                 )
             )
 
