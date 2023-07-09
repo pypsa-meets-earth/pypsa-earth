@@ -392,7 +392,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             if dc_as_links:
                 p_max_pu = config["links"].get("p_max_pu", 1.0)
                 lengths = n.links.loc[all_links, "length"]
-                i_links = [i for _, i in l if _ == "Link"]
+                i_links = [i for _, i in links if _ == "Link"]
                 length = sum(n.links.loc[i_links, "length"].mean() for l in links)
                 p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in links)
                 underwater_fraction = (
