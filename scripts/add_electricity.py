@@ -287,9 +287,6 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
         n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
     )
 
-    # If there are no "DC" links, then the 'underwater_fraction' column
-    # may be missing. Therefore we have to return here.
-    # TODO: Require fix
     attach_dc_costs(
         lines_or_links=n.links,
         costs=costs,
