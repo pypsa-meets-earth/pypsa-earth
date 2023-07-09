@@ -294,8 +294,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             pass
         return n, n.buses.index.to_series()
 
-    dc_as_links = not n.links.loc[n.links.carrier == "DC"].empty
-    dc_as_lines = not n.lines.loc[n.lines.carrier == "DC"].empty
+    dc_as_links = not (n.lines.carrier == "DC").any()
 
     # Determine connected link components, ignore all links but DC
     adjacency_matrix = n.adjacency_matrix(
@@ -400,7 +399,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                     lengths * n.links.loc[all_links, "underwater_fraction"]
                 ).sum() / lengths.sum()
             # HVDC part is represented as "Line" component
-            elif dc_as_lines:
+            else:
                 p_max_pu = config["lines"].get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
                 length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
