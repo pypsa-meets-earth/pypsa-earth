@@ -403,15 +403,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 p_max_pu = config["lines"].get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
                 length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
-                p_nom = (
-                    n.lines.loc[all_dc_lines]
-                    .apply(
-                        lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
-                        axis=1,
-                        result_type="reduce",
-                    )
-                    .min()
-                )
+                p_nom = n.lines.loc[all_dc_lines, "s_nom"].min()
                 underwater_fraction = (
                     (lengths * n.lines.loc[all_dc_lines, "underwater_fraction"]).sum()
                     / lengths.sum()
