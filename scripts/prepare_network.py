@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such as
+Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such
+as.
 
 - adding an annual **limit** of carbon-dioxide emissions,
 - adding an exogenous **price** per tonne emissions of carbon-dioxide (or other kinds),
@@ -54,7 +55,6 @@ Description
     The rule :mod:`prepare_all_networks` runs
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
-
 """
 import logging
 import os

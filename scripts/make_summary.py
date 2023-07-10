@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 """
 Creates summaries of aggregated energy and costs as ``.csv`` files.
+
 Relevant Settings
 -----------------
 ..code:: yaml

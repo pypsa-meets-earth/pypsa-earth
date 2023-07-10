@@ -349,7 +349,9 @@ def add_battery_constraints(n):
 
 def extra_functionality(n, snapshots):
     """
-    Collects supplementary constraints which will be passed to ``pypsa.linopf.network_lopf``.
+    Collects supplementary constraints which will be passed to
+    ``pypsa.linopf.network_lopf``.
+
     If you want to enforce additional custom constraints, this is a good location to add them.
     The arguments ``opts`` and ``snakemake.config`` are expected to be attached to the network.
     """
