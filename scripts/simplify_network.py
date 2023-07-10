@@ -129,6 +129,11 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
+    # Re-define s_nom for DC lines
+    n.lines.loc[n.lines["carrier"] == "DC", "num_parallel"] = n.lines.eval(
+        "s_nom / (v_nom * i_nom)"
+    )
+
     # Replace transformers by lines
     trafo_map = pd.Series(n.transformers.bus1.values, n.transformers.bus0.values)
     trafo_map = trafo_map[~trafo_map.index.duplicated(keep="first")]
