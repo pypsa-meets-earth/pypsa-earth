@@ -351,15 +351,12 @@ def _set_lines_s_nom_from_linetypes(n):
     n.lines["s_nom"] = (
         np.sqrt(3)
         * n.lines["type"].map(n.line_types.i_nom)
-        * n.lines["v_nom"]
-        * n.lines.num_parallel
+        * n.lines.eval("v_nom * num_parallel")
     )
     # Re-define s_nom for DC lines
-    n.lines.loc[n.lines["carrier"] == "DC", "s_nom"] = (
-        n.lines["type"].map(n.line_types.i_nom)
-        * n.lines["v_nom"]
-        * n.lines.num_parallel
-    )
+    n.lines.loc[n.lines["carrier"] == "DC", "s_nom"] = n.lines["type"].map(
+        n.line_types.i_nom
+    ) * n.lines.eval("v_nom * num_parallel")
 
 
 def _remove_dangling_branches(branches, buses):
