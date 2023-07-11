@@ -367,12 +367,12 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     )
 
     for lbl in labels.value_counts().loc[lambda s: s > 2].index:
-        for b, buses, links in split_links(labels.index[labels == lbl]):
+        for b, buses, dc_edges in split_links(labels.index[labels == lbl]):
             if len(buses) <= 2:
                 continue
 
             logger.debug("nodes = {}".format(labels.index[labels == lbl]))
-            logger.debug("b = {}\nbuses = {}\nlinks = {}".format(b, buses, links))
+            logger.debug("b = {}\nbuses = {}\nlinks = {}".format(b, buses, dc_edges))
 
             m = sp.spatial.distance_matrix(
                 n.buses.loc[b, ["x", "y"]], n.buses.loc[buses[1:-1], ["x", "y"]]
@@ -382,9 +382,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 n, busmap, costs, config, connection_costs_per_link, buses
             )
 
-            # TODO revise a variable name for `links` variable
-            # `links` is a list containing dc-relevant graph elements like [('Line', '712308316-1_0')]
-            all_dc_branches = [i for _, i in sum(links, [])]
+            # TODO revise a variable name for `dc_edges` variable
+            # `dc_edges` is a list containing dc-relevant graph elements like [('Line', '712308316-1_0')]
+            all_dc_branches = [i for _, i in sum(dc_edges, [])]
             all_links = list(set(n.links.index).intersection(all_dc_branches))
             all_dc_lines = list(set(n.lines.index).intersection(all_dc_branches))
 
@@ -398,9 +398,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             if dc_as_links:
                 p_max_pu = config["links"].get("p_max_pu", 1.0)
                 lengths = n.links.loc[all_links, "length"]
-                i_links = [i for _, i in links if _ == "Link"]
-                length = sum(n.links.loc[i_links, "length"].mean() for l in links)
-                p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in links)
+                i_links = [i for _, i in dc_edges if _ == "Link"]
+                length = sum(n.links.loc[i_links, "length"].mean() for l in dc_edges)
+                p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in dc_edges)
                 underwater_fraction = (
                     lengths * n.links.loc[all_links, "underwater_fraction"]
                 ).sum() / lengths.sum()
