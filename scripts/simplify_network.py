@@ -130,7 +130,8 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
     # Re-define s_nom for DC lines
-    n.lines.loc[n.lines["carrier"] == "DC", "num_parallel"] = n.lines.eval(
+    is_dc_carrier = n.lines["carrier"] == "DC"
+    n.lines.loc[is_dc_carrier, "num_parallel"] = n.lines.loc[is_dc_carrier].eval(
         "s_nom / (v_nom * i_nom)"
     )
 
