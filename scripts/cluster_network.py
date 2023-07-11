@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates networks clustered to ``{cluster}`` number of zones with aggregated buses, generators and transmission corridors.
+Creates networks clustered to ``{cluster}`` number of zones with aggregated
+buses, generators and transmission corridors.
 
 Relevant Settings
 -----------------
@@ -118,7 +119,6 @@ Exemplary unsolved network clustered to 37 nodes:
 .. image:: /img/elec_s_37.png
     :width: 40  %
     :align: center
-
 """
 import logging
 import os

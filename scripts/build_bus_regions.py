@@ -61,8 +61,8 @@ logger = logging.getLogger(__name__)
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
     """
-    Compute the polygons of a voronoi partition of `points` within the
-    polygon `outline`
+    Compute the polygons of a voronoi partition of `points` within the polygon
+    `outline`
 
     Attributes
     ----------
