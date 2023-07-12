@@ -142,10 +142,7 @@ def _load_buses_from_osm(fp_buses, config):
     return buses
 
 
-def _set_links_underwater_fraction(fp_offshore_shapes, n):
-    if n.links.empty:
-        return
-
+def add_underwater_links(n, fp_offshore_shapes):
     if not hasattr(n.links, "geometry"):
         n.links["underwater_fraction"] = 0.0
     else:
@@ -157,6 +154,38 @@ def _set_links_underwater_fraction(fp_offshore_shapes, n):
             n.links["underwater_fraction"] = (
                 links.intersection(offshore_shape).length / links.length
             )
+
+
+def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
+    # HVDC part always has some links as converters
+    # excluding probably purely DC networks which are currently somewhat exotic
+    if lines_or_links.empty:
+        return
+
+    if lines_or_links.loc[lines_or_links.carrier == "DC"].empty:
+        # Add "underwater_fraction" both to lines and links
+        lines_or_links["underwater_fraction"] = 0.0
+        return
+
+    if not hasattr(lines_or_links, "geometry"):
+        lines_or_links["underwater_fraction"] = 0.0
+    else:
+        offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
+        if offshore_shape is None or offshore_shape.is_empty:
+            lines_or_links["underwater_fraction"] = 0.0
+        else:
+            branches = gpd.GeoSeries(
+                lines_or_links.geometry.dropna().map(shapely.wkt.loads)
+            )
+            # fix to avoid NaN for links during augmentation
+            if branches.empty:
+                lines_or_links["underwater_fraction"] = 0
+            else:
+                lines_or_links["underwater_fraction"] = (
+                    # TODO Check assumption that all underwater lines are DC
+                    branches.intersection(offshore_shape).length
+                    / branches.length
+                )
 
 
 def _load_lines_from_osm(fp_osm_lines, config, buses):
@@ -322,15 +351,12 @@ def _set_lines_s_nom_from_linetypes(n):
     n.lines["s_nom"] = (
         np.sqrt(3)
         * n.lines["type"].map(n.line_types.i_nom)
-        * n.lines["v_nom"]
-        * n.lines.num_parallel
+        * n.lines.eval("v_nom * num_parallel")
     )
     # Re-define s_nom for DC lines
-    n.lines.loc[n.lines["carrier"] == "DC", "s_nom"] = (
-        n.lines["type"].map(n.line_types.i_nom)
-        * n.lines["v_nom"]
-        * n.lines.num_parallel
-    )
+    n.lines.loc[n.lines["carrier"] == "DC", "s_nom"] = n.lines["type"].map(
+        n.line_types.i_nom
+    ) * n.lines.eval("v_nom * num_parallel")
 
 
 def _remove_dangling_branches(branches, buses):
@@ -499,7 +525,8 @@ def base_network(inputs, config):
 
     _set_countries_and_substations(inputs, config, n)
 
-    _set_links_underwater_fraction(inputs.offshore_shapes, n)
+    _set_dc_underwater_fraction(n.lines, inputs.offshore_shapes)
+    _set_dc_underwater_fraction(n.links, inputs.offshore_shapes)
 
     return n
 

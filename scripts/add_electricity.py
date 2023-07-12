@@ -253,40 +253,52 @@ def attach_load(n, demand_profiles):
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
-def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
-    n.lines["capital_cost"] = (
-        n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
-    )
-
-    if n.links.empty:
+def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
+    if lines_or_links.empty:
         return
 
-    dc_b = n.links.carrier == "DC"
-    # If there are no "DC" links, then the 'underwater_fraction' column
-    # may be missing. Therefore we have to return here.
-    # TODO: Require fix
-    if n.links.loc[n.links.carrier == "DC"].empty:
+    if lines_or_links.loc[lines_or_links.carrier == "DC"].empty:
         return
 
+    dc_b = lines_or_links.carrier == "DC"
     if simple_hvdc_costs:
         costs = (
-            n.links.loc[dc_b, "length"]
+            lines_or_links.loc[dc_b, "length"]
             * length_factor
             * costs.at["HVDC overhead", "capital_cost"]
         )
     else:
         costs = (
-            n.links.loc[dc_b, "length"]
+            lines_or_links.loc[dc_b, "length"]
             * length_factor
             * (
-                (1.0 - n.links.loc[dc_b, "underwater_fraction"])
+                (1.0 - lines_or_links.loc[dc_b, "underwater_fraction"])
                 * costs.at["HVDC overhead", "capital_cost"]
-                + n.links.loc[dc_b, "underwater_fraction"]
+                + lines_or_links.loc[dc_b, "underwater_fraction"]
                 * costs.at["HVDC submarine", "capital_cost"]
             )
             + costs.at["HVDC inverter pair", "capital_cost"]
         )
-    n.links.loc[dc_b, "capital_cost"] = costs
+    lines_or_links.loc[dc_b, "capital_cost"] = costs
+
+
+def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
+    n.lines["capital_cost"] = (
+        n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
+    )
+
+    attach_dc_costs(
+        lines_or_links=n.links,
+        costs=costs,
+        length_factor=length_factor,
+        simple_hvdc_costs=simple_hvdc_costs,
+    )
+    attach_dc_costs(
+        lines_or_links=n.lines,
+        costs=costs,
+        length_factor=length_factor,
+        simple_hvdc_costs=simple_hvdc_costs,
+    )
 
 
 def attach_wind_and_solar(

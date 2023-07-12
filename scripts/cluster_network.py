@@ -614,6 +614,8 @@ def clustering_for_n_clusters(
             .dropna(),
             fill_value=0,
         )
+    if not n.lines.loc[n.lines.carrier == "DC"].empty:
+        clustering.network.lines["underwater_fraction"] = 0
 
     return clustering
 
