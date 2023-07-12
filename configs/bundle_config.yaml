@@ -102,7 +102,7 @@ databundles:
     destination: "cutouts"
     urls:
       # zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/10N_fk4sVotiKRv5za0cvxc1viw2uE5Gs/view?usp=share_link
+      gdrive: https://drive.google.com/file/d/1TW3ej9yJb6FVz53v1XnWmqhr5m3tXtcC/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
