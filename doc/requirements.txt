@@ -8,7 +8,7 @@ sphinx_book_theme
 sphinxcontrib-bibtex
 myst-parser  # recommark is deprecated, https://stackoverflow.com/a/71660856/13573820
 
-pypsa
+pypsa>=0.21.3, <0.24
 vresutils>=0.3.1
 powerplantmatching>=0.4.8
 atlite>=0.2.2
