@@ -16,6 +16,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Improve network simplification routine to account for representation HVDC as Line component `PR #743 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/743>`__
 
+* Remove deprecated pypsa.networkclustering approach and replace by pypsa.clustering.spatial `PR #786 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/786>`__
+
 PyPSA-Earth 0.2.2
 =================
 
