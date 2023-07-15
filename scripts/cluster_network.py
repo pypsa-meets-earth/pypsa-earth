@@ -88,7 +88,7 @@ Description
     **Is it possible to run the model without the** ``simplify_network`` **rule?**
 
         No, the network clustering methods in the PyPSA module
-        `pypsa.networkclustering <https://github.com/PyPSA/PyPSA/blob/master/pypsa/networkclustering.py>`_
+        `pypsa.clustering.spatial <https://github.com/PyPSA/PyPSA/blob/master/pypsa/networkclustering.py>`_
         do not work reliably with multiple voltage levels and transformers.
 
 .. tip::
@@ -141,7 +141,7 @@ from _helpers import (
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
-from pypsa.networkclustering import (
+from pypsa.clustering.spatial import (
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
@@ -694,7 +694,7 @@ if __name__ == "__main__":
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
         linemap = n.lines.index.to_series()
-        clustering = pypsa.networkclustering.Clustering(
+        clustering = pypsa.clustering.spatial.Clustering(
             n, busmap, linemap, linemap, pd.Series(dtype="O")
         )
     elif len(n.buses) < n_clusters:
