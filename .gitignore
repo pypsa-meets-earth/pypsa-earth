@@ -14,6 +14,7 @@
 *.pbf
 *.zip
 *.png
+*.done
 
 # Untracked files
 config.yaml

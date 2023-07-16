@@ -701,7 +701,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         resources:
             mem=memory,
         shadow:
-            "shallow"
+            "copy-minimal" if os.name == "nt" else "shallow"
         script:
             "scripts/solve_network.py"
 
