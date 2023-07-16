@@ -221,11 +221,11 @@ world_iso = {
         "BF": "burkina-faso",
         "BI": "burundi",
         "CM": "cameroon",
-        "IC": "canary-islands",  # Island
-        "CV": "cape-verde",  # Island
+        # "IC": "canary-islands",  # Island
+        # "CV": "cape-verde",
         "CF": "central-african-republic",
         "TD": "chad",
-        "KM": "comoros",  # Island
+        # "KM": "comoros",
         "CG": "congo-brazzaville",
         "CD": "congo-democratic-republic",
         "DJ": "djibouti",
@@ -247,20 +247,20 @@ world_iso = {
         "MW": "malawi",
         "ML": "mali",
         "MR": "mauritania",
-        "MU": "mauritius",  # Island
-        "YT": "mayotte",  # Island
+        "MU": "mauritius",
+        # "YT": "mayotte",  # Island
         "MA": "morocco",
         "MZ": "mozambique",
         "NA": "namibia",
         "NE": "niger",
         "NG": "nigeria",
-        "RE": "reunion",  # Island
+        # "RE": "reunion",  # Island
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
-        "ST": "sao-tome-and-principe",  # Island
+        # "ST": "sao-tome-and-principe",
         "SN": "senegal",
         "GM": "gambia",
-        "SC": "seychelles",  # Island
+        # "SC": "seychelles",
         "SL": "sierra-leone",
         "SO": "somalia",  # No Data
         # south-africa-and-lesotho
@@ -308,7 +308,7 @@ world_iso = {
         "LB": "lebanon",
         "MY": "malaysia",
         "BN": "brunei",
-        "MV": "maldives",  # Island
+        "MV": "maldives",
         "MN": "mongolia",
         "MM": "myanmar",
         "NP": "nepal",
@@ -338,31 +338,31 @@ world_iso = {
     "Oceania": {
         "AS": "american-samoa",  # Island
         "AU": "australia",
-        "CP": "ile-de-clipperton",  # Island  In gadm as XCL
-        "CK": "cook-islands",  # Island
-        "FJ": "fiji",  # Island
-        "PF": "french-polynesia",  # Island
-        "GU": "guam",  # Island
+        # "CP": "ile-de-clipperton",  # Island  In gadm as XCL
+        # "CK": "cook-islands",  # Island
+        "FJ": "fiji",
+        # "PF": "french-polynesia",  # Island
+        # "GU": "guam",  # Island
         "KI": "kiribati",  # Island
-        "MH": "marshall-islands",  # Island
-        "FM": "micronesia",  # Island
-        "NR": "nauru",  # Island
-        "NC": "new-caledonia",
+        "MH": "marshall-islands",
+        "FM": "micronesia",
+        "NR": "nauru",
+        "NC": "new-caledonia",  # Island
         "NZ": "new-zealand",
         "NU": "niue",  # Island
-        "NF": "norfolk-island",  # Island
-        "MP": "northern-mariana-islands",
+        # "NF": "norfolk-island",  # Island
+        # "MP": "northern-mariana-islands",
         "PG": "papua-new-guinea",
-        "PN": "pitcairn-islands",  # Islands
-        "PW": "palau",  # Island
-        "WS": "samoa",  # Island
+        # "PN": "pitcairn-islands",  # Islands
+        "PW": "palau",
+        "WS": "samoa",
         "SB": "solomon-islands",
-        "TK": "tokelau",  # Island
-        "TO": "tonga",  # Island
-        "TV": "tuvalu",  # Island
+        # "TK": "tokelau",  # Island
+        "TO": "tonga",
+        "TV": "tuvalu",
         # "UM": "united-states-minor-outlying-islands", #Islands
         "VU": "vanuatu",  # Island
-        "WF": "wallis-and-futuna",  # Island
+        # "WF": "wallis-and-futuna",  # Island
     },
     "Europe": {
         # "AX": "aland-islands", # Island
@@ -380,20 +380,20 @@ world_iso = {
         "CZ": "czech-republic",
         "DK": "denmark",
         "EE": "estonia",
-        "FO": "faroe islands",  # Islands
+        # "FO": "faroe islands",  # Islands
         "FI": "finland",
         "FR": "france",
         "GE": "georgia",
         "DE": "germany",
         # "GI": "gibraltar", # Island ?
         "GR": "greece",
-        "GG": "guernsey",  # Island
+        # "GG": "guernsey",  # Island
         "HU": "hungary",
         "IS": "iceland",
-        "IE": "ireland-and-northern-ireland",
-        "IM": "isle of man",  # Island
+        # "IE": "ireland-and-northern-ireland",
+        # "IM": "isle of man",  # Island
         "IT": "italy",
-        "JE": "jersey",  # Island
+        # "JE": "jersey",  # Island
         "KZ": "kazakhstan",
         "XK": "kosovo",
         "LV": "latvia",
@@ -426,37 +426,37 @@ world_iso = {
     },
     "NorthAmerica": {
         # "AI": "anguilla", #Island
-        "AG": "antigua-and-barbuda",  # Islands
+        "AG": "antigua-and-barbuda",
         # "AW": "aruba", # Islands
-        "BS": "bahamas",  # Islands
-        "BB": "barbados",  # Islands
+        "BS": "bahamas",
+        "BB": "barbados",
         # "BM": "bermuda", # Islands
         # "BQ": "bonaire", # Islands
         # "VG": "british-virgin-islands", # Islands
         "CA": "canada",
         # "KY": "cayman-islands", # Islands
-        "CU": "cuba",  # Islands
+        "CU": "cuba",
         # "CW": "curacao", # Islands
-        "DM": "dominica",  # Islands
+        "DM": "dominica",
         "DO": "dominican-republic",
         "GL": "greenland",
-        "GD": "grenada",  # Islands
-        "GP": "guadeloupe",  # Islands
+        "GD": "grenada",
+        # "GP": "guadeloupe",  # Islands
         "HT": "haiti",
-        "JM": "jamaica",  # Islands
+        "JM": "jamaica",
         # "MQ": "martinique", # Islands
         "MX": "mexico",
         # "MS": "montserrat", # Islands
         "US": "united-states-of-america",
-        "PR": "puerto-rico",  # Islands
+        "PR": "puerto-rico",
         # "BL": "saint-barthelemy", # Islands
-        "KN": "saint-kitts-and-nevis",  # Islands
-        "LC": "saint-lucia",  # Islands
+        "KN": "saint-kitts-and-nevis",
+        "LC": "saint-lucia",
         # "MF": "saint-martin", # Islands
         # "PM": "saint-pierre-and-miquelon", # Islands
-        "VC": "saint-vincent-and-the-grenadines",  # Islands
+        "VC": "saint-vincent-and-the-grenadines",
         # "SX": "saint-marteen", # Islands
-        "TT": "trinidad-and-tobago",  # Islands
+        "TT": "trinidad-and-tobago",
         # "TC": "turks-and-caicos", # Islands
         # "UM": "united-states-minor-outlying-islands", #Islands
         # "VI": "united-states-virgin-islands", #Islands
@@ -613,6 +613,7 @@ iso_to_geofk_dict = {
     "SN": "SN-GM",  # Senegal -> Senegal-Gambia
     "GM": "SN-GM",  # Gambia -> Senegal-Gambia
     "KM": "comores",  # Comores
+    "IC": "canary-islands",  # Canary islands
     # "HK": "CN",  # Hong Kong  -> China  # no more with gadm 4.1
     # "MO": "CN",  # Macao  -> China  # no more with gadm 4.1
     "SG": "MY",  # Singapore -> Malaysia-Singapore-Brunei
