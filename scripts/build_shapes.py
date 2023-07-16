@@ -265,13 +265,12 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
-    ret_df.apply(lambda x: make_valid(x) if not x.is_valid else x)
-    ret_df.reset_index()
+    ret_df = ret_df.make_valid()
 
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.0):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.02):
     if out_logging:
         logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
@@ -280,7 +279,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
     if eez_shapes is not None:
         shapes_list += list(eez_shapes)
 
-    africa_shape = unary_union(shapes_list)
+    africa_shape = make_valid(unary_union(shapes_list))
 
     return africa_shape
 
@@ -863,6 +862,7 @@ def gadm(
         df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
         axis=1,
         inplace=True,
+        errors="ignore",
     )
 
     if worldpop_method != False:
