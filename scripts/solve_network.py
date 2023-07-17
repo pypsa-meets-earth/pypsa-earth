@@ -360,15 +360,22 @@ def add_RES_constraints(n, res_share):
 
     rhs = res_share * load
 
-    res_techs = ["solar", "onwind", "offwind-dc", "offwind-ac", "battery", "hydro", "ror"]
+    res_techs = [
+        "solar",
+        "onwind",
+        "offwind-dc",
+        "offwind-ac",
+        "battery",
+        "hydro",
+        "ror",
+    ]
     charger = ["H2 electrolysis", "battery charger"]
-    discharger=["H2 fuel cell", "battery discharger"]
+    discharger = ["H2 fuel cell", "battery discharger"]
 
     gens_i = n.generators.query("carrier in @res_techs").index
     stores_i = n.storage_units.query("carrier in @res_techs").index
     charger_i = n.links.query("carrier in @charger").index
     discharger_i = n.links.query("carrier in @discharger").index
-
 
     # Generators
     lhs_gen = (
@@ -381,51 +388,67 @@ def add_RES_constraints(n, res_share):
 
     # StorageUnits
     lhs_dispatch = (
-        linexpr(
-            (
-                n.snapshot_weightings.stores,
-                get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+        (
+            linexpr(
+                (
+                    n.snapshot_weightings.stores,
+                    get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+                )
             )
+            .T.groupby(sgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
     lhs_store = (
-        linexpr(
-            (
-                n.snapshot_weightings.stores,
-                get_var(n, "StorageUnit", "p_store")[stores_i].T,
+        (
+            linexpr(
+                (
+                    n.snapshot_weightings.stores,
+                    get_var(n, "StorageUnit", "p_store")[stores_i].T,
+                )
             )
+            .T.groupby(sgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     # Stores (or their resp. Link components)
     # Note that the variables "p0" and "p1" currently do not exist.
     # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
     lhs_charge = (
-        linexpr(
-            (
-                n.links.loc[charger_i].efficiency,
-                get_var(n, "Link", "p")[charger_i],
+        (
+            linexpr(
+                (
+                    n.links.loc[charger_i].efficiency,
+                    get_var(n, "Link", "p")[charger_i],
+                )
             )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .groupby(cgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
     lhs_discharge = (
-        linexpr(
-            (
-                n.links.loc[discharger_i].efficiency,
-                get_var(n, "Link", "p")[discharger_i],
+        (
+            linexpr(
+                (
+                    n.links.loc[discharger_i].efficiency,
+                    get_var(n, "Link", "p")[discharger_i],
+                )
             )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .groupby(cgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
-    lhs = lhs_gen + lhs_dispatch - lhs_store #- lhs_charge + lhs_discharge
+    lhs = lhs_gen + lhs_dispatch - lhs_store  # - lhs_charge + lhs_discharge
 
     define_constraints(n, lhs, "=", rhs, "RES share")
 
