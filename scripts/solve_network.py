@@ -347,6 +347,89 @@ def add_battery_constraints(n):
     define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
 
+def add_RES_constraints(n, res_share):
+    lgrouper = n.loads.bus.map(n.buses.country)
+    ggrouper = n.generators.bus.map(n.buses.country)
+    sgrouper = n.storage_units.bus.map(n.buses.country)
+    cgrouper = n.links.bus0.map(n.buses.country)
+
+    load = (
+        n.snapshot_weightings.generators
+        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+    )
+
+    rhs = res_share * load
+
+    res_techs = ["solar", "onwind", "offwind-dc", "offwind-ac", "battery", "hydro", "ror"]
+    charger = ["H2 electrolysis", "battery charger"]
+    discharger=["H2 fuel cell", "battery discharger"]
+
+    gens_i = n.generators.query("carrier in @res_techs").index
+    stores_i = n.storage_units.query("carrier in @res_techs").index
+    charger_i = n.links.query("carrier in @charger").index
+    discharger_i = n.links.query("carrier in @discharger").index
+
+
+    # Generators
+    lhs_gen = (
+        linexpr(
+            (n.snapshot_weightings.generators, get_var(n, "Generator", "p")[gens_i].T)
+        )
+        .T.groupby(ggrouper, axis=1)
+        .apply(join_exprs)
+    )
+
+    # StorageUnits
+    lhs_dispatch = (
+        linexpr(
+            (
+                n.snapshot_weightings.stores,
+                get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+            )
+        )
+        .T.groupby(sgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
+    lhs_store = (
+        linexpr(
+            (
+                n.snapshot_weightings.stores,
+                get_var(n, "StorageUnit", "p_store")[stores_i].T,
+            )
+        )
+        .T.groupby(sgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
+
+    # Stores (or their resp. Link components)
+    # Note that the variables "p0" and "p1" currently do not exist.
+    # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
+    lhs_charge = (
+        linexpr(
+            (
+                n.links.loc[charger_i].efficiency,
+                get_var(n, "Link", "p")[charger_i],
+            )
+        )
+        .groupby(cgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
+    lhs_discharge = (
+        linexpr(
+            (
+                n.links.loc[discharger_i].efficiency,
+                get_var(n, "Link", "p")[discharger_i],
+            )
+        )
+        .groupby(cgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
+
+    lhs = lhs_gen + lhs_dispatch - lhs_store #- lhs_charge + lhs_discharge
+
+    define_constraints(n, lhs, "=", rhs, "RES share")
+
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -366,6 +449,10 @@ def extra_functionality(n, snapshots):
     reserve = config["electricity"].get("operational_reserve", {})
     if reserve.get("activate"):
         add_operational_reserve_margin(n, snapshots, config)
+    for o in opts:
+        if "RES" in o:
+            res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
+            add_RES_constraints(n, res_share)
     for o in opts:
         if "EQ" in o:
             add_EQ_constraints(n, o)
