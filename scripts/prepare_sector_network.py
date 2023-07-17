@@ -130,7 +130,7 @@ def add_oil(n, costs):
 
     # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted seperately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
     n.carriers.loc["oil", "co2_emissions"] = 0
-    print("co2_emissions of oil set to 0 for testing") # TODO add logger.info
+    print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
 
     n.madd(
         "Bus",
