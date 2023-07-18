@@ -199,7 +199,7 @@ def H2_export_yearly_constraint(n):
 
     lhs = res
 
-    include_country_load = snakemake.config["policy_config"]["yealy"][
+    include_country_load = snakemake.config["policy_config"]["yearly"][
         "include_country_load"
     ]
 
