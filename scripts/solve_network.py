@@ -199,16 +199,16 @@ def H2_export_yearly_constraint(n):
 
     lhs = res
 
-    include_country_load = snakemake.config["policy_config"]["yealy"]["include_country_load"]
+    include_country_load = snakemake.config["policy_config"]["yealy"][
+        "include_country_load"
+    ]
 
     if include_country_load:
         rhs = (
             h2_export * (1 / 0.7) + load
         )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
-    else: 
-        rhs = (
-            h2_export * (1 / 0.7)
-        )
+    else:
+        rhs = h2_export * (1 / 0.7)
 
     con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
 
@@ -258,7 +258,8 @@ def monthly_constraints(n, n_ref):
 
     if (
         snakemake.config["policy_config"]["monthly"]["reference_case"]
-        and snakemake.config["policy_config"]["policy"] == "H2_export_monthly_constraint"
+        and snakemake.config["policy_config"]["policy"]
+        == "H2_export_monthly_constraint"
         and eval(snakemake.wildcards["h2export"]) != 0
     ):
         res_ref = n_ref.generators_t.p[res_index] * weightings
