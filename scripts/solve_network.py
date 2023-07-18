@@ -199,9 +199,16 @@ def H2_export_yearly_constraint(n):
 
     lhs = res
 
-    rhs = (
-        h2_export * (1 / 0.7) + load
-    )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
+    include_country_load = snakemake.config["policy_config"]["yealy"]["include_country_load"]
+
+    if include_country_load:
+        rhs = (
+            h2_export * (1 / 0.7) + load
+        )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
+    else: 
+        rhs = (
+            h2_export * (1 / 0.7)
+        )
 
     con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
 
@@ -217,7 +224,7 @@ def monthly_constraints(n, n_ref):
         "offwind2",
         "ror",
     ]
-    allowed_excess = snakemake.config["policy_config"]["allowed_excess"]
+    allowed_excess = snakemake.config["policy_config"]["monthly"]["allowed_excess"]
 
     res_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
 
@@ -250,7 +257,8 @@ def monthly_constraints(n, n_ref):
     elec_input = elec_input.groupby(elec_input.index.month).sum()
 
     if (
-        snakemake.config["policy_config"]["reference_case"]
+        snakemake.config["policy_config"]["monthly"]["reference_case"]
+        and snakemake.config["policy_config"]["policy"] == "H2_export_monthly_constraint"
         and eval(snakemake.wildcards["h2export"]) != 0
     ):
         res_ref = n_ref.generators_t.p[res_index] * weightings
@@ -502,7 +510,7 @@ if __name__ == "__main__":
             add_existing(n)
 
         if (
-            snakemake.config["policy_config"]["reference_case"]
+            snakemake.config["policy_config"]["monthly"]["reference_case"]
             and eval(snakemake.wildcards["h2export"]) != 0
         ):
             n_ref_path = snakemake.output[0].replace(
