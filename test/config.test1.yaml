@@ -25,15 +25,21 @@ scenario:
   demand:
   - "DF"
 
+
+policy_config:
+  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching"
+  monthly: # Specify attributes for the monthly constraint
+    allowed_excess: 1.0
+    reference_case: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
+  yearly: # Specify attributes for the yearly constraint
+    re_country_load: false # Set to "True" to force the RE electricity to be equal to the electricity required for hydrogen export and the country electricity load. "False" excludes the country electricity load from the constraint.
+
+
 clustering_options:
   alternative_clustering: true
 
-policy_config:
-  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching" # TODO check wether "export" is required here or misleading
-  reference_case: false
-  allowed_excess: 1.0
-
 countries: ['NG', 'BJ']
+
 H2_network: false
 H2_network_limit: 2000 #GWkm
 
@@ -469,3 +475,4 @@ plotting:
     solid biomass transport: green
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
+    biomass EOP: "green"
