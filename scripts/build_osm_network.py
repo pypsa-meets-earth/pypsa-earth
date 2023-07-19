@@ -16,6 +16,7 @@ from config_osm_data import osm_clean_columns
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
+from sklearn.cluster import DBSCAN
 
 logger = logging.getLogger(__name__)
 
@@ -37,76 +38,32 @@ def line_endings_to_bus_conversion(lines):
     return lines
 
 
-# tol in m
-def set_substations_ids(buses, distance_crs, tol=2000):
+def set_substations_ids(buses, distance_crs, tol=5000):
     """
-    Function to set substations ids to buses, accounting for location
-    tolerance.
+    Assigns station IDs to buses based on their proximity.
 
-    The algorithm is as follows:
+    Parameters:
+    - buses: GeoDataFrame object representing the buses data.
+    - distance_crs: Coordinate reference system (CRS) to convert the geometry to.
+    - tol: Tolerance distance in chosen CRS to define cluster proximity.
 
-    1. initialize all substation ids to -1
-    2. if the current substation has been already visited [substation_id < 0], then skip the calculation
-    3. otherwise:
-        1. identify the substations within the specified tolerance (tol)
-        2. when all the substations in tolerance have substation_id < 0, then specify a new substation_id
-        3. otherwise, if one of the substation in tolerance has a substation_id >= 0, then set that substation_id to all the others;
-           in case of multiple substations with substation_ids >= 0, the first value is picked for all
+    Returns:
+    - None. Modifies the 'station_id' column in the 'buses' GeoDataFrame.
+
+    Example:
+    set_substations_ids(buses_data, 'EPSG:3857', tol=5000)
     """
 
-    buses["station_id"] = -1
+    # Convert the geometry to EPSG:3857
+    tmp_geometry = buses.geometry.to_crs(distance_crs)
 
-    # create temporary series to execute distance calculations using m as reference distances
-    temp_bus_geom = buses.geometry.to_crs(distance_crs)
+    coords = tmp_geometry.apply(lambda geom: np.array(geom.coords[0])).to_list()
 
-    # set tqdm options for substation ids
-    tqdm_kwargs_substation_ids = dict(
-        ascii=False,
-        unit=" buses",
-        total=buses.shape[0],
-        desc="Set substation ids ",
-    )
+    # Perform DBSCAN on the coordinates
+    db = DBSCAN(eps=tol, min_samples=1).fit(coords)
 
-    station_id = 0
-    for i, row in tqdm(buses.iterrows(), **tqdm_kwargs_substation_ids):
-        if buses.loc[i, "station_id"] >= 0:
-            continue
-
-        # get substations within tolerance
-        close_nodes = np.flatnonzero(
-            temp_bus_geom.distance(temp_bus_geom.loc[i]) <= tol
-        )
-
-        if len(close_nodes) == 1:
-            # if only one substation is in tolerance, then the substation is the current one iì
-            # Note that the node cannot be with substation_id >= 0, given the preliminary check
-            # at the beginning of the for loop
-            buses.loc[buses.index[i], "station_id"] = station_id
-            # update station id
-            station_id += 1
-        else:
-            # several substations in tolerance
-            # get their ids
-            subset_substation_ids = buses.loc[buses.index[close_nodes], "station_id"]
-            # check if all substation_ids are negative (<0)
-            all_neg = subset_substation_ids.max() < 0
-            # check if at least a substation_id is negative (<0)
-            some_neg = subset_substation_ids.min() < 0
-
-            if all_neg:
-                # when all substation_ids are negative, then this is a new substation id
-                # set the current station_id and increment the counter
-                buses.loc[buses.index[close_nodes], "station_id"] = station_id
-                station_id += 1
-            elif some_neg:
-                # otherwise, when at least a substation_id is non-negative, then pick the first value
-                # and set it to all the other substations within tolerance
-                sub_id = -1
-                for substation_id in subset_substation_ids:
-                    if substation_id >= 0:
-                        sub_id = substation_id
-                        break
-                buses.loc[buses.index[close_nodes], "station_id"] = sub_id
+    # Add the cluster labels to the GeoDataFrame
+    buses['station_id'] = db.labels_
 
 
 def set_lines_ids(lines, buses, distance_crs):
