@@ -514,7 +514,8 @@ if __name__ == "__main__":
         if (
             snakemake.config["policy_config"]["monthly"]["reference_case"]
             and eval(snakemake.wildcards["h2export"]) != 0
-            and snakemake.config["policy_config"]["policy"] == "H2_export_monthly_constraint"
+            and snakemake.config["policy_config"]["policy"]
+            == "H2_export_monthly_constraint"
         ):
             n_ref_path = snakemake.output[0].replace(
                 snakemake.output[0].split("_")[-1], "0export.nc"
