@@ -478,15 +478,16 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="26",
+            clusters="10",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L0.60",
             planning_horizons="2030",
-            sopts="144H",
-            discountrate=0.071,
+            sopts="300H",
+            discountrate=0.15,
             demand="DF",
-            h2export="5",
+            h2export="60",
         )
+
         sets_path_to_root("pypsa-earth-sec")
 
     logging.basicConfig(
@@ -513,6 +514,7 @@ if __name__ == "__main__":
         if (
             snakemake.config["policy_config"]["monthly"]["reference_case"]
             and eval(snakemake.wildcards["h2export"]) != 0
+            and snakemake.config["policy_config"]["policy"] == "H2_export_monthly_constraint"
         ):
             n_ref_path = snakemake.output[0].replace(
                 snakemake.output[0].split("_")[-1], "0export.nc"
