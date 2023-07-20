@@ -15,8 +15,8 @@ from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_
 from config_osm_data import osm_clean_columns
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
-from tqdm import tqdm
 from sklearn.cluster import DBSCAN
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ def set_substations_ids(buses, distance_crs, tol=5000):
     db = DBSCAN(eps=tol, min_samples=1).fit(coords)
 
     # Add the cluster labels to the GeoDataFrame
-    buses['station_id'] = db.labels_
+    buses["station_id"] = db.labels_
 
 
 def set_lines_ids(lines, buses, distance_crs):
