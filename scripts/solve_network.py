@@ -360,15 +360,22 @@ def add_RES_constraints(n, res_share):
 
     rhs = res_share * load
 
-    res_techs = ["solar", "onwind", "offwind-dc", "offwind-ac", "battery", "hydro", "ror"]
+    res_techs = [
+        "solar",
+        "onwind",
+        "offwind-dc",
+        "offwind-ac",
+        "battery",
+        "hydro",
+        "ror",
+    ]
     charger = ["H2 electrolysis", "battery charger"]
-    discharger=["H2 fuel cell", "battery discharger"]
+    discharger = ["H2 fuel cell", "battery discharger"]
 
     gens_i = n.generators.query("carrier in @res_techs").index
     stores_i = n.storage_units.query("carrier in @res_techs").index
     charger_i = n.links.query("carrier in @charger").index
     discharger_i = n.links.query("carrier in @discharger").index
-
 
     # Generators
     lhs_gen = (
@@ -394,9 +401,9 @@ def add_RES_constraints(n, res_share):
             (-n.snapshot_weightings.stores,
              get_var(n, "StorageUnit", "p_store")[stores_i].T)
         )
-        .T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     # Stores (or their resp. Link components)
     # Note that the variables "p0" and "p1" currently do not exist.
@@ -407,20 +414,26 @@ def add_RES_constraints(n, res_share):
                 -n.links.loc[charger_i].efficiency,
                 get_var(n, "Link", "p")[charger_i],
             )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .groupby(cgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
     lhs_discharge = (
-        linexpr(
-            (
-                n.links.loc[discharger_i].efficiency,
-                get_var(n, "Link", "p")[discharger_i],
+        (
+            linexpr(
+                (
+                    n.links.loc[discharger_i].efficiency,
+                    get_var(n, "Link", "p")[discharger_i],
+                )
             )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .groupby(cgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     # signs of resp. terms are coded in the linexpr.
     # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
