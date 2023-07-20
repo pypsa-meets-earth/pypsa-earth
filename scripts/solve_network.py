@@ -382,20 +382,17 @@ def add_RES_constraints(n, res_share):
     # StorageUnits
     lhs_dispatch = (
         linexpr(
-            (
-                n.snapshot_weightings.stores,
-                get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
-            )
+            (n.snapshot_weightings.stores,
+             get_var(n, "StorageUnit", "p_dispatch")[stores_i].T)
         )
         .T.groupby(sgrouper, axis=1)
         .apply(join_exprs)
     ).reindex(lhs_gen.index).fillna("")
+
     lhs_store = (
         linexpr(
-            (
-                n.snapshot_weightings.stores,
-                get_var(n, "StorageUnit", "p_store")[stores_i].T,
-            )
+            (-n.snapshot_weightings.stores,
+             get_var(n, "StorageUnit", "p_store")[stores_i].T)
         )
         .T.groupby(sgrouper, axis=1)
         .apply(join_exprs)
@@ -407,7 +404,7 @@ def add_RES_constraints(n, res_share):
     lhs_charge = (
         linexpr(
             (
-                n.links.loc[charger_i].efficiency,
+                -n.links.loc[charger_i].efficiency,
                 get_var(n, "Link", "p")[charger_i],
             )
         )
@@ -425,7 +422,9 @@ def add_RES_constraints(n, res_share):
         .apply(join_exprs)
     ).reindex(lhs_gen.index).fillna("")
 
-    lhs = lhs_gen + lhs_dispatch - lhs_store #- lhs_charge + lhs_discharge
+    # signs of resp. terms are coded in the linexpr.
+    # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
+    lhs = lhs_gen + lhs_dispatch + lhs_store + lhs_charge + lhs_discharge
 
     define_constraints(n, lhs, "=", rhs, "RES share")
 
