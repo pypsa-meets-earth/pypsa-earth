@@ -400,10 +400,9 @@ def add_RES_constraints(n, res_share):
         linexpr(
             (-n.snapshot_weightings.stores,
              get_var(n, "StorageUnit", "p_store")[stores_i].T)
-        )
-        .reindex(lhs_gen.index)
-        .fillna("")
-    )
+        ).T.groupby(sgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
 
     # Stores (or their resp. Link components)
     # Note that the variables "p0" and "p1" currently do not exist.
@@ -414,26 +413,21 @@ def add_RES_constraints(n, res_share):
                 -n.links.loc[charger_i].efficiency,
                 get_var(n, "Link", "p")[charger_i],
             )
-            .groupby(cgrouper, axis=1)
-            .apply(join_exprs)
         )
-        .reindex(lhs_gen.index)
-        .fillna("")
-    )
+        .groupby(cgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
+
     lhs_discharge = (
-        (
-            linexpr(
-                (
-                    n.links.loc[discharger_i].efficiency,
-                    get_var(n, "Link", "p")[discharger_i],
-                )
+        linexpr(
+            (
+                n.links.loc[discharger_i].efficiency,
+                get_var(n, "Link", "p")[discharger_i],
             )
-            .groupby(cgrouper, axis=1)
-            .apply(join_exprs)
         )
-        .reindex(lhs_gen.index)
-        .fillna("")
-    )
+        .groupby(cgrouper, axis=1)
+        .apply(join_exprs)
+    ).reindex(lhs_gen.index).fillna("")
 
     # signs of resp. terms are coded in the linexpr.
     # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
