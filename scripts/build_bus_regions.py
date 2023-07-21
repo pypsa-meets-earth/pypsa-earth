@@ -46,13 +46,10 @@ import logging
 import os
 
 import geopandas as gpd
-import numpy
 import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging
-from shapely.geometry import Point, Polygon
-from shapely.ops import unary_union
-from vresutils.graph import voronoi_partition_pts
+from shapely.geometry import Point
 
 # from scripts.build_shapes import gadm
 
