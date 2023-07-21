@@ -388,13 +388,19 @@ def add_RES_constraints(n, res_share):
 
     # StorageUnits
     lhs_dispatch = (
-        linexpr(
-            (n.snapshot_weightings.stores,
-             get_var(n, "StorageUnit", "p_dispatch")[stores_i].T)
+        (
+            linexpr(
+                (
+                    n.snapshot_weightings.stores,
+                    get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+                )
+            )
+            .T.groupby(sgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     lhs_store = (
         linexpr(
