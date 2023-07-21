@@ -133,6 +133,7 @@ rule add_export:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
         costs=CDIR + "costs_{planning_horizons}.csv",
+        ship_profile="data/ship_profile_9TWh.csv", # TODO create rule with {h2export} wildcard
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path=pypsaearth(
