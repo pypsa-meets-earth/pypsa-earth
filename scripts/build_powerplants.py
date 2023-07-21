@@ -280,8 +280,6 @@ if __name__ == "__main__":
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
 
-    csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
-
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
     countries_names = list(map(two_digits_2_name_country, countries_codes))
@@ -289,6 +287,7 @@ if __name__ == "__main__":
     config["target_countries"] = countries_names
 
     if "EXTERNAL_DATABASE" in config:
+        csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
