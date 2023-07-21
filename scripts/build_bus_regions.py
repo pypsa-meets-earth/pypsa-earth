@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates Voronoi shapes for each bus representing both onshore and offshore regions.
+Creates Voronoi shapes for each bus representing both onshore and offshore
+regions.
 
 Relevant Settings
 -----------------
@@ -40,19 +41,15 @@ Outputs
 
 Description
 -----------
-
 """
 import logging
 import os
 
 import geopandas as gpd
-import numpy
 import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging
-from shapely.geometry import Point, Polygon
-from shapely.ops import unary_union
-from vresutils.graph import voronoi_partition_pts
+from shapely.geometry import Point
 
 # from scripts.build_shapes import gadm
 
@@ -61,8 +58,8 @@ logger = logging.getLogger(__name__)
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
     """
-    Compute the polygons of a voronoi partition of `points` within the
-    polygon `outline`
+    Compute the polygons of a voronoi partition of `points` within the polygon
+    `outline`
 
     Attributes
     ----------
