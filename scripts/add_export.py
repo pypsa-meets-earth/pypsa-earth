@@ -138,10 +138,10 @@ if __name__ == "__main__":
             ll="c1.0",
             opts="Co2L0.10",
             planning_horizons="2030",
-            sopts="6H",
-            discountrate="0.071",
+            sopts="300H",
+            discountrate="0.15",
             demand="DF",
-            h2export="120",
+            h2export="10",
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -155,6 +155,16 @@ if __name__ == "__main__":
     logger.info(
         f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
     )
+
+    # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
+    export_h2_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
+    if (export_h2_profile.sum() - export_h2).abs().values > 1:  # Threshold of 1 MWh
+        logger.error(
+            f"Sum of ship profile ({export_h2_profile.sum()}) does not match export demand ({export_h2})"
+        )
+        raise ValueError(
+            f"Sum of ship profile ({export_h2_profile.sum()/1e6} TWh) does not match export demand ({export_h2/1e6} TWh)"
+        )
 
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
