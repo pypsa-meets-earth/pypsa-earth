@@ -56,7 +56,7 @@ def select_ports(n):
     return hydrogen_buses_ports
 
 
-def add_export(n, hydrogen_buses_ports, export_h2):
+def add_export(n, hydrogen_buses_ports, export_profile):
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
     # Find most northwestern point in country shape and get x and y coordinates
     country_shape = country_shape.to_crs("EPSG:4326")
@@ -120,10 +120,40 @@ def add_export(n, hydrogen_buses_ports, export_h2):
         "H2 export load",
         bus="H2 export bus",
         carrier="H2",
-        p_set=export_h2 / 8760,
+        p_set=export_profile,
     )
 
     return
+
+
+def create_export_profile():
+    # get export demand
+
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
+
+    if snakemake.config["export"]["export_profile"] == "constant":
+        export_profile = export_h2 / 8760
+
+    elif snakemake.config["export"]["export_profile"] == "ship":
+        # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
+        export_h2_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
+        if (export_h2_profile.sum() - export_h2).abs().values > 1:  # Threshold of 1 MWh
+            logger.error(
+                f"Sum of ship profile ({export_h2_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
+            )
+            raise ValueError(
+                f"Sum of ship profile ({export_h2_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
+            )
+
+        # TODO resample to n.snapshot_weightings
+        # export_profile
+
+    # revise logger msg
+    logger.info(
+        f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
+    )
+
+    return export_profile
 
 
 if __name__ == "__main__":
@@ -141,7 +171,7 @@ if __name__ == "__main__":
             sopts="300H",
             discountrate="0.15",
             demand="DF",
-            h2export="10",
+            h2export="9",
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -149,22 +179,8 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     countries = list(n.buses.country.unique())
 
-    # get export demand
-
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
-    logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
-    )
-
-    # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
-    export_h2_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
-    if (export_h2_profile.sum() - export_h2).abs().values > 1:  # Threshold of 1 MWh
-        logger.error(
-            f"Sum of ship profile ({export_h2_profile.sum()}) does not match export demand ({export_h2})"
-        )
-        raise ValueError(
-            f"Sum of ship profile ({export_h2_profile.sum()/1e6} TWh) does not match export demand ({export_h2/1e6} TWh)"
-        )
+    # Create export profile
+    export_profile = create_export_profile()
 
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
@@ -178,10 +194,10 @@ if __name__ == "__main__":
     )
 
     # get hydrogen export buses/ports
-    hydrogen_buses_ports = select_ports(n)
+    # hydrogen_buses_ports = select_ports(n)
 
     # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_h2)
+    add_export(n, hydrogen_buses_ports, export_profile)
 
     n.export_to_netcdf(snakemake.output[0])
 
