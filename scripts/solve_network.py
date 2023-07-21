@@ -403,37 +403,52 @@ def add_RES_constraints(n, res_share):
     )
 
     lhs_store = (
-        linexpr(
-            (-n.snapshot_weightings.stores,
-             get_var(n, "StorageUnit", "p_store")[stores_i].T)
-        ).T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        (
+            linexpr(
+                (
+                    -n.snapshot_weightings.stores,
+                    get_var(n, "StorageUnit", "p_store")[stores_i].T,
+                )
+            )
+            .T.groupby(sgrouper, axis=1)
+            .apply(join_exprs)
+        )
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     # Stores (or their resp. Link components)
     # Note that the variables "p0" and "p1" currently do not exist.
     # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
     lhs_charge = (
-        linexpr(
-            (
-                -n.links.loc[charger_i].efficiency,
-                get_var(n, "Link", "p")[charger_i],
+        (
+            linexpr(
+                (
+                    -n.links.loc[charger_i].efficiency,
+                    get_var(n, "Link", "p")[charger_i],
+                )
             )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .groupby(cgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     lhs_discharge = (
-        linexpr(
-            (
-                n.links.loc[discharger_i].efficiency,
-                get_var(n, "Link", "p")[discharger_i],
+        (
+            linexpr(
+                (
+                    n.links.loc[discharger_i].efficiency,
+                    get_var(n, "Link", "p")[discharger_i],
+                )
             )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
         )
-        .groupby(cgrouper, axis=1)
-        .apply(join_exprs)
-    ).reindex(lhs_gen.index).fillna("")
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
 
     # signs of resp. terms are coded in the linexpr.
     # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
