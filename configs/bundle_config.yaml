@@ -36,7 +36,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_NGBJ.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1Vb1ISjhy7iwTTZYeezGd6S4nLt-EDGme/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -49,7 +49,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_BW.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/19IXvTD8gVSzgTInL85ta7QjaNI8ZPCCY/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -62,7 +62,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1VGzE8ZJHAvAQ9X44QNSX4rH3QF7Yi37D/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -75,7 +75,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_NGBJ.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -88,7 +88,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_BW.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -101,7 +101,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -278,7 +278,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
