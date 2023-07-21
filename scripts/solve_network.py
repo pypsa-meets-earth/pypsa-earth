@@ -96,7 +96,6 @@ from pypsa.linopf import (
     linexpr,
     network_lopf,
 )
-from vresutils.benchmark import memory_logger
 
 logger = logging.getLogger(__name__)
 
@@ -426,22 +425,18 @@ if __name__ == "__main__":
     opts = snakemake.wildcards.opts.split("-")
     solve_opts = snakemake.config["solving"]["options"]
 
-    fn = getattr(snakemake.log, "memory", None)
-    with memory_logger(filename=fn, interval=30.0) as mem:
-        n = pypsa.Network(snakemake.input[0])
-        if snakemake.config["augmented_line_connection"].get("add_to_snakefile"):
-            n.lines.loc[
-                n.lines.index.str.contains("new"), "s_nom_min"
-            ] = snakemake.config["augmented_line_connection"].get("min_expansion")
-        n = prepare_network(n, solve_opts)
-        n = solve_network(
-            n,
-            config=snakemake.config,
-            opts=opts,
-            solver_dir=tmpdir,
-            solver_logfile=snakemake.log.solver,
-        )
-        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
-        n.export_to_netcdf(snakemake.output[0])
-
-    logger.info("Maximum memory usage: {}".format(mem.mem_usage))
+    n = pypsa.Network(snakemake.input[0])
+    if snakemake.config["augmented_line_connection"].get("add_to_snakefile"):
+        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = snakemake.config[
+            "augmented_line_connection"
+        ].get("min_expansion")
+    n = prepare_network(n, solve_opts)
+    n = solve_network(
+        n,
+        config=snakemake.config,
+        opts=opts,
+        solver_dir=tmpdir,
+        solver_logfile=snakemake.log.solver,
+    )
+    n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    n.export_to_netcdf(snakemake.output[0])

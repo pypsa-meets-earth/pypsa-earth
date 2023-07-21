@@ -688,9 +688,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             python="logs/"
             + RDIR
             + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
-            memory="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
         benchmark:
             (
                 "benchmarks/"
