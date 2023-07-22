@@ -688,9 +688,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             python="logs/"
             + RDIR
             + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
-            memory="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
         benchmark:
             (
                 "benchmarks/"
@@ -701,7 +698,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         resources:
             mem=memory,
         shadow:
-            "shallow"
+            "copy-minimal" if os.name == "nt" else "shallow"
         script:
             "scripts/solve_network.py"
 
@@ -902,7 +899,7 @@ rule run_scenario:
             base_config_path = (
                 yaml.full_load(f)
                 .get("run", {})
-                .get("base_config", "config.tutorial.yaml")
+                .get("base_config", "config.default.yaml")
             )
 
             # Ensure the scenario name matches the name of the configuration

@@ -13,6 +13,8 @@
 **/pbf
 *.pbf
 *.zip
+*.png
+*.done
 
 # Untracked files
 config.yaml
@@ -37,6 +39,8 @@ resources/
 scripts/temp
 scripts/test.py
 test/tmp/
+configs/scenarios/config.*.yaml
+!configs/scenarios/config.NG.yaml
 dask-worker-space/
 
 # Untrack some Jupyter changes
@@ -58,3 +62,7 @@ doc/_build
 doc/*.vscode/settings.json
 *.vscode/settings.json
 *.code-workspace
+
+# Additional debugging folders
+backup*
+screenlog*

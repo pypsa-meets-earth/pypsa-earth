@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates electric demand profile csv
+Creates electric demand profile csv.
 
 Relevant Settings
 -----------------
@@ -39,20 +39,21 @@ The rule :mod:`build_demand` creates load demand profiles in correspondence of t
 It creates the load paths for GEGIS outputs by combining the input parameters of the countries, weather year, prediction year, and SSP scenario.
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
-
 """
 import logging
 import os
+from itertools import product
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
 import pypsa
+import scipy.sparse as sparse
 import xarray as xr
 from _helpers import configure_logging, getContinent, update_p_nom_max
+from shapely.prepared import prep
 from shapely.validation import make_valid
-from vresutils import transfer as vtransfer
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ def normed(s):
 
 def get_load_paths_gegis(ssp_parentfolder, config):
     """
-    Create load paths for GEGIS outputs
+    Create load paths for GEGIS outputs.
 
     The paths are created automatically according to included country,
     weather year, prediction year and ssp scenario
@@ -90,6 +91,21 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         load_paths.append(load_path)
 
     return load_paths
+
+
+def shapes_to_shapes(orig, dest):
+    """
+    Adopted from vresutils.transfer.Shapes2Shapes()
+    """
+    orig_prepped = list(map(prep, orig))
+    transfer = sparse.lil_matrix((len(dest), len(orig)), dtype=float)
+
+    for i, j in product(range(len(dest)), range(len(orig))):
+        if orig_prepped[j].intersects(dest[i]):
+            area = orig[j].intersection(dest[i]).area
+            transfer[i, j] = area / dest[i].area
+
+    return transfer
 
 
 def build_demand_profiles(
@@ -143,16 +159,14 @@ def build_demand_profiles(
 
     def upsample(cntry, group):
         """
-        Distributes load in country according to population and gdp
+        Distributes load in country according to population and gdp.
         """
         l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
             shapes_cntry = shapes.loc[shapes.country == cntry]
-            transfer = vtransfer.Shapes2Shapes(
-                group, shapes_cntry.geometry, normed=False
-            ).T.tocsr()
+            transfer = shapes_to_shapes(group, shapes_cntry.geometry).T.tocsr()
             gdp_n = pd.Series(
                 transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
             )
