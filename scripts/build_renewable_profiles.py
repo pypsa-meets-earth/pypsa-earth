@@ -506,6 +506,32 @@ if __name__ == "__main__":
     client = Client(cluster, asynchronous=True)
 
     cutout = atlite.Cutout(paths["cutout"])
+
+    # TODO Test with alternative clustering
+    low_x_out_cutout = regions.x.min() < cutout.coords["x"].min()
+    up_x_complet_out_cutout = regions.x.max() < cutout.coords["x"].min()
+
+    up_x_out_cutout = regions.x.max() > cutout.coords["x"].max()
+    low_x_complet_out_cutout = regions.x.min() > cutout.coords["x"].max()
+
+    low_y_out_cutout = regions.y.min() < cutout.coords["y"].min()
+    low_y_complet_out_cutout = regions.y.max() < cutout.coords["y"].min()
+
+    up_y_out_cutout = regions.y.max() > cutout.coords["y"].max()
+    up_y_complet_out_cutout = regions.y.min() > cutout.coords["y"].max()
+
+    if (low_x_complet_out_cutout or up_x_complet_out_cutout) or (
+        low_y_complet_out_cutout or up_y_complet_out_cutout
+    ):
+        logger.exception(
+            "The requester region is not covered with the provided weather data. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
+        )
+        raise Exception("Cutout Error")
+    elif low_x_out_cutout or up_x_out_cutout or low_y_out_cutout or up_y_out_cutout:
+        logger.warning(
+            "Weather data does not fully cover the requester region. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
+        )
+
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
         cutout = filter_cutout_region(cutout, regions)
