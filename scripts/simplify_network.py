@@ -104,6 +104,7 @@ from pypsa.clustering.spatial import (
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
+from shapely.geometry import LineString
 
 sys.settrace
 
@@ -428,6 +429,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 p_min_pu=-p_max_pu,
                 underground=False,
                 under_construction=False,
+                geometry_links=LineString(
+                    zip(n.buses.loc[[b[0], b[1]]].x, n.buses.loc[[b[0], b[1]]].y)
+                ),
             )
 
             logger.info(
