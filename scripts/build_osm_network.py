@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
 from config_osm_data import osm_clean_columns
-from shapely.geometry import LineString, Point, MultiLineString
+from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import linemerge, nearest_points
 from tqdm import tqdm
 
@@ -609,49 +609,54 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         Coordinate reference system to use for distance calculations
     tol : float
         Tolerance in meters to snap the buses to the lines
-    
+
     Returns
     -------
     lines : GeoDataFrame
         GeoDataFrame containing the lines
     """
-    
-    df_l = lines.copy() # can use lines directly without copying
+
+    df_l = lines.copy()  # can use lines directly without copying
     # drop all columns excpet id and geometry for buses
-    df_p = buses[['id', 'geometry']].copy()
+    df_p = buses[["id", "geometry"]].copy()
 
     # change crs to distance based
     df_l = df_l.to_crs(distance_crs)
     df_p = df_p.to_crs(distance_crs)
 
-    # Buffer points to create areas for spatial join 
+    # Buffer points to create areas for spatial join
     buffer_df = gpd.GeoDataFrame(geometry=df_p.buffer(tol))
-        
+
     # Spatial join to find lines intersecting point buffers
-    joined = gpd.sjoin(df_l, buffer_df, how="inner", op='intersects')
+    joined = gpd.sjoin(df_l, buffer_df, how="inner", op="intersects")
 
     # group lines by their ids
-    group_lines = joined.groupby('id')
+    group_lines = joined.groupby("id")
 
     # iterate over the groups, TODO: change to apply
     for i, group in group_lines:
-        line_id = group['id'].iloc[0] # pick the line id that represents the group
-        line_geom = df_l[df_l['id'] == line_id]['geometry'].iloc[0]
+        line_id = group["id"].iloc[0]  # pick the line id that represents the group
+        line_geom = df_l[df_l["id"] == line_id]["geometry"].iloc[0]
 
         # number of points that intersect with the line
         num_points = len(group)
 
         # get the indeces of the points that intersect with the line
-        points_indexes = group['index_right'].tolist()
-        
+        points_indexes = group["index_right"].tolist()
+
         # get the geometries of the points that intersect with the line
-        multi_points = df_p.loc[points_indexes, 'geometry'].tolist()
+        multi_points = df_p.loc[points_indexes, "geometry"].tolist()
 
         # finda all the nearest points on the line to the points that intersect with the line
-        nearest_points_list = [nearest_points(line_geom, point)[0] for point in multi_points]
-        
+        nearest_points_list = [
+            nearest_points(line_geom, point)[0] for point in multi_points
+        ]
+
         # create perpendicular lines from the points that intersect with the line to the nearest points on the line
-        perpendicular_lines = [LineString([point, nearest_point]) for point, nearest_point in zip(multi_points, nearest_points_list)]
+        perpendicular_lines = [
+            LineString([point, nearest_point])
+            for point, nearest_point in zip(multi_points, nearest_points_list)
+        ]
 
         # split the line geom with the perpendicular lines using difference
         split_line = line_geom.difference(MultiLineString(perpendicular_lines))
@@ -661,8 +666,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         # in that case replace the start point with the point that is intersecting the start point of the line
 
         # replace the line with the split line
-        df_l.loc[df_l['id'] == line_id, 'geometry'] = split_line
-
+        df_l.loc[df_l["id"] == line_id, "geometry"] = split_line
 
     # explode the multilinestrings (not recommended, but inculded for completion)
     # exploding the df should be done at the last step
