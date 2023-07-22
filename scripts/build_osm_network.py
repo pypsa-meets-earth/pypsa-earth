@@ -13,8 +13,8 @@ import numpy as np
 import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
 from config_osm_data import osm_clean_columns
-from shapely.geometry import LineString, Point
-from shapely.ops import linemerge, split
+from shapely.geometry import LineString, Point, MultiLineString
+from shapely.ops import linemerge, nearest_points
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
@@ -595,131 +595,93 @@ def create_station_at_equal_bus_locations(
     return lines, buses
 
 
-def _split_linestring_by_point(linestring, points):
-    """
-    Function to split a linestring geometry by multiple inner points.
-
-    Parameters
-    ----------
-    lstring : LineString
-        Linestring of the line to be split
-    points : list
-        List of points to split the linestring
-
-    Return
-    ------
-    list_lines : list
-        List of linestring to split the line
-    """
-
-    list_linestrings = [linestring]
-
-    for p in points:
-        # execute split to all lines and store results
-        temp_list = [split(l, p) for l in list_linestrings]
-        # nest all geometries
-        list_linestrings = [lstring for tval in temp_list for lstring in tval.geoms]
-
-    return list_linestrings
-
-
 def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     """
-    Function to avoid buses overpassing lines with no connection when the bus
-    is within a given tolerance from the line.
+    Function to snap buses to lines that are within a certain tolerance.
 
     Parameters
     ----------
     lines : GeoDataFrame
-        Geodataframe of lines
+        GeoDataFrame containing the lines
     buses : GeoDataFrame
-        Geodataframe of substations
+        GeoDataFrame containing the buses
+    distance_crs : str
+        Coordinate reference system to use for distance calculations
     tol : float
-        Tolerance in meters of the distance between the substation and the line
-        below which the line will be split
+        Tolerance in meters to snap the buses to the lines
+    
+    Returns
+    -------
+    lines : GeoDataFrame
+        GeoDataFrame containing the lines
     """
+    
+    df_l = lines.copy() # can use lines directly without copying
+    # drop all columns excpet id and geometry for buses
+    df_p = buses[['id', 'geometry']].copy()
 
-    lines_to_add = []  # list of lines to be added
-    lines_to_split = []  # list of lines that have been split
+    # change crs to distance based
+    df_l = df_l.to_crs(distance_crs)
+    df_p = df_p.to_crs(distance_crs)
 
-    lines_epsgmod = lines.to_crs(distance_crs)
-    buses_epsgmod = buses.to_crs(distance_crs)
+    # Buffer points to create areas for spatial join 
+    buffer_df = gpd.GeoDataFrame(geometry=df_p.buffer(tol))
+        
+    # Spatial join to find lines intersecting point buffers
+    joined = gpd.sjoin(df_l, buffer_df, how="inner", op='intersects')
 
-    # set tqdm options for substation ids
-    tqdm_kwargs_substation_ids = dict(
-        ascii=False,
-        unit=" lines",
-        total=lines.shape[0],
-        desc="Verify lines overpassing nodes ",
-    )
+    # group lines by their ids
+    group_lines = joined.groupby('id')
 
-    for l in tqdm(lines.index, **tqdm_kwargs_substation_ids):
-        # bus indices being within tolerance from the line
-        bus_in_tol_epsg = buses_epsgmod[
-            buses_epsgmod.geometry.distance(lines_epsgmod.geometry.loc[l]) <= tol
-        ]
+    # iterate over the groups, TODO: change to apply
+    for i, group in group_lines:
+        line_id = group['id'].iloc[0] # pick the line id that represents the group
+        line_geom = df_l[df_l['id'] == line_id]['geometry'].iloc[0]
 
-        # exclude endings of the lines
-        bus_in_tol_epsg = bus_in_tol_epsg[
-            (
-                (
-                    bus_in_tol_epsg.geometry.distance(
-                        lines_epsgmod.geometry.loc[l].boundary.geoms[0]
-                    )
-                    > tol
-                )
-                | (
-                    bus_in_tol_epsg.geometry.distance(
-                        lines_epsgmod.geometry.loc[l].boundary.geoms[1]
-                    )
-                    > tol
-                )
-            )
-        ]
+        # number of points that intersect with the line
+        num_points = len(group)
 
-        if not bus_in_tol_epsg.empty:
-            # add index of line to split
-            lines_to_split.append(l)
+        # get the indeces of the points that intersect with the line
+        points_indexes = group['index_right'].tolist()
+        
+        # get the geometries of the points that intersect with the line
+        multi_points = df_p.loc[points_indexes, 'geometry'].tolist()
 
-            buses_locs = buses.geometry.loc[bus_in_tol_epsg.index]
+        # finda all the nearest points on the line to the points that intersect with the line
+        nearest_points_list = [nearest_points(line_geom, point)[0] for point in multi_points]
+        
+        # create perpendicular lines from the points that intersect with the line to the nearest points on the line
+        perpendicular_lines = [LineString([point, nearest_point]) for point, nearest_point in zip(multi_points, nearest_points_list)]
 
-            # get new line geometries
-            new_geometries = _split_linestring_by_point(lines.geometry[l], buses_locs)
-            n_geoms = len(new_geometries)
+        # split the line geom with the perpendicular lines using difference
+        split_line = line_geom.difference(MultiLineString(perpendicular_lines))
 
-            # create temporary copies of the line
-            df_append = gpd.GeoDataFrame([lines.loc[l]] * n_geoms)
-            # update geometries
-            df_append["geometry"] = new_geometries
-            # update name of the line
-            df_append["line_id"] = [
-                str(df_append["line_id"].iloc[0]) + f"_{id}" for id in range(n_geoms)
-            ]
+        # TODO: replace the end points of each line in the multistring with the points that intersect with the line
+        # unless there is a point that is intersecting the start point of the line
+        # in that case replace the start point with the point that is intersecting the start point of the line
 
-            lines_to_add.append(df_append)
+        # replace the line with the split line
+        df_l.loc[df_l['id'] == line_id, 'geometry'] = split_line
 
-    if not lines_to_add:
-        return lines, buses
 
-    df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True))
-    df_to_add.set_crs(lines.crs, inplace=True)
-    df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
+    # explode the multilinestrings (not recommended, but inculded for completion)
+    # exploding the df should be done at the last step
+    # if an operation requires separate lines, it should be done using df.explode().apply(your_function)
+    # which is a lot more memory efficient
+    df_l = df_l.explode(index_parts=False)
+
+    # update line endings (inculded for completion, the scope of the function should be limited to fixing overpassing lines)
+    # commented out due to errors in the bus conversion function
+    # df_l = line_endings_to_bus_conversion(df_l)
 
     # update length
-    df_to_add["length"] = df_to_add.to_crs(distance_crs).geometry.length
+    df_l["length"] = df_l.to_crs(distance_crs).geometry.length
 
-    # update line endings
-    df_to_add = line_endings_to_bus_conversion(df_to_add)
+    # return to original crs
+    df_l = df_l.to_crs(lines.crs)
 
-    # remove original lines
-    lines.drop(lines_to_split, inplace=True)
-
-    lines = gpd.GeoDataFrame(
-        pd.concat([lines, df_to_add], ignore_index=True).reset_index(drop=True),
-        crs=lines.crs,
-    )
-
-    return lines, buses
+    # buses should not be returned as they are not changed, but included for completion
+    return df_l, buses
 
 
 def force_ac_lines(df, col="tag_frequency"):
