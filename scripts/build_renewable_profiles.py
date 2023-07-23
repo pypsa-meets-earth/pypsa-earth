@@ -508,26 +508,30 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(paths["cutout"])
 
     # TODO Test with alternative clustering
-    low_x_out_cutout = regions.x.min() < cutout.coords["x"].min()
-    up_x_complet_out_cutout = regions.x.max() < cutout.coords["x"].min()
+    x_low_out_cutout = regions.x.min() < cutout.coords["x"].min()
+    x_up_completly_out_cutout = regions.x.max() < cutout.coords["x"].min()
 
-    up_x_out_cutout = regions.x.max() > cutout.coords["x"].max()
-    low_x_complet_out_cutout = regions.x.min() > cutout.coords["x"].max()
+    x_up_out_cutout = regions.x.max() > cutout.coords["x"].max()
+    x_low_completly_out_cutout = regions.x.min() > cutout.coords["x"].max()
 
-    low_y_out_cutout = regions.y.min() < cutout.coords["y"].min()
-    low_y_complet_out_cutout = regions.y.max() < cutout.coords["y"].min()
+    y_low_out_cutout = regions.y.min() < cutout.coords["y"].min()
+    y_up_completly_out_cutout = regions.y.max() < cutout.coords["y"].min()
 
-    up_y_out_cutout = regions.y.max() > cutout.coords["y"].max()
-    up_y_complet_out_cutout = regions.y.min() > cutout.coords["y"].max()
+    y_up_out_cutout = regions.y.max() > cutout.coords["y"].max()
+    y_low_completly_out_cutout = regions.y.min() > cutout.coords["y"].max()
 
-    if (low_x_complet_out_cutout or up_x_complet_out_cutout) or (
-        low_y_complet_out_cutout or up_y_complet_out_cutout
-    ):
-        logger.exception(
-            "The requester region is not covered with the provided weather data. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
-        )
-        raise Exception("Cutout Error")
-    elif low_x_out_cutout or up_x_out_cutout or low_y_out_cutout or up_y_out_cutout:
+    assert not (
+        x_low_completly_out_cutout
+        or x_up_completly_out_cutout
+        or y_low_completly_out_cutout
+        or y_up_completly_out_cutout
+    ), (
+        "The requester region is not covered with the provided weather data\n\r"
+        "Check please the provided cutout.\n\r"
+        "More details are provided in docs on \n\r"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration \n\r"
+    )
+    if x_low_out_cutout or x_up_out_cutout or y_low_out_cutout or y_up_out_cutout:
         logger.warning(
             "Weather data does not fully cover the requester region. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
         )
