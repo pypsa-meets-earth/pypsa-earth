@@ -217,6 +217,36 @@ COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
 
 
+def check_cutout_match(cutout, geodf):
+    x_low_out_cutout = geodf.x.min() < cutout.coords["x"].min()
+    x_up_completly_out_cutout = geodf.x.max() < cutout.coords["x"].min()
+
+    x_up_out_cutout = geodf.x.max() > cutout.coords["x"].max()
+    x_low_completly_out_cutout = geodf.x.min() > cutout.coords["x"].max()
+
+    y_low_out_cutout = geodf.y.min() < cutout.coords["y"].min()
+    y_up_completly_out_cutout = geodf.y.max() < cutout.coords["y"].min()
+
+    y_up_out_cutout = geodf.y.max() > cutout.coords["y"].max()
+    y_low_completly_out_cutout = geodf.y.min() > cutout.coords["y"].max()
+
+    assert not (
+        x_low_completly_out_cutout
+        or x_up_completly_out_cutout
+        or y_low_completly_out_cutout
+        or y_up_completly_out_cutout
+    ), (
+        "The requester region is not covered with the provided weather data.\n\r"
+        "Check please the provided cutout. More details on cutout generation are provided in docs:\n\r"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration \n\r"
+    )
+
+    if x_low_out_cutout or x_up_out_cutout or y_low_out_cutout or y_up_out_cutout:
+        logger.warning(
+            "Weather data does not fully cover the requester region. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
+        )
+
+
 def get_eia_annual_hydro_generation(fn, countries):
     # in billion kWh/a = TWh/a
     df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
@@ -507,34 +537,7 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
 
-    # TODO Test with alternative clustering
-    x_low_out_cutout = regions.x.min() < cutout.coords["x"].min()
-    x_up_completly_out_cutout = regions.x.max() < cutout.coords["x"].min()
-
-    x_up_out_cutout = regions.x.max() > cutout.coords["x"].max()
-    x_low_completly_out_cutout = regions.x.min() > cutout.coords["x"].max()
-
-    y_low_out_cutout = regions.y.min() < cutout.coords["y"].min()
-    y_up_completly_out_cutout = regions.y.max() < cutout.coords["y"].min()
-
-    y_up_out_cutout = regions.y.max() > cutout.coords["y"].max()
-    y_low_completly_out_cutout = regions.y.min() > cutout.coords["y"].max()
-
-    assert not (
-        x_low_completly_out_cutout
-        or x_up_completly_out_cutout
-        or y_low_completly_out_cutout
-        or y_up_completly_out_cutout
-    ), (
-        "The requester region is not covered with the provided weather data\n\r"
-        "Check please the provided cutout.\n\r"
-        "More details are provided in docs on \n\r"
-        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration \n\r"
-    )
-    if x_low_out_cutout or x_up_out_cutout or y_low_out_cutout or y_up_out_cutout:
-        logger.warning(
-            "Weather data does not fully cover the requester region. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
-        )
+    check_cutout_match(cutout=cutout, geodf=regions)
 
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
