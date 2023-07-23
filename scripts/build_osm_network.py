@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
 from config_osm_data import osm_clean_columns
+from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
@@ -114,12 +115,6 @@ def set_lines_ids(lines, buses, distance_crs):
     Function to set line buses ids to the closest bus in the list.
     """
     # set tqdm options for set lines ids
-    tqdm_kwargs_line_ids = dict(
-        ascii=False,
-        unit=" lines",
-        total=lines.shape[0],
-        desc="Set line bus ids ",
-    )
 
     # initialization
     lines["bus0"] = -1
@@ -128,55 +123,59 @@ def set_lines_ids(lines, buses, distance_crs):
     busesepsg = buses.to_crs(distance_crs)
     linesepsg = lines.to_crs(distance_crs)
 
-    for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
-        # select buses having the voltage level of the current line
-        buses_sel = busesepsg[
-            (buses["voltage"] == row["voltage"]) & (buses["dc"] == row["dc"])
-        ]
+    for key, lines_sel in linesepsg.groupby(["voltage", "dc"]):
+        buses_sel = busesepsg.query(f"voltage == {key[0]} and dc == {key[1]}")
 
         # find the closest node of the bus0 of the line
-        bus0_id = buses_sel.geometry.distance(row.geometry.boundary.geoms[0]).idxmin()
-        lines.loc[i, "bus0"] = buses.loc[bus0_id, "bus_id"]
-
-        # check if the line starts exactly in the node, otherwise modify the linestring
-        distance_bus0 = busesepsg.geometry.loc[bus0_id].distance(
-            row.geometry.boundary.geoms[0]
-        )
-        if distance_bus0 > 0.0:
-            # the line does not start in the node, thus modify the linestring
-            lines.geometry.loc[i] = linemerge(
-                [
-                    LineString(
-                        [
-                            buses.geometry.loc[bus0_id],
-                            lines.geometry.loc[i].boundary.geoms[0],
-                        ]
-                    ),
-                    lines.geometry.loc[i],
-                ]
+        bus0_points = np.array(
+            list(
+                lines_sel.geometry.boundary.apply(
+                    lambda x: (x.geoms[0].x, x.geoms[0].y)
+                )
             )
-
-        # find the closest node of the bus1 of the line
-        bus1_id = buses_sel.geometry.distance(row.geometry.boundary.geoms[1]).idxmin()
-        lines.loc[i, "bus1"] = buses.loc[bus1_id, "bus_id"]
-
-        # check if the line ends exactly in the node, otherwise modify the linestring
-        distance_bus1 = busesepsg.geometry.loc[bus1_id].distance(
-            row.geometry.boundary.geoms[1]
         )
-        if distance_bus1 > 0.0:
-            # the line does not end in the node, thus modify the linestring
-            lines.geometry.loc[i] = linemerge(
-                [
-                    lines.geometry.loc[i],
-                    LineString(
-                        [
-                            lines.geometry.loc[i].boundary.geoms[1],
-                            buses.geometry.loc[bus1_id],
-                        ]
-                    ),
-                ]
+        bus1_points = np.array(
+            list(
+                lines_sel.geometry.boundary.apply(
+                    lambda x: (x.geoms[1].x, x.geoms[1].y)
+                )
             )
+        )
+        points_buses = np.array(list(buses_sel.geometry.apply(lambda x: (x.x, x.y))))
+
+        btree = cKDTree(points_buses)
+        dist0, idx0 = btree.query(bus0_points, k=1)  # find closest points of bus0
+        dist1, idx1 = btree.query(bus1_points, k=1)  # find closest points of bus1
+
+        # set bus0 and bus1
+        lines.loc[lines_sel.index, "bus0"] = buses_sel.bus_id.iloc[idx0].values
+        lines.loc[lines_sel.index, "bus1"] = buses_sel.bus_id.iloc[idx1].values
+
+        # check if the line starts exactly in the bus0, otherwise modify the linestring
+        bus0_linestring = (
+            lines.loc[lines_sel.index]
+            .apply(
+                lambda x: LineString([buses.geometry.loc[x["bus0"]], x["bus_0_coors"]]),
+                axis=1,
+            )
+            .set_crs(crs=lines.crs)
+        )
+        bus1_linestring = (
+            lines.loc[lines_sel.index]
+            .apply(
+                lambda x: LineString([x["bus_1_coors"], buses.geometry.loc[x["bus1"]]]),
+                axis=1,
+            )
+            .set_crs(crs=lines.crs)
+        )
+
+        # update geometry with left and right linestrings to match bus0 and bus1
+        lines.loc[lines_sel.index, "geometry"] = (
+            lines.loc[lines_sel.index]
+            .union(bus0_linestring)
+            .union(bus1_linestring)
+            .apply(linemerge)
+        )
 
     return lines, buses
 
