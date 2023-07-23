@@ -22,6 +22,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Drop code-dependency from vresutil `PR #803 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/803>`__
 
+* Revise set_lines_ids with cKDTree by scipy `PR #806 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/806>`__
+
 PyPSA-Earth 0.2.2
 =================
 
