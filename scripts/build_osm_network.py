@@ -110,7 +110,7 @@ def set_substations_ids(buses, distance_crs, tol=2000):
                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
 
 
-def set_lines_ids(lines, buses, distance_crs):
+def set_lines_ids(lines, buses):
     """
     Function to set line buses ids to the closest bus in the list.
     """
@@ -120,11 +120,8 @@ def set_lines_ids(lines, buses, distance_crs):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    busesepsg = buses.to_crs(distance_crs)
-    linesepsg = lines.to_crs(distance_crs)
-
-    for key, lines_sel in linesepsg.groupby(["voltage", "dc"]):
-        buses_sel = busesepsg.query(f"voltage == {key[0]} and dc == {key[1]}")
+    for key, lines_sel in lines.groupby(["voltage", "dc"]):
+        buses_sel = buses.query(f"voltage == {key[0]} and dc == {key[1]}")
 
         # find the closest node of the bus0 of the line
         bus0_points = np.array(
@@ -530,7 +527,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses, distance_crs)
+    lines, buses = set_lines_ids(lines, buses)
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
@@ -577,7 +574,7 @@ def create_station_at_equal_bus_locations(
     set_substations_ids(buses, distance_crs, tol=tol)
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses, distance_crs)
+    lines, buses = set_lines_ids(lines, buses)
 
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
