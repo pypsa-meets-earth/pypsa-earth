@@ -430,7 +430,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 underground=False,
                 under_construction=False,
                 geometry_links=LineString(
-                    zip(n.buses.loc[[b[0], b[1]]].x, n.buses.loc[[b[0], b[1]]].y)
+                    zip(n.buses.loc[b[0:2]].x, n.buses.loc[b[0:2]].y)
                 ),
             )
 
