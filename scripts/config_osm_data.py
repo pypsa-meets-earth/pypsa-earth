@@ -222,10 +222,10 @@ world_iso = {
         "BI": "burundi",
         "CM": "cameroon",
         # "IC": "canary-islands",  # Island
-        # "CV": "cape-verde",
+        "CV": "cape-verde",
         "CF": "central-african-republic",
         "TD": "chad",
-        # "KM": "comoros",
+        "KM": "comoros",
         "CG": "congo-brazzaville",
         "CD": "congo-democratic-republic",
         "DJ": "djibouti",
@@ -257,10 +257,10 @@ world_iso = {
         # "RE": "reunion",  # Island
         "RW": "rwanda",
         # saint-helena-ascension-and-tristan-da-cunha # Islands
-        # "ST": "sao-tome-and-principe",
+        "ST": "sao-tome-and-principe",
         "SN": "senegal",
         "GM": "gambia",
-        # "SC": "seychelles",
+        "SC": "seychelles",
         "SL": "sierra-leone",
         "SO": "somalia",  # No Data
         # south-africa-and-lesotho
@@ -390,7 +390,7 @@ world_iso = {
         # "GG": "guernsey",  # Island
         "HU": "hungary",
         "IS": "iceland",
-        # "IE": "ireland-and-northern-ireland",
+        "IE": "ireland-and-northern-ireland",
         # "IM": "isle of man",  # Island
         "IT": "italy",
         # "JE": "jersey",  # Island
