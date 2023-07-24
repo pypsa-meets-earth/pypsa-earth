@@ -618,7 +618,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
 
     df_l = lines.copy()  # can use lines directly without copying
     # drop all columns excpet id and geometry for buses
-    df_p = buses[["id", "geometry"]].copy()
+    df_p = buses.copy()
 
     # change crs to distance based
     df_l = df_l.to_crs(distance_crs)
