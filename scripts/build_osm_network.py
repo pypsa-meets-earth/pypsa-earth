@@ -617,7 +617,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     """
 
     df_l = lines.copy()  # can use lines directly without copying
-    # drop all columns excpet id and geometry for buses
+    # drop all columns except id and geometry for buses
     df_p = buses.copy()
 
     # change crs to distance based
@@ -641,7 +641,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         # number of points that intersect with the line
         num_points = len(group)
 
-        # get the indeces of the points that intersect with the line
+        # get the indices of the points that intersect with the line
         points_indexes = group["index_right"].tolist()
 
         # get the geometries of the points that intersect with the line
@@ -668,13 +668,13 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         # replace the line with the split line
         df_l.loc[df_l["id"] == line_id, "geometry"] = split_line
 
-    # explode the multilinestrings (not recommended, but inculded for completion)
+    # explode the multilinestrings (not recommended, but included for completion)
     # exploding the df should be done at the last step
     # if an operation requires separate lines, it should be done using df.explode().apply(your_function)
     # which is a lot more memory efficient
     df_l = df_l.explode(index_parts=False)
 
-    # update line endings (inculded for completion, the scope of the function should be limited to fixing overpassing lines)
+    # update line endings (included for completion, the scope of the function should be limited to fixing overpassing lines)
     # commented out due to errors in the bus conversion function
     # df_l = line_endings_to_bus_conversion(df_l)
 
