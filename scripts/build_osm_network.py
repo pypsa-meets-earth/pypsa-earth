@@ -631,12 +631,12 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     joined = gpd.sjoin(df_l, buffer_df, how="inner", op="intersects")
 
     # group lines by their ids
-    group_lines = joined.groupby("id")
+    group_lines = joined.groupby("line_id")
 
     # iterate over the groups, TODO: change to apply
     for i, group in group_lines:
-        line_id = group["id"].iloc[0]  # pick the line id that represents the group
-        line_geom = df_l[df_l["id"] == line_id]["geometry"].iloc[0]
+        line_id = i  # pick the line id that represents the group
+        line_geom = df_l[df_l["line_id"] == line_id]["geometry"].iloc[0]
 
         # number of points that intersect with the line
         num_points = len(group)
@@ -666,7 +666,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         # in that case replace the start point with the point that is intersecting the start point of the line
 
         # replace the line with the split line
-        df_l.loc[df_l["id"] == line_id, "geometry"] = split_line
+        df_l.loc[df_l["line_id"] == line_id, "geometry"] = split_line
 
     # explode the multilinestrings (not recommended, but included for completion)
     # exploding the df should be done at the last step
