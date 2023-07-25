@@ -222,14 +222,18 @@ def check_cutout_match(cutout, geodf):
     region_box = box(*regions.total_bounds)
 
     assert not region_box.intersection(cutout_box).is_empty, (
-        "The requester region is completely out cutout area.\n\r"
-        "Check please the provided cutout. More details on cutout generation are available in docs:\n\r"
-        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration \n\r"
+        "The requested region is completely out of the cutout area.\n\r"
+        "Check please the provided cutout.\n\r"
+        "More details on cutout generation are available in docs:\n\r"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
     )
 
     if not region_box.covered_by(cutout_box):
         logger.warning(
-            "Weather data does not fully cover the requester region. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
+            "Weather data does not fully cover the requester region.\n\r"
+            "It's recommended to check the provided cutout.\n\r"
+            "More details on cutout generation are available in docs:\n\r"
+            "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
         )
 
 
