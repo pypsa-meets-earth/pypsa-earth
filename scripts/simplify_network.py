@@ -161,12 +161,13 @@ def _prepare_connection_costs_per_link(n, costs, config):
 
     connection_costs_per_link = {}
 
-    if not n.links.loc[n.links.carrier == "DC"].empty:
-        dc_lengths = n.links.length
-        unterwater_fractions = n.links.underwater_fraction
-    elif not n.lines.loc[n.lines.carrier == "DC"].empty:
+    # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
+    if config["electricity"]["hvdc_as_lines"]:
         dc_lengths = n.lines.length
         unterwater_fractions = n.lines.underwater_fraction
+    else:
+        dc_lengths = n.links.length
+        unterwater_fractions = n.links.underwater_fraction
 
     for tech in config["renewable"]:
         if tech.startswith("offwind"):
