@@ -207,7 +207,7 @@ from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 
@@ -218,30 +218,16 @@ GEBCO_CRS = "EPSG:4326"
 
 
 def check_cutout_match(cutout, geodf):
-    x_low_out_cutout = geodf.x.min() < cutout.coords["x"].min()
-    x_up_completly_out_cutout = geodf.x.max() < cutout.coords["x"].min()
+    cutout_box = box(*cutout.bounds)
+    region_box = box(*regions.total_bounds)
 
-    x_up_out_cutout = geodf.x.max() > cutout.coords["x"].max()
-    x_low_completly_out_cutout = geodf.x.min() > cutout.coords["x"].max()
-
-    y_low_out_cutout = geodf.y.min() < cutout.coords["y"].min()
-    y_up_completly_out_cutout = geodf.y.max() < cutout.coords["y"].min()
-
-    y_up_out_cutout = geodf.y.max() > cutout.coords["y"].max()
-    y_low_completly_out_cutout = geodf.y.min() > cutout.coords["y"].max()
-
-    assert not (
-        x_low_completly_out_cutout
-        or x_up_completly_out_cutout
-        or y_low_completly_out_cutout
-        or y_up_completly_out_cutout
-    ), (
-        "The requester region is not covered with the provided weather data.\n\r"
-        "Check please the provided cutout. More details on cutout generation are provided in docs:\n\r"
+    assert not region_box.intersection(cutout_box).is_empty, (
+        "The requester region is completely out cutout area.\n\r"
+        "Check please the provided cutout. More details on cutout generation are available in docs:\n\r"
         "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration \n\r"
     )
 
-    if x_low_out_cutout or x_up_out_cutout or y_low_out_cutout or y_up_out_cutout:
+    if not region_box.covered_by(cutout_box):
         logger.warning(
             "Weather data does not fully cover the requester region. It's recommended to check the provided cutout. More details are provided in https://pypsa-earth.readthedocs.io/en/latest/tutorial.html#adjust-the-model-configuration"
         )
