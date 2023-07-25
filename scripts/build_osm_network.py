@@ -620,23 +620,29 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     # drop all columns except id and geometry for buses
     df_p = buses.copy()
 
+    line_id_str = "line_id"
+    bus_id_str = "bus_id"
+
     # change crs to distance based
     df_l = df_l.to_crs(distance_crs)
     df_p = df_p.to_crs(distance_crs)
 
+    # set index to bus_id
+    df_p.set_index(bus_id_str, inplace=True)
+
     # Buffer points to create areas for spatial join
-    buffer_df = gpd.GeoDataFrame(geometry=df_p.buffer(tol))
+    buffer_df = df_p.buffer(tol).to_frame()
 
     # Spatial join to find lines intersecting point buffers
     joined = gpd.sjoin(df_l, buffer_df, how="inner", op="intersects")
 
     # group lines by their ids
-    group_lines = joined.groupby("line_id")
+    group_lines = joined.groupby(line_id_str)
 
     # iterate over the groups, TODO: change to apply
     for i, group in group_lines:
         line_id = i  # pick the line id that represents the group
-        line_geom = df_l[df_l["line_id"] == line_id]["geometry"].iloc[0]
+        line_geom = df_l[df_l[line_id_str] == line_id]["geometry"].iloc[0]
 
         # number of points that intersect with the line
         num_points = len(group)
@@ -665,14 +671,15 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         # unless there is a point that is intersecting the start point of the line
         # in that case replace the start point with the point that is intersecting the start point of the line
 
-        # replace the line with the split line
-        df_l.loc[df_l["line_id"] == line_id, "geometry"] = split_line
+        # replace the line with the split line in lines df
+        df_l.loc[df_l[line_id_str] == line_id, "geometry"] = split_line
 
     # explode the multilinestrings (not recommended, but included for completion)
     # exploding the df should be done at the last step
     # if an operation requires separate lines, it should be done using df.explode().apply(your_function)
     # which is a lot more memory efficient
-    df_l = df_l.explode(index_parts=False)
+    # df_l = df_l.explode(index_parts=False)  # (recommended)
+    df_l = df_l.explode(ignore_index=True)
 
     # update line endings (included for completion, the scope of the function should be limited to fixing overpassing lines)
     # commented out due to errors in the bus conversion function
@@ -683,6 +690,9 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
 
     # return to original crs
     df_l = df_l.to_crs(lines.crs)
+
+    # remove lines that are rings (included for completion), TODO: this should be a separate function
+    df_l = df_l[~df_l.geometry.is_ring].reset_index()
 
     # buses should not be returned as they are not changed, but included for completion
     return df_l, buses
