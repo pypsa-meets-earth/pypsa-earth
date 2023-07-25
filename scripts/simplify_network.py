@@ -429,9 +429,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 p_min_pu=-p_max_pu,
                 underground=False,
                 under_construction=False,
-                geometry_links=LineString(
-                    zip(n.buses.loc[b[0:2]].x, n.buses.loc[b[0:2]].y)
-                ),
+                # geometry_links=LineString(
+                #    zip(n.buses.loc[b[0:2]].x, n.buses.loc[b[0:2]].y)
+                # ),
             )
 
             logger.info(
@@ -461,6 +461,16 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
         output,
         aggregation_strategies=aggregation_strategies,
         exclude_carriers=exclude_carriers,
+    )
+
+    n.links.geometry = n.links.apply(
+        lambda row: LineString(
+            [
+                [n.buses.loc[row["bus0"]].x, n.buses.loc[row["bus0"]].y],
+                [n.buses.loc[row["bus1"]].x, n.buses.loc[row["bus1"]].y],
+            ]
+        ),
+        axis=1,
     )
     return n, busmap
 
