@@ -22,7 +22,10 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Drop code-dependency from vresutil `PR #803 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/803>`__
 
+* Add a check to ensure match between a cutout and a modelled area `PR #805 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/805>`__
+
 * Add NorthAmerican cutout and improve African cutout `PR #813 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/813>`__
+
 
 PyPSA-Earth 0.2.2
 =================

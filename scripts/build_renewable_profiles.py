@@ -207,7 +207,7 @@ from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 
@@ -215,6 +215,26 @@ logger = logging.getLogger(__name__)
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
+
+
+def check_cutout_match(cutout, geodf):
+    cutout_box = box(*cutout.bounds)
+    region_box = box(*regions.total_bounds)
+
+    assert not region_box.intersection(cutout_box).is_empty, (
+        "The requested region is completely out of the cutout area.\n\r"
+        "Check please the provided cutout.\n\r"
+        "More details on cutout generation are available in docs:\n\r"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
+    )
+
+    if not region_box.covered_by(cutout_box):
+        logger.warning(
+            "Weather data does not fully cover the requester region.\n\r"
+            "It's recommended to check the provided cutout.\n\r"
+            "More details on cutout generation are available in docs:\n\r"
+            "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
+        )
 
 
 def get_eia_annual_hydro_generation(fn, countries):
@@ -506,6 +526,9 @@ if __name__ == "__main__":
     client = Client(cluster, asynchronous=True)
 
     cutout = atlite.Cutout(paths["cutout"])
+
+    check_cutout_match(cutout=cutout, geodf=regions)
+
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
         cutout = filter_cutout_region(cutout, regions)
