@@ -283,3 +283,28 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+
+  # # cutouts bundle of the cutouts folder for the African continent
+  # # This bundle includes SC, ST, KM and CV countries into the previous bundle
+  # bundle_cutouts_africa_with_islands:
+  #   countries: [Africa]
+  #   category: cutouts
+  #   destination: "cutouts"
+  #   urls:
+  #     # zenodo:
+  #     gdrive: https://drive.google.com/file/d/1O_9vQ2SDluJ_LtFdRBeoo1Pz213n5HAN/view?usp=sharing
+  #   output: [cutouts/cutout-2013-era5.nc]
+  #   disable_by_opt:
+  #     build_cutout: [all]
+
+  # cutouts bundle of the cutouts folder for the North American continent
+  bundle_cutouts_northamerica:
+    countries: [NorthAmerica, Europe]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
