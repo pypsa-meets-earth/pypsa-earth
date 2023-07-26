@@ -429,7 +429,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 p_min_pu=-p_max_pu,
                 underground=False,
                 under_construction=False,
-                # geometry_links=LineString(
+                # An attempt to keep meaningful links geometry leads to an error when exporting a network
+                # ValueError: unable to infer dtype on variable 'links_geometry'; xarray cannot serialize arbitrary Python objects
+                # geometry=LineString(
                 #    zip(n.buses.loc[b[0:2]].x, n.buses.loc[b[0:2]].y)
                 # ),
             )
@@ -463,15 +465,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
         exclude_carriers=exclude_carriers,
     )
 
-    n.links.geometry = n.links.apply(
-        lambda row: LineString(
-            [
-                [n.buses.loc[row["bus0"]].x, n.buses.loc[row["bus0"]].y],
-                [n.buses.loc[row["bus1"]].x, n.buses.loc[row["bus1"]].y],
-            ]
-        ),
-        axis=1,
-    )
     return n, busmap
 
 
