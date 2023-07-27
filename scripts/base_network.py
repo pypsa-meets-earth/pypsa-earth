@@ -175,7 +175,9 @@ def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
             lines_or_links["underwater_fraction"] = 0.0
         else:
             branches = gpd.GeoSeries(
-                lines_or_links.geometry.dropna().map(shapely.wkt.loads)
+                lines_or_links.geometry.replace("", np.nan)
+                .dropna()
+                .map(shapely.wkt.loads)
             )
             # fix to avoid NaN for links during augmentation
             if branches.empty:
