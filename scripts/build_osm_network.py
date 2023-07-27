@@ -659,10 +659,16 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         ]
 
         # reflect the points in the line to create a bisector
-        reflected_points_list = [Point([2 * nearest_point.x - point.x, 2 * nearest_point.y - point.y]) for point, nearest_point in zip(multi_points, nearest_points_list)]
+        reflected_points_list = [
+            Point([2 * nearest_point.x - point.x, 2 * nearest_point.y - point.y])
+            for point, nearest_point in zip(multi_points, nearest_points_list)
+        ]
 
         # create perpendicular lines from the points that intersect with the line to the nearest points on the line
-        perpendicular_lines = [LineString([point, reflected_point]) for point, reflected_point in zip(multi_points, reflected_points_list)]
+        perpendicular_lines = [
+            LineString([point, reflected_point])
+            for point, reflected_point in zip(multi_points, reflected_points_list)
+        ]
 
         # split the line geom with the perpendicular lines using difference
         split_line = line_geom.difference(MultiLineString(perpendicular_lines))
