@@ -199,9 +199,16 @@ def H2_export_yearly_constraint(n):
 
     lhs = res
 
-    rhs = (
-        h2_export * (1 / 0.7) + load
-    )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
+    include_country_load = snakemake.config["policy_config"]["yearly"][
+        "re_country_load"
+    ]
+
+    if include_country_load:
+        rhs = (
+            h2_export * (1 / 0.7) + load
+        )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
+    else:
+        rhs = h2_export * (1 / 0.7)
 
     con = define_constraints(n, lhs, ">=", rhs, "H2ExportConstraint", "RESproduction")
 
@@ -217,7 +224,7 @@ def monthly_constraints(n, n_ref):
         "offwind2",
         "ror",
     ]
-    allowed_excess = snakemake.config["policy_config"]["allowed_excess"]
+    allowed_excess = snakemake.config["policy_config"]["monthly"]["allowed_excess"]
 
     res_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
 
@@ -250,7 +257,9 @@ def monthly_constraints(n, n_ref):
     elec_input = elec_input.groupby(elec_input.index.month).sum()
 
     if (
-        snakemake.config["policy_config"]["reference_case"]
+        snakemake.config["policy_config"]["monthly"]["reference_case"]
+        and snakemake.config["policy_config"]["policy"]
+        == "H2_export_monthly_constraint"
         and eval(snakemake.wildcards["h2export"]) != 0
     ):
         res_ref = n_ref.generators_t.p[res_index] * weightings
@@ -469,15 +478,16 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="26",
+            clusters="10",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L0.60",
             planning_horizons="2030",
-            sopts="144H",
-            discountrate=0.071,
+            sopts="300H",
+            discountrate=0.15,
             demand="DF",
-            h2export="5",
+            h2export="60",
         )
+
         sets_path_to_root("pypsa-earth-sec")
 
     logging.basicConfig(
@@ -502,8 +512,10 @@ if __name__ == "__main__":
             add_existing(n)
 
         if (
-            snakemake.config["policy_config"]["reference_case"]
+            snakemake.config["policy_config"]["monthly"]["reference_case"]
             and eval(snakemake.wildcards["h2export"]) != 0
+            and snakemake.config["policy_config"]["policy"]
+            == "H2_export_monthly_constraint"
         ):
             n_ref_path = snakemake.output[0].replace(
                 snakemake.output[0].split("_")[-1], "0export.nc"
