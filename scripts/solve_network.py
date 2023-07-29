@@ -445,7 +445,9 @@ def add_RES_constraints(n, res_share):
         (
             linexpr(
                 (
-                    n.snapshot_weightings.stores.apply(lambda r: r * n.links.loc[discharger_i].efficiency),
+                    n.snapshot_weightings.stores.apply(
+                        lambda r: r * n.links.loc[discharger_i].efficiency
+                    ),
                     get_var(n, "Link", "p")[discharger_i],
                 )
             )
