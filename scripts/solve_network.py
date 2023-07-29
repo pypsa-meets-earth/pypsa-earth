@@ -351,6 +351,13 @@ def add_RES_constraints(n, res_share):
     ggrouper = n.generators.bus.map(n.buses.country)
     sgrouper = n.storage_units.bus.map(n.buses.country)
     cgrouper = n.links.bus0.map(n.buses.country)
+    
+    logger.warning(
+        "The add_RES_constraints functionality is still work in progress. "
+        "Unexpected results might be incurred, particularly if "
+        "temporal clustering is applied or if an unexpected change of technologies "
+        "is subject to the obtimisation."
+    )
 
     load = (
         n.snapshot_weightings.generators
