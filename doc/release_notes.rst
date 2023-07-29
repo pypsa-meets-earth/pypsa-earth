@@ -22,6 +22,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Drop code-dependency from vresutil `PR #803 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/803>`__
 
+* Add a check to ensure match between a cutout and a modelled area `PR #805 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/805>`__
+
 * Support renewables or renewable expansion to meet a desired share of total load. `PR #793 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/793>`__ 
 
 PyPSA-Earth 0.2.2
