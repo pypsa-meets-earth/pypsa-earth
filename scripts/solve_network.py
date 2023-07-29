@@ -423,11 +423,11 @@ def add_RES_constraints(n, res_share):
         (
             linexpr(
                 (
-                    -n.links.loc[charger_i].efficiency,
-                    get_var(n, "Link", "p")[charger_i],
+                    -n.snapshot_weightings.stores,
+                    get_var(n, "Link", "p")[charger_i].T,
                 )
             )
-            .groupby(cgrouper, axis=1)
+            .T.groupby(cgrouper, axis=1)
             .apply(join_exprs)
         )
         .reindex(lhs_gen.index)
