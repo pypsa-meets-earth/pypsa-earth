@@ -308,3 +308,16 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+  
+  # # cutouts bundle of the cutouts folder for the entire globe [long +-180, lat +-89.9]
+  # # commented by default to avoid downloading by mistake: size about 170Gb
+  # bundle_cutouts_earth:
+  #   countries: [Earth]
+  #   category: cutouts
+  #   destination: "cutouts"
+  #   urls:
+  #     # zenodo:
+  #     gdrive: https://drive.google.com/file/d/1C9Q5qU_Wu_gj78H5G3TT2thGA-hKheVf/view?usp=drive_link
+  #   output: [cutouts/cutout-2013-era5.nc]
+  #   disable_by_opt:
+  #     build_cutout: [all]
