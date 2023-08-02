@@ -299,6 +299,10 @@ if __name__ == "__main__":
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
+    else:
+        # create an empty file
+        with open(filepath_osm2pm_ppl, "w"):
+            pass
 
     # specify the main query for filtering powerplants
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]
