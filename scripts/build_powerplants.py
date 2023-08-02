@@ -286,8 +286,16 @@ if __name__ == "__main__":
 
     config["target_countries"] = countries_names
 
-    if "EXTERNAL_DATABASE" in config:
-        csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
+    if (
+        "EXTERNAL_DATABASE"
+        in config["matching_sources"] + config["fully_included_sources"]
+    ):
+        if "EXTERNAL_DATABASE" not in config:
+            logger.error(
+                "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
+                "Please check file configs/powerplantmatching_config.yaml"
+            )
+        logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
