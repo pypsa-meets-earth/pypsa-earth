@@ -111,7 +111,7 @@ world_iso:
     ZM: "zambia"
     ZW: "zimbabwe"
     EH: "western-sahara"
-    
+
   Asia:
     AF: "afghanistan"
     AM: "armenia"
@@ -170,7 +170,7 @@ world_iso:
     UZ: "uzbekistan"
     VN: "vietnam"
     YE: "yemen"
-    
+
   Oceania:
     AS: "american-samoa"  # Island
     AU: "australia"
@@ -199,7 +199,7 @@ world_iso:
     # UM: "united-states-minor-outlying-islands"  # Islands
     VU: "vanuatu"  # Island
     # WF: "wallis-and-futuna"  # Island
-    
+
   Europe:
     # AX: "aland-islands"  # Island
     AL: "albania"
@@ -259,7 +259,7 @@ world_iso:
     GB: "great-britain"
     TR: "turkey"
     VA: "vatican"
-    
+
   NorthAmerica:
     # AI: "anguilla"  # Island
     AG: "antigua-and-barbuda"
@@ -303,7 +303,7 @@ world_iso:
     NI: "nicaragua"
     PA: "panama"
     SV: "el-salvador"
-    
+
   SouthAmerica:
     AR: "argentina"
     BO: "bolivia"
@@ -399,4 +399,3 @@ iso_to_geofk_dict:
   VC: "central-america"  # Saint Vincent e Grenadine
   KN: "central-america"  # Saint Kitts e Nevis
   GD: "central-america"  # Grenada
-
