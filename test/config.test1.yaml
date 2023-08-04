@@ -47,6 +47,8 @@ export:
   h2export: [120] # Yearly export demand in TWh
   store: true # [True, False] # specifies wether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store
+  export_profile: "ship" # use "ship" or "constant"
+
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
