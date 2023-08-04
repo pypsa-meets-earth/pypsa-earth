@@ -15,6 +15,7 @@ Possible improvements:
 import logging
 import os
 from pathlib import Path
+import numpy as np
 
 import geopandas as gpd
 import pandas as pd
@@ -56,7 +57,7 @@ def select_ports(n):
     return hydrogen_buses_ports
 
 
-def add_export(n, hydrogen_buses_ports, export_profile):
+def add_export(n, export_profile):
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
     # Find most northwestern point in country shape and get x and y coordinates
     country_shape = country_shape.to_crs("EPSG:4326")
@@ -127,30 +128,38 @@ def add_export(n, hydrogen_buses_ports, export_profile):
 
 
 def create_export_profile():
-    # get export demand
+    """This function creates the export profile based on the annual export demand and resamples it to temp resolution obtained from the wildcard"""
 
     export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
 
     if snakemake.config["export"]["export_profile"] == "constant":
         export_profile = export_h2 / 8760
+        snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
+        export_profile = pd.Series(export_profile, index=snapshots)
 
     elif snakemake.config["export"]["export_profile"] == "ship":
         # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
-        export_h2_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
-        if (export_h2_profile.sum() - export_h2).abs().values > 1:  # Threshold of 1 MWh
+        export_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
+        export_profile.index = pd.to_datetime(export_profile.index)
+        export_profile = pd.Series(
+            export_profile["profile"], index=pd.to_datetime(export_profile.index)
+        )
+
+        if np.abs(export_profile.sum() - export_h2) > 1:  # Threshold of 1 MWh
             logger.error(
-                f"Sum of ship profile ({export_h2_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
+                f"Sum of ship profile ({export_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
             )
             raise ValueError(
-                f"Sum of ship profile ({export_h2_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
+                f"Sum of ship profile ({export_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
             )
 
-        # TODO resample to n.snapshot_weightings
-        # export_profile
+    # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
+    sopts = snakemake.wildcards.sopts.split("-")
+    export_profile = export_profile.resample(sopts[0]).mean()
 
     # revise logger msg
     logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh resulting in an hourly average of {export_h2/8760:.2f} MWh"
+        f"The yearly export demand is {export_h2/1e6} TWh and resampled to {sopts[0]}"
     )
 
     return export_profile
@@ -197,7 +206,7 @@ if __name__ == "__main__":
     # hydrogen_buses_ports = select_ports(n)
 
     # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_profile)
+    add_export(n, export_profile)
 
     n.export_to_netcdf(snakemake.output[0])
 
