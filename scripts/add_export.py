@@ -15,9 +15,9 @@ Possible improvements:
 import logging
 import os
 from pathlib import Path
-import numpy as np
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pypsa
 from helpers import locate_bus, override_component_attrs, prepare_costs
