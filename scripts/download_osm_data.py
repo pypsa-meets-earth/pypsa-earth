@@ -31,8 +31,7 @@ import os
 import shutil
 from pathlib import Path
 
-from _helpers import configure_logging
-from config_osm_data import iso_to_geofk_dict
+from _helpers import configure_logging, iso_to_geofk_dict
 from earth_osm import eo
 
 logger = logging.getLogger(__name__)
@@ -57,6 +56,7 @@ def country_list_to_geofk(country_list):
     full_codes_list : list
         Example ["NG","ZA"]
     """
+
     full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
 
     return full_codes_list

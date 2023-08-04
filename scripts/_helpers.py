@@ -10,10 +10,16 @@ from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
-import numpy as np
 import pandas as pd
+import yaml
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
+with open("configs/osm_config.yaml", "r") as f:
+    osm_config = yaml.safe_load(f)
+world_iso = osm_config["world_iso"]
+continent_regions = osm_config["continent_regions"]
+iso_to_geofk_dict = osm_config["iso_to_geofk_dict"]
+osm_clean_columns = osm_config["osm_clean_columns"]
 
 
 def sets_path_to_root(root_directory_name):
@@ -449,7 +455,6 @@ def getContinent(code):
     getContinent(code)
     >>> ["africa", "europe"]
     """
-    from config_osm_data import world_iso
 
     continent_list = []
     code_set = set(code)
@@ -664,8 +669,6 @@ def create_country_list(input, iso_coding=True):
         Example ["NG","ZA"]
     """
     import logging
-
-    from config_osm_data import continent_regions, world_iso
 
     _logger = logging.getLogger(__name__)
     _logger.setLevel(logging.INFO)
