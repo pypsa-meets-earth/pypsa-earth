@@ -28,6 +28,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add NorthAmerican and Earth cutouts, and improve African cutout `PR #813 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/813>`__
 
+* Bug fixing to restore Africa execution and improve performances `PR #817 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/817>`__
+
 PyPSA-Earth 0.2.2
 =================
 
