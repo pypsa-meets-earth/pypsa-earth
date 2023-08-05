@@ -674,23 +674,20 @@ def attach_extendable_generators(n, costs, ppl):
             )
 
 
-def estimate_renewable_capacities_irena(n, config):
-    if not config["electricity"].get("estimate_renewable_capacities"):
-        return
-
-    stats = config["electricity"]["estimate_renewable_capacities"]["stats"]
+def estimate_renewable_capacities_irena(n, estimate_renewable_capacities_config, countries_config):
+    stats = estimate_renewable_capacities_config["stats"]
     if not stats:
         return
 
-    year = config["electricity"]["estimate_renewable_capacities"]["year"]
-    tech_map = config["electricity"]["estimate_renewable_capacities"][
+    year = estimate_renewable_capacities_config["year"]
+    tech_map = estimate_renewable_capacities_config[
         "technology_mapping"
     ]
     tech_keys = list(tech_map.keys())
-    countries = config["countries"]
+    countries = countries_config
 
-    p_nom_max = config["electricity"]["estimate_renewable_capacities"]["p_nom_max"]
-    p_nom_min = config["electricity"]["estimate_renewable_capacities"]["p_nom_min"]
+    p_nom_max = estimate_renewable_capacities_config["p_nom_max"]
+    p_nom_min = estimate_renewable_capacities_config["p_nom_min"]
 
     if len(countries) == 0:
         return
@@ -847,7 +844,12 @@ if __name__ == "__main__":
     )
     attach_hydro(n, costs, ppl)
 
-    estimate_renewable_capacities_irena(n, snakemake.config)
+    if snakemake.config["electricity"].get("estimate_renewable_capacities"):
+        estimate_renewable_capacities_irena(
+            n, 
+            snakemake.config["electricity"]["estimate_renewable_capacities"],
+            snakemake.config["countries"]
+        )
 
     update_p_nom_max(n)
     add_nice_carrier_names(n, snakemake.config)

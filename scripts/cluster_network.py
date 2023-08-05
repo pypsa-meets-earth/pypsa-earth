@@ -230,18 +230,16 @@ def get_feature_for_hac(n, buses_i=None, feature=None):
 
 
 def distribute_clusters(
-    inputs, config, n, n_clusters, focus_weights=None, solver_name=None
+    inputs, build_shape_options, country_list, distribution_cluster, n, n_clusters, focus_weights=None, solver_name=None
 ):
     """
     Determine the number of clusters per country.
     """
 
-    distribution_cluster = config["cluster_options"]["distribute_cluster"]
-    country_list = config["countries"]
-    year = config["build_shape_options"]["year"]
-    update = config["build_shape_options"]["update_file"]
-    out_logging = config["build_shape_options"]["out_logging"]
-    nprocesses = config["build_shape_options"]["nprocesses"]
+    year = build_shape_options["year"]
+    update = build_shape_options["update_file"]
+    out_logging = build_shape_options["out_logging"]
+    nprocesses = build_shape_options["nprocesses"]
 
     if solver_name is None:
         solver_name = config["solving"]["solver"]["name"]
@@ -406,7 +404,9 @@ def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
 
 def busmap_for_n_clusters(
     inputs,
-    config,
+    build_shape_options,
+    country_list,
+    distribution_cluster,
     n,
     n_clusters,
     solver_name,
@@ -474,7 +474,9 @@ def busmap_for_n_clusters(
     if n.buses.country.nunique() > 1:
         n_clusters = distribute_clusters(
             inputs,
-            config,
+            build_shape_options,
+            country_list,
+            distribution_cluster,
             n,
             n_clusters,
             focus_weights=focus_weights,
@@ -557,6 +559,8 @@ def clustering_for_n_clusters(
     gadm_layer_id,
     geo_crs,
     country_list,
+    distribution_cluster,
+    build_shape_options,
     custom_busmap=False,
     aggregate_carriers=None,
     line_length_factor=1.25,
@@ -579,7 +583,9 @@ def clustering_for_n_clusters(
         else:
             busmap = busmap_for_n_clusters(
                 inputs,
-                config,
+                build_shape_options,
+                country_list,
+                distribution_cluster,
                 n,
                 n_clusters,
                 solver_name,
@@ -657,10 +663,11 @@ if __name__ == "__main__":
 
     n = pypsa.Network(inputs.network)
 
-    focus_weights = snakemake.config.get("focus_weights", None)
-
     alternative_clustering = snakemake.config["cluster_options"][
         "alternative_clustering"
+    ]
+    distribution_cluster = snakemake.config["cluster_options"][
+        "distribute_cluster"
     ]
     gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
     focus_weights = snakemake.config.get("focus_weights", None)
@@ -745,6 +752,8 @@ if __name__ == "__main__":
             gadm_layer_id,
             geo_crs,
             country_list,
+            distribution_cluster,
+            snakemake.config["build_shape_options"],
             custom_busmap,
             aggregate_carriers,
             line_length_factor,

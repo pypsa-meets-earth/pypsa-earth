@@ -461,21 +461,17 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     return n, busmap
 
 
-def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
+def remove_stubs(n, costs, cluster_config, output, aggregation_strategies=dict()):
     logger.info("Removing stubs")
 
-    across_borders = config["cluster_options"]["simplify_network"].get(
-        "remove_stubs_across_borders", True
-    )
+    across_borders = cluster_config.get("remove_stubs_across_borders", True)
     matching_attrs = [] if across_borders else ["country"]
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
     connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
 
-    exclude_carriers = config["cluster_options"]["simplify_network"].get(
-        "exclude_carriers", []
-    )
+    exclude_carriers = cluster_config.get("exclude_carriers", [])
 
     _aggregate_and_move_components(
         n,
@@ -563,21 +559,28 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
 
 
 def cluster(
-    n, n_clusters, config, algorithm="hac", feature=None, aggregation_strategies=dict()
+    n, 
+    n_clusters,
+    alternative_clustering,
+    build_shape_options,
+    country_list,
+    distribution_cluster,
+    focus_weights,
+    gadm_layer_id,
+    geo_crs,
+    renewable_config,
+    solver_name,
+    algorithm="hac",
+    feature=None,
+    aggregation_strategies=dict()
 ):
     logger.info(f"Clustering to {n_clusters} buses")
-
-    focus_weights = config.get("focus_weights", None)
-    alternative_clustering = config["cluster_options"]["alternative_clustering"]
-    gadm_layer_id = config["build_shape_options"]["gadm_layer_id"]
-    geo_crs = config["crs"]["geo_crs"]
-    country_list = config["countries"]
 
     renewable_carriers = pd.Index(
         [
             tech
             for tech in n.generators.carrier.unique()
-            if tech.split("-", 2)[0] in config["renewable"]
+            if tech.split("-", 2)[0] in renewable_config
         ]
     )
 
@@ -591,7 +594,7 @@ def cluster(
     potential_mode = (
         consense(
             pd.Series(
-                [config["renewable"][tech]["potential"] for tech in renewable_carriers]
+                [renewable_config[tech]["potential"] for tech in renewable_carriers]
             )
         )
         if len(renewable_carriers) > 0
@@ -604,10 +607,12 @@ def cluster(
         gadm_layer_id,
         geo_crs,
         country_list,
+        distribution_cluster,
+        build_shape_options,
         custom_busmap=False,
         aggregation_strategies=aggregation_strategies,
         potential_mode=potential_mode,
-        solver_name=config["solving"]["solver"]["name"],
+        solver_name=solver_name,
         algorithm=algorithm,
         feature=feature,
         focus_weights=focus_weights,
@@ -818,7 +823,7 @@ if __name__ == "__main__":
         n, stub_map = remove_stubs(
             n,
             technology_costs,
-            snakemake.config,
+            cluster_config,
             snakemake.output,
             aggregation_strategies=aggregation_strategies,
         )
@@ -861,10 +866,29 @@ if __name__ == "__main__":
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
+
+        alternative_clustering = snakemake.config["cluster_options"]["alternative_clustering"]
+        build_shape_options = snakemake.config["build_shape_options"]
+        country_list = snakemake.config["countries"]
+        distribution_cluster = snakemake.config["cluster_options"]["distribute_cluster"]
+        focus_weights = snakemake.config.get("focus_weights", None)
+        gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+        geo_crs = snakemake.config["crs"]["geo_crs"]
+        renewable_config = snakemake.config["renewable"]
+        solver_name = snakemake.config["solving"]["solver"]["name"]
+
         n, cluster_map = cluster(
             n,
             int(snakemake.wildcards.simpl),
-            snakemake.config,
+            alternative_clustering,
+            build_shape_options,
+            country_list,
+            distribution_cluster,
+            focus_weights,
+            gadm_layer_id,
+            geo_crs,
+            renewable_config,
+            solver_name,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
             aggregation_strategies,
