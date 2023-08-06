@@ -272,8 +272,9 @@ databundles:
   #       agree: 1
   #   output: [data/gebco/GEBCO_2021_TID.nc]
 
-  # cutouts bundle of the cutouts folder for the African continent
-  bundle_cutouts_africa:
+  # cutouts bundle of the cutouts folder for the mainland African continent
+  # Note: some offshore countries e.g. CV or SC are not covered. Size: about 10GB (zipped)
+  bundle_cutouts_mainland_africa:
     countries: [Africa]
     category: cutouts
     destination: "cutouts"
@@ -283,3 +284,42 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+
+  # # cutouts bundle of the cutouts folder for the whole African continent,
+  # # including UN countries offshore mainland Africa. Size about 20GB (zipped)
+  # bundle_cutouts_whole_africa:
+  #   countries: [Africa]
+  #   category: cutouts
+  #   destination: "cutouts"
+  #   urls:
+  #     # zenodo:
+  #     gdrive: https://drive.google.com/file/d/1O_9vQ2SDluJ_LtFdRBeoo1Pz213n5HAN/view?usp=sharing
+  #   output: [cutouts/cutout-2013-era5.nc]
+  #   disable_by_opt:
+  #     build_cutout: [all]
+
+  # cutouts bundle of the cutouts folder for the North American continent
+  # Note: this includes nearly the entire north emisphere [long +-180, lat 1-85]. Size about 81GB (zipped)
+  bundle_cutouts_northamerica:
+    countries: [NorthAmerica, Europe]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # # cutouts bundle of the cutouts folder for the entire globe [long +-180, lat +-89.9]
+  # # commented by default to avoid downloading by mistake. Size about 170GB (zipped)
+  # bundle_cutouts_earth:
+  #   countries: [Earth]
+  #   category: cutouts
+  #   destination: "cutouts"
+  #   urls:
+  #     # zenodo:
+  #     gdrive: https://drive.google.com/file/d/1C9Q5qU_Wu_gj78H5G3TT2thGA-hKheVf/view?usp=drive_link
+  #   output: [cutouts/cutout-2013-era5.nc]
+  #   disable_by_opt:
+  #     build_cutout: [all]

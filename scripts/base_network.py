@@ -113,7 +113,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
 
 def _load_buses_from_osm(fp_buses, base_network_config, voltages_config):
     buses = (
-        read_csv_nafix(fp_buses)
+        read_csv_nafix(fp_buses, dtype=dict(bus_id="str", voltage="float"))
         .set_index("bus_id")
         .drop(["station_id"], axis=1)
         .rename(columns=dict(voltage="v_nom"))
@@ -196,6 +196,8 @@ def _load_lines_from_osm(fp_osm_lines, base_network_config, voltages_config, bus
                 bus1="str",
                 underground="bool",
                 under_construction="bool",
+                voltage="float",
+                circuits="float",
             ),
         )
         .set_index("line_id")
