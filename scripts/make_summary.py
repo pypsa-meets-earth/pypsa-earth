@@ -502,7 +502,7 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
         Nyears = n.snapshot_weightings.objective.sum() / 8760.0
         costs = load_costs(
             inputs.tech_costs,
-            cost_config, 
+            cost_config,
             elec_config,
             Nyears,
         )

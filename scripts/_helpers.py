@@ -152,7 +152,9 @@ def pdbcast(v, h):
     )
 
 
-def load_network_for_plots(fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True):
+def load_network_for_plots(
+    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
 

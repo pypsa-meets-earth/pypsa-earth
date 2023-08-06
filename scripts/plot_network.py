@@ -386,10 +386,10 @@ if __name__ == "__main__":
         map_boundaries = africa_shape.boundary.bounds
 
     n = load_network_for_plots(
-        snakemake.input.network, 
-        snakemake.input.tech_costs, 
+        snakemake.input.network,
+        snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.electricity
+        snakemake.params.electricity,
     )
 
     scenario_opts = snakemake.wildcards.opts.split("-")

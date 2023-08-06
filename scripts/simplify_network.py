@@ -185,10 +185,18 @@ def _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_
 
 
 def _compute_connection_costs_to_bus(
-    n, busmap, costs, renewable_config, lines_length_factor, connection_costs_per_link=None, buses=None
+    n,
+    busmap,
+    costs,
+    renewable_config,
+    lines_length_factor,
+    connection_costs_per_link=None,
+    buses=None,
 ):
     if connection_costs_per_link is None:
-        connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_factor)
+        connection_costs_per_link = _prepare_connection_costs_per_link(
+            n, costs, renewable_config, lines_length_factor
+        )
 
     if buses is None:
         buses = busmap.index[busmap.index != busmap.values]
@@ -291,7 +299,14 @@ def contains_ac(ls):
     return any(list(map(lambda x: is_ac_branch(x), ls)))
 
 
-def simplify_links(n, costs, renewable_config, lines_length_factor, output, aggregation_strategies=dict()):
+def simplify_links(
+    n,
+    costs,
+    renewable_config,
+    lines_length_factor,
+    output,
+    aggregation_strategies=dict(),
+):
     ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
@@ -361,7 +376,9 @@ def simplify_links(n, costs, renewable_config, lines_length_factor, output, aggr
 
     busmap = n.buses.index.to_series()
 
-    connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_factor)
+    connection_costs_per_link = _prepare_connection_costs_per_link(
+        n, costs, renewable_config, lines_length_factor
+    )
     connection_costs_to_bus = pd.DataFrame(
         0.0, index=n.buses.index, columns=list(connection_costs_per_link)
     )
@@ -379,7 +396,13 @@ def simplify_links(n, costs, renewable_config, lines_length_factor, output, aggr
             )
             busmap.loc[buses] = b[np.r_[0, m.argmin(axis=0), 1]]
             connection_costs_to_bus.loc[buses] += _compute_connection_costs_to_bus(
-                n, busmap, costs, renewable_config, lines_length_factor, connection_costs_per_link, buses
+                n,
+                busmap,
+                costs,
+                renewable_config,
+                lines_length_factor,
+                connection_costs_per_link,
+                buses,
             )
 
             # TODO revise a variable name for `dc_edges` variable
@@ -461,7 +484,15 @@ def simplify_links(n, costs, renewable_config, lines_length_factor, output, aggr
     return n, busmap
 
 
-def remove_stubs(n, costs, cluster_config, renewable_config, lines_length_factor, output, aggregation_strategies=dict()):
+def remove_stubs(
+    n,
+    costs,
+    cluster_config,
+    renewable_config,
+    lines_length_factor,
+    output,
+    aggregation_strategies=dict(),
+):
     logger.info("Removing stubs")
 
     across_borders = cluster_config.get("remove_stubs_across_borders", True)
@@ -469,7 +500,13 @@ def remove_stubs(n, costs, cluster_config, renewable_config, lines_length_factor
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
-    connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, renewable_config, lines_length_factor,)
+    connection_costs_to_bus = _compute_connection_costs_to_bus(
+        n,
+        busmap,
+        costs,
+        renewable_config,
+        lines_length_factor,
+    )
 
     exclude_carriers = cluster_config.get("exclude_carriers", [])
 
@@ -559,7 +596,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
 
 
 def cluster(
-    n, 
+    n,
     n_clusters,
     alternative_clustering,
     build_shape_options,
@@ -572,7 +609,7 @@ def cluster(
     solver_name,
     algorithm="hac",
     feature=None,
-    aggregation_strategies=dict()
+    aggregation_strategies=dict(),
 ):
     logger.info(f"Clustering to {n_clusters} buses")
 
@@ -793,7 +830,9 @@ if __name__ == "__main__":
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetype = snakemake.params.lines_types[base_voltage]
 
-    aggregation_strategies = snakemake.params.cluster_options.get("aggregation_strategies", {})
+    aggregation_strategies = snakemake.params.cluster_options.get(
+        "aggregation_strategies", {}
+    )
     # translate str entries of aggregation_strategies to pd.Series functions:
     aggregation_strategies = {
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
@@ -812,11 +851,11 @@ if __name__ == "__main__":
 
     n, simplify_links_map = simplify_links(
         n,
-        technology_costs, 
+        technology_costs,
         snakemake.params.renewable,
         snakemake.params.lines_length_factor,
-        snakemake.output, 
-        aggregation_strategies
+        snakemake.output,
+        aggregation_strategies,
     )
 
     busmaps = [trafo_map, simplify_links_map]
@@ -873,8 +912,9 @@ if __name__ == "__main__":
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
-
-        alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
+        alternative_clustering = snakemake.params.cluster_options[
+            "alternative_clustering"
+        ]
         build_shape_options = snakemake.params.build_shape_options
         country_list = snakemake.params.countries
         distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]

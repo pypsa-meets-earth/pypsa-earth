@@ -133,9 +133,7 @@ def _load_buses_from_osm(fp_buses, base_network_config, voltages_config):
 
     logger.info(
         "Removing buses with voltages {}".format(
-            pd.Index(buses.v_nom.unique())
-            .dropna()
-            .difference(voltages_config)
+            pd.Index(buses.v_nom.unique()).dropna().difference(voltages_config)
         )
     )
 
@@ -207,7 +205,9 @@ def _load_lines_from_osm(fp_osm_lines, base_network_config, voltages_config, bus
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
     lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
-    lines = _rebase_voltage_to_config(base_network_config, voltages_config, lines)  # rebase voltage to config inputs
+    lines = _rebase_voltage_to_config(
+        base_network_config, voltages_config, lines
+    )  # rebase voltage to config inputs
     # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
     return lines
@@ -238,7 +238,9 @@ def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config
     links["length"] /= 1e3  # m to km conversion
     links["v_nom"] /= 1e3  # V to kV conversion
     links = links.loc[:, ~links.columns.str.contains("^Unnamed")]  # remove unnamed col
-    links = _rebase_voltage_to_config(base_network_config, voltages_config, links)  # rebase voltage to config inputs
+    links = _rebase_voltage_to_config(
+        base_network_config, voltages_config, links
+    )  # rebase voltage to config inputs
     # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
 
     return links
@@ -383,8 +385,7 @@ def _set_countries_and_substations(inputs, base_network_config, countries_config
 
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
-        buses["v_nom"]
-        >= base_network_config["min_voltage_substation_offshore"] / 1000
+        buses["v_nom"] >= base_network_config["min_voltage_substation_offshore"] / 1000
     )
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
@@ -468,7 +469,7 @@ def _rebase_voltage_to_config(base_network_config, voltages_config, component):
 
 
 def base_network(
-    inputs, 
+    inputs,
     base_network_config,
     countries_config,
     hvdc_as_lines_config,
@@ -476,11 +477,14 @@ def base_network(
     links_config,
     snapshots_config,
     transformers_config,
-    voltages_config
+    voltages_config,
 ):
-
-    buses = _load_buses_from_osm(inputs.osm_buses, base_network_config, voltages_config).reset_index()
-    lines = _load_lines_from_osm(inputs.osm_lines, base_network_config, voltages_config, buses)
+    buses = _load_buses_from_osm(
+        inputs.osm_buses, base_network_config, voltages_config
+    ).reset_index()
+    lines = _load_lines_from_osm(
+        inputs.osm_lines, base_network_config, voltages_config, buses
+    )
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
@@ -488,9 +492,13 @@ def base_network(
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
     lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
-    lines_dc = _set_electrical_parameters_dc_lines(lines_config, voltages_config, lines_dc)
+    lines_dc = _set_electrical_parameters_dc_lines(
+        lines_config, voltages_config, lines_dc
+    )
 
-    transformers = _set_electrical_parameters_transformers(transformers_config, transformers)
+    transformers = _set_electrical_parameters_transformers(
+        transformers_config, transformers
+    )
     converters = _set_electrical_parameters_converters(links_config, converters)
 
     n = pypsa.Network()
@@ -564,7 +572,7 @@ if __name__ == "__main__":
     voltages = snakemake.params.voltages
 
     n = base_network(
-        inputs, 
+        inputs,
         base_network_config,
         countries,
         hvdc_as_lines,
@@ -572,7 +580,7 @@ if __name__ == "__main__":
         links,
         snapshots,
         transformers,
-        voltages
+        voltages,
     )
 
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))

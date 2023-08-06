@@ -1005,7 +1005,9 @@ if __name__ == "__main__":
     threshold_voltage = snakemake.params.clean_osm_data_options["threshold_voltage"]
     names_by_shapes = snakemake.params.clean_osm_data_options["names_by_shapes"]
     add_line_endings = snakemake.params.clean_osm_data_options["add_line_endings"]
-    generator_name_method = snakemake.params.clean_osm_data_options.get("generator_name_method", "OSM")
+    generator_name_method = snakemake.params.clean_osm_data_options.get(
+        "generator_name_method", "OSM"
+    )
     offshore_shape_path = snakemake.input.offshore_shapes
     onshore_shape_path = snakemake.input.country_shapes
     geo_crs = snakemake.params.crs["geo_crs"]

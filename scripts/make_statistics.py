@@ -384,15 +384,13 @@ def collect_only_computational(rulename):
     return df
 
 
-def collect_snakemake_stats(name, dict_dfs, renewable_config, renewable_carriers_config):
+def collect_snakemake_stats(
+    name, dict_dfs, renewable_config, renewable_carriers_config
+):
     """
     Collect statistics on what rules have been successful.
     """
-    ren_techs = [
-        tech
-        for tech in renewable_config
-        if tech in renewable_carriers_config
-    ]
+    ren_techs = [tech for tech in renewable_config if tech in renewable_carriers_config]
 
     list_rules = [
         "download_osm_data",
@@ -521,7 +519,13 @@ def add_computational_stats(df, snakemake, column_name=None):
     return df
 
 
-def calculate_stats(scenario_config, renewable_config, renewable_carriers_config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
+def calculate_stats(
+    scenario_config,
+    renewable_config,
+    renewable_carriers_config,
+    metric_crs="EPSG:3857",
+    area_crs="ESRI:54009",
+):
     "Function to collect all statistics"
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
@@ -596,6 +600,12 @@ if __name__ == "__main__":
     name_index = scenario_name if not scenario_name else "-".join(config["countries"])
 
     # create statistics
-    stats = calculate_stats(scenario, renewable, renewable_carriers, metric_crs=metric_crs, area_crs=area_crs)
+    stats = calculate_stats(
+        scenario,
+        renewable,
+        renewable_carriers,
+        metric_crs=metric_crs,
+        area_crs=area_crs,
+    )
     stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([name_index]))
     to_csv_nafix(stats, fp_stats)

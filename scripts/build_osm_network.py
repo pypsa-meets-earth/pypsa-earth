@@ -803,7 +803,15 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
     return buses
 
 
-def built_network(inputs, outputs, build_osm_network_config, countries_config, geo_crs, distance_crs, force_ac=False):
+def built_network(
+    inputs,
+    outputs,
+    build_osm_network_config,
+    countries_config,
+    geo_crs,
+    distance_crs,
+    force_ac=False,
+):
     logger.info("Stage 1/5: Read input data")
 
     buses = read_geojson(
@@ -838,9 +846,7 @@ def built_network(inputs, outputs, build_osm_network_config, countries_config, g
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
     # Add bus to countries with no buses
-    buses = add_buses_to_empty_countries(
-        countries_config, inputs.country_shapes, buses
-    )
+    buses = add_buses_to_empty_countries(countries_config, inputs.country_shapes, buses)
 
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
     if build_osm_network_config.get("group_close_buses", False):

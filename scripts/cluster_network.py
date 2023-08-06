@@ -230,7 +230,14 @@ def get_feature_for_hac(n, buses_i=None, feature=None):
 
 
 def distribute_clusters(
-    inputs, build_shape_options, country_list, distribution_cluster, n, n_clusters, focus_weights=None, solver_name=None
+    inputs,
+    build_shape_options,
+    country_list,
+    distribution_cluster,
+    n,
+    n_clusters,
+    focus_weights=None,
+    solver_name=None,
 ):
     """
     Determine the number of clusters per country.
@@ -684,9 +691,7 @@ if __name__ == "__main__":
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
-        aggregate_carriers = snakemake.params.electricity.get(
-            "conventional_carriers"
-        )
+        aggregate_carriers = snakemake.params.electricity.get("conventional_carriers")
     elif snakemake.wildcards.clusters == "all":
         n_clusters = len(n.buses)
     else:
@@ -721,13 +726,15 @@ if __name__ == "__main__":
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
 
-        aggregation_strategies = snakemake.params.cluster_options.get("aggregation_strategies", {})
+        aggregation_strategies = snakemake.params.cluster_options.get(
+            "aggregation_strategies", {}
+        )
         # translate str entries of aggregation_strategies to pd.Series functions:
         aggregation_strategies = {
             p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
             for p in aggregation_strategies.keys()
         }
-        custom_busmap = False #snakemake.params.custom_busmap custom busmap is depreciated https://github.com/pypsa-meets-earth/pypsa-earth/pull/694
+        custom_busmap = False  # snakemake.params.custom_busmap custom busmap is depreciated https://github.com/pypsa-meets-earth/pypsa-earth/pull/694
         if custom_busmap:
             busmap = pd.read_csv(
                 snakemake.input.custom_busmap, index_col=0, squeeze=True

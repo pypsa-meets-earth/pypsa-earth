@@ -674,15 +674,15 @@ def attach_extendable_generators(n, costs, ppl):
             )
 
 
-def estimate_renewable_capacities_irena(n, estimate_renewable_capacities_config, countries_config):
+def estimate_renewable_capacities_irena(
+    n, estimate_renewable_capacities_config, countries_config
+):
     stats = estimate_renewable_capacities_config["stats"]
     if not stats:
         return
 
     year = estimate_renewable_capacities_config["year"]
-    tech_map = estimate_renewable_capacities_config[
-        "technology_mapping"
-    ]
+    tech_map = estimate_renewable_capacities_config["technology_mapping"]
     tech_keys = list(tech_map.keys())
     countries = countries_config
 
@@ -846,9 +846,9 @@ if __name__ == "__main__":
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
-            n, 
+            n,
             snakemake.params.electricity["estimate_renewable_capacities"],
-            snakemake.params.countries
+            snakemake.params.countries,
         )
 
     update_p_nom_max(n)
