@@ -638,7 +638,7 @@ if __name__ == "__main__":
     )
 
     # load enable configuration
-    config_enable = snakemake.params.enable
+    config_enable = snakemake.config["enable"]
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
 
