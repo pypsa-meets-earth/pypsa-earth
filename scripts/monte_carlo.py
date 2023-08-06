@@ -175,7 +175,7 @@ if __name__ == "__main__":
             unc="m0",
         )
     configure_logging(snakemake)
-    monte_carlo_config = snakemake.config["monte_carlo"]
+    monte_carlo_config = snakemake.params.monte_carlo
 
     ### SCENARIO INPUTS
     ###

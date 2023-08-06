@@ -333,7 +333,7 @@ def attach_wind_and_solar(
                 # TODO: Uncomment out and debug.
                 # underwater_fraction = ds["underwater_fraction"].to_pandas()
                 # connection_cost = (
-                #     snakemake.config["lines"]["length_factor"] *
+                #     snakemake.params.lines"]["length_factor"] *
                 #     ds["average_distance"].to_pandas() *
                 #     (underwater_fraction *
                 #      costs.at[tech + "-connection-submarine", "capital_cost"] +
@@ -444,9 +444,9 @@ def attach_conventional_generators(
 
 
 def attach_hydro(n, costs, ppl):
-    if "hydro" not in snakemake.config["renewable"]:
+    if "hydro" not in snakemake.params.renewable:
         return
-    c = snakemake.config["renewable"]["hydro"]
+    c = snakemake.params.renewable["hydro"]
     carriers = c.get("carriers", ["ror", "PHS", "hydro"])
 
     _add_missing_carriers_from_costs(n, costs, carriers)
@@ -464,7 +464,7 @@ def attach_hydro(n, costs, ppl):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
-    if snakemake.config["cluster_options"]["alternative_clustering"]:
+    if snakemake.params.alternative_clustering:
         bus_id = ppl["region_id"]
     else:
         bus_id = ppl["bus"]
@@ -605,7 +605,7 @@ def attach_hydro(n, costs, ppl):
 
 def attach_extendable_generators(n, costs, ppl):
     logger.warning("The function is deprecated with the next release")
-    elec_opts = snakemake.config["electricity"]
+    elec_opts = snakemake.params.electricity
     carriers = pd.Index(elec_opts["extendable_carriers"]["Generator"])
 
     _add_missing_carriers_from_costs(n, costs, carriers)
@@ -794,22 +794,22 @@ if __name__ == "__main__":
 
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         Nyears,
     )
     ppl = load_powerplants(snakemake.input.powerplants)
-    if "renewable_carriers" in snakemake.config["electricity"]:
-        renewable_carriers = set(snakemake.config["electricity"]["renewable_carriers"])
+    if "renewable_carriers" in snakemake.params.electricity:
+        renewable_carriers = set(snakemake.params.electricity["renewable_carriers"])
     else:
         logger.warning(
             "Missing key `renewable_carriers` under config entry `electricity`. "
             "In future versions, this will raise an error. "
             "Falling back to carriers listed under `renewable`."
         )
-        renewable_carriers = set(snakemake.config["renewable"])
+        renewable_carriers = set(snakemake.params.renewable)
 
-    extendable_carriers = snakemake.config["electricity"]["extendable_carriers"]
+    extendable_carriers = snakemake.params.electricity["extendable_carriers"]
     if not (set(renewable_carriers) & set(extendable_carriers["Generator"])):
         logger.warning(
             "No renewables found in config entry `extendable_carriers`. "
@@ -817,9 +817,9 @@ if __name__ == "__main__":
             "Falling back to all renewables."
         )
 
-    conventional_carriers = snakemake.config["electricity"]["conventional_carriers"]
+    conventional_carriers = snakemake.params.electricity["conventional_carriers"]
     attach_load(n, demand_profiles)
-    update_transmission_costs(n, costs, snakemake.config["lines"]["length_factor"])
+    update_transmission_costs(n, costs, snakemake.params.length_factor)
     conventional_inputs = {
         k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
     }
@@ -830,7 +830,7 @@ if __name__ == "__main__":
         conventional_carriers,
         extendable_carriers,
         renewable_carriers,
-        snakemake.config.get("conventional", {}),
+        snakemake.params.conventional,
         conventional_inputs,
     )
     attach_wind_and_solar(
@@ -840,15 +840,15 @@ if __name__ == "__main__":
         snakemake.input,
         renewable_carriers,
         extendable_carriers,
-        snakemake.config["lines"]["length_factor"],
+        snakemake.params.length_factor,
     )
     attach_hydro(n, costs, ppl)
 
-    if snakemake.config["electricity"].get("estimate_renewable_capacities"):
+    if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
             n, 
-            snakemake.config["electricity"]["estimate_renewable_capacities"],
-            snakemake.config["countries"]
+            snakemake.params.electricity["estimate_renewable_capacities"],
+            snakemake.params.countries
         )
 
     update_p_nom_max(n)

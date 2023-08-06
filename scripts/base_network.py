@@ -554,14 +554,14 @@ if __name__ == "__main__":
     inputs = snakemake.input
 
     # Snakemake imports:
-    base_network_config = snakemake.config["base_network"]
-    countries = snakemake.config["countries"]
-    hvdc_as_lines = snakemake.config["electricity"]["hvdc_as_lines"]
-    lines = snakemake.config["lines"]
-    links = snakemake.config["links"]
-    snapshots = snakemake.config["snapshots"]
-    transformers = snakemake.config["transformers"]
-    voltages = snakemake.config["electricity"]["voltages"]
+    base_network_config = snakemake.params.base_network
+    countries = snakemake.params.countries
+    hvdc_as_lines = snakemake.params.hvdc_as_lines
+    lines = snakemake.params.lines
+    links = snakemake.params.links
+    snapshots = snakemake.params.snapshots
+    transformers = snakemake.params.transformers
+    voltages = snakemake.params.voltages
 
     n = base_network(
         inputs, 

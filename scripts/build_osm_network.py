@@ -890,11 +890,11 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # load default crs
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    distance_crs = snakemake.config["crs"]["distance_crs"]
-    force_ac = snakemake.config["build_osm_network"].get("force_ac", False)
-    build_osm_network = snakemake.config.get("build_osm_network", {})
-    countries = snakemake.config["countries"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
+    force_ac = snakemake.params.build_osm_network.get("force_ac", False)
+    build_osm_network = snakemake.params.build_osm_network
+    countries = snakemake.params.countries
 
     sets_path_to_root("pypsa-earth")
 

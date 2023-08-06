@@ -155,7 +155,7 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     return n, trafo_map
 
 
-def _prepare_connection_costs_per_link(n, costs, config):
+def _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_factor):
     if n.links.empty:
         return {}
 
@@ -168,11 +168,11 @@ def _prepare_connection_costs_per_link(n, costs, config):
         dc_lengths = n.lines.length
         unterwater_fractions = n.lines.underwater_fraction
 
-    for tech in config["renewable"]:
+    for tech in renewable_config:
         if tech.startswith("offwind"):
             connection_costs_per_link[tech] = (
                 dc_lengths
-                * config["lines"]["length_factor"]
+                * lines_length_factor
                 * (
                     unterwater_fractions
                     * costs.at[tech + "-connection-submarine", "capital_cost"]
@@ -185,10 +185,10 @@ def _prepare_connection_costs_per_link(n, costs, config):
 
 
 def _compute_connection_costs_to_bus(
-    n, busmap, costs, config, connection_costs_per_link=None, buses=None
+    n, busmap, costs, renewable_config, lines_length_factor, connection_costs_per_link=None, buses=None
 ):
     if connection_costs_per_link is None:
-        connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, config)
+        connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_factor)
 
     if buses is None:
         buses = busmap.index[busmap.index != busmap.values]
@@ -291,7 +291,7 @@ def contains_ac(ls):
     return any(list(map(lambda x: is_ac_branch(x), ls)))
 
 
-def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
+def simplify_links(n, costs, renewable_config, lines_length_factor, output, aggregation_strategies=dict()):
     ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
@@ -361,7 +361,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     busmap = n.buses.index.to_series()
 
-    connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, config)
+    connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_factor)
     connection_costs_to_bus = pd.DataFrame(
         0.0, index=n.buses.index, columns=list(connection_costs_per_link)
     )
@@ -379,7 +379,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             )
             busmap.loc[buses] = b[np.r_[0, m.argmin(axis=0), 1]]
             connection_costs_to_bus.loc[buses] += _compute_connection_costs_to_bus(
-                n, busmap, costs, config, connection_costs_per_link, buses
+                n, busmap, costs, renewable_config, lines_length_factor, connection_costs_per_link, buses
             )
 
             # TODO revise a variable name for `dc_edges` variable
@@ -461,7 +461,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     return n, busmap
 
 
-def remove_stubs(n, costs, cluster_config, output, aggregation_strategies=dict()):
+def remove_stubs(n, costs, cluster_config, renewable_config, lines_length_factor, output, aggregation_strategies=dict()):
     logger.info("Removing stubs")
 
     across_borders = cluster_config.get("remove_stubs_across_borders", True)
@@ -469,7 +469,7 @@ def remove_stubs(n, costs, cluster_config, output, aggregation_strategies=dict()
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
-    connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
+    connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, renewable_config, lines_length_factor,)
 
     exclude_carriers = cluster_config.get("exclude_carriers", [])
 
@@ -790,12 +790,10 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    base_voltage = snakemake.config["electricity"]["base_voltage"]
-    linetype = snakemake.config["lines"]["types"][base_voltage]
+    base_voltage = snakemake.params.electricity["base_voltage"]
+    linetype = snakemake.params.lines_types[base_voltage]
 
-    aggregation_strategies = snakemake.config["cluster_options"].get(
-        "aggregation_strategies", {}
-    )
+    aggregation_strategies = snakemake.params.cluster_options.get("aggregation_strategies", {})
     # translate str entries of aggregation_strategies to pd.Series functions:
     aggregation_strategies = {
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
@@ -807,23 +805,32 @@ if __name__ == "__main__":
 
     technology_costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         Nyears,
     )
 
     n, simplify_links_map = simplify_links(
-        n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
+        n,
+        technology_costs, 
+        snakemake.params.renewable,
+        snakemake.params.lines_length_factor,
+        snakemake.output, 
+        aggregation_strategies
     )
 
     busmaps = [trafo_map, simplify_links_map]
 
-    cluster_config = snakemake.config["cluster_options"]["simplify_network"]
+    cluster_config = snakemake.params.cluster_options["simplify_network"]
+    renewable_config = snakemake.params.renewable
+    lines_length_factor = snakemake.params.lines_length_factor
     if cluster_config.get("remove_stubs", True):
         n, stub_map = remove_stubs(
             n,
             technology_costs,
             cluster_config,
+            renewable_config,
+            lines_length_factor,
             snakemake.output,
             aggregation_strategies=aggregation_strategies,
         )
@@ -867,14 +874,14 @@ if __name__ == "__main__":
 
     if snakemake.wildcards.simpl:
 
-        alternative_clustering = snakemake.config["cluster_options"]["alternative_clustering"]
-        build_shape_options = snakemake.config["build_shape_options"]
-        country_list = snakemake.config["countries"]
-        distribution_cluster = snakemake.config["cluster_options"]["distribute_cluster"]
-        focus_weights = snakemake.config.get("focus_weights", None)
-        gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-        geo_crs = snakemake.config["crs"]["geo_crs"]
-        renewable_config = snakemake.config["renewable"]
+        alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
+        build_shape_options = snakemake.params.build_shape_options
+        country_list = snakemake.params.countries
+        distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+        focus_weights = snakemake.params.focus_weights
+        gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
+        geo_crs = snakemake.params.geo_crs
+        renewable_config = snakemake.params.renewable
         solver_name = snakemake.config["solving"]["solver"]["name"]
 
         n, cluster_map = cluster(

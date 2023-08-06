@@ -103,7 +103,7 @@ if __name__ == "__main__":
     RDIR = run["name"] + "/" if run.get("name") else ""
     store_path_resources = Path.joinpath(Path().cwd(), "resources", RDIR, "osm", "raw")
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
-    country_list = country_list_to_geofk(snakemake.config["countries"])
+    country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.get_osm_data(
         primary_name="power",

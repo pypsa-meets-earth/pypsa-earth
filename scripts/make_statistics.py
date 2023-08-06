@@ -583,15 +583,15 @@ if __name__ == "__main__":
     sets_path_to_root("pypsa-earth")
 
     fp_stats = snakemake.output["stats"]
-    scenario = snakemake.config["scenario"]
+    scenario = snakemake.params.scenario
     scenario_name = snakemake.config["run"]["name"]
 
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    metric_crs = snakemake.config["crs"]["distance_crs"]
-    area_crs = snakemake.config["crs"]["area_crs"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    metric_crs = snakemake.params.crs["distance_crs"]
+    area_crs = snakemake.params.crs["area_crs"]
 
-    renewable = snakemake.config["renewable"]
-    renewable_carriers = snakemake.config["electricity"]["renewable_carriers"]
+    renewable = snakemake.params.renewable
+    renewable_carriers = snakemake.params.renewable_carriers
 
     name_index = scenario_name if not scenario_name else "-".join(config["countries"])
 

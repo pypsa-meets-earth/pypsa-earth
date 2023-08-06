@@ -145,6 +145,10 @@ rule plot_all_summaries:
 if config["enable"].get("retrieve_databundle", True):
 
     rule retrieve_databundle_light:
+        params:
+            #enable=config["enable"], a slight change will cause this to rerun
+            countries=config["countries"],
+            tutorial=config["tutorial"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand("{file}", file=datafiles_retrivedatabundle(config)),
             directory("data/landcover"),
@@ -159,6 +163,8 @@ if config["enable"].get("retrieve_databundle", True):
 if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
+        params:
+            countries=config["countries"],
         output:
             cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
             generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
@@ -174,6 +180,9 @@ if config["enable"].get("download_osm_data", True):
 
 
 rule clean_osm_data:
+    params:
+        crs=config["crs"],
+        clean_osm_data_options=config["clean_osm_data_options"],
     input:
         cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
@@ -196,6 +205,10 @@ rule clean_osm_data:
 
 
 rule build_osm_network:
+    params:
+        build_osm_network=config.get("build_osm_network", {}),
+        countries=config["countries"],
+        crs=config["crs"],
     input:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
@@ -217,6 +230,10 @@ rule build_osm_network:
 
 
 rule build_shapes:
+    params:
+        build_shape_options=config["build_shape_options"],
+        crs=config["crs"],
+        countries=config["countries"],
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
@@ -241,6 +258,15 @@ rule build_shapes:
 
 
 rule base_network:
+    params:
+        voltages=config["electricity"]["voltages"],
+        transformers=config["transformers"],
+        snapshots=config["snapshots"],
+        links=config["links"],
+        lines=config["lines"],
+        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+        countries=config["countries"],
+        base_network=config["base_network"],
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
@@ -266,6 +292,10 @@ rule base_network:
 
 
 rule build_bus_regions:
+    params:
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        area_crs=config["crs"]["area_crs"],
+        countries=config["countries"],
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
@@ -292,6 +322,9 @@ rule build_bus_regions:
 if config["enable"].get("build_cutout", False):
 
     rule build_cutout:
+        params:
+            snapshots=config["snapshots"],
+            cutouts=config["atlite"]["cutouts"],
         input:
             onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
             offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
@@ -311,6 +344,8 @@ if config["enable"].get("build_cutout", False):
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
+        params:
+            area_crs=config["crs"]["area_crs"],
         input:
             shapefiles_land="data/landcover",
             cutouts=expand("cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"]),
@@ -356,6 +391,10 @@ if config["enable"].get("retrieve_cost_data", True):
 
 
 rule build_demand_profiles:
+    params:
+        snapshots=config["snapshots"],
+        scale=config["load_options"]["scale"],
+        countries=config["countries"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
@@ -379,6 +418,12 @@ rule build_demand_profiles:
 
 
 rule build_renewable_profiles:
+    params:
+        crs=config["crs"],
+        atlite=config["atlite"],
+        renewable=config["renewable"],
+        countries=config["countries"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
         natura="resources/" + RDIR + "natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
@@ -411,6 +456,12 @@ rule build_renewable_profiles:
 
 
 rule build_powerplants:
+    params:
+        geo_crs=config["crs"]["geo_crs"],
+        countries=config["countries"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        powerplants_filter=config["electricity"]["powerplants_filter"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
@@ -436,6 +487,14 @@ rule build_powerplants:
 
 
 rule add_electricity:
+    params:
+        countries=config["countries"],
+        costs=config["costs"],
+        conventional=config.get("conventional", {}),
+        electricity=config["electricity"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        renewable=config["renewable"],
+        length_factor=config["lines"]["length_factor"],
     input:
         **{
             f"profile_{tech}": "resources/"
@@ -474,6 +533,17 @@ rule add_electricity:
 
 
 rule simplify_network:
+    params:
+        renewable=config["renewable"],
+        geo_crs=config["crs"]["geo_crs"],
+        cluster_options=config["cluster_options"],
+        countries=config["countries"],
+        build_shape_options=config["build_shape_options"],
+        electricity=config["electricity"],
+        costs=config["costs"],
+        lines_types=config["lines"]["types"],
+        lines_length_factor=config["lines"]["length_factor"],
+        focus_weights=config.get("focus_weights", None),
     input:
         network="networks/" + RDIR + "elec.nc",
         tech_costs=COSTS,
@@ -505,6 +575,17 @@ rule simplify_network:
 if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
 
     rule cluster_network:
+        params:
+            build_shape_options=config["build_shape_options"],
+            electricity=config["electricity"],
+            costs=config["costs"],
+            length_factor=config["lines"]["length_factor"],
+            renewable=config["renewable"],
+            geo_crs=config["crs"]["geo_crs"],
+            countries=config["countries"],
+            cluster_options=config["cluster_options"],
+            focus_weights=config.get("focus_weights", None),
+            #custom_busmap=config["enable"].get("custom_busmap", False)
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -548,6 +629,12 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             "scripts/cluster_network.py"
 
     rule augmented_line_connections:
+        params:
+            lines=config["lines"],
+            augmented_line_connection=config["augmented_line_connection"],
+            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+            electricity=config["electricity"],
+            costs=config["costs"],
         input:
             tech_costs=COSTS,
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
@@ -573,6 +660,16 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
 if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 
     rule cluster_network:
+        params:
+            build_shape_options=config["build_shape_options"],
+            electricity=config["electricity"],
+            costs=config["costs"],
+            length_factor=config["lines"]["length_factor"],
+            renewable=config["renewable"],
+            geo_crs=config["crs"]["geo_crs"],
+            countries=config["countries"],
+            gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+            cluster_options=config["cluster_options"],
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -634,6 +731,12 @@ rule add_extra_components:
 
 
 rule prepare_network:
+    params:
+        links=config["links"],
+        lines=config["lines"],
+        s_max_pu=config["lines"]["s_max_pu"],
+        electricity=config["electricity"],
+        costs=config["costs"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs=COSTS,
@@ -675,6 +778,9 @@ def memory(w):
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 
     rule solve_network:
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
@@ -706,6 +812,8 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
 
     rule monte_carlo:
+        params:
+            monte_carlo=config["monte_carlo"],
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
@@ -736,6 +844,9 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             ),
 
     rule solve_network:
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         output:
@@ -797,6 +908,11 @@ def input_make_summary(w):
 
 
 rule make_summary:
+    params:
+        electricity=config["electricity"],
+        costs=config["costs"],
+        ll=config["scenario"]["ll"],
+        scenario=config["scenario"],
     input:
         input_make_summary,
         tech_costs=COSTS,
@@ -832,6 +948,10 @@ rule plot_summary:
 
 
 rule plot_network:
+    params:
+        electricity=config["electricity"],
+        costs=config["costs"],
+        plotting=config["plotting"],
     input:
         network="results/"
         + RDIR
@@ -874,6 +994,11 @@ rule build_test_configs:
 
 
 rule make_statistics:
+    params:
+        renewable_carriers=config["electricity"]["renewable_carriers"],
+        renewable=config["renewable"],
+        crs=config["crs"],
+        scenario=config["scenario"],
     output:
         stats="results/" + RDIR + "stats.csv",
     threads: 1

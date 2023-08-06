@@ -549,10 +549,10 @@ if __name__ == "__main__":
 
     def expand_from_wildcard(key):
         w = getattr(snakemake.wildcards, key)
-        return snakemake.config["scenario"][key] if w == "all" else [w]
+        return snakemake.params.scenario[key] if w == "all" else [w]
 
     if snakemake.wildcards.ll.endswith("all"):
-        ll = snakemake.config["scenario"]["ll"]
+        ll = snakemake.params.ll
         if len(snakemake.wildcards.ll) == 4:
             ll = [l for l in ll if l[0] == snakemake.wildcards.ll[0]]
     else:
@@ -571,8 +571,8 @@ if __name__ == "__main__":
     dfs = make_summaries(
         networks_dict,
         snakemake.input,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         country=snakemake.wildcards.country,
     )
 

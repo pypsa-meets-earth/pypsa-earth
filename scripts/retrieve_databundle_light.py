@@ -629,8 +629,8 @@ if __name__ == "__main__":
     sets_path_to_root("pypsa-earth")
 
     rootpath = os.getcwd()
-    tutorial = snakemake.config["tutorial"]
-    countries = snakemake.config["countries"]
+    tutorial = snakemake.params.tutorial
+    countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
     disable_progress = not snakemake.config.get("retrieve_databundle", {}).get(
@@ -638,7 +638,7 @@ if __name__ == "__main__":
     )
 
     # load enable configuration
-    config_enable = snakemake.config["enable"]
+    config_enable = snakemake.params.enable
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
 

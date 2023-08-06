@@ -104,7 +104,7 @@ def load_network(import_name=None, custom_components=None):
         As in pypsa.Network(import_name)
     custom_components : dict
         Dictionary listing custom components.
-        For using ``snakemake.config["override_components"]``
+        For using ``snakemake.params.override_components"]``
         in ``config.yaml`` define:
 
         .. code:: yaml
@@ -152,7 +152,7 @@ def pdbcast(v, h):
     )
 
 
-def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
+def load_network_for_plots(fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
 
@@ -180,7 +180,7 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(tech_costs, config["costs"], config["electricity"], Nyears)
+    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
     update_transmission_costs(n, costs)
 
     return n
