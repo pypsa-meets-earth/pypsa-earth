@@ -995,6 +995,7 @@ rule build_test_configs:
 
 rule make_statistics:
     params:
+        countries=config["countries"],
         renewable_carriers=config["electricity"]["renewable_carriers"],
         renewable=config["renewable"],
         crs=config["crs"],

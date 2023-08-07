@@ -597,7 +597,7 @@ if __name__ == "__main__":
     renewable = snakemake.params.renewable
     renewable_carriers = snakemake.params.renewable_carriers
 
-    name_index = scenario_name if not scenario_name else "-".join(config["countries"])
+    name_index = scenario_name if not scenario_name else "-".join(snakemake.params.countries)
 
     # create statistics
     stats = calculate_stats(
