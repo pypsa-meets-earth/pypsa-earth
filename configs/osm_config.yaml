@@ -1,3 +1,4 @@
+# Columns of CLEAN OSM DATA names and dtypes
 osm_clean_columns:
   substation:
     bus_id: object
@@ -38,7 +39,11 @@ osm_clean_columns:
     dc: bool
     country: object
     geometry: object
-
+# Python dictionary of ISO 3166-1-alpha-2 codes, as per publicly
+# available data on official ISO site in July 2015.
+#
+# Available under MIT license
+# Dimitris Karagkasidis, https://github.com/pageflt
 continents:
   LA: NorthAmerica
   SA: SouthAmerica
@@ -323,6 +328,7 @@ world_iso:
 
 
 # Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
+# Australasia region includes New Caledonia and Papua New Guinea
 continent_regions:
   SCR: ["DK", "NO", "SE", "FI", "IS"]  # SCANDINAVIAN REGION
   EER: ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "FI", "MD"]  # EASTERN EUROPEAN REGION
