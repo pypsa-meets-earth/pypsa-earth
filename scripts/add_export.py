@@ -149,10 +149,10 @@ def create_export_profile():
 
         if np.abs(export_profile.sum() - export_h2) > 1:  # Threshold of 1 MWh
             logger.error(
-                f"Sum of ship profile ({export_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
+                f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_h2} TWh)"
             )
             raise ValueError(
-                f"Sum of ship profile ({export_profile.sum().values[0]/1e6} TWh) does not match export demand ({export_h2} TWh)"
+                f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_h2} TWh)"
             )
 
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
@@ -160,8 +160,9 @@ def create_export_profile():
     export_profile = export_profile.resample(sopts[0]).mean()
 
     # revise logger msg
+    export_type = snakemake.config["export"]["export_profile"]
     logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh and resampled to {sopts[0]}"
+        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {sopts[0]}"
     )
 
     return export_profile
