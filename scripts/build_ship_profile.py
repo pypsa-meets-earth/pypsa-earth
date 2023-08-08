@@ -8,19 +8,17 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-
 logger = logging.getLogger(__name__)
 
 
 def build_ship_profile(export_volume, ship_opts):
-
     ship_capacity = ship_opts["ship_capacity"]
     travel_time = ship_opts["travel_time"]
     fill_time = ship_opts["fill_time"]
     unload_time = ship_opts["unload_time"]
 
-    landing = export_volume / ship_capacity # fraction of max delivery
-    pause_time = 8760/landing - (fill_time+travel_time)
+    landing = export_volume / ship_capacity  # fraction of max delivery
+    pause_time = 8760 / landing - (fill_time + travel_time)
     full_cycle = fill_time + travel_time + unload_time + pause_time
 
     max_transport = ship_capacity * 8760/(fill_time + travel_time + unload_time)
@@ -43,14 +41,15 @@ def build_ship_profile(export_volume, ship_opts):
     ship.index = snapshots
 
     # Scale ship profile to export_volume
-    export_profile = ship/ship.sum() * export_volume * 1e6 # in MWh
+    export_profile = ship / ship.sum() * export_volume * 1e6  # in MWh
 
     # Check profile
-    if abs(export_profile.sum()/1e6 - export_volume) > 0.001:
-        raise ValueError(f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_volume} TWh)")
+    if abs(export_profile.sum() / 1e6 - export_volume) > 0.001:
+        raise ValueError(
+            f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_volume} TWh)"
+        )
 
     return export_profile
-
 
 
 if __name__ == "__main__":
@@ -72,6 +71,6 @@ if __name__ == "__main__":
     export_profile = build_ship_profile(export_volume, ship_opts)
 
     # Save export profile
-    export_profile.to_csv(snakemake.output.ship_profile) #, header=False)
+    export_profile.to_csv(snakemake.output.ship_profile)  # , header=False)
 
     logger.info("Ship profile successfully created")
