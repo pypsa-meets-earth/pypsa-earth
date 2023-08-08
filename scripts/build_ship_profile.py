@@ -43,10 +43,9 @@ def build_ship_profile(export_volume, ship_opts):
         [ship] * 1000, ignore_index=True
     )  # extend ship series to above 8760 hours
 
-
     # Add index, cut profile after length of snapshots
     snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
-    ship = ship[:len(snapshots)]
+    ship = ship[: len(snapshots)]
     ship.index = snapshots
 
     # Scale ship profile to export_volume
@@ -80,7 +79,11 @@ if __name__ == "__main__":
     if export_volume > 0:
         export_profile = build_ship_profile(export_volume, ship_opts)
     else:
-        export_profile = pd.Series(0, index=pd.date_range(freq="h", **snakemake.config["snapshots"]), name="profile")
+        export_profile = pd.Series(
+            0,
+            index=pd.date_range(freq="h", **snakemake.config["snapshots"]),
+            name="profile",
+        )
 
     # Save export profile
     export_profile.to_csv(snakemake.output.ship_profile)  # , header=False)
