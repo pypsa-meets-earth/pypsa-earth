@@ -254,7 +254,10 @@ def add_custom_powerplants(ppl, inputs, config):
 
 
 def replace_natural_gas_technology(df):
-    """Maps and replaces gas technologies in the powerplants.csv onto model compliant carriers."""
+    """
+    Maps and replaces gas technologies in the powerplants.csv onto model
+    compliant carriers.
+    """
     mapping = {
         "Steam Turbine": "CCGT",
         "Combustion Engine": "OCGT",
