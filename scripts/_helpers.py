@@ -14,7 +14,8 @@ import pandas as pd
 import yaml
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
-with open("configs/osm_config.yaml", "r") as f:
+osm_config_path = os.path.join("configs", "osm_config.yaml")
+with open(osm_config_path, "r") as f:
     osm_config = yaml.safe_load(f)
 world_iso = osm_config["world_iso"]
 continent_regions = osm_config["continent_regions"]
