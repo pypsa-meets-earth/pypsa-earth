@@ -31,7 +31,7 @@ repos:
   rev: v2.2.5
   hooks:
   - id: codespell
-    args: ['--ignore-regex="(\b[A-Z]+\b)"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore'] # Ignore capital case words, e.g. country codes
+    args: ['--ignore-regex="(\b[A-Z]+\b)"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,fo,FO']
     types_or: [python, rst, markdown]
     files: ^(scripts|doc)/
 
