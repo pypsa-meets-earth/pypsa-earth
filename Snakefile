@@ -134,6 +134,7 @@ rule build_ship_profile:
     script:
         "scripts/build_ship_profile.py"
 
+
 rule add_export:
     input:
         overrides="data/override_component_attrs",
