@@ -19,8 +19,32 @@ def build_ship_profile(export_volume, ship_opts):
     fill_time = ship_opts["fill_time"]
     unload_time = ship_opts["unload_time"]
 
+    landing = export_volume / ship_capacity # fraction of max delivery
+    pause_time = 8760/landing - (fill_time+travel_time)
+    full_cycle = fill_time + travel_time + unload_time + pause_time
+
+    max_transport = ship_capacity * 8760/(fill_time + travel_time + unload_time)
+    print(f"The maximum transport capacity is {max_transport:.2f} TWh/year")
+
+    # throw error if max_transport < export_volume
+    if max_transport < export_volume:
+        raise ValueError('Not enough ship capacity to export all hydrogen')
+    
+    # Set fill_time ->  1 and travel_time, unload_time, pause_time -> 0
+    ship = pd.Series([1.0] * fill_time + [0.0] * int(travel_time + unload_time + pause_time)) #, index)
+    ship = pd.concat([ship]*1000, ignore_index=True) # extend ship series to above 8760 hours
+    ship = ship[:8760]
+
+    # Add index
+    snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    ship.index = snapshots
+
+    # Scale ship profile to export_volume
+    export_profile = ship/ship.sum() * export_volume * 1e6 # in MWh
 
     # Check profile
+    if abs(export_profile.sum()/1e6 - export_volume) > 0.001:
+        raise ValueError(f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_volume} TWh)")
 
     return export_profile
 
@@ -33,7 +57,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_ship_profile",
-            h2export="9",
+            h2export="5",
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -45,6 +69,6 @@ if __name__ == "__main__":
     export_profile = build_ship_profile(export_volume, ship_opts)
 
     # Save export profile
-    export_profile.to_csv(snakemake.output.ship_profile, header=False)
+    export_profile.to_csv(snakemake.output.ship_profile) #, header=False)
 
     logger.info("Ship profile successfully created")
