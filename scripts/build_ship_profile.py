@@ -42,10 +42,11 @@ def build_ship_profile(export_volume, ship_opts):
     ship = pd.concat(
         [ship] * 1000, ignore_index=True
     )  # extend ship series to above 8760 hours
-    ship = ship[:8760]
 
-    # Add index
+
+    # Add index, cut profile after length of snapshots
     snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    ship = ship[:len(snapshots)]
     ship.index = snapshots
 
     # Scale ship profile to export_volume
@@ -67,7 +68,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_ship_profile",
-            h2export="0",
+            h2export="120",
         )
         sets_path_to_root("pypsa-earth-sec")
 
