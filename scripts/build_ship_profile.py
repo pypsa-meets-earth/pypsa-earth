@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_ship_profile",
-            h2export="15",
+            h2export="0",
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -76,7 +76,10 @@ if __name__ == "__main__":
     export_volume = eval(snakemake.wildcards.h2export)
 
     # Create export profile
-    export_profile = build_ship_profile(export_volume, ship_opts)
+    if export_volume > 0:
+        export_profile = build_ship_profile(export_volume, ship_opts)
+    else:
+        export_profile = pd.Series(0, index=pd.date_range(freq="h", **snakemake.config["snapshots"]), name="profile")
 
     # Save export profile
     export_profile.to_csv(snakemake.output.ship_profile)  # , header=False)
