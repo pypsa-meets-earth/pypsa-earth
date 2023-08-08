@@ -254,7 +254,20 @@ def add_custom_powerplants(ppl, inputs, config):
 
 
 def replace_natural_gas_technology(df):
-    mapping = {"Steam Turbine": "CCGT", "Combustion Engine": "OCGT"}
+    mapping = {
+        "Steam Turbine": "CCGT",
+        "Combustion Engine": "OCGT",
+        "NG": "CCGT",
+        "Ng": "CCGT",
+        "NG/FO": "OCGT",
+        "Ng/Fo": "OCGT",
+        "NG/D": "OCGT",
+        "LNG": "OCGT",
+        "CCGT/D": "CCGT",
+        "CCGT/FO": "CCGT",
+        "LCCGT": "CCGT",
+        "CCGT/Fo": "CCGT",
+    }
     tech = df.Technology.replace(mapping).fillna("CCGT")
     return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
 
