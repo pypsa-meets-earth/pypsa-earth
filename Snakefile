@@ -128,6 +128,12 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
+rule build_ship_profile:
+    output:
+        ship_profile="resources/ship_profile_{h2export}TWh.csv",
+    script:
+        "scripts/build_ship_profile.py"
+
 rule add_export:
     input:
         overrides="data/override_component_attrs",
