@@ -24,14 +24,17 @@ def build_ship_profile(export_volume, ship_opts):
     full_cycle = fill_time + travel_time + unload_time + pause_time
 
     max_transport = ship_capacity * 8760/(fill_time + travel_time + unload_time)
-    print(f"The maximum transport capacity is {max_transport:.2f} TWh/year")
+    print(f"The maximum transport capacity per ship is {max_transport:.2f} TWh/year")
 
     # throw error if max_transport < export_volume
     if max_transport < export_volume:
-        raise ValueError('Not enough ship capacity to export all hydrogen')
+        ships = np.ceil(export_volume / max_transport)
+        print(f"Number of ships needed to export {export_volume} TWh/year is {ships}")
+        logger.info('Not enough ship capacity to export all hydrogen in one ship. Extending the number of shipts to {}'.format(ships))
     
     # Set fill_time ->  1 and travel_time, unload_time, pause_time -> 0
     ship = pd.Series([1.0] * fill_time + [0.0] * int(travel_time + unload_time + pause_time)) #, index)
+    ship.name = "profile"
     ship = pd.concat([ship]*1000, ignore_index=True) # extend ship series to above 8760 hours
     ship = ship[:8760]
 
@@ -57,7 +60,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_ship_profile",
-            h2export="5",
+            h2export="15",
         )
         sets_path_to_root("pypsa-earth-sec")
 
