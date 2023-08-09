@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+
 # Columns of CLEAN OSM DATA names and dtypes
 osm_clean_columns:
   substation:
@@ -355,6 +360,16 @@ continent_regions:
   AUO: ["AU", "NC", "NZ", "PG"]  # Australasia
   UnitedNations: "cc.convert(names=cc.UN.name_short, to='ISO2')"  # UnitedNations
 
+# Geofabrik and iso norm deviate for some countries and domains
+
+# dictionary of correspondence between iso country codes and geofabrik codes containing those information
+# This dictionary instructs the script download_osm_data about how to successfully download data
+# from countries that are aggregated into osm.
+# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SN-GM
+#   That's the reason why in this dictionary they can be found the following entries:
+#       "SN": "SN-GM"
+#       "GM": "SN-GM"
+#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SN-GM" file
 iso_to_geofk_dict:
   EH: "MA"  # Western Sahara -> Morocco
   SN: "SN-GM"  # Senegal -> Senegal-Gambia

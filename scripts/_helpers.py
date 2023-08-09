@@ -14,13 +14,41 @@ import pandas as pd
 import yaml
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
-osm_config_path = os.path.join("configs", "osm_config.yaml")
-with open(osm_config_path, "r") as f:
-    osm_config = yaml.safe_load(f)
-world_iso = osm_config["world_iso"]
-continent_regions = osm_config["continent_regions"]
-iso_to_geofk_dict = osm_config["iso_to_geofk_dict"]
-osm_clean_columns = osm_config["osm_clean_columns"]
+
+
+# world_iso = osm_config["world_iso"]
+# continent_regions = osm_config["continent_regions"]
+# iso_to_geofk_dict = osm_config["iso_to_geofk_dict"]
+# osm_clean_columns = osm_config["osm_clean_columns"]
+
+
+def read_osm_config(*args):
+    """
+    Reads the osm_config.yaml file and returns values based on the provided key
+    arguments.
+
+    Parameters
+    ----------
+    *args : str
+        One or more key arguments corresponding to the values
+          to retrieve from the config file.
+
+    Returns
+    -------
+    tuple
+        A tuple containing values from the osm_config.yaml
+          file corresponding to the provided keys.
+
+    Examples
+    --------
+    >>> values = read_osm_config("key1", "key2")
+    >>> print(values)
+    ('value1', 'value2')
+    """
+    osm_config_path = os.path.join("configs", "osm_config.yaml")
+    with open(osm_config_path, "r") as f:
+        osm_config = yaml.safe_load(f)
+    return tuple([osm_config[a] for a in args])
 
 
 def sets_path_to_root(root_directory_name):
@@ -459,7 +487,7 @@ def getContinent(code):
 
     continent_list = []
     code_set = set(code)
-    for continent in world_iso:
+    for continent in read_osm_config("world_iso"):
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
             continent_list.append(continent)
@@ -682,6 +710,7 @@ def create_country_list(input, iso_coding=True):
         geofabrik-specific ones. When geofabrik codes are
         selected(iso_coding=False), ignore iso-specific names.
         """
+
         if (
             iso_coding
         ):  # if country lists are in iso coding, then check if they are 2-string
@@ -703,7 +732,7 @@ def create_country_list(input, iso_coding=True):
 
     for value1 in input:
         codes_list = []
-
+        world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
         # extract countries in world
         if value1 == "Earth":
             for continent in world_iso.keys():
