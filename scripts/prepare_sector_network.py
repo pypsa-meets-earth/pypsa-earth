@@ -1186,6 +1186,22 @@ def add_industry(n, costs):
         p_set=-co2,
     )
 
+    co2 = (
+        industrial_demand["coal"].sum()
+        * costs.at["coal", "CO2 intensity"]
+        # - industrial_demand["process emission from feedstock"].sum()
+        / 8760
+    )
+
+    n.add(
+        "Load",
+        "industry coal emissions",
+        bus="co2 atmosphere",
+        carrier="industry coal emissions",
+        p_set=-co2,
+    )
+
+
     ########################################################### CARIER = HEAT
     # TODO simplify bus expression
     n.madd(
