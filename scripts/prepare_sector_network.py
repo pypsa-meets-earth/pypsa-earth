@@ -358,7 +358,10 @@ def add_hydrogen(n, costs):
         h2_links = pd.DataFrame(columns=attrs)
 
         candidates = pd.concat(
-            {"lines": n.lines[attrs], "links": n.links.loc[n.links.carrier == "DC", attrs]}
+            {
+                "lines": n.lines[attrs],
+                "links": n.links.loc[n.links.carrier == "DC", attrs],
+            }
         )
 
         for candidate in candidates.index:
@@ -799,7 +802,7 @@ def add_aviation(n, cost):
     airports = pd.concat([airports, ind])
 
     airports = airports.fillna(0)
-    
+
     airports = airports.groupby(airports.index).sum()
     n.madd(
         "Load",
@@ -1822,7 +1825,9 @@ def add_heat(n, costs):
                     - costs.at["gas", "CO2 intensity"]
                     * (
                         costs.at["biomass CHP capture", "electricity-input"]
-                        + costs.at["biomass CHP capture", "compression-electricity-input"]
+                        + costs.at[
+                            "biomass CHP capture", "compression-electricity-input"
+                        ]
                     ),
                     efficiency2=costs.at["central gas CHP", "efficiency"]
                     / costs.at["central gas CHP", "c_b"]
