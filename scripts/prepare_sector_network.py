@@ -1894,17 +1894,18 @@ def add_services(n, costs):
         carrier="services biomass",
         p_set=p_set_biomass,
     )
-    co2 = (
-        p_set_biomass.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
-    ) / 8760
+    
+    # co2 = (
+    #     p_set_biomass.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
+    # ) / 8760
 
-    n.add(
-        "Load",
-        "services biomass emissions",
-        bus="co2 atmosphere",
-        carrier="biomass emissions",
-        p_set=-co2,
-    )
+    # n.add(
+    #     "Load",
+    #     "services biomass emissions",
+    #     bus="co2 atmosphere",
+    #     carrier="biomass emissions",
+    #     p_set=-co2,
+    # )
 
 
 def add_agriculture(n, costs):
