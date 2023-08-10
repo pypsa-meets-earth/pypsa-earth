@@ -736,10 +736,9 @@ def add_aviation(n, cost):
 
     airports = pd.concat([airports, ind])
 
-    airports = airports[~airports.index.duplicated(keep="first")]
-
     airports = airports.fillna(0)
-
+    
+    airports = airports.groupby(airports.index).sum()
     n.madd(
         "Load",
         nodes,
@@ -931,9 +930,8 @@ def add_shipping(n, costs):
 
     ports = pd.concat([ports, ind])
 
-    ports = ports[~ports.index.duplicated(keep="first")]
-
     ports = ports.fillna(0)
+    ports = ports.groupby(ports.index).sum()
 
     if options["shipping_hydrogen_liquefaction"]:
         n.madd("Bus", nodes, suffix=" H2 liquid", carrier="H2 liquid", location=nodes)
@@ -2231,7 +2229,7 @@ if __name__ == "__main__":
     # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    )
+    ).fillna()
     # Ground-sourced heatpump coefficient of performance
     gshp_cop = pd.read_csv(
         snakemake.input.gshp_cop, index_col=0, parse_dates=True
@@ -2257,7 +2255,6 @@ if __name__ == "__main__":
 
     # Load industry demand data
     industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
-    print(industrial_demand)
 
     industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
@@ -2272,7 +2269,6 @@ if __name__ == "__main__":
 
     add_gas(n, costs)
     add_generation(n, costs)
-    add_biomass(n, costs)
 
     add_hydrogen(n, costs)  # TODO add costs
 
@@ -2282,6 +2278,7 @@ if __name__ == "__main__":
 
     h2_hc_conversions(n, costs)
     add_heat(n, costs)
+    add_biomass(n, costs)
 
     add_industry(n, costs)
 
