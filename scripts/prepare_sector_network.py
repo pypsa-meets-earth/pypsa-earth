@@ -322,37 +322,99 @@ def add_hydrogen(n, costs):
         carrier="H2 Store",
         capital_cost=h2_capital_cost,
     )
+    if snakemake.config["custom_data"]["gas_grid"]:
+        h2_links = pd.read_csv(snakemake.input.pipelines)
 
-    attrs = ["bus0", "bus1", "length"]
-    h2_links = pd.DataFrame(columns=attrs)
+        # Order buses to detect equal pairs for bidirectional pipelines
+        buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-    candidates = pd.concat(
-        {"lines": n.lines[attrs], "links": n.links.loc[n.links.carrier == "DC", attrs]}
-    )
+        # Appending string for carrier specification '_AC'
+        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
-    for candidate in candidates.index:
-        buses = [candidates.at[candidate, "bus0"], candidates.at[candidate, "bus1"]]
-        buses.sort()
-        name = f"H2 pipeline {buses[0]} -> {buses[1]}"
-        if name not in h2_links.index:
-            h2_links.at[name, "bus0"] = buses[0]
-            h2_links.at[name, "bus1"] = buses[1]
-            h2_links.at[name, "length"] = candidates.at[candidate, "length"]
+        # Conversion of GADM id to from 3 to 2-digit
+        h2_links["bus0"] = (
+            h2_links["bus0"]
+            .str.split(".")
+            .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+        )
+        h2_links["bus1"] = (
+            h2_links["bus1"]
+            .str.split(".")
+            .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+        )
+
+        # Create index column
+        h2_links["buses_idx"] = (
+            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+        )
+
+        # Aggregate pipelines applying mean on length and sum on capacities
+        h2_links = h2_links.groupby("buses_idx").agg(
+            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+        )
+    else:
+        attrs = ["bus0", "bus1", "length"]
+        h2_links = pd.DataFrame(columns=attrs)
+
+        candidates = pd.concat(
+            {"lines": n.lines[attrs], "links": n.links.loc[n.links.carrier == "DC", attrs]}
+        )
+
+        for candidate in candidates.index:
+            buses = [candidates.at[candidate, "bus0"], candidates.at[candidate, "bus1"]]
+            buses.sort()
+            name = f"H2 pipeline {buses[0]} -> {buses[1]}"
+            if name not in h2_links.index:
+                h2_links.at[name, "bus0"] = buses[0]
+                h2_links.at[name, "bus1"] = buses[1]
+                h2_links.at[name, "length"] = candidates.at[candidate, "length"]
 
     # TODO Add efficiency losses
     if snakemake.config["H2_network"]:
-        n.madd(
-            "Link",
-            h2_links.index,
-            bus0=h2_links.bus0.values + " H2",
-            bus1=h2_links.bus1.values + " H2",
-            p_min_pu=-1,
-            p_nom_extendable=True,
-            length=h2_links.length.values,
-            capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
-            carrier="H2 pipeline",
-            lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-        )
+        if snakemake.config["H2_repurposed_network"]:
+            n.madd(
+                "Link",
+                h2_links.index + " repurposed",
+                bus0=h2_links.bus0.values + " H2",
+                bus1=h2_links.bus1.values + " H2",
+                p_min_pu=-1,
+                p_nom_extendable=True,
+                p_nom_max=h2_links.capacity.values
+                * 0.8,  # https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
+                length=h2_links.length.values,
+                capital_cost=costs.at["H2 (g) pipeline repurposed", "fixed"]
+                * h2_links.length.values,
+                carrier="H2 pipeline repurposed",
+                lifetime=costs.at["H2 (g) pipeline repurposed", "lifetime"],
+            )
+            n.madd(
+                "Link",
+                h2_links.index,
+                bus0=h2_links.bus0.values + " H2",
+                bus1=h2_links.bus1.values + " H2",
+                p_min_pu=-1,
+                p_nom_extendable=True,
+                length=h2_links.length.values,
+                capital_cost=costs.at["H2 (g) pipeline", "fixed"]
+                * h2_links.length.values,
+                carrier="H2 pipeline",
+                lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+            )
+        else:
+            n.madd(
+                "Link",
+                h2_links.index,
+                bus0=h2_links.bus0.values + " H2",
+                bus1=h2_links.bus1.values + " H2",
+                p_min_pu=-1,
+                p_nom_extendable=True,
+                length=h2_links.length.values,
+                capital_cost=costs.at["H2 (g) pipeline", "fixed"]
+                * h2_links.length.values,
+                carrier="H2 pipeline",
+                lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+            )
 
 
 def define_spatial(nodes):
