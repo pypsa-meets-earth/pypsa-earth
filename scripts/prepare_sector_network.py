@@ -1894,7 +1894,7 @@ def add_services(n, costs):
         carrier="services biomass",
         p_set=p_set_biomass,
     )
-    
+
     # co2 = (
     #     p_set_biomass.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
     # ) / 8760
@@ -1906,7 +1906,59 @@ def add_services(n, costs):
     #     carrier="biomass emissions",
     #     p_set=-co2,
     # )
+    p_set_oil = (
+        profile_residential
+        * energy_totals.loc[countries, "services oil"].sum()
+        * 1e6
+    )
 
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services oil",
+        bus=spatial.oil.nodes,
+        carrier="services oil",
+        p_set=p_set_oil,
+    )
+
+    co2 = (
+        p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]
+    ) / 8760
+
+    n.add(
+        "Load",
+        "services oil emissions",
+        bus="co2 atmosphere",
+        carrier="oil emissions",
+        p_set=-co2,
+    )
+
+    p_set_gas = (
+        profile_residential
+        * energy_totals.loc[countries, "services gas"].sum()
+        * 1e6
+    )
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services gas",
+        bus=spatial.gas.nodes,
+        carrier="services gas",
+        p_set=p_set_gas,
+    )
+
+    co2 = (
+        p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]
+    ) / 8760
+
+    n.add(
+        "Load",
+        "services gas emissions",
+        bus="co2 atmosphere",
+        carrier="gas emissions",
+        p_set=-co2,
+    )
 
 def add_agriculture(n, costs):
     n.madd(
