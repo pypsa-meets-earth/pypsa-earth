@@ -461,7 +461,7 @@ def add_biomass(n, costs):
         nodes + " biomass EOP",
         bus0=spatial.biomass.nodes,
         bus1=nodes,
-        bus2="co2 atmosphere",
+        # bus2="co2 atmosphere",
         marginal_cost=costs.at[biomass_gen, "efficiency"]
         * costs.at[biomass_gen, "VOM"],  # NB: VOM is per MWel
         # NB: fixed cost is per MWel
@@ -470,7 +470,7 @@ def add_biomass(n, costs):
         p_nom_extendable=True,
         carrier=biomass_gen,
         efficiency=costs.at[biomass_gen, "efficiency"],
-        efficiency2=costs.at["solid biomass", "CO2 intensity"],
+        # efficiency2=costs.at["solid biomass", "CO2 intensity"],
         lifetime=costs.at[biomass_gen, "lifetime"],
     )
     n.madd(
