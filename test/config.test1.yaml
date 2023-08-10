@@ -42,6 +42,7 @@ countries: ['NG', 'BJ']
 
 H2_network: false
 H2_network_limit: 2000 #GWkm
+H2_repurposed_network: false
 
 fossil_reserves:
   oil: 100 #TWh Maybe reduntant
