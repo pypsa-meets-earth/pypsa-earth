@@ -1175,7 +1175,7 @@ def add_industry(n, costs):
         n.loads.loc[nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
         # - industrial_demand["process emission from feedstock"].sum()
-        / 8760
+        #/ 8760
     )
 
     n.add(
