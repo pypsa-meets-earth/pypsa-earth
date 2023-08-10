@@ -255,6 +255,7 @@ sector:
   dac: true
   SMR: true
   cc_fraction: 0.9
+  cc: true
 
   conventional_generation: # generator : carrier
     OCGT: gas
