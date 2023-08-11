@@ -762,31 +762,26 @@ def prepare_generators_df(df_all_generators):
     return df_all_generators
 
 
-def find_first_overlap(geom, country_geoms, default_name):
-    """
-    Return the first index whose shape intersects the geometry.
-    """
-    for c_name, c_geom in country_geoms.items():
-        if not geom.disjoint(c_geom):
-            return c_name
-    return default_name
-
-
 def set_countryname_by_shape(
     df,
     ext_country_shapes,
-    exclude_external=True,
     col_country="country",
 ):
     "Set the country name by the name shape"
-    df[col_country] = [
-        find_first_overlap(
-            row["geometry"],
-            ext_country_shapes,
-            None if exclude_external else row[col_country],
-        )
-        for id, row in df.iterrows()
-    ]
+
+    # use auxiliary spatial join to determine the country of each line, keep first occurrence only
+    df_m = gpd.sjoin_nearest(
+        df[["line_id", "voltage", "tag_frequency", "geometry"]],
+        ext_country_shapes,
+        how="left",
+        max_distance=0.01,
+    ).reset_index()
+    df_m.drop_duplicates(subset="index", inplace=True)
+    df_m.rename(columns={"index_right": col_country}, inplace=True)
+    df_m.set_index("index", inplace=True)
+
+    # set country name to original dataframe
+    df[col_country] = df_m[col_country]
     df.dropna(subset=[col_country], inplace=True)
     return df
 
