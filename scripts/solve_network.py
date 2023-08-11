@@ -204,7 +204,9 @@ def H2_export_yearly_constraint(n):
     ]
 
     if include_country_load:
-        elec_efficiency = n.links.filter(like='Electrolysis', axis=0).loc[:,"efficiency"].mean()
+        elec_efficiency = (
+            n.links.filter(like="Electrolysis", axis=0).loc[:, "efficiency"].mean()
+        )
         rhs = (
             h2_export * (1 / elec_efficiency) + load
         )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
