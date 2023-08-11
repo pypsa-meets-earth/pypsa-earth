@@ -801,7 +801,7 @@ def add_aviation(n, cost):
 
     airports = pd.concat([airports, ind])
 
-    #airports = airports.fillna(0)
+    # airports = airports.fillna(0)
 
     airports = airports.groupby(airports.index).sum()
     n.madd(
@@ -995,7 +995,7 @@ def add_shipping(n, costs):
 
     ports = pd.concat([ports, ind]).drop("Bus", axis=1)
 
-    #ports = ports.fillna(0.0)
+    # ports = ports.fillna(0.0)
     ports = ports.groupby(ports.index).sum()
 
     if options["shipping_hydrogen_liquefaction"]:
