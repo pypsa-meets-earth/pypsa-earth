@@ -801,7 +801,7 @@ def add_aviation(n, cost):
 
     airports = pd.concat([airports, ind])
 
-    airports = airports.fillna(0)
+    #airports = airports.fillna(0)
 
     airports = airports.groupby(airports.index).sum()
     n.madd(
@@ -993,9 +993,9 @@ def add_shipping(n, costs):
         # TODO double check the use of efficiency
     )  # TODO use real data here
 
-    ports = pd.concat([ports, ind])
+    ports = pd.concat([ports, ind]).drop("Bus", axis=1)
 
-    ports = ports.fillna(0)
+    #ports = ports.fillna(0.0)
     ports = ports.groupby(ports.index).sum()
 
     if options["shipping_hydrogen_liquefaction"]:
@@ -2215,11 +2215,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="10",
+            clusters="11",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="24H",
             discountrate="0.071",
             demand="DF",
         )
