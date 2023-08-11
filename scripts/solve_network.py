@@ -204,8 +204,9 @@ def H2_export_yearly_constraint(n):
     ]
 
     if include_country_load:
+        elec_efficiency = n.links.filter(like='Electrolysis', axis=0).loc[:,"efficiency"].mean()
         rhs = (
-            h2_export * (1 / 0.7) + load
+            h2_export * (1 / elec_efficiency) + load
         )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
     else:
         rhs = h2_export * (1 / 0.7)
@@ -478,14 +479,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="10",
+            clusters="12",
             ll="c1.0",
-            opts="Co2L0.60",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="300H",
-            discountrate=0.15,
+            sopts="24H",
+            discountrate=0.071,
             demand="DF",
-            h2export="60",
+            h2export="120",
         )
 
         sets_path_to_root("pypsa-earth-sec")
