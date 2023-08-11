@@ -329,23 +329,21 @@ def attach_wind_and_solar(
 
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
-                continue
-                # TODO: Uncomment out and debug.
-                # underwater_fraction = ds["underwater_fraction"].to_pandas()
-                # connection_cost = (
-                #     snakemake.config["lines"]["length_factor"] *
-                #     ds["average_distance"].to_pandas() *
-                #     (underwater_fraction *
-                #      costs.at[tech + "-connection-submarine", "capital_cost"] +
-                #      (1.0 - underwater_fraction) *
-                #      costs.at[tech + "-connection-underground", "capital_cost"]
-                #      ))
-                # capital_cost = (costs.at["offwind", "capital_cost"] +
-                #                 costs.at[tech + "-station", "capital_cost"] +
-                #                 connection_cost)
-                # logger.info(
-                #     "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".
-                #     format(connection_cost.min(), connection_cost.max(), tech))
+                underwater_fraction = ds["underwater_fraction"].to_pandas()
+                connection_cost = (
+                    snakemake.config["lines"]["length_factor"] *
+                    ds["average_distance"].to_pandas() *
+                    (underwater_fraction *
+                     costs.at[tech + "-connection-submarine", "capital_cost"] +
+                     (1.0 - underwater_fraction) *
+                     costs.at[tech + "-connection-underground", "capital_cost"]
+                     ))
+                capital_cost = (costs.at["offwind", "capital_cost"] +
+                                costs.at[tech + "-station", "capital_cost"] +
+                                connection_cost)
+                logger.info(
+                    "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".
+                    format(connection_cost.min(), connection_cost.max(), tech))
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
