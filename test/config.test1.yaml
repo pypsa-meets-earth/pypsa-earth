@@ -65,6 +65,7 @@ custom_data:
   h2_underground: false
   add_existing: false
   custom_sectors: false
+  gas_grid: false
 
 costs:
   lifetime: 25 #default lifetime
