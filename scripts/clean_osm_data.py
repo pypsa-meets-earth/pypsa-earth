@@ -771,7 +771,7 @@ def set_countryname_by_shape(
 
     # use auxiliary spatial join to determine the country of each line, keep first occurrence only
     df_m = gpd.sjoin_nearest(
-        df[["line_id", "voltage", "tag_frequency", "geometry"]],
+        df.drop(columns=[col_country], errors="ignore"),
         ext_country_shapes,
         how="left",
         max_distance=0.01,
@@ -781,7 +781,7 @@ def set_countryname_by_shape(
     df_m.set_index("index", inplace=True)
 
     # set country name to original dataframe
-    df[col_country] = df_m[col_country]
+    df.loc[df_m.index, col_country] = df_m[col_country]
     df.dropna(subset=[col_country], inplace=True)
     return df
 
@@ -806,6 +806,7 @@ def create_extended_country_shapes(country_shapes, offshore_shapes, tolerance=0.
         )
         .set_index("name")["geometry"]
         .buffer(tolerance)
+        .to_frame()
     )
 
     return merged_shapes
