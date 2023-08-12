@@ -12,6 +12,12 @@ logging:
 countries: ["NG", "BJ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
+subregion: false # remove 'false' if subregion are to be specified
+# NG: [1,2,3 ...]
+# BJ: [1,2,3 ...]
+# Chose the region based on its GADM subdivision Map ID code https://gadm.org/maps.html. 
+# If countries is selected but subregion are not specified, then all region of that country is selected.
+
 enable:
   retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
