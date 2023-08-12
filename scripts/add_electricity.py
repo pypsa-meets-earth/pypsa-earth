@@ -559,9 +559,16 @@ def attach_hydro(n, costs, ppl):
 
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
-        hydro_stats = pd.read_csv(
-            snakemake.input.hydro_capacities, comment="#", na_values=["-"], index_col=0
-        ).set_index("Country")
+        hydro_stats = (
+            pd.read_csv(
+                snakemake.input.hydro_capacities,
+                comment="#",
+                na_values=["-"],
+                index_col=0,
+            )
+            .groupby("Country")
+            .sum()
+        )
         e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
         e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
         e_missing = e_target - e_installed
