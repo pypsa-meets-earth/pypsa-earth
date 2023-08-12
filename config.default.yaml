@@ -15,7 +15,7 @@ countries: ["NG", "BJ"]
 subregion: false # remove 'false' if subregion are to be specified
 # NG: [1,2,3 ...]
 # BJ: [1,2,3 ...]
-# Chose the region based on its GADM subdivision Map ID code https://gadm.org/maps.html. 
+# Chose the region based on its GADM subdivision Map ID code https://gadm.org/maps.html.
 # If countries is selected but subregion are not specified, then all region of that country is selected.
 
 enable:
