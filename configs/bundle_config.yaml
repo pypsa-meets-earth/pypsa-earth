@@ -311,6 +311,19 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # cutouts bundle of the cutouts folder for the Asian continent, except Russia
+  # Size about 30GB (zipped)
+  bundle_cutouts_asia:
+    countries: ["KVR", "WAS", "FEAR", "SEAR", "CASR", "SASR", "ASEAN", "MEAR"]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
   # # cutouts bundle of the cutouts folder for the entire globe [long +-180, lat +-89.9]
   # # commented by default to avoid downloading by mistake. Size about 170GB (zipped)
   # bundle_cutouts_earth:
