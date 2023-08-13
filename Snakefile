@@ -146,7 +146,6 @@ if config["enable"].get("retrieve_databundle", True):
 
     rule retrieve_databundle_light:
         params:
-            #enable=config["enable"], a slight change will cause this to rerun
             countries=config["countries"],
             tutorial=config["tutorial"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
@@ -393,7 +392,7 @@ if config["enable"].get("retrieve_cost_data", True):
 rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
-        scale=config["load_options"]["scale"],
+        load_options=config["load_options"],
         countries=config["countries"],
     input:
         base_network="networks/" + RDIR + "base.nc",
@@ -420,7 +419,6 @@ rule build_demand_profiles:
 rule build_renewable_profiles:
     params:
         crs=config["crs"],
-        atlite=config["atlite"],
         renewable=config["renewable"],
         countries=config["countries"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],

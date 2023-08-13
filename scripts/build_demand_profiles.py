@@ -217,7 +217,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.params.scale
+    scale = snakemake.params.load_options["scale"]
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]

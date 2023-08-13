@@ -333,7 +333,7 @@ def attach_wind_and_solar(
                 # TODO: Uncomment out and debug.
                 # underwater_fraction = ds["underwater_fraction"].to_pandas()
                 # connection_cost = (
-                #     snakemake.params.lines"]["length_factor"] *
+                #     snakemake.params.length_factor *
                 #     ds["average_distance"].to_pandas() *
                 #     (underwater_fraction *
                 #      costs.at[tech + "-connection-submarine", "capital_cost"] +
