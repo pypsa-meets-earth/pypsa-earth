@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
-Lifts electrical transmission network to a single 380 kV voltage layer,
-removes dead-ends of the network,
-and reduces multi-hop HVDC connections to a single link.
+Lifts electrical transmission network to a single 380 kV voltage layer, removes
+dead-ends of the network, and reduces multi-hop HVDC connections to a single
+link.
 
 Relevant Settings
 -----------------
@@ -57,19 +57,19 @@ Outputs
 
 - ``resources/regions_onshore_elec_s{simpl}.geojson``:
 
-    .. image:: ../img/regions_onshore_elec_s.png
-            :scale: 33 %
+    .. image:: /img/regions_onshore_elec_s.png
+            :width: 33 %
 
 - ``resources/regions_offshore_elec_s{simpl}.geojson``:
 
-    .. image:: ../img/regions_offshore_elec_s  .png
-            :scale: 33 %
+    .. image:: /img/regions_offshore_elec_s  .png
+            :width: 33 %
 
 - ``resources/busmap_elec_s{simpl}.csv``: Mapping of buses from ``networks/elec.nc`` to ``networks/elec_s{simpl}.nc``;
 - ``networks/elec_s{simpl}.nc``:
 
-    .. image:: ../img/elec_s.png
-        :scale: 33 %
+    .. image:: /img/elec_s.png
+        :width: 33 %
 
 Description
 -----------
@@ -96,13 +96,13 @@ import scipy as sp
 from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
-from pypsa.networkclustering import (
+from pypsa.clustering.spatial import (
     aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
     get_clustering_from_busmap,
 )
+from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
@@ -110,23 +110,30 @@ sys.settrace
 logger = logging.getLogger(__name__)
 
 
-def simplify_network_to_380(n, linetype):
+def simplify_network_to_base_voltage(n, linetype, base_voltage):
     """
-    Fix all lines to a voltage level of 380 kV and remove all transformers.
-    The function preserves the transmission capacity for each line while updating
-    its voltage level, line type and number of parallel bundles (num_parallel).
-    Transformers are removed and connected components are moved from their
-    starting bus to their ending bus. The corresponding starting buses are
-    removed as well.
-    """
-    logger.info("Mapping all network lines onto a single 380kV layer")
+    Fix all lines to a voltage level of base voltage level and remove all
+    transformers.
 
-    linetype_380 = linetype
-    n.lines["type"] = linetype_380
-    n.lines["v_nom"] = 380
-    n.lines["i_nom"] = n.line_types.i_nom[linetype_380]
+    The function preserves the transmission capacity for each line while
+    updating its voltage level, line type and number of parallel bundles
+    (num_parallel). Transformers are removed and connected components
+    are moved from their starting bus to their ending bus. The
+    corresponding starting buses are removed as well.
+    """
+    logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
+
+    n.lines["type"] = linetype
+    n.lines["v_nom"] = base_voltage
+    n.lines["i_nom"] = n.line_types.i_nom[linetype]
     # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
+
+    # Re-define s_nom for DC lines
+    is_dc_carrier = n.lines["carrier"] == "DC"
+    n.lines.loc[is_dc_carrier, "num_parallel"] = n.lines.loc[is_dc_carrier].eval(
+        "s_nom / (v_nom * i_nom)"
+    )
 
     # Replace transformers by lines
     trafo_map = pd.Series(n.transformers.bus1.values, n.transformers.bus0.values)
@@ -154,15 +161,23 @@ def _prepare_connection_costs_per_link(n, costs, config):
 
     connection_costs_per_link = {}
 
+    # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
+    if config["electricity"]["hvdc_as_lines"]:
+        dc_lengths = n.lines.length
+        unterwater_fractions = n.lines.underwater_fraction
+    else:
+        dc_lengths = n.links.length
+        unterwater_fractions = n.links.underwater_fraction
+
     for tech in config["renewable"]:
         if tech.startswith("offwind"):
             connection_costs_per_link[tech] = (
-                n.links.length
+                dc_lengths
                 * config["lines"]["length_factor"]
                 * (
-                    n.links.underwater_fraction
+                    unterwater_fractions
                     * costs.at[tech + "-connection-submarine", "capital_cost"]
-                    + (1.0 - n.links.underwater_fraction)
+                    + (1.0 - unterwater_fractions)
                     * costs.at[tech + "-connection-underground", "capital_cost"]
                 )
             )
@@ -264,6 +279,19 @@ def _aggregate_and_move_components(
         n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
 
+# Filter AC lines to avoid mixing with DC part when processing links
+def contains_ac(ls):
+    def is_ac_branch(x):
+        if x[0] == "Link":
+            return n.links.loc[x[1]].dc != True
+        elif x[0] == "Line":
+            return n.lines.loc[x[1]].dc != True
+        else:
+            logger.error("Unknown branch type for the instance {x}")
+
+    return any(list(map(lambda x: is_ac_branch(x), ls)))
+
+
 def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
@@ -273,10 +301,15 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             pass
         return n, n.buses.index.to_series()
 
+    dc_as_links = not (n.lines.carrier == "DC").any()
+
     # Determine connected link components, ignore all links but DC
     adjacency_matrix = n.adjacency_matrix(
-        branch_components=["Link"],
-        weights=dict(Link=(n.links.carrier == "DC").astype(float)),
+        branch_components=["Link", "Line"],
+        weights=dict(
+            Link=(n.links.carrier == "DC").astype(float),
+            Line=(n.lines.carrier == "DC").astype(float),
+        ),
     )
 
     _, labels = connected_components(adjacency_matrix, directed=False)
@@ -284,7 +317,17 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     G = n.graph()
 
+    # Split DC part by supernodes
     def split_links(nodes):
+        # only DC nodes are of interest for further supernodes treatment
+        nodes_links = n.links["bus0"].to_list() + n.links["bus1"].to_list()
+        nodes_dc_lines = [
+            d
+            for d in nodes
+            if n.lines.loc[(n.lines.bus0 == d) | (n.lines.bus1 == d)].dc.any()
+        ]
+        nodes = nodes_links + nodes_dc_lines
+
         nodes = frozenset(nodes)
 
         seen = set()
@@ -292,7 +335,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
         for u in supernodes:
             for m, ls in G.adj[u].items():
-                if m not in nodes or m in seen:
+                # AC lines can be captured in case of complicated network topologies
+                # even despite using `nodes` defined by links
+                if m not in nodes or m in seen or contains_ac(ls):
                     continue
 
                 buses = [u, m]
@@ -300,11 +345,12 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
                 while m not in (supernodes | seen):
                     seen.add(m)
-                    for m2, ls in G.adj[m].items():
-                        if m2 in seen or m2 == u:
+                    for m2, ls2 in G.adj[m].items():
+                        # there may be AC lines which connect ends of DC chains
+                        if m2 in seen or m2 == u or contains_ac(ls2):
                             continue
                         buses.append(m2)
-                        links.append(list(ls))  # [name for name in ls])
+                        links.append(list(ls2))  # [name for name in ls])
                         break
                     else:
                         # stub
@@ -322,12 +368,12 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     )
 
     for lbl in labels.value_counts().loc[lambda s: s > 2].index:
-        for b, buses, links in split_links(labels.index[labels == lbl]):
+        for b, buses, dc_edges in split_links(labels.index[labels == lbl]):
             if len(buses) <= 2:
                 continue
 
             logger.debug("nodes = {}".format(labels.index[labels == lbl]))
-            logger.debug("b = {}\nbuses = {}\nlinks = {}".format(b, buses, links))
+            logger.debug("b = {}\nbuses = {}\nlinks = {}".format(b, buses, dc_edges))
 
             m = sp.spatial.distance_matrix(
                 n.buses.loc[b, ["x", "y"]], n.buses.loc[buses[1:-1], ["x", "y"]]
@@ -337,24 +383,48 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 n, busmap, costs, config, connection_costs_per_link, buses
             )
 
-            all_links = [i for _, i in sum(links, [])]
+            # TODO revise a variable name for `dc_edges` variable
+            # `dc_edges` is a list containing dc-relevant graph elements like [('Line', '712308316-1_0')]
+            all_dc_branches = [i for _, i in sum(dc_edges, [])]
+            all_links = list(set(n.links.index).intersection(all_dc_branches))
+            all_dc_lines = list(set(n.lines.index).intersection(all_dc_branches))
 
-            p_max_pu = config["links"].get("p_max_pu", 1.0)
-            lengths = n.links.loc[all_links, "length"]
-            name = lengths.idxmax() + "+{}".format(len(links) - 1)
+            # p_max_pu = config["links"].get("p_max_pu", 1.0)
+            all_dc_lengths = pd.concat(
+                [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
+            )
+            name = all_dc_lengths.idxmax() + "+{}".format(len(all_dc_branches) - 1)
+
+            # HVDC part is represented as "Link" component
+            if dc_as_links:
+                p_max_pu = config["links"].get("p_max_pu", 1.0)
+                lengths = n.links.loc[all_links, "length"]
+                i_links = [i for _, i in sum(dc_edges, []) if _ == "Link"]
+                length = sum(n.links.loc[i_links, "length"].mean() for l in dc_edges)
+                p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in dc_edges)
+                underwater_fraction = (
+                    lengths * n.links.loc[all_links, "underwater_fraction"]
+                ).sum() / lengths.sum()
+            # HVDC part is represented as "Line" component
+            else:
+                p_max_pu = config["lines"].get("p_max_pu", 1.0)
+                lengths = n.lines.loc[all_dc_lines, "length"]
+                length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
+                p_nom = n.lines.loc[all_dc_lines, "s_nom"].min()
+                underwater_fraction = (
+                    (lengths * n.lines.loc[all_dc_lines, "underwater_fraction"]).sum()
+                    / lengths.sum()
+                    if len(lengths) > 0
+                    else 0
+                )
+
             params = dict(
                 carrier="DC",
                 bus0=b[0],
                 bus1=b[1],
-                length=sum(
-                    n.links.loc[[i for _, i in l], "length"].mean() for l in links
-                ),
-                p_nom=min(n.links.loc[[i for _, i in l], "p_nom"].sum() for l in links),
-                underwater_fraction=sum(
-                    lengths
-                    / lengths.sum()
-                    * n.links.loc[all_links, "underwater_fraction"]
-                ),
+                length=length,
+                p_nom=p_nom,
+                underwater_fraction=underwater_fraction,
                 p_max_pu=p_max_pu,
                 p_min_pu=-p_max_pu,
                 underground=False,
@@ -362,12 +432,13 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             )
 
             logger.info(
-                "Joining the links {} connecting the buses {} to simple link {}".format(
-                    ", ".join(all_links), ", ".join(buses), name
+                "Joining the links and DC lines {} connecting the buses {} to simple link {}".format(
+                    ", ".join(all_dc_branches), ", ".join(buses), name
                 )
             )
 
             n.mremove("Link", all_links)
+            n.mremove("Line", all_dc_lines)
 
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.items():
@@ -471,7 +542,8 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         dist.loc[incarrier_b, ~incarrier_b] = np.inf
 
     busmap = n.buses.index.to_series()
-    busmap.loc[buses_i] = dist.idxmin(1)
+    if not dist.empty:
+        busmap.loc[buses_i] = dist.idxmin(1)
 
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
@@ -548,7 +620,7 @@ def cluster(
 def drop_isolated_nodes(n, threshold):
     """
     Find isolated nodes in the network and drop those of them which don't have
-    load or have a load value lower than a threshold
+    load or have a load value lower than a threshold.
 
     Parameters
     ----------
@@ -614,7 +686,7 @@ def drop_isolated_nodes(n, threshold):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Dropped {len(i_to_drop)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectivelly"
+        f"Dropped {len(i_to_drop)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectively"
     )
 
     return n
@@ -622,9 +694,9 @@ def drop_isolated_nodes(n, threshold):
 
 def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     """
-    Find isolated nodes in the network and merge those of them which have
-    load value below than a specified threshold into a single isolated node
-    which represents all the remote generation
+    Find isolated nodes in the network and merge those of them which have load
+    value below than a specified threshold into a single isolated node which
+    represents all the remote generation.
 
     Parameters
     ----------
@@ -658,7 +730,11 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
-        n.buses.loc[i_suffic_load].groupby("country")["bus_id"].first().to_dict()
+        n.buses.assign(bus_id=n.buses.index)
+        .loc[i_suffic_load]
+        .groupby("country")["bus_id"]
+        .first()
+        .to_dict()
     )
     isolated_buses_mapping = n.buses.loc[i_suffic_load, "country"].replace(
         map_isolated_node_by_country
@@ -694,7 +770,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Merged {len(i_suffic_load)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectivelly"
+        f"Merged {len(i_suffic_load)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
     return clustering.network, busmap
@@ -710,7 +786,8 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    linetype = snakemake.config["lines"]["types"][380.0]
+    base_voltage = snakemake.config["electricity"]["base_voltage"]
+    linetype = snakemake.config["lines"]["types"][base_voltage]
 
     aggregation_strategies = snakemake.config["cluster_options"].get(
         "aggregation_strategies", {}
@@ -720,7 +797,7 @@ if __name__ == "__main__":
         p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
         for p in aggregation_strategies.keys()
     }
-    n, trafo_map = simplify_network_to_380(n, linetype)
+    n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 

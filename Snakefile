@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 import sys
 
@@ -28,12 +28,8 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 configfile: "configs/bundle_config.yaml"
 
 
-DEFAULT_CONFIG = "config.tutorial.yaml" if config["tutorial"] else "config.default.yaml"
-
-
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
-
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
@@ -50,7 +46,7 @@ if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
     COSTS = "data/costs.csv"
-ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 10)
+ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
 wildcard_constraints:
@@ -61,9 +57,20 @@ wildcard_constraints:
     unc="[-+a-zA-Z0-9\.]*",
 
 
+if config["custom_rules"] is not []:
+    for rule in config["custom_rules"]:
+
+        include: rule
+
+
 rule clean:
-    shell:
-        "snakemake -j 1 solve_all_networks --delete-all-output"
+    run:
+        shell("snakemake -j 1 solve_all_networks --delete-all-output")
+        try:
+            shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
+        except:
+            pass
+        shell("snakemake -j 1 run_all_scenarios --delete-all-output")
 
 
 rule run_tests:
@@ -76,11 +83,18 @@ rule run_tests:
         directory = "test/tmp"  # assign directory
         for filename in os.scandir(directory):  # iterate over files in that directory
             if filename.is_file():
-                print(filename.path)
-                shell("cp {filename.path} config.yaml")
+                print(
+                    f"Running test: config name '{filename.name}'' and path name '{filename.path}'"
+                )
+                if "custom" in filename.name:
+                    shell("mkdir -p configs/scenarios")
+                    shell("cp {filename.path} configs/scenarios/config.custom.yaml")
+                    shell("snakemake --cores 1 run_all_scenarios --forceall")
                 if "monte" in filename.name:
+                    shell("cp {filename.path} config.yaml")
                     shell("snakemake --cores all solve_all_networks_monte --forceall")
                 else:
+                    shell("cp {filename.path} config.yaml")
                     shell("snakemake --cores all solve_all_networks --forceall")
         print("Tests are successful.")
 
@@ -346,7 +360,7 @@ rule build_demand_profiles:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         load=load_data_paths,
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
@@ -439,7 +453,7 @@ rule add_electricity:
         base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
         powerplants="resources/" + RDIR + "powerplants.csv",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson", 
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
@@ -674,9 +688,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             python="logs/"
             + RDIR
             + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
-            memory="logs/"
-            + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_memory.log",
         benchmark:
             (
                 "benchmarks/"
@@ -687,7 +698,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         resources:
             mem=memory,
         shadow:
-            "shallow"
+            "copy-minimal" if os.name == "nt" else "shallow"
         script:
             "scripts/solve_network.py"
 
@@ -872,7 +883,6 @@ rule make_statistics:
 
 rule run_scenario:
     input:
-        default_config=DEFAULT_CONFIG,
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touchfile=touch("results/{scenario_name}/scenario.done"),
@@ -882,18 +892,28 @@ rule run_scenario:
         mem_mb=5000,
     run:
         from scripts.build_test_configs import create_test_config
+        import yaml
 
-        # Ensure the scenario name matches the name of the configuration
+        # get base configuration file from diff config
+        with open(input.diff_config) as f:
+            base_config_path = (
+                yaml.full_load(f)
+                .get("run", {})
+                .get("base_config", "config.default.yaml")
+            )
+
+            # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
             {"run": {"name": wildcards.scenario_name}},
             input.diff_config,
         )
         # merge the default config file with the difference
-        create_test_config(input.default_config, input.diff_config, "config.yaml")
+        create_test_config(base_config_path, input.diff_config, "config.yaml")
         os.system("snakemake -j all solve_all_networks --rerun-incomplete")
         os.system("snakemake -j1 make_statistics --force")
         copyfile("config.yaml", output.copyconfig)
+
 
 
 rule run_all_scenarios:

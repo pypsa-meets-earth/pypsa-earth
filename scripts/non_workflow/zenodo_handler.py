@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -9,7 +9,7 @@ Uploads local files to Zenodo or sandbox.Zenodo.
 
 Requirements
 ------------
-- Install zenodopy: pip git+https://github.com/pz-max/zenodopy@patch-4 
+- Install zenodopy: pip git+https://github.com/pz-max/zenodopy@patch-4
 
 - Setup zenodopy (token): https://github.com/pz-max/zenodopy/tree/patch-4#using-the-package
 
@@ -48,7 +48,7 @@ METADATA = {
     "access_right": "open",
     "license": {"id": "cc-by-4.0"},
     "keywords": ["Macro Energy Systems", "Power Systems"],
-}  # more opton visisble at Zenodo REST API https://developers.zenodo.org/#introduction
+}  # more options visible at Zenodo REST API https://developers.zenodo.org/#introduction
 
 
 #############

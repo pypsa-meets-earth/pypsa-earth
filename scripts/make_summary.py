@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
 Creates summaries of aggregated energy and costs as ``.csv`` files.
+
 Relevant Settings
 -----------------
-.. code:: yaml
+..code:: yaml
     costs:
         USD2013_to_EUR2013:
         discountrate:
@@ -16,7 +17,7 @@ Relevant Settings
         capital_cost:
     electricity:
         max_hours:
-.. seealso::
+..seealso::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`costs_cf`, :ref:`electricity_cf`
 Inputs
@@ -26,7 +27,7 @@ Outputs
 Description
 -----------
 The following rule can be used to summarize the results in separate .csv files:
-.. code::
+..code::
     snakemake results/summaries/elec_s_all_lall_Co2L-3H_all
                                          clusters
                                              line volume or cost cap
@@ -215,7 +216,10 @@ def calculate_capacity(n, label, capacity):
 
 
 def calculate_supply(n, label, supply):
-    """calculate the max dispatch of each component at the buses where the loads are attached"""
+    """
+    Calculate the max dispatch of each component at the buses where the loads
+    are attached.
+    """
 
     load_types = n.loads.carrier.value_counts().index
 
@@ -269,7 +273,10 @@ def calculate_supply(n, label, supply):
 
 
 def calculate_supply_energy(n, label, supply_energy):
-    """calculate the total dispatch of each component at the buses where the loads are attached"""
+    """
+    Calculate the total dispatch of each component at the buses where the loads
+    are attached.
+    """
 
     load_types = n.loads.carrier.value_counts().index
 
@@ -523,14 +530,21 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",
-            clusters="10",
+            clusters="5",
             ll="copt",
-            opts="Co2L-24H",
-            country="NG",
+            opts="Co2L-3H",
+            country="all",
         )
-        network_dir = os.path.join("..", "results", "networks")
+        network_dir = ".."
     else:
-        network_dir = os.path.join("results", "networks")
+        network_dir = "."
+
+    scenario_name = snakemake.config.get("run", {}).get("name", "")
+    if scenario_name:
+        network_dir = os.path.join(network_dir, "results", scenario_name, "networks")
+    else:
+        network_dir = os.path.join(network_dir, "results", "networks")
+
     configure_logging(snakemake)
 
     def expand_from_wildcard(key):

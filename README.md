@@ -1,12 +1,12 @@
 <!--
 SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
 # PyPSA-Earth
 
-<p align="left"> 
+<p align="left">
 by
 <a href="https://pypsa-meets-earth.github.io">
     <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" width="150">
@@ -20,7 +20,7 @@ by
 [![Status Windows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![REUSE status](https://api.reuse.software/badge/github.com/pypsa-meets-earth/pypsa-earth)](https://api.reuse.software/info/github.com/pypsa-meets-earth/pypsa-earth)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-earth/pypsa-earth/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-earth/pypsa-earth/main)
@@ -29,7 +29,7 @@ by
 
 **PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution.** It enables large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions. It is suitable for operational as well as combined generation, storage and transmission expansion studies. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. The data includes electricity demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
 
-The model is described in the Applied Energy article "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.12109 [(BibTeX)](https://pypsa-earth.readthedocs.io/en/latest/talks_and_papers.html#publications). The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information.
+The model is described in the Applied Energy article "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.121096 [(BibTeX)](https://pypsa-earth.readthedocs.io/en/latest/talks_and_papers.html#publications). The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information.
 
 **PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth.** We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
@@ -68,7 +68,7 @@ There are multiple ways to get involved and learn more about our work. That's ho
   - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
 - **Buddy talk (Open)**
   - book a 30min meeting with Max to discuss anything you like
-  - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min)
+  - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min)
 - **Specific code meeting (Open)**
   - meeting hosted on Discord
   - join updates, demos, Q&A's, discussions and the coordination of each work package
@@ -334,6 +334,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/asolavi">
+            <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/carlosfv92">
             <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
             <br />
@@ -362,6 +369,14 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/jessLryan">
+            <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
+            <br />
+            <sub><b>Jess</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/pitmonticone">
             <img src="https://avatars.githubusercontent.com/u/38562595?v=4" width="100;" alt="pitmonticone"/>
             <br />
@@ -374,8 +389,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Sylvain Quoilin</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/juli-a-ko">
             <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>

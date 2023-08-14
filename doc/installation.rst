@@ -50,8 +50,8 @@ The environment can be installed and activated like this:
 
     .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you 
-open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.    
+Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you
+open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.
 
 In case mamba did not work for you, you might want to try conda instead:
 
@@ -64,7 +64,7 @@ In case mamba did not work for you, you might want to try conda instead:
 
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
 
-Java Installation 
+Java Installation
 ---------------------------------
 
 PyPSA-Earth currently needs Java redistribution to work properly. To check if Java is still installed you can request it's version from a terminal:
@@ -74,8 +74,9 @@ PyPSA-Earth currently needs Java redistribution to work properly. To check if Ja
     .../pypsa-earth % java --version
 
 The expected output should resemble the following:
-   
+
    .. code:: bash
+
       java version "1.8.0_341"
       Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
       Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
@@ -87,25 +88,25 @@ In case you don't have Java, you have to install it from the `official website <
     .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
 
 
-Solver Installation 
+Solver Installation
 ---------------------------------
 
 An optimization solver is needed to solve the mathematical problem that is build with the automated workflow of PyPSA-Earth.
-With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as 
+With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as
 
-* `CBC <https://projects.coin-or.org/Cbc>`_; 
+* `CBC <https://projects.coin-or.org/Cbc>`_;
 
-* `GLPK <https://www.gnu.org/software/glpk/>`_ and `WinGLPK <http://winglpk.sourceforge.net/>`_ (is included into pypsa-earth environment and installed automatically during environment creation); 
+* `GLPK <https://www.gnu.org/software/glpk/>`_ and `WinGLPK <http://winglpk.sourceforge.net/>`_ (is included into pypsa-earth environment and installed automatically during environment creation);
 
 * `HiGHS <https://github.com/ERGO-Code/HiGHS>`_.
 
-To further improve performances, commercial solvers like 
+To further improve performances, commercial solvers like
 
 * `Gurobi <http://www.gurobi.com/>`_;
 
 * `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
-  
-(both commercial licenses with free academic options) can also be used. 
+
+(both commercial licenses with free academic options) can also be used.
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 

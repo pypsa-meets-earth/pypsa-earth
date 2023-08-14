@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -31,8 +31,8 @@ Outputs
 
 - ``resource/powerplants.csv``: A list of conventional power plants (i.e. neither wind nor solar) with fields for name, fuel type, technology, country, capacity in MW, duration, commissioning year, retrofit year, latitude, longitude, and dam information as documented in the `powerplantmatching README <https://github.com/FRESNA/powerplantmatching/blob/master/README.md>`_; additionally it includes information on the closest substation/bus in ``networks/base.nc``.
 
-    .. image:: ../img/powerplantmatching.png
-        :scale: 30 %
+    .. image:: /img/powerplantmatching.png
+        :width: 30 %
 
     **Source:** `powerplantmatching on GitHub <https://github.com/FRESNA/powerplantmatching>`_
 
@@ -68,13 +68,13 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 
-Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
 Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
 
 Tagging considerations for columns in the file:
-    - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
-    - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
-    - Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
+- FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
+- Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
+- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 1. The benchmark PPM keys values were taken as follows:
@@ -142,7 +142,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     "wave": "Other",
                     "geothermal": "Geothermal",
                     "solar": "Solar",
-                    # "Hard Coal" follows defauls of PPM
+                    # "Hard Coal" follows defaults of PPM
                     "coal": "Hard Coal",
                     "gas": "Natural Gas",
                     "biomass": "Bioenergy",
@@ -200,7 +200,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
-    # However, everithing extracted from OSM seems to belong
+    # However, everything extracted from OSM seems to belong
     # to power plants with "tags.power" == "generator" only
     osm_ppm_df = pd.DataFrame(
         data={
@@ -244,22 +244,25 @@ def add_custom_powerplants(ppl, inputs, config):
     add_ppls = read_csv_nafix(
         inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
     )
-    # if isinstance(custom_ppl_query, str):
-    #     add_ppls.query(custom_ppl_query, inplace=True)
 
-    return pd.concat(
-        [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
-    )
+    if custom_ppl_query == "merge":
+        return pd.concat(
+            [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
+        )
+    elif custom_ppl_query == "replace":
+        return add_ppls
 
 
 def replace_natural_gas_technology(df):
-    mapping = {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}
-    tech = df.Technology.replace(mapping).fillna("OCGT")
-    return df.Technology.where(df.Fueltype != "Natural Gas", tech)
+    mapping = {"Steam Turbine": "CCGT", "Combustion Engine": "OCGT"}
+    tech = df.Technology.replace(mapping).fillna("CCGT")
+    return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
 
 
 def replace_natural_gas_fueltype(df):
-    return df.Fueltype.where(df.Fueltype != "Natural Gas", df.Technology)
+    return df.Fueltype.mask(
+        (df.Technology == "OCGT") | (df.Technology == "CCGT"), "Natural Gas"
+    )
 
 
 if __name__ == "__main__":
@@ -277,18 +280,29 @@ if __name__ == "__main__":
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
 
-    csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
-
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
     countries_names = list(map(two_digits_2_name_country, countries_codes))
 
     config["target_countries"] = countries_names
 
-    if "EXTERNAL_DATABASE" in config:
+    if (
+        "EXTERNAL_DATABASE"
+        in config["matching_sources"] + config["fully_included_sources"]
+    ):
+        if "EXTERNAL_DATABASE" not in config:
+            logger.error(
+                "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
+                "Please check file configs/powerplantmatching_config.yaml"
+            )
+        logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
+    else:
+        # create an empty file
+        with open(filepath_osm2pm_ppl, "w"):
+            pass
 
     # specify the main query for filtering powerplants
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]
@@ -301,7 +315,6 @@ if __name__ == "__main__":
         pm.powerplants(from_url=False, update=True, config_update=config)
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
         .powerplant.convert_country_to_alpha2()
         .assign(
             Technology=replace_natural_gas_technology,

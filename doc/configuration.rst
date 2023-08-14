@@ -10,9 +10,9 @@ Configuration
 
 PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
 The options here described are collected in a ``config.yaml`` file located in the root directory.
-Users should copy the provided default configuration (``config.default.yaml``) and amend 
-their own modifications and assumptions in the user-specific configuration file (``config.yaml``); 
-confer installation instructions at :ref:`defaultconfig`.
+Users should copy the provided default configuration (``config.default.yaml``) and amend
+their own modifications and assumptions in the user-specific configuration file (``config.yaml``);
+confer installation instructions at :ref:`installation`.
 
 .. note::
   Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
@@ -24,7 +24,8 @@ Top-level configuration
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
-   :lines: 5-12,20,31-38
+   :start-at: version:
+   :end-at:  build_cutout:
 
 
 .. csv-table::
@@ -32,7 +33,7 @@ Top-level configuration
    :widths: 25,7,22,30
    :file: configtables/toplevel.csv
 
-.. _scenario:
+.. _run:
 
 ``run``
 =======
@@ -41,13 +42,19 @@ It is common conduct to analyse energy system optimisation models for **multiple
 e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
 investment changes as more ambitious greenhouse-gas emission reduction targets are applied.
 
-The ``run`` section is used for running and storing scenarios with different configurations which are not covered by :ref:`wildcards`. It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set ``shared_cutouts`` to `true`.    
+The ``run`` section is used for running and storing scenarios with different configurations which are not covered by :ref:`wildcards`. It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set ``shared_cutouts`` to `true`.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: run:
-   :end-before: scenario:
+   :end-at: shared_cutouts:
 
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/run.csv
+
+.. _scenario:
 
 ``scenario``
 ============
@@ -69,7 +76,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: scenario:
-   :end-before: countries:
+   :end-at: opts:
 
 .. csv-table::
    :header-rows: 1
@@ -81,27 +88,171 @@ An exemplary dependency graph (starting from the simplification rules) then look
 ``snapshots``
 =============
 
-Specifies the temporal range to build an energy system model for as arguments to `pandas.date_range <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html>`_
+Specifies the temporal range for the historical weather data, which is used to build the energy system model. It uses arguments to `pandas.date_range <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html>`_. The date range must be in the past (before 2022). A well-tested year is 2013.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: snapshots:
-   :end-before: enable:
+   :end-at: inclusive:
 
 .. csv-table::
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/snapshots.csv
 
+.. _crs_cf:
+
+``crs``
+===============
+
+Defines the coordinate reference systems (crs).
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: crs:
+   :end-at: area_crs:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/crs.csv
+
+
+.. _augmented_line_connection_cf:
+
+``augmented_line_connection``
+=============================
+
+If enabled, it increases the connectivity of the network. It makes the network graph `k-edge-connected <https://en.wikipedia.org/wiki/K-edge-connected_graph>`_, i.e.,
+if fewer than k edges are removed, the network graph stays connected. It uses the `k-edge-augmentation <https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation>`_
+algorithm from the `NetworkX <https://networkx.org/documentation/stable/index.html>`_ Python package.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: augmented_line_connection:
+   :end-at: min_DC_length:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/augmented_line_connection.csv
+
+.. _cluster_options_cf:
+
+``cluster_options``
+=============================
+
+Specifies the options to simplify and cluster the network. This is done in two stages, first using the rule ``simplify_network`` and then using the rule ``cluster_network``. For more details on this process, see the `PyPSA-Earth paper <https://www.sciencedirect.com/science/article/pii/S0306261923004609>`_, section 3.7.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: cluster_options:
+   :end-at: efficiency:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/cluster_options.csv
+
+.. _build_shape_options_cf:
+
+``build_shape_options``
+=============================
+
+Specifies the options to build the shapes in which the region of interest (``countries``) is divided.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: build_shape_options:
+   :end-at: contended_flag:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/build_shape_options.csv
+
+.. _clean_osm_data_options_cf:
+
+``clean_osm_data_options``
+=============================
+
+Specifies the options to clean the `OpenStreetMap <https://wiki.osmfoundation.org/wiki/Main_Page>`_ (OSM) data.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: clean_osm_data_options:
+   :end-at: generator_name_method:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/clean_osm_data_options.csv
+
+.. _build_osm_network_cf:
+
+``build_osm_network``
+=============================
+
+Specifies the options to build the `OpenStreetMap <https://wiki.osmfoundation.org/wiki/Main_Page>`_ (OSM) network.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: build_osm_network:
+   :end-at: force_ac:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/build_osm_network.csv
+
+.. _base_network_cf:
+
+``base_network``
+=============================
+
+Specifies the minimum voltage magnitude in the base network and the offshore substations.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: base_network:
+   :end-at: min_voltage_rebase_voltage:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/base_network.csv
+
+.. _load_options_cf:
+
+``load_options``
+=============================
+
+Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socio-economic pathway (GDP and population growth), to enhance modelling capabilities.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: load_options:
+   :end-at: scale:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/load_options.csv
+
+.. warning::
+    The snapshots date range (``snapshots\start`` - ``snapshots\end``) must be in the ``weather_year``.
+
 .. _electricity_cf:
 
 ``electricity``
 ===============
 
+Specifies the options for the rule ``add_electricity``. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, CO2 emission limits, operational reserve, storage parameters. See the table below for more details.
+
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: electricity:
-   :end-before: lines:
+   :end-at: PV:
 
 .. csv-table::
    :header-rows: 1
@@ -110,6 +261,57 @@ Specifies the temporal range to build an energy system model for as arguments to
 
 .. warning::
     Carriers in ``conventional_carriers`` must not also be in ``extendable_carriers``.
+
+.. _lines_cf:
+
+``lines``
+=============
+
+Specifies electricity line parameters.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-after: PV:
+   :end-at: under_construction:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/lines.csv
+
+.. _links_cf:
+
+``links``
+=============
+
+Specifies Link parameters. Links are a fundamental component of `PyPSA <https://pypsa.readthedocs.io/en/latest/components.html>`_ .
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: links:
+   :end-before: transformers:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/links.csv
+
+.. _transformers_cf:
+
+``transformers``
+================
+
+Specifies transformers parameters and types.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: transformers:
+   :end-before: atlite:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/transformers.csv
 
 .. _atlite_cf:
 
@@ -132,6 +334,8 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 
 ``renewable``
 =============
+
+Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (``onwind``), offshore wind with AC connection (``offwind-ac``), offshore wind with DC connection (``offwind-dc``), solar (``solar``), and hydropower (``hydro``).
 
 ``onwind``
 ----------
@@ -191,82 +395,24 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at:   hydro:
-   :end-before: costs:
+   :end-at: multiplier:
 
 .. csv-table::
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
 
-.. _lines_cf:
-
-``lines``
-=============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: lines:
-   :end-before: links:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/lines.csv
-
-.. _links_cf:
-
-``links``
-=============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: links:
-   :end-before: transformers:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/links.csv
-
-.. _transformers_cf:
-
-``transformers``
-================
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: transformers:
-   :end-before: load:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/transformers.csv
-
-.. _load_cf:
-
-``load``
-=============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-at: load:
-   :end-before: costs:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/load.csv
-
 .. _costs_cf:
 
 ``costs``
 =============
 
+Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file ``data/costs.csv``, which can also be modified manually.
+
 .. literalinclude:: ../config.default.yaml
    :language: yaml
-   :start-after: scaling_factor:
-   :end-before: monte_carlo:
+   :start-after: Costs Configuration
+   :end-at: co2:
 
 .. csv-table::
    :header-rows: 1
@@ -274,24 +420,15 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
    :file: configtables/costs.csv
 
 .. note::
-    To change cost assumptions in more detail (i.e. other than ``marginal_cost`` and ``capital_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
-    You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
+   To change cost assumptions in more detail (i.e. other than ``marginal_cost``), consider modifying cost assumptions directly in ``data/costs.csv`` as this is not yet supported through the config file.
+   You can also build multiple different cost databases. Make a renamed copy of ``data/costs.csv`` (e.g. ``data/costs-optimistic.csv``) and set the variable ``COSTS=data/costs-optimistic.csv`` in the ``Snakefile``.
 
-
-.. _clustering_cf:
-
-``clustering``
-==============
-
-.. literalinclude:: ../config.default.yaml
-   :language: yaml
-   :start-after:     co2:
-   :end-before: solving:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 25,7,22,30
-   :file: configtables/clustering.csv
+.. note::
+   The ``marginal costs`` or in this context ``variable costs`` of operating the assets is important for realistic operational model outputs.
+   It can define the curtailment order of renewable generators, the dispatch order of generators, and the dispatch of storage units.
+   If not approapriate set, the model might output unrealistic results. Learn more about this in
+   `Parzen et al. 2023 <https://www.sciencedirect.com/science/article/pii/S2589004222020028>`_ and in
+   `Kittel et al. 2022 <https://www.sciencedirect.com/science/article/pii/S2589004222002723>`_.
 
 
 .. _monte_cf:
@@ -299,8 +436,7 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 ``monte_carlo``
 ===============
 
-``options``
------------
+Specifies the options for Monte Carlo sampling.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
@@ -316,6 +452,8 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 
 ``solving``
 =============
+
+Specify linear power flow formulation and optimization solver settings.
 
 ``options``
 -----------
@@ -347,6 +485,8 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
 
 ``plotting``
 =============
+
+Specifies plotting options.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml

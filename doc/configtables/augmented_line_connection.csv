@@ -1,0 +1,6 @@
+,Unit,Values,Description
+add_to_snakefile, bool, "{True, False}", "True: includes this rule to the workflow."
+connectivity_upgrade, int, "{1, 2, 3, ...}", "Number k such that the network graph is k-edge-connected."
+new_line_type,, "{[""HVAC""], [""HVDC""], [""HVAC"", ""HVDC""]}", "Type of expanded lines."
+min_expansion, int or float,, "[MW] New created line capacity."
+min_DC_length, int or float,, "[km] Minimum line length of HVDC line."

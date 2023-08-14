@@ -2,12 +2,27 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 1.0.0
+version: 0.2.2
 tutorial: false
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
+
+countries: ["NG", "BJ"]
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
+
+enable:
+  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  build_natura_raster: false  # If True, than an exclusion raster will be build
+  build_cutout: false
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
   name: "" # use this to keep track of runs with different settings
@@ -20,23 +35,10 @@ scenario:
   clusters: [10]
   opts: [Co2L-3H]
 
-countries: ["NG", "BJ"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
-
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
   inclusive: "left" # end is not inclusive
-
-enable:
-  retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false  # If True, than an exclusion raster will be build
-  build_cutout: false
-  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
 
 # definition of the Coordinate Reference Systems
 crs:
@@ -62,7 +64,7 @@ cluster_options:
     remove_stubs: true
     remove_stubs_across_borders: true
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is above the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -95,7 +97,7 @@ build_shape_options:
 
 clean_osm_data_options:  # osm = OpenStreetMap
   names_by_shapes: true  # Set the country name based on the extended country shapes
-  threshold_voltage: 35000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
+  threshold_voltage: 51000  # [V] assets below that voltage threshold will not be used (cable, line, generator, etc.)
   tag_substation: "transmission"  # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true  # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
@@ -108,8 +110,8 @@ build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetM
   force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 base_network:
-  min_voltage_substation_offshore: 35000  # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 35000  # [V] minimum voltage in base network
+  min_voltage_substation_offshore: 51000  # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 51000  # [V] minimum voltage in base network
 
 load_options:
   ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
@@ -118,6 +120,7 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
+  base_voltage: 380.
   voltages: [220., 300., 380.]
   co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9  # European default, adjustment to Africa necessary
@@ -141,7 +144,7 @@ electricity:
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -182,7 +185,7 @@ atlite:
   nprocesses: 4
   cutouts:
     # geographical bounds automatically determined from countries input
-    africa-2013-era5:
+    cutout-2013-era5:
       module: era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
@@ -195,7 +198,7 @@ atlite:
 
 renewable:
   onwind:
-    cutout: africa-2013-era5
+    cutout: cutout-2013-era5
     resource:
       method: wind
       turbine: Vestas_V112_3MW
@@ -222,7 +225,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: africa-2013-era5
+    cutout: cutout-2013-era5
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -240,7 +243,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: africa-2013-era5
+    cutout: cutout-2013-era5
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -259,7 +262,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: africa-2013-era5
+    cutout: cutout-2013-era5
     resource:
       method: pv
       panel: CSi
@@ -280,7 +283,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: africa-2013-era5
+    cutout: cutout-2013-era5
     resource:
       method: hydro
       hydrobasins: data/hydrobasins/hybas_world_lev06_v1c.shp
@@ -297,7 +300,8 @@ renewable:
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
     multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
 
-# TODO: Needs to be adjusted for Africa
+# TODO: Needs to be adjusted for Africa.
+# Costs Configuration (Do not remove, needed for Sphynx documentation).
 costs:
   year: 2030
   version: v0.5.0
@@ -337,8 +341,8 @@ monte_carlo:
       # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
       # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
     loads_t.p_set: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
 
 
 solving:

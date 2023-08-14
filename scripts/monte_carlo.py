@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -45,7 +45,7 @@ Parameter sweeps can help to explore the uncertainty of the outputs cause by par
 Many are familiar with the classical "sensitivity analysis" that can be applied by varying the
 input of only one feature, while exploring its outputs changes. Here implemented is a
 "global sensitivity analysis" that can help to explore the multi-dimensional uncertainty space
-when more than one feature are changed at the same time. 
+when more than one feature are changed at the same time.
 
 To do so, the scripts is separated in two building blocks: One creates the experimental design,
 the other, modifies and outputs the network file. Building the experimental design is currently
@@ -61,7 +61,7 @@ for all PyPSA objects that are `int` or `float`. Boolean values could be used bu
 The experimental design `lhs_scaled` (dimension: sample X features) is then used to modify the PyPSA
 networks. Thereby, this script creates samples x amount of networks. The iterators comes from the
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
-0 to (total number of) SAMPLES. 
+0 to (total number of) SAMPLES.
 """
 import logging
 import os
@@ -87,7 +87,8 @@ def monte_carlo_sampling_pydoe2(
     correlation_matrix=None,
 ):
     """
-    Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with various options. Additionally all "corners" are simulated.
+    Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
+    various options. Additionally all "corners" are simulated.
 
     Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
     Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
@@ -103,7 +104,7 @@ def monte_carlo_sampling_pydoe2(
         correlation_matrix=correlation_matrix,
     )
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
@@ -114,16 +115,15 @@ def monte_carlo_sampling_chaospy(N_FEATURES, SAMPLES, rule="latin_hypercube", se
 
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
-
     """
     # Generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
     uniform_cube = eval(
         f"chaospy.J({N_FEATURES})"
     )  # writes Nfeatures times the chaospy.uniform... command)
-    lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T
+    lh = np.atleast_2d(uniform_cube.sample(SAMPLES, rule=rule, seed=seed)).T
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
@@ -132,7 +132,9 @@ def monte_carlo_sampling_scipy(
     N_FEATURES, SAMPLES, centered=False, strength=2, optimization=None, seed=42
 ):
     """
-    Creates Latin Hypercube Sample (LHS) implementation from SciPy with various options:
+    Creates Latin Hypercube Sample (LHS) implementation from SciPy with various
+    options:
+
     - Center the point within the multi-dimensional grid, centered=True
     - optimization scheme, optimization="random-cd"
     - strength=1, classical LHS
@@ -154,7 +156,7 @@ def monte_carlo_sampling_scipy(
     )
     lh = sampler.random(n=SAMPLES)
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 

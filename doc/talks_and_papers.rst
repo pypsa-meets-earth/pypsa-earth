@@ -20,7 +20,7 @@ Video
 - `First PyPSA user meeting with industry, TSO's, non-profits and research groups <https://youtu.be/fmwDxNpSMM4>`_
 - `Open Energy System Modelling in Africa: State of the Art and Future Opportunities <https://www.youtube.com/watch?v=E0V0T4U9nmQ>`_
 - `Getting Started with PyPSA-Eur - Part 1 <https://www.youtube.com/watch?v=ty47YU1_eeQ>`_
-- `Getting Started with PyPSA-Eur - Part 2 <https://www.youtube.com/watch?v=mAwhQnNRIvs>`_ 
+- `Getting Started with PyPSA-Eur - Part 2 <https://www.youtube.com/watch?v=mAwhQnNRIvs>`_
 - `PyPSA: Free Software for Investment Planning in Sector-Coupled Energy Systems <https://www.youtube.com/watch?v=h8YA8RM33K8>`_
 - `More user and developer tutorial on the PyPSA-Earth YouTube channel <https://www.youtube.com/channel/UCxLy648Np5B0mX1m4XPBrcg?app=desktop&cbrd=1>`_
 
@@ -68,4 +68,4 @@ Selected list:
 - Neumann et al. 2021 `"The near-optimal feasible space of a renewable power system model." <https://www.sciencedirect.com/science/article/pii/S0378779620304934>`_
 - Victoria et al. 2020 `"Early decarbonisation of the European energy system pays off." <https://www.nature.com/articles/s41467-020-20015-4>`_
 - Neumann et al. 2020 `"Costs of Regional Equity and Autarky in a Renewable European Power System." <https://arxiv.org/pdf/2007.08379.pdf>`_
-- Hörsch et al. 2017 `"The role of spatial scale in joint optimisations of generation and transmission for European highly renewable scenarios." <https://ieeexplore.ieee.org/abstract/document/7982024>`_ 
+- Hörsch et al. 2017 `"The role of spatial scale in joint optimisations of generation and transmission for European highly renewable scenarios." <https://ieeexplore.ieee.org/abstract/document/7982024>`_

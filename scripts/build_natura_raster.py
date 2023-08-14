@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
@@ -25,16 +25,16 @@ Inputs
 
 - ``data/raw/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-points.shp``: `WDPA <https://en.wikipedia.org/wiki/Natura_2000>`_ World Database for Protected Areas.
 
-    .. image:: ../img/natura.png
-        :scale: 33 %
+    .. image:: /img/natura.png
+        :width: 33 %
 
 Outputs
 -------
 
 - ``resources/natura.tiff``: Rasterized version of `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas to reduce computation times.
 
-    .. image:: ../img/natura.png
-        :scale: 33 %
+    .. image:: /img/natura.png
+        :width: 33 %
 
 Description
 -----------
@@ -116,7 +116,8 @@ def get_transform_and_shape(bounds, res, out_logging):
 
 def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     """
-    Iterates through all snakemake rule inputs and unifies shapefiles (.shp) only.
+    Iterates through all snakemake rule inputs and unifies shapefiles (.shp)
+    only.
 
     The input is given in the Snakefile and shapefiles are given by .shp
 
@@ -124,7 +125,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     Returns
     -------
     unified_shape : GeoDataFrame with a unified "multishape"
-
     """
     import pandas as pd
     from shapely.ops import unary_union

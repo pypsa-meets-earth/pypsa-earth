@@ -7,7 +7,7 @@
 How to docs?
 ============
 
-We add the code documentation along the way. 
+We add the code documentation along the way.
 You might think that cost a lot of time and is not efficient - but that's not really true anymore!
 Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speed up the overall process.
 Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add
@@ -39,16 +39,23 @@ Please, if you have problems with the documentation create an issue and let us k
 Compile the documentation locally
 ----------------------------------
 
-To create the documentation locally, you need sphinx. It may be installed using specification
-form `doc/environment.docs.yaml` like is was done when creating `pypsa-earth` environment:
+To create the documentation locally, you need `Sphinx <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ . It can be installed using specifications
+form `doc/requirements.txt`. First, we recommend creating a fresh python environment and activate it:
 
 .. code:: bash
 
-    .../pypsa-earth % mamba env create -f envs/environment.docs.yaml
+    .../pypsa-earth % conda create --name pypsa-earth-docs python
 
-    .../pypsa-earth % conda activate pypsa-earth-docs    
+    .../pypsa-earth % conda activate pypsa-earth-docs
 
-Then the following commands allow you to create the documentation locally:
+Next, install the packages specified in `doc/requiremnts.txt` using `pip`:
+
+.. code:: bash
+
+    .../pypsa-earth % pip install -r doc/requirements.txt
+
+
+Once installation is completed, the following commands allow you to create the documentation locally:
 
 .. code:: bash
 
@@ -58,3 +65,9 @@ Then the following commands allow you to create the documentation locally:
 
 This will create html files in `pypsa-earth/doc/_build/html`.
 VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
+
+.. note::
+
+    Windows users might face some challenges when building the documentation locally using `make`. A workaround can be found, but might be time consuming. For instance:
+
+    1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow.

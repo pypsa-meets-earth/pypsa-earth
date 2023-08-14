@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 """
-Creates Voronoi shapes for each bus representing both onshore and offshore regions.
+Creates Voronoi shapes for each bus representing both onshore and offshore
+regions.
 
 Relevant Settings
 -----------------
@@ -30,29 +31,25 @@ Outputs
 
 - ``resources/regions_onshore.geojson``:
 
-    .. image:: ../img/regions_onshore.png
-        :scale: 33 %
+    .. image:: /img/regions_onshore.png
+        :width: 33 %
 
 - ``resources/regions_offshore.geojson``:
 
-    .. image:: ../img/regions_offshore.png
-        :scale: 33 %
+    .. image:: /img/regions_offshore.png
+        :width: 33 %
 
 Description
 -----------
-
 """
 import logging
 import os
 
 import geopandas as gpd
-import numpy
 import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging
-from shapely.geometry import Point, Polygon
-from shapely.ops import unary_union
-from vresutils.graph import voronoi_partition_pts
+from shapely.geometry import Point
 
 # from scripts.build_shapes import gadm
 
@@ -61,8 +58,8 @@ logger = logging.getLogger(__name__)
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
     """
-    Compute the polygons of a voronoi partition of `points` within the
-    polygon `outline`
+    Compute the polygons of a voronoi partition of `points` within the polygon
+    `outline`
 
     Attributes
     ----------
@@ -272,7 +269,7 @@ if __name__ == "__main__":
     )
 
     if offshore_regions:
-        # if a offshore_regions exists excute below
+        # if a offshore_regions exists execute below
         pd.concat(offshore_regions, ignore_index=True).to_file(
             snakemake.output.regions_offshore
         )

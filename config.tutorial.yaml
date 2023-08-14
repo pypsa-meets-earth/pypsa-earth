@@ -2,21 +2,12 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 1.0.0
+version: 0.2.2
 tutorial: true
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
-
-run:
-  name: ""
-
-scenario:
-  simpl: ['']
-  ll: ['copt']
-  clusters: [6]
-  opts: [Co2L-4H]
 
 countries: ["NG", "BJ"]
 
@@ -31,13 +22,6 @@ countries: ["NG", "BJ"]
   #["MA"]  # Morroco
   #["ZA"]  # South Africa
 
-summary_dir: results
-
-snapshots:
-  start: "2013-03-1"
-  end: "2013-03-7"
-  inclusive: "left" # end is not inclusive
-
 enable:
   # prepare_links_p_nom: false
   retrieve_databundle: true
@@ -47,6 +31,24 @@ enable:
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
   build_natura_raster: true  # If True, then build_natura_raster can be run
+
+custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
+
+run:
+  name: ""
+
+scenario:
+  simpl: ['']
+  ll: ['copt']
+  clusters: [6]
+  opts: [Co2L-4H]
+
+summary_dir: results
+
+snapshots:
+  start: "2013-03-1"
+  end: "2013-03-7"
+  inclusive: "left" # end is not inclusive
 
 # definition of the Coordinate Reference Systems
 crs:
@@ -75,7 +77,7 @@ cluster_options:
     remove_stubs: true
     remove_stubs_across_borders: true
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is above the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -132,6 +134,7 @@ load_options:
   scale: 1  # scales all load time-series, i.e. 2 = doubles load
 
 electricity:
+  base_voltage: 380.
   voltages: [220., 300., 380.]
   co2limit: 1.487e+9
   co2base: 1.487e+9
@@ -155,7 +158,7 @@ electricity:
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -197,7 +200,7 @@ atlite:
     # use 'base' to determine geographical bounds and time span from config
     # base:
     # module: era5
-    africa-2013-era5-tutorial:
+    cutout-2013-era5-tutorial:
       module: era5
       dx: 0.3  # cutout resolution
       dy: 0.3  # cutout resolution
@@ -209,7 +212,7 @@ atlite:
 
 renewable:
   onwind:
-    cutout: africa-2013-era5-tutorial
+    cutout: cutout-2013-era5-tutorial
     resource:
       method: wind
       turbine: Vestas_V112_3MW
@@ -226,7 +229,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: africa-2013-era5-tutorial
+    cutout: cutout-2013-era5-tutorial
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -241,7 +244,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: africa-2013-era5-tutorial
+    cutout: cutout-2013-era5-tutorial
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -257,7 +260,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: africa-2013-era5-tutorial
+    cutout: cutout-2013-era5-tutorial
     resource:
       method: pv
       panel: CSi
@@ -278,7 +281,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: africa-2013-era5-tutorial
+    cutout: cutout-2013-era5-tutorial
     resource:
       method: hydro
       hydrobasins: data/hydrobasins/hybas_world_lev04_v1c.shp
@@ -334,8 +337,8 @@ monte_carlo:
       # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
       # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
     loads_t.p_set: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
+    # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
 
 
 solving:

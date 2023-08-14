@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
 
@@ -47,9 +47,37 @@ from numba.core import types
 from numba.typed import Dict
 
 
+def get_GADM_filename(country_code):
+    """
+    Function to get the GADM filename given the country code.
+    """
+    special_codes_GADM = {
+        "XK": "XKO",  # kosovo
+        "CP": "XCL",  # clipperton island
+        "SX": "MAF",  # sint maartin
+        "TF": "ATF",  # french southern territories
+        "AX": "ALA",  # aland
+        "IO": "IOT",  # british indian ocean territory
+        "CC": "CCK",  # cocos island
+        "NF": "NFK",  # norfolk
+        "PN": "PCN",  # pitcairn islands
+        "JE": "JEY",  # jersey
+        "XS": "XSP",  # spratly
+        "GG": "GGY",  # guernsey
+        "UM": "UMI",  # united states minor outlying islands
+        "SJ": "SJM",  # svalbard
+        "CX": "CXR",  # Christmas island
+    }
+
+    if country_code in special_codes_GADM:
+        return f"gadm41_{special_codes_GADM[country_code]}"
+    else:
+        return f"gadm41_{two_2_three_digits_country(country_code)}"
+
+
 def download_GADM(country_code, update=False, out_logging=False):
     """
-    Download gpkg file from GADM for a given country code
+    Download gpkg file from GADM for a given country code.
 
     Parameters
     ----------
@@ -61,13 +89,8 @@ def download_GADM(country_code, update=False, out_logging=False):
     Returns
     -------
     gpkg file per country
-
     """
-    if country_code == "XK":
-        GADM_filename = f"gadm41_XKO"
-    else:
-        GADM_filename = f"gadm41_{two_2_three_digits_country(country_code)}"
-
+    GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
@@ -147,7 +170,8 @@ def get_GADM_layer(
     outlogging=False,
 ):
     """
-    Function to retrive a specific layer id of a geopackage for a selection of countries
+    Function to retrieve a specific layer id of a geopackage for a selection of
+    countries.
 
     Parameters
     ----------
@@ -157,7 +181,6 @@ def get_GADM_layer(
         Layer to consider in the format GID_{layer_id}.
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
-
     """
     # initialization of the geoDataFrame
     geodf_list = []
@@ -246,13 +269,12 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
-    ret_df.apply(lambda x: make_valid(x) if not x.is_valid else x)
-    ret_df.reset_index()
+    ret_df = ret_df.make_valid()
 
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.1):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.02):
     if out_logging:
         logger.info("Stage 3 of 5: Merge country shapes to create continent shape")
 
@@ -261,7 +283,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
     if eez_shapes is not None:
         shapes_list += list(eez_shapes)
 
-    africa_shape = unary_union(shapes_list)
+    africa_shape = make_valid(unary_union(shapes_list))
 
     return africa_shape
 
@@ -286,8 +308,9 @@ def save_to_geojson(df, fn):
 def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
-    The dataset shall be downloaded independently by the user (see guide) or
-    together with pypsa-earth package.
+
+    The dataset shall be downloaded independently by the user (see
+    guide) or together with pypsa-earth package.
     """
     if not os.path.exists(EEZ_gpkg):
         raise Exception(
@@ -325,11 +348,11 @@ def eez(
     tolerance=0.01,
 ):
     """
-    Creates offshore shapes by
+    Creates offshore shapes by.
+
     - buffer smooth countryshape (=offset country shape)
     - and differ that with the offshore shape
     Leads to for instance a 100m non-build coastline
-
     """
 
     if out_logging:
@@ -383,19 +406,20 @@ def download_WorldPop(
 ):
     """
     Download Worldpop using either the standard method or the API method.
-        Parameters
-        ----------
-        worldpop_method: str
-             worldpop_method = "api" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
-        country_code : str
-            Two letter country codes of the downloaded files.
-            Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
-        year : int
-            Year of the data to download
-        update : bool
-            Update = true, forces re-download of files
-        size_min : int
-            Minimum size of each file to download
+
+    Parameters
+    ----------
+    worldpop_method: str
+         worldpop_method = "api" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
+    country_code : str
+        Two letter country codes of the downloaded files.
+        Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
+    year : int
+        Year of the data to download
+    update : bool
+        Update = true, forces re-download of files
+    size_min : int
+        Minimum size of each file to download
     """
     if worldpop_method == "api":
         return download_WorldPop_API(country_code, year, update, out_logging, size_min)
@@ -414,7 +438,8 @@ def download_WorldPop_standard(
     size_min=300,
 ):
     """
-    Download tiff file for each country code using the standard method from worldpop datastore with 1kmx1km resolution.
+    Download tiff file for each country code using the standard method from
+    worldpop datastore with 1kmx1km resolution.
 
     Parameters
     ----------
@@ -479,7 +504,8 @@ def download_WorldPop_API(
     country_code, year=2020, update=False, out_logging=False, size_min=300
 ):
     """
-    Download tiff file for each country code using the api method from worldpop API with 100mx100m resolution.
+    Download tiff file for each country code using the api method from worldpop
+    API with 100mx100m resolution.
 
     Parameters
     ----------
@@ -615,7 +641,7 @@ def generalized_mask(src, geom, **kwargs):
 
 def _sum_raster_over_mask(shape, img):
     """
-    Function to sum the raster value within a shape
+    Function to sum the raster value within a shape.
     """
     # select the desired area of the raster corresponding to each polygon
     # Approximation: the population is measured including the pixels
@@ -643,7 +669,7 @@ def add_gdp_data(
     disable_progressbar=False,
 ):
     """
-    Function to add gdp data to arbitrary number of shapes in a country
+    Function to add gdp data to arbitrary number of shapes in a country.
 
     Inputs:
     -------
@@ -1077,7 +1103,7 @@ def add_population_data(
     disable_progressbar=False,
 ):
     """
-    Function to add population data to arbitrary number of shapes in a country
+    Function to add population data to arbitrary number of shapes in a country.
 
     Inputs:
     -------
@@ -1200,6 +1226,7 @@ def gadm(
         df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
         axis=1,
         inplace=True,
+        errors="ignore",
     )
 
     if worldpop_method != False:

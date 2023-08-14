@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 name: pypsa-earth
 channels:
@@ -12,11 +12,11 @@ dependencies:
 - pip
 - mamba   # esp for windows build
 
-- pypsa>=0.21.3
+- pypsa>=0.24, <0.25
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-- powerplantmatching>=0.5.6
-- earth-osm>=0.0.8  # until 0.1.0
+- powerplantmatching>=0.5.7
+- earth-osm>=0.1.0
 - atlite
 
   # Dependencies of the workflow itself
@@ -25,7 +25,7 @@ dependencies:
 - seaborn
 - snakemake-minimal
 - memory_profiler
-- ruamel.yaml
+- ruamel.yaml<=0.17.26
 - pytables
 - lxml
 - numpy
