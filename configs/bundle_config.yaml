@@ -9,7 +9,7 @@
 
 # .. code:: yaml
 
-#   bundle_name:  # name of the bundle
+#   _name:  # name of the bundle
 #     countries: [country code, region code or country list]  # list of countries represented in the databundle
 #     [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
 #     category: common/resources/data/cutouts  # category of data contained in the bundle:
