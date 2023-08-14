@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Module to zip the desired folders to be stored in google drive, or equivalent
+Module to zip the desired folders to be stored in google drive, or equivalent.
 """
 import os
 import zipfile

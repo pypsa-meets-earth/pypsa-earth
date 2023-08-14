@@ -36,8 +36,8 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_NGBJ.zip?download=1
-      gdrive: https://drive.google.com/file/d/1BSxmm3AG5TTOxrLG0ki8IdlL2n3hEviq/view
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_NGBJ.zip?download=1
+      gdrive: https://drive.google.com/file/d/1Vb1ISjhy7iwTTZYeezGd6S4nLt-EDGme/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -49,8 +49,8 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_BW.zip?download=1
-      gdrive: https://drive.google.com/file/d/1aXqbCxEpe0aNI6EYuCLtFS6CbdXurTn7/view
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_BW.zip?download=1
+      gdrive: https://drive.google.com/file/d/19IXvTD8gVSzgTInL85ta7QjaNI8ZPCCY/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -62,8 +62,8 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/1zY3WnKqwBF0derS4ncRIPpdTdNn978xw/view
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_MA.zip?download=1
+      gdrive: https://drive.google.com/file/d/1VGzE8ZJHAvAQ9X44QNSX4rH3QF7Yi37D/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -75,9 +75,9 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_NGBJ.zip?download=1
-      gdrive: https://drive.google.com/file/d/1N6wJb-dBTqWZX1Tlf5y979lEPtqcVEfQ/view
-    output: [cutouts/africa-2013-era5-tutorial.nc]
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_NGBJ.zip?download=1
+      gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
 
@@ -88,9 +88,9 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_BW.zip?download=1
-      gdrive: https://drive.google.com/file/d/1vtckYOZeSugDXrE0PGqxFwsVkdHNimhV/view
-    output: [cutouts/africa-2013-era5-tutorial.nc]
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_BW.zip?download=1
+      gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
 
@@ -101,9 +101,9 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/1ouIhGQ4e2M2FLzPUZgcKu5GSpRPZotqw/view
-    output: [cutouts/africa-2013-era5-tutorial.nc]
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_MA.zip?download=1
+      gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
 
@@ -180,7 +180,7 @@ databundles:
     output: [data/landcover/*]
 
   # data bundle of the data folder for the African continent
-  bundle_landcover_latinamerica_caribbean:  # excludes North America
+  bundle_landcover_latinamerica_caribbean: # excludes North America
     countries: [SouthAmerica, NorthAmerica]
     category: landcover
     destination: "data/landcover"
@@ -211,7 +211,7 @@ databundles:
 
   # data bundle of the data folder for the Poles
   bundle_landcover_northamerica:
-    countries: [NorthAmerica]  # Greenland and Antartica
+    countries: [NorthAmerica] # Greenland and Antartica
     category: landcover
     destination: "data/landcover"
     urls:
@@ -221,7 +221,7 @@ databundles:
 
   # data bundle of the data folder for the Poles
   bundle_landcover_poles:
-    countries: [GL, ATA]  # Greenland and Antartica
+    countries: [GL, ATA] # Greenland and Antartica
     category: landcover
     destination: "data/landcover"
     urls:
@@ -272,15 +272,80 @@ databundles:
   #       agree: 1
   #   output: [data/gebco/GEBCO_2021_TID.nc]
 
-  # cutouts bundle of the cutouts folder for the African continent
-  bundle_cutouts_africa:
+  # cutouts bundle of the cutouts folder for the mainland African continent
+  # Note: some offshore countries e.g. CV or SC are not covered. Size: about 10GB (zipped)
+  bundle_cutouts_mainland_africa:
     countries: [Africa]
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/cutouts_africa.zip?download=1
-      gdrive: https://drive.google.com/file/d/1uCn7S5EHnPuaZHG5sWEVx2lT6Ve2r5dk/view
-    output: [cutouts/africa-2013-era5.nc]
+      zenodo: https://sandbox.zenodo.org/record/1223907/files/cutouts_africa.zip?download=1
+      gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # # cutouts bundle of the cutouts folder for the whole African continent,
+  # # including UN countries offshore mainland Africa. Size about 20GB (zipped)
+  # bundle_cutouts_whole_africa:
+  #   countries: [Africa]
+  #   category: cutouts
+  #   destination: "cutouts"
+  #   urls:
+  #     # zenodo:
+  #     gdrive: https://drive.google.com/file/d/1O_9vQ2SDluJ_LtFdRBeoo1Pz213n5HAN/view?usp=sharing
+  #   output: [cutouts/cutout-2013-era5.nc]
+  #   disable_by_opt:
+  #     build_cutout: [all]
+
+  # cutouts bundle of the cutouts folder for the North American continent
+  # Note: this includes nearly the entire north emisphere [long +-180, lat 1-85]. Size about 81GB (zipped)
+  bundle_cutouts_northamerica:
+    countries: [NorthAmerica, Europe]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # cutouts bundle of the cutouts folder for the Asian continent, except Russia
+  # Size about 30GB (zipped)
+  bundle_cutouts_asia:
+    countries: ["KVR", "WAS", "FEAR", "SEAR", "CASR", "SASR", "ASEAN", "MEAR"]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # # cutouts bundle of the cutouts folder for the entire globe [long +-180, lat +-89.9]
+  # # commented by default to avoid downloading by mistake. Size about 170GB (zipped)
+  # bundle_cutouts_earth:
+  #   countries: [Earth]
+  #   category: cutouts
+  #   destination: "cutouts"
+  #   urls:
+  #     # zenodo:
+  #     gdrive: https://drive.google.com/file/d/1C9Q5qU_Wu_gj78H5G3TT2thGA-hKheVf/view?usp=drive_link
+  #   output: [cutouts/cutout-2013-era5.nc]
+  #   disable_by_opt:
+  #     build_cutout: [all]
+
+  # Cutout for South America, approx 18 GB
+  bundle_cutouts_southamerica:
+    countries: [SouthAmerica]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
 
