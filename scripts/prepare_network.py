@@ -94,22 +94,26 @@ def download_emission_data():
 
 
 def emission_extractor(filename, emission_year):
-    country_names = n.buses.country.unique() 
+    country_names = n.buses.country.unique()
     # data reading process
     datapath = os.path.join(os.getcwd(), "data", filename)
     emission_of_countries = []
     df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
-    df = df.set_index('Country_code_A3')
-    df = df.loc[df['IPCC_for_std_report_desc'] == "Public electricity and heat production"]
-    df = df.loc[:,'Y_1970':'Y_2018'].ffill(axis = 1)
-    df = df.loc[:,'Y_1970':'Y_2018'].bfill(axis = 1)
+    df = df.set_index("Country_code_A3")
+    df = df.loc[
+        df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
+    ]
+    df = df.loc[:, "Y_1970":"Y_2018"].ffill(axis=1)
+    df = df.loc[:, "Y_1970":"Y_2018"].bfill(axis=1)
     for j in country_names:
         j = cc.convert(j, to="ISO3")
         try:
-            emission_of_countries.append(df.loc[j]['Y_'+str(emission_year)])
+            emission_of_countries.append(df.loc[j]["Y_" + str(emission_year)])
         except KeyError:
-            print(f"The emission value for {cc.convert(j, to='name_short', not_found=None)} is not found.")
+            print(
+                f"The emission value for {cc.convert(j, to='name_short', not_found=None)} is not found."
+            )
     emission_of_countries = sum(emission_of_countries)
     return emission_of_countries
 
@@ -326,7 +330,9 @@ if __name__ == "__main__":
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 if snakemake.config["electricity"]["automatic_emission"]:
-                    emission_year = snakemake.config["electricity"]["automatic_emission_base_year"]
+                    emission_year = snakemake.config["electricity"][
+                        "automatic_emission_base_year"
+                    ]
                     filename = download_emission_data()
                     co2limit = emission_extractor(filename, emission_year)
                     co2limit = co2limit * float(m[0])
@@ -338,7 +344,9 @@ if __name__ == "__main__":
                     logger.info("Setting CO2 limit according to wildcard value.")
             else:
                 if snakemake.config["electricity"]["automatic_emission"]:
-                    emission_year = snakemake.config["electricity"]["automatic_emission_base_year"]
+                    emission_year = snakemake.config["electricity"][
+                        "automatic_emission_base_year"
+                    ]
                     filename = download_emission_data()
                     co2limit = emission_extractor(filename, emission_year)
                     add_co2limit(n, co2limit, Nyears)
