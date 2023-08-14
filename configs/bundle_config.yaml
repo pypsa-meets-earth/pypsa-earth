@@ -337,14 +337,14 @@ databundles:
   #   disable_by_opt:
   #     build_cutout: [all]
 
-  # # Adding a cutout for South America, approx 18 GB
+  # Cutout for South America, approx 18 GB
   databundles:
   bundle_cutouts_southamerica:
-    countries: [SA]
-    tutorial: true
+    countries: [SouthAmerica]
     category: cutouts
     destination: "cutouts"
     urls:
+      # zenodo:
       gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
