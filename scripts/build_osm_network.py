@@ -12,6 +12,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
+from config_osm_data import osm_clean_columns
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
@@ -39,7 +40,8 @@ def line_endings_to_bus_conversion(lines):
 # tol in m
 def set_substations_ids(buses, distance_crs, tol=2000):
     """
-    Function to set substations ids to buses, accounting for location tolerance
+    Function to set substations ids to buses, accounting for location
+    tolerance.
 
     The algorithm is as follows:
 
@@ -109,7 +111,7 @@ def set_substations_ids(buses, distance_crs, tol=2000):
 
 def set_lines_ids(lines, buses, distance_crs):
     """
-    Function to set line buses ids to the closest bus in the list
+    Function to set line buses ids to the closest bus in the list.
     """
     # set tqdm options for set lines ids
     tqdm_kwargs_line_ids = dict(
@@ -183,9 +185,12 @@ def merge_stations_same_station_id(
     buses, delta_lon=0.001, delta_lat=0.001, precision=4
 ):
     """
-    Function to merge buses with same voltage and station_id
-    This function iterates over all substation ids and creates a bus_id for every substation and voltage level.
-    Therefore, a substation with multiple voltage levels is represented with different buses, one per voltage level
+    Function to merge buses with same voltage and station_id This function
+    iterates over all substation ids and creates a bus_id for every substation
+    and voltage level.
+
+    Therefore, a substation with multiple voltage levels is represented
+    with different buses, one per voltage level
     """
     # initialize list of cleaned buses
     buses_clean = []
@@ -255,7 +260,10 @@ def merge_stations_same_station_id(
 
 def get_ac_frequency(df, fr_col="tag_frequency"):
     """
-    # Function to define a default frequency value. Attempts to find the most usual non-zero frequency across the dataframe; 50 Hz is assumed as a back-up value
+    # Function to define a default frequency value.
+
+    Attempts to find the most usual non-zero frequency across the
+    dataframe; 50 Hz is assumed as a back-up value
     """
 
     # Initialize a default frequency value
@@ -274,7 +282,8 @@ def get_ac_frequency(df, fr_col="tag_frequency"):
 
 def get_transformers(buses, lines):
     """
-    Function to create fake transformer lines that connect buses of the same station_id at different voltage
+    Function to create fake transformer lines that connect buses of the same
+    station_id at different voltage.
     """
 
     ac_freq = get_ac_frequency(lines)
@@ -319,7 +328,9 @@ def get_transformers(buses, lines):
     ]
 
     df_transformers = gpd.GeoDataFrame(df_transformers, columns=trasf_columns)
-    df_transformers.set_index(lines.index[-1] + df_transformers.index + 1, inplace=True)
+    if not df_transformers.empty:
+        init_index = 0 if lines.empty else lines.index[-1] + 1
+        df_transformers.set_index(init_index + df_transformers.index, inplace=True)
     # update line endings
     df_transformers = line_endings_to_bus_conversion(df_transformers)
 
@@ -328,7 +339,8 @@ def get_transformers(buses, lines):
 
 def get_converters(buses, lines):
     """
-    Function to create fake converter lines that connect buses of the same station_id of different polarities
+    Function to create fake converter lines that connect buses of the same
+    station_id of different polarities.
     """
 
     df_converters = []
@@ -384,7 +396,8 @@ def get_converters(buses, lines):
 
 def connect_stations_same_station_id(lines, buses):
     """
-    Function to create fake links between substations with the same substation_id
+    Function to create fake links between substations with the same
+    substation_id.
     """
     ac_freq = get_ac_frequency(lines)
     station_id_list = buses.station_id.unique()
@@ -462,9 +475,9 @@ def connect_stations_same_station_id(lines, buses):
 
 def set_lv_substations(buses):
     """
-    Function to set what nodes are lv, thereby setting substation_lv
-    The current methodology is to set lv nodes to buses where multiple voltage level are found,
-    hence when the station_id is duplicated
+    Function to set what nodes are lv, thereby setting substation_lv The
+    current methodology is to set lv nodes to buses where multiple voltage
+    level are found, hence when the station_id is duplicated.
     """
     # initialize column substation_lv to true
     buses["substation_lv"] = True
@@ -498,8 +511,8 @@ def merge_stations_lines_by_station_id_and_voltage(
     lines, buses, geo_crs, distance_crs, tol=2000
 ):
     """
-    Function to merge close stations and adapt the line datasets to adhere to the merged dataset
-
+    Function to merge close stations and adapt the line datasets to adhere to
+    the merged dataset.
     """
 
     logger.info(
@@ -512,7 +525,8 @@ def merge_stations_lines_by_station_id_and_voltage(
     logger.info("Stage 3b/4: Merge substations with the same id")
 
     # merge buses with same station id and voltage
-    buses = merge_stations_same_station_id(buses)
+    if not buses.empty:
+        buses = merge_stations_same_station_id(buses)
 
     logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
@@ -583,7 +597,7 @@ def create_station_at_equal_bus_locations(
 
 def _split_linestring_by_point(linestring, points):
     """
-    Function to split a linestring geometry by multiple inner points
+    Function to split a linestring geometry by multiple inner points.
 
     Parameters
     ----------
@@ -611,8 +625,8 @@ def _split_linestring_by_point(linestring, points):
 
 def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     """
-    Function to avoid buses overpassing lines with no connection
-    when the bus is within a given tolerance from the line
+    Function to avoid buses overpassing lines with no connection when the bus
+    is within a given tolerance from the line.
 
     Parameters
     ----------
@@ -684,6 +698,9 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
 
             lines_to_add.append(df_append)
 
+    if not lines_to_add:
+        return lines, buses
+
     df_to_add = gpd.GeoDataFrame(pd.concat(lines_to_add, ignore_index=True))
     df_to_add.set_crs(lines.crs, inplace=True)
     df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
@@ -709,10 +726,11 @@ def force_ac_lines(df, col="tag_frequency"):
     """
     Function that forces all PyPSA lines to be AC lines.
 
-    A network can contain AC and DC power lines that are modelled as PyPSA "Line" component.
-    When DC lines are available, their power flow can be controlled by their converter.
-    When it is artificially converted into AC, this feature is lost.
-    However, for debugging and preliminary analysis, it can be useful to bypass problems.
+    A network can contain AC and DC power lines that are modelled as
+    PyPSA "Line" component. When DC lines are available, their power
+    flow can be controlled by their converter. When it is artificially
+    converted into AC, this feature is lost. However, for debugging and
+    preliminary analysis, it can be useful to bypass problems.
     """
     # TODO: default frequency may be by country
     default_ac_frequency = 50
@@ -723,12 +741,81 @@ def force_ac_lines(df, col="tag_frequency"):
     return df
 
 
+def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
+    """
+    Function to add a bus for countries missing substation data.
+    """
+    country_shapes = gpd.read_file(fp_country_shapes).set_index("name")["geometry"]
+    bus_country_list = buses["country"].unique().tolist()
+
+    # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
+    # difference can't give negative values; the following will return only relevant country names
+    no_data_countries = list(set(country_list).difference(set(bus_country_list)))
+
+    if len(no_data_countries) > 0:
+        logger.info(
+            f"No buses for the following countries: {no_data_countries}. Adding a node for everyone of them."
+        )
+        no_data_countries_shape = (
+            country_shapes[country_shapes.index.isin(no_data_countries) == True]
+            .reset_index()
+            .to_crs(geo_crs)
+        )
+        length = len(no_data_countries)
+        df = gpd.GeoDataFrame(
+            {
+                "voltage": [220000] * length,
+                "country": no_data_countries_shape["name"],
+                "lon": no_data_countries_shape["geometry"].centroid.x,
+                "lat": no_data_countries_shape["geometry"].centroid.y,
+                "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
+                "station_id": [np.nan] * length,
+                # All lines for the countries with NA bus data are assumed to be AC
+                "dc": [False] * length,
+                "under_construction": [False] * length,
+                "tag_area": [0.0] * length,
+                "symbol": ["substation"] * length,
+                "tag_substation": ["transmission"] * length,
+                "geometry": no_data_countries_shape["geometry"].centroid,
+                "substation_lv": [True] * length,
+            },
+            crs=geo_crs,
+        ).astype(
+            buses.dtypes.to_dict()
+        )  # keep the same dtypes as buses
+        buses = gpd.GeoDataFrame(
+            pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
+            crs=buses.crs,
+        )
+
+        # update country list by buses dataframe
+        bus_country_list = buses["country"].unique().tolist()
+
+    non_allocated_countries = list(
+        set(country_list).symmetric_difference(set(bus_country_list))
+    )
+
+    if len(non_allocated_countries) > 0:
+        logger.error(
+            f"There following countries could not be allocated properly: {non_allocated_countries}"
+        )
+
+    return buses
+
+
 def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False):
     logger.info("Stage 1/5: Read input data")
 
-    buses = gpd.read_file(inputs["substations"])
-    lines = gpd.read_file(inputs["lines"])
-    generators = read_geojson(inputs["generators"])
+    buses = read_geojson(
+        inputs["substations"],
+        osm_clean_columns["substation"].keys(),
+        dtype=osm_clean_columns["substation"],
+    )
+    lines = read_geojson(
+        inputs["lines"],
+        osm_clean_columns["line"].keys(),
+        dtype=osm_clean_columns["line"],
+    )
 
     lines = line_endings_to_bus_conversion(lines)
 
@@ -750,6 +837,11 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
+    # Add bus to countries with no buses
+    buses = add_buses_to_empty_countries(
+        config["countries"], inputs.country_shapes, buses
+    )
+
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
     if config.get("build_osm_network", {}).get("group_close_buses", False):
         tol = config["build_osm_network"].get("group_tolerance_buses", 500)
@@ -763,56 +855,6 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False
         logger.info("Stage 4/5: Aggregate close substations: disabled")
 
     logger.info("Stage 5/5: Add augmented substation to country with no data")
-
-    country_shapes_fn = inputs.country_shapes
-    country_shapes = gpd.read_file(country_shapes_fn).set_index("name")["geometry"]
-    country_list = config["countries"]
-    bus_country_list = buses["country"].unique().tolist()
-
-    # it may happen that bus_country_list contains entries not relevant as a country name (e.g. "not found")
-    # difference can't give negative values; the following will return only relevant country names
-    no_data_countries = list(set(country_list).difference(set(bus_country_list)))
-
-    if len(no_data_countries) > 0:
-        no_data_countries_shape = country_shapes[
-            country_shapes.index.isin(no_data_countries) == True
-        ].reset_index()
-        length = len(no_data_countries)
-        df = gpd.GeoDataFrame(
-            {
-                "voltage": [220000] * length,
-                "country": no_data_countries_shape["name"],
-                "lon": no_data_countries_shape["geometry"].centroid.x,
-                "lat": no_data_countries_shape["geometry"].centroid.y,
-                "bus_id": np.arange(len(buses) + 1, len(buses) + (length + 1), 1),
-                "station_id": [np.nan] * length,
-                # All lines for the countries with NA bus data are assumed to be AC
-                "dc": [False] * length,
-                "under_construction": [False] * length,
-                "tag_area": [0.0] * length,
-                "symbol": ["substation"] * length,
-                "tag_substation": ["transmission"] * length,
-                "geometry": no_data_countries_shape["geometry"]
-                .to_crs(geo_crs)
-                .centroid,
-                "substation_lv": [True] * length,
-            }
-        ).astype(
-            buses.dtypes.to_dict()
-        )  # keep the same dtypes as buses
-        buses = gpd.GeoDataFrame(
-            pd.concat([buses, df], ignore_index=True).reset_index(drop=True),
-            crs=buses.crs,
-        )
-
-    non_allocated_countries = list(
-        set(country_list).symmetric_difference(set(bus_country_list))
-    )
-
-    if len(non_allocated_countries) > 0:
-        logger.error(
-            f"There following countries could not be allocated properly: {non_allocated_countries}"
-        )
 
     # get transformers: modelled as lines connecting buses with different voltage
     transformers = get_transformers(buses, lines)

@@ -116,7 +116,8 @@ def get_transform_and_shape(bounds, res, out_logging):
 
 def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     """
-    Iterates through all snakemake rule inputs and unifies shapefiles (.shp) only.
+    Iterates through all snakemake rule inputs and unifies shapefiles (.shp)
+    only.
 
     The input is given in the Snakefile and shapefiles are given by .shp
 
@@ -124,7 +125,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     Returns
     -------
     unified_shape : GeoDataFrame with a unified "multishape"
-
     """
     import pandas as pd
     from shapely.ops import unary_union

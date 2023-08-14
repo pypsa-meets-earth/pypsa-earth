@@ -13,6 +13,9 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+# list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
+NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
+
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 
@@ -26,7 +29,6 @@ def sets_path_to_root(root_directory_name):
         Name of the root directory.
     n : int
         Number of folders the function will check upwards/root directed.
-
     """
     import os
 
@@ -294,7 +296,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
     """
-    Function to download data from a url with a progress bar progress in retrieving data
+    Function to download data from a url with a progress bar progress in
+    retrieving data.
 
     Parameters
     ----------
@@ -328,12 +331,19 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
 
 def get_aggregation_strategies(aggregation_strategies):
     """
-    default aggregation strategies that cannot be defined in .yaml format must be specified within
-    the function, otherwise (when defaults are passed in the function's definition) they get lost
-    when custom values are specified in the config.
+    Default aggregation strategies that cannot be defined in .yaml format must
+    be specified within the function, otherwise (when defaults are passed in
+    the function's definition) they get lost when custom values are specified
+    in the config.
     """
     import numpy as np
-    from pypsa.networkclustering import _make_consense
+
+    # to handle the new version of PyPSA.
+    try:
+        from pypsa.clustering.spatial import _make_consense
+    except Exception:
+        # TODO: remove after new release and update minimum pypsa version
+        from pypsa.clustering.spatial import _make_consense
 
     bus_strategies = dict(country=_make_consense("Bus", "country"))
     bus_strategies.update(aggregation_strategies.get("buses", {}))
@@ -375,7 +385,9 @@ def mock_snakemake(rulename, **wildcards):
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
+    workflow = sm.Workflow(
+        snakefile, overwrite_configfiles=[], rerun_triggers=[]
+    )  # overwrite_config=config
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
@@ -421,7 +433,7 @@ def mock_snakemake(rulename, **wildcards):
 
 def getContinent(code):
     """
-    Returns continent names that contains list of iso-code countries
+    Returns continent names that contains list of iso-code countries.
 
     Parameters
     ----------
@@ -541,7 +553,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
 
 def country_name_2_two_digits(country_name):
     """
-    Convert full country name to 2-digit country code
+    Convert full country name to 2-digit country code.
 
     Parameters
     ----------
@@ -563,18 +575,15 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-NA_VALUES = ["NULL"]
-
-
 def read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"
-    if "keep_default_na" in kwargs:
-        del kwargs["keep_default_na"]
-    if "na_values" in kwargs:
-        del kwargs["na_values"]
+    if "keep_default_na" not in kwargs:
+        kwargs["keep_default_na"] = False
+    if "na_values" not in kwargs:
+        kwargs["na_values"] = NA_VALUES
 
     if os.stat(file).st_size > 0:
-        return pd.read_csv(file, **kwargs, keep_default_na=False, na_values=NA_VALUES)
+        return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
 
@@ -604,18 +613,38 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def read_geojson(fn):
+def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
+    """
+    Function to read a geojson file fn. When the file is empty, then an empty
+    GeoDataFrame is returned having columns cols, the specified crs and the
+    columns specified by the dtype dictionary it not none.
+
+    Parameters:
+    ----------
+    fn : str
+        Path to the file to read
+    cols : list
+        List of columns of the GeoDataFrame
+    dtype : dict
+        Dictionary of the type of the object by column
+    crs : str
+        CRS of the GeoDataFrame
+    """
     # if the file is non-zero, read the geodataframe and return it
     if os.path.getsize(fn) > 0:
         return gpd.read_file(fn)
     else:
         # else return an empty GeoDataFrame
-        return gpd.GeoDataFrame(geometry=[])
+        df = gpd.GeoDataFrame(columns=cols, geometry=[], crs=crs)
+        if isinstance(dtype, dict):
+            for k, v in dtype.items():
+                df[k] = df[k].astype(v)
+        return df
 
 
 def create_country_list(input, iso_coding=True):
     """
-    Create a country list for defined regions in config_osm_data.py
+    Create a country list for defined regions in config_osm_data.py.
 
     Parameters
     ----------
@@ -644,8 +673,10 @@ def create_country_list(input, iso_coding=True):
     def filter_codes(c_list, iso_coding=True):
         """
         Filter list according to the specified coding.
-        When iso code are implemented (iso_coding=True), then remove the geofabrik-specific ones.
-        When geofabrik codes are selected(iso_coding=False), ignore iso-specific names.
+
+        When iso code are implemented (iso_coding=True), then remove the
+        geofabrik-specific ones. When geofabrik codes are
+        selected(iso_coding=False), ignore iso-specific names.
         """
         if (
             iso_coding

@@ -76,7 +76,7 @@ It is advisable to adapt the required range of coordinates to the selection of c
     atlite:
         nprocesses: 4
         cutouts:
-                africa-2013-era5-tutorial:
+                cutout-2013-era5-tutorial:
                     module: era5
                     dx: 0.3  # cutout resolution
                     dy: 0.3  # cutout resolution
@@ -90,13 +90,13 @@ For example, we may want to use the ERA-5 dataset for solar and not the default 
 
 .. code:: yaml
 
-    africa-2013-era5-tutorial:
+    cutout-2013-era5-tutorial:
         module: era5
 
 .. code:: yaml
 
     solar:
-        cutout: africa-2013-era5-tutorial
+        cutout: cutout-2013-era5-tutorial
 
 Finally, it is possible to pick a solver. For instance, this tutorial uses the open-source solver glpk and does not rely
 on the commercial solvers such as Gurobi or CPLEX (for which free academic licenses are available).

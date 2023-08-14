@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Adds electrical generators, load and existing hydro storage units to a base network.
+Adds electrical generators, load and existing hydro storage units to a base
+network.
 
 Relevant Settings
 -----------------
@@ -92,10 +93,8 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, getContinent, update_p_nom_max
+from _helpers import configure_logging, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
-from shapely.validation import make_valid
-from vresutils import transfer as vtransfer
 
 idx = pd.IndexSlice
 
@@ -109,7 +108,7 @@ def normed(s):
 def calculate_annuity(n, r):
     """
     Calculate the annuity factor for an asset with lifetime n years and
-    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6.
     """
     if isinstance(r, pd.Series):
         return pd.Series(1 / n, index=r.index).where(
@@ -137,7 +136,7 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
 
 def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
-    set all asset costs and other parameters
+    Set all asset costs and other parameters.
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
@@ -221,7 +220,7 @@ def load_powerplants(ppl_fn):
         "hard coal": "coal",
     }
     return (
-        pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
+        read_csv_nafix(ppl_fn, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
         .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
@@ -232,7 +231,7 @@ def load_powerplants(ppl_fn):
 
 def attach_load(n, demand_profiles):
     """
-    Add load profiles to network buses
+    Add load profiles to network buses.
 
     Parameters
     ----------
@@ -247,9 +246,38 @@ def attach_load(n, demand_profiles):
     n : pypsa network
         Now attached with load time series
     """
-    demand_df = pd.read_csv(demand_profiles, index_col=0, parse_dates=True)
+    demand_df = read_csv_nafix(demand_profiles, index_col=0, parse_dates=True)
 
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
+
+
+def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
+    if lines_or_links.empty:
+        return
+
+    if lines_or_links.loc[lines_or_links.carrier == "DC"].empty:
+        return
+
+    dc_b = lines_or_links.carrier == "DC"
+    if simple_hvdc_costs:
+        costs = (
+            lines_or_links.loc[dc_b, "length"]
+            * length_factor
+            * costs.at["HVDC overhead", "capital_cost"]
+        )
+    else:
+        costs = (
+            lines_or_links.loc[dc_b, "length"]
+            * length_factor
+            * (
+                (1.0 - lines_or_links.loc[dc_b, "underwater_fraction"])
+                * costs.at["HVDC overhead", "capital_cost"]
+                + lines_or_links.loc[dc_b, "underwater_fraction"]
+                * costs.at["HVDC submarine", "capital_cost"]
+            )
+            + costs.at["HVDC inverter pair", "capital_cost"]
+        )
+    lines_or_links.loc[dc_b, "capital_cost"] = costs
 
 
 def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
@@ -257,35 +285,18 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
         n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
     )
 
-    if n.links.empty:
-        return
-
-    dc_b = n.links.carrier == "DC"
-    # If there are no "DC" links, then the 'underwater_fraction' column
-    # may be missing. Therefore we have to return here.
-    # TODO: Require fix
-    if n.links.loc[n.links.carrier == "DC"].empty:
-        return
-
-    if simple_hvdc_costs:
-        costs = (
-            n.links.loc[dc_b, "length"]
-            * length_factor
-            * costs.at["HVDC overhead", "capital_cost"]
-        )
-    else:
-        costs = (
-            n.links.loc[dc_b, "length"]
-            * length_factor
-            * (
-                (1.0 - n.links.loc[dc_b, "underwater_fraction"])
-                * costs.at["HVDC overhead", "capital_cost"]
-                + n.links.loc[dc_b, "underwater_fraction"]
-                * costs.at["HVDC submarine", "capital_cost"]
-            )
-            + costs.at["HVDC inverter pair", "capital_cost"]
-        )
-    n.links.loc[dc_b, "capital_cost"] = costs
+    attach_dc_costs(
+        lines_or_links=n.links,
+        costs=costs,
+        length_factor=length_factor,
+        simple_hvdc_costs=simple_hvdc_costs,
+    )
+    attach_dc_costs(
+        lines_or_links=n.lines,
+        costs=costs,
+        length_factor=length_factor,
+        simple_hvdc_costs=simple_hvdc_costs,
+    )
 
 
 def attach_wind_and_solar(
@@ -374,8 +385,15 @@ def attach_conventional_generators(
     conventional_config,
     conventional_inputs,
 ):
-    carriers = set(conventional_carriers) | (set(extendable_carriers["Generator"]) - set(renewable_carriers))
+    carriers = set(conventional_carriers) | (
+        set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    )
     _add_missing_carriers_from_costs(n, costs, carriers)
+
+    # Replace carrier "natural gas" with the respective technology (OCGT or CCGT) to align with PyPSA names of "carriers" and avoid filtering "natural gas" powerplants in ppl.query("carrier in @carriers")
+    ppl.loc[ppl["carrier"] == "natural gas", "carrier"] = ppl.loc[
+        ppl["carrier"] == "natural gas", "technology"
+    ]
 
     ppl = (
         ppl.query("carrier in @carriers")
@@ -415,7 +433,7 @@ def attach_conventional_generators(
             if f"conventional_{carrier}_{attr}" in conventional_inputs:
                 # Values affecting generators of technology k country-specific
                 # First map generator buses to countries; then map countries to p_max_pu
-                values = pd.read_csv(values, index_col=0).iloc[:, 0]
+                values = read_csv_nafix(values, index_col=0).iloc[:, 0]
                 bus_values = n.buses.country.map(values)
                 n.generators[attr].update(
                     n.generators.loc[idx].bus.map(bus_values).dropna()
@@ -458,32 +476,40 @@ def attach_hydro(n, costs, ppl):
             missing_plants = pd.Index(inflow_buses.unique()).difference(
                 inflow.indexes["plant"]
             )
-            intersection_plants = pd.Index(
-                inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
-            )
+            # map power plants index (regions_onshore) into power plants ids (powerplants.csv)
+            # plants_to_keep correspond to "plant" index of regions_onshore
+            # plants_to_keep.index corresponds to bus_id of PyPSA network
+            plants_with_data = inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
+            plants_to_keep = plants_with_data.to_numpy()
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants.empty:
                 # original total p_nom
                 total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
-                idxs_to_keep = inflow_buses[
-                    inflow_buses.isin(intersection_plants)
-                ].index
-                ror = ror.loc[ror.index.intersection(idxs_to_keep)]
-                hydro = hydro.loc[hydro.index.intersection(idxs_to_keep)]
+                # update plants_with_data to ensure proper match between "plant" index and bus_id
+                plants_with_data = inflow_buses[inflow_buses.isin(plants_to_keep)]
+                network_buses_to_keep = plants_with_data.index
+                plants_to_keep = plants_with_data.to_numpy()
+
+                ror = ror.loc[ror.index.intersection(network_buses_to_keep)]
+                hydro = hydro.loc[hydro.index.intersection(network_buses_to_keep)]
                 # loss of p_nom
                 loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
 
                 logger.warning(
                     f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
-                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom}MW out of {total_p_nom}MW."
+                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
                 )
 
-            if not intersection_plants.empty:
+            # if there are any plants for which runoff data are available
+            if not plants_with_data.empty:
+                network_buses_to_keep = plants_with_data.index
+                plants_to_keep = plants_with_data.to_numpy()
+
                 inflow_t = (
-                    inflow.sel(plant=intersection_plants)
+                    inflow.sel(plant=plants_to_keep)
                     .rename({"plant": "name"})
-                    .assign_coords(name=inflow_idx)
+                    .assign_coords(name=network_buses_to_keep)
                     .transpose("time", "name")
                     .to_pandas()
                 )

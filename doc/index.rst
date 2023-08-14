@@ -111,7 +111,7 @@ The PyPSA meets Earth team is currently running four types of meetings:
 - **Buddy talk (Open)**
 
   - book a 30min meeting with Max to discuss anything you like
-  - booking link: `calendly.com/pypsa-meets-earth <https://calendly.com/pypsa-meets-earth/pypsa-meets-earth-exchange-30min>`_
+  - booking link: `calendly.com/pypsa-meets-earth <https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min>`_
 
 =============
 Documentation

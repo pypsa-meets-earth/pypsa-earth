@@ -87,7 +87,8 @@ def monte_carlo_sampling_pydoe2(
     correlation_matrix=None,
 ):
     """
-    Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with various options. Additionally all "corners" are simulated.
+    Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
+    various options. Additionally all "corners" are simulated.
 
     Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
     Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
@@ -103,7 +104,7 @@ def monte_carlo_sampling_pydoe2(
         correlation_matrix=correlation_matrix,
     )
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
@@ -114,16 +115,15 @@ def monte_carlo_sampling_chaospy(N_FEATURES, SAMPLES, rule="latin_hypercube", se
 
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
-
     """
     # Generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
     uniform_cube = eval(
         f"chaospy.J({N_FEATURES})"
     )  # writes Nfeatures times the chaospy.uniform... command)
-    lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T
+    lh = np.atleast_2d(uniform_cube.sample(SAMPLES, rule=rule, seed=seed)).T
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
@@ -132,7 +132,9 @@ def monte_carlo_sampling_scipy(
     N_FEATURES, SAMPLES, centered=False, strength=2, optimization=None, seed=42
 ):
     """
-    Creates Latin Hypercube Sample (LHS) implementation from SciPy with various options:
+    Creates Latin Hypercube Sample (LHS) implementation from SciPy with various
+    options:
+
     - Center the point within the multi-dimensional grid, centered=True
     - optimization scheme, optimization="random-cd"
     - strength=1, classical LHS
@@ -154,7 +156,7 @@ def monte_carlo_sampling_scipy(
     )
     lh = sampler.random(n=SAMPLES)
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Hypercube discrepancy is:", discrepancy)
+    logger.info(f"Hypercube discrepancy is: {discrepancy}")
 
     return lh
 
