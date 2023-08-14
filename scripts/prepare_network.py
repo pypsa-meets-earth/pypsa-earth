@@ -92,25 +92,29 @@ def download_emission_data():
         logger.error(f"Failed download resource from '{url}'.")
         return False
 
+
 def emission_extractor(filename, emission_year, country_names):
     # data reading process
-    datapath  = os.path.join(
-            os.getcwd(),
-            "data",
-            filename
-        )
-    df = pd.read_excel(datapath, sheet_name='v6.0_EM_CO2_fossil_IPCC1996', skiprows=8)
+    datapath = os.path.join(os.getcwd(), "data", filename)
+    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
-    df = df.set_index('Country_code_A3')
-    df = df.loc[df['IPCC_for_std_report_desc'] == "Public electricity and heat production"]
-    df = df.loc[:,'Y_1970':'Y_2018'].ffill(axis = 1)
-    df = df.loc[:,'Y_1970':'Y_2018'].bfill(axis = 1)
-    cc_iso3 = cc.convert(names=country_names, to='ISO3')
-    emission_by_country = df.loc[df.index.intersection(cc_iso3), 'Y_'+str(emission_year)]
+    df = df.set_index("Country_code_A3")
+    df = df.loc[
+        df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
+    ]
+    df = df.loc[:, "Y_1970":"Y_2018"].ffill(axis=1)
+    df = df.loc[:, "Y_1970":"Y_2018"].bfill(axis=1)
+    cc_iso3 = cc.convert(names=country_names, to="ISO3")
+    emission_by_country = df.loc[
+        df.index.intersection(cc_iso3), "Y_" + str(emission_year)
+    ]
     missing_ccs = np.setdiff1d(cc_iso3, df.index.intersection(cc_iso3))
-    if missing_ccs.size: 
-        logger.warning(f"The emission value for the following countries has not been found: {missing_ccs}")
+    if missing_ccs.size:
+        logger.warning(
+            f"The emission value for the following countries has not been found: {missing_ccs}"
+        )
     return sum(emission_by_country)
+
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
     n.add(
@@ -324,11 +328,13 @@ if __name__ == "__main__":
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if snakemake.config["electricity"]["automatic_emission"]:
                 country_names = n.buses.country.unique()
-                emission_year = snakemake.config["electricity"]["automatic_emission_base_year"]
+                emission_year = snakemake.config["electricity"][
+                    "automatic_emission_base_year"
+                ]
                 filename = download_emission_data()
                 co2limit = emission_extractor(filename, emission_year, country_names)
                 if len(m) > 0:
-                    co2limit = co2limit * float(m[0])  
+                    co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
                 co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
