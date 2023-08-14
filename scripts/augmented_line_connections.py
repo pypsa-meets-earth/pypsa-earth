@@ -27,8 +27,6 @@ Outputs
 
 Description
 -----------
-
-
 """
 import logging
 import os
@@ -39,7 +37,7 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging
 from add_electricity import load_costs
-from base_network import _set_links_underwater_fraction
+from base_network import _set_dc_underwater_fraction
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
@@ -88,6 +86,7 @@ if __name__ == "__main__":
 
     # TODO: Currently only AC lines are read in and meshed. One need to combine
     # AC & DC lines and then move on.
+    # rather there is a need to filter-out DC lines
     network_lines = n.lines
     sel = network_lines.s_nom > 100  # TODO: Check, should be all selected or filtered?
     attrs = ["bus0", "bus1", "length"]
@@ -170,7 +169,10 @@ if __name__ == "__main__":
             lifetime=costs.at["HVAC overhead", "lifetime"],
         )
 
-        _set_links_underwater_fraction(snakemake.input.regions_offshore, n)
+        # TODO There is a need to add calculations of `underwater_fraction`
+        # considering only lines added during augmentation
+        # _set_dc_underwater_fraction(n.links, snakemake.input.regions_offshore)
+        # _set_dc_underwater_fraction(n.lines, snakemake.input.regions_offshore)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

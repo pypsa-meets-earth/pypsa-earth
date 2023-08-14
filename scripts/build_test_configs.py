@@ -5,11 +5,12 @@
 
 # -*- coding: utf-8 -*-
 """
-Write option files (configs) for the Continuous Integration tests
+Write option files (configs) for the Continuous Integration tests.
 
-The config.tutorial.yaml has all options.
-The test/* config files have only key/value strings that are different from the tutorial config.
-The below scripts 'updates' the test configs and adds all options of the tutorial config.
+The config.tutorial.yaml has all options. The test/* config files have
+only key/value strings that are different from the tutorial config. The
+below scripts 'updates' the test configs and adds all options of the
+tutorial config.
 """
 import collections.abc
 import copy
@@ -29,7 +30,9 @@ def update(d, u):
 
 
 def _parse_inputconfig(input_config, yaml):
-    """Utility function to parse input config into a dictionary"""
+    """
+    Utility function to parse input config into a dictionary.
+    """
     if isinstance(input_config, dict):
         return input_config
 
@@ -42,9 +45,9 @@ def _parse_inputconfig(input_config, yaml):
 
 def create_test_config(default_config, diff_config, output_path):
     """
-    This function takes as input a default dictionary-like object
-    and a difference dictionary-like object, merges the changes of the latter into the former,
-    and saves the output in the desired output path.
+    This function takes as input a default dictionary-like object and a
+    difference dictionary-like object, merges the changes of the latter into
+    the former, and saves the output in the desired output path.
 
     Inputs
     ------
@@ -60,7 +63,6 @@ def create_test_config(default_config, diff_config, output_path):
     Outputs
     -------
     - merged dictionary
-
     """
 
     # Load yaml files

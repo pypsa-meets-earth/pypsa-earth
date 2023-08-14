@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 """
 Plots energy and cost summaries for solved networks.
+
 Relevant Settings
 -----------------
 Inputs

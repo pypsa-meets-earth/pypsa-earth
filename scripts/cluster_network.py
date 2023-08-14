@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates networks clustered to ``{cluster}`` number of zones with aggregated buses, generators and transmission corridors.
+Creates networks clustered to ``{cluster}`` number of zones with aggregated
+buses, generators and transmission corridors.
 
 Relevant Settings
 -----------------
@@ -87,7 +88,7 @@ Description
     **Is it possible to run the model without the** ``simplify_network`` **rule?**
 
         No, the network clustering methods in the PyPSA module
-        `pypsa.networkclustering <https://github.com/PyPSA/PyPSA/blob/master/pypsa/networkclustering.py>`_
+        `pypsa.clustering.spatial <https://github.com/PyPSA/PyPSA/blob/master/pypsa/networkclustering.py>`_
         do not work reliably with multiple voltage levels and transformers.
 
 .. tip::
@@ -118,7 +119,6 @@ Exemplary unsolved network clustered to 37 nodes:
 .. image:: /img/elec_s_37.png
     :width: 40  %
     :align: center
-
 """
 import logging
 import os
@@ -141,7 +141,7 @@ from _helpers import (
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
-from pypsa.networkclustering import (
+from pypsa.clustering.spatial import (
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
@@ -232,7 +232,9 @@ def get_feature_for_hac(n, buses_i=None, feature=None):
 def distribute_clusters(
     inputs, config, n, n_clusters, focus_weights=None, solver_name=None
 ):
-    """Determine the number of clusters per country"""
+    """
+    Determine the number of clusters per country.
+    """
 
     distribution_cluster = config["cluster_options"]["distribute_cluster"]
     country_list = config["countries"]
@@ -249,6 +251,7 @@ def distribute_clusters(
             n.loads_t.p_set.mean()
             .groupby(n.loads.bus)
             .sum()
+            .reindex(n.buses.index, fill_value=0.0)
             .groupby([n.buses.country, n.buses.sub_network])
             .sum()
             .pipe(normed)
@@ -334,7 +337,7 @@ def distribute_clusters(
 
     def n_bounds(model, *n_id):
         """
-        Create a function that makes a bound pair for pyomo
+        Create a function that makes a bound pair for pyomo.
 
         Use n_bounds(model, n_id) if N is Single-Index
         Use n_bounds(model, *n_id) if N is Multi-Index
@@ -606,9 +609,14 @@ def clustering_for_n_clusters(
             n.links.eval("underwater_fraction * length").div(nc.links.length).dropna()
         )
         nc.links["capital_cost"] = nc.links["capital_cost"].add(
-            (nc.links.length - n.links.length).clip(lower=0).mul(extended_link_costs),
+            (nc.links.length - n.links.length)
+            .clip(lower=0)
+            .mul(extended_link_costs)
+            .dropna(),
             fill_value=0,
         )
+    if not n.lines.loc[n.lines.carrier == "DC"].empty:
+        clustering.network.lines["underwater_fraction"] = 0
 
     return clustering
 
@@ -641,7 +649,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="10"
+            "cluster_network", network="elec", simpl="", clusters="110"
         )
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
@@ -687,7 +695,7 @@ if __name__ == "__main__":
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
         linemap = n.lines.index.to_series()
-        clustering = pypsa.networkclustering.Clustering(
+        clustering = pypsa.clustering.spatial.Clustering(
             n, busmap, linemap, linemap, pd.Series(dtype="O")
         )
     elif len(n.buses) < n_clusters:

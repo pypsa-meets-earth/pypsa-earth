@@ -6,13 +6,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
-"""Calculates for each network node the
-(i) installable capacity (based on land-use), (ii) the available generation time
-series (based on weather data), and (iii) the average distance from the node for
-onshore wind, AC-connected offshore wind, DC-connected offshore wind and solar
-PV generators. For hydro generators, it calculates the expected inflows.
-In addition for offshore wind it calculates the fraction of the grid connection
-which is under water.
+"""
+Calculates for each network node the (i) installable capacity (based on land-
+use), (ii) the available generation time series (based on weather data), and
+(iii) the average distance from the node for onshore wind, AC-connected
+offshore wind, DC-connected offshore wind and solar PV generators. For hydro
+generators, it calculates the expected inflows. In addition for offshore wind
+it calculates the fraction of the grid connection which is under water.
 
 Relevant settings
 -----------------
@@ -189,7 +189,6 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 - ``conservative`` ascertains the nodal limit by increasing capacities
   proportional to the layout until the limit of an individual grid cell is
   reached.
-
 """
 import functools
 import logging
@@ -206,8 +205,9 @@ import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
+from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 
@@ -215,6 +215,26 @@ logger = logging.getLogger(__name__)
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
+
+
+def check_cutout_match(cutout, geodf):
+    cutout_box = box(*cutout.bounds)
+    region_box = box(*regions.total_bounds)
+
+    assert not region_box.intersection(cutout_box).is_empty, (
+        "The requested region is completely out of the cutout area.\n\r"
+        "Check please the provided cutout.\n\r"
+        "More details on cutout generation are available in docs:\n\r"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
+    )
+
+    if not region_box.covered_by(cutout_box):
+        logger.warning(
+            "Weather data does not fully cover the requester region.\n\r"
+            "It's recommended to check the provided cutout.\n\r"
+            "More details on cutout generation are available in docs:\n\r"
+            "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
+        )
 
 
 def get_eia_annual_hydro_generation(fn, countries):
@@ -263,8 +283,10 @@ def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
 def check_cutout_completness(cf):
     """
     Check if a cutout contains missed values.
-    That may be the case due to some issues with accessibility of ERA5 data
-    See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
+
+    That may be the case due to some issues with accessibility of ERA5
+    data See for details
+    https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
     Returns share of cutout cells with missed data
     """
     n_missed_cells = pd.isnull(cf).sum()
@@ -280,6 +302,7 @@ def check_cutout_completness(cf):
 def estimate_bus_loss(data_column, tech):
     """
     Calculated share of buses with data loss due to flaws in the cutout data.
+
     Returns share of the buses with missed data
     """
     n_weights_initial = len(data_column)
@@ -299,7 +322,7 @@ def estimate_bus_loss(data_column, tech):
 
 def filter_cutout_region(cutout, regions):
     """
-    Filter the cutout to focus on the region of interest
+    Filter the cutout to focus on the region of interest.
     """
     # filter cutout regions to focus on the region of interest
     minx, miny, maxx, maxy = regions.total_bounds
@@ -311,7 +334,8 @@ def filter_cutout_region(cutout, regions):
 
 def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     """
-    Function used to rescale the inflows of the hydro capacities to match country statistics
+    Function used to rescale the inflows of the hydro capacities to match
+    country statistics.
 
     Parameters
     ----------
@@ -373,7 +397,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
             yearlyavg_runoff_by_plant.loc[normalization_buses].groupby("country").sum()
         )
 
-        # common country indeces
+        # common country indices
         common_countries = normalize_using_yearly.columns.intersection(
             grouped_runoffs.index
         )
@@ -472,7 +496,7 @@ if __name__ == "__main__":
     pgb.streams.wrap_stderr()
     countries = snakemake.config["countries"]
     paths = snakemake.input
-    nprocesses = snakemake.config["atlite"].get("nprocesses")
+    nprocesses = int(snakemake.threads)
     noprogress = not snakemake.config["atlite"].get("show_progress", False)
     config = snakemake.config["renewable"][snakemake.wildcards.technology]
     resource = config["resource"]
@@ -498,7 +522,13 @@ if __name__ == "__main__":
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
 
+    cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
+    client = Client(cluster, asynchronous=True)
+
     cutout = atlite.Cutout(paths["cutout"])
+
+    check_cutout_match(cutout=cutout, geodf=regions)
+
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
         cutout = filter_cutout_region(cutout, regions)
@@ -524,7 +554,7 @@ if __name__ == "__main__":
     buses = regions.index
 
     func = getattr(cutout, resource.pop("method"))
-    resource["dask_kwargs"] = {"num_workers": nprocesses}
+    resource["dask_kwargs"] = {"scheduler": client}
 
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
@@ -795,3 +825,4 @@ if __name__ == "__main__":
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
         ds.to_netcdf(snakemake.output.profile)
+    client.shutdown()

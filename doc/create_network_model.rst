@@ -11,7 +11,7 @@ The simplification ``snakemake`` rules prepare **approximations** of the full mo
 - :mod:`base_network` builds and stores the base network with all buses, HVAC lines and HVDC links
 - :mod:`add_electricity` adds the generators and demand to the network model
 - :mod:`simplify_network` transforms the transmission grid to a 380 kV only equivalent network
-- :mod:`cluster_network` uses a clustering approach (e.g. `k-means <https://en.wikipedia.org/wiki/K-means_clustering>`_ ) 
+- :mod:`cluster_network` uses a clustering approach (e.g. `k-means <https://en.wikipedia.org/wiki/K-means_clustering>`_ )
   to partition the network into a given number of zones and then reduce the network to a representation with one bus per zone.
 - :mod:`add_extra_components` add extra components to the model, such as storage
 - :mod:`prepare_network` introduces optional constraints and requirements in the modelling,
