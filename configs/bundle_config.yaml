@@ -338,7 +338,6 @@ databundles:
   #     build_cutout: [all]
 
   # Cutout for South America, approx 18 GB
-  databundles:
   bundle_cutouts_southamerica:
     countries: [SouthAmerica]
     category: cutouts
