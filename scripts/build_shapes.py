@@ -714,7 +714,8 @@ def _init_process_pop(df_gadm_, df_tasks_, dict_worldpop_file_locations_):
 
 def process_function_population(row_id):
     """
-    Function that reads the task from df_tasks and executes all the methods
+    Function that reads the task from df_tasks and executes all the methods.
+
     to obtain population values for the specified region
     -------
     Inputs:
@@ -877,8 +878,9 @@ def compute_geomask_region(
 
 def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     """
-    Function that sums all the population values in np_pop_val into the correct GADM_ID
-    It uses np_pop_xy to access the key stored in region_geomask[x][y]
+    Function that sums all the population values in np_pop_val into the correct
+    GADM_ID It uses np_pop_xy to access the key stored in region_geomask[x][y]
+
     The relation of this key to GADM_ID is stored in id_mapping
     -------
     Inputs:
@@ -891,7 +893,6 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
         df_pop_count: Dataframe with columns
             - "GADM_ID"
             - "pop" containing population of GADM_ID region
-
     """
     # Initialize a dictionary
     dict_id = Dict.empty(
@@ -925,8 +926,9 @@ def loop_and_extact_val_x_y(
     np_pop_count, np_pop_val, np_pop_xy, region_geomask, dict_id
 ):
     """
-    Function that will be compiled using @njit (numba)
-    It takes all the population values from np_pop_val and stores them in np_pop_count
+    Function that will be compiled using @njit (numba) It takes all the
+    population values from np_pop_val and stores them in np_pop_count.
+
     where each location in np_pop_count is mapped to a GADM_ID through dict_id (id_mapping by extension)
     -------
     Inputs:
@@ -958,7 +960,9 @@ def calculate_transform_and_coords_for_window(
     current_transform, window_dimensions, original_window=False
 ):
     """
-    Function which calculates the [lat,long] corners of the window given window_dimensions,
+    Function which calculates the [lat,long] corners of the window given
+    window_dimensions,
+
     if not(original_window) it also changes the affine transform to match the window
     -------
     Inputs:
@@ -972,7 +976,6 @@ def calculate_transform_and_coords_for_window(
             coordinate_topleft: [latitude, longitude] of top left corner of the window
             coordinate_botright: [latitude, longitude] of bottom right corner of the window
         ]
-
     """
     col_offset, row_offset, x_axis_len, y_axis_len = window_dimensions
 
@@ -1011,7 +1014,8 @@ def calculate_transform_and_coords_for_window(
 
 def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
     """
-    Function to generate a list of tasks based on the memory constraints
+    Function to generate a list of tasks based on the memory constraints.
+
     One task represents a single window of the image
     -------
     Inputs:
