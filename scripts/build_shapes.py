@@ -1107,10 +1107,11 @@ def add_population_data(
 ):
     """
     Function to add population data to arbitrary number of shapes in a country.
-    It loads data from WorldPop raster files where each pixel represents the population in that square region.
-    Each square polygon (or pixel) is then mapped into the corresponding GADM shape.
-    Then the population in a GADM shape is identified by summing over all pixels mapped to that region.
-    
+    It loads data from WorldPop raster files where each pixel represents the
+    population in that square region. Each square polygon (or pixel) is then
+    mapped into the corresponding GADM shape. Then the population in a GADM
+    shape is identified by summing over all pixels mapped to that region.
+
     This is performed with an iterative approach:
     1. All necessary WorldPop data tiff file are downloaded
     2. The so-called windows are created to handle RAM limitations related to large WorldPop files.
@@ -1212,7 +1213,7 @@ def add_population_data(
                         gadm_id, pop_count = df_pop_count.iloc[i]
                         # Select the row with the same "GADM_ID" and set the population count
                         df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] += pop_count
-                    
+
                     # update bar
                     pbar.update(1)
 
