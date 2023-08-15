@@ -461,10 +461,10 @@ def download_WorldPop_standard(
     """
 
     if country_code == "XK":
-        WorldPop_filename = f"srb_ppp_{year}_UNadj_constrained.tif"
+        WorldPop_filename = f"kos_ppp_{year}_constrained.tif"
         WorldPop_urls = [
-            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/SRB/{WorldPop_filename}",
-            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/SRB/{WorldPop_filename}",
+            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/KOS/{WorldPop_filename}",
+            f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/KOS/{WorldPop_filename}",
         ]
     else:
         WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
@@ -901,7 +901,7 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     )
     dict_id[0] = 0
     counter = 1
-    # Loop over ip mapping and add indicies to the dictionary
+    # Loop over ip mapping and add indices to the dictionary
     for ID_index in np.array(id_mapping.index):
         dict_id[ID_index] = counter
         counter += 1
