@@ -941,7 +941,6 @@ def loop_and_extact_val_x_y(
     Outputs:
         np_pop_count: np.array containing population counts
     """
-
     # Loop the population data
     for i in range(len(np_pop_val)):
         cur_value = np_pop_val[i]
@@ -1108,6 +1107,19 @@ def add_population_data(
 ):
     """
     Function to add population data to arbitrary number of shapes in a country.
+    It loads data from WorldPop raster files where each pixel represents the population in that square region.
+    Each square polygon (or pixel) is then mapped into the corresponding GADM shape.
+    Then the population in a GADM shape is identified by summing over all pixels mapped to that region.
+    
+    This is performed with an iterative approach:
+    1. All necessary WorldPop data tiff file are downloaded
+    2. The so-called windows are created to handle RAM limitations related to large WorldPop files.
+       Large WorldPop files require significant RAM to handle, which may not be available,
+       hence, the entire activity is decomposed into multiple windows (or tasks).
+       Each window represents a subset of a raster file on which the following algorithm is applied.
+       Note: when enough RAM is available only a window is created for efficiency purposes.
+    3. Execute all tasks by summing the values of the pixels mapped into each GADM shape.
+       Parallelization applies in this task.
 
     Inputs:
     -------
@@ -1193,14 +1205,16 @@ def add_population_data(
             for df_pop_count in pool.imap_unordered(
                 process_function_population, range(len(df_tasks))
             ):
-                # Acquire the lock before accessing df_gadm
+                # Acquire the lock before accessing df_gadm and pbar
                 with lock:
                     # Loop the regions and write population to df_gadm
                     for i in range(len(df_pop_count)):
                         gadm_id, pop_count = df_pop_count.iloc[i]
                         # Select the row with the same "GADM_ID" and set the population count
                         df_gadm.loc[df_gadm["GADM_ID"] == gadm_id, "pop"] += pop_count
-                pbar.update(1)
+                    
+                    # update bar
+                    pbar.update(1)
 
 
 def gadm(
