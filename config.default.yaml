@@ -39,6 +39,10 @@ clustering_options:
 
 countries: ['MA']
 
+demand_data:
+  update_data: true
+  base_year: 2019
+  
 H2_network: false
 H2_network_limit: 2000 #GWkm
 
