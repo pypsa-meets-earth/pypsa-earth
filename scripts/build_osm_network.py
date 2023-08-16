@@ -615,6 +615,8 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     lines : GeoDataFrame
         GeoDataFrame containing the lines
     """
+    if lines.empty:
+        return lines, buses
 
     df_l = lines.copy()  # can use lines directly without copying
     # drop all columns except id and geometry for buses
@@ -691,7 +693,9 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     df_l = df_l.explode(index_parts=True).reset_index()
 
     # revise line_id to account for part index
-    df_l[line_id_str] = df_l[line_id_str] + "_" + df_l["level_1"].astype(str)
+    df_l[line_id_str] = (
+        df_l[line_id_str].astype(str) + "_" + df_l["level_1"].astype(str)
+    )
     df_l.drop(columns=["level_0", "level_1"], inplace=True)
 
     # update line endings (included for completion, the scope of the function should be limited to fixing overpassing lines)
