@@ -233,6 +233,12 @@ rule prepare_heat_data:
     script:
         "scripts/prepare_heat_data.py"
 
+rule build_energy_totals:
+    output:
+        energy_totals_base="data/energy_totals_base.csv"
+        energy_totals="data/energy_totals_{demand}_{planning_horizon}.csv"
+    script:
+        "scripts/build_energy_totals.py"
 
 rule build_solar_thermal_profiles:
     input:
