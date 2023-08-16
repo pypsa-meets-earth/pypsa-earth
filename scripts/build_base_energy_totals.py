@@ -18,7 +18,7 @@ pd.options.mode.chained_assignment = None
 
 def calc_sector(sector):
     for country in countries:
-        print(country, sector)
+        #print(country, sector)
         df_co = df_yr[df_yr.country == country]
 
         if sector!= "navigation":
