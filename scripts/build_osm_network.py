@@ -597,7 +597,13 @@ def create_station_at_equal_bus_locations(
 
 def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     """
-    Function to snap buses to lines that are within a certain tolerance.
+    Snap buses to lines that are within a certain tolerance.
+    It does this by first buffering the buses by the tolerance distance, 
+    and then performing a spatial join to find all lines that intersect with the buffers. 
+    For each group of lines that intersect with a buffer, the function identifies the points that overpass the line (i.e., are not snapped to the line), 
+    and then snaps those points to the nearest point on the line. 
+    The line is then split at each snapped point, resulting in a new set of lines that are snapped to the buses. 
+    The function returns a GeoDataFrame containing the snapped lines, and the original GeoDataFrame containing the buses.
 
     Parameters
     ----------
