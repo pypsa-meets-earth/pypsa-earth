@@ -1,0 +1,176 @@
+import os
+import requests
+import py7zr
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import country_converter as coco
+from pathlib import Path
+from io import BytesIO
+from urllib.request import urlopen
+from zipfile import ZipFile
+import sys
+from helpers import sets_path_to_root, three_2_two_digits_country
+
+pd.options.mode.chained_assignment = None 
+
+
+def calc_sector(sector):
+    for country in countries:
+        print(country, sector)
+        df_co = df_yr[df_yr.country == country]
+
+        if sector!= "navigation":
+            df_sector = df_co.loc[df["Commodity - Transaction"].str.lower().str.contains(sector)]    
+            #assert df_yr[df_yr["Commodity - Transaction"].str.contains(sector)]["Unit"].unique() == 'Metric tons,  thousand', "Not all quantities have the expected unit: {}".format(expected_unit)
+        else:
+            df_sector = df_co.loc[(df["Commodity - Transaction"].str.lower().str.contains(sector))|(df["Commodity - Transaction"].str.lower().str.contains("marine bunkers"))]    
+
+        if df_sector.empty:
+            pass
+        else:
+            index_mass = df_sector.loc[df_sector["Unit"]== 'Metric tons,  thousand'].index
+            df_sector.loc[index_mass, "Quantity_TWh"] = df_sector.loc[index_mass].apply(lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1)
+
+            index_energy = df_sector[df_sector["Unit"]== 'Kilowatt-hours, million'].index
+            df_sector.loc[index_energy, "Quantity_TWh"] = df_sector.loc[index_energy].apply(lambda x: x["Quantity"] / 1e3, axis=1)
+            
+            index_energy_TJ = df_sector[df_sector["Unit"]== 'Terajoules'].index
+            df_sector.loc[index_energy_TJ, "Quantity_TWh"] = df_sector.loc[index_energy_TJ].apply(lambda x: x["Quantity"] / 3600, axis=1)
+            
+
+            index_volume = df_sector[df_sector["Unit"]== 'Cubic metres, thousand'].index
+            df_sector.loc[index_volume, "Quantity_TWh"] = df_sector.loc[index_volume].apply(lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1)
+            
+            sectors_dfs[sector]=df_sector.copy() 
+
+            if sector ==  "consumption by households":
+                energy_totals_base.at[country, "electricity residential"] = df_sector[(df_sector.Commodity=="Electricity") | df_sector.Commodity.isin(other_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "residential oil"] = df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "residential biomass"] = df_sector[df_sector.Commodity.isin(biomass_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "residential gas"] = df_sector[df_sector.Commodity.isin(gas_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "total residential space"] = df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum().round(4)*0.6
+                energy_totals_base.at[country, "total residential water"] = df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum().round(4)*0.4
+            
+            elif sector== "services":            
+                energy_totals_base.at[country, "services electricity"] = df_sector[(df_sector.Commodity=="Electricity") | df_sector.Commodity.isin(other_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "services oil"] = df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "services biomass"] = df_sector[df_sector.Commodity.isin(biomass_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "services gas"] = df_sector[df_sector.Commodity.isin(gas_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "total services space"] = df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum().round(4)*0.6
+                energy_totals_base.at[country, "total services water"] = df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum().round(4)*0.4
+
+            elif sector == "road":
+                energy_totals_base.at[country, "total road"] = df_sector.Quantity_TWh.sum().round(4)
+
+            elif sector == "agriculture":   
+                energy_totals_base.at[country, "agriculture electricity"] = df_sector[(df_sector.Commodity=="Electricity") | df_sector.Commodity.isin(other_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "agriculture oil"] = df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "agriculture biomass"] = df_sector[df_sector.Commodity.isin(biomass_fuels)].Quantity_TWh.sum().round(4)
+                #energy_totals_base.at[country, "electricity rail"] = df_house[(df_house.Commodity=="Electricity")].Quantity_TWh.sum().round(4)
+
+            elif sector == "rail":
+                energy_totals_base.at[country, "total rail"] = df_sector[(df_sector.Commodity=="Gas Oil/ Diesel Oil")|(df_sector.Commodity=="Biodiesel")].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "electricity rail"] = df_sector[(df_sector.Commodity=="Electricity")].Quantity_TWh.sum().round(4)
+
+            elif sector == "aviation":
+                energy_totals_base.at[country, "total international aviation"] = df_sector[(df_sector.Commodity == "Kerosene-type Jet Fuel") & (df_sector.Transaction == "International aviation bunkers")].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "total domestic aviation"] = df_sector[(df_sector.Commodity == "Kerosene-type Jet Fuel") & (df_sector.Transaction == "Consumption by domestic aviation")].Quantity_TWh.sum().round(4)
+
+            elif sector == "navigation":
+                energy_totals_base.at[country, "total international navigation"] = df_sector[df_sector.Transaction=="International marine bunkers"].Quantity_TWh.sum().round(4)
+                energy_totals_base.at[country, "total domestic navigation"] = df_sector[df_sector.Transaction=="Consumption by domestic navigation"].Quantity_TWh.sum().round(4)
+            
+            else:
+                print("wrong sector")
+
+if __name__ == "__main__":
+    if "snakemake" not in globals():
+        from helpers import mock_snakemake, sets_path_to_root
+
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+        snakemake = mock_snakemake(
+            "build_energy_totals",
+            simpl="",
+            clusters=10,
+            demand="DF",
+            planning_horizons=2030,
+        )
+        sets_path_to_root("pypsa-earth-sec")
+
+    energy_stat_database = pd.read_excel(snakemake.input.unsd_paths, index_col=0, header=0) #pd.read_excel("/nfs/home/haz43975/pypsa-earth-sec/scripts/Energy_Statistics_Database.xlsx"
+
+    # Load the links and make a dictionary
+    df = energy_stat_database.copy()
+    df = df.dropna(axis=0, subset=['Link'])
+    df = df.to_dict('dict')
+    d = df['Link'] 
+
+    # Feed the dictionary of links to the for loop, download and unzip all files
+    for key, value in d.items():
+        zipurl = value
+
+        with urlopen(zipurl) as zipresp:
+            with ZipFile(BytesIO(zipresp.read())) as zfile:
+                zfile.extractall("/nfs/home/haz43975/pypsa-earth-sec/data/demand/unsd")
+
+                path = "/nfs/home/haz43975/pypsa-earth-sec/data/demand/unsd"
+
+    # Get the files from the path provided in the OP
+    all_files = Path(path).glob('*.txt')
+
+    # Create a dataframe from all downloaded files
+    df = pd.concat((pd.read_csv(f, encoding='utf8', sep=';') for f in all_files), ignore_index=True)
+
+    # Split 'Commodity', 'Transaction' column to two
+    df[['Commodity', 'Transaction', 'extra']] = df['Commodity - Transaction'].str.split(' - ', expand=True)
+
+    # Remove Foootnote and Estimate from 'Commodity - Transaction' column
+    #df = df.loc[df['Commodity - Transaction'] != 'Footnote']
+    #df = df.loc[df['Commodity - Transaction'] != 'Estimate']
+
+    # Create a column with iso2 country code
+    cc = coco.CountryConverter()
+    Country = pd.Series(df['Country or Area'])
+
+    df["country"] = cc.pandas_convert(series=Country, to='ISO2', not_found='not found')  
+
+    # remove countries or areas that have no iso2 such as former countries names
+    df = df.loc[df['country'] != 'not found']
+
+    # Convert country column that contains lists for some country names that are identified with more than one country.
+    df["country"] = df["country"].astype(str)
+
+    # Remove all iso2 conversions for some country names that are identified with more than one country.
+    df = df[~df.country.str.contains(',', na=False)].reset_index(drop=True)
+    
+    fuels_conv_toTWh = {"Gas Oil/ Diesel Oil":0.01194, "Motor Gasoline":0.01230, "Kerosene-type Jet Fuel": 0.01225, "Aviation gasoline":0.01230, "Biodiesel": 0.01022,"Natural gas liquids": 0.01228,
+    "Biogasoline": 0.007444, "Bitumen": 0.01117, "Fuel oil": 0.01122, 'Liquefied petroleum gas (LPG)':0.01313, "Liquified Petroleum Gas (LPG)": 0.01313,"Lubricants":0.01117, "Naphtha": 0.01236, "Fuelwood": 0.00254, "Charcoal":0.00819,
+    "Patent fuel": 0.00575, "Brown coal briquettes":0.00575, "Hard coal":0.007167, "Other bituminous coal":0.005556, "Anthracite":0.005, "Peat":0.00271, "Peat products":0.00271, "Lignite":0.003889,
+    "Brown coal": 0.003889, "Sub-bituminous coal": 0.005555, "Coke-oven coke":0.0002778, "Coke oven coke":0.0002778,"Coke Oven Coke":0.0002778, "Gasoline-type jet fuel":0.01230, "Conventional crude oil": 0.01175,
+    'Brown Coal Briquettes': 0.00575, "Refinery Gas":0.01375, "Petroleum coke":0.009028, "Coking coal": 0.007833, "Peat Products":0.00271, 'Petroleum Coke':0.009028}
+
+    year=2019
+
+    countries = ["BR", "AR", "EG"]
+
+    df_yr = df[df.Year==year]
+    df_yr = df_yr[df_yr.country.isin(countries)]
+    energy_totals_cols = pd.read_csv("/nfs/home/haz43975/pypsa-earth-sec/data/energy_totals_DF_2030.csv").columns
+    energy_totals = pd.DataFrame(columns=energy_totals_cols, index=countries)
+
+    oil_fuels=["Patent fuel","Gas Oil/ Diesel Oil","Motor Gasoline", "Liquefied petroleum gas (LPG)"]
+    gas_fuels=["Natural gas (including LNG)","Gasworks Gas"]
+    biomass_fuels=["Biodiesel", "Biogases", "Fuelwood"]
+    other_fuels = ["Charcoal","Brown coal briquettes","Other bituminous coal"]
+    heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
+    energy_totals_cols = pd.read_csv("/nfs/home/haz43975/pypsa-earth-sec/data/energy_totals_DF_2030.csv").columns
+    energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
+    sectors_dfs={}
+
+    sectors = [ "consumption by households", "road","rail", "aviation", "navigation","agriculture", "services"]
+
+    for sector in sectors:
+        calc_sector(sector)
+    energy_totals_base.dropna(axis=1, how="all")
