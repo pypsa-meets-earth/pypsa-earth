@@ -651,23 +651,31 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         points_indexes = group["index_right"].tolist()
 
         # get the geometries of the points that intersect with the line
-        multi_points = df_p.loc[points_indexes, "geometry"].tolist()
+        all_points = df_p.loc[points_indexes, "geometry"]
+
+        # discard points related to the extrema points (the buses) of each line
+        distance_from_buses = all_points.distance(line_geom.boundary)
+        overpassing_points = list(all_points[distance_from_buses > tol])
+
+        # if no overpassing points are identified, skip iteration
+        if len(overpassing_points) == 0:
+            continue
 
         # find all the nearest points on the line to the points that intersect with the line
         nearest_points_list = [
-            nearest_points(line_geom, point)[0] for point in multi_points
+            nearest_points(line_geom, point)[0] for point in overpassing_points
         ]
 
         # reflect the points in the line to create a bisector
         reflected_points_list = [
             Point([2 * nearest_point.x - point.x, 2 * nearest_point.y - point.y])
-            for point, nearest_point in zip(multi_points, nearest_points_list)
+            for point, nearest_point in zip(overpassing_points, nearest_points_list)
         ]
 
         # create perpendicular lines from the points that intersect with the line to the nearest points on the line
         perpendicular_lines = [
             LineString([point, reflected_point])
-            for point, reflected_point in zip(multi_points, reflected_points_list)
+            for point, reflected_point in zip(overpassing_points, reflected_points_list)
         ]
 
         # split the line geom with the perpendicular lines using difference
