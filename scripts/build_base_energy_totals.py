@@ -1,4 +1,5 @@
 import os
+import glob
 import requests
 import py7zr
 import numpy as np
@@ -84,6 +85,7 @@ def calc_sector(sector):
             else:
                 print("wrong sector")
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake, sets_path_to_root
@@ -91,7 +93,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
-            "build_energy_totals",
+            "build_base_energy_totals",
             simpl="",
             clusters=10,
             demand="DF",
@@ -107,18 +109,25 @@ if __name__ == "__main__":
     df = df.to_dict('dict')
     d = df['Link'] 
 
-    # Feed the dictionary of links to the for loop, download and unzip all files
-    for key, value in d.items():
-        zipurl = value
+    if snakemake.config["demand_data"]["update_data"]:
+    # Delete and existing files to avoid duplication and double counting
+            
+        files = glob.glob('data/demand/unsd/*.txt')
+        for f in files:
+            os.remove(f)
 
-        with urlopen(zipurl) as zipresp:
-            with ZipFile(BytesIO(zipresp.read())) as zfile:
-                zfile.extractall("/nfs/home/haz43975/pypsa-earth-sec/data/demand/unsd")
+        # Feed the dictionary of links to the for loop, download and unzip all files
+        for key, value in d.items():
+            zipurl = value
 
-                path = "/nfs/home/haz43975/pypsa-earth-sec/data/demand/unsd"
+            with urlopen(zipurl) as zipresp:
+                with ZipFile(BytesIO(zipresp.read())) as zfile:
+                    zfile.extractall("data/demand/unsd")
+
+                    path = "data/demand/unsd"
 
     # Get the files from the path provided in the OP
-    all_files = Path(path).glob('*.txt')
+    all_files = Path("data/demand/unsd").glob('*.txt')
 
     # Create a dataframe from all downloaded files
     df = pd.concat((pd.read_csv(f, encoding='utf8', sep=';') for f in all_files), ignore_index=True)
@@ -127,8 +136,8 @@ if __name__ == "__main__":
     df[['Commodity', 'Transaction', 'extra']] = df['Commodity - Transaction'].str.split(' - ', expand=True)
 
     # Remove Foootnote and Estimate from 'Commodity - Transaction' column
-    #df = df.loc[df['Commodity - Transaction'] != 'Footnote']
-    #df = df.loc[df['Commodity - Transaction'] != 'Estimate']
+    df = df.loc[df['Commodity - Transaction'] != 'Footnote']
+    df = df.loc[df['Commodity - Transaction'] != 'Estimate']
 
     # Create a column with iso2 country code
     cc = coco.CountryConverter()
@@ -145,32 +154,39 @@ if __name__ == "__main__":
     # Remove all iso2 conversions for some country names that are identified with more than one country.
     df = df[~df.country.str.contains(',', na=False)].reset_index(drop=True)
     
+    # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
     fuels_conv_toTWh = {"Gas Oil/ Diesel Oil":0.01194, "Motor Gasoline":0.01230, "Kerosene-type Jet Fuel": 0.01225, "Aviation gasoline":0.01230, "Biodiesel": 0.01022,"Natural gas liquids": 0.01228,
     "Biogasoline": 0.007444, "Bitumen": 0.01117, "Fuel oil": 0.01122, 'Liquefied petroleum gas (LPG)':0.01313, "Liquified Petroleum Gas (LPG)": 0.01313,"Lubricants":0.01117, "Naphtha": 0.01236, "Fuelwood": 0.00254, "Charcoal":0.00819,
     "Patent fuel": 0.00575, "Brown coal briquettes":0.00575, "Hard coal":0.007167, "Other bituminous coal":0.005556, "Anthracite":0.005, "Peat":0.00271, "Peat products":0.00271, "Lignite":0.003889,
     "Brown coal": 0.003889, "Sub-bituminous coal": 0.005555, "Coke-oven coke":0.0002778, "Coke oven coke":0.0002778,"Coke Oven Coke":0.0002778, "Gasoline-type jet fuel":0.01230, "Conventional crude oil": 0.01175,
     'Brown Coal Briquettes': 0.00575, "Refinery Gas":0.01375, "Petroleum coke":0.009028, "Coking coal": 0.007833, "Peat Products":0.00271, 'Petroleum Coke':0.009028}
 
-    year=2019
+    #Fetch country list and demand base year from the config file
+    year=snakemake.config["demand_data"]["base_year"]
+    countries = snakemake.config["countries"]
 
-    countries = ["BR", "AR", "EG"]
-
+    # Filter for the year and country
     df_yr = df[df.Year==year]
     df_yr = df_yr[df_yr.country.isin(countries)]
-    energy_totals_cols = pd.read_csv("/nfs/home/haz43975/pypsa-earth-sec/data/energy_totals_DF_2030.csv").columns
-    energy_totals = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
+    # Create an empty dataframe for energy_totals_base
+    energy_totals_cols = pd.read_csv("/nfs/home/haz43975/pypsa-earth-sec/data/energy_totals_DF_2030.csv").columns
+    energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
+
+    # Lists that combine the different fuels in the dataset to the model's carriers
     oil_fuels=["Patent fuel","Gas Oil/ Diesel Oil","Motor Gasoline", "Liquefied petroleum gas (LPG)"]
     gas_fuels=["Natural gas (including LNG)","Gasworks Gas"]
     biomass_fuels=["Biodiesel", "Biogases", "Fuelwood"]
     other_fuels = ["Charcoal","Brown coal briquettes","Other bituminous coal"]
     heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
-    energy_totals_cols = pd.read_csv("/nfs/home/haz43975/pypsa-earth-sec/data/energy_totals_DF_2030.csv").columns
-    energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
+
+    # Create a dictionary to save the data if need to be checked
     sectors_dfs={}
 
+    # Run the function that processes the data for all the sectors
     sectors = [ "consumption by households", "road","rail", "aviation", "navigation","agriculture", "services"]
-
     for sector in sectors:
         calc_sector(sector)
-    energy_totals_base.dropna(axis=1, how="all")
+    
+    #Export the base energy totals file
+    energy_totals_base.dropna(axis=1, how="all").to_csv(snakemake.output.energy_totals_base)
