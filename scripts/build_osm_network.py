@@ -14,7 +14,7 @@ import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
 from config_osm_data import osm_clean_columns
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.ops import linemerge, nearest_points
+from shapely.ops import linemerge, nearest_points, split
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
@@ -668,20 +668,19 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
             nearest_points(line_geom, point)[0] for point in overpassing_points
         ]
 
-        # reflect the points in the line to create a bisector
-        reflected_points_list = [
-            Point([2 * nearest_point.x - point.x, 2 * nearest_point.y - point.y])
-            for point, nearest_point in zip(overpassing_points, nearest_points_list)
-        ]
+        # sort the nearest points based on their distance from the start point of the line
+        nearest_points_list.sort(key=lambda point: line_geom.project(point))
 
-        # create perpendicular lines from the points that intersect with the line to the nearest points on the line
-        perpendicular_lines = [
-            LineString([point, reflected_point])
-            for point, reflected_point in zip(overpassing_points, reflected_points_list)
-        ]
+        # split the line at each nearest point using the split function
+        split_line = [line_geom]
+        for point in nearest_points_list:
+            # Split the line at the current point
+            # The split function returns a GeometryCollection, so we need to convert it to a list
+            split_lines = split(split_line[-1], point)
+            split_line = split_line[:-1] + list(split_lines.geoms)
 
-        # split the line geom with the perpendicular lines using difference
-        split_line = line_geom.difference(MultiLineString(perpendicular_lines))
+        # convert the split line to a multilinestring
+        split_line = MultiLineString(split_line)
 
         # replace the line with the split line in lines df
         df_l.loc[i, "geometry"] = split_line
