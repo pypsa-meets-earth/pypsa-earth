@@ -242,14 +242,14 @@ rule build_base_energy_totals:
     script:
         "scripts/build_base_energy_totals.py"
 
+
 rule prepare_energy_totals:
     input:
-        unsd_paths="data/energy_totals_base.csv"
+        unsd_paths="data/energy_totals_base.csv",
     output:
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
     script:
         "scripts/prepare_energy_totals.py"
-
 
 
 rule build_solar_thermal_profiles:
