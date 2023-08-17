@@ -290,6 +290,24 @@ rule build_bus_regions:
 
 
 if config["enable"].get("build_cutout", False):
+    for technology in cutouts_in_config:
+        cutout_fl = (
+            "cutouts/" + CDIR + config["renewable"][technology]["cutout"] + ".nc"
+        )
+        if os.path.exists(cutout_fl):
+            raise Exception(
+                "A cutout file '"
+                + cutout_fl
+                + "' still exists. Stopping to avoid over-writing it"
+            )
+
+    cutout_fl = "cutouts/" + CDIR + list(config["atlite"]["cutouts"].keys())[0] + ".nc"
+    if os.path.exists(cutout_fl):
+        raise Exception(
+            "A cutout file '"
+            + cutout_fl
+            + "' still exists. Stopping to avoid over-writing it"
+        )
 
     rule build_cutout:
         input:
