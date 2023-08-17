@@ -248,7 +248,7 @@ if __name__ == "__main__":
     if snakemake.config["demand_data"]["update_data"]:
         # Delete and existing files to avoid duplication and double counting
 
-        files = glob.glob("data/demand/unsd/*.txt")
+        files = glob.glob("data/demand/unsd/data/*.txt")
         for f in files:
             os.remove(f)
 
@@ -258,12 +258,12 @@ if __name__ == "__main__":
 
             with urlopen(zipurl) as zipresp:
                 with ZipFile(BytesIO(zipresp.read())) as zfile:
-                    zfile.extractall("data/demand/unsd")
+                    zfile.extractall("data/demand/unsd/data")
 
-                    path = "data/demand/unsd"
+                    path = "data/demand/unsd/data"
 
     # Get the files from the path provided in the OP
-    all_files = Path("data/demand/unsd").glob("*.txt")
+    all_files = Path("data/demand/unsd/data").glob("*.txt")
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
