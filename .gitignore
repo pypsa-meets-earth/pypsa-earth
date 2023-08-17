@@ -37,9 +37,11 @@ data/industry_sector_ratios_NZ_2030.csv
 #/data/Industrial_Database.csv
 /data/retro/tabula-calculator-calcsetbuilding.csv
 /data/nuts*
-/data/demand/unsd
+/data/demand/unsd/data
 /data/ports.csv
+
 /data/airports.csv
+/data/energy_totals_base.csv
 /scripts/old
 doc/_build
 /cutouts
@@ -58,3 +60,5 @@ doc/_build
 *.xlsx
 *~
 *.pyc
+
+!data/demand/unsd/paths/Energy_Statistics_Database.xlsx
