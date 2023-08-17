@@ -13,6 +13,9 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 
+# list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
+NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
+
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 
@@ -604,9 +607,6 @@ def country_name_2_two_digits(country_name):
 
     full_name = coco.convert(country_name, to="ISO2")
     return full_name
-
-
-NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "na", "null"]
 
 
 def read_csv_nafix(file, **kwargs):

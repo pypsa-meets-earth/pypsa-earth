@@ -280,18 +280,29 @@ if __name__ == "__main__":
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
 
-    csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
-
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
     countries_names = list(map(two_digits_2_name_country, countries_codes))
 
     config["target_countries"] = countries_names
 
-    if "EXTERNAL_DATABASE" in config:
+    if (
+        "EXTERNAL_DATABASE"
+        in config["matching_sources"] + config["fully_included_sources"]
+    ):
+        if "EXTERNAL_DATABASE" not in config:
+            logger.error(
+                "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
+                "Please check file configs/powerplantmatching_config.yaml"
+            )
+        logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
+    else:
+        # create an empty file
+        with open(filepath_osm2pm_ppl, "w"):
+            pass
 
     # specify the main query for filtering powerplants
     ppl_query = snakemake.config["electricity"]["powerplants_filter"]

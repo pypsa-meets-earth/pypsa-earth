@@ -251,6 +251,7 @@ def distribute_clusters(
             n.loads_t.p_set.mean()
             .groupby(n.loads.bus)
             .sum()
+            .reindex(n.buses.index, fill_value=0.0)
             .groupby([n.buses.country, n.buses.sub_network])
             .sum()
             .pipe(normed)
@@ -648,7 +649,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="10"
+            "cluster_network", network="elec", simpl="", clusters="110"
         )
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
