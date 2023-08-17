@@ -236,7 +236,7 @@ rule prepare_heat_data:
 
 rule build_base_energy_totals:
     input:
-        unsd_paths="/nfs/home/haz43975/pypsa-earth-sec/scripts/Energy_Statistics_Database.xlsx",
+        unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
     output:
         energy_totals_base="data/energy_totals_base.csv",
     script:
