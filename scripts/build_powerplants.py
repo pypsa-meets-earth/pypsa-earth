@@ -272,7 +272,11 @@ def replace_natural_gas_technology(df):
         "LCCGT": "CCGT",
         "CCGT/Fo": "CCGT",
     }
-    tech = df.Technology.replace(mapping).fillna("CCGT")
+    df["Technology"] = df["Technology"].map(mapping).fillna("CCGT")
+    for tech in df["Technology"]:
+        if tech not in ["CCGT", "OCGT"]:
+            logger.info(tech, len(df[df["Technology"] == tech]))
+            df["Technology"] = df["Technology"].map({tech: "CCGT"})
     return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
 
 
