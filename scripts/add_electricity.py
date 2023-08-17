@@ -35,6 +35,7 @@ Relevant Settings
         hydro:
             carriers:
             hydro_max_hours:
+            hydro_max_hours_default:
             hydro_capital_cost:
 
     lines:
@@ -584,7 +585,7 @@ def attach_hydro(n, costs, ppl):
                 hydro_stats["E_store[TWh]"] * 1e3 / hydro_stats["p_nom_discharge[GW]"]
             )
 
-        max_hours_country.clip(0, inplace=True)
+        max_hours_country.clip(lower=0, inplace=True)
 
         missing_countries = pd.Index(hydro["country"].unique()).difference(
             max_hours_country.dropna().index
@@ -595,9 +596,10 @@ def attach_hydro(n, costs, ppl):
                     ", ".join(missing_countries)
                 )
             )
+        hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
         hydro_max_hours = hydro.max_hours.where(
             hydro.max_hours > 0, hydro.country.map(max_hours_country)
-        ).fillna(6)
+        ).fillna(hydro_max_hours_default)
 
         n.madd(
             "StorageUnit",
