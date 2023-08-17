@@ -233,13 +233,15 @@ rule prepare_heat_data:
     script:
         "scripts/prepare_heat_data.py"
 
+
 rule build_base_energy_totals:
     input:
-        unsd_paths="/nfs/home/haz43975/pypsa-earth-sec/scripts/Energy_Statistics_Database.xlsx"
+        unsd_paths="/nfs/home/haz43975/pypsa-earth-sec/scripts/Energy_Statistics_Database.xlsx",
     output:
         energy_totals_base="data/energy_totals_base.csv",
     script:
         "scripts/build_energy_totals.py"
+
 
 rule build_solar_thermal_profiles:
     input:
