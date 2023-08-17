@@ -23,7 +23,7 @@ scenario:
   sopts:
   - "144H"
   demand:
-  - "DF"
+  - "AB"
 
 
 policy_config:
