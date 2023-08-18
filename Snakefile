@@ -178,7 +178,7 @@ rule clean_osm_data:
         cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
         lines="resources/" + RDIR + "osm/raw/all_raw_lines.geojson",
-        custom_lines = "data/custom_lines.geojson",
+        custom_lines="data/custom_lines.geojson",
         substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",

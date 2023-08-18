@@ -852,9 +852,9 @@ def clean_data(
 
     if os.path.getsize(input_files["lines"]) > 0:
         # Load raw data lines
-        if snakemake.config["clean_osm_data_options"]["use_custom_lines"] == False :
-            df_lines = gpd.read_file(input_files["lines"])    
-        elif snakemake.config["clean_osm_data_options"]["use_custom_lines"] == True :
+        if snakemake.config["clean_osm_data_options"]["use_custom_lines"] == False:
+            df_lines = gpd.read_file(input_files["lines"])
+        elif snakemake.config["clean_osm_data_options"]["use_custom_lines"] == True:
             df_lines = gpd.read_file(input_files["custom_lines"])
 
         # prepare lines dataframe and data types
