@@ -466,7 +466,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def getContinent(code):
+def getContinent(code, world_iso: read_osm_config("world_iso")):
     """
     Returns continent names that contains list of iso-code countries.
 
