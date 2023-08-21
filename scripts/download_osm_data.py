@@ -31,7 +31,7 @@ import os
 import shutil
 from pathlib import Path
 
-from _helpers import configure_logging, iso_to_geofk_dict, read_osm_config
+from _helpers import configure_logging, read_osm_config
 from earth_osm import eo
 
 logger = logging.getLogger(__name__)

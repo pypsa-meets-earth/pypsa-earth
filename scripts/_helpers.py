@@ -51,7 +51,7 @@ def read_osm_config(*args):
     osm_config_path = os.path.join("configs", "osm_config.yaml")
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
-    return tuple([osm_config[a] for a in args])
+    return [osm_config[a] for a in args]
 
 
 def sets_path_to_root(root_directory_name):
@@ -466,7 +466,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def getContinent(code, world_iso: read_osm_config("world_iso")):
+def getContinent(code):
     """
     Returns continent names that contains list of iso-code countries.
 
@@ -490,7 +490,8 @@ def getContinent(code, world_iso: read_osm_config("world_iso")):
 
     continent_list = []
     code_set = set(code)
-    for continent in read_osm_config("world_iso"):
+    world_iso = read_osm_config("world_iso")[0]
+    for continent in world_iso.keys():
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
             continent_list.append(continent)
@@ -757,3 +758,7 @@ def create_country_list(input, iso_coding=True):
     full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
 
     return full_codes_list
+
+
+if __name__ == "__main__":
+    getContinent(["PH"])

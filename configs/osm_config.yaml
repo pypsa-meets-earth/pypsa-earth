@@ -58,17 +58,14 @@ continents:
   EU: Europe
 
 world_iso:
-  # world_iso maps ISO country codes to country names
   Africa:
     DZ: "algeria"  # Algeria
     AO: "angola"
     BJ: "benin"
     BW: "botswana"
-    # IO: "british-indian-ocean-territory"  # Island
     BF: "burkina-faso"
     BI: "burundi"
     CM: "cameroon"
-    # IC: "canary-islands"  # Island
     CV: "cape-verde"
     CF: "central-african-republic"
     TD: "chad"
@@ -80,7 +77,6 @@ world_iso:
     GQ: "equatorial-guinea"
     ER: "eritrea"
     ET: "ethiopia"
-    # TF: "french-southern-territories"  # Island
     GA: "gabon"
     GH: "ghana"
     GW: "guinea-bissau"  # No Data
@@ -95,21 +91,16 @@ world_iso:
     ML: "mali"
     MR: "mauritania"
     MU: "mauritius"
-    # YT: "mayotte"  # Island
-    MA: "morocco"
     MZ: "mozambique"
     NA: "namibia"
     NE: "niger"
     NG: "nigeria"
-    # RE: "reunion"  # Island
     RW: "rwanda"
-    # saint-helena-ascension-and-tristan-da-cunha # Islands
     ST: "sao-tome-and-principe"
     SN: "senegal"
     GM: "gambia"
     SC: "seychelles"
-    SO: "somalia"  # No Data
-    # south-africa-and-lesotho
+    SO: "somalia"
     ZA: "south-africa"
     SS: "south-sudan"
     SD: "sudan"
@@ -121,7 +112,6 @@ world_iso:
     ZM: "zambia"
     ZW: "zimbabwe"
     EH: "western-sahara"
-
   Asia:
     AF: "afghanistan"
     AM: "armenia"
@@ -129,15 +119,10 @@ world_iso:
     BH: "bahrain"
     BD: "bangladesh"
     BT: "bhutan"
-    # IO: "british-indian-ocean-territory"
     KH: "cambodia"
     CN: "china"
-    # CX: "christmas-island"  # Island
-    # CC: "cocos-keeling-islands"  # Island
     CY: "cyprus"
-    # EG: "egypt"  # leads to bug -> missing ssp file when executing ["Africa"]
     GE: "georgia"
-    # HK: "hong-kong"  # no more with gadm 4.1
     IN: "india"
     ID: "indonesia"
     IR: "iran"
@@ -166,7 +151,6 @@ world_iso:
     RU: "russian-federation"
     SA: "saudi-arabia"
     SG: "singapore"  # merged with MY
-    # XS: "spratly-islands"  # Island
     LK: "sri-lanka"
     SY: "syria"
     TW: "taiwan"
@@ -176,19 +160,13 @@ world_iso:
     TR: "turkey"
     TM: "turkmenistan"
     AE: "united-arab-emirates"
-    # XD: "united-nations-neutral-zone"
     UZ: "uzbekistan"
     VN: "vietnam"
     YE: "yemen"
-
   Oceania:
     AS: "american-samoa"  # Island
     AU: "australia"
-    # CP: "ile-de-clipperton"  # Island  In gadm as XCL
-    # CK: "cook-islands"  # Island
     FJ: "fiji"
-    # PF: "french-polynesia"  # Island
-    # GU: "guam"  # Island
     KI: "kiribati"  # Island
     MH: "marshall-islands"
     FM: "micronesia"
@@ -196,22 +174,14 @@ world_iso:
     NC: "new-caledonia"  # Island
     NZ: "new-zealand"
     NU: "niue"  # Island
-    # NF: "norfolk-island"  # Island
-    # MP: "northern-mariana-islands"
     PG: "papua-new-guinea"
-    # PN: "pitcairn-islands"  # Islands
     PW: "palau"
     WS: "samoa"
     SB: "solomon-islands"
-    # TK: "tokelau"  # Island
     TO: "tonga"
     TV: "tuvalu"
-    # UM: "united-states-minor-outlying-islands"  # Islands
     VU: "vanuatu"  # Island
-    # WF: "wallis-and-futuna"  # Island
-
   Europe:
-    # AX: "aland-islands"  # Island
     AL: "albania"
     AD: "andorra"
     AM: "armenia"
@@ -226,20 +196,15 @@ world_iso:
     CZ: "czech-republic"
     DK: "denmark"
     EE: "estonia"
-    # FO: "faroe-islands"  # Islands
     FI: "finland"
     FR: "france"
     GE: "georgia"
     DE: "germany"
-    # GI: "gibraltar"  # Island ?
     GR: "greece"
-    # GG: "guernsey"  # Island
     HU: "hungary"
     IS: "iceland"
     IE: "ireland-and-northern-ireland"
-    # IM: "isle-of-man"  # Island
     IT: "italy"
-    # JE: "jersey"  # Island
     KZ: "kazakhstan"
     XK: "kosovo"
     LV: "latvia"
@@ -262,50 +227,31 @@ world_iso:
     SK: "slovakia"
     SI: "slovenia"
     ES: "spain"
-    # SJ: "svalbard-and-jan-mayen"  # Islands
     SE: "sweden"
     CH: "switzerland"
     UA: "ukraine"
     GB: "great-britain"
     TR: "turkey"
     VA: "vatican"
-
   NorthAmerica:
-    # AI: "anguilla"  # Island
     AG: "antigua-and-barbuda"
-    # AW: "aruba"  # Islands
     BS: "bahamas"
     BB: "barbados"
-    # BM: "bermuda"  # Islands
-    # BQ: "bonaire"  # Islands
-    # VG: "british-virgin-islands"  # Islands
     CA: "canada"
-    # KY: "cayman-islands"  # Islands
     CU: "cuba"
-    # CW: "curacao"  # Islands
     DM: "dominica"
     DO: "dominican-republic"
     GL: "greenland"
     GD: "grenada"
-    # GP: "guadeloupe"  # Islands
     HT: "haiti"
     JM: "jamaica"
-    # MQ: "martinique"  # Islands
     MX: "mexico"
-    # MS: "montserrat"  # Islands
     US: "united-states-of-america"
     PR: "puerto-rico"
-    # BL: "saint-barthelemy"  # Islands
     KN: "saint-kitts-and-nevis"
     LC: "saint-lucia"
-    # MF: "saint-martin"  # Islands
-    # PM: "saint-pierre-and-miquelon"  # Islands
     VC: "saint-vincent-and-the-grenadines"
-    # SX: "saint-marteen"  # Islands
     TT: "trinidad-and-tobago"
-    # TC: "turks-and-caicos"  # Islands
-    # UM: "united-states-minor-outlying-islands"  # Islands
-    # VI: "united-states-virgin-islands"  # Islands
     BZ: "belize"
     CR: "costa-rica"
     HN: "honduras"
@@ -313,7 +259,6 @@ world_iso:
     NI: "nicaragua"
     PA: "panama"
     SV: "el-salvador"
-
   SouthAmerica:
     AR: "argentina"
     BO: "bolivia"
