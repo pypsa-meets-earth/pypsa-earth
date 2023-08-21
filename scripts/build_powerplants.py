@@ -253,13 +253,13 @@ def add_custom_powerplants(ppl, inputs, config):
         return add_ppls
 
 
-def replace_natural_gas_technology(df):
+def replace_natural_gas_technology(df: pd.DataFrame):
     """
     Maps and replaces gas technologies in the powerplants.csv onto model
     compliant carriers.
     """
     mapping = {
-        "Steam Turbine": "CCGT",
+        # "Steam Turbine": "CCGT",
         "Combustion Engine": "OCGT",
         "NG": "CCGT",
         "Ng": "CCGT",
@@ -272,18 +272,15 @@ def replace_natural_gas_technology(df):
         "LCCGT": "CCGT",
         "CCGT/Fo": "CCGT",
     }
-    df["Technology"] = df["Technology"].map(mapping).fillna("CCGT")
-    for tech in df["Technology"]:
-        if tech not in ["CCGT", "OCGT"]:
-            logger.info(tech, len(df[df["Technology"] == tech]))
-            df["Technology"] = df["Technology"].map({tech: "CCGT"})
-    return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
-
-
-def replace_natural_gas_fueltype(df):
-    return df.Fueltype.mask(
-        (df.Technology == "OCGT") | (df.Technology == "CCGT"), "Natural Gas"
+    df["Technology"] = df["Technology"].replace(mapping).fillna("CCGT")
+    unique_tech_with_ng = df[df["Fueltype"] == "Natural Gas"]["Technology"].unique()
+    unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
+    if len(unknown_techs) > 0:
+        df["Technology"] = df["Technology"].map({t: "CCGT" for t in unknown_techs})
+    df["Fueltype"] = np.where(
+        df["Fueltype"] == "Natural Gas", df["Technology"], df["Fueltype"]
     )
+    return df
 
 
 if __name__ == "__main__":
@@ -337,10 +334,7 @@ if __name__ == "__main__":
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
         .powerplant.convert_country_to_alpha2()
-        .assign(
-            Technology=replace_natural_gas_technology,
-            Fueltype=replace_natural_gas_fueltype,
-        )
+        .pipe(replace_natural_gas_technology)
     )
 
     ppl = add_custom_powerplants(
