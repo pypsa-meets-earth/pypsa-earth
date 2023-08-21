@@ -259,7 +259,7 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     compliant carriers.
     """
     mapping = {
-        # "Steam Turbine": "CCGT",
+        "Steam Turbine": "CCGT",
         "Combustion Engine": "OCGT",
         "NG": "CCGT",
         "Ng": "CCGT",
@@ -272,11 +272,18 @@ def replace_natural_gas_technology(df: pd.DataFrame):
         "LCCGT": "CCGT",
         "CCGT/Fo": "CCGT",
     }
-    df["Technology"] = df["Technology"].replace(mapping).fillna("CCGT")
+    fueltype = df["Fueltype"] == "Natural Gas"
+    df.loc[fueltype, "Technology"] = (
+        df.loc[fueltype, "Technology"].replace(mapping).fillna("CCGT")
+    )
     unique_tech_with_ng = df[df["Fueltype"] == "Natural Gas"]["Technology"].unique()
     unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
     if len(unknown_techs) > 0:
-        df["Technology"] = df["Technology"].map({t: "CCGT" for t in unknown_techs})
+        df.Technology.where(
+            df.Technology == "Natural Gas",
+            df["Technology"].map({t: "CCGT" for t in unknown_techs}),
+            inplace=True,
+        )
     df["Fueltype"] = np.where(
         df["Fueltype"] == "Natural Gas", df["Technology"], df["Fueltype"]
     )
