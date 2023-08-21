@@ -299,9 +299,9 @@ if config["enable"].get("build_cutout", False):
         cutout_fl = "cutouts/" + CDIR + ct + ".nc"
         if os.path.exists(cutout_fl):
             raise Exception(
-                "A cutout file '"
+                "An option `build_cutout` is enabled, while a cutout file '"
                 + cutout_fl
-                + "' still exists. Stopping to avoid over-writing it"
+                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
             )
 
     rule build_cutout:
