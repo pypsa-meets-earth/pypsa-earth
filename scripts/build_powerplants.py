@@ -276,7 +276,7 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     df.loc[fueltype, "Technology"] = (
         df.loc[fueltype, "Technology"].replace(mapping).fillna("CCGT")
     )
-    unique_tech_with_ng = df[df["Fueltype"] == "Natural Gas"]["Technology"].unique()
+    unique_tech_with_ng = df.loc[fueltype, "Technology"].unique()
     unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
     if len(unknown_techs) > 0:
         df.Technology.where(
