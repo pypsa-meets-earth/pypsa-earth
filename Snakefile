@@ -289,12 +289,11 @@ rule build_bus_regions:
         "scripts/build_bus_regions.py"
 
 
-res_tech_names = list(config["renewable"].keys())
-config_cutouts = [
-    (lambda x: config["renewable"][x]["cutout"])(x) for x in res_tech_names
-] + list(config["atlite"]["cutouts"].keys())
+def check_and_keep_cutout(config=config):
+    config_cutouts = [
+        d_value["cutout"] for tc, d_value in config["renewable"].items()
+    ] + list(config["atlite"]["cutouts"].keys())
 
-if config["enable"].get("build_cutout", False):
     for ct in set(config_cutouts):
         cutout_fl = "cutouts/" + CDIR + ct + ".nc"
         if os.path.exists(cutout_fl):
@@ -303,6 +302,10 @@ if config["enable"].get("build_cutout", False):
                 + cutout_fl
                 + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
             )
+
+
+if config["enable"].get("build_cutout", False):
+    check_and_keep_cutout(config)
 
     rule build_cutout:
         input:
