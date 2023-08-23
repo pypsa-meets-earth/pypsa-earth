@@ -289,7 +289,11 @@ rule build_bus_regions:
         "scripts/build_bus_regions.py"
 
 
-def check_and_keep_cutout(config=config):
+def terminate_if_cutout_exists(config=config):
+    """
+    Check if any of the requested cutout files exist.
+    If that's the case, terminate execution to avoid data loss.
+    """
     config_cutouts = [
         d_value["cutout"] for tc, d_value in config["renewable"].items()
     ] + list(config["atlite"]["cutouts"].keys())
@@ -305,7 +309,7 @@ def check_and_keep_cutout(config=config):
 
 
 if config["enable"].get("build_cutout", False):
-    check_and_keep_cutout(config)
+    terminate_if_cutout_exists(config)
 
     rule build_cutout:
         input:
