@@ -280,13 +280,11 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
     if len(unknown_techs) > 0:
         df.Technology.where(
-            df.Technology == "Natural Gas",
+            fueltype,
             df["Technology"].map({t: "CCGT" for t in unknown_techs}),
             inplace=True,
         )
-    df["Fueltype"] = np.where(
-        df["Fueltype"] == "Natural Gas", df["Technology"], df["Fueltype"]
-    )
+    df["Fueltype"] = np.where(fueltype, df["Technology"], df["Fueltype"])
     return df
 
 
