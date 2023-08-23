@@ -42,6 +42,7 @@ countries: ['NG', 'BJ']
 
 H2_network: false
 H2_network_limit: 2000 #GWkm
+H2_repurposed_network: false
 
 fossil_reserves:
   oil: 100 #TWh Maybe reduntant
@@ -71,6 +72,7 @@ custom_data:
   h2_underground: false
   add_existing: false
   custom_sectors: false
+  gas_grid: false
 
 costs:
   lifetime: 25 #default lifetime
@@ -262,6 +264,7 @@ sector:
   dac: true
   SMR: true
   cc_fraction: 0.9
+  cc: true
 
   conventional_generation: # generator : carrier
     OCGT: gas
