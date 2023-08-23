@@ -212,7 +212,10 @@ sector:
   transport_internal_combustion_efficiency: 0.3
 
   biomass_transport: true  # biomass transport between nodes
-
+  
+  efficiency_heat_oil_to_elec: 0.9
+  efficiency_heat_biomass_to_elec: 0.9
+  efficiency_heat_gas_to_elec: 0.9
 
   land_transport_fuel_cell_share: # 1 means all FCEVs HERE
     BU_2030: 0.00
