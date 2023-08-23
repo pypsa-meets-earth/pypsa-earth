@@ -528,7 +528,7 @@ def add_biomass(n, costs):
         nodes + " biomass EOP",
         bus0=spatial.biomass.nodes,
         bus1=nodes,
-        bus2="co2 atmosphere",
+        # bus2="co2 atmosphere",
         marginal_cost=costs.at[biomass_gen, "efficiency"]
         * costs.at[biomass_gen, "VOM"],  # NB: VOM is per MWel
         # NB: fixed cost is per MWel
@@ -537,7 +537,7 @@ def add_biomass(n, costs):
         p_nom_extendable=True,
         carrier=biomass_gen,
         efficiency=costs.at[biomass_gen, "efficiency"],
-        efficiency2=costs.at["solid biomass", "CO2 intensity"],
+        # efficiency2=costs.at["solid biomass", "CO2 intensity"],
         lifetime=costs.at[biomass_gen, "lifetime"],
     )
     n.madd(
@@ -1242,7 +1242,7 @@ def add_industry(n, costs):
         n.loads.loc[nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
         # - industrial_demand["process emission from feedstock"].sum()
-        / 8760
+        # / 8760
     )
 
     n.add(
@@ -1250,6 +1250,21 @@ def add_industry(n, costs):
         "industry oil emissions",
         bus="co2 atmosphere",
         carrier="industry oil emissions",
+        p_set=-co2,
+    )
+
+    co2 = (
+        industrial_demand["coal"].sum()
+        * costs.at["coal", "CO2 intensity"]
+        # - industrial_demand["process emission from feedstock"].sum()
+        / 8760
+    )
+
+    n.add(
+        "Load",
+        "industry coal emissions",
+        bus="co2 atmosphere",
+        carrier="industry coal emissions",
         p_set=-co2,
     )
 
@@ -1948,15 +1963,61 @@ def add_services(n, costs):
         carrier="services biomass",
         p_set=p_set_biomass,
     )
-    co2 = (
-        p_set_biomass.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
-    ) / 8760
+
+    # co2 = (
+    #     p_set_biomass.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
+    # ) / 8760
+
+    # n.add(
+    #     "Load",
+    #     "services biomass emissions",
+    #     bus="co2 atmosphere",
+    #     carrier="biomass emissions",
+    #     p_set=-co2,
+    # )
+    p_set_oil = (
+        profile_residential * energy_totals.loc[countries, "services oil"].sum() * 1e6
+    )
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services oil",
+        bus=spatial.oil.nodes,
+        carrier="services oil",
+        p_set=p_set_oil,
+    )
+
+    co2 = (p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]) / 8760
 
     n.add(
         "Load",
-        "services biomass emissions",
+        "services oil emissions",
         bus="co2 atmosphere",
-        carrier="biomass emissions",
+        carrier="oil emissions",
+        p_set=-co2,
+    )
+
+    p_set_gas = (
+        profile_residential * energy_totals.loc[countries, "services gas"].sum() * 1e6
+    )
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" services gas",
+        bus=spatial.gas.nodes,
+        carrier="services gas",
+        p_set=p_set_gas,
+    )
+
+    co2 = (p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]) / 8760
+
+    n.add(
+        "Load",
+        "services gas emissions",
+        bus="co2 atmosphere",
+        carrier="gas emissions",
         p_set=-co2,
     )
 
@@ -2023,6 +2084,14 @@ def add_residential(n, costs):
             .columns
         )
 
+        gas_ind = (
+            n.loads_t.p_set.filter(like=countries[0])
+            .filter(like="residential")
+            .filter(like="gas")
+            .dropna(axis=1)
+            .columns
+        )
+
         heat_shape = (
             n.loads_t.p_set.loc[:, heat_ind]
             / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
@@ -2037,6 +2106,10 @@ def add_residential(n, costs):
             * 1e6
         )
 
+        heat_gas_demand = (
+            heat_shape * energy_totals.loc[countries[0], "residential heat gas"] * 1e6
+        )
+
         n.loads_t.p_set.loc[:, heat_ind] = (
             heat_shape
             * (
@@ -2044,6 +2117,7 @@ def add_residential(n, costs):
                 + energy_totals.loc[countries, "total residential water"].sum()
                 - energy_totals.loc[countries[0], "residential heat biomass"]
                 - energy_totals.loc[countries[0], "residential heat oil"]
+                - energy_totals.loc[countries[0], "residential heat gas"]
             )
             * 1e6
         )
@@ -2064,6 +2138,12 @@ def add_residential(n, costs):
             * energy_totals.loc[countries, "residential biomass"].sum()
             * 1e6
         ) + heat_biomass_demand.values
+
+        p_set_gas = (
+            profile_residential
+            * energy_totals.loc[countries, "residential gas"].sum()
+            * 1e6
+        ) + heat_gas_demand.values
 
         n.madd(
             "Load",
@@ -2091,6 +2171,24 @@ def add_residential(n, costs):
             p_set=p_set_biomass,
         )
 
+        n.madd(
+            "Load",
+            nodes,
+            suffix=" residential gas",
+            bus=spatial.gas.nodes,
+            carrier="residential gas",
+            p_set=p_set_gas,
+        )
+        co2 = (p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]) / 8760
+
+        n.add(
+            "Load",
+            "residential gas emissions",
+            bus="co2 atmosphere",
+            carrier="gas emissions",
+            p_set=-co2,
+        )
+
         co2 = (
             p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
         ) / 8760
@@ -2109,6 +2207,7 @@ def add_residential(n, costs):
                 + energy_totals.loc[country, "total residential water"]
                 - energy_totals.loc[country, "residential heat biomass"]
                 - energy_totals.loc[country, "residential heat oil"]
+                - energy_totals.loc[country, "residential heat gas"]
             )
 
             heat_buses = (n.loads_t.p_set.filter(regex="heat")).columns
