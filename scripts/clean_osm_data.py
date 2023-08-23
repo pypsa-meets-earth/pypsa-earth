@@ -852,7 +852,15 @@ def clean_data(
 
     if os.path.getsize(input_files["lines"]) > 0:
         # Load raw data lines
-        df_lines = gpd.read_file(input_files["lines"])
+        if snakemake.config["clean_osm_data_options"]["use_custom_lines"] == False :
+            df_lines = gpd.read_file(input_files["lines"])
+    
+        elif snakemake.config["clean_osm_data_options"]["use_custom_lines"] == True :
+            current_directory = os.getcwd() 
+            custom_lines_path = os.path.dirname(current_directory) + "\\data\\custom_lines.geojson"
+            df_lines = gpd.read_file(custom_lines_path)
+            if df_lines.empty: 
+                df_lines = gpd.read_file(input_files["lines"])
 
         # prepare lines dataframe and data types
         df_lines = prepare_lines_df(df_lines)

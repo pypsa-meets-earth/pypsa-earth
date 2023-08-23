@@ -23,6 +23,7 @@ dag.svg
 # Files appear for tests
 configs/scenarios/config.custom.yaml
 data/*.csv
+data/custom_lines.geojson
 
 # Untracked folders (and files within)
 img/
