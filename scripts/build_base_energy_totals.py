@@ -173,8 +173,8 @@ def calc_sector(sector):
                 energy_totals_base.at[country, "total rail"] = (
                     df_sector[
                         (df_sector.Commodity == "Gas Oil/ Diesel Oil")
-                        | (df_sector.Commodity == "Biodiesel") 
-                            | (df_sector.Commodity == "Electricity")
+                        | (df_sector.Commodity == "Biodiesel")
+                        | (df_sector.Commodity == "Electricity")
                     ]
                     .Quantity_TWh.sum()
                     .round(4)
