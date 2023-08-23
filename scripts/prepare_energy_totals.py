@@ -65,9 +65,15 @@ if __name__ == "__main__":
     energy_totals = base_energy_totals * efficiency_gains * growth_factors
 
     # Residential
-    efficiency_heat_oil_to_elec = snakemake.config["sector"]["efficiency_heat_oil_to_elec"]
-    efficiency_heat_biomass_to_elec = snakemake.config["sector"]["efficiency_heat_biomass_to_elec"]
-    efficiency_heat_gas_to_elec = snakemake.config["sector"]["efficiency_heat_gas_to_elec"]
+    efficiency_heat_oil_to_elec = snakemake.config["sector"][
+        "efficiency_heat_oil_to_elec"
+    ]
+    efficiency_heat_biomass_to_elec = snakemake.config["sector"][
+        "efficiency_heat_biomass_to_elec"
+    ]
+    efficiency_heat_gas_to_elec = snakemake.config["sector"][
+        "efficiency_heat_gas_to_elec"
+    ]
 
     energy_totals["electricity residential space"] = (
         base_energy_totals["total residential space"]
