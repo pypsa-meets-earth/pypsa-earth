@@ -34,10 +34,15 @@ if __name__ == "__main__":
             "prepare_energy_totals",
             simpl="",
             clusters=10,
-            demand="XX",
-            planning_horizons=2038,
+            demand="AB",
+            planning_horizons=2030,
         )
         sets_path_to_root("pypsa-earth-sec")
+
+    countries = snakemake.config["countries"]
+    #countries = ["NG", "BJ"]
+    investment_year = int(snakemake.wildcards.planning_horizons)
+    demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
     base_energy_totals = pd.read_csv("data/energy_totals_base.csv", index_col=0)
     growth_factors = pd.read_csv("data/demand/growth_factors.csv", index_col=0)
@@ -45,10 +50,14 @@ if __name__ == "__main__":
     fuel_shares = pd.read_csv("data/demand/fuel_shares.csv", index_col=0)
     district_heating = pd.read_csv("data/demand/district_heating.csv", index_col=0)
 
+    growth_factors = growth_factors[growth_factors.index.isin(countries)]
+    efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
+    fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
+    district_heating = district_heating[district_heating.index.isin(countries)]
+
     options = snakemake.config["sector"]
 
-    investment_year = int(snakemake.wildcards.planning_horizons)
-    demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
+
 
     fuel_cell_share = get(
         options["land_transport_fuel_cell_share"],
