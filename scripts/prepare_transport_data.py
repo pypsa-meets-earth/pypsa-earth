@@ -206,7 +206,7 @@ if __name__ == "__main__":
             "prepare_transport_data",
             simpl="",
             clusters="10",
-            demand="DF",
+            demand="AB",
             planning_horizons=2030,
         )
 

@@ -2058,184 +2058,184 @@ def add_agriculture(n, costs):
 def add_residential(n, costs):
     # need to adapt for many countries #TODO
 
-    if snakemake.config["custom_data"]["heat_demand"]:
-        # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
-        # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
+    # if snakemake.config["custom_data"]["heat_demand"]:
+    # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
+    # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
 
-        heat_ind = (
-            n.loads_t.p_set.filter(like=countries[0])
-            .filter(like="residential")
-            .filter(like="heat")
-            .dropna(axis=1)
-            .columns
+    heat_ind = (
+        n.loads_t.p_set.filter(like=countries[0])
+        .filter(like="residential")
+        .filter(like="heat")
+        .dropna(axis=1)
+        .columns
+    )
+    oil_ind = (
+        n.loads_t.p_set.filter(like=countries[0])
+        .filter(like="residential")
+        .filter(like="oil")
+        .dropna(axis=1)
+        .columns
+    )
+    bio_ind = (
+        n.loads_t.p_set.filter(like=countries[0])
+        .filter(like="residential")
+        .filter(like="biomass")
+        .dropna(axis=1)
+        .columns
+    )
+
+    gas_ind = (
+        n.loads_t.p_set.filter(like=countries[0])
+        .filter(like="residential")
+        .filter(like="gas")
+        .dropna(axis=1)
+        .columns
+    )
+
+    heat_shape = (
+        n.loads_t.p_set.loc[:, heat_ind]
+        / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
+    )
+    heat_oil_demand = (
+        heat_shape * energy_totals.loc[countries[0], "residential heat oil"] * 1e6
+    )
+
+    heat_biomass_demand = (
+        heat_shape
+        * energy_totals.loc[countries[0], "residential heat biomass"]
+        * 1e6
+    )
+
+    heat_gas_demand = (
+        heat_shape * energy_totals.loc[countries[0], "residential heat gas"] * 1e6
+    )
+
+    n.loads_t.p_set.loc[:, heat_ind] = (
+        heat_shape
+        * (
+            energy_totals.loc[countries, "total residential space"].sum()
+            + energy_totals.loc[countries, "total residential water"].sum()
+            - energy_totals.loc[countries[0], "residential heat biomass"]
+            - energy_totals.loc[countries[0], "residential heat oil"]
+            - energy_totals.loc[countries[0], "residential heat gas"]
         )
-        oil_ind = (
-            n.loads_t.p_set.filter(like=countries[0])
-            .filter(like="residential")
-            .filter(like="oil")
-            .dropna(axis=1)
-            .columns
-        )
-        bio_ind = (
-            n.loads_t.p_set.filter(like=countries[0])
-            .filter(like="residential")
-            .filter(like="biomass")
-            .dropna(axis=1)
-            .columns
+        * 1e6
+    )
+
+    # TODO make compatible with more counties
+    profile_residential = (
+        n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
+    )
+
+    p_set_oil = (
+        profile_residential
+        * energy_totals.loc[countries, "residential oil"].sum()
+        * 1e6
+    ) + heat_oil_demand.values
+
+    p_set_biomass = (
+        profile_residential
+        * energy_totals.loc[countries, "residential biomass"].sum()
+        * 1e6
+    ) + heat_biomass_demand.values
+
+    p_set_gas = (
+        profile_residential
+        * energy_totals.loc[countries, "residential gas"].sum()
+        * 1e6
+    ) + heat_gas_demand.values
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" residential oil",
+        bus=spatial.oil.nodes,
+        carrier="residential oil",
+        p_set=p_set_oil,
+    )
+    co2 = (p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]) / 8760
+
+    n.add(
+        "Load",
+        "residential oil emissions",
+        bus="co2 atmosphere",
+        carrier="oil emissions",
+        p_set=-co2,
+    )
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" residential biomass",
+        bus=spatial.biomass.nodes,
+        carrier="residential biomass",
+        p_set=p_set_biomass,
+    )
+
+    n.madd(
+        "Load",
+        nodes,
+        suffix=" residential gas",
+        bus=spatial.gas.nodes,
+        carrier="residential gas",
+        p_set=p_set_gas,
+    )
+    co2 = (p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]) / 8760
+
+    n.add(
+        "Load",
+        "residential gas emissions",
+        bus="co2 atmosphere",
+        carrier="gas emissions",
+        p_set=-co2,
+    )
+
+    co2 = (
+        p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
+    ) / 8760
+
+    n.add(
+        "Load",
+        "residential biomass emissions",
+        bus="co2 atmosphere",
+        carrier="biomass emissions",
+        p_set=-co2,
+    )
+
+    for country in countries:
+        rem_heat_demand = (
+            energy_totals.loc[country, "total residential space"]
+            + energy_totals.loc[country, "total residential water"]
+            - energy_totals.loc[country, "residential heat biomass"]
+            - energy_totals.loc[country, "residential heat oil"]
+            - energy_totals.loc[country, "residential heat gas"]
         )
 
-        gas_ind = (
-            n.loads_t.p_set.filter(like=countries[0])
-            .filter(like="residential")
-            .filter(like="gas")
-            .dropna(axis=1)
-            .columns
-        )
-
-        heat_shape = (
-            n.loads_t.p_set.loc[:, heat_ind]
-            / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
-        )
-        heat_oil_demand = (
-            heat_shape * energy_totals.loc[countries[0], "residential heat oil"] * 1e6
-        )
-
-        heat_biomass_demand = (
-            heat_shape
-            * energy_totals.loc[countries[0], "residential heat biomass"]
-            * 1e6
-        )
-
-        heat_gas_demand = (
-            heat_shape * energy_totals.loc[countries[0], "residential heat gas"] * 1e6
-        )
-
-        n.loads_t.p_set.loc[:, heat_ind] = (
-            heat_shape
-            * (
-                energy_totals.loc[countries, "total residential space"].sum()
-                + energy_totals.loc[countries, "total residential water"].sum()
-                - energy_totals.loc[countries[0], "residential heat biomass"]
-                - energy_totals.loc[countries[0], "residential heat oil"]
-                - energy_totals.loc[countries[0], "residential heat gas"]
+        heat_buses = (n.loads_t.p_set.filter(regex="heat")).columns
+        n.loads_t.p_set.loc[:, heat_buses] = (
+            (
+                n.loads_t.p_set.filter(like=country)[heat_buses]
+                / n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum()
             )
+            * rem_heat_demand
             * 1e6
         )
 
-        # TODO make compatible with more counties
-        profile_residential = (
-            n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
-        )
+        # if snakemake.config["custom_data"]["elec_demand"]:
+    for country in countries:
+        # indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
 
-        p_set_oil = (
-            profile_residential
-            * energy_totals.loc[countries, "residential oil"].sum()
-            * 1e6
-        ) + heat_oil_demand.values
+        buses = n.buses[
+            (n.buses.carrier == "AC") & (n.buses.country == country)
+        ].index
 
-        p_set_biomass = (
-            profile_residential
-            * energy_totals.loc[countries, "residential biomass"].sum()
-            * 1e6
-        ) + heat_biomass_demand.values
-
-        p_set_gas = (
-            profile_residential
-            * energy_totals.loc[countries, "residential gas"].sum()
-            * 1e6
-        ) + heat_gas_demand.values
-
-        n.madd(
-            "Load",
-            nodes,
-            suffix=" residential oil",
-            bus=spatial.oil.nodes,
-            carrier="residential oil",
-            p_set=p_set_oil,
-        )
-        co2 = (p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]) / 8760
-
-        n.add(
-            "Load",
-            "residential oil emissions",
-            bus="co2 atmosphere",
-            carrier="oil emissions",
-            p_set=-co2,
-        )
-        n.madd(
-            "Load",
-            nodes,
-            suffix=" residential biomass",
-            bus=spatial.biomass.nodes,
-            carrier="residential biomass",
-            p_set=p_set_biomass,
-        )
-
-        n.madd(
-            "Load",
-            nodes,
-            suffix=" residential gas",
-            bus=spatial.gas.nodes,
-            carrier="residential gas",
-            p_set=p_set_gas,
-        )
-        co2 = (p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]) / 8760
-
-        n.add(
-            "Load",
-            "residential gas emissions",
-            bus="co2 atmosphere",
-            carrier="gas emissions",
-            p_set=-co2,
-        )
-
-        co2 = (
-            p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
-        ) / 8760
-
-        n.add(
-            "Load",
-            "residential biomass emissions",
-            bus="co2 atmosphere",
-            carrier="biomass emissions",
-            p_set=-co2,
-        )
-
-        for country in countries:
-            rem_heat_demand = (
-                energy_totals.loc[country, "total residential space"]
-                + energy_totals.loc[country, "total residential water"]
-                - energy_totals.loc[country, "residential heat biomass"]
-                - energy_totals.loc[country, "residential heat oil"]
-                - energy_totals.loc[country, "residential heat gas"]
+        n.loads_t.p_set.loc[:, buses] = (
+            (
+                n.loads_t.p_set.filter(like=country)[buses]
+                / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
             )
-
-            heat_buses = (n.loads_t.p_set.filter(regex="heat")).columns
-            n.loads_t.p_set.loc[:, heat_buses] = (
-                (
-                    n.loads_t.p_set.filter(like=country)[heat_buses]
-                    / n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum()
-                )
-                * rem_heat_demand
-                * 1e6
-            )
-
-        if snakemake.config["custom_data"]["elec_demand"]:
-            for country in countries:
-                # indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
-
-                buses = n.buses[
-                    (n.buses.carrier == "AC") & (n.buses.country == country)
-                ].index
-
-                n.loads_t.p_set.loc[:, buses] = (
-                    (
-                        n.loads_t.p_set.filter(like=country)[buses]
-                        / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
-                    )
-                    * energy_totals.loc[country, "electricity residential"]
-                    * 1e6
-                )
+            * energy_totals.loc[country, "electricity residential"]
+            * 1e6
+        )
 
 
 # def add_co2limit(n, Nyears=1.0, limit=0.0):

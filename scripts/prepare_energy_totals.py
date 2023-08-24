@@ -50,10 +50,10 @@ if __name__ == "__main__":
     fuel_shares = pd.read_csv("data/demand/fuel_shares.csv", index_col=0)
     district_heating = pd.read_csv("data/demand/district_heating.csv", index_col=0)
 
-    growth_factors = growth_factors[growth_factors.index.isin(countries)]
-    efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
-    fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
-    district_heating = district_heating[district_heating.index.isin(countries)]
+    # growth_factors = growth_factors[growth_factors.index.isin(countries)]
+    # efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
+    # fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
+    # district_heating = district_heating[district_heating.index.isin(countries)]
 
     options = snakemake.config["sector"]
 
