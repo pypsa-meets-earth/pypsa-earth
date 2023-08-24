@@ -1311,9 +1311,7 @@ def add_industry(n, costs):
     #     )
 
     # else:
-    industrial_elec = industrial_demand["electricity"].apply(
-        lambda frac: frac / 8760
-    )
+    industrial_elec = industrial_demand["electricity"].apply(lambda frac: frac / 8760)
 
     n.madd(
         "Load",
@@ -2093,17 +2091,14 @@ def add_residential(n, costs):
     )
 
     heat_shape = (
-        n.loads_t.p_set.loc[:, heat_ind]
-        / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
+        n.loads_t.p_set.loc[:, heat_ind] / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
     )
     heat_oil_demand = (
         heat_shape * energy_totals.loc[countries[0], "residential heat oil"] * 1e6
     )
 
     heat_biomass_demand = (
-        heat_shape
-        * energy_totals.loc[countries[0], "residential heat biomass"]
-        * 1e6
+        heat_shape * energy_totals.loc[countries[0], "residential heat biomass"] * 1e6
     )
 
     heat_gas_demand = (
@@ -2123,9 +2118,7 @@ def add_residential(n, costs):
     )
 
     # TODO make compatible with more counties
-    profile_residential = (
-        n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
-    )
+    profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
 
     p_set_oil = (
         profile_residential
@@ -2189,9 +2182,7 @@ def add_residential(n, costs):
         p_set=-co2,
     )
 
-    co2 = (
-        p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]
-    ) / 8760
+    co2 = (p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]) / 8760
 
     n.add(
         "Load",
@@ -2224,9 +2215,7 @@ def add_residential(n, costs):
     for country in countries:
         # indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
 
-        buses = n.buses[
-            (n.buses.carrier == "AC") & (n.buses.country == country)
-        ].index
+        buses = n.buses[(n.buses.carrier == "AC") & (n.buses.country == country)].index
 
         n.loads_t.p_set.loc[:, buses] = (
             (
@@ -2457,10 +2446,10 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
 
-    #if snakemake.config["custom_data"]["transport_demand"]:
+    # if snakemake.config["custom_data"]["transport_demand"]:
     add_rail_transport(n, costs)
 
-    #if snakemake.config["custom_data"]["custom_sectors"]:
+    # if snakemake.config["custom_data"]["custom_sectors"]:
     add_agriculture(n, costs)
     add_residential(n, costs)
     add_services(n, costs)
