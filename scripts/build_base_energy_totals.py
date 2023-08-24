@@ -345,7 +345,7 @@ if __name__ == "__main__":
 
     # Create an empty dataframe for energy_totals_base
     energy_totals_cols = pd.read_csv(
-        "/nfs/home/haz43975/pypsa-earth-sec/data/energy_totals_DF_2030.csv"
+        "data/energy_totals_DF_2030.csv"
     ).columns
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
