@@ -344,9 +344,7 @@ if __name__ == "__main__":
     df_yr = df_yr[df_yr.country.isin(countries)]
 
     # Create an empty dataframe for energy_totals_base
-    energy_totals_cols = pd.read_csv(
-        "data/energy_totals_DF_2030.csv"
-    ).columns
+    energy_totals_cols = pd.read_csv("data/energy_totals_DF_2030.csv").columns
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
     # Lists that combine the different fuels in the dataset to the model's carriers
