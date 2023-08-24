@@ -1296,24 +1296,24 @@ def add_industry(n, costs):
         if n.loads_t.p_set[loads_i].empty:
             continue
 
-        if not snakemake.config["custom_data"]["elec_demand"]:
-            # if electricity demand is provided by pypsa-earth, the electricty used
-            # in industry is included, and need to be removed from the default elec
-            # demand here, and added as "industry electricity"
-            factor = (
-                1
-                - industrial_demand.loc[loads_i, "current electricity"].sum()
-                / n.loads_t.p_set[loads_i].sum().sum()
-            )
-            n.loads_t.p_set[loads_i] *= factor
-            industrial_elec = industrial_demand["current electricity"].apply(
-                lambda frac: frac / 8760
-            )
+    # if not snakemake.config["custom_data"]["elec_demand"]:
+    #     # if electricity demand is provided by pypsa-earth, the electricty used
+    #     # in industry is included, and need to be removed from the default elec
+    #     # demand here, and added as "industry electricity"
+    #     factor = (
+    #         1
+    #         - industrial_demand.loc[loads_i, "current electricity"].sum()
+    #         / n.loads_t.p_set[loads_i].sum().sum()
+    #     )
+    #     n.loads_t.p_set[loads_i] *= factor
+    #     industrial_elec = industrial_demand["current electricity"].apply(
+    #         lambda frac: frac / 8760
+    #     )
 
-        else:
-            industrial_elec = industrial_demand["electricity"].apply(
-                lambda frac: frac / 8760
-            )
+    # else:
+    industrial_elec = industrial_demand["electricity"].apply(
+        lambda frac: frac / 8760
+    )
 
     n.madd(
         "Load",
@@ -2314,13 +2314,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="11",
+            clusters="14",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="24H",
             discountrate="0.071",
-            demand="DF",
+            demand="XX",
         )
 
     # Load population layout
@@ -2457,13 +2457,13 @@ if __name__ == "__main__":
 
     add_land_transport(n, costs)
 
-    if snakemake.config["custom_data"]["transport_demand"]:
-        add_rail_transport(n, costs)
+    #if snakemake.config["custom_data"]["transport_demand"]:
+    add_rail_transport(n, costs)
 
-    if snakemake.config["custom_data"]["custom_sectors"]:
-        add_agriculture(n, costs)
-        add_residential(n, costs)
-        add_services(n, costs)
+    #if snakemake.config["custom_data"]["custom_sectors"]:
+    add_agriculture(n, costs)
+    add_residential(n, costs)
+    add_services(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
 
