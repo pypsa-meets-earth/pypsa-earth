@@ -128,11 +128,19 @@ rule prepare_sector_network:
         "scripts/prepare_sector_network.py"
 
 
+rule build_ship_profile:
+    output:
+        ship_profile="resources/ship_profile_{h2export}TWh.csv",
+    script:
+        "scripts/build_ship_profile.py"
+
+
 rule add_export:
     input:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
         costs=CDIR + "costs_{planning_horizons}.csv",
+        ship_profile="resources/ship_profile_{h2export}TWh.csv",
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path=pypsaearth(
@@ -386,6 +394,7 @@ rule solve_network:
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
+        configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
     output:
         RDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
