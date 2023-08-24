@@ -40,7 +40,7 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth-sec")
 
     countries = snakemake.config["countries"]
-    #countries = ["NG", "BJ"]
+    # countries = ["NG", "BJ"]
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
@@ -56,8 +56,6 @@ if __name__ == "__main__":
     district_heating = district_heating[district_heating.index.isin(countries)]
 
     options = snakemake.config["sector"]
-
-
 
     fuel_cell_share = get(
         options["land_transport_fuel_cell_share"],
