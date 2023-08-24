@@ -289,7 +289,27 @@ rule build_bus_regions:
         "scripts/build_bus_regions.py"
 
 
+def terminate_if_cutout_exists(config=config):
+    """
+    Check if any of the requested cutout files exist.
+    If that's the case, terminate execution to avoid data loss.
+    """
+    config_cutouts = [
+        d_value["cutout"] for tc, d_value in config["renewable"].items()
+    ] + list(config["atlite"]["cutouts"].keys())
+
+    for ct in set(config_cutouts):
+        cutout_fl = "cutouts/" + CDIR + ct + ".nc"
+        if os.path.exists(cutout_fl):
+            raise Exception(
+                "An option `build_cutout` is enabled, while a cutout file '"
+                + cutout_fl
+                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
+            )
+
+
 if config["enable"].get("build_cutout", False):
+    terminate_if_cutout_exists(config)
 
     rule build_cutout:
         input:
