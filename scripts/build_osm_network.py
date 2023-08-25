@@ -14,7 +14,7 @@ import pandas as pd
 from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
 from config_osm_data import osm_clean_columns
 from scipy.spatial import cKDTree
-from shapely.geometry import LineString, Point, MultiLineString, Point
+from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import linemerge, nearest_points, split
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
