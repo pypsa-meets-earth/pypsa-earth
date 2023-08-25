@@ -2214,7 +2214,7 @@ def add_residential(n, costs):
             - energy_totals.loc[country, "residential heat gas"]
         )
 
-        heat_buses = (n.loads_t.p_set.filter(regex="heat")).columns
+        heat_buses = (n.loads_t.p_set.filter(regex="heat").filter(like=country)).columns
         n.loads_t.p_set.loc[:, heat_buses] = (
             (
                 n.loads_t.p_set.filter(like=country)[heat_buses]
