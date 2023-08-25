@@ -469,19 +469,19 @@ def merge_stations_lines_by_station_id_and_voltage(
     """
 
     logger.info(
-        "Stage 3a/4: Set substation ids with tolerance of %.2f km" % (tol / 1000)
+        "Stage 4a/5: Set substation ids with tolerance of %.2f km" % (tol / 1000)
     )
 
     # set substation ids
     set_substations_ids(buses, distance_crs, tol=tol)
 
-    logger.info("Stage 3b/4: Merge substations with the same id")
+    logger.info("Stage 4b/5: Merge substations with the same id")
 
     # merge buses with same station id and voltage
     if not buses.empty:
         buses = merge_stations_same_station_id(buses)
 
-    logger.info("Stage 3c/4: Specify the bus ids of the line endings")
+    logger.info("Stage 4c/5: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses)
@@ -494,7 +494,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     # set substation_lv
     set_lv_substations(buses)
 
-    logger.info("Stage 3d/4: Add converters to lines")
+    logger.info("Stage 4d/5: Add converters to lines")
 
     # append fake converters
     # lines = pd.concat([lines, converters], ignore_index=True)
