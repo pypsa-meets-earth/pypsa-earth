@@ -2093,6 +2093,9 @@ def add_residential(n, costs):
     heat_shape = (
         n.loads_t.p_set.loc[:, heat_ind] / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
     )
+
+    heat_shape = heat_shape.groupby(lambda x: next((substring for substring in nodes if substring in x), x), axis=1).sum()
+    
     heat_oil_demand = (
         heat_shape * energy_totals.loc[countries[0], "residential heat oil"] * 1e6
     )
