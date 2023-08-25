@@ -2061,30 +2061,26 @@ def add_residential(n, costs):
     # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
 
     heat_ind = (
-        n.loads_t.p_set.filter(like=countries[0])
-        .filter(like="residential")
+        n.loads_t.p_set.filter(like="residential")
         .filter(like="heat")
         .dropna(axis=1)
         .columns
     )
     oil_ind = (
-        n.loads_t.p_set.filter(like=countries[0])
-        .filter(like="residential")
+        n.loads_t.p_set.filter(like="residential")
         .filter(like="oil")
         .dropna(axis=1)
         .columns
     )
     bio_ind = (
-        n.loads_t.p_set.filter(like=countries[0])
-        .filter(like="residential")
+        n.loads_t.p_set.filter(like="residential")
         .filter(like="biomass")
         .dropna(axis=1)
         .columns
     )
 
     gas_ind = (
-        n.loads_t.p_set.filter(like=countries[0])
-        .filter(like="residential")
+        n.loads_t.p_set.filter(like="residential")
         .filter(like="gas")
         .dropna(axis=1)
         .columns
