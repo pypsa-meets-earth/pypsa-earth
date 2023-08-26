@@ -486,7 +486,7 @@ def collect_renewable_stats(rulename, technology):
             ),
         )
 
-        add_computational_stats(df_RES_stats, snakemake, rulename)
+        add_computational_stats(df_RES_stats, snakemake, f"{rulename}_{technology}")
 
         return df_RES_stats
     else:
