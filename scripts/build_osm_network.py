@@ -67,18 +67,20 @@ def set_substations_ids(buses, distance_crs, tol=5000):
     buses["station_id"] = db.labels_
 
 
-def set_lines_ids(lines, buses):
+def set_lines_ids(lines, buses, distance_crs):
     """
     Function to set line buses ids to the closest bus in the list.
     """
     # set tqdm options for set lines ids
+    lines_d = lines.to_crs(distance_crs)
+    buses_d = buses.to_crs(distance_crs)
 
     # initialization
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    for key, lines_sel in lines.groupby(["voltage", "dc"]):
-        buses_sel = buses.query(f"voltage == {key[0]} and dc == {key[1]}")
+    for key, lines_sel in lines_d.groupby(["voltage", "dc"]):
+        buses_sel = buses_d.query(f"voltage == {key[0]} and dc == {key[1]}")
 
         # find the closest node of the bus0 of the line
         bus0_points = np.array(
@@ -452,14 +454,6 @@ def set_lv_substations(buses):
     return buses
 
 
-# Note tolerance = 0.01 means around 700m
-# TODO: the current tolerance is high to avoid an issue in the Nigeria case where line 565939360-1
-#       seems to be interconnected to both ends, but at the eastern one, the node is actually not connected
-#       another line seems to be exactly touching the node, but from the data point of view it only fly over it.
-#       There may be the need to split a line in several segments in the case the line is within tolerance with
-#       respect to a node
-
-
 def merge_stations_lines_by_station_id_and_voltage(
     lines, buses, geo_crs, distance_crs, tol=2000
 ):
@@ -484,7 +478,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     logger.info("Stage 4c/5: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses)
+    lines, buses = set_lines_ids(lines, buses, distance_crs)
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
@@ -503,47 +497,6 @@ def merge_stations_lines_by_station_id_and_voltage(
     lines.reset_index(drop=True, inplace=True)
     # if len(links) > 0:
     #     links.reset_index(drop=True, inplace=True)
-
-    return lines, buses
-
-
-def create_station_at_equal_bus_locations(
-    lines, buses, geo_crs, distance_crs, tol=2000
-):
-    # V1. Create station_id at same bus location
-    # - We saw that buses are not connected exactly at one point, they are
-    #   usually connected to a substation "area" (analysed on maps)
-    # - Create station_id at exactly the same location might therefore be not
-    #   always correct
-    # - Though as you can see below, it might be still sometime the case.
-    #   Examples are **station 4** (2 lines with the same voltage connect at the
-    #   same point) and **station 23** (4 lines with two different voltages connect
-    #   at the same point)
-    # TODO: Filter out the generator lines - defined as going from generator to
-    #       the next station which is connected to a load. Excluding generator
-    #       lines make probably sense because they are not transmission expansion
-    #       relevant. For now we simplify and include generator lines.
-
-    # If same location/geometry make station
-    bus_all = buses
-
-    # set substation ids
-    set_substations_ids(buses, distance_crs, tol=tol)
-
-    # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses)
-
-    # update line endings
-    lines = line_endings_to_bus_conversion(lines)
-
-    # For each station number with multiple buses make lowest voltage `substation_lv = TRUE`
-    set_lv_substations(bus_all)
-
-    # TRY: Keep only buses that are not duplicated & lv_substation = True
-    # TODO: Check if this is necessary. What effect do duplicates have?
-    bus_all = bus_all[bus_all["substation_lv"] == True]
-
-    lines = connect_stations_same_station_id(lines, buses)
 
     return lines, buses
 
