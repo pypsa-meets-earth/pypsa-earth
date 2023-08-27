@@ -47,7 +47,13 @@ def read_osm_config(*args) -> tuple:
     >>> print(world_iso)
     {"Africa":{"DZ":"algeria",...},...}
     """
-    osm_config_path = os.path.join("configs", "osm_config.yaml")
+    if "__file__" in globals():
+        base_folder = os.path.dirname(__file__)
+        if not os.path.exists(os.path.join(base_folder, "configs")):
+            base_folder = os.path.dirname(base_folder)
+    else:
+        base_folder = os.getcwd()
+    osm_config_path = os.path.join(base_folder, "configs", "osm_config.yaml")
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
