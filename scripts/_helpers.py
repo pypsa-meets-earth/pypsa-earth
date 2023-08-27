@@ -19,7 +19,7 @@ NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 
-def read_osm_config(*args):
+def read_osm_config(*args) -> tuple:
     """
     Reads the osm_config.yaml file and returns values based on the provided key
     arguments.
@@ -28,7 +28,9 @@ def read_osm_config(*args):
     ----------
     *args : str
         One or more key arguments corresponding to the values
-          to retrieve from the config file.
+          to retrieve from the config file. The typical arguments used are
+          "world_iso", "continent_regions", "iso_to_geofk_dict" and
+          "osm_clean_columns"
 
     Returns
     -------
@@ -41,11 +43,19 @@ def read_osm_config(*args):
     >>> values = read_osm_config("key1", "key2")
     >>> print(values)
     ('value1', 'value2')
+    >>> world_iso = read_osm_config("world_iso")
+    >>> print(world_iso)
+    {"Africa":{"DZ":"algeria",...},...}
     """
     osm_config_path = os.path.join("configs", "osm_config.yaml")
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
-    return [osm_config[a] for a in args]
+    if len(args) == 0:
+        return osm_config
+    elif len(args) == 1:
+        return osm_config[args[0]]
+    else:
+        tuple([osm_config[a] for a in args])
 
 
 def sets_path_to_root(root_directory_name):
@@ -484,7 +494,7 @@ def getContinent(code):
 
     continent_list = []
     code_set = set(code)
-    world_iso = read_osm_config("world_iso")[0]
+    world_iso = read_osm_config("world_iso")
     for continent in world_iso.keys():
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
