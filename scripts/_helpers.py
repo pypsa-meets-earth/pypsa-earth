@@ -767,7 +767,3 @@ def create_country_list(input, iso_coding=True):
     full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
 
     return full_codes_list
-
-
-if __name__ == "__main__":
-    getContinent(["PH"])
