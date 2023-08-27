@@ -55,7 +55,7 @@ def read_osm_config(*args) -> tuple:
     elif len(args) == 1:
         return osm_config[args[0]]
     else:
-        tuple([osm_config[a] for a in args])
+        return tuple([osm_config[a] for a in args])
 
 
 def sets_path_to_root(root_directory_name):
