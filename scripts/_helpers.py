@@ -19,7 +19,7 @@ NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 
-def read_osm_config(*args) -> tuple:
+def read_osm_config(*args):
     """
     Reads the osm_config.yaml file and returns values based on the provided key
     arguments.
