@@ -715,7 +715,6 @@ def create_country_list(input, iso_coding=True):
         geofabrik-specific ones. When geofabrik codes are
         selected(iso_coding=False), ignore iso-specific names.
         """
-
         if (
             iso_coding
         ):  # if country lists are in iso coding, then check if they are 2-string

@@ -56,7 +56,6 @@ def country_list_to_geofk(country_list):
     full_codes_list : list
         Example ["NG","ZA"]
     """
-
     full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
 
     return full_codes_list
