@@ -19,12 +19,6 @@ NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 
-# world_iso = osm_config["world_iso"]
-# continent_regions = osm_config["continent_regions"]
-# iso_to_geofk_dict = osm_config["iso_to_geofk_dict"]
-# osm_clean_columns = osm_config["osm_clean_columns"]
-
-
 def read_osm_config(*args):
     """
     Reads the osm_config.yaml file and returns values based on the provided key
