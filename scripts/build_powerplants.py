@@ -328,7 +328,7 @@ if __name__ == "__main__":
             pass
 
     # specify the main query for filtering powerplants
-    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
+    ppl_query = snakemake.params.powerplants_filter
     if isinstance(ppl_query, str):
         config["main_query"] = ppl_query
     else:
@@ -363,10 +363,10 @@ if __name__ == "__main__":
     if bus_null_b.any():
         logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
-    if snakemake.config["cluster_options"]["alternative_clustering"]:
-        gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-        country_list = snakemake.config["countries"]
-        geo_crs = snakemake.config["crs"]["geo_crs"]
+    if snakemake.params.alternative_clustering:
+        gadm_layer_id = snakemake.params.gadm_layer_id
+        country_list = snakemake.params.countries
+        geo_crs = snakemake.params.geo_crs
 
         gdf = gpd.read_file(snakemake.input.gadm_shapes)
 
