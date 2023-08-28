@@ -11,8 +11,13 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
-from config_osm_data import osm_clean_columns
+from _helpers import (
+    configure_logging,
+    read_geojson,
+    read_osm_config,
+    sets_path_to_root,
+    to_csv_nafix,
+)
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
@@ -805,7 +810,7 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
 
 def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False):
     logger.info("Stage 1/5: Read input data")
-
+    osm_clean_columns = read_osm_config("osm_clean_columns")
     buses = read_geojson(
         inputs["substations"],
         osm_clean_columns["substation"].keys(),
