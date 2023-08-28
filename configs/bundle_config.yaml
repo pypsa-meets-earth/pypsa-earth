@@ -147,6 +147,14 @@ databundles:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
+    - data/ssp2-2.6/2030/era5_2013/Asia.nc
+    - data/ssp2-2.6/2030/era5_2013/Europe.nc
+    - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
+    - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
+    - data/ssp2-2.6/2030/era5_2013/Oceania.nc
+    - data/hydrobasins/hybas_world_lev04_v1c.shp
+    - data/hydrobasins/hybas_world_lev05_v1c.shp
+    - data/hydrobasins/hybas_world_lev06_v1c.shp
 
   # resources bundle containing the resources folder for Africa only
   bundle_natura_earth:
@@ -336,3 +344,15 @@ databundles:
   #   output: [cutouts/cutout-2013-era5.nc]
   #   disable_by_opt:
   #     build_cutout: [all]
+
+  # Cutout for South America, approx 18 GB
+  bundle_cutouts_southamerica:
+    countries: [SouthAmerica]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]

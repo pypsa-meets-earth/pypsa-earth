@@ -34,6 +34,11 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add Asian cutout `PR #826 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/826>`__
 
+* Add osm_config yaml file `PR #822 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/822>`__
+
+* Re-enable offshore wind and revise hydro `PR #830 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/830>`__
+
+
 PyPSA-Earth 0.2.2
 =================
 

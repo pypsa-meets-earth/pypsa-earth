@@ -35,6 +35,7 @@ Relevant Settings
         hydro:
             carriers:
             hydro_max_hours:
+            hydro_max_hours_default:
             hydro_capital_cost:
 
     lines:
@@ -303,10 +304,10 @@ def attach_wind_and_solar(
     n,
     costs,
     ppl,
-    input_profiles,
+    input_files,
     technologies,
     extendable_carriers,
-    line_length_factor=1,
+    line_length_factor,
 ):
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
@@ -323,29 +324,33 @@ def attach_wind_and_solar(
 
         df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
-        with xr.open_dataset(getattr(snakemake.input, "profile_" + tech)) as ds:
+        with xr.open_dataset(getattr(input_files, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
                 continue
 
             suptech = tech.split("-", 2)[0]
             if suptech == "offwind":
-                continue
-                # TODO: Uncomment out and debug.
-                # underwater_fraction = ds["underwater_fraction"].to_pandas()
-                # connection_cost = (
-                #     snakemake.params.length_factor *
-                #     ds["average_distance"].to_pandas() *
-                #     (underwater_fraction *
-                #      costs.at[tech + "-connection-submarine", "capital_cost"] +
-                #      (1.0 - underwater_fraction) *
-                #      costs.at[tech + "-connection-underground", "capital_cost"]
-                #      ))
-                # capital_cost = (costs.at["offwind", "capital_cost"] +
-                #                 costs.at[tech + "-station", "capital_cost"] +
-                #                 connection_cost)
-                # logger.info(
-                #     "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".
-                #     format(connection_cost.min(), connection_cost.max(), tech))
+                underwater_fraction = ds["underwater_fraction"].to_pandas()
+                connection_cost = (
+                    line_length_factor
+                    * ds["average_distance"].to_pandas()
+                    * (
+                        underwater_fraction
+                        * costs.at[tech + "-connection-submarine", "capital_cost"]
+                        + (1.0 - underwater_fraction)
+                        * costs.at[tech + "-connection-underground", "capital_cost"]
+                    )
+                )
+                capital_cost = (
+                    costs.at["offwind", "capital_cost"]
+                    + costs.at[tech + "-station", "capital_cost"]
+                    + connection_cost
+                )
+                logger.info(
+                    "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".format(
+                        connection_cost.min(), connection_cost.max(), tech
+                    )
+                )
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
@@ -389,11 +394,6 @@ def attach_conventional_generators(
         set(extendable_carriers["Generator"]) - set(renewable_carriers)
     )
     _add_missing_carriers_from_costs(n, costs, carriers)
-
-    # Replace carrier "natural gas" with the respective technology (OCGT or CCGT) to align with PyPSA names of "carriers" and avoid filtering "natural gas" powerplants in ppl.query("carrier in @carriers")
-    ppl.loc[ppl["carrier"] == "natural gas", "carrier"] = ppl.loc[
-        ppl["carrier"] == "natural gas", "technology"
-    ]
 
     ppl = (
         ppl.query("carrier in @carriers")
@@ -457,9 +457,14 @@ def attach_hydro(n, costs, ppl):
         .rename(index=lambda s: str(s) + " hydro")
     )
 
-    # TODO: remove this line to address nan when powerplantmatching is stable
     # Current fix, NaN technologies set to ROR
-    ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
+    if ppl.technology.isna().any():
+        n_nans = ppl.technology.isna().sum()
+        logger.warning(
+            f"Identified {n_nans} hydro powerplants with unknown technology.\n"
+            "Initialized to 'Run-Of-River'"
+        )
+        ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
 
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
@@ -550,13 +555,20 @@ def attach_hydro(n, costs, ppl):
 
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
-        hydro_stats = pd.read_csv(
-            snakemake.input.hydro_capacities, comment="#", na_values=["-"], index_col=0
+        hydro_stats = (
+            pd.read_csv(
+                snakemake.input.hydro_capacities,
+                comment="#",
+                na_values=["-"],
+                index_col=0,
+            )
+            .groupby("Country")
+            .sum()
         )
         e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
         e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
         e_missing = e_target - e_installed
-        missing_mh_i = hydro.query("max_hours == 0").index
+        missing_mh_i = hydro.query("max_hours.isnull()").index
 
         if hydro_max_hours == "energy_capacity_totals_by_country":
             max_hours_country = (
@@ -568,6 +580,8 @@ def attach_hydro(n, costs, ppl):
                 hydro_stats["E_store[TWh]"] * 1e3 / hydro_stats["p_nom_discharge[GW]"]
             )
 
+        max_hours_country.clip(lower=0, inplace=True)
+
         missing_countries = pd.Index(hydro["country"].unique()).difference(
             max_hours_country.dropna().index
         )
@@ -577,9 +591,10 @@ def attach_hydro(n, costs, ppl):
                     ", ".join(missing_countries)
                 )
             )
+        hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
         hydro_max_hours = hydro.max_hours.where(
             hydro.max_hours > 0, hydro.country.map(max_hours_country)
-        ).fillna(6)
+        ).fillna(hydro_max_hours_default)
 
         n.madd(
             "StorageUnit",
