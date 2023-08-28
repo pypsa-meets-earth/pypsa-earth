@@ -21,31 +21,31 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
 def read_osm_config(*args):
     """
-    Reads the osm_config.yaml file and returns values based on the provided key
-    arguments.
+    Read values from the osm_config.yaml file based on provided key arguments.
 
     Parameters
     ----------
     *args : str
-        One or more key arguments corresponding to the values
-          to retrieve from the config file. The typical arguments used are
-          "world_iso", "continent_regions", "iso_to_geofk_dict" and
-          "osm_clean_columns"
+        One or more key arguments corresponding to the values to retrieve
+        from the config file. Typical arguments include "world_iso",
+        "continent_regions", "iso_to_geofk_dict", and "osm_clean_columns".
 
     Returns
     -------
-    tuple
-        A tuple containing values from the osm_config.yaml
-          file corresponding to the provided keys.
+    tuple or str or dict
+        If a single key is provided, returns the corresponding value from the
+        osm_config.yaml file. If multiple keys are provided, returns a tuple
+        containing values corresponding to the provided keys.
 
     Examples
     --------
     >>> values = read_osm_config("key1", "key2")
     >>> print(values)
     ('value1', 'value2')
+
     >>> world_iso = read_osm_config("world_iso")
     >>> print(world_iso)
-    {"Africa":{"DZ":"algeria",...},...}
+    {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
         base_folder = os.path.dirname(__file__)
