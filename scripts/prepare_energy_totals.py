@@ -23,6 +23,9 @@ def get(item, investment_year=None):
     else:
         return item
 
+def calculate_end_values(df):
+    return (1 + df) ** no_years
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -33,8 +36,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_energy_totals",
             simpl="",
-            clusters=10,
-            demand="AB",
+            clusters=32,
+            demand="EG",
             planning_horizons=2030,
         )
         sets_path_to_root("pypsa-earth-sec")
@@ -45,12 +48,14 @@ if __name__ == "__main__":
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
     base_energy_totals = pd.read_csv("data/energy_totals_base.csv", index_col=0)
-    growth_factors = pd.read_csv("data/demand/growth_factors.csv", index_col=0)
-    efficiency_gains = pd.read_csv("data/demand/efficiency_gains.csv", index_col=0)
+    growth_factors_cagr = pd.read_csv("data/demand/growth_factors_cagr.csv", index_col=0)
+    efficiency_gains_cagr = pd.read_csv("data/demand/efficiency_gains_cagr.csv", index_col=0)
     fuel_shares = pd.read_csv("data/demand/fuel_shares.csv", index_col=0)
     district_heating = pd.read_csv("data/demand/district_heating.csv", index_col=0)
 
-    # growth_factors = growth_factors[growth_factors.index.isin(countries)]
+    no_years = int(snakemake.wildcards.planning_horizons) - int(snakemake.config["demand_data"]["base_year"])
+    growth_factors = calculate_end_values(growth_factors_cagr)
+    efficiency_gains = calculate_end_values(efficiency_gains_cagr)
     # efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
     # fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
     # district_heating = district_heating[district_heating.index.isin(countries)]
