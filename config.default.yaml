@@ -271,7 +271,6 @@ sector:
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
-  
   conventional_generation: # generator : carrier
     OCGT: gas
     #Gen_Test: oil # Just for testing purposes
