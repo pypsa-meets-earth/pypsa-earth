@@ -105,7 +105,7 @@ clean_osm_data_options:  # osm = OpenStreetMap
   custom_path_lines: False # Provide the specific absolute path of the custom file including its name and type e.g. (C:\...\...\pypsa-earth\data\custom_lines.geojson)
   use_custom_substations: "OSM_only"  # Flag added to use customized (Custom_only), OSM-downloaded (OSM_only), or both (Add_custom) in the clean_osm_data script (custom information should follow the format of the respective OSM .geojson file in the data folder)
   custom_path_cables: False # Provide the specific absolute path of the custom file including its name and type e.g. (C:\...\...\pypsa-earth\data\custom_substations.geojson)
-  use_custom_cables: "OSM_only"  # Flag added to use customized (Custom_only), OSM-downloaded (OSM_only), or both (Add_custom) in the clean_osm_data script (custom information should follow the format of the respective OSM .geojson file in the data folder)
+  use_custom_substations: "OSM_only"  # Flag added to use customized (Custom_only), OSM-downloaded (OSM_only), or both (Add_custom) in the clean_osm_data script (custom information should follow the format of the respective OSM .geojson file in the data folder)
   custom_path_cables: False # Provide the specific absolute path of the custom file including its name and type e.g. (C:\...\...\pypsa-earth\data\custom_cables.geojson)
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
