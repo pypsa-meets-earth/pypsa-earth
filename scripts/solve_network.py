@@ -542,17 +542,17 @@ if __name__ == "__main__":
         )
     configure_logging(snakemake)
 
-    tmpdir = snakemake.config["solving"].get("tmpdir")
+    tmpdir = snakemake.params.solving.get("tmpdir")
     if tmpdir is not None:
         Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
-    solve_opts = snakemake.config["solving"]["options"]
+    solve_opts = snakemake.params.solving["options"]
 
     n = pypsa.Network(snakemake.input[0])
-    if snakemake.config["augmented_line_connection"].get("add_to_snakefile"):
-        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = snakemake.config[
-            "augmented_line_connection"
-        ].get("min_expansion")
+    if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
+        n.lines.loc[
+            n.lines.index.str.contains("new"), "s_nom_min"
+        ] = snakemake.params.augmented_line_connection.get("min_expansion")
     n = prepare_network(n, solve_opts)
     n = solve_network(
         n,
