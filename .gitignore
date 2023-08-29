@@ -39,6 +39,8 @@ data/industry_sector_ratios_NZ_2030.csv
 /data/nuts*
 /data/demand/unsd/data
 /data/ports.csv
+/data/energy_totals_DF_2030
+/data/energy_totals_XX_2038
 
 /data/airports.csv
 /data/energy_totals_base.csv

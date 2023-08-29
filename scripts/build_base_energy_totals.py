@@ -97,13 +97,13 @@ def calc_sector(sector):
                     df_sector[df_sector.Commodity.isin(heat)]
                     .Quantity_TWh.sum()
                     .round(4)
-                    * 0.6
+                    * snakemake.config["sector"]["space_heat_share"]
                 )
                 energy_totals_base.at[country, "total residential water"] = (
                     df_sector[df_sector.Commodity.isin(heat)]
                     .Quantity_TWh.sum()
                     .round(4)
-                    * 0.4
+                    * (1 - snakemake.config["sector"]["space_heat_share"])
                 )
 
             elif sector == "services":
@@ -134,13 +134,13 @@ def calc_sector(sector):
                     df_sector[df_sector.Commodity.isin(heat)]
                     .Quantity_TWh.sum()
                     .round(4)
-                    * 0.6
+                    * snakemake.config["sector"]["space_heat_share"]
                 )
                 energy_totals_base.at[country, "total services water"] = (
                     df_sector[df_sector.Commodity.isin(heat)]
                     .Quantity_TWh.sum()
                     .round(4)
-                    * 0.4
+                    * (1 - snakemake.config["sector"]["space_heat_share"])
                 )
 
             elif sector == "road":
