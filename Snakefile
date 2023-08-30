@@ -367,12 +367,15 @@ rule copy_config:
     script:
         "scripts/copy_config.py"
 
+
 rule copy_commit:
-    output: SDIR + "/commit_info.txt"
+    output:
+        SDIR + "/commit_info.txt",
     shell:
         """
         git log -n 1 --pretty=format:"Commit: %H%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s" > {output}
         """
+
 
 rule solve_network:
     input:
