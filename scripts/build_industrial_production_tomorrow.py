@@ -9,7 +9,7 @@ Created on Thu Jul 14 19:01:13 2022
 
 import pandas as pd
 from prepare_sector_network import get
-
+import os
 
 def industry_prod_tomorrow(production):
     production_tomorrow = production.copy()
@@ -86,7 +86,8 @@ def industry_prod_tomorrow(production):
     production_tomorrow["HVC"] *= get(
         config_ind["HVC_primary_fraction"], investment_year
     )
-
+    
+    # Non-metallic minerals
     return production_tomorrow
 
 
@@ -94,10 +95,12 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         snakemake = mock_snakemake(
             "build_industrial_production_per_country_tomorrow",
             planning_horizons=2030,
-            demand="DF",
+            demand="EG",
         )
 
     config = snakemake.config
