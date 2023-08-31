@@ -113,7 +113,7 @@ if __name__ == "__main__":
     )
 
     # Rename columns
-    airports = airports.rename(columns={"iso_country":"country"})
+    airports = airports.rename(columns={"iso_country": "country"})
 
     # Save
     airports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
