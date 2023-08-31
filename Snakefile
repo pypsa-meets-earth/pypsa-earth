@@ -85,6 +85,7 @@ rule prepare_ports:
     script:
         "scripts/prepare_ports.py"
 
+
 rule prepare_airports:
     output:
         ports="data/airports.csv",
