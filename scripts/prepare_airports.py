@@ -112,5 +112,8 @@ if __name__ == "__main__":
         airports["airport_size_nr"] / airports["Total_airport_size_nr"]
     )
 
+    # Rename columns
+    airports = airports.rename(columns={"iso_country":"country"})
+
     # Save
     airports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
