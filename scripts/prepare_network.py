@@ -75,6 +75,14 @@ logger = logging.getLogger(__name__)
 
 
 def download_emission_data():
+    """
+    Download emission file from EDGAR.
+
+    Returns
+    -------
+    global emission file for all countries in the world.
+    """
+
     try:
         url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
         with requests.get(url) as rq:
@@ -94,6 +102,23 @@ def download_emission_data():
 
 
 def emission_extractor(filename, emission_year, country_names):
+    """
+    Extracts CO2 emission values for given country codes from the global emission file.
+
+    Parameters
+    ----------
+    filename : str
+        Global emission filename
+    emission_year : int
+        Year of CO2 emissions
+    country_names : numpy.ndarray
+        Two letter country codes of analysed countries.
+
+    Returns
+    -------
+    CO2 emission values of studied countries.
+    """
+
     # data reading process
     datapath = os.path.join(os.getcwd(), "data", filename)
     df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
@@ -113,7 +138,7 @@ def emission_extractor(filename, emission_year, country_names):
         logger.warning(
             f"The emission value for the following countries has not been found: {missing_ccs}"
         )
-    return sum(emission_by_country)
+    return emission_by_country
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
@@ -332,7 +357,7 @@ if __name__ == "__main__":
                     "automatic_emission_base_year"
                 ]
                 filename = download_emission_data()
-                co2limit = emission_extractor(filename, emission_year, country_names)
+                co2limit = emission_extractor(filename, emission_year, country_names).sum()
                 if len(m) > 0:
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
