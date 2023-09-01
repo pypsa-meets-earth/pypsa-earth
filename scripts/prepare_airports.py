@@ -84,7 +84,7 @@ if __name__ == "__main__":
     df = airports_original.copy()
 
     # Keep only airports that are of type medium and large
-    # df = df.loc[df["type"].isin(["large_airport", "medium_airport"])]
+    df = df.loc[df["type"].isin(["large_airport", "medium_airport"])]
 
     # Filtering out the military airbases and keeping only commercial airports
     df = df[~df.iata_code.isnull()]
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     df.insert(2, "airport_size_nr", 1)
     df.loc[df["type"].isin(["medium_airport"]), "airport_size_nr"] = 1
-    df.loc[df["type"].isin(["large_airport"]), "airport_size_nr"] = 3
+    df.loc[df["type"].isin(["large_airport"]), "airport_size_nr"] = snakemake.config["sector"]["airport_sizing_factor"]
 
     # Calculate the number of total airports size
     df1 = df.copy()

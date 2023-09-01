@@ -265,6 +265,7 @@ sector:
   SMR: true
   cc_fraction: 0.9
   cc: true
+  airport_sizing_factor: 3
 
   conventional_generation: # generator : carrier
     OCGT: gas
