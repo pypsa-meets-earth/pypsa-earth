@@ -38,7 +38,10 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Re-enable offshore wind and revise hydro `PR #830 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/830>`__
 
+* Add databundle of cutouts for Kazakhstan for CI test  `PR #856 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/856>`__. The bundle (~5MB) is used in pypsa-kz-data repository during CI tests.
+
 * Option to specify a global upper capacity limit (using existing BAU functionality) `PR #857 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/857>`__
+
 
 PyPSA-Earth 0.2.2
 =================

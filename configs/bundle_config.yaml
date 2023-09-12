@@ -107,6 +107,17 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # Cutout of Kazakhstan for CI test of pypsa-kz-data repo, only 5 MB
+  bundle_cutouts_test_KZ:
+    countries: [KZ]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/record/1239739/files/tutorial_cutouts_KZ.zip?download=1
+    output: [cutouts/cutout-2013-era5-tutorial.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
   # tutorial bundle for all African countries
   bundle_tutorial_data_common:
     countries: [Africa]
