@@ -54,7 +54,7 @@ doc/_build
 /sample_pypsa_eur
 
 /notebooks
-
+/slurm
 # File extensions
 *.org
 *.nc
