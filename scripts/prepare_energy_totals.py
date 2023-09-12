@@ -81,7 +81,11 @@ if __name__ == "__main__":
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
-    energy_totals = base_energy_totals * efficiency_gains.loc[countries] * growth_factors.loc[countries]
+    energy_totals = (
+        base_energy_totals
+        * efficiency_gains.loc[countries]
+        * growth_factors.loc[countries]
+    )
 
     # Residential
     efficiency_heat_oil_to_elec = snakemake.config["sector"][
