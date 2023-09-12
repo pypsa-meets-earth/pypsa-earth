@@ -272,6 +272,7 @@ rule build_population_layouts:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
+        gdp_layout="resources/gdp_shares/gdp_layout.nc"
     resources:
         mem_mb=20000,
     benchmark:
@@ -297,12 +298,14 @@ rule build_clustered_population_layouts:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
+        gdp_layout="resources/gdp_shares/gdp_layout.nc",
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv"
     resources:
         mem_mb=10000,
     benchmark:
@@ -533,9 +536,10 @@ if config["custom_data"].get("industry_demand", False) == True:
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="resources/custom_data/industrial_database.csv",
-            #shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
-            shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
+            shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
+            #shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
         output:
             industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
@@ -572,6 +576,7 @@ if config["custom_data"].get("industry_demand", False) == False:
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="data/industrial_database.csv",
             shapes_path=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"

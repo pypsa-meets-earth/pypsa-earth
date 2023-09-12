@@ -60,33 +60,39 @@ if __name__ == "__main__":
 
     # population in each grid cell
     pop_cells = pd.Series(I.dot(nuts3["pop"]))
+    gdp_cells = pd.Series(I.dot(nuts3["gdp"]))
 
     # in km^2
     with mp.Pool(processes=snakemake.threads) as pool:
         cell_areas = pd.Series(pool.map(vshapes.area, grid_cells)) / 1e6
 
     # pop per km^2
-    density_cells = pop_cells / cell_areas
+    density_cells_pop = pop_cells / cell_areas
+    density_cells_gdp = gdp_cells / cell_areas
 
     # rural or urban population in grid cell
-    pop_rural = pd.Series(0.0, density_cells.index)
-    pop_urban = pd.Series(0.0, density_cells.index)
+    pop_rural = pd.Series(0.0, density_cells_pop.index)
+    pop_urban = pd.Series(0.0, density_cells_pop.index)
 
     for ct in countries:
         indicator_nuts3_ct = nuts3.country.apply(lambda x: 1.0 if x == ct else 0.0)
 
         indicator_cells_ct = pd.Series(Iinv.T.dot(indicator_nuts3_ct))
 
-        density_cells_ct = indicator_cells_ct * density_cells
+        density_cells_pop_ct = indicator_cells_ct * density_cells_pop
+        density_cells_gdp_ct = indicator_cells_ct * density_cells_gdp
 
         pop_cells_ct = indicator_cells_ct * pop_cells
-
+        gdp_cells_ct = indicator_cells_ct * gdp_cells
         # correct for imprecision of Iinv*I
         pop_ct = nuts3.loc[nuts3.country == ct, "pop"].sum()
         pop_cells_ct *= pop_ct / pop_cells_ct.sum()
 
+        gdp_ct = nuts3.loc[nuts3.country == ct, "gdp"].sum()
+        gdp_cells_ct *= gdp_ct / gdp_cells_ct.sum()
+
         # The first low density grid cells to reach rural fraction are rural
-        asc_density_i = density_cells_ct.sort_values().index
+        asc_density_i = density_cells_pop_ct.sort_values().index
         asc_density_cumsum = pop_cells_ct[asc_density_i].cumsum() / pop_cells_ct.sum()
         rural_fraction_ct = 1 - urban_fraction[ct]
         pop_ct_rural_b = asc_density_cumsum < rural_fraction_ct
@@ -106,6 +112,13 @@ if __name__ == "__main__":
         ycoords = ("y", cutout.coords["y"].data)
         xcoords = ("x", cutout.coords["x"].data)
         values = pop.values.reshape(cutout.shape)
-        layout = xr.DataArray(values, [ycoords, xcoords])
+        pop_layout = xr.DataArray(values, [ycoords, xcoords])
 
-        layout.to_netcdf(snakemake.output[f"pop_layout_{key}"])
+        pop_layout.to_netcdf(snakemake.output[f"pop_layout_{key}"])
+    
+    #for key, gdp in gdp_cells.items():
+    ycoords = ("y", cutout.coords["y"].data)
+    xcoords = ("x", cutout.coords["x"].data)
+    values = gdp_cells.values.reshape(cutout.shape)
+    gdp_layout = xr.DataArray(values, [ycoords, xcoords])
+    gdp_layout.to_netcdf(snakemake.output[f"gdp_layout"])

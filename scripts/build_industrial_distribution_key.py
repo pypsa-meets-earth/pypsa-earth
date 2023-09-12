@@ -53,8 +53,17 @@ def build_nodal_distribution_key(
         na_values=[""],
     )
 
+    gdp = pd.read_csv(
+        snakemake.input.clustered_gdp_layout,
+        index_col=0,
+        keep_default_na=False,
+        na_values=[""],
+    )
+
     # pop["country"] = pop.index.str[:2]
     keys["population"] = pop["total"].values / pop["total"].sum()
+
+    keys["gdp"] = gdp["total"].values/gdp["total"].sum()
 
     for tech, country in product(technology, countries):
         regions_ct = regions.name[regions.name.str.contains(country)]
@@ -75,7 +84,7 @@ def build_nodal_distribution_key(
                 key.groupby(facilities.index).sum().reindex(regions_ct, fill_value=0.0)
             )
         else:
-            key = keys.loc[regions_ct, "population"]
+            key = keys.loc[regions_ct, "gdp"]
 
         keys.loc[regions_ct, tech] = key
     keys["country"] = pop["ct"]
@@ -91,9 +100,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=10,
-            demand="DF",
-            planning_horizons=2030,
+            clusters=37,
+            demand="EG",
+            planning_horizons=2050,
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -115,7 +124,7 @@ if __name__ == "__main__":
         header=0,
         keep_default_na=False,  # , index_col=0
     )
-
+    geo_locs["capacity"] = pd.to_numeric(geo_locs.capacity)
     gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
 
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]
@@ -123,7 +132,6 @@ if __name__ == "__main__":
     technology = geo_locs.technology.unique()
 
     shapes_path = snakemake.input.shapes_path
-
     industrial_database = map_industry_to_buses(
         geo_locs[geo_locs.quality != "unavailable"]
     )
