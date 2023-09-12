@@ -234,13 +234,26 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 
 def add_BAU_constraints(n, config):
-    mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
+    ext_c = n.generators.query("p_nom_extendable").carrier.unique()
+    mincaps = pd.Series(
+        config["electricity"].get("BAU_mincapacities", {key: 0 for key in ext_c})
+    )
     lhs = (
         linexpr((1, get_var(n, "Generator", "p_nom")))
         .groupby(n.generators.carrier)
         .apply(join_exprs)
     )
     define_constraints(n, lhs, ">=", mincaps[lhs.index], "Carrier", "bau_mincaps")
+
+    maxcaps = pd.Series(
+        config["electricity"].get("BAU_maxcapacities", {key: np.inf for key in ext_c})
+    )
+    lhs = (
+        linexpr((1, get_var(n, "Generator", "p_nom")))
+        .groupby(n.generators.carrier)
+        .apply(join_exprs)
+    )
+    define_constraints(n, lhs, "<=", maxcaps[lhs.index], "Carrier", "bau_maxcaps")
 
 
 def add_SAFE_constraints(n, config):
@@ -554,6 +567,7 @@ if __name__ == "__main__":
             n.lines.index.str.contains("new"), "s_nom_min"
         ] = snakemake.params.augmented_line_connection.get("min_expansion")
     n = prepare_network(n, solve_opts)
+
     n = solve_network(
         n,
         config=snakemake.config,
