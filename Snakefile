@@ -381,28 +381,6 @@ rule build_temperature_profiles:
     script:
         "scripts/build_temperature_profiles.py"
 
-
-rule copy_config:
-    output:
-        SDIR + "/configs/config.yaml",
-    threads: 1
-    resources:
-        mem_mb=1000,
-    benchmark:
-        SDIR + "/benchmarks/copy_config"
-    script:
-        "scripts/copy_config.py"
-
-
-rule copy_commit:
-    output:
-        SDIR + "/commit_info.txt",
-    shell:
-        """
-        git log -n 1 --pretty=format:"Commit: %H%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s" > {output}
-        """
-
-
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
@@ -411,8 +389,6 @@ rule solve_network:
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
-        configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
-        commit=SDIR + "/commit_info.txt",
     output:
         RDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",

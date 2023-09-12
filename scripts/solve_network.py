@@ -7,6 +7,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
+import subprocess
+import yaml
 from helpers import override_component_attrs
 from pypsa.linopf import ilopf, network_lopf
 from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
@@ -407,6 +409,39 @@ def extra_functionality(n, snapshots):
     add_co2_sequestration_limit(n, snapshots)
 
 
+# Function to get the last Git commit message
+def get_last_commit_message():
+    try:
+        # Run the Git command to get the last commit message
+        result = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%s"], capture_output=True, text=True
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        print(f"Error getting the last commit message: {e}")
+        return ""
+
+
+# Function to update the YAML file with the last commit message as a comment
+def update_config(config):
+    try:
+        # Read the YAML file
+        with open(config, "r") as file:
+            yaml_data = file.readlines()
+
+        # Insert the last commit message as a comment at the beginning of the YAML data
+        yaml_data.insert(0, f"# Last Git commit: {get_last_commit_message()}\n")
+
+        # Write the modified data back to the YAML file
+        with open(config, "w") as file:
+            config.writelines(yaml_data)
+
+    except Exception as e:
+        print(f"Error updating the YAML file: {e}")
+
+    return config
+
+
 def solve_network(n, config, opts="", **kwargs):
     solver_options = config["solving"]["solver"].copy()
     solver_name = solver_options.pop("name")
@@ -416,7 +451,7 @@ def solve_network(n, config, opts="", **kwargs):
     max_iterations = cf_solving.get("max_iterations", 6)
 
     # add to network for extra_functionality
-    n.config = config
+    n.config = update_config(config)
     n.opts = opts
 
     if cf_solving.get("skip_iterations", False):
