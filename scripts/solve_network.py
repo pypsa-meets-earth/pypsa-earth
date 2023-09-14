@@ -2,12 +2,12 @@
 """Solve network."""
 import logging
 import os
+import subprocess
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypsa
-import subprocess
 import yaml
 from helpers import override_component_attrs
 from pypsa.linopf import ilopf, network_lopf

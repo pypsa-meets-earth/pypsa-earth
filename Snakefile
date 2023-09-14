@@ -381,6 +381,7 @@ rule build_temperature_profiles:
     script:
         "scripts/build_temperature_profiles.py"
 
+
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
