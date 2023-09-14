@@ -79,6 +79,7 @@ Details (and errors made through this heuristic) are discussed in the paper
 """
 import logging
 import os
+import subprocess
 import re
 from pathlib import Path
 
@@ -507,6 +508,32 @@ def extra_functionality(n, snapshots):
     add_battery_constraints(n)
 
 
+# Function to get the last Git commit message
+def get_last_commit_message():
+    try:
+        # Run the Git command to get the last commit message
+        result = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%H %s"],
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        print(f"Error getting the last commit message: {e}")
+        return ""
+
+
+# Function to add the last commit to the config
+def update_config(config):
+    try:
+        # Insert the last commit message to config
+        config.update({"git_commit": get_last_commit_message()})
+    except Exception as e:
+        print(f"Error updating the config: {e}")
+
+    return config
+
+
 def solve_network(n, config, opts="", **kwargs):
     solver_options = config["solving"]["solver"].copy()
     solver_name = solver_options.pop("name")
@@ -516,7 +543,7 @@ def solve_network(n, config, opts="", **kwargs):
     max_iterations = cf_solving.get("max_iterations", 6)
 
     # add to network for extra_functionality
-    n.config = config
+    n.config = update_config(config)
     n.opts = opts
 
     if cf_solving.get("skip_iterations", False):
@@ -525,7 +552,7 @@ def solve_network(n, config, opts="", **kwargs):
             solver_name=solver_name,
             solver_options=solver_options,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     else:
         ilopf(
@@ -536,7 +563,7 @@ def solve_network(n, config, opts="", **kwargs):
             min_iterations=min_iterations,
             max_iterations=max_iterations,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     return n
 
