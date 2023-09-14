@@ -414,7 +414,9 @@ def get_last_commit_message():
     try:
         # Run the Git command to get the last commit message
         result = subprocess.run(
-            ["git", "log", "-1", "--pretty=format:%s"], capture_output=True, text=True
+            ["git", "log", "-1", "--pretty=format:%H %s"],
+            capture_output=True,
+            text=True,
         )
         return result.stdout.strip()
     except Exception as e:
@@ -422,22 +424,34 @@ def get_last_commit_message():
         return ""
 
 
+# Function to return the last PyPSA-Earth commit message
+def get_submodule_commit_message():
+    try:
+        # Retrieve the last commit message for pypsa-earth
+        submodule_path = f"pypsa-earth"
+        last_commit_message = (
+            subprocess.check_output(
+                ["git", "log", "-n", "1", "--pretty=format:%H %s"],
+                cwd=submodule_path,
+                stderr=subprocess.STDOUT,
+            )
+            .decode()
+            .strip()
+        )
+        return last_commit_message
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing Git: {e}")
+        return None
+
+
 # Function to update the YAML file with the last commit message as a comment
 def update_config(config):
     try:
-        # Read the YAML file
-        with open(config, "r") as file:
-            yaml_data = file.readlines()
-
-        # Insert the last commit message as a comment at the beginning of the YAML data
-        yaml_data.insert(0, f"# Last Git commit: {get_last_commit_message()}\n")
-
-        # Write the modified data back to the YAML file
-        with open(config, "w") as file:
-            config.writelines(yaml_data)
-
+        # Insert the last commit message to config
+        config.update({"git_commit": get_last_commit_message()})
+        config.update({"submodule_commit": get_submodule_commit_message()})
     except Exception as e:
-        print(f"Error updating the YAML file: {e}")
+        print(f"Error updating the config: {e}")
 
     return config
 
@@ -516,11 +530,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="12",
+            clusters="4",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="24H",
+            sopts="144H",
             discountrate=0.071,
             demand="DF",
             h2export="120",
@@ -574,6 +588,7 @@ if __name__ == "__main__":
             solver_logfile=snakemake.log.solver,
         )
 
+        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
         n.export_to_netcdf(snakemake.output[0])
 
     logger.info("Maximum memory usage: {}".format(mem.mem_usage))
