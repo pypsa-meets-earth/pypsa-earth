@@ -629,8 +629,8 @@ if __name__ == "__main__":
     sets_path_to_root("pypsa-earth")
 
     rootpath = os.getcwd()
-    tutorial = snakemake.config["tutorial"]
-    countries = snakemake.config["countries"]
+    tutorial = snakemake.params.tutorial
+    countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
     disable_progress = not snakemake.config.get("retrieve_databundle", {}).get(

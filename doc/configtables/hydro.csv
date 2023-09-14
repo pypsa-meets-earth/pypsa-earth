@@ -7,6 +7,7 @@ resource,,,
 carriers,--,"Any subset of {'ror', 'PHS', 'hydro'}","Specifies the types of hydro power plants to build per-unit availability time series for. 'ror' stands for run-of-river plants, 'PHS' represents pumped-hydro storage, and 'hydro' stands for hydroelectric dams."
 PHS_max_hours,h,float,"Maximum state of charge capacity of the pumped-hydro storage (PHS) in terms of hours at full output capacity ``p_nom``. Cf. `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_."
 hydro_max_hours,h,"Any of {float, 'energy_capacity_totals_by_country', 'estimate_by_large_installations'}","Maximum state of charge capacity of the pumped-hydro storage (PHS) in terms of hours at full output capacity ``p_nom`` or heuristically determined. Cf. `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_."
+hydro_max_hours_default,h,float,"(optional, default 6) Default value of max_hours for hydro plants with missing values"
 clip_min_inflow,MW,float,"To avoid too small values in the inflow time series, values below this threshold are set to zero."
 extendable, bool, "{True, False}", "True: In nodes where there is no hydro generation, adds a zero-capacity hydro generator so that hydro is considered for capacity expansion. It is done in the ``add_electricity`` rule."
 normalization,--,dict,"When specified, it describes how to normalize hydro time series to adhere to national statistics"
