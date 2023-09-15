@@ -348,7 +348,7 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
- 
+
   # cutouts bundle of the cutouts folder for Western Asia
   # Size about  3.8 GB (zipped)
   bundle_cutouts_westernasia:
