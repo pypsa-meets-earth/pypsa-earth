@@ -591,7 +591,7 @@ if config["custom_data"].get("industry_demand", False) == False:
         script:
             "scripts/build_industrial_distribution_key.py"
 
-    rule build_industrial_production_per_country_tomorrow:  #default data
+    rule build_base_industry_totals:  #default data
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
         output:
@@ -600,9 +600,9 @@ if config["custom_data"].get("industry_demand", False) == False:
         resources:
             mem_mb=1000,
         benchmark:
-            "benchmarks/build_industrial_production_per_country_tomorrow_{planning_horizons}_{demand}"
+            "benchmarks/build_base_industry_totals_{planning_horizons}_{demand}"
         script:
-            "scripts/build_industrial_production_tomorrow.py"
+            "scripts/build_base_industry_totals.py"
 
     rule build_industry_demand:  #default data
         input:
