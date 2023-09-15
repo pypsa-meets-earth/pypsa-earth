@@ -9,7 +9,7 @@
 
 # .. code:: yaml
 
-#   _name:  # name of the bundle
+#   bundle_name:  # name of the bundle
 #     countries: [country code, region code or country list]  # list of countries represented in the databundle
 #     [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
 #     category: common/resources/data/cutouts  # category of data contained in the bundle:
@@ -348,13 +348,15 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
-
+ 
+  # cutouts bundle of the cutouts folder for Western Asia
+  # Size about  3.8 GB (zipped)
   bundle_cutouts_westernasia:
     countries: [WAS]
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/110UA0WQnmRV-20cXxYNR8WHLnLti6Qip/view?usp=drive_link
-    output: [cutouts/western-asia-2013-era5.nc]
+      gdrive: https://drive.google.com/file/d/1as-fZS4Z70CfDf3bR4i9t9S5-5pBqURP/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
