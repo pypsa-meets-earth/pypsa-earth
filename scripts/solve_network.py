@@ -79,8 +79,8 @@ Details (and errors made through this heuristic) are discussed in the paper
 """
 import logging
 import os
-import subprocess
 import re
+import subprocess
 from pathlib import Path
 
 import numpy as np
