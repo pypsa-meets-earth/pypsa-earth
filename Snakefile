@@ -595,7 +595,7 @@ if config["custom_data"].get("industry_demand", False) == False:
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
         output:
-            industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            base_industry_totals="resources/demand/base_industry_totals{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
