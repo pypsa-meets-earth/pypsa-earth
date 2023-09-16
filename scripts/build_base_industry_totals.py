@@ -16,13 +16,16 @@ from helpers import get_conv_factors, aggregate_fuels
 # def calc_industry_base(df):
 
 def create_industry_base_totals(df):
-    #for country in countries:
+   
+    # Converting values of mass (ktons) to energy (TWh)
     index_mass = df.loc[
         df["Unit"] == "Metric tons,  thousand"
     ].index
     df.loc[index_mass, "Quantity_TWh"] = df.loc[index_mass].apply(
         lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1
     )
+    
+    # Converting values of energy (GWh) to energy (TWh)
     index_energy = df[
         df["Unit"] == "Kilowatt-hours, million"
     ].index
@@ -30,11 +33,13 @@ def create_industry_base_totals(df):
         index_energy
     ].apply(lambda x: x["Quantity"] / 1e3, axis=1)
 
+    # Converting values of energy (TJ) to energy (TWh)
     index_energy_TJ = df[df["Unit"] == "Terajoules"].index
     df.loc[index_energy_TJ, "Quantity_TWh"] = df.loc[
         index_energy_TJ
     ].apply(lambda x: x["Quantity"] / 3600, axis=1)
 
+    # Converting values of volume (thousand m3) to energy (TWh)
     index_volume = df[
         df["Unit"] == "Cubic metres, thousand"
     ].index
@@ -43,11 +48,12 @@ def create_industry_base_totals(df):
     ].apply(lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1)
 
     df["carrier"] = df["Commodity"].map(fuel_dict)
-    #industry_totals_base = calc_industry_base(df) 
 
+    # Aggregating and grouping the dataframe
     df_agg = df.groupby(['country', 'carrier', 'Transaction']).agg({'Quantity_TWh': 'sum'}).reset_index()
     industry_totals_base = df_agg.pivot_table(columns='Transaction', index=['country', 'carrier']).fillna(0.0)
     industry_totals_base=industry_totals_base.droplevel(level=0, axis=1)
+
     return industry_totals_base
 
 if __name__ == "__main__":
@@ -62,16 +68,16 @@ if __name__ == "__main__":
             demand="EG",
         )
 
+    #Loading config file and wild cards
     config = snakemake.config
-    config_ind = snakemake.config["industry"]
 
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
-
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.config["demand_data"]["base_year"]
     )
 
+    #Loading all energy balance files
     all_files = Path("/nfs/home/haz43975/pes_paper/EG/pypsa-earth-sec/data/demand/unsd/data").glob("*.txt") #TODO change path
 
     # Create a dataframe from all downloaded files
@@ -107,9 +113,10 @@ if __name__ == "__main__":
     fuels_conv_toTWh = get_conv_factors("industry")
     # Lists that combine the different fuels in the dataset to the model's carriers
     
+    #Fetch the fuel categories from the helpers script
     gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity = aggregate_fuels("industry")
 
-
+    #Create fuel dictionary to use for mapping all fuels to the pypsa representative fuels
     fuel_dict = {element: var_name for var_name, element_list in [('gas', gas_fuels), 
                                                                   ('oil', oil_fuels), 
                                                                   ('biomass', biomass_fuels), 
@@ -127,9 +134,10 @@ if __name__ == "__main__":
     df_yr = df_yr[df_yr.country.isin(countries)]
     df_yr = df_yr[df_yr["Commodity - Transaction"].str.contains("industry")]
 
+    # Create the industry totals file
     industry_totals_base = create_industry_base_totals(df_yr)
 
-    
+    # Export the industry totals dataframe
     industry_totals_base.to_csv("../data/industry_totals_base.csv")
 
 
