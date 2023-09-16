@@ -127,7 +127,6 @@ if __name__ == "__main__":
     # Fetch country list and demand base year from the config file
     year = snakemake.config["demand_data"]["base_year"]
     countries = snakemake.config["countries"]
-    countries = ["EG", "MA"]
 
     # Filter for the year and country
     df_yr = df[df.Year == year]
