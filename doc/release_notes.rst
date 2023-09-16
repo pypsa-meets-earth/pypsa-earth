@@ -32,6 +32,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add Asian cutout `PR #826 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/826>`__
 
+* Add a cutout for Western Asia `PR #837 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/837>`__
+
 PyPSA-Earth 0.2.2
 =================
 
