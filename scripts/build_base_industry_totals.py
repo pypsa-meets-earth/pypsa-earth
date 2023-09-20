@@ -15,6 +15,10 @@ import country_converter as coco
 from helpers import get_conv_factors, aggregate_fuels
 # def calc_industry_base(df):
 
+def calculate_end_values(df):   
+    return (1 + df) ** no_years
+
+
 def create_industry_base_totals(df):
    
     # Converting values of mass (ktons) to energy (TWh)
@@ -53,7 +57,18 @@ def create_industry_base_totals(df):
     df_agg = df.groupby(['country', 'carrier', 'Transaction']).agg({'Quantity_TWh': 'sum'}).reset_index()
     industry_totals_base = df_agg.pivot_table(columns='Transaction', index=['country', 'carrier']).fillna(0.0)
     industry_totals_base=industry_totals_base.droplevel(level=0, axis=1)
+    industry_totals_base["other"] = 0
 
+    if include_other:
+
+        # Loop through the columns in the list and sum them if they exist
+        for col_name in other_list:
+            if col_name in industry_totals_base.columns:
+                industry_totals_base["other"] += industry_totals_base[col_name]
+                industry_totals_base.drop(col_name, axis=1, inplace=True)
+    else:
+        industry_totals_base.drop(columns=[col for col in other_list if col in industry_totals_base.columns], inplace=True)
+    
     return industry_totals_base
 
 if __name__ == "__main__":
@@ -63,18 +78,45 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
-            "build_industrial_production_per_country_tomorrow",
+            "build_base_industry_totals",
             planning_horizons=2030,
             demand="EG",
         )
 
     #Loading config file and wild cards
-    config = snakemake.config
 
+    year = snakemake.config["demand_data"]["base_year"]
+    countries = snakemake.config["countries"]
+    countries = ["DE", "US", "EG", "MA", "UA", "UK"]
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.config["demand_data"]["base_year"]
+    )
+    include_other = snakemake.config["demand_data"]["other_industries"]
+
+    industry_list = [
+            'iron and steel',
+            'chemical and petrochemical',
+            'non-ferrous metals',
+            'non-metallic minerals',
+            'transport equipment',
+            'machinery',
+            'mining and quarrying',
+            'food and tobacco',
+            'paper, pulp and printing',
+            'paper, pulp and print',
+            'wood and wood products',
+            'textile and leather',
+            'construction',
+            'not elsewhere specified (industry)',
+            'other manuf., const. and non-fuel ind.',
+            'other manuf., const. and non-fuel min. ind.',
+        ]
+    other_list=['other manuf., const. and non-fuel ind.',
+            'other manuf., const. and non-fuel min. ind.',]
+    cagr = pd.read_csv(
+        "/nfs/home/haz43975/pes_paper/EG/pypsa-earth-sec/data/demand/industry_growth_cagr.csv", index_col=0
     )
 
     #Loading all energy balance files
@@ -90,6 +132,9 @@ if __name__ == "__main__":
         " - ", expand=True
     )
 
+    # Remove fill na in Transaction column
+    df["Transaction"] = df["Transaction"].fillna("NA")
+    df["Transaction"] = df["Transaction"].str.lower()
     # Remove Foootnote and Estimate from 'Commodity - Transaction' column
     df = df.loc[df["Commodity - Transaction"] != "Footnote"]
     df = df.loc[df["Commodity - Transaction"] != "Estimate"]
@@ -111,7 +156,9 @@ if __name__ == "__main__":
 
     # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
     fuels_conv_toTWh = get_conv_factors("industry")
+    
     # Lists that combine the different fuels in the dataset to the model's carriers
+
     
     #Fetch the fuel categories from the helpers script
     gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity = aggregate_fuels("industry")
@@ -124,20 +171,34 @@ if __name__ == "__main__":
                                                                   ('coal', coal_fuels), 
                                                                   ('electricity', electricity)] for element in element_list}  
 
-    # Fetch country list and demand base year from the config file
-    year = snakemake.config["demand_data"]["base_year"]
-    countries = snakemake.config["countries"]
+
 
     # Filter for the year and country
     df_yr = df[df.Year == year]
     df_yr = df_yr[df_yr.country.isin(countries)]
-    df_yr = df_yr[df_yr["Commodity - Transaction"].str.contains("industry")]
+    # df_yr = df_yr[df_yr["Commodity - Transaction"].str.contains("industry")]
+    df_yr = df_yr[df_yr['Transaction'].str.lower().str.contains('|'.join(industry_list))]
 
+
+    df_yr = df_yr[~df_yr.Transaction.str.lower().str.contains("consumption by manufacturing, construction and non-fuel")]
+    df_yr['Transaction'] = df_yr['Transaction'].str.replace(" industry", "")
+
+    df_yr['Transaction'] = df_yr['Transaction'].str.rstrip()
+    df_yr['Transaction'] = df_yr['Transaction'].str.replace("consumption by ", "")
+
+    #df_yr[df_yr['Commodity - Transaction'].str.lower().str.contains('|'.join(industry_list))]
+    #df_yr "consumption by manufacturing, construction and non-fuel"
     # Create the industry totals file
     industry_totals_base = create_industry_base_totals(df_yr)
 
+    
     # Export the industry totals dataframe
     industry_totals_base.to_csv("../data/industry_totals_base.csv")
 
+
+    # Calculate the growth in studied year
+    growth_factors = calculate_end_values(cagr)
+
+    print("end")
 
 

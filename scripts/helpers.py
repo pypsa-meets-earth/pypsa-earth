@@ -589,6 +589,7 @@ def get_conv_factors(sector):
         "Patent fuel": 0.00575,
         "Brown coal briquettes": 0.00575,
         "Hard coal": 0.007167,
+        "Hrad coal": 0.007167,
         "Other bituminous coal": 0.005556,
         "Anthracite": 0.005,
         "Peat": 0.00271,
@@ -619,14 +620,64 @@ def get_conv_factors(sector):
 
 def aggregate_fuels(sector):
     
-    gas_fuels = ['Blast Furnace Gas', 'Blast furnace gas', 'Gas coke', 'Gas Coke', 'Gas Oil/ Diesel Oil', 'Gasworks Gas', 
-           'Natural gas (including LNG)', 'Natural gas', 'Natural Gas (including LNG)', 'Natural gas liquids', 'Refinery gas']
-    oil_fuels = ['Bitumen', 'Conventional crude oil', 'Crude petroleum', 'Fuel oil', 'Kerosene-type Jet Fuel', 
-                 'Liquefied petroleum gas (LPG)', 'Liquified Petroleum Gas (LPG)', 'Lubricants', 'Motor Gasoline', 'Naphtha']
+    gas_fuels = [
+    'Blast Furnace Gas',
+    'Biogases',
+    'Biogasoline',
+    'Coke Oven Gas',
+    'Gas Coke',
+    'Gasworks Gas',
+    'Natural gas (including LNG)',
+    'Natural Gas (including LNG)',
+    'Natural gas liquids',
+    'Refinery gas'
+    ]
+    
+    oil_fuels = [
+    'Biodiesel',
+    'Motor Gasoline',
+    'Liquefied petroleum gas (LPG)',
+    'Liquified Petroleum Gas (LPG)',
+    'Fuel oil',
+    'Kerosene-type Jet Fuel',
+    'Conventional crude oil',
+    'Crude petroleum',
+    'Lubricants',
+    'Naphtha',
+    'Gas Oil/ Diesel Oil',
+    'Black Liquor',
 
-    biomass_fuels = ['Bagasse', 'Fuelwood']
+    ]
 
-    coal_fuels = ['Charcoal', 'Coke oven coke', 'Coke-oven coke', 'Coke Oven Coke', 'Coking coal', 'Hard coal', 
+    coal_fuels = [
+        'Anthracite',
+        'Brown coal',
+        'Brown coal briquettes',
+        'Coke-oven coke',
+        'Coke Oven Coke',
+        'Hard coal',
+        'Other bituminous coal',
+        'Sub-bituminous coal',
+        'Coking coal',
+        'Bitumen'
+    ]
+
+    biomass_fuels = [
+        'Bagasse',
+        'Fuelwood',
+        'Peat',
+        'Peat products',
+        'Charcoal',
+        'Petroleum Coke',
+        'Lignite',
+        'Brown coal',
+        'Hrad coal',
+        'Sub-bituminous coal',
+        'Petroleum Coke'
+    ]
+
+
+    coal_fuels = ['Anthracite', 'Charcoal', 'Coke oven coke', 'Coke-oven coke', 'Coke Oven Coke', 'Coking coal', 'Hard coal', 
             'Other bituminous coal', 'Petroleum coke']
     
     electricity = ['Electricity']
