@@ -350,7 +350,7 @@ databundles:
       build_cutout: [all]
 
   # cutouts bundle of the cutouts folder for Western Asia
-  # Size about  3.8 GB (zipped)
+  # Size about 3.8 GB (zipped)
   bundle_cutouts_westernasia:
     countries: [WAS]
     category: cutouts
