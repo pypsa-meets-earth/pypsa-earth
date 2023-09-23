@@ -916,19 +916,19 @@ if __name__ == "__main__":
 
     out = snakemake.output
 
-    countries_list = snakemake.config["countries"]
-    layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-    update = snakemake.config["build_shape_options"]["update_file"]
-    out_logging = snakemake.config["build_shape_options"]["out_logging"]
-    year = snakemake.config["build_shape_options"]["year"]
-    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
-    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
+    countries_list = snakemake.params.countries
+    layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
+    update = snakemake.params.build_shape_options["update_file"]
+    out_logging = snakemake.params.build_shape_options["out_logging"]
+    year = snakemake.params.build_shape_options["year"]
+    nprocesses = snakemake.params.build_shape_options["nprocesses"]
+    contended_flag = snakemake.params.build_shape_options["contended_flag"]
     EEZ_gpkg = snakemake.input["eez"]
-    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
-    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    distance_crs = snakemake.config["crs"]["distance_crs"]
-    nchunks = snakemake.config["build_shape_options"]["nchunks"]
+    worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
+    gdp_method = snakemake.params.build_shape_options["gdp_method"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
+    nchunks = snakemake.params.build_shape_options["nchunks"]
     if nchunks < nprocesses:
         logger.info(f"build_shapes data chunks set to nprocesses {nprocesses}")
         nchunks = nprocesses

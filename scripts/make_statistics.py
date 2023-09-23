@@ -261,7 +261,7 @@ def collect_bus_regions_stats(bus_region_rule="build_bus_regions"):
     return df
 
 
-def collect_network_stats(network_rule, config):
+def collect_network_stats(network_rule, scenario_config):
     """
     Collect statistics on pypsa networks:
     - installed capacity by carrier
@@ -269,7 +269,7 @@ def collect_network_stats(network_rule, config):
     - lines total capacity
     """
     wildcards = {
-        k: str(config["scenario"][k][0]) for k in ["simpl", "clusters", "ll", "opts"]
+        k: str(scenario_config[k][0]) for k in ["simpl", "clusters", "ll", "opts"]
     }
 
     snakemake = _mock_snakemake(network_rule, **wildcards)
@@ -384,15 +384,13 @@ def collect_only_computational(rulename):
     return df
 
 
-def collect_snakemake_stats(name, dict_dfs, config):
+def collect_snakemake_stats(
+    name, dict_dfs, renewable_config, renewable_carriers_config
+):
     """
     Collect statistics on what rules have been successful.
     """
-    ren_techs = [
-        tech
-        for tech in config["renewable"]
-        if tech in config["electricity"]["renewable_carriers"]
-    ]
+    ren_techs = [tech for tech in renewable_config if tech in renewable_carriers_config]
 
     list_rules = [
         "download_osm_data",
@@ -486,7 +484,7 @@ def collect_renewable_stats(rulename, technology):
             ),
         )
 
-        add_computational_stats(df_RES_stats, snakemake, rulename)
+        add_computational_stats(df_RES_stats, snakemake, f"{rulename}_{technology}")
 
         return df_RES_stats
     else:
@@ -521,7 +519,13 @@ def add_computational_stats(df, snakemake, column_name=None):
     return df
 
 
-def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
+def calculate_stats(
+    scenario_config,
+    renewable_config,
+    renewable_carriers_config,
+    metric_crs="EPSG:3857",
+    area_crs="ESRI:54009",
+):
     "Function to collect all statistics"
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
@@ -534,7 +538,7 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     }
 
     network_dict = {
-        network_rule: collect_network_stats(network_rule, config)
+        network_rule: collect_network_stats(network_rule, scenario_config)
         for network_rule in [
             "base_network",
             "add_electricity",
@@ -548,8 +552,8 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     ren_rule = "build_renewable_profiles"
     renewables_dict = {
         f"{ren_rule}_{tech}": collect_renewable_stats(ren_rule, tech)
-        for tech in config["renewable"]
-        if tech in config["electricity"]["renewable_carriers"]
+        for tech in renewable_config
+        if tech in renewable_carriers_config
     }
 
     # network-related rules
@@ -567,7 +571,7 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         "total_comp_stats", dict_dfs
     )
     dict_dfs["snakemake_status"] = collect_snakemake_stats(
-        "snakemake_status", dict_dfs, config
+        "snakemake_status", dict_dfs, renewable_config, renewable_carriers_config
     )
 
     return dict_dfs
@@ -583,16 +587,27 @@ if __name__ == "__main__":
     sets_path_to_root("pypsa-earth")
 
     fp_stats = snakemake.output["stats"]
-    config = snakemake.config
-    scenario_name = config["run"]["name"]
+    scenario = snakemake.params.scenario
+    scenario_name = snakemake.config["run"]["name"]
 
-    geo_crs = config["crs"]["geo_crs"]
-    metric_crs = config["crs"]["distance_crs"]
-    area_crs = config["crs"]["area_crs"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    metric_crs = snakemake.params.crs["distance_crs"]
+    area_crs = snakemake.params.crs["area_crs"]
 
-    name_index = scenario_name if not scenario_name else "-".join(config["countries"])
+    renewable = snakemake.params.renewable
+    renewable_carriers = snakemake.params.renewable_carriers
+
+    name_index = (
+        scenario_name if not scenario_name else "-".join(snakemake.params.countries)
+    )
 
     # create statistics
-    stats = calculate_stats(config, metric_crs=metric_crs, area_crs=area_crs)
+    stats = calculate_stats(
+        scenario,
+        renewable,
+        renewable_carriers,
+        metric_crs=metric_crs,
+        area_crs=area_crs,
+    )
     stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([name_index]))
     to_csv_nafix(stats, fp_stats)
