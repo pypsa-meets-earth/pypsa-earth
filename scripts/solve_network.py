@@ -86,9 +86,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import update_config
-from _helpers import get_last_commit_message
-from _helpers import configure_logging
+from _helpers import configure_logging, get_last_commit_message, update_config
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
