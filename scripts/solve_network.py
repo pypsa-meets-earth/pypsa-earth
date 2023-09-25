@@ -8,8 +8,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-import yaml
 from helpers import override_component_attrs
+from helpers import update_config
 from pypsa.linopf import ilopf, network_lopf
 from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
 from vresutils.benchmark import memory_logger
@@ -407,53 +407,6 @@ def extra_functionality(n, snapshots):
         if snakemake.config["H2_network_limit"]:
             add_h2_network_cap(n, snakemake.config["H2_network_limit"])
     add_co2_sequestration_limit(n, snapshots)
-
-
-# Function to get the last Git commit message
-def get_last_commit_message():
-    try:
-        # Run the Git command to get the last commit message
-        result = subprocess.run(
-            ["git", "log", "-1", "--pretty=format:%H %s"],
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-    except Exception as e:
-        print(f"Error getting the last commit message: {e}")
-        return ""
-
-
-# Function to return the last PyPSA-Earth commit message
-def get_submodule_commit_message():
-    try:
-        # Retrieve the last commit message for pypsa-earth
-        submodule_path = f"pypsa-earth"
-        last_commit_message = (
-            subprocess.check_output(
-                ["git", "log", "-n", "1", "--pretty=format:%H %s"],
-                cwd=submodule_path,
-                stderr=subprocess.STDOUT,
-            )
-            .decode()
-            .strip()
-        )
-        return last_commit_message
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing Git: {e}")
-        return None
-
-
-# Function to update the YAML file with the last commit message as a comment
-def update_config(config):
-    try:
-        # Insert the last commit message to config
-        config.update({"git_commit": get_last_commit_message()})
-        config.update({"submodule_commit": get_submodule_commit_message()})
-    except Exception as e:
-        print(f"Error updating the config: {e}")
-
-    return config
 
 
 def solve_network(n, config, opts="", **kwargs):
