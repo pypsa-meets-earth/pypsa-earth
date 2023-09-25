@@ -1030,6 +1030,7 @@ rule run_scenario:
         diff_config="configs/scenarios/config.{scenario_name}.yaml",
     output:
         touchfile=touch("results/{scenario_name}/scenario.done"),
+        copyconfig="results/{scenario_name}/config.yaml",
     threads: 1
     resources:
         mem_mb=5000,
@@ -1055,6 +1056,7 @@ rule run_scenario:
         create_test_config(base_config_path, input.diff_config, "config.yaml")
         os.system("snakemake -j all solve_all_networks --rerun-incomplete")
         os.system("snakemake -j1 make_statistics --force")
+        copyfile("config.yaml", output.copyconfig)
 
 
 rule run_all_scenarios:

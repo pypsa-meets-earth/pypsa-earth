@@ -86,6 +86,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
+from _helpers import update_config
+from _helpers import get_last_commit_message
 from _helpers import configure_logging
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
@@ -506,32 +508,6 @@ def extra_functionality(n, snapshots):
         if "EQ" in o:
             add_EQ_constraints(n, o)
     add_battery_constraints(n)
-
-
-# Function to get the last Git commit message
-def get_last_commit_message():
-    try:
-        # Run the Git command to get the last commit message
-        result = subprocess.run(
-            ["git", "log", "-1", "--pretty=format:%H %s"],
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-    except Exception as e:
-        print(f"Error getting the last commit message: {e}")
-        return ""
-
-
-# Function to add the last commit to the config
-def update_config(config):
-    try:
-        # Insert the last commit message to config
-        config.update({"git_commit": get_last_commit_message()})
-    except Exception as e:
-        print(f"Error updating the config: {e}")
-
-    return config
 
 
 def solve_network(n, config, opts="", **kwargs):
