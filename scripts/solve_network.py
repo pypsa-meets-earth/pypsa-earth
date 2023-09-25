@@ -8,8 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from helpers import override_component_attrs
-from helpers import update_config
+from helpers import override_component_attrs, update_config
 from pypsa.linopf import ilopf, network_lopf
 from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
 from vresutils.benchmark import memory_logger
