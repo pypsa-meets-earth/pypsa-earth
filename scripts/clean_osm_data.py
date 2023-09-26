@@ -835,33 +835,24 @@ def set_name_by_closestcity(df_all_generators, colname="name"):
     return df_all_generators
 
 
-def use_custom_data_files(
-    custom_component_type,
-):  #### custom_data_type should be a string named lines, cables or substations
-    # checks the type of data/components to be reviewed
-    if custom_component_type == "lines":
-        custom_conditional = snakemake.config["clean_osm_data_options"][
-            "use_custom_lines"
-        ]
-        custom_path = snakemake.config["clean_osm_data_options"].get(
-            "custom_path_lines", False
-        )
-
-    elif custom_component_type == "substations":
-        custom_conditional = snakemake.config["clean_osm_data_options"][
-            "use_custom_substations"
-        ]
-        custom_path = snakemake.config["clean_osm_data_options"].get(
-            "custom_path_substations", False
-        )
-
-    elif custom_component_type == "cables":
-        custom_conditional = snakemake.config["clean_osm_data_options"][
-            "use_custom_cables"
-        ]
-        custom_path = snakemake.config["clean_osm_data_options"].get(
-            "custom_path_cables", False
-        )
+def use_custom_data_files (custom_component_type):
+    """
+    Function to check if OSM or custom data should be considered. 
+    the custom_component_type should be a string named lines, cables or substations
+    """       
+    
+    #checks the type of data/components to be reviewed
+    if custom_component_type == 'lines' :
+        custom_conditional = snakemake.config["clean_osm_data_options"]["use_custom_lines"]
+        custom_path = snakemake.config["clean_osm_data_options"].get("path_custom_lines",False)
+        
+    elif custom_component_type == 'substations' :
+        custom_conditional = snakemake.config["clean_osm_data_options"]["use_custom_substations"]
+        custom_path = snakemake.config["clean_osm_data_options"].get("path_custom_substations",False)
+        
+    elif custom_component_type == 'cables' :
+        custom_conditional = snakemake.config["clean_osm_data_options"]["use_custom_cables"]
+        custom_path = snakemake.config["clean_osm_data_options"].get("path_custom_cables",False)
 
     else:
         raise ValueError(
@@ -922,7 +913,7 @@ def clean_data(
     if os.path.getsize(input_files["cables"]) > 0:
         logger.info("Add OSM cables to data")
         # Load raw data lines
-        df_cables = gpd.read_file(input_files["cables"])
+        df_cables = use_custom_data_files ('cables')
 
         # prepare cables dataframe and data types
         df_cables = prepare_lines_df(df_cables)
@@ -970,7 +961,7 @@ def clean_data(
     logger.info("Process OSM substations")
 
     if os.path.getsize(input_files["substations"]) > 0:
-        df_all_substations = gpd.read_file(input_files["substations"])
+        df_all_substations = use_custom_data_files ('substations')
 
         # prepare dataset for substations
         df_all_substations = prepare_substation_df(df_all_substations)

@@ -115,12 +115,12 @@ clean_osm_data_options:
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
-  use_custom_lines: "OSM_only"  # Flag added to use customized (Custom_only), OSM-downloaded (OSM_only), or both (Add_custom) in the clean_osm_data script (custom information should follow the format of the respective OSM .geojson file in the data folder)
-  custom_path_lines: false # Provide the specific absolute path of the custom file including its name and type e.g. (C:\...\...\pypsa-earth\data\custom_lines.geojson)
-  use_custom_substations: "OSM_only"  # Flag added to use customized (Custom_only), OSM-downloaded (OSM_only), or both (Add_custom) in the clean_osm_data script (custom information should follow the format of the respective OSM .geojson file in the data folder)
-  custom_path_substations: false # Provide the specific absolute path of the custom file including its name and type e.g. (C:\...\...\pypsa-earth\data\custom_substations.geojson)
-  use_custom_cables: "OSM_only"  # Flag added to use customized (Custom_only), OSM-downloaded (OSM_only), or both (Add_custom) in the clean_osm_data script (custom information should follow the format of the respective OSM .geojson file in the data folder)
-  custom_path_cables: false # Provide the specific absolute path of the custom file including its name and type e.g. (C:\...\...\pypsa-earth\data\custom_cables.geojson)
+  use_custom_lines: "OSM_only"  # Use OSM (OSM_only), customized (Custom_only), or both data sets (Add_custom)
+  path_custom_lines: False  # If exists, provide the specific absolute path of the custom file e.g. (C:\...\...\pypsa-earth\data\custom_lines.geojson)
+  use_custom_substations: "OSM_only"  # Use OSM (OSM_only), customized (Custom_only), or both data sets (Add_custom)
+  path_custom_substations: False  # If exists, provide the specific absolute path of the custom file e.g. (C:\...\...\pypsa-earth\data\custom_substations.geojson)
+  use_custom_cables: "OSM_only"  # Use OSM (OSM_only), customized (Custom_only), or both data sets (Add_custom)
+  path_custom_cables: False  # If exists, provide the specific absolute path of the custom file e.g. (C:\...\...\pypsa-earth\data\custom_cables.geojson)
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
