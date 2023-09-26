@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def prepare_substation_df(df_all_buses):
     """
     Prepare raw substations dataframe to the structure compatible with PyPSA-
-    Eur.
+    Earth.
 
     Parameters
     ----------
