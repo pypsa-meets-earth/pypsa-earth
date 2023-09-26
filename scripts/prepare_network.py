@@ -131,6 +131,8 @@ def emission_extractor(filename, emission_year, country_names):
     df = df.loc[:, "Y_1970":"Y_2018"].ffill(axis=1)
     df = df.loc[:, "Y_1970":"Y_2018"].bfill(axis=1)
     cc_iso3 = cc.convert(names=country_names, to="ISO3")
+    if len(country_names) == 1:
+        cc_iso3 = [cc_iso3]
     emission_by_country = df.loc[
         df.index.intersection(cc_iso3), "Y_" + str(emission_year)
     ]
