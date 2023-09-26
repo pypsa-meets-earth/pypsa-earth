@@ -103,7 +103,8 @@ def download_emission_data():
 
 def emission_extractor(filename, emission_year, country_names):
     """
-    Extracts CO2 emission values for given country codes from the global emission file.
+    Extracts CO2 emission values for given country codes from the global
+    emission file.
 
     Parameters
     ----------
@@ -357,7 +358,9 @@ if __name__ == "__main__":
                     "automatic_emission_base_year"
                 ]
                 filename = download_emission_data()
-                co2limit = emission_extractor(filename, emission_year, country_names).sum()
+                co2limit = emission_extractor(
+                    filename, emission_year, country_names
+                ).sum()
                 if len(m) > 0:
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
