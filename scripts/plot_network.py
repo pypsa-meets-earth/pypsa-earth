@@ -378,7 +378,7 @@ if __name__ == "__main__":
 
     set_plot_style()
 
-    opts = snakemake.config["plotting"]
+    opts = snakemake.params.plotting
     map_figsize = opts["map"]["figsize"]
     map_boundaries = opts["map"]["boundaries"]
 
@@ -386,7 +386,10 @@ if __name__ == "__main__":
         map_boundaries = africa_shape.boundary.bounds
 
     n = load_network_for_plots(
-        snakemake.input.network, snakemake.input.tech_costs, snakemake.config
+        snakemake.input.network,
+        snakemake.input.tech_costs,
+        snakemake.params.costs,
+        snakemake.params.electricity,
     )
 
     scenario_opts = snakemake.wildcards.opts.split("-")
