@@ -27,7 +27,7 @@ def prepare_substation_df(df_all_buses):
     df_all_buses : dataframe
         Raw substations dataframe as downloaded from OpenStreetMap
     """
-    # Modify the naming of the DataFrame columns to adapt to the PyPSA-Eur-like format
+    # Modify the naming of the DataFrame columns to adapt to the PyPSA-Earth format
     df_all_buses = df_all_buses.rename(
         columns={
             "id": "bus_id",
@@ -678,7 +678,7 @@ def explode_rows(df, cols):
     return df
 
 
-def integrate_lines_df(df_all_lines, distance_crs):
+def integrate_lines_df(df_all_lines):
     """
     Function to add underground, under_construction, frequency and circuits.
     """
@@ -788,20 +788,25 @@ def prepare_generators_df(df_all_generators):
 def set_countryname_by_shape(
     df,
     ext_country_shapes,
+    distance_crs="EPSG:3857",
     col_country="country",
+    max_distance=1000,
 ):
     "Set the country name by the name shape"
 
     # use auxiliary spatial join to determine the country of each line, keep first occurrence only
-    df_m = gpd.sjoin_nearest(
-        df.drop(columns=[col_country], errors="ignore"),
-        ext_country_shapes,
-        how="left",
-        max_distance=0.01,
-    ).reset_index()
-    df_m.drop_duplicates(subset="index", inplace=True)
-    df_m.rename(columns={"index_right": col_country}, inplace=True)
-    df_m.set_index("index", inplace=True)
+    df_m = (
+        gpd.sjoin_nearest(
+            df.drop(columns=[col_country], errors="ignore").to_crs(distance_crs),
+            ext_country_shapes.to_crs(distance_crs),
+            how="left",
+            max_distance=max_distance,
+        )
+        .reset_index()
+        .drop_duplicates(subset="index")
+        .rename(columns={"index_right": col_country})
+        .set_index("index")
+    )
 
     # set country name to original dataframe
     df.loc[df_m.index, col_country] = df_m[col_country]
@@ -901,7 +906,7 @@ def clean_data(
     if not df_all_lines.empty:
         # Add underground, under_construction, frequency and circuits columns to the dataframe
         # and drop corresponding unused columns
-        df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
+        df_all_lines = integrate_lines_df(df_all_lines)
 
         logger.info("Filter lines by voltage, frequency, circuits and geometry")
 
@@ -921,7 +926,9 @@ def clean_data(
         # set the country name by the shape
         if names_by_shapes:
             logger.info("Setting lines country name using the GADM shapes")
-            df_all_lines = set_countryname_by_shape(df_all_lines, ext_country_shapes)
+            df_all_lines = set_countryname_by_shape(
+                df_all_lines, ext_country_shapes, distance_crs
+            )
 
         # set unique line ids
         df_all_lines = set_unique_id(df_all_lines, "line_id")
@@ -981,6 +988,7 @@ def clean_data(
             df_all_buses = set_countryname_by_shape(
                 df_all_buses,
                 ext_country_shapes,
+                distance_crs,
             )
 
         # set unique bus ids
@@ -1009,6 +1017,7 @@ def clean_data(
             df_all_generators = set_countryname_by_shape(
                 df_all_generators,
                 ext_country_shapes,
+                distance_crs,
                 col_country="Country",
             )
 
