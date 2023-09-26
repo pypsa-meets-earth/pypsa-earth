@@ -352,9 +352,9 @@ if __name__ == "__main__":
     for o in opts:
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
-            if snakemake.config["electricity"]["automatic_emission"]:
+            if snakemake.params.electricity["automatic_emission"]:
                 country_names = n.buses.country.unique()
-                emission_year = snakemake.config["electricity"][
+                emission_year = snakemake.params.electricity[
                     "automatic_emission_base_year"
                 ]
                 filename = download_emission_data()
@@ -365,10 +365,10 @@ if __name__ == "__main__":
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
-                co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
+                co2limit = float(m[0]) * snakemake.params.electricity["co2base"]
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.config["electricity"]["co2limit"]
+                co2limit = snakemake.params.electricity["co2limit"]
                 logger.info("Setting CO2 limit according to config value.")
             add_co2limit(n, co2limit, Nyears)
             break
