@@ -69,6 +69,8 @@ def create_industry_base_totals(df):
     else:
         industry_totals_base.drop(columns=[col for col in other_list if col in industry_totals_base.columns], inplace=True)
     
+    industry_totals_base = industry_totals_base.rename(columns={'paper, pulp and print': 'paper pulp and print'})
+
     return industry_totals_base
 
 if __name__ == "__main__":
@@ -87,7 +89,9 @@ if __name__ == "__main__":
 
     year = snakemake.config["demand_data"]["base_year"]
     countries = snakemake.config["countries"]
-    countries = ["DE", "US", "EG", "MA", "UA", "UK"]
+    #countries = ["DE", "US", "EG", "MA", "UA", "UK"]
+    #countries = ["EG", "MA", "NG"]
+    
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
     no_years = int(snakemake.wildcards.planning_horizons) - int(
@@ -198,6 +202,9 @@ if __name__ == "__main__":
 
     # Calculate the growth in studied year
     growth_factors = calculate_end_values(cagr)
+    
+    industry_totals = industry_totals_base * growth_factors
+    
 
     print("end")
 
