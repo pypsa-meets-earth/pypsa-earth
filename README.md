@@ -283,13 +283,20 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/Emre-Yorat89">
+            <img src="https://avatars.githubusercontent.com/u/62134151?v=4" width="100;" alt="Emre-Yorat89"/>
+            <br />
+            <sub><b>Emre_Yorat</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
             <br />
             <sub><b>Giacomo Falchetta</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Ekaterina-Vo">
             <img src="https://avatars.githubusercontent.com/u/99509555?v=4" width="100;" alt="Ekaterina-Vo"/>
@@ -324,27 +331,20 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/carlosfv92">
             <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
             <br />
             <sub><b>Carlos Fernandez</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/EmreYorat">
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
             <sub><b>EmreYorat</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Emre-Yorat89">
-            <img src="https://avatars.githubusercontent.com/u/62134151?v=4" width="100;" alt="Emre-Yorat89"/>
-            <br />
-            <sub><b>Emre_Yorat</b></sub>
         </a>
     </td>
     <td align="center">
