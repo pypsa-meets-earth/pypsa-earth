@@ -877,10 +877,10 @@ def use_custom_data_files(custom_component_type):
     if custom_conditional == "OSM_only":
         loaded_df = gpd.read_file(input_files[custom_component_type])
 
-    elif custom_conditional == "Custom_only":
+    elif custom_conditional == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
-    elif custom_conditional == "Add_custom":
+    elif custom_conditional == "add_custom":
         loaded_df1 = gpd.read_file(input_files[custom_component_type])
         loaded_df2 = gpd.read_file(custom_path)
 
