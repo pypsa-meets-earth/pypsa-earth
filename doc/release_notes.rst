@@ -67,6 +67,8 @@ PyPSA-Earth 0.2.2
 
 * Remove RES addition functionality from attach_conventional_generators `PR #769 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/769>`__. Currently wind and solar powerplants stored in powerplants.csv are added to the network by attach_conventional_generators.
 
+* Add functionalities to download and extract emission of countries. `PR #748 https://github.com/pypsa-meets-earth/pypsa-earth/pull/748`
+
 PyPSA-Earth 0.2.1
 =================
 
