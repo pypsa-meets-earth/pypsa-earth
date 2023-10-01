@@ -44,6 +44,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Option to specify a global upper capacity limit (using existing BAU functionality) `PR #857 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/857>`__
 
+* Add cluster options `all`, `min` and `flex` `PR #848 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/857>`__
+
 PyPSA-Earth 0.2.2
 =================
 
