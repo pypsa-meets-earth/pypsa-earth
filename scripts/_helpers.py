@@ -10,13 +10,58 @@ from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
-import numpy as np
 import pandas as pd
+import yaml
 
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
+
+
+def read_osm_config(*args):
+    """
+    Read values from the osm_config.yaml file based on provided key arguments.
+
+    Parameters
+    ----------
+    *args : str
+        One or more key arguments corresponding to the values to retrieve
+        from the config file. Typical arguments include "world_iso",
+        "continent_regions", "iso_to_geofk_dict", and "osm_clean_columns".
+
+    Returns
+    -------
+    tuple or str or dict
+        If a single key is provided, returns the corresponding value from the
+        osm_config.yaml file. If multiple keys are provided, returns a tuple
+        containing values corresponding to the provided keys.
+
+    Examples
+    --------
+    >>> values = read_osm_config("key1", "key2")
+    >>> print(values)
+    ('value1', 'value2')
+
+    >>> world_iso = read_osm_config("world_iso")
+    >>> print(world_iso)
+    {"Africa": {"DZ": "algeria", ...}, ...}
+    """
+    if "__file__" in globals():
+        base_folder = os.path.dirname(__file__)
+        if not os.path.exists(os.path.join(base_folder, "configs")):
+            base_folder = os.path.dirname(base_folder)
+    else:
+        base_folder = os.getcwd()
+    osm_config_path = os.path.join(base_folder, "configs", "osm_config.yaml")
+    with open(osm_config_path, "r") as f:
+        osm_config = yaml.safe_load(f)
+    if len(args) == 0:
+        return osm_config
+    elif len(args) == 1:
+        return osm_config[args[0]]
+    else:
+        return tuple([osm_config[a] for a in args])
 
 
 def sets_path_to_root(root_directory_name):
@@ -107,7 +152,7 @@ def load_network(import_name=None, custom_components=None):
         As in pypsa.Network(import_name)
     custom_components : dict
         Dictionary listing custom components.
-        For using ``snakemake.config["override_components"]``
+        For using ``snakemake.params.override_components"]``
         in ``config.yaml`` define:
 
         .. code:: yaml
@@ -155,7 +200,9 @@ def pdbcast(v, h):
     )
 
 
-def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
+def load_network_for_plots(
+    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
 
@@ -183,7 +230,7 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(Nyears, tech_costs, config["costs"], config["electricity"])
+    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
     update_transmission_costs(n, costs)
 
     return n
@@ -452,11 +499,11 @@ def getContinent(code):
     getContinent(code)
     >>> ["africa", "europe"]
     """
-    from config_osm_data import world_iso
 
     continent_list = []
     code_set = set(code)
-    for continent in world_iso:
+    world_iso = read_osm_config("world_iso")
+    for continent in world_iso.keys():
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
             continent_list.append(continent)
@@ -665,8 +712,6 @@ def create_country_list(input, iso_coding=True):
     """
     import logging
 
-    from config_osm_data import continent_regions, world_iso
-
     _logger = logging.getLogger(__name__)
     _logger.setLevel(logging.INFO)
 
@@ -699,7 +744,7 @@ def create_country_list(input, iso_coding=True):
 
     for value1 in input:
         codes_list = []
-
+        world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
         # extract countries in world
         if value1 == "Earth":
             for continent in world_iso.keys():

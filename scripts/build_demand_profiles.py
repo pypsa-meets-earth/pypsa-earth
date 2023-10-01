@@ -215,11 +215,11 @@ if __name__ == "__main__":
     # Snakemake imports:
     regions = snakemake.input.regions
     load_paths = snakemake.input["load"]
-    countries = snakemake.config["countries"]
+    countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.config["load_options"]["scale"]
-    start_date = snakemake.config["snapshots"]["start"]
-    end_date = snakemake.config["snapshots"]["end"]
+    scale = snakemake.params.load_options["scale"]
+    start_date = snakemake.params.snapshots["start"]
+    end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
 
     build_demand_profiles(
