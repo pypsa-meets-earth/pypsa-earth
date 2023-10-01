@@ -559,8 +559,8 @@ rule simplify_network:
         build_shape_options=config["build_shape_options"],
         electricity=config["electricity"],
         costs=config["costs"],
-        lines_types=config["lines"]["types"],
-        lines_length_factor=config["lines"]["length_factor"],
+        config_lines=config["lines"],
+        config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
     input:
         network="networks/" + RDIR + "elec.nc",
