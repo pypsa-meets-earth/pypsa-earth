@@ -789,6 +789,12 @@ def memory(w):
             break
     if w.clusters.endswith("m"):
         return int(factor * (18000 + 180 * int(w.clusters[:-1])))
+    elif w.clusters.endswith("flex"):
+        return int(factor * (18000 + 180 * int(w.clusters[:-4])))
+    elif w.clusters == "all":
+        return int(factor * (18000 + 180 * 4000))
+    elif w.clusters == "min":
+        return int(factor * (18000 + 180 * 20))
     else:
         return int(factor * (10000 + 195 * int(w.clusters)))
 
