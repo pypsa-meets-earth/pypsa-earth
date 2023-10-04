@@ -777,7 +777,7 @@ def create_country_list(input, iso_coding=True):
 
 def get_last_commit_message():
     """
-    Function to get the last Git commit message
+    Function to get the last Git commit message.
 
     Returns
     -------
@@ -798,7 +798,7 @@ def get_last_commit_message():
 
 def update_config(config):
     """
-    Function to add the last commit to the config
+    Function to add the last commit to the config.
 
     Returns
     -------

@@ -85,11 +85,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
+
 <<<<<<< HEAD
-from _helpers import update_config
-from _helpers import configure_logging
+from _helpers import configure_logging, update_config
+
 =======
 from _helpers import configure_logging, get_last_commit_message, update_config
+
 >>>>>>> 8c1f3076df8407a89e22255a3a7ca2530dc836db
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
