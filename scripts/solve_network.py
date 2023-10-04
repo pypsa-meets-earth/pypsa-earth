@@ -80,14 +80,12 @@ Details (and errors made through this heuristic) are discussed in the paper
 import logging
 import os
 import re
-import subprocess
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import update_config
-from _helpers import get_last_commit_message
 from _helpers import configure_logging
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (

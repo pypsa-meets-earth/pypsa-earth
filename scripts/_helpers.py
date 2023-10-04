@@ -775,8 +775,14 @@ def create_country_list(input, iso_coding=True):
     return full_codes_list
 
 
-# Function to get the last Git commit message
 def get_last_commit_message():
+    """
+    Function to get the last Git commit message
+
+    Returns
+    -------
+    result : string
+    """
     try:
         # Run the Git command to get the last commit message
         result = subprocess.run(
@@ -790,12 +796,14 @@ def get_last_commit_message():
         return ""
 
 
-# Function to add the last commit to the config
 def update_config(config):
-    try:
-        # Insert the last commit message to config
-        config.update({"git_commit": get_last_commit_message()})
-    except Exception as e:
-        logger.warning(f"Error updating the config: {e}")
+    """
+    Function to add the last commit to the config
 
+    Returns
+    -------
+    config : dict
+    """
+    # Insert the last commit message to config
+    config.update({"git_commit": get_last_commit_message()})
     return config
