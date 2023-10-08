@@ -105,7 +105,17 @@ def download_GADM(country_code, update=False, out_logging=False):
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
 
-        with requests.get(GADM_url, stream=True) as r:
+        try:
+            r = requests.get(GADM_url, stream=True, timeout=1)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            logger.error(f"GADM server is down at {GADM_url}")
+            raise Exception(f"GADM server is down at {GADM_url}")
+        except Exception as exception:
+            logger.error(
+                "An error happened when trying to load GADM data by {GADM_url}"
+            )
+            raise Exception(f"Something went wrong when connecting to {GADM_url}")
+        else:
             with open(GADM_inputfile_gpkg, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
