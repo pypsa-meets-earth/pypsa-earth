@@ -784,7 +784,6 @@ def get_last_commit_message():
     result : string
     """
     try:
-        # Run the Git command to get the last commit message
         result = subprocess.run(
             ["git", "log", "-1", "--pretty=format:%H %s"],
             capture_output=True,
@@ -794,16 +793,3 @@ def get_last_commit_message():
     except Exception as e:
         logger.warning(f"Error getting the last commit message: {e}")
         return ""
-
-
-def update_config(config):
-    """
-    Function to add the last commit to the config.
-
-    Returns
-    -------
-    config : dict
-    """
-    # Insert the last commit message to config
-    config.update({"git_commit": get_last_commit_message()})
-    return config

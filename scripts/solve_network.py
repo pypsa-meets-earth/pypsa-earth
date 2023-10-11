@@ -85,7 +85,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, update_config
+from _helpers import configure_logging
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -516,7 +516,7 @@ def solve_network(n, config, opts="", **kwargs):
     max_iterations = cf_solving.get("max_iterations", 6)
 
     # add to network for extra_functionality
-    n.config = update_config(config)
+    n.config = config
     n.opts = opts
 
     if cf_solving.get("skip_iterations", False):
