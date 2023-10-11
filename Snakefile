@@ -27,6 +27,7 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 
 configfile: "configs/bundle_config.yaml"
 
+
 config.update({"git_commit": get_last_commit_message()})
 
 # convert country list according to the desired region
