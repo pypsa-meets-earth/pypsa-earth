@@ -106,7 +106,7 @@ def download_GADM(country_code, update=False, out_logging=False):
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
 
         try:
-            r = requests.get(GADM_url, stream=True, timeout=1)
+            r = requests.get(GADM_url, stream=True, timeout=300)
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             logger.error(f"GADM server is down at {GADM_url}")
             raise Exception(f"GADM server is down at {GADM_url}")
