@@ -646,8 +646,8 @@ if config["custom_data"].get("industry_demand", False) == False:
         input:
             industry_sector_ratios="data/industry_sector_ratios.csv",
             industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
-            industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
-            industrial_production_per_country="data/industrial_production_per_country.csv",
+            #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            #industrial_production_per_country="data/industrial_production_per_country.csv",
             base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
             industrial_database="data/industrial_database.csv",
             costs=CDIR
