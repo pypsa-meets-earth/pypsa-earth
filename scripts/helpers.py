@@ -615,6 +615,7 @@ def get_conv_factors(sector):
         "Gas coke":  0.007326,
         "Gas Coke":  0.007326,
         "Refinery gas": 0.01375,
+        "Coal Tar": 0.007778,
     }
     return fuels_conv_toTWh
 

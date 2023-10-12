@@ -42,9 +42,9 @@ def build_nodal_distribution_key(
 ):  # returns percentage of co2 emissions
     """Build nodal distribution keys for each sector."""
 
-    countries = regions["name"].str[:2].unique()
+    #countries = regions["name"].str[:2].unique()
 
-    keys = pd.DataFrame(index=regions.name, columns=technology, dtype=float)
+    keys = pd.DataFrame(index=regions.name, columns=industry, dtype=float)
 
     pop = pd.read_csv(
         snakemake.input.clustered_pop_layout,
@@ -65,7 +65,7 @@ def build_nodal_distribution_key(
 
     keys["gdp"] = gdp["total"].values/gdp["total"].sum()
 
-    for tech, country in product(technology, countries):
+    for tech, country in product(industry, countries):
         regions_ct = regions.name[regions.name.str.contains(country)]
 
         facilities = industrial_database.query(
@@ -90,6 +90,20 @@ def build_nodal_distribution_key(
     keys["country"] = pop["ct"]
     return keys
 
+def match_technology(df):
+
+    industry_mapping = {
+        "Integrated steelworks": "iron and steel",
+        "DRI + Electric arc": "iron and steel",
+        "Electric arc": "iron and steel",
+        "Cement": "non-metallic minerals",
+        "HVC": "chemical and petrochemical",
+        "Paper": "paper pulp and print"
+    }
+
+    df['industry'] = df['technology'].map(industry_mapping)
+    return df
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -100,7 +114,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=37,
+            clusters=38,
             demand="EG",
             planning_horizons=2050,
         )
@@ -110,6 +124,10 @@ if __name__ == "__main__":
     gadm_level = options["gadm_level"]
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
+
+    countries = snakemake.config["countries"]
+
+    #countries = ["EG", "BH"]
 
     if regions["name"][0][
         :3
@@ -125,11 +143,15 @@ if __name__ == "__main__":
         keep_default_na=False,  # , index_col=0
     )
     geo_locs["capacity"] = pd.to_numeric(geo_locs.capacity)
+
+    # Call the function to add the "industry" column
+    df_with_industry = match_technology(geo_locs)
+
     gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
 
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]
 
-    technology = geo_locs.technology.unique()
+    industry = geo_locs.industry.unique()
 
     shapes_path = snakemake.input.shapes_path
     industrial_database = map_industry_to_buses(

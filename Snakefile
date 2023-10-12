@@ -595,7 +595,7 @@ if config["custom_data"].get("industry_demand", False) == False:
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
         output:
-            base_industry_totals="resources/demand/base_industry_totals{planning_horizons}_{demand}.csv",
+            base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
@@ -610,6 +610,8 @@ if config["custom_data"].get("industry_demand", False) == False:
             industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             industrial_production_per_country="data/industrial_production_per_country.csv",
+            base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
+            industrial_database="data/industrial_database.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         output:

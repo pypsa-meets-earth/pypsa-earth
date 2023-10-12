@@ -71,7 +71,13 @@ def create_industry_base_totals(df):
     
     industry_totals_base = industry_totals_base.rename(columns={'paper, pulp and print': 'paper pulp and print'})
 
-    return industry_totals_base
+    missing_columns = [col for col in clean_industry_list if col not in industry_totals_base.columns]
+
+    # Add missing columns with all values set to 0
+    for col in missing_columns:
+        industry_totals_base[col] = 0
+
+    return industry_totals_base * 1e6  #change from TWh to MWh
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -90,7 +96,7 @@ if __name__ == "__main__":
     year = snakemake.config["demand_data"]["base_year"]
     countries = snakemake.config["countries"]
     #countries = ["DE", "US", "EG", "MA", "UA", "UK"]
-    #countries = ["EG", "MA", "NG"]
+    #countries = ["EG", "BH"]
     
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
@@ -119,12 +125,23 @@ if __name__ == "__main__":
         ]
     other_list=['other manuf., const. and non-fuel ind.',
             'other manuf., const. and non-fuel min. ind.',]
-    cagr = pd.read_csv(
-        "/nfs/home/haz43975/pes_paper/EG/pypsa-earth-sec/data/demand/industry_growth_cagr.csv", index_col=0
-    )
+
+    clean_industry_list =['iron and steel',
+            'chemical and petrochemical',
+            'non-ferrous metals',
+            'non-metallic minerals',
+            'transport equipment',
+            'machinery',
+            'mining and quarrying',
+            'food and tobacco',
+            'paper pulp and print',
+            'wood and wood products',
+            'textile and leather',
+            'construction',
+            'other']
 
     #Loading all energy balance files
-    all_files = Path("/nfs/home/haz43975/pes_paper/EG/pypsa-earth-sec/data/demand/unsd/data").glob("*.txt") #TODO change path
+    all_files = Path("../data/demand/unsd/data").glob("*.txt") #TODO change path
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
@@ -197,15 +214,8 @@ if __name__ == "__main__":
 
     
     # Export the industry totals dataframe
-    industry_totals_base.to_csv("../data/industry_totals_base.csv")
+    industry_totals_base.to_csv(snakemake.output["base_industry_totals"])
 
-
-    # Calculate the growth in studied year
-    growth_factors = calculate_end_values(cagr)
-    
-    industry_totals = industry_totals_base * growth_factors
-    
-
-    print("end")
+    #print("end")
 
 
