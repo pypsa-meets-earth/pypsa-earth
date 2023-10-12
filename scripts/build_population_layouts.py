@@ -115,8 +115,8 @@ if __name__ == "__main__":
         pop_layout = xr.DataArray(values, [ycoords, xcoords])
 
         pop_layout.to_netcdf(snakemake.output[f"pop_layout_{key}"])
-    
-    #for key, gdp in gdp_cells.items():
+
+    # for key, gdp in gdp_cells.items():
     ycoords = ("y", cutout.coords["y"].data)
     xcoords = ("x", cutout.coords["x"].data)
     values = gdp_cells.values.reshape(cutout.shape)

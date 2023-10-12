@@ -48,7 +48,7 @@ if __name__ == "__main__":
     pop.to_csv(snakemake.output.clustered_pop_layout)
 
     gdp_layout = xr.open_dataarray(snakemake.input["gdp_layout"])
-    gdp =  I.dot(gdp_layout.stack(spatial=("y", "x")))
+    gdp = I.dot(gdp_layout.stack(spatial=("y", "x")))
     gdp = pd.DataFrame(gdp, index=clustered_regions.index, columns=["total"])
 
     gdp["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country

@@ -42,7 +42,7 @@ def build_nodal_distribution_key(
 ):  # returns percentage of co2 emissions
     """Build nodal distribution keys for each sector."""
 
-    #countries = regions["name"].str[:2].unique()
+    # countries = regions["name"].str[:2].unique()
 
     keys = pd.DataFrame(index=regions.name, columns=industry, dtype=float)
 
@@ -63,7 +63,7 @@ def build_nodal_distribution_key(
     # pop["country"] = pop.index.str[:2]
     keys["population"] = pop["total"].values / pop["total"].sum()
 
-    keys["gdp"] = gdp["total"].values/gdp["total"].sum()
+    keys["gdp"] = gdp["total"].values / gdp["total"].sum()
 
     for tech, country in product(industry, countries):
         regions_ct = regions.name[regions.name.str.contains(country)]
@@ -90,18 +90,18 @@ def build_nodal_distribution_key(
     keys["country"] = pop["ct"]
     return keys
 
-def match_technology(df):
 
+def match_technology(df):
     industry_mapping = {
         "Integrated steelworks": "iron and steel",
         "DRI + Electric arc": "iron and steel",
         "Electric arc": "iron and steel",
         "Cement": "non-metallic minerals",
         "HVC": "chemical and petrochemical",
-        "Paper": "paper pulp and print"
+        "Paper": "paper pulp and print",
     }
 
-    df['industry'] = df['technology'].map(industry_mapping)
+    df["industry"] = df["technology"].map(industry_mapping)
     return df
 
 
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     countries = snakemake.config["countries"]
 
-    #countries = ["EG", "BH"]
+    # countries = ["EG", "BH"]
 
     if regions["name"][0][
         :3

@@ -12,8 +12,10 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
+
 def calculate_end_values(df):
     return (1 + df) ** no_years
+
 
 def country_to_nodal(industrial_production, keys):
     # keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
@@ -58,25 +60,22 @@ if __name__ == "__main__":
 
         sets_path_to_root("pypsa-earth-sec")
 
-
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.config["demand_data"]["base_year"]
     )
 
-    cagr = pd.read_csv(
-        "data/demand/industry_growth_cagr.csv", index_col=0
-    )
+    cagr = pd.read_csv("data/demand/industry_growth_cagr.csv", index_col=0)
 
     countries = snakemake.config["countries"]
-    #countries = ["EG", "BH"]
+    # countries = ["EG", "BH"]
 
     growth_factors = calculate_end_values(cagr)
 
+    industry_base_totals = pd.read_csv(
+        snakemake.input["base_industry_totals"], index_col=[0, 1]
+    )
 
-    industry_base_totals = pd.read_csv(snakemake.input["base_industry_totals"], index_col=[0,1])
-
-
-    production_base =  cagr.applymap(lambda x:1)
+    production_base = cagr.applymap(lambda x: 1)
     production_tom = production_base * growth_factors
 
     industry_totals = (production_tom * industry_base_totals).fillna(0)
@@ -103,94 +102,123 @@ if __name__ == "__main__":
             "Industry Steel Casting Rolling Finishing", axis=1, inplace=True
         )
 
-
-    clean_industry_list =['iron and steel',
-            'chemical and petrochemical',
-            'non-ferrous metals',
-            'non-metallic minerals',
-            'transport equipment',
-            'machinery',
-            'mining and quarrying',
-            'food and tobacco',
-            'paper pulp and print',
-            'wood and wood products',
-            'textile and leather',
-            'construction',
-            'other']
+    clean_industry_list = [
+        "iron and steel",
+        "chemical and petrochemical",
+        "non-ferrous metals",
+        "non-metallic minerals",
+        "transport equipment",
+        "machinery",
+        "mining and quarrying",
+        "food and tobacco",
+        "paper pulp and print",
+        "wood and wood products",
+        "textile and leather",
+        "construction",
+        "other",
+    ]
 
     emission_factors = {
         "iron and steel": 0.025,
-        "chemical and petrochemical": 0.51, #taken from HVC including process and feedstock
-        "non-ferrous metals": 1.5, #taken from Aluminum primary
-        "non-metallic minerals": 0.542, #taken for cement
+        "chemical and petrochemical": 0.51,  # taken from HVC including process and feedstock
+        "non-ferrous metals": 1.5,  # taken from Aluminum primary
+        "non-metallic minerals": 0.542,  # taken for cement
         "transport equipment": 0,
         "machinery": 0,
-        "mining and quarrying": 0, # assumed
+        "mining and quarrying": 0,  # assumed
         "food and tobacco": 0,
         "paper pulp and print": 0,
         "wood and wood products": 0,
         "textile and leather": 0,
-        "construction": 0, #assumed
+        "construction": 0,  # assumed
         "other": 0,
     }
-
-
 
     geo_locs = pd.read_csv(
         snakemake.input.industrial_database,
         sep=",",
         header=0,
         keep_default_na=False,
-        index_col=0
+        index_col=0,
     )
     geo_locs["capacity"] = pd.to_numeric(geo_locs.capacity)
 
     def match_technology(df):
-
         industry_mapping = {
             "Integrated steelworks": "iron and steel",
             "DRI + Electric arc": "iron and steel",
             "Electric arc": "iron and steel",
             "Cement": "non-metallic minerals",
             "HVC": "chemical and petrochemical",
-            "Paper": "paper pulp and print"
+            "Paper": "paper pulp and print",
         }
 
-        df['industry'] = df['technology'].map(industry_mapping)
+        df["industry"] = df["technology"].map(industry_mapping)
         return df
-    
+
     geo_locs = match_technology(geo_locs).loc[countries]
-    
-    AL = pd.read_csv("data/AL_production.csv",index_col=0)
+
+    AL = pd.read_csv("data/AL_production.csv", index_col=0)
     AL_prod_tom = AL["production[ktons/a]"].loc[countries]
     AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
-
-
-    Steel_emissions = geo_locs[geo_locs.industry=="iron and steel"].groupby("country").sum().capacity * 1000 * emission_factors["iron and steel"] * industry_util_factor
-    NMM_emissions = geo_locs[geo_locs.industry=="non-metallic minerals"].groupby("country").sum().capacity * 1000 * emission_factors["non-metallic minerals"]* industry_util_factor
-    refinery_emissons =  geo_locs[geo_locs.industry=="chemical and petrochemical"].groupby("country").sum().capacity * emission_factors["chemical and petrochemical"] * 0.136 * 365 * industry_util_factor
+    Steel_emissions = (
+        geo_locs[geo_locs.industry == "iron and steel"]
+        .groupby("country")
+        .sum()
+        .capacity
+        * 1000
+        * emission_factors["iron and steel"]
+        * industry_util_factor
+    )
+    NMM_emissions = (
+        geo_locs[geo_locs.industry == "non-metallic minerals"]
+        .groupby("country")
+        .sum()
+        .capacity
+        * 1000
+        * emission_factors["non-metallic minerals"]
+        * industry_util_factor
+    )
+    refinery_emissons = (
+        geo_locs[geo_locs.industry == "chemical and petrochemical"]
+        .groupby("country")
+        .sum()
+        .capacity
+        * emission_factors["chemical and petrochemical"]
+        * 0.136
+        * 365
+        * industry_util_factor
+    )
 
     for country in countries:
         industry_base_totals.loc[(country, "process emissons"), :] = 0
         try:
-            industry_base_totals.loc[(country, "process emissons"), "non-metallic minerals"] = NMM_emissions.loc[country]
+            industry_base_totals.loc[
+                (country, "process emissons"), "non-metallic minerals"
+            ] = NMM_emissions.loc[country]
         except KeyError:
             pass
-        
+
         try:
-            industry_base_totals.loc[(country, "process emissons"), "iron and steel"] = Steel_emissions.loc[country]
+            industry_base_totals.loc[
+                (country, "process emissons"), "iron and steel"
+            ] = Steel_emissions.loc[country]
         except KeyError:
-            pass# # Code to handle the KeyError
+            pass  # # Code to handle the KeyError
         try:
-            industry_base_totals.loc[(country, "process emissons"), "non-ferrous metals"] = AL_emissions.loc[country]
+            industry_base_totals.loc[
+                (country, "process emissons"), "non-ferrous metals"
+            ] = AL_emissions.loc[country]
         except KeyError:
-            pass# Code to handle the KeyError
+            pass  # Code to handle the KeyError
         try:
-            industry_base_totals.loc[(country, "process emissons"), "chemical and petrochemical"] = refinery_emissons.loc[country]
+            industry_base_totals.loc[
+                (country, "process emissons"), "chemical and petrochemical"
+            ] = refinery_emissons.loc[country]
         except KeyError:
-            pass# Code to handle the KeyError
-    industry_base_totals  = industry_base_totals.sort_index()   
+            pass  # Code to handle the KeyError
+    industry_base_totals = industry_base_totals.sort_index()
 
     # final energy consumption per node and industry (TWh/a)
     nodal_df = nodal_production_tom.dot(industry_base_totals.T)
@@ -207,4 +235,3 @@ if __name__ == "__main__":
     nodal_df.to_csv(
         snakemake.output.industrial_energy_demand_per_node, float_format="%.2f"
     )
-
