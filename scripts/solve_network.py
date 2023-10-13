@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from helpers import override_component_attrs, update_config
+from helpers import override_component_attrs
 from pypsa.linopf import ilopf, network_lopf
 from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
 from vresutils.benchmark import memory_logger
@@ -416,7 +416,7 @@ def solve_network(n, config, opts="", **kwargs):
     max_iterations = cf_solving.get("max_iterations", 6)
 
     # add to network for extra_functionality
-    n.config = update_config(config)
+    n.config = config
     n.opts = opts
 
     if cf_solving.get("skip_iterations", False):

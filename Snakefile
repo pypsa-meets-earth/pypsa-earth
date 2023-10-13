@@ -1,5 +1,6 @@
 from os.path import exists
 from shutil import copyfile
+from scripts.helpers import get_last_commit_message
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -18,6 +19,9 @@ PYPSAEARTH_FOLDER = "./pypsa-earth"
 SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
+
+config.update({"git_commit": get_last_commit_message(".")})
+config.update({"submodule_commit": get_last_commit_message("./pypsa-earth")})
 
 CUTOUTS_PATH = (
     "cutouts/cutout-2013-era5-tutorial.nc"

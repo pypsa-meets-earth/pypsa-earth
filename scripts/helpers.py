@@ -568,27 +568,7 @@ def locate_bus(
         ].item()  # looks for closest one shape=node
 
 
-def get_last_commit_message():
-    """
-    Function to get the last Git commit message
-    Returns
-    -------
-    result : string
-    """
-    try:
-        # Run the Git command to get the last commit message
-        result = subprocess.run(
-            ["git", "log", "-1", "--pretty=format:%H %s"],
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-    except Exception as e:
-        logging.warning(f"Error getting the last commit message: {e}")
-        return ""
-
-
-def get_submodule_commit_message():
+def get_last_commit_message(path):
     """
     Function to get the last PyPSA-Earth Git commit message
     Returns
@@ -596,12 +576,10 @@ def get_submodule_commit_message():
     result : string
     """
     try:
-        # Retrieve the last commit message for pypsa-earth
-        submodule_path = f"pypsa-earth"
         last_commit_message = (
             subprocess.check_output(
                 ["git", "log", "-n", "1", "--pretty=format:%H %s"],
-                cwd=submodule_path,
+                cwd=path,
                 stderr=subprocess.STDOUT,
             )
             .decode()
@@ -611,17 +589,3 @@ def get_submodule_commit_message():
     except subprocess.CalledProcessError as e:
         logging.warning(f"Error executing Git: {e}")
         return None
-
-
-# Function to update the YAML file with the last commit message as a comment
-def update_config(config):
-    """
-    Function to add the last commit to the config
-    Returns
-    -------
-    config : dict
-    """
-    # Insert the last commit message to config
-    config.update({"git_commit": get_last_commit_message()})
-    config.update({"submodule_commit": get_submodule_commit_message()})
-    return config
