@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 from pathlib import Path
 
@@ -17,6 +18,19 @@ import yaml
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
+
+logger = logging.getLogger(__name__)
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    logger.error(
+        "An error happened during workflow execution.",
+        exc_info=(exc_type, exc_value, exc_traceback),
+    )
 
 
 def read_osm_config(*args):
