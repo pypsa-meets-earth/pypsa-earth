@@ -24,6 +24,7 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    handle_exception,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -38,6 +39,11 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler(stream=sys.stdout)
+logger.addHandler(handler)
+sys.excepthook = handle_exception
+
 
 sets_path_to_root("pypsa-earth")
 
