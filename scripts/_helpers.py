@@ -33,8 +33,17 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
 
+    tb = exc_traceback
+    while tb.tb_next:
+        tb = tb.tb_next
+    flname = tb.tb_frame.f_globals.get("__file__")
+    funcname = tb.tb_frame.f_code.co_name
+
     logger.error(
-        "An error happened during workflow execution.",
+        "An error happened in module %r, function %r: %s",
+        flname,
+        funcname,
+        exc_value,
         exc_info=(exc_type, exc_value, exc_traceback),
     )
 
