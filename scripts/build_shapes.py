@@ -37,13 +37,7 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-handler = logging.StreamHandler(stream=sys.stdout)
-logger.addHandler(handler)
 sys.excepthook = handle_exception
-
 
 sets_path_to_root("pypsa-earth")
 

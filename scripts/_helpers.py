@@ -7,6 +7,7 @@
 
 import logging
 import os
+import sys
 from pathlib import Path
 
 import country_converter as coco
@@ -23,6 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler(stream=sys.stdout)
+    logger.addHandler(handler)
+
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
