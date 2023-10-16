@@ -8,12 +8,15 @@
 import logging
 import os
 import sys
+import subprocess
 from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
 import pandas as pd
 import yaml
+
+logger = logging.getLogger(__name__)
 
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
@@ -798,3 +801,23 @@ def create_country_list(input, iso_coding=True):
     full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
 
     return full_codes_list
+
+
+def get_last_commit_message():
+    """
+    Function to get the last Git commit message.
+
+    Returns
+    -------
+    result : string
+    """
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%H %s"],
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        logger.warning(f"Error getting the last commit message: {e}")
+        return ""
