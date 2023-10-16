@@ -108,11 +108,11 @@ def download_GADM(country_code, update=False, out_logging=False):
         try:
             r = requests.get(GADM_url, stream=True, timeout=300)
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            logger.error(
+            raise Exception(
                 f"GADM server is down at {GADM_url}. Data needed for building shapes can't be extracted.\n\r"
             )
         except Exception as exception:
-            logger.error(
+            raise Exception(
                 f"An error happened when trying to load GADM data by {GADM_url}.\n\r"
                 + str(exception)
                 + "\n\r"
