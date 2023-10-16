@@ -46,6 +46,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add cluster options `all`, `min` and `flex` `PR #848 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/857>`__
 
+* Add commit id of pypsa earth in the n.meta of the .nc file per default `PR #863 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/863>`__
+
 PyPSA-Earth 0.2.2
 =================
 
