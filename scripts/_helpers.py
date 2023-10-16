@@ -7,8 +7,8 @@
 
 import logging
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 import country_converter as coco
