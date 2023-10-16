@@ -334,6 +334,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/doneachh">
+            <img src="https://avatars.githubusercontent.com/u/132910766?v=4" width="100;" alt="doneachh"/>
+            <br />
+            <sub><b>Anton Achhammer</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/carlosfv92">
             <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
             <br />
@@ -367,15 +374,15 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Jarrad Wright</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/jessLryan">
             <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
             <br />
             <sub><b>Jess</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/kma33">
             <img src="https://avatars.githubusercontent.com/u/25573938?v=4" width="100;" alt="kma33"/>
