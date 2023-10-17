@@ -1,5 +1,5 @@
 from os.path import exists
-from shutil import copyfile
+from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -44,6 +44,21 @@ subworkflow pypsaearth:
         PYPSAEARTH_FOLDER + "/Snakefile"
     configfile:
         "./config.pypsa-earth.yaml"
+
+if config["enable"].get("retrieve_cost_data", True):
+
+    rule retrieve_cost_data:
+        input:
+            HTTP.remote(
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs" + "_{planning_horizons}.csv",
+                keep_local=True,
+            ),
+        output:
+            costs=CDIR + "costs_{planning_horizons}.csv",
+        resources:
+            mem_mb=5000,
+        run:
+            move(input[0], output[0])
 
 
 rule prepare_sector_networks:
