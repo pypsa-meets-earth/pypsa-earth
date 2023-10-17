@@ -45,12 +45,14 @@ subworkflow pypsaearth:
     configfile:
         "./config.pypsa-earth.yaml"
 
+
 if config["enable"].get("retrieve_cost_data", True):
 
     rule retrieve_cost_data:
         input:
             HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs" + "_{planning_horizons}.csv",
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs"
+                + "_{planning_horizons}.csv",
                 keep_local=True,
             ),
         output:
