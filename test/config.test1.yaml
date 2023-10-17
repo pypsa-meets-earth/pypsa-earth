@@ -53,7 +53,7 @@ fossil_reserves:
 
 hydrogen_underground_storage: false
 
-enable: 
+enable:
   retrieve_cost_data: true # if true, the workflow overwrites the cost data saved in data/costs again
 
 export:
