@@ -525,7 +525,7 @@ def solve_network(n, config, opts="", **kwargs):
             solver_name=solver_name,
             solver_options=solver_options,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     else:
         ilopf(
@@ -536,7 +536,7 @@ def solve_network(n, config, opts="", **kwargs):
             min_iterations=min_iterations,
             max_iterations=max_iterations,
             extra_functionality=extra_functionality,
-            **kwargs
+            **kwargs,
         )
     return n
 

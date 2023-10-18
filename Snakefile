@@ -11,7 +11,7 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from scripts._helpers import create_country_list
+from scripts._helpers import create_country_list, get_last_commit_message
 from scripts.build_demand_profiles import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
@@ -27,6 +27,8 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 
 configfile: "configs/bundle_config.yaml"
 
+
+config.update({"git_commit": get_last_commit_message()})
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
