@@ -738,6 +738,119 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
+def merge_into_network(n, aggregation_strategies=dict()):
+    """
+    Find isolated nodes in the network and merge those of them which have load
+    value below than a specified threshold into a single isolated node which
+    represents all the remote generation.
+
+    Parameters
+    ----------
+    n : PyPSA.Network
+        Original network
+    threshold : float
+        Load power used as a threshold to merge isolated nodes
+
+    Returns
+    -------
+    modified network
+    """
+    # keep original values of the overall load and generation in the network
+    # to track changes due to drop of buses
+    generators_mean_origin = n.generators.p_nom.mean()
+    load_mean_origin = n.loads_t.p_set.mean().mean()
+
+    n.determine_network_topology()
+
+    # duplicated sub-networks mean that there is at least one interconnection between buses
+    i_islands = n.buses[
+        (~n.buses.duplicated(subset=["sub_network"], keep=False))
+        & (n.buses.carrier == "AC")
+    ].index
+
+    # TODO not sure filtering is needed
+    # # isolated buses with load below than a specified threshold should be merged
+    # i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
+    # i_suffic_load = i_load_islands[
+    #     n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
+    # ]
+
+    # TODO add a second nodes for debug purposes
+    # i_islands = i_islands.append(pd.Index(["10"]))
+
+    i_connected = n.buses.index.difference(i_islands)
+    points_buses = np.array(
+        list(zip(n.buses.loc[i_connected].x, n.buses.loc[i_connected].y))
+    )
+    islands_points = np.array(
+        list(zip(n.buses.loc[i_islands].x, n.buses.loc[i_islands].y))
+    )
+
+    btree = cKDTree(points_buses)
+    dist0, idx0 = btree.query(islands_points, k=1)
+
+    # works for a single isolated bus
+    # x_nearest, y_nearest = points_buses[idx0[0]]
+    # nearest_bus_df = n.buses.loc[(n.buses.x == x_nearest) & (n.buses.y == y_nearest)]
+
+    # TODO if there is only a single bus -> idx0 is np.array with a single element
+    # which leads to issues: ValueError: not enough values to unpack (expected 2, got 1)
+    x_nearest, y_nearest = points_buses[idx0]
+
+    nearest_bus_list = [
+        n.buses.loc[(n.buses.x == x) & (n.buses.y == y)]
+        for x, y in list([x_nearest, y_nearest])
+    ]
+    nearest_bus_df = pd.concat(nearest_bus_list)
+
+    # each isolated node should be mapped into the closes non-isolated node
+    map_isolated_node_by_country = (
+        n.buses.assign(bus_id=n.buses.index)
+        .loc[nearest_bus_df.index]
+        .groupby("country")["bus_id"]
+        .first()
+        .to_dict()
+    )
+    isolated_buses_mapping = n.buses.loc[i_islands, "country"].replace(
+        map_isolated_node_by_country
+    )
+    busmap = (
+        n.buses.index.to_series()
+        .replace(isolated_buses_mapping)
+        .astype(str)
+        .rename("busmap")
+    )
+
+    # return the original network if no changes are detected
+    if (busmap.index == busmap).all():
+        return n, n.buses.index.to_series()
+
+    bus_strategies, generator_strategies = get_aggregation_strategies(
+        aggregation_strategies
+    )
+
+    clustering = get_clustering_from_busmap(
+        n,
+        busmap,
+        bus_strategies=bus_strategies,
+        aggregate_generators_weighted=True,
+        aggregate_generators_carriers=None,
+        aggregate_one_ports=["Load", "StorageUnit"],
+        line_length_factor=1.0,
+        generator_strategies=generator_strategies,
+        scale_link_capital_costs=False,
+    )
+
+    load_mean_final = n.loads_t.p_set.mean().mean()
+    generators_mean_final = n.generators.p_nom.mean()
+
+    logger.info(
+        f"Merged {len(islands_points)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
+    )
+
+    return clustering.network, busmap
+
+
 def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     """
     Find isolated nodes in the network and merge those of them which have load
