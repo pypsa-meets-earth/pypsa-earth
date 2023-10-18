@@ -104,6 +104,7 @@ from pypsa.clustering.spatial import (
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
+from scipy.spatial import cKDTree
 
 sys.settrace
 
@@ -798,8 +799,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
     x_nearest, y_nearest = points_buses[idx0]
 
     nearest_bus_list = [
-        n.buses.loc[(n.buses.x == x) & (n.buses.y == y)]
-        for x, y in list([x_nearest, y_nearest])
+        n.buses.loc[(n.buses.x == x) & (n.buses.y == y)] for x, y in points_nearest
     ]
     nearest_bus_df = pd.concat(nearest_bus_list)
 
