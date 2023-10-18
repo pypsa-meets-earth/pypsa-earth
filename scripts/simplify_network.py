@@ -1094,6 +1094,13 @@ if __name__ == "__main__":
         )
         busmaps.append(merged_nodes_map)
 
+    # TODO Add a configuration option
+    n, fetched_nodes_map = merge_into_network(
+        n,
+        aggregation_strategies=aggregation_strategies,
+    )
+    busmaps.append(fetched_nodes_map)
+
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
 
