@@ -341,6 +341,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/AlexanderMeisinger">
+            <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/carlosfv92">
             <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
             <br />
@@ -367,15 +374,15 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>HanaElattar</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/jarry7">
             <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
             <br />
             <sub><b>Jarrad Wright</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/jessLryan">
             <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
@@ -410,7 +417,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Juli-a-ko</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
