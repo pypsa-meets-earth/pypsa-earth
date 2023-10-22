@@ -98,7 +98,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
         # to avoid any network positions outside all Voronoi cells, append
         # the corners of a rectangle framing these points
-        vor = Voronoi(
+        vcells = Voronoi(
             np.vstack(
                 (
                     points,
@@ -114,7 +114,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
         polygons_arr = np.empty((len(points),), "object")
         for i in range(len(points)):
-            poly = Polygon(vor.vertices[vor.regions[vor.point_region[i]]])
+            poly = Polygon(vcells.vertices[vcells.regions[vcells.point_region[i]]])
 
             if not poly.is_valid:
                 poly = poly.buffer(0)

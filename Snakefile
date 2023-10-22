@@ -11,7 +11,7 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from scripts._helpers import create_country_list
+from scripts._helpers import create_country_list, get_last_commit_message
 from scripts.build_demand_profiles import get_load_paths_gegis
 from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
@@ -27,6 +27,8 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 
 configfile: "configs/bundle_config.yaml"
 
+
+config.update({"git_commit": get_last_commit_message()})
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
@@ -51,7 +53,7 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+m?|all",
+    clusters="[0-9]+(m|flex|min)?|all",
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
@@ -559,8 +561,8 @@ rule simplify_network:
         build_shape_options=config["build_shape_options"],
         electricity=config["electricity"],
         costs=config["costs"],
-        lines_types=config["lines"]["types"],
-        lines_length_factor=config["lines"]["length_factor"],
+        config_lines=config["lines"],
+        config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
     input:
         network="networks/" + RDIR + "elec.nc",
@@ -789,6 +791,12 @@ def memory(w):
             break
     if w.clusters.endswith("m"):
         return int(factor * (18000 + 180 * int(w.clusters[:-1])))
+    elif w.clusters.endswith("flex"):
+        return int(factor * (18000 + 180 * int(w.clusters[:-4])))
+    elif w.clusters == "all":
+        return int(factor * (18000 + 180 * 4000))
+    elif w.clusters == "min":
+        return int(factor * (18000 + 180 * 20))
     else:
         return int(factor * (10000 + 195 * int(w.clusters)))
 
