@@ -37,9 +37,11 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-create_logger(__name___, level=logging.INFO)
-
 sets_path_to_root("pypsa-earth")
+
+
+create_logger()
+sys.excepthook = handle_exception
 
 
 def get_GADM_filename(country_code):
