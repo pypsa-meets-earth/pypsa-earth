@@ -27,11 +27,6 @@ logger = logging.getLogger(__name__)
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
-
     tb = exc_traceback
     while tb.tb_next:
         tb = tb.tb_next
@@ -53,6 +48,14 @@ def handle_exception(exc_type, exc_value, exc_traceback):
             exc_value,
             exc_info=(exc_type, exc_value, exc_traceback),
         )
+
+
+def create_logger(level=logging.INFO):
+    # logger = logging.getLogger('__main__.' + __name__)
+    logger = logging.getLogger("__main__")
+    logger.setLevel(level)
+    handler = logging.StreamHandler(stream=sys.stdout)
+    logger.addHandler(handler)
 
 
 def read_osm_config(*args):
