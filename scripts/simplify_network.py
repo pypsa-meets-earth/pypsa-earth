@@ -776,9 +776,6 @@ def merge_into_network(n, aggregation_strategies=dict()):
     #     n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
     # ]
 
-    # TODO add a second nodes for debug purposes
-    # i_islands = i_islands.append(pd.Index(["10"]))
-
     i_connected = n.buses.index.difference(i_islands)
     points_buses = np.array(
         list(zip(n.buses.loc[i_connected].x, n.buses.loc[i_connected].y))
@@ -790,12 +787,6 @@ def merge_into_network(n, aggregation_strategies=dict()):
     btree = cKDTree(points_buses)
     dist0, idx0 = btree.query(islands_points, k=1)
 
-    # works for a single isolated bus
-    # x_nearest, y_nearest = points_buses[idx0[0]]
-    # nearest_bus_df = n.buses.loc[(n.buses.x == x_nearest) & (n.buses.y == y_nearest)]
-
-    # TODO if there is only a single bus -> idx0 is np.array with a single element
-    # which leads to issues: ValueError: not enough values to unpack (expected 2, got 1)
     points_nearest = [points_buses[i] for i in idx0]
 
     nearest_bus_list = [
