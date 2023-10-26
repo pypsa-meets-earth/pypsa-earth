@@ -796,7 +796,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
 
     # TODO if there is only a single bus -> idx0 is np.array with a single element
     # which leads to issues: ValueError: not enough values to unpack (expected 2, got 1)
-    x_nearest, y_nearest = points_buses[idx0]
+    points_nearest = [points_buses[i] for i in idx0]
 
     nearest_bus_list = [
         n.buses.loc[(n.buses.x == x) & (n.buses.y == y)] for x, y in points_nearest
