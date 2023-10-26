@@ -777,6 +777,11 @@ def merge_into_network(n, aggregation_strategies=dict()):
     # ]
 
     i_connected = n.buses.index.difference(i_islands)
+
+    # return the original network if no isolated nodes are detected
+    if len(i_islands) == 0:
+        return n, n.buses.index.to_series()
+
     points_buses = np.array(
         list(zip(n.buses.loc[i_connected].x, n.buses.loc[i_connected].y))
     )
