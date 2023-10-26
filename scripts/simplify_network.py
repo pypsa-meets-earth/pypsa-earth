@@ -845,7 +845,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Merged {len(islands_points)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
+        f"Fetched {len(islands_points)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
     return clustering.network, busmap
