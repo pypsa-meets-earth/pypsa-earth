@@ -197,7 +197,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # get crs
-    natura_crs = snakemake.config["crs"]["area_crs"]
+    natura_crs = snakemake.params.area_crs
 
     out_logging = True
     inputs = snakemake.input

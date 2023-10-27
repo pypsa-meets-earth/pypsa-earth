@@ -98,7 +98,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
         # to avoid any network positions outside all Voronoi cells, append
         # the corners of a rectangle framing these points
-        vor = Voronoi(
+        vcells = Voronoi(
             np.vstack(
                 (
                     points,
@@ -114,7 +114,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
         polygons_arr = np.empty((len(points),), "object")
         for i in range(len(points)):
-            poly = Polygon(vor.vertices[vor.regions[vor.point_region[i]]])
+            poly = Polygon(vcells.vertices[vcells.regions[vcells.point_region[i]]])
 
             if not poly.is_valid:
                 poly = poly.buffer(0)
@@ -167,8 +167,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_bus_regions")
     configure_logging(snakemake)
 
-    countries = snakemake.config["countries"]
-    area_crs = snakemake.config["crs"]["area_crs"]
+    countries = snakemake.params.countries
+    area_crs = snakemake.params.area_crs
 
     n = pypsa.Network(snakemake.input.base_network)
 
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 
         onshore_shape = country_shapes[country]
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
-        if snakemake.config["cluster_options"]["alternative_clustering"]:
+        if snakemake.params.alternative_clustering:
             onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
             shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
         else:

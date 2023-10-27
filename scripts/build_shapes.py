@@ -109,7 +109,19 @@ def download_GADM(country_code, update=False, out_logging=False):
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
 
-        with requests.get(GADM_url, stream=True) as r:
+        try:
+            r = requests.get(GADM_url, stream=True, timeout=300)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            raise Exception(
+                f"GADM server is down at {GADM_url}. Data needed for building shapes can't be extracted.\n\r"
+            )
+        except Exception as exception:
+            raise Exception(
+                f"An error happened when trying to load GADM data by {GADM_url}.\n\r"
+                + str(exception)
+                + "\n\r"
+            )
+        else:
             with open(GADM_inputfile_gpkg, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
@@ -1301,18 +1313,18 @@ if __name__ == "__main__":
     EEZ_gpkg = snakemake.input["eez"]
     mem_mb = snakemake.resources["mem_mb"]
 
-    countries_list = snakemake.config["countries"]
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    distance_crs = snakemake.config["crs"]["distance_crs"]
+    countries_list = snakemake.params.countries
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
 
-    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
-    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
-    layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
-    out_logging = snakemake.config["build_shape_options"]["out_logging"]
-    update = snakemake.config["build_shape_options"]["update_file"]
-    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
-    year = snakemake.config["build_shape_options"]["year"]
+    layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
+    update = snakemake.params.build_shape_options["update_file"]
+    out_logging = snakemake.params.build_shape_options["out_logging"]
+    year = snakemake.params.build_shape_options["year"]
+    nprocesses = snakemake.params.build_shape_options["nprocesses"]
+    contended_flag = snakemake.params.build_shape_options["contended_flag"]
+    worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
+    gdp_method = snakemake.params.build_shape_options["gdp_method"]
 
     country_shapes = countries(
         countries_list,

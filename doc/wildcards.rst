@@ -41,6 +41,15 @@ If an `m` is placed behind the number of clusters (e.g. ``100m``),
 generators are only moved to the clustered buses but not aggregated
 by carrier; i.e. the clustered bus may have more than one e.g. wind generator.
 
+If a `flex` is placed behind the number of clusters (e.g. ``100flex``),
+the number of clusters will be the minimum between the desired value of clusters
+and the actual number of buses.
+
+The wildcard value `all` specifies that no clustering is executed and the whole buses are used.
+
+The wildcard value `min` specifies that the network is clustered to the smallest network possible
+accounting for the topology of the network (e.g. not fully meshed networks, isolated areas, etc.).
+
 .. _ll:
 
 The ``{ll}`` wildcard

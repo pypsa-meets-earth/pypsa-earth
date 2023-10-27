@@ -32,7 +32,7 @@ dependencies:
 - pandas
 - geopandas>=0.11.0
 - fiona!=1.8.22
-- xarray
+- xarray<=2023.8.0
 - netcdf4
 - networkx
 - scipy
@@ -45,6 +45,7 @@ dependencies:
 - country_converter
 - pyogrio
 - numba
+- py7zr
 
   # Keep in conda environment when calling ipython
 - ipython
