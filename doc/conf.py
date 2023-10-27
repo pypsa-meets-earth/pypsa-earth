@@ -65,7 +65,7 @@ author = "Max Parzen"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.2"
+release = "0.2.3"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
