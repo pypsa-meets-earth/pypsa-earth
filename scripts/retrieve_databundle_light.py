@@ -83,6 +83,8 @@ according to the following rules:
 import logging
 import os
 import re
+import pandas as pd
+import requests
 from zipfile import ZipFile
 
 import yaml
@@ -481,39 +483,25 @@ def get_best_bundles_by_category(
     returned_bundles : list
         List of bundles to download
     """
-    # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
-    dict_n_matched = {
-        bname: config_bundles[bname]["n_matched"]
-        for bname in config_bundles
-        if config_bundles[bname]["category"] == category
-        and config_bundles[bname].get("tutorial", False) == tutorial
-        and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]
-    }
+    df_empty = pd.DataFrame(columns=["bundle_name", "bundle_size", "n_matches"])
+    i = 0
+    for bname in config_bundles:
+        if config_bundles[bname]["category"] == category and config_bundles[bname].get("tutorial", False) == tutorial and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]:
+            bundles = pd.DataFrame({"bundle_name": bname, "n_matches": config_bundles[bname]["n_matched"]}, index=[i])
+            i = i + 1
+            df_empty = pd.concat([df_empty, bundles], axis=0)
 
     returned_bundles = []
-
-    # check if non-empty dictionary
-    if dict_n_matched:
-        # if non-empty, then pick bundles until all countries are selected
-        # or no more bundles are found
-        dict_sort = sorted(dict_n_matched.items(), key=lambda d: d[1])
-
-        current_matched_countries = []
-        remaining_countries = set(country_list)
-
-        for d_val in dict_sort:
-            bname = d_val[0]
-
-            cbundle_list = set(config_bundles[bname]["countries"])
-
-            # list of countries in the bundle that are not yet matched
-            intersect = cbundle_list.intersection(remaining_countries)
-
-            if intersect:
-                current_matched_countries.extend(intersect)
-                remaining_countries = remaining_countries.difference(intersect)
-
-                returned_bundles.append(bname)
+    if not df_empty.empty:
+        df_empty = df_empty.sort_values(by = "n_matches")
+        for i in df_empty.index:
+            urlsx = list(config_bundles[df_empty.loc[i]["bundle_name"]]["urls"].values())
+            response = requests.head(urlsx[0])
+            bundle_size = response.headers['Content-Length']
+            df_empty.loc[i, "bundle_size"] = bundle_size
+        df_empty = df_empty[df_empty["n_matches"] == len(country_list)]
+        df_empty = df_empty.sort_values(by = ["bundle_size"], ascending=True).head(1)
+        returned_bundles = list(df_empty["bundle_name"])
 
     return returned_bundles
 
