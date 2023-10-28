@@ -67,12 +67,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger, handle_exception
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 
 def download_emission_data():

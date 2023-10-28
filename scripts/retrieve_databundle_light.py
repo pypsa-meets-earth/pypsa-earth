@@ -90,12 +90,15 @@ import yaml
 from _helpers import (
     configure_logging,
     create_country_list,
+    create_logger,
+    handle_exception,
     progress_retrieve,
     sets_path_to_root,
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 
 def load_databundle_config(config):

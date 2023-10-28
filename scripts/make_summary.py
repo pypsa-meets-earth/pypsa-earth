@@ -48,11 +48,17 @@ import sys
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import (
+    create_logger,
+    handle_exception,
+    load_costs,
+    update_transmission_costs,
+)
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 opt_name = {"Store": "e", "Line": "s", "Transformer": "s"}
 

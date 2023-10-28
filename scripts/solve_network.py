@@ -86,7 +86,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger, handle_exception
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -98,7 +98,8 @@ from pypsa.linopf import (
     network_lopf,
 )
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 
 def prepare_network(n, solve_opts):

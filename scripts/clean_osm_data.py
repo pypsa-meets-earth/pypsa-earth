@@ -13,9 +13,17 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import reverse_geocode as rg
-from _helpers import REGION_COLS, configure_logging, save_to_geojson, to_csv_nafix
+from _helpers import (
+    REGION_COLS,
+    configure_logging,
+    create_logger,
+    handle_exception,
+    save_to_geojson,
+    to_csv_nafix,
+)
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 
 def prepare_substation_df(df_all_substations):
