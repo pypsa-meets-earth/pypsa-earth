@@ -495,8 +495,8 @@ def get_best_bundles_by_category(
     if not df_empty.empty:
         df_empty = df_empty.sort_values(by = "n_matches")
         for i in df_empty.index:
-            urlsx = list(config_bundles[df_empty.loc[i]["bundle_name"]]["urls"].values())
-            response = requests.head(urlsx[0])
+            url = list(config_bundles[df_empty.loc[i]["bundle_name"]]["urls"].values())
+            response = requests.head(url[0])
             bundle_size = response.headers['Content-Length']
             df_empty.loc[i, "bundle_size"] = bundle_size
         df_empty = df_empty[df_empty["n_matches"] == len(country_list)]
