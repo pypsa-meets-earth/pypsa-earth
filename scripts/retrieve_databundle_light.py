@@ -83,10 +83,10 @@ according to the following rules:
 import logging
 import os
 import re
-import pandas as pd
-import requests
 from zipfile import ZipFile
 
+import pandas as pd
+import requests
 import yaml
 from _helpers import (
     configure_logging,
@@ -486,21 +486,28 @@ def get_best_bundles_by_category(
     df_empty = pd.DataFrame(columns=["bundle_name", "bundle_size", "n_matches"])
     i = 0
     for bname in config_bundles:
-        if config_bundles[bname]["category"] == category and config_bundles[bname].get("tutorial", False) == tutorial and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]:
-            bundles = pd.DataFrame({"bundle_name": bname, "n_matches": config_bundles[bname]["n_matched"]}, index=[i])
+        if (
+            config_bundles[bname]["category"] == category
+            and config_bundles[bname].get("tutorial", False) == tutorial
+            and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]
+        ):
+            bundles = pd.DataFrame(
+                {"bundle_name": bname, "n_matches": config_bundles[bname]["n_matched"]},
+                index=[i],
+            )
             i = i + 1
             df_empty = pd.concat([df_empty, bundles], axis=0)
 
     returned_bundles = []
     if not df_empty.empty:
-        df_empty = df_empty.sort_values(by = "n_matches")
+        df_empty = df_empty.sort_values(by="n_matches")
         for i in df_empty.index:
             url = list(config_bundles[df_empty.loc[i]["bundle_name"]]["urls"].values())
             response = requests.head(url[0])
-            bundle_size = response.headers['Content-Length']
+            bundle_size = response.headers["Content-Length"]
             df_empty.loc[i, "bundle_size"] = bundle_size
         df_empty = df_empty[df_empty["n_matches"] == len(country_list)]
-        df_empty = df_empty.sort_values(by = ["bundle_size"], ascending=True).head(1)
+        df_empty = df_empty.sort_values(by=["bundle_size"], ascending=True).head(1)
         returned_bundles = list(df_empty["bundle_name"])
 
     return returned_bundles
