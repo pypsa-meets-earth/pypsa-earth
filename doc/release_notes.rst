@@ -12,6 +12,7 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
+* Keep all traceback in logs. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/898>`__
 
 PyPSA-Earth 0.2.3
 =================
