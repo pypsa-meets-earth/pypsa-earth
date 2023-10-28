@@ -43,6 +43,7 @@ Replacing '/summaries/' with '/plots/' creates nice colored maps of the results.
 """
 import logging
 import os
+import sys
 
 import pandas as pd
 import pypsa

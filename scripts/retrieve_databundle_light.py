@@ -83,6 +83,7 @@ according to the following rules:
 import logging
 import os
 import re
+import sys
 from zipfile import ZipFile
 
 import yaml

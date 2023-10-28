@@ -59,6 +59,7 @@ Description
 import logging
 import os
 import re
+import sys
 from zipfile import ZipFile
 
 import country_converter as cc

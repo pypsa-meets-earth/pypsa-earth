@@ -53,6 +53,7 @@ Tip: The output file `natura.tiff` contains now the 100x100m rasters of protecti
 """
 import logging
 import os
+import sys
 
 import atlite
 import geopandas as gpd

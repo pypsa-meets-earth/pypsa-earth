@@ -94,6 +94,7 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 """
 import logging
 import os
+import sys
 
 import geopandas as gpd
 import numpy as np

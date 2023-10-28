@@ -95,6 +95,7 @@ Description
 """
 import logging
 import os
+import sys
 
 import atlite
 import geopandas as gpd

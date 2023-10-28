@@ -9,6 +9,7 @@ import logging
 import multiprocessing as mp
 import os
 import shutil
+import sys
 import zipfile
 from itertools import takewhile
 from math import ceil

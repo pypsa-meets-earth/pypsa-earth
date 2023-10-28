@@ -24,6 +24,7 @@ This rule creates a dataframe containing in the columns the relevant statistics 
 """
 import os
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 
