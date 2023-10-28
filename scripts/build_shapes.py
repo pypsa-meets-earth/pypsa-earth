@@ -39,8 +39,7 @@ from tqdm import tqdm
 
 sets_path_to_root("pypsa-earth")
 
-
-create_logger()
+create_logger(__name__)
 sys.excepthook = handle_exception
 
 

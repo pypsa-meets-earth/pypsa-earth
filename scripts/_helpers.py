@@ -50,9 +50,8 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         )
 
 
-def create_logger(level=logging.INFO):
-    # logger = logging.getLogger('__main__.' + __name__)
-    logger = logging.getLogger("__main__")
+def create_logger(logger_name, level=logging.INFO):
+    logger = logging.getLogger(logger_name)
     logger.setLevel(level)
     handler = logging.StreamHandler(stream=sys.stdout)
     logger.addHandler(handler)
