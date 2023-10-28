@@ -27,6 +27,10 @@ logger = logging.getLogger(__name__)
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
+    """
+    Customise errors traceback.
+    """
+
     tb = exc_traceback
     while tb.tb_next:
         tb = tb.tb_next
@@ -51,6 +55,11 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 def create_logger(logger_name, level=logging.INFO):
+    """
+    Create a logger for a module and adds a handler needed to capture in logs
+    traceback from exceptions emerging during the workflow.
+    """
+
     logger = logging.getLogger(logger_name)
     logger.setLevel(level)
     handler = logging.StreamHandler(stream=sys.stdout)
