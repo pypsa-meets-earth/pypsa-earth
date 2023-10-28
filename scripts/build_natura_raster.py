@@ -58,11 +58,12 @@ import atlite
 import geopandas as gpd
 import numpy as np
 import rasterio as rio
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger, handle_exception
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 CUTOUT_CRS = "EPSG:4326"
 

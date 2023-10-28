@@ -103,6 +103,8 @@ import pypsa
 import yaml
 from _helpers import (
     configure_logging,
+    create_logger,
+    handle_exception,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -112,7 +114,8 @@ from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
 from shapely.geometry import Point
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):

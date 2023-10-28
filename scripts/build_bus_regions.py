@@ -48,12 +48,13 @@ import os
 import geopandas as gpd
 import pandas as pd
 import pypsa
-from _helpers import REGION_COLS, configure_logging
+from _helpers import REGION_COLS, configure_logging, create_logger, handle_exception
 from shapely.geometry import Point
 
 # from scripts.build_shapes import gadm
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+sys.excepthook = handle_exception
 
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
