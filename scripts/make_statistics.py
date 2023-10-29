@@ -32,10 +32,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import mock_snakemake, sets_path_to_root, to_csv_nafix
+from _helpers import create_logger, mock_snakemake, sets_path_to_root, to_csv_nafix
 from build_test_configs import create_test_config
 from ruamel.yaml import YAML
 from shapely.validation import make_valid
+
+create_logger(__name__)
 
 
 def _multi_index_scen(rulename, keys):

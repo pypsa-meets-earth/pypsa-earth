@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from _helpers import (
     configure_logging,
+    create_logger,
     read_geojson,
     read_osm_config,
     sets_path_to_root,
@@ -22,7 +23,7 @@ from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
 
 
 def line_endings_to_bus_conversion(lines):

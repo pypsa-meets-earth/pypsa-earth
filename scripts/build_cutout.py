@@ -99,9 +99,10 @@ import os
 import atlite
 import geopandas as gpd
 import pandas as pd
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

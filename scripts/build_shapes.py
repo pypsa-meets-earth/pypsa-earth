@@ -24,6 +24,7 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    create_logger,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -36,10 +37,9 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 sets_path_to_root("pypsa-earth")
+
+create_logger(__name__)
 
 
 def get_GADM_filename(country_code):

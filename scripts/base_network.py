@@ -67,12 +67,12 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 import yaml
-from _helpers import configure_logging, read_csv_nafix
+from _helpers import configure_logging, create_logger, read_csv_nafix
 from scipy.sparse import csgraph
 from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
 
 
 def _get_oid(df):

@@ -8,6 +8,7 @@
 import logging
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import country_converter as coco
@@ -21,6 +22,47 @@ logger = logging.getLogger(__name__)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
+
+logger = logging.getLogger(__name__)
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """
+    Customise errors traceback.
+    """
+    tb = exc_traceback
+    while tb.tb_next:
+        tb = tb.tb_next
+    flname = tb.tb_frame.f_globals.get("__file__")
+    funcname = tb.tb_frame.f_code.co_name
+
+    if issubclass(exc_type, KeyboardInterrupt):
+        logger.error(
+            "Manual interruption %r, function %r: %s",
+            flname,
+            funcname,
+            exc_value,
+        )
+    else:
+        logger.error(
+            "An error happened in module %r, function %r: %s",
+            flname,
+            funcname,
+            exc_value,
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+
+
+def create_logger(logger_name, level=logging.INFO):
+    """
+    Create a logger for a module and adds a handler needed to capture in logs
+    traceback from exceptions emerging during the workflow.
+    """
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(level)
+    handler = logging.StreamHandler(stream=sys.stdout)
+    logger.addHandler(handler)
+    sys.excepthook = handle_exception
 
 
 def read_osm_config(*args):

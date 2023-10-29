@@ -70,12 +70,12 @@ import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import qmc
 from solve_network import *
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
 
 
 def monte_carlo_sampling_pydoe2(

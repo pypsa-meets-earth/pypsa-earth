@@ -93,7 +93,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_aggregation_strategies,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
@@ -107,7 +112,7 @@ from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
 
-logger = logging.getLogger(__name__)
+create_logger(__name__)
 
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):
