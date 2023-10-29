@@ -97,7 +97,6 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_aggregation_strategies,
-    handle_exception,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -114,7 +113,6 @@ from scipy.sparse.csgraph import connected_components, dijkstra
 sys.settrace
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):

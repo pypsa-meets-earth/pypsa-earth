@@ -94,7 +94,6 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 """
 import logging
 import os
-import sys
 
 import geopandas as gpd
 import numpy as np
@@ -105,7 +104,6 @@ import yaml
 from _helpers import (
     configure_logging,
     create_logger,
-    handle_exception,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -116,7 +114,6 @@ from shapely import wkt
 from shapely.geometry import Point
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):

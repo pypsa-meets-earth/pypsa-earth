@@ -62,6 +62,7 @@ def create_logger(logger_name, level=logging.INFO):
     logger.setLevel(level)
     handler = logging.StreamHandler(stream=sys.stdout)
     logger.addHandler(handler)
+    sys.excepthook = handle_exception
 
 
 def read_osm_config(*args):

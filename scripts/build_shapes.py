@@ -9,7 +9,6 @@ import logging
 import multiprocessing as mp
 import os
 import shutil
-import sys
 import zipfile
 from itertools import takewhile
 from math import ceil
@@ -26,7 +25,6 @@ import xarray as xr
 from _helpers import (
     configure_logging,
     create_logger,
-    handle_exception,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -42,7 +40,6 @@ from tqdm import tqdm
 sets_path_to_root("pypsa-earth")
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def get_GADM_filename(country_code):

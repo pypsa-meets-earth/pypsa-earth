@@ -7,7 +7,6 @@
 
 import logging
 import os
-import sys
 
 import geopandas as gpd
 import numpy as np
@@ -15,7 +14,6 @@ import pandas as pd
 from _helpers import (
     configure_logging,
     create_logger,
-    handle_exception,
     read_geojson,
     read_osm_config,
     sets_path_to_root,
@@ -26,7 +24,6 @@ from shapely.ops import linemerge, split
 from tqdm import tqdm
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def line_endings_to_bus_conversion(lines):

@@ -53,18 +53,17 @@ Tip: The output file `natura.tiff` contains now the 100x100m rasters of protecti
 """
 import logging
 import os
-import sys
 
 import atlite
 import geopandas as gpd
 import numpy as np
 import rasterio as rio
-from _helpers import configure_logging, create_logger, handle_exception
+from _helpers import configure_logging, create_logger
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
 create_logger(__name__)
-sys.excepthook = handle_exception
+
 
 CUTOUT_CRS = "EPSG:4326"
 

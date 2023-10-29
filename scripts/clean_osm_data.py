@@ -7,7 +7,6 @@
 
 import logging
 import os
-import sys
 
 import geopandas as gpd
 import numpy as np
@@ -17,13 +16,11 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
-    handle_exception,
     save_to_geojson,
     to_csv_nafix,
 )
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def prepare_substation_df(df_all_substations):

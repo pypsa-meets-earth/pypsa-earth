@@ -54,12 +54,11 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 """
 import logging
 import os
-import sys
 
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger, handle_exception
+from _helpers import configure_logging, create_logger
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -69,7 +68,6 @@ from add_electricity import (
 idx = pd.IndexSlice
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def attach_storageunits(n, costs, config):

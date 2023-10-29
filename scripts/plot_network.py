@@ -18,7 +18,6 @@ Description
 """
 import logging
 import os
-import sys
 
 import cartopy.crs as ccrs
 import geopandas as gpd
@@ -31,7 +30,6 @@ from _helpers import (
     aggregate_p,
     configure_logging,
     create_logger,
-    handle_exception,
     load_network_for_plots,
 )
 from matplotlib.legend_handler import HandlerPatch
@@ -40,7 +38,6 @@ from matplotlib.patches import Circle, Ellipse
 to_rgba = mpl.colors.colorConverter.to_rgba
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):

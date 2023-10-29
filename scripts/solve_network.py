@@ -80,13 +80,12 @@ Details (and errors made through this heuristic) are discussed in the paper
 import logging
 import os
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger, handle_exception
+from _helpers import configure_logging, create_logger
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -99,7 +98,6 @@ from pypsa.linopf import (
 )
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def prepare_network(n, solve_opts):

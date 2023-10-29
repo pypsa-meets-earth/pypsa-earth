@@ -42,7 +42,6 @@ it returns a csv file called "demand_profiles.csv", that allocates the load to t
 """
 import logging
 import os
-import sys
 from itertools import product
 
 import geopandas as gpd
@@ -52,18 +51,11 @@ import powerplantmatching as pm
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import (
-    configure_logging,
-    create_logger,
-    getContinent,
-    handle_exception,
-    update_p_nom_max,
-)
+from _helpers import configure_logging, create_logger, getContinent, update_p_nom_max
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def normed(s):

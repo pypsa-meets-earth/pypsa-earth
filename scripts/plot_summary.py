@@ -18,14 +18,12 @@ Description
 """
 import logging
 import os
-import sys
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import configure_logging, create_logger, handle_exception
+from _helpers import configure_logging, create_logger
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def rename_techs(label):

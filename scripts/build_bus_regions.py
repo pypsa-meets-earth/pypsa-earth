@@ -44,18 +44,16 @@ Description
 """
 import logging
 import os
-import sys
 
 import geopandas as gpd
 import pandas as pd
 import pypsa
-from _helpers import REGION_COLS, configure_logging, create_logger, handle_exception
+from _helpers import REGION_COLS, configure_logging, create_logger
 from shapely.geometry import Point
 
 # from scripts.build_shapes import gadm
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):

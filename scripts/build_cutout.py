@@ -95,15 +95,14 @@ Description
 """
 import logging
 import os
-import sys
 
 import atlite
 import geopandas as gpd
 import pandas as pd
-from _helpers import configure_logging, create_logger, handle_exception
+from _helpers import configure_logging, create_logger
 
 create_logger(__name__)
-sys.excepthook = handle_exception
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

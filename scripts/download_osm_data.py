@@ -29,14 +29,12 @@ Outputs
 import logging
 import os
 import shutil
-import sys
 from pathlib import Path
 
-from _helpers import configure_logging, create_logger, handle_exception, read_osm_config
+from _helpers import configure_logging, create_logger, read_osm_config
 from earth_osm import eo
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def country_list_to_geofk(country_list):

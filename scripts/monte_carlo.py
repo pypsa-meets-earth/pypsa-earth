@@ -65,19 +65,17 @@ wildcard {unc}, which is described in the config.yaml and created in the Snakefi
 """
 import logging
 import os
-import sys
 
 import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger, handle_exception
+from _helpers import configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import qmc
 from solve_network import *
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def monte_carlo_sampling_pydoe2(

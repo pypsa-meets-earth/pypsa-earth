@@ -122,7 +122,6 @@ Exemplary unsolved network clustered to 37 nodes:
 """
 import logging
 import os
-import sys
 from functools import reduce
 
 import geopandas as gpd
@@ -138,7 +137,6 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_aggregation_strategies,
-    handle_exception,
     sets_path_to_root,
     update_p_nom_max,
 )
@@ -155,7 +153,6 @@ from shapely.geometry import Point
 idx = pd.IndexSlice
 
 create_logger(__name__)
-sys.excepthook = handle_exception
 
 
 def normed(x):

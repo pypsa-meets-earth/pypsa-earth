@@ -193,7 +193,6 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 import functools
 import logging
 import os
-import sys
 import time
 from math import isnan
 
@@ -204,13 +203,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import (
-    configure_logging,
-    create_logger,
-    handle_exception,
-    read_csv_nafix,
-    sets_path_to_root,
-)
+from _helpers import configure_logging, create_logger, read_csv_nafix, sets_path_to_root
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
@@ -219,7 +212,7 @@ from shapely.geometry import LineString, Point, box
 cc = coco.CountryConverter()
 
 create_logger(__name__)
-sys.excepthook = handle_exception
+
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
