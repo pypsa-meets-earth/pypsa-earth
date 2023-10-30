@@ -841,20 +841,24 @@ def load_network_data(network_asset):
 
     the network_asset should be a string named lines, cables or
     substations.
-    
     """
 
-    # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)  
+    # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)
 
     try:
-        data_options = snakemake.config["clean_osm_data_options"][f"use_custom_{network_asset}"]
-        custom_path = snakemake.config["clean_osm_data_options"][f"path_custom_{network_asset}"]
+        data_options = snakemake.config["clean_osm_data_options"][
+            f"use_custom_{network_asset}"
+        ]
+        custom_path = snakemake.config["clean_osm_data_options"][
+            f"path_custom_{network_asset}"
+        ]
 
     except:
-        logger.error(f"Missing use_custom_{network_asset} or path_custom_{network_asset} options in the config file")
+        logger.error(
+            f"Missing use_custom_{network_asset} or path_custom_{network_asset} options in the config file"
+        )
 
-    
-    # creates a dataframe for the network_asset defined 
+    # creates a dataframe for the network_asset defined
     if data_options == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
@@ -866,11 +870,12 @@ def load_network_data(network_asset):
 
     else:
         if data_options != "OSM_only":
-            logger.warning(f"Unrecognized option {data_options} for handling custom data of {network_asset}." + 
-                           "Default OSM_only option used. Options available in clean_OSM_data_options configtable")
-        
-        loaded_df = gpd.read_file(input_files[network_asset])
+            logger.warning(
+                f"Unrecognized option {data_options} for handling custom data of {network_asset}."
+                + "Default OSM_only option used. Options available in clean_OSM_data_options configtable"
+            )
 
+        loaded_df = gpd.read_file(input_files[network_asset])
 
     # returns dataframe to be read in each section of the code depending on the component type (lines, substations or cables)
 
