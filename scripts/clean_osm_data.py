@@ -835,59 +835,42 @@ def set_name_by_closestcity(df_all_generators, colname="name"):
     return df_all_generators
 
 
-def use_custom_data_files(custom_component_type):
+def load_network_data(network_asset):
     """
     Function to check if OSM or custom data should be considered.
 
-    the custom_component_type should be a string named lines, cables or
-    substations
+    the network_asset should be a string named lines, cables or
+    substations.
+    
     """
 
-    # checks the type of data/components to be reviewed
-    if custom_component_type == "lines":
-        custom_conditional = snakemake.config["clean_osm_data_options"][
-            "use_custom_lines"
-        ]
-        custom_path = snakemake.config["clean_osm_data_options"].get(
-            "path_custom_lines", False
-        )
+    # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)  
 
-    elif custom_component_type == "substations":
-        custom_conditional = snakemake.config["clean_osm_data_options"][
-            "use_custom_substations"
-        ]
-        custom_path = snakemake.config["clean_osm_data_options"].get(
-            "path_custom_substations", False
-        )
+    try:
+        data_options = snakemake.config["clean_osm_data_options"][f"use_custom_{network_asset}"]
+        custom_path = snakemake.config["clean_osm_data_options"][f"path_custom_{network_asset}"]
 
-    elif custom_component_type == "cables":
-        custom_conditional = snakemake.config["clean_osm_data_options"][
-            "use_custom_cables"
-        ]
-        custom_path = snakemake.config["clean_osm_data_options"].get(
-            "path_custom_cables", False
-        )
+    except:
+        logger.error(f"Missing use_custom_{network_asset} or path_custom_{network_asset} options in the config file")
 
-    else:
-        raise ValueError(
-            "Invalid custom_component_type. Expected 'lines', 'substations', or 'cables'."
-        )
-
-    # creates a dataframe based on the component type presented
-    if custom_conditional == "OSM_only":
-        loaded_df = gpd.read_file(input_files[custom_component_type])
-
-    elif custom_conditional == "custom_only":
+    
+    # creates a dataframe for the network_asset defined 
+    if data_options == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
-    elif custom_conditional == "add_custom":
-        loaded_df1 = gpd.read_file(input_files[custom_component_type])
+    elif data_options == "add_custom":
+        loaded_df1 = gpd.read_file(input_files[network_asset])
         loaded_df2 = gpd.read_file(custom_path)
 
         loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
 
     else:
-        raise ValueError("Invalid custom_conditional value.")
+        if data_options != "OSM_only":
+            logger.warning(f"Unrecognized option {data_options} for handling custom data of {network_asset}." + 
+                           "Default OSM_only option used. Options available in clean_OSM_data_options configtable")
+        
+        loaded_df = gpd.read_file(input_files[network_asset])
+
 
     # returns dataframe to be read in each section of the code depending on the component type (lines, substations or cables)
 
@@ -911,7 +894,7 @@ def clean_data(
 
     if os.path.getsize(input_files["lines"]) > 0:
         # Load raw data lines
-        df_lines = use_custom_data_files("lines")
+        df_lines = load_network_data("lines")
 
         # prepare lines dataframe and data types
         df_lines = prepare_lines_df(df_lines)
@@ -927,7 +910,7 @@ def clean_data(
     if os.path.getsize(input_files["cables"]) > 0:
         logger.info("Add OSM cables to data")
         # Load raw data lines
-        df_cables = use_custom_data_files("cables")
+        df_cables = load_network_data("cables")
 
         # prepare cables dataframe and data types
         df_cables = prepare_lines_df(df_cables)
@@ -975,7 +958,7 @@ def clean_data(
     logger.info("Process OSM substations")
 
     if os.path.getsize(input_files["substations"]) > 0:
-        df_all_substations = use_custom_data_files("substations")
+        df_all_substations = load_network_data("substations")
 
         # prepare dataset for substations
         df_all_substations = prepare_substation_df(df_all_substations)
