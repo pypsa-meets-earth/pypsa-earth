@@ -226,7 +226,7 @@ sector:
   efficiency_heat_gas_to_elec: 0.9
 
   dynamic_transport:
-    enable: True # If "True", then the BEV and FCEV shares are obtained depening on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
+    enable: true # If "True", then the BEV and FCEV shares are obtained depening on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
     land_transport_electric_share:
       Co2L2.0: 0.00
       Co2L1.0: 0.01
