@@ -769,7 +769,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
         & (n.buses.carrier == "AC")
     ].index
 
-    # TODO not sure filtering is needed
+    # TODO filtering may be applied to decide if the isolated buses should be fetched
     # # isolated buses with load below than a specified threshold should be merged
     # i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
     # i_suffic_load = i_load_islands[
