@@ -213,6 +213,7 @@ def H2_liquid_fossil_conversions(n, costs):
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
         p_nom_extendable=True,
+        p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
     )
 
@@ -2316,13 +2317,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="14",
+            clusters="4",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L0.10",
             planning_horizons="2030",
-            sopts="24H",
+            sopts="6H",
             discountrate="0.071",
-            demand="XX",
+            demand="DF",
         )
 
     # Load population layout
