@@ -94,12 +94,12 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, read_csv_nafix, update_p_nom_max
+from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def normed(s):
@@ -220,7 +220,7 @@ def load_powerplants(ppl_fn):
         "ccgt, thermal": "CCGT",
         "hard coal": "coal",
     }
-    return (
+    ppl = (
         read_csv_nafix(ppl_fn, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
         .powerplant.convert_country_to_alpha2()
@@ -228,6 +228,12 @@ def load_powerplants(ppl_fn):
         .drop(columns=["efficiency"])
         .replace({"carrier": carrier_dict})
     )
+    # drop powerplants with null capacity
+    null_ppls = ppl[ppl.p_nom <= 0]
+    if not null_ppls.empty:
+        logger.warning(f"Drop powerplants with null capacity: {list(null_ppls.name)}.")
+        ppl = ppl.drop(null_ppls.index).reset_index(drop=True)
+    return ppl
 
 
 def attach_load(n, demand_profiles):

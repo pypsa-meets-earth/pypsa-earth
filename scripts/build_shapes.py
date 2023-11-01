@@ -24,6 +24,7 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    create_logger,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -36,10 +37,9 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 sets_path_to_root("pypsa-earth")
+
+logger = create_logger(__name__)
 
 
 def get_GADM_filename(country_code):
@@ -105,7 +105,19 @@ def download_GADM(country_code, update=False, out_logging=False):
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
 
-        with requests.get(GADM_url, stream=True) as r:
+        try:
+            r = requests.get(GADM_url, stream=True, timeout=300)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            raise Exception(
+                f"GADM server is down at {GADM_url}. Data needed for building shapes can't be extracted.\n\r"
+            )
+        except Exception as exception:
+            raise Exception(
+                f"An error happened when trying to load GADM data by {GADM_url}.\n\r"
+                + str(exception)
+                + "\n\r"
+            )
+        else:
             with open(GADM_inputfile_gpkg, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 

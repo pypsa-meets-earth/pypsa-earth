@@ -29,6 +29,7 @@ from _helpers import (
     aggregate_costs,
     aggregate_p,
     configure_logging,
+    create_logger,
     load_network_for_plots,
 )
 from matplotlib.legend_handler import HandlerPatch
@@ -36,7 +37,7 @@ from matplotlib.patches import Circle, Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):

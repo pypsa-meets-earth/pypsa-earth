@@ -5,7 +5,10 @@
 
 # -*- coding: utf-8 -*-
 
+import logging
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 import country_converter as coco
@@ -13,10 +16,52 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 
+logger = logging.getLogger(__name__)
+
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """
+    Customise errors traceback.
+    """
+    tb = exc_traceback
+    while tb.tb_next:
+        tb = tb.tb_next
+    flname = tb.tb_frame.f_globals.get("__file__")
+    funcname = tb.tb_frame.f_code.co_name
+
+    if issubclass(exc_type, KeyboardInterrupt):
+        logger.error(
+            "Manual interruption %r, function %r: %s",
+            flname,
+            funcname,
+            exc_value,
+        )
+    else:
+        logger.error(
+            "An error happened in module %r, function %r: %s",
+            flname,
+            funcname,
+            exc_value,
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+
+
+def create_logger(logger_name, level=logging.INFO):
+    """
+    Create a logger for a module and adds a handler needed to capture in logs
+    traceback from exceptions emerging during the workflow.
+    """
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(level)
+    handler = logging.StreamHandler(stream=sys.stdout)
+    logger.addHandler(handler)
+    sys.excepthook = handle_exception
+    return logger
 
 
 def read_osm_config(*args):
@@ -769,3 +814,23 @@ def create_country_list(input, iso_coding=True):
     full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
 
     return full_codes_list
+
+
+def get_last_commit_message():
+    """
+    Function to get the last Git commit message.
+
+    Returns
+    -------
+    result : string
+    """
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%H %s"],
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        logger.warning(f"Error getting the last commit message: {e}")
+        return ""

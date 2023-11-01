@@ -89,12 +89,13 @@ import yaml
 from _helpers import (
     configure_logging,
     create_country_list,
+    create_logger,
     progress_retrieve,
     sets_path_to_root,
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def load_databundle_config(config):

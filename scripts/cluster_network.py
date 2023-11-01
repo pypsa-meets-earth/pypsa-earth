@@ -135,6 +135,7 @@ import shapely
 from _helpers import (
     REGION_COLS,
     configure_logging,
+    create_logger,
     get_aggregation_strategies,
     sets_path_to_root,
     update_p_nom_max,
@@ -151,7 +152,7 @@ from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def normed(x):
@@ -662,7 +663,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="110"
+            "cluster_network", network="elec", simpl="", clusters="min"
         )
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
@@ -693,8 +694,12 @@ if __name__ == "__main__":
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
         aggregate_carriers = snakemake.params.electricity.get("conventional_carriers")
+    elif snakemake.wildcards.clusters.endswith("flex"):
+        n_clusters = min(len(n.buses), int(snakemake.wildcards.clusters[:-4]))
     elif snakemake.wildcards.clusters == "all":
         n_clusters = len(n.buses)
+    elif snakemake.wildcards.clusters == "min":
+        n_clusters = n.buses.groupby(["country", "sub_network"]).size().count()
     else:
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None

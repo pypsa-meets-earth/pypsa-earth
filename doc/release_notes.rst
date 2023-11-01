@@ -12,21 +12,17 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
+**New Features and major Changes**
+
 * Keep all traceback in logs. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/898>`__
 
-PyPSA-Earth 0.2.3
-=================
-
-**New Features and major Changes (19th October 2023)**
-
-
-
-PyPSA-Earth 0.2.3
-=================
-
-**New Features and major Changes (19th October 2023)**
-
 * Function added in clean_osm_data script to allow the use of custom network data instead or on-top of OSM data. `PR #842 <'https://github.com/pypsa-meets-earth/pypsa-earth/pull/842>`__
+
+
+PyPSA-Earth 0.2.3
+=================
+
+**New Features and major Changes (19th October 2023)**
 
 * Add params: section in rule definition to keep track of changed settings in config.yaml. `PR #823 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/823>`__ and `PR #880 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/880>`__
 

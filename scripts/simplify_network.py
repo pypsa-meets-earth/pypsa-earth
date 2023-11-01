@@ -93,7 +93,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_aggregation_strategies,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
@@ -107,7 +112,7 @@ from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):
@@ -155,14 +160,16 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     return n, trafo_map
 
 
-def _prepare_connection_costs_per_link(n, costs, renewable_config, lines_length_factor):
+def _prepare_connection_costs_per_link(
+    n, costs, renewable_config, hvdc_as_lines, lines_length_factor
+):
     if n.links.empty:
         return {}
 
     connection_costs_per_link = {}
 
     # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
-    if config["electricity"]["hvdc_as_lines"]:
+    if hvdc_as_lines:
         dc_lengths = n.lines.length
         unterwater_fractions = n.lines.underwater_fraction
     else:
@@ -190,13 +197,14 @@ def _compute_connection_costs_to_bus(
     busmap,
     costs,
     renewable_config,
+    hvdc_as_lines,
     lines_length_factor,
     connection_costs_per_link=None,
     buses=None,
 ):
     if connection_costs_per_link is None:
         connection_costs_per_link = _prepare_connection_costs_per_link(
-            n, costs, renewable_config, lines_length_factor
+            n, costs, renewable_config, hvdc_as_lines, lines_length_factor
         )
 
     if buses is None:
@@ -304,8 +312,11 @@ def simplify_links(
     n,
     costs,
     renewable_config,
-    lines_length_factor,
+    hvdc_as_lines,
+    config_lines,
+    config_links,
     output,
+    exclude_carriers=[],
     aggregation_strategies=dict(),
 ):
     ## Complex multi-node links are folded into end-points
@@ -378,7 +389,7 @@ def simplify_links(
     busmap = n.buses.index.to_series()
 
     connection_costs_per_link = _prepare_connection_costs_per_link(
-        n, costs, renewable_config, lines_length_factor
+        n, costs, renewable_config, hvdc_as_lines, config_lines["length_factor"]
     )
     connection_costs_to_bus = pd.DataFrame(
         0.0, index=n.buses.index, columns=list(connection_costs_per_link)
@@ -401,7 +412,8 @@ def simplify_links(
                 busmap,
                 costs,
                 renewable_config,
-                lines_length_factor,
+                hvdc_as_lines,
+                config_lines,
                 connection_costs_per_link,
                 buses,
             )
@@ -412,7 +424,6 @@ def simplify_links(
             all_links = list(set(n.links.index).intersection(all_dc_branches))
             all_dc_lines = list(set(n.lines.index).intersection(all_dc_branches))
 
-            # p_max_pu = config["links"].get("p_max_pu", 1.0)
             all_dc_lengths = pd.concat(
                 [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
             )
@@ -420,7 +431,7 @@ def simplify_links(
 
             # HVDC part is represented as "Link" component
             if dc_as_links:
-                p_max_pu = config["links"].get("p_max_pu", 1.0)
+                p_max_pu = config_links.get("p_max_pu", 1.0)
                 lengths = n.links.loc[all_links, "length"]
                 i_links = [i for _, i in sum(dc_edges, []) if _ == "Link"]
                 length = sum(n.links.loc[i_links, "length"].mean() for l in dc_edges)
@@ -430,7 +441,7 @@ def simplify_links(
                 ).sum() / lengths.sum()
             # HVDC part is represented as "Line" component
             else:
-                p_max_pu = config["lines"].get("p_max_pu", 1.0)
+                p_max_pu = config_lines.get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
                 length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
                 p_nom = n.lines.loc[all_dc_lines, "s_nom"].min()
@@ -470,10 +481,6 @@ def simplify_links(
 
     logger.debug("Collecting all components using the busmap")
 
-    exclude_carriers = config["cluster_options"]["simplify_network"].get(
-        "exclude_carriers", []
-    )
-
     _aggregate_and_move_components(
         n,
         busmap,
@@ -490,6 +497,7 @@ def remove_stubs(
     costs,
     cluster_config,
     renewable_config,
+    hvdc_as_lines,
     lines_length_factor,
     output,
     aggregation_strategies=dict(),
@@ -506,6 +514,7 @@ def remove_stubs(
         busmap,
         costs,
         renewable_config,
+        hvdc_as_lines,
         lines_length_factor,
     )
 
@@ -829,8 +838,11 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetype = snakemake.params.lines_types[base_voltage]
-
+    linetype = snakemake.params.config_lines["types"][base_voltage]
+    exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
+        "exclude_carriers", []
+    )
+    hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
     aggregation_strategies = snakemake.params.cluster_options.get(
         "aggregation_strategies", {}
     )
@@ -854,8 +866,11 @@ if __name__ == "__main__":
         n,
         technology_costs,
         snakemake.params.renewable,
-        snakemake.params.lines_length_factor,
+        hvdc_as_lines,
+        snakemake.params.config_lines,
+        snakemake.params.config_links,
         snakemake.output,
+        exclude_carriers,
         aggregation_strategies,
     )
 
@@ -863,13 +878,14 @@ if __name__ == "__main__":
 
     cluster_config = snakemake.params.cluster_options["simplify_network"]
     renewable_config = snakemake.params.renewable
-    lines_length_factor = snakemake.params.lines_length_factor
+    lines_length_factor = snakemake.params.config_lines["length_factor"]
     if cluster_config.get("remove_stubs", True):
         n, stub_map = remove_stubs(
             n,
             technology_costs,
             cluster_config,
             renewable_config,
+            hvdc_as_lines,
             lines_length_factor,
             snakemake.output,
             aggregation_strategies=aggregation_strategies,
