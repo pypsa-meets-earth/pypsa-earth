@@ -152,7 +152,7 @@ from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def normed(x):

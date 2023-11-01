@@ -71,7 +71,7 @@ from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def download_emission_data():

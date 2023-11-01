@@ -99,7 +99,7 @@ from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def normed(s):

@@ -23,7 +23,7 @@ from shapely.geometry import LineString, Point
 from shapely.ops import linemerge, split
 from tqdm import tqdm
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def line_endings_to_bus_conversion(lines):

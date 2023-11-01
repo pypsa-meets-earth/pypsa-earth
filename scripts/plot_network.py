@@ -37,7 +37,7 @@ from matplotlib.patches import Circle, Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):

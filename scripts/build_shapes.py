@@ -39,7 +39,7 @@ from tqdm import tqdm
 
 sets_path_to_root("pypsa-earth")
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def get_GADM_filename(country_code):

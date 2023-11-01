@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from _helpers import configure_logging, create_logger
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def rename_techs(label):

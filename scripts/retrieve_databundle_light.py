@@ -95,7 +95,7 @@ from _helpers import (
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def load_databundle_config(config):

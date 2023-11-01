@@ -51,7 +51,7 @@ from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 opt_name = {"Store": "e", "Line": "s", "Transformer": "s"}

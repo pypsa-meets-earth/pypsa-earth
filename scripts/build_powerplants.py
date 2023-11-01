@@ -113,7 +113,7 @@ from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
 from shapely.geometry import Point
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):

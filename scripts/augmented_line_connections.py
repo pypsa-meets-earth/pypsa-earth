@@ -42,7 +42,7 @@ from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 # Functions

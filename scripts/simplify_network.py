@@ -112,7 +112,7 @@ from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):

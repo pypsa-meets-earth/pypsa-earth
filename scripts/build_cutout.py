@@ -101,7 +101,7 @@ import geopandas as gpd
 import pandas as pd
 from _helpers import configure_logging, create_logger
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 if __name__ == "__main__":

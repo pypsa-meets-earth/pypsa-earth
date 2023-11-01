@@ -75,7 +75,7 @@ from pyDOE2 import lhs
 from scipy.stats import qmc
 from solve_network import *
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def monte_carlo_sampling_pydoe2(

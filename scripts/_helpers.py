@@ -23,8 +23,6 @@ NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
-logger = logging.getLogger(__name__)
-
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     """
@@ -63,6 +61,7 @@ def create_logger(logger_name, level=logging.INFO):
     handler = logging.StreamHandler(stream=sys.stdout)
     logger.addHandler(handler)
     sys.excepthook = handle_exception
+    return logger
 
 
 def read_osm_config(*args):

@@ -34,7 +34,7 @@ from pathlib import Path
 from _helpers import configure_logging, create_logger, read_osm_config
 from earth_osm import eo
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def country_list_to_geofk(country_list):

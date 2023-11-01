@@ -37,7 +37,7 @@ from build_test_configs import create_test_config
 from ruamel.yaml import YAML
 from shapely.validation import make_valid
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def _multi_index_scen(rulename, keys):

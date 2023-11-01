@@ -20,7 +20,7 @@ from _helpers import (
     to_csv_nafix,
 )
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def prepare_substation_df(df_all_substations):

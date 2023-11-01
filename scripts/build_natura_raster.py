@@ -62,7 +62,7 @@ from _helpers import configure_logging, create_logger
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 CUTOUT_CRS = "EPSG:4326"

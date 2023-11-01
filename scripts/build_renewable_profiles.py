@@ -211,7 +211,7 @@ from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 COPERNICUS_CRS = "EPSG:4326"

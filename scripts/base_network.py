@@ -72,7 +72,7 @@ from scipy.sparse import csgraph
 from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def _get_oid(df):

@@ -55,7 +55,7 @@ from _helpers import configure_logging, create_logger, getContinent, update_p_no
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def normed(s):

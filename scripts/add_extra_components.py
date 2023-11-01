@@ -67,7 +67,7 @@ from add_electricity import (
 
 idx = pd.IndexSlice
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def attach_storageunits(n, costs, config):

@@ -53,7 +53,7 @@ from shapely.geometry import Point
 
 # from scripts.build_shapes import gadm
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):

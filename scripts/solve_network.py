@@ -97,7 +97,7 @@ from pypsa.linopf import (
     network_lopf,
 )
 
-create_logger(__name__)
+logger = create_logger(__name__)
 
 
 def prepare_network(n, solve_opts):
