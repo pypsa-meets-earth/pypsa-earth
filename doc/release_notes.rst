@@ -14,6 +14,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **New Features and major Changes**
 
+* Function added in clean_osm_data script to allow the use of custom network data intead or on top of OSM data. `PR #842 <'https://github.com/pypsa-meets-earth/pypsa-earth/pull/842>`__
+
 * Add params: section in rule definition to keep track of changed settings in config.yaml. `PR #823 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/823>`__
 
 * Fix Natural Gas implementation in "add_electricity" to avoid "Natural Gas" to be filtered out `PR #797 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/797>`__
