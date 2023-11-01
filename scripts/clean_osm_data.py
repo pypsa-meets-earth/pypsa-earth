@@ -844,19 +844,22 @@ def set_name_by_closestcity(df_all_generators, colname="name"):
 def load_network_data(network_asset, data_options):
     """
     Function to check if OSM or custom data should be considered.
-    The network_asset should be a string named "lines", "cables" 
-    or "substations".
+
+    The network_asset should be a string named "lines", "cables" or
+    "substations".
     """
 
-    # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)  
+    # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)
     try:
         cleanning_data_options = data_options[f"use_custom_{network_asset}"]
         custom_path = data_options[f"path_custom_{network_asset}"]
 
     except:
-        logger.error(f"Missing use_custom_{network_asset} or path_custom_{network_asset} options in the config file")
+        logger.error(
+            f"Missing use_custom_{network_asset} or path_custom_{network_asset} options in the config file"
+        )
 
-    # creates a dataframe for the network_asset defined 
+    # creates a dataframe for the network_asset defined
     if cleanning_data_options == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
@@ -867,13 +870,16 @@ def load_network_data(network_asset, data_options):
 
     else:
         if cleanning_data_options != "OSM_only":
-            logger.warning(f"Unrecognized option {data_options} for handling custom data of {network_asset}." + 
-                           "Default OSM_only option used. Options available in clean_OSM_data_options configtable")
-        
+            logger.warning(
+                f"Unrecognized option {data_options} for handling custom data of {network_asset}."
+                + "Default OSM_only option used. Options available in clean_OSM_data_options configtable"
+            )
+
         loaded_df = gpd.read_file(input_files[network_asset])
 
     # returns dataframe to be read in each section of the code depending on the component type (lines, substations or cables)
     return loaded_df
+
 
 def clean_data(
     input_files,
