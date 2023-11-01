@@ -281,17 +281,25 @@ def download_and_unzip_protectedplanet(
             # extract the nested zip files
             for fzip in zip_files:
                 # final path of the file
-                inner_zipname = os.path.join(config["destination"], fzip)
+                try:
+                    inner_zipname = os.path.join(config["destination"], fzip)
 
-                zip_obj.extract(fzip, path=config["destination"])
+                    zip_obj.extract(fzip, path=config["destination"])
 
-                with ZipFile(inner_zipname, "r") as nested_zip:
-                    nested_zip.extractall(path=config["destination"])
+                    with ZipFile(inner_zipname, "r") as nested_zip:
+                        nested_zip.extractall(path=config["destination"])
 
-                # remove inner zip file
-                os.remove(inner_zipname)
+                    # remove inner zip file
+                    os.remove(inner_zipname)
 
-            # remove outer zip file
+                    logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
+                except:
+                    logger.warning(
+                        f"Exception while unzipping file '{fzip}' for {resource}: skipped"
+                    )
+
+            # close and remove outer zip file
+            zip_obj.close()
             os.remove(file_path)
 
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
