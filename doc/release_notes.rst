@@ -12,11 +12,21 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
-**New Features and major Changes**
+* Keep all traceback in logs. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/898>`__
 
-* Function added in clean_osm_data script to allow the use of custom network data intead or on top of OSM data. `PR #842 <'https://github.com/pypsa-meets-earth/pypsa-earth/pull/842>`__
+PyPSA-Earth 0.2.3
+=================
 
-* Add params: section in rule definition to keep track of changed settings in config.yaml. `PR #823 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/823>`__
+**New Features and major Changes (19th October 2023)**
+
+
+
+PyPSA-Earth 0.2.3
+=================
+
+**New Features and major Changes (19th October 2023)**
+
+* Add params: section in rule definition to keep track of changed settings in config.yaml. `PR #823 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/823>`__ and `PR #880 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/880>`__
 
 * Fix Natural Gas implementation in "add_electricity" to avoid "Natural Gas" to be filtered out `PR #797 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/797>`__
 
@@ -36,10 +46,19 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add Asian cutout `PR #826 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/826>`__
 
+* Add a cutout for Western Asia `PR #837 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/837>`__
+
 * Add osm_config yaml file `PR #822 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/822>`__
 
 * Re-enable offshore wind and revise hydro `PR #830 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/830>`__
 
+* Add databundle of cutouts for Kazakhstan for CI test  `PR #856 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/856>`__. The bundle (~5MB) is used in pypsa-kz-data repository during CI tests.
+
+* Option to specify a global upper capacity limit (using existing BAU functionality) `PR #857 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/857>`__
+
+* Add cluster options `all`, `min` and `flex` `PR #848 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/857>`__
+
+* Add commit id of pypsa earth in the n.meta of the .nc file per default `PR #863 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/863>`__
 
 PyPSA-Earth 0.2.2
 =================
@@ -63,6 +82,8 @@ PyPSA-Earth 0.2.2
 * Add codespell linter which corrects word spellings `PR #763 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/763>`__
 
 * Remove RES addition functionality from attach_conventional_generators `PR #769 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/769>`__. Currently wind and solar powerplants stored in powerplants.csv are added to the network by attach_conventional_generators.
+
+* Add functionalities to download and extract emission of countries. `PR #748 https://github.com/pypsa-meets-earth/pypsa-earth/pull/748`
 
 PyPSA-Earth 0.2.1
 =================
