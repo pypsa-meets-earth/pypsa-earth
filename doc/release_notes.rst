@@ -26,6 +26,8 @@ PyPSA-Earth 0.2.3
 
 **New Features and major Changes (19th October 2023)**
 
+* Function added in clean_osm_data script to allow the use of custom network data instead or on-top of OSM data. `PR #842 <'https://github.com/pypsa-meets-earth/pypsa-earth/pull/842>`__
+
 * Add params: section in rule definition to keep track of changed settings in config.yaml. `PR #823 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/823>`__ and `PR #880 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/880>`__
 
 * Fix Natural Gas implementation in "add_electricity" to avoid "Natural Gas" to be filtered out `PR #797 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/797>`__
