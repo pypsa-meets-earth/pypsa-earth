@@ -277,7 +277,7 @@ sector:
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
   airport_sizing_factor: 3
 
-
+  min_part_load_fischer_tropsch: 0.9
 
   conventional_generation: # generator : carrier
     OCGT: gas
