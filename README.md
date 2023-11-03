@@ -4,7 +4,7 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# PyPSA-Earth
+# PyPSA-Earth. A Flexible Python-based Open Optimisation Model to Study Energy System Futures around the World.
 
 <p align="left">
 by
