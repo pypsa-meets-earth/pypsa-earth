@@ -8,7 +8,11 @@
 Installation
 ##########################################
 
-The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the directory in which the commands following the ``%`` should be entered.
+Before installing PyPSA-Earth on your computer, it's crucial to ensure that your system meets the necessary hardware and software requirements. The following sections outline the prerequisites in terms of hardware and software. Additionally, detailed installation guidelines for required software tools will be provided, followed by step-by-step instructions for installing PyPSA-Earth.
+
+.. note::
+    The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the directory in which the commands following the ``%`` should be entered.
+
 
 
 Clone the Repository
