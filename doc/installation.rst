@@ -19,9 +19,31 @@ Ensure that your system meets the minimum hardware specifications to run PyPSA-E
 
 * 8-16 GB RAM and adequate CPU (at-least 2-cores)
 
-* Storage (HDD/SSD) capacity depends on the region of interest. Africa model requires 40 Gb, the world -- 250 Gb, a single country -- between 1-10 Gb. Tutorial requires just below 10Gb. Thus, considering all required software tools, at least 40 GB of storage space is recommended.
+* Storage (HDD/SSD) capacity depends on the region of interest. Africa model requires 40 Gb, the world `--`` 250 Gb, a single country `--` between 1-10 Gb. Tutorial requires just below 10Gb. Thus, considering all required software tools, at least 40 GB of storage space is recommended.
 
-Software 
+Software Prerequisites
+======================
+Prior to installing PyPSA-Earth, you'll need to ensure the following software tools are installed and configured on your system:
+
+* `Miniconda <https://docs.conda.io/projects/miniconda/en/latest/miniconda-install.html>`_
+* `Git <https://git-scm.com/downloads>`_
+* `VS Code <https://code.visualstudio.com/>`_ (or any other IDE)
+
+Miniconda
+---------
+To use packages in python, it is highly recommended to use a ``conda`` package manager, such as `miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`__. You may check if ``conda`` is already installed on your system with ``conda -V`` command.
+If ``conda`` is not installed, follow `miniconda installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
+For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
+
+Git
+---
+`Git <https://git-scm.com/>`__ is a free open-source tool that facilitates tracking changes in the code development and enable to coordinate the parallel software development between many developers.
+Download and install ``git`` to your system using the following `link <https://git-scm.com/downloads>`__.
+It is highly recommended to `learn the git basics <https://git-scm.com/doc>`__.
+
+
+
+
 
 Clone the Repository
 ====================
