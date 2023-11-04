@@ -13,7 +13,15 @@ Before installing PyPSA-Earth on your computer, it's crucial to ensure that your
 .. note::
     The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the directory in which the commands following the ``%`` should be entered.
 
+Hardware Requirements
+=====================
+Ensure that your system meets the minimum hardware specifications to run PyPSA-Earth effectively. Recommended hardware specifications may include:
 
+* 8-16 GB RAM and adequate CPU (at-least 2-cores)
+
+* Storage (HDD/SSD) capacity depends on the region of interest. Africa model requires 40 Gb, the world -- 250 Gb, a single country -- between 1-10 Gb. Tutorial requires just below 10Gb. Thus, considering all required software tools, at least 40 GB of storage space is recommended.
+
+Software 
 
 Clone the Repository
 ====================
