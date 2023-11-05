@@ -33,20 +33,11 @@ Prior to installing PyPSA-Earth, you'll need to ensure the following software to
 
 Miniconda
 ---------
-<<<<<<< HEAD
 To use packages in python, it is highly recommended to use a ``conda`` package manager, such as `miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`__. You may check if ``conda`` is already installed on your system with
 
 .. code:: bash
 
     conda --version
-=======
-To use packages in python, it is highly recommended to use a ``conda`` package manager, such as `miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`__. You may check if ``conda`` is already installed on your system with
-
-    .. code:: bash
-
-        conda --version
-
->>>>>>> 6a6aa92abc89f5c3c3f6c9135f6b33d056e247c8
 
 If ``conda`` is not installed, follow `miniconda installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
@@ -64,17 +55,10 @@ In order to write and debug python code, you need an Integrated Development Envi
 Java
 ----
 PyPSA-Earth currently needs Java redistribution to work properly. To check if Java is still installed you can request it's version from a terminal:
-<<<<<<< HEAD
 
 .. code:: bash
 
     java --version
-=======
-
-    .. code:: bash
-
-        java --version
->>>>>>> 6a6aa92abc89f5c3c3f6c9135f6b33d056e247c8
 
 The expected output should resemble the following:
 
@@ -142,13 +126,6 @@ For more on information on how to install conda and work with it you can look in
 
 Solver Installation (Optional)
 ------------------
-
-To run the model with high temporal and spatial resolution, it is recommended to install
-
-
-
-
-
 An optimization solver is needed to solve the mathematical problem that is build with the automated workflow of PyPSA-Earth.
 With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as
 
@@ -164,7 +141,8 @@ To further improve performances, commercial solvers like
 
 * `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
 
-(both commercial licenses with free academic options) can also be used.
+(both commercial licenses with free academic options) can also be used. No need to install ``cbc`` and ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.  
+However, to run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
@@ -172,7 +150,7 @@ A recommended instruction to install the HiGHS solver is given `here <https://gi
 Install Jupyter Lab
 ================================
 
-We use Jupyter notebooks to share examples on how to use the model and analyse the results. VSCode supports working with Jupyter Notebooks natively. In case you are using different IDE and don't have Jupyter notebooks pre-installed you can install jupyter lab (new jupyter notebooks) with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
+We use Jupyter notebooks to share examples on how to use the model and analyse the results. ``VSCode`` supports working with Jupyter Notebooks natively. In case you are using different IDE and don't have Jupyter notebooks pre-installed you can install jupyter lab (new jupyter notebooks) with the `ipython kernel installation <http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/>`_ and test if your jupyter lab works:
 
 .. code:: bash
 
