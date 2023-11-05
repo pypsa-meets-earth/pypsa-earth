@@ -337,7 +337,9 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
 
         try:
             logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
+            progress_retrieve(
+                url, file_path, headers=True, disable_progress=disable_progress
+            )
 
             # if the file is a zipfile and unzip is enabled
             # then unzip it and remove the original file
@@ -394,7 +396,11 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
 
         progress_retrieve(
-            url, file_path, data=postdata, disable_progress=disable_progress
+            url,
+            file_path,
+            data=postdata,
+            header=header,
+            disable_progress=disable_progress,
         )
 
         # if the file is a zipfile and unzip is enabled
