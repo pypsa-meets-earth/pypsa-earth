@@ -386,7 +386,9 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
     return costs
 
 
-def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
+def progress_retrieve(
+    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
+):
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -417,6 +419,11 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
 
     if data is not None:
         data = urllib.parse.urlencode(data).encode()
+
+    if headers:
+        opener = urllib.request.build_opener()
+        opener.addheaders = [("User-agent", "Mozilla/5.0")]
+        urllib.request.install_opener(opener)
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
