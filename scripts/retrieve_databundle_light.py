@@ -343,7 +343,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
 
             # if the file is a zipfile and unzip is enabled
             # then unzip it and remove the original file
-            if config.get("unzip", False):
+            if config.get("unzip", False) or bool(re.search(".zip$", file_path)):
                 with ZipFile(file_path, "r") as zipfile:
                     zipfile.extractall(config["destination"])
 
