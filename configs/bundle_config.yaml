@@ -141,6 +141,17 @@ databundles:
     - data/hydrobasins/hybas_world_lev04_v1c.shp
     - data/hydrobasins/hybas_world_lev05_v1c.shp
 
+  # global data for hydrobasins
+  bundle_hydrobasins:
+    countries: [Earth]
+    tutorial: false
+    category: common
+    destination: "data/hydrobasins"
+    urls:
+      direct: https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_af_lev06_v1c.zip
+    output:
+    - data/hydrobasins/hybas_world_lev06_v1c.shp
+
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
     countries: [Earth]
