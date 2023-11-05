@@ -34,11 +34,10 @@ Prior to installing PyPSA-Earth, you'll need to ensure the following software to
 Miniconda
 ---------
 To use packages in python, it is highly recommended to use a ``conda`` package manager, such as `miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`__. You may check if ``conda`` is already installed on your system with 
+    
+.. code:: bash    
 
-    .. code:: bash
-        
-        conda --version
-
+    conda --version
 
 If ``conda`` is not installed, follow `miniconda installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
@@ -56,23 +55,23 @@ In order to write and debug python code, you need an Integrated Development Envi
 Java
 ----
 PyPSA-Earth currently needs Java redistribution to work properly. To check if Java is still installed you can request it's version from a terminal:
-
-    .. code:: bash
-        
-        java --version
+    
+.. code:: bash
+    
+    java --version
 
 The expected output should resemble the following:
+    
+.. code:: bash
 
-    .. code:: bash
-
-        java version "1.8.0_341"
-        Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
-        Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+    java version "1.8.0_341"
+    Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+    Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
 
 In case you don't have Java, you have to install it from the `official website <https://www.oracle.com/java/technologies/downloads/>`_ or equivalent. 
 
 
-PyPSA-Earth installation
+PyPSA-Earth Installation
 ========================
 
 Clone the Repository
@@ -83,34 +82,7 @@ Clone the Repository
 
 First of all, clone the `PyPSA-Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth/>`__ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces.
-
-.. code:: bash
-
-    /some/other/path % cd /some/path/without/spaces
-
-    /some/path/without/spaces % mkdir pypsa-earth-project
-
-    /some/path/without/spaces % cd pypsa-earth-project
-
-    .../pypsa-earth-project % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
-
-
-Solvers (Optional)
-------------------
-
-To run the model with high temporal and spatial resolution, it is recommended to install 
-
-
-
-Clone the Repository
-====================
-.. note::
-
-  In order to work with the provided Jupyter notebooks in the `documentation repository <https://github.com/pypsa-meets-earth/documentation>`_, it is recommended to follow the folder structure suggested in :ref:`notebooks`.
-
-First of all, clone the `PyPSA-Earth repository <https://github.com/pypsa-meets-earth/pypsa-earth/>`_ using the version control system ``git``.
-The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces.
-If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
+The following commands can be executed in command prompt of ``miniconda``, terminal of ``VSCode``, or in ``Git Bash``.
 
 .. code:: bash
 
@@ -118,17 +90,13 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 
     /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
 
-.. _deps:
+For more details regarding the folder structure, visit :ref:`notebooks` section.
 
 Install Dependencies
-===============================
-
-Python Dependencies
---------------------------------
-
+-------------------------
 PyPSA-Earth relies on a set of other Python packages to function.
 
-The python package requirements are curated in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file. We install only `mamba` in the conda base environment to accelerate the installation.
+The python package requirements are located in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file. We install only `mamba` in the conda base environment to accelerate the installation.
 **Please keep the base environment always clean, meaning don't install anything there!** It will allow to ensure compatibility of all the packages needed to work with PyPSA-Earth model.
 
 The environment can be installed and activated like this:
@@ -155,20 +123,15 @@ In case mamba did not work for you, you might want to try conda instead:
 
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
 
-Java Installation
----------------------------------
 
-In Linux and Mac OS that is possible through the following command:
+Solver Installation (Optional)
+------------------
 
-    .. code:: bash
-
-        .../pypsa-earth (pypsa-earth) % conda install -c conda-forge openjdk
+To run the model with high temporal and spatial resolution, it is recommended to install 
 
 
 
 
-Solver Installation
----------------------------------
 
 An optimization solver is needed to solve the mathematical problem that is build with the automated workflow of PyPSA-Earth.
 With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as
@@ -189,18 +152,6 @@ To further improve performances, commercial solvers like
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
-Set Configuration File
-================================
-
-PyPSA-Earth has several configuration options that must be specified in a ``config.yaml`` file located in the project directory. An example configuration ``config.default.yaml`` is maintained in the repository. More details on the configuration options are in :ref:`config` section.
-
-Before first use, create a ``config.yaml`` by copying the example.
-
-.. code:: bash
-
-    .../pypsa-earth % cp config.default.yaml config.yaml
-
-It makes sense to regularly check their own ``config.yaml`` against changes in the ``config.default.yaml`` when pulling a new version from the remote repository.
 
 Install Jupyter Lab
 ================================
