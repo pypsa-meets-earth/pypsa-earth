@@ -141,7 +141,7 @@ To further improve performances, commercial solvers like
 
 * `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
 
-(both commercial licenses with free academic options) can also be used. No need to install ``cbc`` and ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.  
+(both commercial licenses with free academic options) can also be used. No need to install ``cbc`` and ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.
 However, to run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
