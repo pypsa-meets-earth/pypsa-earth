@@ -34,9 +34,9 @@ Prior to installing PyPSA-Earth, you'll need to ensure the following software to
 Miniconda
 ---------
 <<<<<<< HEAD
-To use packages in python, it is highly recommended to use a ``conda`` package manager, such as `miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`__. You may check if ``conda`` is already installed on your system with 
-    
-.. code:: bash    
+To use packages in python, it is highly recommended to use a ``conda`` package manager, such as `miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`__. You may check if ``conda`` is already installed on your system with
+
+.. code:: bash
 
     conda --version
 =======
@@ -65,9 +65,9 @@ Java
 ----
 PyPSA-Earth currently needs Java redistribution to work properly. To check if Java is still installed you can request it's version from a terminal:
 <<<<<<< HEAD
-    
+
 .. code:: bash
-    
+
     java --version
 =======
 
@@ -77,7 +77,7 @@ PyPSA-Earth currently needs Java redistribution to work properly. To check if Ja
 >>>>>>> 6a6aa92abc89f5c3c3f6c9135f6b33d056e247c8
 
 The expected output should resemble the following:
-    
+
 .. code:: bash
 
     java version "1.8.0_341"
@@ -143,7 +143,7 @@ For more on information on how to install conda and work with it you can look in
 Solver Installation (Optional)
 ------------------
 
-To run the model with high temporal and spatial resolution, it is recommended to install 
+To run the model with high temporal and spatial resolution, it is recommended to install
 
 
 
