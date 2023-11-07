@@ -59,7 +59,7 @@ hydrogen_underground_storage: false
 export:
   h2export: [120] # Yearly export demand in TWh
   store: true # [True, False] # specifies wether an export store to balance demand is implemented
-  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank incl. compressor"
+  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   export_profile: "ship" # use "ship" or "constant"
   ship:
     ship_capacity: 0.4 # TWh # 0.05 TWh for new ones, 0.003 TWh for Susio Frontier, 0.4 TWh according to Hampp2021: "Corresponds to 11360 t H2 (l) with LHV of 33.3333 Mwh/t_H2. Cihlar et al 2020 based on IEA 2019, Table 3-B"

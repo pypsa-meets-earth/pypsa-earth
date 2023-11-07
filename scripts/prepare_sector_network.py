@@ -310,7 +310,7 @@ def add_hydrogen(n, costs):
             )
 
     # hydrogen stored overground (where not already underground)
-    h2_capital_cost = costs.at["hydrogen storage tank incl. compressor", "fixed"]
+    h2_capital_cost = costs.at["hydrogen storage tank type 1 including compressor", "fixed"]
     nodes_overground = cavern_nodes.index.symmetric_difference(nodes)
 
     n.madd(
