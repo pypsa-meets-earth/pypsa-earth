@@ -356,6 +356,64 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     return True
 
 
+def download_and_unzip_hydrobasins(
+    config, rootpath, hot_run=True, disable_progress=False
+):
+    """
+    download_and_unzip_basins(config, rootpath, dest_path, hot_run=True,
+    disable_progress=False)
+
+    Function to download and unzip the data for hydrobasins.
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+    """
+    resource = config["category"]
+    url = config["urls"]["hydrobasins"]
+
+    file_path = os.path.join(config["destination"], os.path.basename(url))
+
+    if hot_run:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        try:
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            progress_retrieve(
+                url,
+                file_path,
+                headers=[("User-agent", "Mozilla/5.0")],
+                disable_progress=disable_progress,
+            )
+
+            # if the file is a zipfile and unzip is enabled
+            # then unzip it and remove the original file
+            if config.get("unzip", False):
+                with ZipFile(file_path, "r") as zipfile:
+                    zipfile.extractall(config["destination"])
+
+                os.remove(file_path)
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+        except:
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            return False
+
+    return True
+
+
 def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
     """
     download_and_unzip_post(config, rootpath, dest_path, hot_run=True,
