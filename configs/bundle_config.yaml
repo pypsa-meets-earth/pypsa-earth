@@ -149,6 +149,7 @@ databundles:
     destination: "data/hydrobasins"
     urls:
       direct: https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_af_lev06_v1c.zip
+    unzip: true
     output:
     - data/hydrobasins/hybas_world_lev06_v1c.shp
 
