@@ -484,32 +484,37 @@ def get_best_bundles_by_category(
     """
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
     df_matches = pd.DataFrame(columns=["bundle_name", "bundle_size", "n_matched"])
-    
+
     for bname, bvalue in config_bundles.items():
         if (
             bvalue["category"] == category
             and bvalue.get("tutorial", False) == tutorial
             and _check_disabled_by_opt(bvalue, config_enable) != ["all"]
         ):
-            df_matches.loc[bname] = [bname, len(bvalue["countries"]), bvalue["n_matched"]]      
-    
+            df_matches.loc[bname] = [
+                bname,
+                len(bvalue["countries"]),
+                bvalue["n_matched"],
+            ]
+
     df_matches["neg_bundle_size"] = -df_matches["bundle_size"]
-    df_matches.sort_values(by=["n_matched", "neg_bundle_size"], inplace=True, ascending=False)
-    
+    df_matches.sort_values(
+        by=["n_matched", "neg_bundle_size"], inplace=True, ascending=False
+    )
+
     bname_list = list(df_matches["bundle_name"])
     returned_bundles = []
 
     if bname_list:
         current_matched_countries = []
         remaining_countries = set(country_list)
-        
-        for bname in bname_list:
 
+        for bname in bname_list:
             cbundle_list = set(config_bundles[bname]["countries"])
-            
+
             # list of countries in the bundle that are not yet matched
             intersect = cbundle_list.intersection(remaining_countries)
-            
+
             if intersect:
                 current_matched_countries.extend(intersect)
                 remaining_countries = remaining_countries.difference(intersect)
