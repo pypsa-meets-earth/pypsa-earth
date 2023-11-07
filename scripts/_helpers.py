@@ -422,7 +422,7 @@ def progress_retrieve(
 
     if headers:
         opener = urllib.request.build_opener()
-        opener.addheaders = [("User-agent", "Mozilla/5.0")]
+        opener.addheaders = headers
         urllib.request.install_opener(opener)
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
