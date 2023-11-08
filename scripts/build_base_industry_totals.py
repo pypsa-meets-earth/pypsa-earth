@@ -154,7 +154,7 @@ if __name__ == "__main__":
     ]
 
     # Loading all energy balance files
-    all_files = Path("../data/demand/unsd/data").glob("*.txt")  # TODO change path
+    all_files = Path("data/demand/unsd/data").glob("*.txt")  # TODO change path
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
