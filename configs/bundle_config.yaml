@@ -148,7 +148,8 @@ databundles:
     category: common
     destination: "data/hydrobasins"
     urls:
-      direct: https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_af_lev06_v1c.zip
+      hydrobasins: https://data.hydrosheds.org/file/HydroBASINS/standard/
+      suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
     unzip: true
     output:
     - data/hydrobasins/hybas_world_lev06_v1c.shp
