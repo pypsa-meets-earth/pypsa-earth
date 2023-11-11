@@ -382,34 +382,39 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    url = config["urls"]["hydrobasins"]
+    url_templ = config["urls"]["hydrobasins"]  # + "hybas_af_lev01_v1c.zip"
+    suffix_list = config["urls"]["suffixes"]
+    # url = url + "hybas_" + suffix_list[2] + "_lev01_v1c.zip"
 
-    file_path = os.path.join(config["destination"], os.path.basename(url))
+    for rg in suffix_list:
+        url = url_templ + "hybas_" + rg + "_lev01_v1c.zip"
+        file_path = os.path.join(config["destination"], os.path.basename(url))
+        if hot_run:
+            if os.path.exists(file_path):
+                os.remove(file_path)
 
-    if hot_run:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+            try:
+                logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+                progress_retrieve(
+                    url,
+                    file_path,
+                    headers=[("User-agent", "Mozilla/5.0")],
+                    disable_progress=disable_progress,
+                )
 
-        try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(
-                url,
-                file_path,
-                headers=[("User-agent", "Mozilla/5.0")],
-                disable_progress=disable_progress,
-            )
-
-            # if the file is a zipfile and unzip is enabled
-            # then unzip it and remove the original file
-            if config.get("unzip", False):
-                with ZipFile(file_path, "r") as zipfile:
-                    zipfile.extractall(config["destination"])
+                # if the file is a zipfile and unzip is enabled
+                # then unzip it and remove the original file
+                if config.get("unzip", False):
+                    with ZipFile(file_path, "r") as zipfile:
+                        zipfile.extractall(config["destination"])
 
                 os.remove(file_path)
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
-            return False
+                logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+            except:
+                logger.warning(
+                    f"Failed download resource '{resource}' from cloud '{url}'."
+                )
+                return False
 
     return True
 
