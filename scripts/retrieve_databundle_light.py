@@ -382,12 +382,16 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    url_templ = config["urls"]["hydrobasins"]  # + "hybas_af_lev01_v1c.zip"
+    url_templ = config["urls"]["hydrobasins"]
     suffix_list = config["urls"]["suffixes"]
-    # url = url + "hybas_" + suffix_list[2] + "_lev01_v1c.zip"
+
+    basins_fl = snakemake.config["renewable"]["hydro"]["resource"]["hydrobasins"]
+    level_pattern = r".*?lev(.*)_.*"
+    level_code = re.findall(level_pattern, basins_fl)
 
     for rg in suffix_list:
-        url = url_templ + "hybas_" + rg + "_lev01_v1c.zip"
+        # lev01_v1c.zip
+        url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
         file_path = os.path.join(config["destination"], os.path.basename(url))
         if hot_run:
             if os.path.exists(file_path):
