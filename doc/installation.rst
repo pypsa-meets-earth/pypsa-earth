@@ -141,11 +141,11 @@ To further improve performances, commercial solvers like
 
 * `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
 
-(both commercial licenses with free academic options) can also be used. 
+(both commercial licenses with free academic options) can also be used.
 
 .. note::
 
-    No need to install ``cbc`` or ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation. 
+    No need to install ``cbc`` or ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.
     However, solving capabilities of ``cbc`` and ``glpk`` are limited.
     To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
