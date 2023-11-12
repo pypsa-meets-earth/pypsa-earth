@@ -124,7 +124,7 @@ In case mamba did not work for you, you might want to try conda instead:
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
 
 
-Solver Installation (Optional)
+Solver Installation
 ------------------
 An optimization solver is needed to solve the mathematical problem that is build with the automated workflow of PyPSA-Earth.
 With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as
@@ -141,8 +141,13 @@ To further improve performances, commercial solvers like
 
 * `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
 
-(both commercial licenses with free academic options) can also be used. No need to install ``cbc`` and ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.
-However, to run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
+(both commercial licenses with free academic options) can also be used. 
+
+.. note::
+
+    No need to install ``cbc`` or ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation. 
+    However, solving capabilities of ``cbc`` and ``glpk`` are limited.
+    To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
