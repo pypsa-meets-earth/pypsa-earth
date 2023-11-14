@@ -53,9 +53,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=38,
+            clusters=4,
             planning_horizons=2030,
-            demand="EG",
+            demand="AB",
         )
 
         sets_path_to_root("pypsa-earth-sec")
@@ -192,36 +192,53 @@ if __name__ == "__main__":
     )
 
     for country in countries:
-        industry_base_totals.loc[(country, "process emissons"), :] = 0
+        industry_base_totals.loc[(country, "process emissions"), :] = 0
         try:
             industry_base_totals.loc[
-                (country, "process emissons"), "non-metallic minerals"
+                (country, "process emissions"), "non-metallic minerals"
             ] = NMM_emissions.loc[country]
         except KeyError:
             pass
 
         try:
             industry_base_totals.loc[
-                (country, "process emissons"), "iron and steel"
+                (country, "process emissions"), "iron and steel"
             ] = Steel_emissions.loc[country]
         except KeyError:
             pass  # # Code to handle the KeyError
         try:
             industry_base_totals.loc[
-                (country, "process emissons"), "non-ferrous metals"
+                (country, "process emissions"), "non-ferrous metals"
             ] = AL_emissions.loc[country]
         except KeyError:
             pass  # Code to handle the KeyError
         try:
             industry_base_totals.loc[
-                (country, "process emissons"), "chemical and petrochemical"
+                (country, "process emissions"), "chemical and petrochemical"
             ] = refinery_emissons.loc[country]
         except KeyError:
             pass  # Code to handle the KeyError
     industry_base_totals = industry_base_totals.sort_index()
 
-    # final energy consumption per node and industry (TWh/a)
-    nodal_df = nodal_production_tom.dot(industry_base_totals.T)
+    all_carriers = ["electricity", "gas", "coal", "oil", "hydrogen", "biomass", "low-temperature heat"]
+
+    for country in countries:
+        carriers_present = industry_base_totals.xs(country, level='country').index
+        missing_carriers = set(all_carriers) - set(carriers_present)
+        for carrier in missing_carriers:
+            # Add the missing carrier with a value of 0
+            industry_base_totals.loc[(country, carrier), :] = 0
+
+
+    nodal_df = pd.DataFrame()
+
+    for country in countries:
+        nodal_production_tom_co = nodal_production_tom[nodal_production_tom.index.to_series().str.startswith(country)]
+        industry_base_totals_co = industry_base_totals.loc[country]
+        # final energy consumption per node and industry (TWh/a)
+        nodal_df_co = nodal_production_tom_co.dot(industry_base_totals_co.T)
+        nodal_df = pd.concat([nodal_df, nodal_df_co])
+
 
     rename_sectors = {
         "elec": "electricity",
