@@ -26,7 +26,7 @@ def create_industry_base_totals(df):
     # Converting values of mass (ktons) to energy (TWh)
     index_mass = df.loc[df["Unit"] == "Metric tons,  thousand"].index
     df.loc[index_mass, "Quantity_TWh"] = df.loc[index_mass].apply(
-        lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1
+        lambda x: x["Quantity"] * fuels_conv_toTWh.get(x["Commodity"], "not found"), axis=1
     )
 
     # Converting values of energy (GWh) to energy (TWh)
@@ -90,7 +90,7 @@ def create_industry_base_totals(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake
+        from helpers import mock_snakemake, sets_path_to_root
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -99,6 +99,7 @@ if __name__ == "__main__":
             planning_horizons=2030,
             demand="EG",
         )
+        sets_path_to_root("pypsa-earth-sec")
 
     # Loading config file and wild cards
 
@@ -153,9 +154,9 @@ if __name__ == "__main__":
         "other",
     ]
 
-    # Loading all energy balance files
-    all_files = Path("data/demand/unsd/data").glob("*.txt")  # TODO change path
-
+    # Get the files from the path provided in the OP
+    all_files = list(Path(snakemake.input["unsd_path"]).glob("*.txt"))
+    
     # Create a dataframe from all downloaded files
     df = pd.concat(
         (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
