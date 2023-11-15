@@ -222,6 +222,7 @@ sector:
   bev_availability: 0.5 #How many cars do smart charging
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
+  industry_util_factor: 0.7
 
   biomass_transport: true  # biomass transport between nodes
   efficiency_heat_oil_to_elec: 0.9
