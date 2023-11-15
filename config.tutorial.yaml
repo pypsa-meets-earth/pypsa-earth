@@ -286,7 +286,7 @@ renewable:
     cutout: cutout-2013-era5-tutorial
     resource:
       method: hydro
-      hydrobasins: data/hydrobasins/hybas_world_lev04_v1c.shp
+      hydrobasins_level: 4
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
