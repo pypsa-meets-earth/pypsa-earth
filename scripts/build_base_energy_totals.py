@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
     # Get the files from the path provided in the OP
     all_files = list(Path("data/demand/unsd/data").glob("*.txt"))
-    
+
     # Create a dataframe from all downloaded files
     df = pd.concat(
         (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True

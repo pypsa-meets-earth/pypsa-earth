@@ -26,7 +26,8 @@ def create_industry_base_totals(df):
     # Converting values of mass (ktons) to energy (TWh)
     index_mass = df.loc[df["Unit"] == "Metric tons,  thousand"].index
     df.loc[index_mass, "Quantity_TWh"] = df.loc[index_mass].apply(
-        lambda x: x["Quantity"] * fuels_conv_toTWh.get(x["Commodity"], "not found"), axis=1
+        lambda x: x["Quantity"] * fuels_conv_toTWh.get(x["Commodity"], "not found"),
+        axis=1,
     )
 
     # Converting values of energy (GWh) to energy (TWh)
@@ -156,7 +157,7 @@ if __name__ == "__main__":
 
     # Get the files from the path provided in the OP
     all_files = list(Path(snakemake.input["unsd_path"]).glob("*.txt"))
-    
+
     # Create a dataframe from all downloaded files
     df = pd.concat(
         (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True

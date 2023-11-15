@@ -220,25 +220,33 @@ if __name__ == "__main__":
             pass  # Code to handle the KeyError
     industry_base_totals = industry_base_totals.sort_index()
 
-    all_carriers = ["electricity", "gas", "coal", "oil", "hydrogen", "biomass", "low-temperature heat"]
+    all_carriers = [
+        "electricity",
+        "gas",
+        "coal",
+        "oil",
+        "hydrogen",
+        "biomass",
+        "low-temperature heat",
+    ]
 
     for country in countries:
-        carriers_present = industry_base_totals.xs(country, level='country').index
+        carriers_present = industry_base_totals.xs(country, level="country").index
         missing_carriers = set(all_carriers) - set(carriers_present)
         for carrier in missing_carriers:
             # Add the missing carrier with a value of 0
             industry_base_totals.loc[(country, carrier), :] = 0
 
-
     nodal_df = pd.DataFrame()
 
     for country in countries:
-        nodal_production_tom_co = nodal_production_tom[nodal_production_tom.index.to_series().str.startswith(country)]
+        nodal_production_tom_co = nodal_production_tom[
+            nodal_production_tom.index.to_series().str.startswith(country)
+        ]
         industry_base_totals_co = industry_base_totals.loc[country]
         # final energy consumption per node and industry (TWh/a)
         nodal_df_co = nodal_production_tom_co.dot(industry_base_totals_co.T)
         nodal_df = pd.concat([nodal_df, nodal_df_co])
-
 
     rename_sectors = {
         "elec": "electricity",
