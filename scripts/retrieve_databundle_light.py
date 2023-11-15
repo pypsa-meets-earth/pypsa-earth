@@ -361,7 +361,18 @@ def download_and_unzip_hydrobasins(
     download_and_unzip_basins(config, rootpath, dest_path, hot_run=True,
     disable_progress=False)
 
-    Function to download and unzip the data for hydrobasins.
+    Function to download and unzip the data for hydrobasins from HydroBASINS database
+    available via https://www.hydrosheds.org/products/hydrobasins
+
+    We are using data from the HydroSHEDS version 1 database
+    which is © World Wildlife Fund, Inc. (2006-2022) and has been used herein under license.
+    WWF has not evaluated our data pipeline and therefore gives no warranty regarding its
+    accuracy, completeness, currency or suitability for any particular purpose.
+    Portions of the HydroSHEDS v1 database incorporate data which are the intellectual property
+    rights of © USGS (2006-2008), NASA (2000-2005), ESRI (1992-1998), CIAT (2004-2006),
+    UNEP-WCMC (1993), WWF (2004), Commonwealth of Australia (2007), and Her Royal Majesty
+    and the British Crown and are used under license. The HydroSHEDS v1 database and
+    more information are available at https://www.hydrosheds.org.
 
     Inputs
     ------
