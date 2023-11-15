@@ -209,10 +209,14 @@ def H2_liquid_fossil_conversions(n, costs):
         bus2=spatial.co2.nodes,
         carrier="Fischer-Tropsch",
         efficiency=costs.at["Fischer-Tropsch", "efficiency"],
-        capital_cost=costs.at["Fischer-Tropsch", "fixed"],
+        capital_cost=costs.at["Fischer-Tropsch", "fixed"]
+        * costs.at[
+            "Fischer-Tropsch", "efficiency"
+        ],  # Use efficiency to convert from EUR/MW_FT/a to EUR/MW_H2/a
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
         p_nom_extendable=True,
+        p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
     )
 
@@ -310,7 +314,9 @@ def add_hydrogen(n, costs):
             )
 
     # hydrogen stored overground (where not already underground)
-    h2_capital_cost = costs.at["hydrogen storage tank incl. compressor", "fixed"]
+    h2_capital_cost = costs.at[
+        "hydrogen storage tank type 1 including compressor", "fixed"
+    ]
     nodes_overground = cavern_nodes.index.symmetric_difference(nodes)
 
     n.madd(

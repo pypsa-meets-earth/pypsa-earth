@@ -11,6 +11,7 @@ data/energy_totals_NZ_2030.csv
 gadm_shapes.geojson
 data/energy_totals_NZ_2030
 data/industry_sector_ratios_NZ_2030.csv 
+data/costs*
 
 # Folders
 /bak
