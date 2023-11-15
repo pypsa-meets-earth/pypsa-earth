@@ -154,21 +154,21 @@ if __name__ == "__main__":
         "construction",
         "other",
     ]
-    
-    unsd_path = os.path.dirname(snakemake.input["energy_totals_base"])+"/demand/unsd/data/"
 
+    unsd_path = (
+        os.path.dirname(snakemake.input["energy_totals_base"]) + "/demand/unsd/data/"
+    )
 
     print("###########################################################")
     print(snakemake.input["unsd_path"])
     print(unsd_path)
     absolute_path = os.path.abspath(__file__)
-    print(os.getcwd()+unsd_path)
+    print(os.getcwd() + unsd_path)
     print("###########################################################")
-
 
     # Get the files from the path provided in the OP
     all_files = list(Path(unsd_path).glob("*.txt"))
-    
+
     # Create a dataframe from all downloaded files
     df = pd.concat(
         (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
