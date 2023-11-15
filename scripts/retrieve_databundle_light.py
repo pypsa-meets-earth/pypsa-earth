@@ -394,9 +394,11 @@ def download_and_unzip_hydrobasins(
     url_templ = config["urls"]["hydrobasins"]
     suffix_list = config["urls"]["suffixes"]
 
-    basins_fl = snakemake.config["renewable"]["hydro"]["resource"]["hydrobasins"]
-    level_pattern = r".*?lev(.*)_.*"
-    level_code = re.findall(level_pattern, basins_fl)
+    level_code = snakemake.config["renewable"]["hydro"]["resource"]["hydrobasins_level"]
+    if level_code <= 9:
+        level_code = "0" + str(level_code)
+    else:
+        level_code = str(level_code)
 
     for rg in suffix_list:
         # lev01_v1c.zip
