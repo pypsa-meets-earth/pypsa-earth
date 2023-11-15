@@ -632,6 +632,8 @@ if config["custom_data"].get("industry_demand", False) == False:
     rule build_base_industry_totals:  #default data
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
+            unsd_path="data/demand/unsd/data/",
+            energy_totals_base="data/energy_totals_base.csv",
         output:
             base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         threads: 1
