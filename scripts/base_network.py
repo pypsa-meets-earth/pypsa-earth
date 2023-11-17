@@ -67,12 +67,12 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 import yaml
-from _helpers import configure_logging, read_csv_nafix
+from _helpers import configure_logging, create_logger, read_csv_nafix
 from scipy.sparse import csgraph
 from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def _get_oid(df):
@@ -111,9 +111,9 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
     )
 
 
-def _load_buses_from_osm(fp_buses, config):
+def _load_buses_from_osm(fp_buses, base_network_config, voltages_config):
     buses = (
-        read_csv_nafix(fp_buses)
+        read_csv_nafix(fp_buses, dtype=dict(bus_id="str", voltage="float"))
         .set_index("bus_id")
         .drop(["station_id"], axis=1)
         .rename(columns=dict(voltage="v_nom"))
@@ -129,13 +129,11 @@ def _load_buses_from_osm(fp_buses, config):
     buses = buses.dropna(axis="index", subset=["x", "y", "country"])
 
     # Rebase all voltages to three levels
-    buses = _rebase_voltage_to_config(config, buses)
+    buses = _rebase_voltage_to_config(base_network_config, voltages_config, buses)
 
     logger.info(
         "Removing buses with voltages {}".format(
-            pd.Index(buses.v_nom.unique())
-            .dropna()
-            .difference(config["electricity"]["voltages"])
+            pd.Index(buses.v_nom.unique()).dropna().difference(voltages_config)
         )
     )
 
@@ -188,7 +186,7 @@ def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
                 )
 
 
-def _load_lines_from_osm(fp_osm_lines, config, buses):
+def _load_lines_from_osm(fp_osm_lines, base_network_config, voltages_config, buses):
     lines = (
         read_csv_nafix(
             fp_osm_lines,
@@ -198,6 +196,8 @@ def _load_lines_from_osm(fp_osm_lines, config, buses):
                 bus1="str",
                 underground="bool",
                 under_construction="bool",
+                voltage="float",
+                circuits="float",
             ),
         )
         .set_index("line_id")
@@ -207,14 +207,16 @@ def _load_lines_from_osm(fp_osm_lines, config, buses):
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
     lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
-    lines = _rebase_voltage_to_config(config, lines)  # rebase voltage to config inputs
+    lines = _rebase_voltage_to_config(
+        base_network_config, voltages_config, lines
+    )  # rebase voltage to config inputs
     # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
     return lines
 
 
 # TODO Seems to be not needed anymore
-def _load_links_from_osm(fp_osm_converters, config):
+def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config):
     # the links file can be empty
     if os.path.getsize(fp_osm_converters) == 0:
         links = pd.DataFrame()
@@ -238,7 +240,9 @@ def _load_links_from_osm(fp_osm_converters, config):
     links["length"] /= 1e3  # m to km conversion
     links["v_nom"] /= 1e3  # V to kV conversion
     links = links.loc[:, ~links.columns.str.contains("^Unnamed")]  # remove unnamed col
-    links = _rebase_voltage_to_config(config, links)  # rebase voltage to config inputs
+    links = _rebase_voltage_to_config(
+        base_network_config, voltages_config, links
+    )  # rebase voltage to config inputs
     # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
 
     return links
@@ -277,41 +281,41 @@ def _load_transformers_from_osm(fp_osm_transformers, buses):
     return transformers
 
 
-def _set_electrical_parameters_lines(config, lines):
+def _set_electrical_parameters_lines(lines_config, voltages_config, lines):
     if lines.empty:
         lines["type"] = []
         return lines
 
-    v_noms = config["electricity"]["voltages"]
+    v_noms = voltages_config
     lines["carrier"] = "AC"
     lines["dc"] = False
-    linetypes = config["lines"]["types"]
+    linetypes = lines_config["types"]
 
     for v_nom in v_noms:
         lines.loc[lines["v_nom"] == v_nom, "type"] = linetypes[v_nom]
 
-    lines["s_max_pu"] = config["lines"]["s_max_pu"]
+    lines["s_max_pu"] = lines_config["s_max_pu"]
 
     return lines
 
 
-def _set_electrical_parameters_dc_lines(config, lines):
-    v_noms = config["electricity"]["voltages"]
+def _set_electrical_parameters_dc_lines(lines_config, voltages_config, lines):
+    v_noms = voltages_config
     lines["carrier"] = "DC"
     lines["dc"] = True
 
-    lines["type"] = config["lines"]["dc_type"]
+    lines["type"] = lines_config["dc_type"]
 
-    lines["s_max_pu"] = config["lines"]["s_max_pu"]
+    lines["s_max_pu"] = lines_config["s_max_pu"]
 
     return lines
 
 
-def _set_electrical_parameters_links(config, links):
+def _set_electrical_parameters_links(links_config, links):
     if links.empty:
         return links
 
-    p_max_pu = config["links"].get("p_max_pu", 1.0)
+    p_max_pu = links_config.get("p_max_pu", 1.0)
     links["p_max_pu"] = p_max_pu
     links["p_min_pu"] = -p_max_pu
 
@@ -321,8 +325,8 @@ def _set_electrical_parameters_links(config, links):
     return links
 
 
-def _set_electrical_parameters_transformers(config, transformers):
-    config = config["transformers"]
+def _set_electrical_parameters_transformers(transformers_config, transformers):
+    config = transformers_config
 
     ## Add transformer parameters
     transformers["x"] = config.get("x", 0.1)
@@ -332,8 +336,8 @@ def _set_electrical_parameters_transformers(config, transformers):
     return transformers
 
 
-def _set_electrical_parameters_converters(config, converters):
-    p_max_pu = config["links"].get("p_max_pu", 1.0)
+def _set_electrical_parameters_converters(links_config, converters):
+    p_max_pu = links_config.get("p_max_pu", 1.0)
     converters["p_max_pu"] = p_max_pu
     converters["p_min_pu"] = -p_max_pu
 
@@ -365,8 +369,8 @@ def _remove_dangling_branches(branches, buses):
     )
 
 
-def _set_countries_and_substations(inputs, config, n):
-    countries = config["countries"]
+def _set_countries_and_substations(inputs, base_network_config, countries_config, n):
+    countries = countries_config
     country_shapes = gpd.read_file(inputs.country_shapes).set_index("name")["geometry"]
 
     offshore_shapes = unary_union(gpd.read_file(inputs.offshore_shapes)["geometry"])
@@ -383,8 +387,7 @@ def _set_countries_and_substations(inputs, config, n):
 
     # Assumption that HV-bus qualifies as potential offshore bus. Offshore bus is empty otherwise.
     offshore_hvb = (
-        buses["v_nom"]
-        >= config["base_network"]["min_voltage_substation_offshore"] / 1000
+        buses["v_nom"] >= base_network_config["min_voltage_substation_offshore"] / 1000
     )
     # Compares two lists & makes list value true if at least one is true
     buses["substation_off"] = offshore_b | offshore_hvb
@@ -434,7 +437,7 @@ def _set_countries_and_substations(inputs, config, n):
     return buses
 
 
-def _rebase_voltage_to_config(config, component):
+def _rebase_voltage_to_config(base_network_config, voltages_config, component):
     """
     Rebase the voltage of components to the config.yaml input.
 
@@ -449,11 +452,11 @@ def _rebase_voltage_to_config(config, component):
     component : dataframe
     """
     v_min = (
-        config["base_network"]["min_voltage_rebase_voltage"] / 1000
+        base_network_config["min_voltage_rebase_voltage"] / 1000
     )  # min. filtered value in dataset
-    v_low = config["electricity"]["voltages"][0]
-    v_mid = config["electricity"]["voltages"][1]
-    v_up = config["electricity"]["voltages"][2]
+    v_low = voltages_config[0]
+    v_mid = voltages_config[1]
+    v_up = voltages_config[2]
     v_low_mid = (v_mid - v_low) / 2 + v_low  # between low and mid voltage
     v_mid_up = (v_up - v_mid) / 2 + v_mid  # between mid and upper voltage
     component.loc[
@@ -467,34 +470,52 @@ def _rebase_voltage_to_config(config, component):
     return component
 
 
-def base_network(inputs, config):
-    buses = _load_buses_from_osm(inputs.osm_buses, config).reset_index()
-    lines = _load_lines_from_osm(inputs.osm_lines, config, buses)
+def base_network(
+    inputs,
+    base_network_config,
+    countries_config,
+    hvdc_as_lines_config,
+    lines_config,
+    links_config,
+    snapshots_config,
+    transformers_config,
+    voltages_config,
+):
+    buses = _load_buses_from_osm(
+        inputs.osm_buses, base_network_config, voltages_config
+    ).reset_index()
+    lines = _load_lines_from_osm(
+        inputs.osm_lines, base_network_config, voltages_config, buses
+    )
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
     lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
-    lines_ac = _set_electrical_parameters_lines(config, lines_ac)
-    lines_dc = _set_electrical_parameters_dc_lines(config, lines_dc)
+    lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
+    lines_dc = _set_electrical_parameters_dc_lines(
+        lines_config, voltages_config, lines_dc
+    )
 
-    transformers = _set_electrical_parameters_transformers(config, transformers)
-    converters = _set_electrical_parameters_converters(config, converters)
+    transformers = _set_electrical_parameters_transformers(
+        transformers_config, transformers
+    )
+    converters = _set_electrical_parameters_converters(links_config, converters)
 
     n = pypsa.Network()
     n.name = "PyPSA-Eur"
 
-    n.set_snapshots(pd.date_range(freq="h", **config["snapshots"]))
+    n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
     n.import_components_from_dataframe(buses, "Bus")
 
-    if config["electricity"]["hvdc_as_lines"]:
+    if hvdc_as_lines_config:
         lines = pd.concat([lines_ac, lines_dc])
         n.import_components_from_dataframe(lines, "Line")
     else:
-        lines_dc = _set_electrical_parameters_links(config, lines_dc)
+        lines_dc = _set_electrical_parameters_links(links_config, lines_dc)
         # parse line information into p_nom required for converters
         lines_dc["p_nom"] = lines_dc.apply(
             lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
@@ -523,7 +544,7 @@ def base_network(inputs, config):
 
     _set_lines_s_nom_from_linetypes(n)
 
-    _set_countries_and_substations(inputs, config, n)
+    _set_countries_and_substations(inputs, base_network_config, countries_config, n)
 
     _set_dc_underwater_fraction(n.lines, inputs.offshore_shapes)
     _set_dc_underwater_fraction(n.links, inputs.offshore_shapes)
@@ -540,9 +561,29 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)
 
-    inputs, config = snakemake.input, snakemake.config
+    inputs = snakemake.input
 
-    n = base_network(inputs, config)
+    # Snakemake imports:
+    base_network_config = snakemake.params.base_network
+    countries = snakemake.params.countries
+    hvdc_as_lines = snakemake.params.hvdc_as_lines
+    lines = snakemake.params.lines
+    links = snakemake.params.links
+    snapshots = snakemake.params.snapshots
+    transformers = snakemake.params.transformers
+    voltages = snakemake.params.voltages
+
+    n = base_network(
+        inputs,
+        base_network_config,
+        countries,
+        hvdc_as_lines,
+        lines,
+        links,
+        snapshots,
+        transformers,
+        voltages,
+    )
 
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
     n.meta = snakemake.config

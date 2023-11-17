@@ -99,9 +99,10 @@ import os
 import atlite
 import geopandas as gpd
 import pandas as pd
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -111,8 +112,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_cutout", cutout="africa-2013-era5")
     configure_logging(snakemake)
 
-    cutout_params = snakemake.config["atlite"]["cutouts"][snakemake.wildcards.cutout]
-    snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    cutout_params = snakemake.params.cutouts[snakemake.wildcards.cutout]
+    snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
     time = [snapshots[0], snapshots[-1]]
     cutout_params["time"] = slice(*cutout_params.get("time", time))
     onshore_shapes = snakemake.input.onshore_shapes

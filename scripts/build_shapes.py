@@ -24,6 +24,7 @@ import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
+    create_logger,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -36,10 +37,9 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 sets_path_to_root("pypsa-earth")
+
+logger = create_logger(__name__)
 
 
 def get_GADM_filename(country_code):
@@ -105,7 +105,19 @@ def download_GADM(country_code, update=False, out_logging=False):
         #  create data/osm directory
         os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
 
-        with requests.get(GADM_url, stream=True) as r:
+        try:
+            r = requests.get(GADM_url, stream=True, timeout=300)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            raise Exception(
+                f"GADM server is down at {GADM_url}. Data needed for building shapes can't be extracted.\n\r"
+            )
+        except Exception as exception:
+            raise Exception(
+                f"An error happened when trying to load GADM data by {GADM_url}.\n\r"
+                + str(exception)
+                + "\n\r"
+            )
+        else:
             with open(GADM_inputfile_gpkg, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
@@ -265,13 +277,12 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
-    ret_df.apply(lambda x: make_valid(x) if not x.is_valid else x)
-    ret_df.reset_index()
+    ret_df = ret_df.make_valid()
 
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.0):
+def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.02):
     if out_logging:
         logger.info("Stage 3 of 4: Merge country shapes to create continent shape")
 
@@ -280,7 +291,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
     if eez_shapes is not None:
         shapes_list += list(eez_shapes)
 
-    africa_shape = unary_union(shapes_list)
+    africa_shape = make_valid(unary_union(shapes_list))
 
     return africa_shape
 
@@ -863,6 +874,7 @@ def gadm(
         df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
         axis=1,
         inplace=True,
+        errors="ignore",
     )
 
     if worldpop_method != False:
@@ -916,19 +928,19 @@ if __name__ == "__main__":
 
     out = snakemake.output
 
-    countries_list = snakemake.config["countries"]
-    layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-    update = snakemake.config["build_shape_options"]["update_file"]
-    out_logging = snakemake.config["build_shape_options"]["out_logging"]
-    year = snakemake.config["build_shape_options"]["year"]
-    nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
-    contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
+    countries_list = snakemake.params.countries
+    layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
+    update = snakemake.params.build_shape_options["update_file"]
+    out_logging = snakemake.params.build_shape_options["out_logging"]
+    year = snakemake.params.build_shape_options["year"]
+    nprocesses = snakemake.params.build_shape_options["nprocesses"]
+    contended_flag = snakemake.params.build_shape_options["contended_flag"]
     EEZ_gpkg = snakemake.input["eez"]
-    worldpop_method = snakemake.config["build_shape_options"]["worldpop_method"]
-    gdp_method = snakemake.config["build_shape_options"]["gdp_method"]
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    distance_crs = snakemake.config["crs"]["distance_crs"]
-    nchunks = snakemake.config["build_shape_options"]["nchunks"]
+    worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
+    gdp_method = snakemake.params.build_shape_options["gdp_method"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
+    nchunks = snakemake.params.build_shape_options["nchunks"]
     if nchunks < nprocesses:
         logger.info(f"build_shapes data chunks set to nprocesses {nprocesses}")
         nchunks = nprocesses

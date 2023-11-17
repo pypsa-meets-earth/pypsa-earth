@@ -85,14 +85,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
 from vresutils.benchmark import memory_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def prepare_network(n, solve_opts, config=None):
@@ -229,7 +229,12 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 
 def add_BAU_constraints(n, config):
-    mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
+
+    ext_c = n.generators.query("p_nom_extendable").carrier.unique()
+  
+    mincaps = pd.Series(
+        config["electricity"].get("BAU_mincapacities", {key: 0 for key in ext_c})
+    )
     # lhs = (
     #     linexpr((1, get_var(n, "Generator", "p_nom")))
     #     .groupby(n.generators.carrier)
@@ -242,6 +247,16 @@ def add_BAU_constraints(n, config):
     lhs = capacity_variable.groupby_sum(ext_carrier_i)
     rhs = mincaps[lhs.coords["carrier"].values].rename_axis("carrier")
     n.model.add_constraints(lhs >= rhs, name="bau_mincaps")
+
+    maxcaps = pd.Series(
+        config["electricity"].get("BAU_maxcapacities", {key: np.inf for key in ext_c})
+    )
+    lhs = (
+        linexpr((1, get_var(n, "Generator", "p_nom")))
+        .groupby(n.generators.carrier)
+        .apply(join_exprs)
+    )
+    define_constraints(n, lhs, "<=", maxcaps[lhs.index], "Carrier", "bau_maxcaps")
 
 
 def add_SAFE_constraints(n, config):
@@ -360,6 +375,125 @@ def add_battery_constraints(n):
     n.model.add_constraints(lhs == 0, name="link_charger_ratio")
 
 
+def add_RES_constraints(n, res_share):
+    lgrouper = n.loads.bus.map(n.buses.country)
+    ggrouper = n.generators.bus.map(n.buses.country)
+    sgrouper = n.storage_units.bus.map(n.buses.country)
+    cgrouper = n.links.bus0.map(n.buses.country)
+
+    logger.warning(
+        "The add_RES_constraints functionality is still work in progress. "
+        "Unexpected results might be incurred, particularly if "
+        "temporal clustering is applied or if an unexpected change of technologies "
+        "is subject to the obtimisation."
+    )
+
+    load = (
+        n.snapshot_weightings.generators
+        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+    )
+
+    rhs = res_share * load
+
+    res_techs = [
+        "solar",
+        "onwind",
+        "offwind-dc",
+        "offwind-ac",
+        "battery",
+        "hydro",
+        "ror",
+    ]
+    charger = ["H2 electrolysis", "battery charger"]
+    discharger = ["H2 fuel cell", "battery discharger"]
+
+    gens_i = n.generators.query("carrier in @res_techs").index
+    stores_i = n.storage_units.query("carrier in @res_techs").index
+    charger_i = n.links.query("carrier in @charger").index
+    discharger_i = n.links.query("carrier in @discharger").index
+
+    # Generators
+    lhs_gen = (
+        linexpr(
+            (n.snapshot_weightings.generators, get_var(n, "Generator", "p")[gens_i].T)
+        )
+        .T.groupby(ggrouper, axis=1)
+        .apply(join_exprs)
+    )
+
+    # StorageUnits
+    lhs_dispatch = (
+        (
+            linexpr(
+                (
+                    n.snapshot_weightings.stores,
+                    get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+                )
+            )
+            .T.groupby(sgrouper, axis=1)
+            .apply(join_exprs)
+        )
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
+
+    lhs_store = (
+        (
+            linexpr(
+                (
+                    -n.snapshot_weightings.stores,
+                    get_var(n, "StorageUnit", "p_store")[stores_i].T,
+                )
+            )
+            .T.groupby(sgrouper, axis=1)
+            .apply(join_exprs)
+        )
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
+
+    # Stores (or their resp. Link components)
+    # Note that the variables "p0" and "p1" currently do not exist.
+    # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
+    lhs_charge = (
+        (
+            linexpr(
+                (
+                    -n.snapshot_weightings.stores,
+                    get_var(n, "Link", "p")[charger_i].T,
+                )
+            )
+            .T.groupby(cgrouper, axis=1)
+            .apply(join_exprs)
+        )
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
+
+    lhs_discharge = (
+        (
+            linexpr(
+                (
+                    n.snapshot_weightings.stores.apply(
+                        lambda r: r * n.links.loc[discharger_i].efficiency
+                    ),
+                    get_var(n, "Link", "p")[discharger_i],
+                )
+            )
+            .groupby(cgrouper, axis=1)
+            .apply(join_exprs)
+        )
+        .reindex(lhs_gen.index)
+        .fillna("")
+    )
+
+    # signs of resp. terms are coded in the linexpr.
+    # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
+    lhs = lhs_gen + lhs_dispatch + lhs_store + lhs_charge + lhs_discharge
+
+    define_constraints(n, lhs, "=", rhs, "RES share")
+
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -379,6 +513,10 @@ def extra_functionality(n, snapshots):
     reserve = config["electricity"].get("operational_reserve", {})
     if reserve.get("activate"):
         add_operational_reserve_margin(n, snapshots, config)
+    for o in opts:
+        if "RES" in o:
+            res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
+            add_RES_constraints(n, res_share)
     for o in opts:
         if "EQ" in o:
             add_EQ_constraints(n, o)
@@ -438,18 +576,18 @@ if __name__ == "__main__":
         )
     configure_logging(snakemake)
 
-    # tmpdir = snakemake.config["solving"].get("tmpdir")
+    # tmpdir = snakemake.params.solving.get("tmpdir")
     # if tmpdir is not None:
     #     Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
-    solve_opts = snakemake.config["solving"]["options"]
+    solve_opts = snakemake.params.solving["options"]
 
     n = pypsa.Network(snakemake.input[0])
     # TODO Double-check handling the augmented case
-    # if snakemake.config["augmented_line_connection"].get("add_to_snakefile"):
-    #     n.lines.loc[
-    #         n.lines.index.str.contains("new"), "s_nom_min"
-    #     ] = snakemake.config["augmented_line_connection"].get("min_expansion")
+    #if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
+    #    n.lines.loc[
+    #        n.lines.index.str.contains("new"), "s_nom_min"
+    #    ] = snakemake.params.augmented_line_connection.get("min_expansion")
     n = prepare_network(n, solve_opts, config=solve_opts)
     n = solve_network(
         n, config=snakemake.config, opts=opts, solver_logfile=snakemake.log.solver
