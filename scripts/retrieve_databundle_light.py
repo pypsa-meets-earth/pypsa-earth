@@ -762,6 +762,33 @@ if __name__ == "__main__":
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
+    basins_path = config_bundles["bundle_hydrobasins"]["destination"]
+
+    files_in_dir = [
+        f
+        for f in os.listdir(basins_path)
+        if os.path.isfile(os.path.join(basins_path, f))
+    ]
+
+    hydrobasins_level = snakemake.config["renewable"]["hydro"]["resource"][
+        "hydrobasins_level"
+    ]
+    if hydrobasins_level <= 9:
+        hydrobasins_level = "0" + str(hydrobasins_level)
+    else:
+        hydrobasins_level = str(hydrobasins_level)
+
+    regex_to_look_for = re.compile(".*_lev" + hydrobasins_level + "_v1c.shp$")
+    files_to_merge = list(filter(regex_to_look_for.match, files_in_dir))
+
+    gpdf_list = [None] * len(files_to_merge)
+    for i in range(0, len(files_to_merge)):
+        gpdf_list[i] = gpd.read_file(os.path.join(basins_path, files_to_merge[i]))
+    fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list))
+    fl_merged.to_file(
+        os.path.join(basins_path, "hybas_world_lev" + hydrobasins_level + "_v1c.shp")
+    )
+
     logger.info(
         "Bundle successfully loaded and unzipped:\n\t"
         + "\n\t".join(bundles_to_download)
