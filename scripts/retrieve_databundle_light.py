@@ -85,6 +85,8 @@ import os
 import re
 from zipfile import ZipFile
 
+import geopandas as gpd
+import pandas as pd
 import yaml
 from _helpers import (
     configure_logging,
