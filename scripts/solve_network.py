@@ -229,9 +229,8 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 
 def add_BAU_constraints(n, config):
-
     ext_c = n.generators.query("p_nom_extendable").carrier.unique()
-  
+
     mincaps = pd.Series(
         config["electricity"].get("BAU_mincapacities", {key: 0 for key in ext_c})
     )
@@ -584,7 +583,7 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     # TODO Double-check handling the augmented case
-    #if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
+    # if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
     #    n.lines.loc[
     #        n.lines.index.str.contains("new"), "s_nom_min"
     #    ] = snakemake.params.augmented_line_connection.get("min_expansion")
