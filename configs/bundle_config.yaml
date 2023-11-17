@@ -152,7 +152,7 @@ databundles:
       suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
     unzip: true
     output:
-    - data/hydrobasins/hybas_world_lev06_v1c.shp
+    - data/hydrobasins/*.shp
 
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
