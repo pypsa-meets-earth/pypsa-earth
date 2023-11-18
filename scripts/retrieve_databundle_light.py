@@ -411,7 +411,9 @@ def download_and_unzip_hydrobasins(
                 os.remove(file_path)
 
             try:
-                logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+                logger.info(
+                    f"Downloading resource '{resource}' for hydrobasins in '{rg}' from cloud '{url}'."
+                )
                 progress_retrieve(
                     url,
                     file_path,
