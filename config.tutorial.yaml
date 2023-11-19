@@ -284,9 +284,9 @@ renewable:
     extendable: true
   hydro:
     cutout: cutout-2013-era5-tutorial
+    hydrobasins_level: 4
     resource:
       method: hydro
-      hydrobasins_level: 4
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
