@@ -80,6 +80,7 @@ according to the following rules:
 - ``cutouts``: input data unzipped into the cutouts folder
 
 """
+import glob
 import logging
 import os
 import re
@@ -96,6 +97,7 @@ from _helpers import (
     sets_path_to_root,
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
+from tqdm import tqdm
 
 logger = create_logger(__name__)
 
