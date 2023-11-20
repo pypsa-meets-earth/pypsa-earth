@@ -502,14 +502,13 @@ def get_best_bundles_by_category(
         by=["n_matched", "neg_bundle_size"], inplace=True, ascending=False
     )
 
-    bname_list = list(df_matches["bundle_name"])
     returned_bundles = []
 
-    if bname_list:
+    if not df_matches.empty:
         current_matched_countries = []
         remaining_countries = set(country_list)
 
-        for bname in bname_list:
+        for bname in df_matches.index:
             cbundle_list = set(config_bundles[bname]["countries"])
 
             # list of countries in the bundle that are not yet matched
