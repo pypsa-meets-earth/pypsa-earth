@@ -715,7 +715,9 @@ def merge_hydrobasins_shape(config):
     logger.info("Reading hydrobasins files \n\r")
     for i in tqdm(range(0, len(files_to_merge))):
         gpdf_list[i] = gpd.read_file(files_to_merge[i])
-    fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list))
+    fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
+        subset="HYBAS_ID", ignore_index=True
+    )
     logger.info(
         "Merging single files into:\n\t"
         + "hybas_world_lev"
