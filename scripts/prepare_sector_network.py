@@ -1400,13 +1400,24 @@ def add_land_transport(n, costs):
 
     print("adding land transport")
 
-    fuel_cell_share = get(
-        options["land_transport_fuel_cell_share"],
-        demand_sc + "_" + str(investment_year),
-    )
-    electric_share = get(
-        options["land_transport_electric_share"], demand_sc + "_" + str(investment_year)
-    )
+    if options["dynamic_transport"]["enable"] == False:
+        fuel_cell_share = get(
+            options["land_transport_fuel_cell_share"],
+            demand_sc + "_" + str(investment_year),
+        )
+        electric_share = get(
+            options["land_transport_electric_share"],
+            demand_sc + "_" + str(investment_year),
+        )
+
+    elif options["dynamic_transport"]["enable"] == True:
+        fuel_cell_share = options["dynamic_transport"][
+            "land_transport_fuel_cell_share"
+        ][snakemake.wildcards.opts]
+        electric_share = options["dynamic_transport"]["land_transport_electric_share"][
+            snakemake.wildcards.opts
+        ]
+
     ice_share = 1 - fuel_cell_share - electric_share
 
     print("FCEV share", fuel_cell_share)
