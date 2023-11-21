@@ -2432,7 +2432,6 @@ if __name__ == "__main__":
         snakemake.input.industrial_demand, index_col=0, header=0
     )  # * 1e6
 
-    # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
