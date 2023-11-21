@@ -118,7 +118,7 @@ if __name__ == "__main__":
         "other",
     ]
 
-    emission_factors = {
+    emission_factors = { #Based on JR data following PyPSA-EUR
         "iron and steel": 0.025,
         "chemical and petrochemical": 0.51,  # taken from HVC including process and feedstock
         "non-ferrous metals": 1.5,  # taken from Aluminum primary
