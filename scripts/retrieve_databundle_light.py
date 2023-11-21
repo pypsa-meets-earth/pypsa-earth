@@ -702,9 +702,7 @@ def datafiles_retrivedatabundle(config):
 
 def merge_hydrobasins_shape(config):
     basins_path = config_bundles["bundle_hydrobasins"]["destination"]
-    hydrobasins_level = snakemake.config["renewable"]["hydro"]["resource"][
-        "hydrobasins_level"
-    ]
+    hydrobasins_level = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
 
     mask_file = os.path.join(
         basins_path, "hybas_*_lev{:02d}_v1c.shp".format(int(hydrobasins_level))
