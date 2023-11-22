@@ -565,28 +565,32 @@ def get_best_bundles_by_category(
         List of bundles to download
     """
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
-    dict_n_matched = {
-        bname: config_bundles[bname]["n_matched"]
-        for bname in config_bundles
-        if config_bundles[bname]["category"] == category
-        and config_bundles[bname].get("tutorial", False) == tutorial
-        and _check_disabled_by_opt(config_bundles[bname], config_enable) != ["all"]
-    }
+    df_matches = pd.DataFrame(columns=["bundle_name", "bundle_size", "n_matched"])
+
+    for bname, bvalue in config_bundles.items():
+        if (
+            bvalue["category"] == category
+            and bvalue.get("tutorial", False) == tutorial
+            and _check_disabled_by_opt(bvalue, config_enable) != ["all"]
+        ):
+            df_matches.loc[bname] = [
+                bname,
+                len(bvalue["countries"]),
+                bvalue["n_matched"],
+            ]
+
+    df_matches["neg_bundle_size"] = -df_matches["bundle_size"]
+    df_matches.sort_values(
+        by=["n_matched", "neg_bundle_size"], inplace=True, ascending=False
+    )
 
     returned_bundles = []
 
-    # check if non-empty dictionary
-    if dict_n_matched:
-        # if non-empty, then pick bundles until all countries are selected
-        # or no more bundles are found
-        dict_sort = sorted(dict_n_matched.items(), key=lambda d: d[1])
-
+    if not df_matches.empty:
         current_matched_countries = []
         remaining_countries = set(country_list)
 
-        for d_val in dict_sort:
-            bname = d_val[0]
-
+        for bname in df_matches.index:
             cbundle_list = set(config_bundles[bname]["countries"])
 
             # list of countries in the bundle that are not yet matched
