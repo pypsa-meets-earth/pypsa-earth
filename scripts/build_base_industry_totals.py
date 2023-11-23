@@ -64,13 +64,17 @@ def create_industry_base_totals(df):
 
     if include_other:
         # Loop through the columns in the list and sum them if they exist
-        print("other industries are included, check thoroughly as data sometimes is not accurate")
+        print(
+            "other industries are included, check thoroughly as data sometimes is not accurate"
+        )
         for col_name in other_list:
             if col_name in industry_totals_base.columns:
                 industry_totals_base["other"] += industry_totals_base[col_name]
                 industry_totals_base.drop(col_name, axis=1, inplace=True)
     else:
-        print("other industries are included, check thoroughly as data sometimes is not accurate")
+        print(
+            "other industries are included, check thoroughly as data sometimes is not accurate"
+        )
         industry_totals_base.drop(
             columns=[col for col in other_list if col in industry_totals_base.columns],
             inplace=True,
