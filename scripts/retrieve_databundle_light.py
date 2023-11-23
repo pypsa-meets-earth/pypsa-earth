@@ -395,8 +395,8 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    url_templ = config["urls"]["hydrobasins"]
-    suffix_list = config["urls"]["suffixes"]
+    url_templ = config["urls"]["hydrobasins"]["base_url"]
+    suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
     level_code = snakemake.config["renewable"]["hydro"]["resource"]["hydrobasins_level"]
     level_code = "{:02d}".format(int(level_code))
