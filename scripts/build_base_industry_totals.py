@@ -64,11 +64,13 @@ def create_industry_base_totals(df):
 
     if include_other:
         # Loop through the columns in the list and sum them if they exist
+        print("other industries are included, check thoroughly as data sometimes is not accurate")
         for col_name in other_list:
             if col_name in industry_totals_base.columns:
                 industry_totals_base["other"] += industry_totals_base[col_name]
                 industry_totals_base.drop(col_name, axis=1, inplace=True)
     else:
+        print("other industries are included, check thoroughly as data sometimes is not accurate")
         industry_totals_base.drop(
             columns=[col for col in other_list if col in industry_totals_base.columns],
             inplace=True,
@@ -158,13 +160,6 @@ if __name__ == "__main__":
     unsd_path = (
         os.path.dirname(snakemake.input["energy_totals_base"]) + "/demand/unsd/data/"
     )
-
-    print("###########################################################")
-    # print(snakemake.input["unsd_path"])
-    print(unsd_path)
-    absolute_path = os.path.abspath(__file__)
-    print(os.getcwd() + unsd_path)
-    print("###########################################################")
 
     # Get the files from the path provided in the OP
     all_files = list(Path(unsd_path).glob("*.txt"))
