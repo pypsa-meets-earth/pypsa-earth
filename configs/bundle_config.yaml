@@ -148,8 +148,15 @@ databundles:
     category: common
     destination: "data/hydrobasins"
     urls:
-      hydrobasins: https://data.hydrosheds.org/file/HydroBASINS/standard/
-      suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
+  bundle_hydrobasins:
+    countries: [Earth]
+    tutorial: false
+    category: common
+    destination: "data/hydrobasins"
+    urls:
+      hydrobasins:
+         base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
+         suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
     unzip: true
     output:
     - data/hydrobasins/*.shp
