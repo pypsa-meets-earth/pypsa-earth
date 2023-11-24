@@ -209,10 +209,14 @@ def H2_liquid_fossil_conversions(n, costs):
         bus2=spatial.co2.nodes,
         carrier="Fischer-Tropsch",
         efficiency=costs.at["Fischer-Tropsch", "efficiency"],
-        capital_cost=costs.at["Fischer-Tropsch", "fixed"],
+        capital_cost=costs.at["Fischer-Tropsch", "fixed"]
+        * costs.at[
+            "Fischer-Tropsch", "efficiency"
+        ],  # Use efficiency to convert from EUR/MW_FT/a to EUR/MW_H2/a
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
         p_nom_extendable=True,
+        p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
     )
 
@@ -310,7 +314,9 @@ def add_hydrogen(n, costs):
             )
 
     # hydrogen stored overground (where not already underground)
-    h2_capital_cost = costs.at["hydrogen storage tank incl. compressor", "fixed"]
+    h2_capital_cost = costs.at[
+        "hydrogen storage tank type 1 including compressor", "fixed"
+    ]
     nodes_overground = cavern_nodes.index.symmetric_difference(nodes)
 
     n.madd(
@@ -1394,13 +1400,24 @@ def add_land_transport(n, costs):
 
     print("adding land transport")
 
-    fuel_cell_share = get(
-        options["land_transport_fuel_cell_share"],
-        demand_sc + "_" + str(investment_year),
-    )
-    electric_share = get(
-        options["land_transport_electric_share"], demand_sc + "_" + str(investment_year)
-    )
+    if options["dynamic_transport"]["enable"] == False:
+        fuel_cell_share = get(
+            options["land_transport_fuel_cell_share"],
+            demand_sc + "_" + str(investment_year),
+        )
+        electric_share = get(
+            options["land_transport_electric_share"],
+            demand_sc + "_" + str(investment_year),
+        )
+
+    elif options["dynamic_transport"]["enable"] == True:
+        fuel_cell_share = options["dynamic_transport"][
+            "land_transport_fuel_cell_share"
+        ][snakemake.wildcards.opts]
+        electric_share = options["dynamic_transport"]["land_transport_electric_share"][
+            snakemake.wildcards.opts
+        ]
+
     ice_share = 1 - fuel_cell_share - electric_share
 
     print("FCEV share", fuel_cell_share)
@@ -2316,13 +2333,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="14",
+            clusters="4",
             ll="c1.0",
-            opts="Co2L",
+            opts="Co2L0.10",
             planning_horizons="2030",
-            sopts="24H",
+            sopts="6H",
             discountrate="0.071",
-            demand="XX",
+            demand="DF",
         )
 
     # Load population layout
