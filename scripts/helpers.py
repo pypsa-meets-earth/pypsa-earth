@@ -575,6 +575,7 @@ def get_last_commit_message(path):
     -------
     result : string
     """
+    _logger = logging.getLogger(__name__)
     try:
         last_commit_message = (
             subprocess.check_output(
@@ -587,5 +588,5 @@ def get_last_commit_message(path):
         )
         return last_commit_message
     except subprocess.CalledProcessError as e:
-        logging.warning(f"Error executing Git: {e}")
+        _logger.warning(f"Error executing Git: {e}")
         return None
