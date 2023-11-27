@@ -44,6 +44,9 @@ demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
   base_year: 2019
 
+  other_industries: false # Whether or not to include industries that are not specified. some countries have has exageratted numbers, check carefully.
+
+
 H2_network: false
 H2_network_limit: 2000 #GWkm
 H2_repurposed_network: false
@@ -223,6 +226,7 @@ sector:
   bev_availability: 0.5 #How many cars do smart charging
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
+  industry_util_factor: 0.7
 
   biomass_transport: true  # biomass transport between nodes
   efficiency_heat_oil_to_elec: 0.9

@@ -262,7 +262,7 @@ if __name__ == "__main__":
                     path = "data/demand/unsd/data"
 
     # Get the files from the path provided in the OP
-    all_files = Path("data/demand/unsd/data").glob("*.txt")
+    all_files = list(Path("data/demand/unsd/data").glob("*.txt"))
 
     # Create a dataframe from all downloaded files
     df = pd.concat(

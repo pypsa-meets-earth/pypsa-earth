@@ -1340,7 +1340,7 @@ def add_industry(n, costs):
         carrier="process emissions",
         p_set=-(
             #    industrial_demand["process emission from feedstock"]+
-            industrial_demand["process emission"]
+            industrial_demand["process emissions"]
         )
         / 8760,
     )
@@ -2334,12 +2334,12 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1.0",
-            opts="Co2L0.10",
+            ll="c1",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="6H",
+            sopts="144H",
             discountrate="0.071",
-            demand="DF",
+            demand="AB",
         )
 
     # Load population layout
@@ -2439,9 +2439,9 @@ if __name__ == "__main__":
     # TODO follow the same structure as land transport and heat
 
     # Load industry demand data
-    industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
-
-    industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+    industrial_demand = pd.read_csv(
+        snakemake.input.industrial_demand, index_col=0, header=0
+    )  # * 1e6
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########

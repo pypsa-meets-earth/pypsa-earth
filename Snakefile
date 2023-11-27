@@ -315,6 +315,7 @@ rule build_population_layouts:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
+        gdp_layout="resources/gdp_shares/gdp_layout.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -340,12 +341,14 @@ rule build_clustered_population_layouts:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
+        gdp_layout="resources/gdp_shares/gdp_layout.nc",
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
     resources:
         mem_mb=10000,
     benchmark:
@@ -586,9 +589,12 @@ if config["custom_data"].get("industry_demand", False) == True:
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="resources/custom_data/industrial_database.csv",
-            #shapes_path=pypsaearth("resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson")
-            shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
+            shapes_path=pypsaearth(
+                "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            #shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
         output:
             industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         threads: 1
@@ -625,6 +631,7 @@ if config["custom_data"].get("industry_demand", False) == False:
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
             industrial_database="data/industrial_database.csv",
             shapes_path=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
@@ -639,25 +646,29 @@ if config["custom_data"].get("industry_demand", False) == False:
         script:
             "scripts/build_industrial_distribution_key.py"
 
-    rule build_industrial_production_per_country_tomorrow:  #default data
+    rule build_base_industry_totals:  #default data
         input:
             industrial_production_per_country="data/industrial_production_per_country.csv",
+            #unsd_path="data/demand/unsd/data/",
+            energy_totals_base="data/energy_totals_base.csv",
         output:
-            industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         threads: 1
         resources:
             mem_mb=1000,
         benchmark:
-            "benchmarks/build_industrial_production_per_country_tomorrow_{planning_horizons}_{demand}"
+            "benchmarks/build_base_industry_totals_{planning_horizons}_{demand}"
         script:
-            "scripts/build_industrial_production_tomorrow.py"
+            "scripts/build_base_industry_totals.py"
 
     rule build_industry_demand:  #default data
         input:
             industry_sector_ratios="data/industry_sector_ratios.csv",
             industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
-            industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
-            industrial_production_per_country="data/industrial_production_per_country.csv",
+            #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            #industrial_production_per_country="data/industrial_production_per_country.csv",
+            base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
+            industrial_database="data/industrial_database.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         output:
