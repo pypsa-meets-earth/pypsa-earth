@@ -1049,9 +1049,7 @@ def add_shipping(n, costs):
             p_set=ports["p_set"],
         )
 
-        co2 = (
-            shipping_oil_share * ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
-        )
+        co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
 
         n.add(
             "Load",
