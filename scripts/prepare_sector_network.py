@@ -2056,8 +2056,9 @@ def add_agriculture(n, costs):
     co2 = (
         nodal_energy_totals.loc[nodes, "agriculture oil"]
         * 1e6
+        / 8760
         * costs.at["oil", "CO2 intensity"]
-    )
+    ).sum()
 
     n.add(
         "Load",
