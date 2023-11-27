@@ -2211,16 +2211,6 @@ def add_residential(n, costs):
         p_set=-co2,
     )
 
-    co2 = (p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]) / 8760
-
-    n.add(
-        "Load",
-        "residential biomass emissions",
-        bus="co2 atmosphere",
-        carrier="biomass emissions",
-        p_set=-co2,
-    )
-
     for country in countries:
         rem_heat_demand = (
             energy_totals.loc[country, "total residential space"]
