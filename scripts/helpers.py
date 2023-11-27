@@ -590,6 +590,6 @@ def get_last_commit_message(path):
         )
     except subprocess.CalledProcessError as e:
         _logger.warning(f"Error executing Git: {e}")
-    
+
     os.chdir(backup_cwd)
     return last_commit_message
