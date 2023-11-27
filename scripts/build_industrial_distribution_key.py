@@ -116,6 +116,8 @@ if __name__ == "__main__":
         keep_default_na=False,  # , index_col=0
     )
 
+    geo_locs.capacity = pd.to_numeric(geo_locs.capacity)
+
     gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
 
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]

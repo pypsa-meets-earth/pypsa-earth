@@ -535,6 +535,13 @@ rule plot_summary:
         "scripts/plot_summary.py"
 
 
+rule build_industrial_database:
+    output:
+        industrial_database="data/industrial_database.csv",
+    script:
+        "scripts/build_industrial_database.py"
+
+
 rule prepare_db:
     input:
         network=RDIR
