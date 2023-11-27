@@ -576,17 +576,20 @@ def get_last_commit_message(path):
     result : string
     """
     _logger = logging.getLogger(__name__)
+    last_commit_message = None
+    backup_cwd = os.getcwd()
     try:
+        os.chdir(path)
         last_commit_message = (
             subprocess.check_output(
                 ["git", "log", "-n", "1", "--pretty=format:%H %s"],
-                cwd=path,
                 stderr=subprocess.STDOUT,
             )
             .decode()
             .strip()
         )
-        return last_commit_message
     except subprocess.CalledProcessError as e:
         _logger.warning(f"Error executing Git: {e}")
-        return None
+    
+    os.chdir(backup_cwd)
+    return last_commit_message

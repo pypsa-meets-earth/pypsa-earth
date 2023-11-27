@@ -21,7 +21,7 @@ RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
 
 config.update({"git_commit": get_last_commit_message(".")})
-config.update({"submodule_commit": get_last_commit_message("./pypsa-earth")})
+config.update({"submodule_commit": get_last_commit_message(PYPSAEARTH_FOLDER)})
 
 CUTOUTS_PATH = (
     "cutouts/cutout-2013-era5-tutorial.nc"
