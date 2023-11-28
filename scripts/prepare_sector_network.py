@@ -1049,9 +1049,7 @@ def add_shipping(n, costs):
             p_set=ports["p_set"],
         )
 
-        co2 = (
-            shipping_oil_share * ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
-        )
+        co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
 
         n.add(
             "Load",
@@ -2058,8 +2056,9 @@ def add_agriculture(n, costs):
     co2 = (
         nodal_energy_totals.loc[nodes, "agriculture oil"]
         * 1e6
+        / 8760
         * costs.at["oil", "CO2 intensity"]
-    )
+    ).sum()
 
     n.add(
         "Load",
@@ -2209,16 +2208,6 @@ def add_residential(n, costs):
         "residential gas emissions",
         bus="co2 atmosphere",
         carrier="gas emissions",
-        p_set=-co2,
-    )
-
-    co2 = (p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]) / 8760
-
-    n.add(
-        "Load",
-        "residential biomass emissions",
-        bus="co2 atmosphere",
-        carrier="biomass emissions",
         p_set=-co2,
     )
 
