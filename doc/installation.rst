@@ -109,8 +109,6 @@ The environment can be installed and activated like this:
 
     .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
-    .../pypsa-earth (pypsa-earth) % snakemake --version
-
 Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you
 open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.
 
@@ -124,6 +122,12 @@ In case mamba did not work for you, you might want to try conda instead:
 
 
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
+
+To confirm the installation, run the following command in the activated environment:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) % snakemake --version
 
 
 Solver Installation
