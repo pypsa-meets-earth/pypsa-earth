@@ -736,15 +736,15 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     basins_path = config_hydrobasin["destination"]
     output_fl = config_hydrobasin["output"][0]
 
-    mask_file = os.path.join(
-        basins_path, "hybas_??_lev{:02d}_v1c.shp".format(int(hydrobasins_level))
-    )
-    files_to_merge = glob.glob(mask_file)
+    files_to_merge = [
+        "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)
+        for suffix in config_hydrobasin["urls"]["hydrobasins"]["suffixes"]
+    ]
 
     gpdf_list = [None] * len(files_to_merge)
     logger.info("Reading hydrobasins files \n\r")
-    for i in tqdm(range(0, len(files_to_merge))):
-        gpdf_list[i] = gpd.read_file(files_to_merge[i])
+    for i, f_name in tqdm(enumerate(files_to_merge)):
+        gpdf_list[i] = gpd.read_file(os.path.join(basins_path, f_name))
     fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
         subset="HYBAS_ID", ignore_index=True
     )
