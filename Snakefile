@@ -28,7 +28,7 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 configfile: "configs/bundle_config.yaml"
 
 
-config.update({"git_commit": get_last_commit_message()})
+config.update({"git_commit": get_last_commit_message(".")})
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
@@ -1043,7 +1043,7 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from scripts.build_test_configs import create_test_config
+        from build_test_configs import create_test_config
         import yaml
 
         # get base configuration file from diff config
