@@ -20,6 +20,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Improve retrieve_databundle to prioritize smallest databundles `PR #911 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/911>`__
 
+* Add functionality to load shapefiles for hydrobasins directly from the data source directly `PR #919 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/919>`__
+
 
 PyPSA-Earth 0.2.3
 =================
