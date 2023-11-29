@@ -362,6 +362,29 @@ if config["enable"].get("build_cutout", False):
             "scripts/build_cutout.py"
 
 
+if config["enable"].get("modify_cutout", False):
+
+    rule build_climate_projections:
+        params:
+            snapshots=config["snapshots"],
+            climate_scenario=config["projection"]["climate_scenario"],
+            future_year=config["projection"]["future_year"],
+            years_window=config["projection"]["years_window"],
+        input:
+            "cutouts/" + CDIR + "{cutout}.nc",
+        output:
+            "cutouts/" + CDIR + "{cutout}_{future_year}.nc",
+        log:
+            "logs/" + RDIR + "build_climate_projections/{cutout}_{future_year}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "build_climate_projections_{cutout}_{future_year}"
+        threads: ATLITE_NPROCESSES
+        resources:
+            mem_mb=ATLITE_NPROCESSES * 1000,
+        script:
+            "scripts/build_climate_projections.py"
+
+
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:

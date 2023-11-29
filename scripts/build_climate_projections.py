@@ -51,11 +51,6 @@ import xarray as xr
 from shapely.geometry import LineString as Line
 from shapely.geometry import Point
 
-# TODO export parameters from the config
-scenario_name = "ssp245"
-month_in_focus = 5  # a temporary parameter
-
-
 cutout_path = "cutouts/sar-2013-era5.nc"
 region_name = "sar"
 cmip6_ens_dir = "data/cmip6/Global Atlas/tas_" + scenario_name + "/"
@@ -154,40 +149,66 @@ def build_cutout_future(
     return cutout_xr
 
 
-cmip6_xr = xr.open_dataset(os.path.join(cmip6_ens_dir, cmip6_fl))
+if __name__ == "__main__":
+    if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
-cutout_xr = xr.open_dataset(cutout_path)
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        snakemake = mock_snakemake(
+            "build_climate_projections",
+            snapshots=config["snapshots"],
+            climate_scenario=config["projection"]["climate_scenario"],
+            future_year=config["projection"]["future_year"],
+            years_window=config["projection"]["years_window"],
+            cutout="africa-2013-era5",
+        )
+    configure_logging(snakemake)
 
-cmip6_region = crop_cmip6(cmip6_xr, cutout_xr)
+    cutout_params = snakemake.params.cutouts[snakemake.wildcards.cutout]
+    snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
+    time = [snapshots[0], snapshots[-1]]
+    cutout_params["time"] = slice(*cutout_params.get("time", time))
+    onshore_shapes = snakemake.input.onshore_shapes
+    offshore_shapes = snakemake.input.offshore_shapes
 
-cmip6_region_interp = interpolate_cmip6_to_cutout_grid(
-    cmip6_xr=cmip6_region, cutout_xr=cutout_xr
-)
+    # TODO export parameters from the config
+    scenario_name = "ssp245"
+    month_in_focus = 5  # a temporary parameter
 
-# graphical test of interpolation
-fig = plt.figure()
-cmip6_region_interp["t"].mean("time").mean("member").plot()
-fig.savefig("test_cmip6_interp.png", dpi=700)
+    cmip6_xr = xr.open_dataset(os.path.join(cmip6_ens_dir, cmip6_fl))
 
-# test of projection
-dt_interp_2070vs2020 = calculate_proj_of_average(
-    cmip6_xr=cmip6_region_interp,
-    month=5,
-    year0=2020,
-    year1=2070,
-    years_window=month_in_focus,
-)
-print("dt_interp_2070vs2020")
-print(dt_interp_2070vs2020)
+    cutout_xr = xr.open_dataset(cutout_path)
 
-cutout_future = build_cutout_future(
-    cutout_xr=cutout_xr,
-    cmip6_xr=cmip6_region_interp,
-    months=5,
-    year0=2020,
-    year1=2070,
-    years_window=5,
-)
-cutout_future.to_netcdf(
-    "cutout_2070_" + str(month_in_focus) + "_" + region_name + ".nc"
-)
+    cmip6_region = crop_cmip6(cmip6_xr, cutout_xr)
+
+    cmip6_region_interp = interpolate_cmip6_to_cutout_grid(
+        cmip6_xr=cmip6_region, cutout_xr=cutout_xr
+    )
+
+    # graphical test of interpolation
+    fig = plt.figure()
+    cmip6_region_interp["t"].mean("time").mean("member").plot()
+    fig.savefig("test_cmip6_interp.png", dpi=700)
+
+    # test of projection
+    dt_interp_2070vs2020 = calculate_proj_of_average(
+        cmip6_xr=cmip6_region_interp,
+        month=5,
+        year0=2020,
+        year1=2070,
+        years_window=month_in_focus,
+    )
+    print("dt_interp_2070vs2020")
+    print(dt_interp_2070vs2020)
+
+    cutout_future = build_cutout_future(
+        cutout_xr=cutout_xr,
+        cmip6_xr=cmip6_region_interp,
+        months=5,
+        year0=2020,
+        year1=2070,
+        years_window=5,
+    )
+    cutout_future.to_netcdf(
+        "cutout_2070_" + str(month_in_focus) + "_" + region_name + ".nc"
+    )
