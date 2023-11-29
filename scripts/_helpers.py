@@ -816,21 +816,29 @@ def create_country_list(input, iso_coding=True):
     return full_codes_list
 
 
-def get_last_commit_message():
+def get_last_commit_message(path):
     """
-    Function to get the last Git commit message.
+    Function to get the last PyPSA-Earth Git commit message.
 
     Returns
     -------
     result : string
     """
+    _logger = logging.getLogger(__name__)
+    last_commit_message = None
+    backup_cwd = os.getcwd()
     try:
-        result = subprocess.run(
-            ["git", "log", "-1", "--pretty=format:%H %s"],
-            capture_output=True,
-            text=True,
+        os.chdir(path)
+        last_commit_message = (
+            subprocess.check_output(
+                ["git", "log", "-n", "1", "--pretty=format:%H %s"],
+                stderr=subprocess.STDOUT,
+            )
+            .decode()
+            .strip()
         )
-        return result.stdout.strip()
-    except Exception as e:
-        logger.warning(f"Error getting the last commit message: {e}")
-        return ""
+    except subprocess.CalledProcessError as e:
+        _logger.warning(f"Error executing Git: {e}")
+
+    os.chdir(backup_cwd)
+    return last_commit_message
