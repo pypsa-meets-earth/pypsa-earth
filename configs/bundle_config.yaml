@@ -68,6 +68,20 @@ databundles:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
+  # load tutorial hydrobasins bundle for Africa only
+  bundle_tutorial_hydrobasins:
+    countries: [Africa]
+    tutorial: true
+    category: common
+    destination: "data/hydrobasins"
+    urls:
+      hydrobasins:
+        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
+        suffixes: ["af"]
+    unzip: true
+    output:
+    - data/hydrobasins/hybas_world.shp
+
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
     countries: [NG, BJ]
@@ -153,7 +167,7 @@ databundles:
         suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
     unzip: true
     output:
-    - data/hydrobasins/*.shp
+    - data/hydrobasins/hybas_world.shp
 
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
