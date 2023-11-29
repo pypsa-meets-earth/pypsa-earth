@@ -48,13 +48,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
+from _helpers import configure_logging, create_logger
 from shapely.geometry import LineString as Line
 from shapely.geometry import Point
 
-cutout_path = "cutouts/sar-2013-era5.nc"
-region_name = "sar"
-cmip6_ens_dir = "data/cmip6/Global Atlas/tas_" + scenario_name + "/"
-cmip6_fl = "t_CMIP6_" + scenario_name + "_mon_201501-210012.nc"
+logger = create_logger(__name__)
 
 
 def crop_cmip6(cmip6_xr, cutout_xr):
