@@ -80,7 +80,7 @@ databundles:
         suffixes: ["af"]
     unzip: true
     output:
-    - data/hydrobasins/hybas_world.shp
+    - data/hydrobasins/hybas_world_v1c.shp
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
