@@ -732,13 +732,12 @@ def datafiles_retrivedatabundle(config):
     return listoutputs
 
 
-def merge_hydrobasins_shape(config):
-    basins_path = config_bundles["bundle_hydrobasins"]["destination"]
-    hydrobasins_level = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
-    output_fl = config_bundles["bundle_hydrobasins"]["output"][0]
+def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
+    basins_path = config_hydrobasin["destination"]
+    output_fl = config_hydrobasin["output"][0]
 
     mask_file = os.path.join(
-        basins_path, "hybas_*_lev{:02d}_v1c.shp".format(int(hydrobasins_level))
+        basins_path, "hybas_??_lev{:02d}_v1c.shp".format(int(hydrobasins_level))
     )
     files_to_merge = glob.glob(mask_file)
 
@@ -749,26 +748,8 @@ def merge_hydrobasins_shape(config):
     fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
         subset="HYBAS_ID", ignore_index=True
     )
-    logger.info(
-        "Merging single files into:\n\t"
-        + "hybas_world_lev"
-        + str(hydrobasins_level)
-        + "_v1c.shp"
-    )
-    fl_merged.to_file(output_fl)
-
-
-def rename_hydrobasins_tutorial(config):
-    basins_path = config_bundles["bundle_tutorial_hydrobasins"]["destination"]
-    hydrobasins_level = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
-    output_fl = config_bundles["bundle_tutorial_hydrobasins"]["output"][0]
-
-    mask_file = os.rename(
-        os.path.join(
-            basins_path, "hybas_af_lev{:02d}_v1c.shp".format(int(hydrobasins_level))
-        ),
-        output_fl,
-    )
+    logger.info("Merging single files into:\n\t" + output_fl)
+    fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
 
 if __name__ == "__main__":
@@ -835,13 +816,14 @@ if __name__ == "__main__":
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
-    if "bundle_hydrobasins" in bundles_to_download:
+    hydrobasin_bundles = [
+        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
+    ]
+    if len(hydrobasin_bundles) > 0:
         logger.info("Merging regional hydrobasins files into a global shapefile")
-        merge_hydrobasins_shape(config=config_bundles["bundle_hydrobasins"])
-
-    if "bundle_tutorial_hydrobasins" in bundles_to_download:
-        rename_hydrobasins_tutorial(
-            config=config_bundles["bundle_tutorial_hydrobasins"]
+        hydrobasins_level = snakemake.params["hydrobasins_level"]
+        merge_hydrobasins_shape(
+            config_bundles[hydrobasin_bundles[0]], hydrobasins_level
         )
 
     logger.info(
