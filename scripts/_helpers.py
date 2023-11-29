@@ -818,7 +818,8 @@ def create_country_list(input, iso_coding=True):
 
 def get_last_commit_message(path):
     """
-    Function to get the last PyPSA-Earth Git commit message
+    Function to get the last PyPSA-Earth Git commit message.
+
     Returns
     -------
     result : string
