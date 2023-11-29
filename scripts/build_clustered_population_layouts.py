@@ -15,7 +15,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
             simpl="",
-            clusters=10,
+            clusters=38,
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -46,3 +46,12 @@ if __name__ == "__main__":
     pop["fraction"] = pop.total / pop.ct.map(country_population)
 
     pop.to_csv(snakemake.output.clustered_pop_layout)
+
+    gdp_layout = xr.open_dataarray(snakemake.input["gdp_layout"])
+    gdp = I.dot(gdp_layout.stack(spatial=("y", "x")))
+    gdp = pd.DataFrame(gdp, index=clustered_regions.index, columns=["total"])
+
+    gdp["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
+    country_gdp = gdp.total.groupby(gdp.ct).sum()
+    gdp["fraction"] = gdp.total / gdp.ct.map(country_gdp)
+    gdp.to_csv(snakemake.output.clustered_gdp_layout)

@@ -42,9 +42,9 @@ def build_nodal_distribution_key(
 ):  # returns percentage of co2 emissions
     """Build nodal distribution keys for each sector."""
 
-    countries = regions["name"].str[:2].unique()
+    # countries = regions["name"].str[:2].unique()
 
-    keys = pd.DataFrame(index=regions.name, columns=technology, dtype=float)
+    keys = pd.DataFrame(index=regions.name, columns=industry, dtype=float)
 
     pop = pd.read_csv(
         snakemake.input.clustered_pop_layout,
@@ -53,10 +53,19 @@ def build_nodal_distribution_key(
         na_values=[""],
     )
 
+    gdp = pd.read_csv(
+        snakemake.input.clustered_gdp_layout,
+        index_col=0,
+        keep_default_na=False,
+        na_values=[""],
+    )
+
     # pop["country"] = pop.index.str[:2]
     keys["population"] = pop["total"].values / pop["total"].sum()
 
-    for tech, country in product(technology, countries):
+    keys["gdp"] = gdp["total"].values / gdp["total"].sum()
+
+    for tech, country in product(industry, countries):
         regions_ct = regions.name[regions.name.str.contains(country)]
 
         facilities = industrial_database.query(
@@ -75,11 +84,25 @@ def build_nodal_distribution_key(
                 key.groupby(facilities.index).sum().reindex(regions_ct, fill_value=0.0)
             )
         else:
-            key = keys.loc[regions_ct, "population"]
+            key = keys.loc[regions_ct, "gdp"]
 
         keys.loc[regions_ct, tech] = key
     keys["country"] = pop["ct"]
     return keys
+
+
+def match_technology(df):
+    industry_mapping = {
+        "Integrated steelworks": "iron and steel",
+        "DRI + Electric arc": "iron and steel",
+        "Electric arc": "iron and steel",
+        "Cement": "non-metallic minerals",
+        "HVC": "chemical and petrochemical",
+        "Paper": "paper pulp and print",
+    }
+
+    df["industry"] = df["technology"].map(industry_mapping)
+    return df
 
 
 if __name__ == "__main__":
@@ -91,9 +114,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
             simpl="",
-            clusters=10,
-            demand="DF",
-            planning_horizons=2030,
+            clusters=38,
+            demand="EG",
+            planning_horizons=2050,
         )
         sets_path_to_root("pypsa-earth-sec")
 
@@ -101,6 +124,10 @@ if __name__ == "__main__":
     gadm_level = options["gadm_level"]
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
+
+    countries = snakemake.config["countries"]
+
+    # countries = ["EG", "BH"]
 
     if regions["name"][0][
         :3
@@ -115,15 +142,18 @@ if __name__ == "__main__":
         header=0,
         keep_default_na=False,  # , index_col=0
     )
+    geo_locs["capacity"] = pd.to_numeric(geo_locs.capacity)
+
+    # Call the function to add the "industry" column
+    df_with_industry = match_technology(geo_locs)
 
     gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
 
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]
 
-    technology = geo_locs.technology.unique()
+    industry = geo_locs.industry.unique()
 
     shapes_path = snakemake.input.shapes_path
-
     industrial_database = map_industry_to_buses(
         geo_locs[geo_locs.quality != "unavailable"]
     )

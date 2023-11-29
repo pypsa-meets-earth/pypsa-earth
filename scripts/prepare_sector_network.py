@@ -1049,9 +1049,7 @@ def add_shipping(n, costs):
             p_set=ports["p_set"],
         )
 
-        co2 = (
-            shipping_oil_share * ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
-        )
+        co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
 
         n.add(
             "Load",
@@ -1340,7 +1338,7 @@ def add_industry(n, costs):
         carrier="process emissions",
         p_set=-(
             #    industrial_demand["process emission from feedstock"]+
-            industrial_demand["process emission"]
+            industrial_demand["process emissions"]
         )
         / 8760,
     )
@@ -2058,8 +2056,9 @@ def add_agriculture(n, costs):
     co2 = (
         nodal_energy_totals.loc[nodes, "agriculture oil"]
         * 1e6
+        / 8760
         * costs.at["oil", "CO2 intensity"]
-    )
+    ).sum()
 
     n.add(
         "Load",
@@ -2212,16 +2211,6 @@ def add_residential(n, costs):
         p_set=-co2,
     )
 
-    co2 = (p_set_oil.sum().sum() * costs.at["solid biomass", "CO2 intensity"]) / 8760
-
-    n.add(
-        "Load",
-        "residential biomass emissions",
-        bus="co2 atmosphere",
-        carrier="biomass emissions",
-        p_set=-co2,
-    )
-
     for country in countries:
         rem_heat_demand = (
             energy_totals.loc[country, "total residential space"]
@@ -2334,12 +2323,12 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1.0",
-            opts="Co2L0.10",
+            ll="c1",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="6H",
+            sopts="144H",
             discountrate="0.071",
-            demand="DF",
+            demand="AB",
         )
 
     # Load population layout
@@ -2439,9 +2428,9 @@ if __name__ == "__main__":
     # TODO follow the same structure as land transport and heat
 
     # Load industry demand data
-    industrial_demand = pd.read_csv(snakemake.input.industrial_demand)  # * 1e6
-
-    industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
+    industrial_demand = pd.read_csv(
+        snakemake.input.industrial_demand, index_col=0, header=0
+    )  # * 1e6
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
