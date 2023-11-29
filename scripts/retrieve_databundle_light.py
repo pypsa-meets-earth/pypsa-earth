@@ -758,6 +758,19 @@ def merge_hydrobasins_shape(config):
     fl_merged.to_file(output_fl)
 
 
+def rename_hydrobasins_tutorial(config):
+    basins_path = config_bundles["bundle_tutorial_hydrobasins"]["destination"]
+    hydrobasins_level = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
+    output_fl = config_bundles["bundle_tutorial_hydrobasins"]["output"][0]
+
+    mask_file = os.rename(
+        os.path.join(
+            basins_path, "hybas_af_lev{:02d}_v1c.shp".format(int(hydrobasins_level))
+        ),
+        output_fl,
+    )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -825,6 +838,11 @@ if __name__ == "__main__":
     if "bundle_hydrobasins" in bundles_to_download:
         logger.info("Merging regional hydrobasins files into a global shapefile")
         merge_hydrobasins_shape(config=config_bundles["bundle_hydrobasins"])
+
+    if "bundle_tutorial_hydrobasins" in bundles_to_download:
+        rename_hydrobasins_tutorial(
+            config=config_bundles["bundle_tutorial_hydrobasins"]
+        )
 
     logger.info(
         "Bundle successfully loaded and unzipped:\n\t"
