@@ -530,7 +530,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def getContinent(code):
+def getContinent(code, world_iso=read_osm_config("world_iso")):
     """
     Returns continent names that contains list of iso-code countries.
 
@@ -554,7 +554,6 @@ def getContinent(code):
 
     continent_list = []
     code_set = set(code)
-    world_iso = read_osm_config("world_iso")
     for continent in world_iso.keys():
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
@@ -794,9 +793,10 @@ def create_country_list(input, iso_coding=True):
 
     full_codes_list = []
 
+    world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
+
     for value1 in input:
         codes_list = []
-        world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
         # extract countries in world
         if value1 == "Earth":
             for continent in world_iso.keys():
