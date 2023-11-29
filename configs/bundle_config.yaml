@@ -36,7 +36,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_NGBJ.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1Vb1ISjhy7iwTTZYeezGd6S4nLt-EDGme/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -49,7 +49,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_BW.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/19IXvTD8gVSzgTInL85ta7QjaNI8ZPCCY/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
@@ -62,11 +62,25 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_data_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1VGzE8ZJHAvAQ9X44QNSX4rH3QF7Yi37D/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+
+  # load tutorial hydrobasins bundle for Africa only
+  bundle_tutorial_hydrobasins:
+    countries: [Africa]
+    tutorial: true
+    category: hydrobasins
+    destination: "data/hydrobasins"
+    urls:
+      hydrobasins:
+        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
+        suffixes: ["af"]
+    unzip: true
+    output:
+    - data/hydrobasins/hybas_world.shp
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
@@ -75,7 +89,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_NGBJ.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -88,7 +102,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_BW.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -101,7 +115,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/tutorial_cutouts_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -125,12 +139,9 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/tutorial_data_general.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/3853/files/tutorial_data_general.zip?download=1
       gdrive: https://drive.google.com/file/d/1nRLrs_kP0qVl-IHC4BFLjpoKa3HLk2Py/view
     output:
-    - data/costs.csv
-    - data/hydro_capacities.csv
-    - data/custom_powerplants.csv
     - data/eez/eez_v11.gpkg
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/ssp2-2.6/2030/era5_2013/Asia.nc
@@ -138,8 +149,20 @@ databundles:
     - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/Oceania.nc
-    - data/hydrobasins/hybas_world_lev04_v1c.shp
-    - data/hydrobasins/hybas_world_lev05_v1c.shp
+
+  # global data for hydrobasins
+  bundle_hydrobasins:
+    countries: [Earth]
+    tutorial: false
+    category: hydrobasins
+    destination: "data/hydrobasins"
+    urls:
+      hydrobasins:
+        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
+        suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
+    unzip: true
+    output:
+    - data/hydrobasins/hybas_world.shp
 
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:

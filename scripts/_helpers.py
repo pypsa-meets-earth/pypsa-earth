@@ -386,7 +386,9 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
     return costs
 
 
-def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
+def progress_retrieve(
+    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
+):
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -417,6 +419,11 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
 
     if data is not None:
         data = urllib.parse.urlencode(data).encode()
+
+    if headers:
+        opener = urllib.request.build_opener()
+        opener.addheaders = headers
+        urllib.request.install_opener(opener)
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
@@ -523,7 +530,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def getContinent(code):
+def getContinent(code, world_iso=read_osm_config("world_iso")):
     """
     Returns continent names that contains list of iso-code countries.
 
@@ -547,7 +554,6 @@ def getContinent(code):
 
     continent_list = []
     code_set = set(code)
-    world_iso = read_osm_config("world_iso")
     for continent in world_iso.keys():
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
@@ -787,9 +793,10 @@ def create_country_list(input, iso_coding=True):
 
     full_codes_list = []
 
+    world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
+
     for value1 in input:
         codes_list = []
-        world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
         # extract countries in world
         if value1 == "Earth":
             for continent in world_iso.keys():

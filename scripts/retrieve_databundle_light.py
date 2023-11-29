@@ -80,11 +80,13 @@ according to the following rules:
 - ``cutouts``: input data unzipped into the cutouts folder
 
 """
+import glob
 import logging
 import os
 import re
 from zipfile import ZipFile
 
+import geopandas as gpd
 import pandas as pd
 import yaml
 from _helpers import (
@@ -95,6 +97,7 @@ from _helpers import (
     sets_path_to_root,
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
+from tqdm import tqdm
 
 logger = create_logger(__name__)
 
@@ -303,6 +306,59 @@ def download_and_unzip_protectedplanet(
     return True
 
 
+def download_and_unpack(
+    url,
+    file_path,
+    resource,
+    destination,
+    headers=None,
+    hot_run=True,
+    unzip=True,
+    disable_progress=False,
+):
+    """
+    download_and_unpack( url, file_path, resource, destination, headers=None,
+    hot_run=True, unzip=True, disable_progress=False)
+
+    A helper function to encapsulate retrieval and unzip
+
+    Inputs
+    ------
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+    """
+    if hot_run:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        try:
+            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
+            progress_retrieve(
+                url, file_path, headers=headers, disable_progress=disable_progress
+            )
+
+            # if the file is a zipfile and unzip is enabled
+            # then unzip it and remove the original file
+            if unzip:
+                with ZipFile(file_path, "r") as zipfile:
+                    zipfile.extractall(destination)
+
+                os.remove(file_path)
+            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+        except:
+            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            return False
+
+    return True
+
+
 def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
     """
     download_and_unzip_direct(config, rootpath, dest_path, hot_run=True,
@@ -328,31 +384,81 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     True when download is successful, False otherwise
     """
     resource = config["category"]
+    destination = config["destination"]
     url = config["urls"]["direct"]
 
     file_path = os.path.join(config["destination"], os.path.basename(url))
 
-    if hot_run:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+    unzip = config.get("unzip", False)
 
-        try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
+    download_and_unpack(
+        url=url,
+        file_path=file_path,
+        resource=resource,
+        hot_run=hot_run,
+        unzip=unzip,
+        disable_progress=disable_progress,
+    )
 
-            # if the file is a zipfile and unzip is enabled
-            # then unzip it and remove the original file
-            if config.get("unzip", False):
-                with ZipFile(file_path, "r") as zipfile:
-                    zipfile.extractall(config["destination"])
 
-                os.remove(file_path)
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
-            return False
+def download_and_unzip_hydrobasins(
+    config, rootpath, hot_run=True, disable_progress=False
+):
+    """
+    download_and_unzip_basins(config, rootpath, dest_path, hot_run=True,
+    disable_progress=False)
 
-    return True
+    Function to download and unzip the data for hydrobasins from HydroBASINS database
+    available via https://www.hydrosheds.org/products/hydrobasins
+
+    We are using data from the HydroSHEDS version 1 database
+    which is © World Wildlife Fund, Inc. (2006-2022) and has been used herein under license.
+    WWF has not evaluated our data pipeline and therefore gives no warranty regarding its
+    accuracy, completeness, currency or suitability for any particular purpose.
+    Portions of the HydroSHEDS v1 database incorporate data which are the intellectual property
+    rights of © USGS (2006-2008), NASA (2000-2005), ESRI (1992-1998), CIAT (2004-2006),
+    UNEP-WCMC (1993), WWF (2004), Commonwealth of Australia (2007), and Her Royal Majesty
+    and the British Crown and are used under license. The HydroSHEDS v1 database and
+    more information are available at https://www.hydrosheds.org.
+
+    Inputs
+    ------
+    config : Dict
+        Configuration data for the category to download
+    rootpath : str
+        Absolute path of the repository
+    hot_run : Bool (default True)
+        When true the data are downloaded
+        When false, the workflow is run without downloading and unzipping
+    disable_progress : Bool (default False)
+        When true the progress bar to download data is disabled
+
+    Outputs
+    -------
+    True when download is successful, False otherwise
+    """
+    resource = config["category"]
+    destination = config["destination"]
+    url_templ = config["urls"]["hydrobasins"]["base_url"]
+    suffix_list = config["urls"]["hydrobasins"]["suffixes"]
+
+    level_code = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
+    level_code = "{:02d}".format(int(level_code))
+
+    for rg in suffix_list:
+        url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
+        file_path = os.path.join(config["destination"], os.path.basename(url))
+
+        download_and_unpack(
+            url=url,
+            file_path=file_path,
+            resource=resource,
+            destination=destination,
+            headers=[("User-agent", "Mozilla/5.0")],
+            hot_run=hot_run,
+            unzip=True,
+            disable_progress=disable_progress,
+        )
 
 
 def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
@@ -395,7 +501,10 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
 
         progress_retrieve(
-            url, file_path, data=postdata, disable_progress=disable_progress
+            url,
+            file_path,
+            data=postdata,
+            disable_progress=disable_progress,
         )
 
         # if the file is a zipfile and unzip is enabled
@@ -623,6 +732,26 @@ def datafiles_retrivedatabundle(config):
     return listoutputs
 
 
+def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
+    basins_path = config_hydrobasin["destination"]
+    output_fl = config_hydrobasin["output"][0]
+
+    files_to_merge = [
+        "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)
+        for suffix in config_hydrobasin["urls"]["hydrobasins"]["suffixes"]
+    ]
+
+    gpdf_list = [None] * len(files_to_merge)
+    logger.info("Reading hydrobasins files \n\r")
+    for i, f_name in tqdm(enumerate(files_to_merge)):
+        gpdf_list[i] = gpd.read_file(os.path.join(basins_path, f_name))
+    fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
+        subset="HYBAS_ID", ignore_index=True
+    )
+    logger.info("Merging single files into:\n\t" + output_fl)
+    fl_merged.to_file(output_fl, driver="ESRI Shapefile")
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -686,6 +815,16 @@ if __name__ == "__main__":
 
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
+
+    hydrobasin_bundles = [
+        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
+    ]
+    if len(hydrobasin_bundles) > 0:
+        logger.info("Merging regional hydrobasins files into a global shapefile")
+        hydrobasins_level = snakemake.params["hydrobasins_level"]
+        merge_hydrobasins_shape(
+            config_bundles[hydrobasin_bundles[0]], hydrobasins_level
+        )
 
     logger.info(
         "Bundle successfully loaded and unzipped:\n\t"

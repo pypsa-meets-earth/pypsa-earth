@@ -150,6 +150,7 @@ if config["enable"].get("retrieve_databundle", True):
         params:
             countries=config["countries"],
             tutorial=config["tutorial"],
+            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand("{file}", file=datafiles_retrivedatabundle(config)),
             directory("data/landcover"),
