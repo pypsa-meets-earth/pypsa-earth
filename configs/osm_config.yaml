@@ -367,3 +367,12 @@ iso_to_geofk_dict:
   VC: "central-america"  # Saint Vincent e Grenadine
   KN: "central-america"  # Saint Kitts e Nevis
   GD: "central-america"  # Grenada
+  AW: "central-america"  # Aruba
+  AX: "finland"  # Aland
+  BM: "north-america"  # Bermuda
+  CW: "central-america"  # Curaçao
+  KY: "central-america"  # Cayman Islands
+  HK: "china"  # Hong Kong
+  MO: "china"  # Macau
+  SX: "central-america"  # Sint Maarten
+  TC: "central-america"  # Turks and Caicos Islands
