@@ -85,14 +85,13 @@ def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
         round(max(cutout_xr.coords["y"].values) + dx_new, 1),
         dx_new,
     )
-    # Interpolate
     cmip6_interp = cmip6_xr.interp(time=cmip6_xr.time, lat=newlat, lon=newlon)
 
     return cmip6_interp
 
 
 # TODO fix years_window
-def subset_by_time(cmip6_xr, month, year, years_window=5):
+def subset_by_time(cmip6_xr, month, year, years_window):
     # TODO add warning in case there are no enough years
     cmip6_in_period = cmip6_xr.where(
         (
@@ -105,13 +104,13 @@ def subset_by_time(cmip6_xr, month, year, years_window=5):
     return cmip6_in_period
 
 
-def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window=5):
+def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
     cmip6_interp_year0 = subset_by_time(
         cmip6_xr,
-        month=month_in_focus,
+        month,
         year=year0,
     )
-    cmip6_interp_year1 = subset_by_time(cmip6_xr, month=month_in_focus, year=year1)
+    cmip6_interp_year1 = subset_by_time(cmip6_xr, month=month, year=year1)
     dt_interp = cmip6_interp_year1["t"].mean("member").mean(
         "time"
     ) - cmip6_interp_year0["t"].mean("member").mean("time")
@@ -131,9 +130,7 @@ def build_projection_for_month(cutout_xr, dt_xr, month):
     return cutout_xr
 
 
-def build_cutout_future(
-    cutout_xr, cmip6_xr, months=5, year0=2020, year1=2070, years_window=5
-):
+def build_cutout_future(cutout_xr, cmip6_xr, months, year0, year1, years_window):
     for k_month in [months]:
         dt_k = calculate_proj_of_average(
             cmip6_xr=cmip6_xr, month=k_month, year0=year0, year1=year1, years_window=5
@@ -154,6 +151,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_climate_projections",
             climate_scenario="ssp2-2.6",
+            present_year=2020,
             future_year=2050,
             years_window=5,
             cutout="africa-2013-era5",
