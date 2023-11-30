@@ -80,8 +80,6 @@ according to the following rules:
 - ``cutouts``: input data unzipped into the cutouts folder
 
 """
-import glob
-import logging
 import os
 import re
 from zipfile import ZipFile
@@ -352,11 +350,10 @@ def download_and_unpack(
 
                 os.remove(file_path)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+            return True
         except:
             logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
             return False
-
-    return True
 
 
 def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
@@ -445,11 +442,13 @@ def download_and_unzip_hydrobasins(
     level_code = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
     level_code = "{:02d}".format(int(level_code))
 
+    all_downloaded = True
+
     for rg in suffix_list:
         url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
         file_path = os.path.join(config["destination"], os.path.basename(url))
 
-        download_and_unpack(
+        all_downloaded &= download_and_unpack(
             url=url,
             file_path=file_path,
             resource=resource,
@@ -459,6 +458,8 @@ def download_and_unzip_hydrobasins(
             unzip=True,
             disable_progress=disable_progress,
         )
+
+    return all_downloaded
 
 
 def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
@@ -742,13 +743,12 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     ]
 
     gpdf_list = [None] * len(files_to_merge)
-    logger.info("Reading hydrobasins files \n\r")
+    logger.info("Merging hydrobasins files into: " + output_fl)
     for i, f_name in tqdm(enumerate(files_to_merge)):
         gpdf_list[i] = gpd.read_file(os.path.join(basins_path, f_name))
     fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
         subset="HYBAS_ID", ignore_index=True
     )
-    logger.info("Merging single files into:\n\t" + output_fl)
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
 
@@ -791,6 +791,9 @@ if __name__ == "__main__":
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
+    # initialize downloaded and missing bundles
+    downloaded_bundles = []
+
     # download the selected bundles
     for b_name in bundles_to_download:
         host_list = config_bundles[b_name]["urls"]
@@ -811,6 +814,7 @@ if __name__ == "__main__":
                 logger.warning(f"Error in downloading bundle {b_name} - host {host}")
 
             if downloaded_bundle:
+                downloaded_bundles.append(b_name)
                 break
 
         if not downloaded_bundle:
@@ -826,7 +830,14 @@ if __name__ == "__main__":
             config_bundles[hydrobasin_bundles[0]], hydrobasins_level
         )
 
+    # log the downloaded and missing bundles
     logger.info(
-        "Bundle successfully loaded and unzipped:\n\t"
-        + "\n\t".join(bundles_to_download)
+        "Bundle successfully loaded and unzipped:\n\t" + "\n\t".join(downloaded_bundles)
     )
+
+    missing_bundles = set(bundles_to_download) - set(downloaded_bundles)
+    if missing_bundles:
+        logger.warning(
+            "The following bundles could not be downloaded:\n\t"
+            + "\n\t".join(list(missing_bundles))
+        )

@@ -149,6 +149,7 @@ databundles:
     - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/Oceania.nc
+    - data/landcover/world_protected_area/protected_areas_tutorial.shp
 
   # global data for hydrobasins
   bundle_hydrobasins:
@@ -170,13 +171,9 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/data_v0.1.zip?download=1
-      gdrive: https://drive.google.com/file/d/1jN5iV_iaRa5lc1XOaEtletKPUgPNOVuf/view
+      zenodo: https://sandbox.zenodo.org/records/4114/files/bundle_data_earth.zip?download=1
+      gdrive: https://drive.google.com/file/d/1zU4VRRBDVIVqoykhK9lnOAr60unVm_x2/view?usp=drive_link
     output:
-    - data/costs.csv
-    - data/hydro_capacities.csv
-    - data/custom_powerplants.csv
-    - data/eia_hydro_annual_generation.csv
     - data/eez/eez_v11.gpkg
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -186,9 +183,6 @@ databundles:
     - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/Oceania.nc
-    - data/hydrobasins/hybas_world_lev04_v1c.shp
-    - data/hydrobasins/hybas_world_lev05_v1c.shp
-    - data/hydrobasins/hybas_world_lev06_v1c.shp
 
   # resources bundle containing the resources folder for Africa only
   bundle_natura_earth:
@@ -321,7 +315,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1223907/files/cutouts_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/4114/files/bundle_cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
