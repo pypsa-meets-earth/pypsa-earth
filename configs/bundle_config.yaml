@@ -149,6 +149,7 @@ databundles:
     - data/ssp2-2.6/2030/era5_2013/NorthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/Oceania.nc
+    - data/landcover/world_protected_area/protected_areas_tutorial.shp
 
   # global data for hydrobasins
   bundle_hydrobasins:
