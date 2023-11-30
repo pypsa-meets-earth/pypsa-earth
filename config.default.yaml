@@ -204,6 +204,14 @@ atlite:
       # y: [33., 72]    # manual set cutout range
 
 
+projection:
+  climate_scenario: ssp245
+  present_year: 2020
+  future_year: 2050
+  years_window: 5 # a half of width currently
+  gcm_selection: false # false to use all the available global climate models
+
+
 renewable:
   onwind:
     cutout: cutout-2013-era5
