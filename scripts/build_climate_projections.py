@@ -12,24 +12,23 @@ Relevant Settings
 
 .. code:: yaml
 
-    scenario:
-        future_clim
-
-    future_climate:
-        ssp_scenario:
-        reference_year:
-        future_weather_year:
-        climate_avr_windows:
+    projection:
+        climate_scenario:
+        present_year:
+        future_year:
+        years_window:
+        gcm_selection:
 
 Inputs
 ------
 
-- ``cutouts/cutout.nc``: confer :ref:`cutout`, a cutout file PyPSA Network
+- ``cutouts/cutout.nc``: confer :ref:`cutout`, a cutout file produced by altile
+- ``data/cmip6_avr.cn``:
 
 Outputs
 -------
 
-- ``cutouts/cutout_future_{future_weather_year}.nc``: A cutout modified to account for future climate conditions
+- ``cutouts/{cutout}_{future_year}.nc"``: A cutout modified to account for future climate conditions
 
 Description
 -----------
