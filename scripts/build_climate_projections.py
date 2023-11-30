@@ -154,29 +154,25 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "build_climate_projections",
-            snapshots=config["snapshots"],
-            climate_scenario=config["projection"]["climate_scenario"],
-            future_year=config["projection"]["future_year"],
-            years_window=config["projection"]["years_window"],
+            climate_scenario="ssp2-2.6",
+            future_year=2050,
+            years_window=5,
             cutout="africa-2013-era5",
         )
     configure_logging(snakemake)
 
-    cutout_params = snakemake.params.cutouts[snakemake.wildcards.cutout]
+    climate_scenario = snakemake.params.climate_scenario
+    present_year = snakemake.params.present_year
+    future_year = snakemake.params.future_year
+    years_window = snakemake.params.years_window
+    cutout = snakemake.input.cutout
+    cmip6 = snakemake.input.cmip6_avr
+
     snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
-    time = [snapshots[0], snapshots[-1]]
-    cutout_params["time"] = slice(*cutout_params.get("time", time))
-    onshore_shapes = snakemake.input.onshore_shapes
-    offshore_shapes = snakemake.input.offshore_shapes
+    season_in_focus = snapshots.month.unique().to_list()
 
-    # TODO export parameters from the config
-    scenario_name = "ssp245"
-    month_in_focus = 5  # a temporary parameter
-
-    cmip6_xr = xr.open_dataset(os.path.join(cmip6_ens_dir, cmip6_fl))
-
-    cutout_xr = xr.open_dataset(cutout_path)
-
+    cmip6_xr = xr.open_dataset(cmip6)
+    cutout_xr = xr.open_dataset(cutout)
     cmip6_region = crop_cmip6(cmip6_xr, cutout_xr)
 
     cmip6_region_interp = interpolate_cmip6_to_cutout_grid(
