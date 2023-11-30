@@ -12,7 +12,7 @@ Upcoming release
 Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
 E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
 
-**New Features and major Changes**
+**New Features and Major Changes**
 
 * Keep all traceback in logs. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/898>`__
 
@@ -20,6 +20,11 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Improve retrieve_databundle to prioritize smallest databundles `PR #911 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/911>`__
 
+* Add functionality to load shapefiles for hydrobasins directly from the data source directly `PR #919 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/919>`__
+
+**Minor Changes and bug-fixing**
+
+* Revise databundles and improve logging in retrieve_databundle `PR #928 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/928>`__
 
 PyPSA-Earth 0.2.3
 =================

@@ -292,9 +292,10 @@ renewable:
     extendable: true
   hydro:
     cutout: cutout-2013-era5
+    hydrobasins_level: 6
     resource:
       method: hydro
-      hydrobasins: data/hydrobasins/hybas_world_lev06_v1c.shp
+      hydrobasins: data/hydrobasins/hybas_world.shp
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
