@@ -368,10 +368,12 @@ if config["enable"].get("modify_cutout", False):
         params:
             snapshots=config["snapshots"],
             climate_scenario=config["projection"]["climate_scenario"],
+            present_year=config["projection"]["present_year"],
             future_year=config["projection"]["future_year"],
             years_window=config["projection"]["years_window"],
         input:
-            "cutouts/" + CDIR + "{cutout}.nc",
+            cutout="cutouts/" + CDIR + "{cutout}.nc",
+            cmip6_avr="/Users/ekaterina/Documents/_github_/cmip6/Global Atlas/tas_ssp245/t_CMIP6_ssp245_mon_201501-210012.nc",
         output:
             "cutouts/" + CDIR + "{cutout}_{future_year}.nc",
         log:
