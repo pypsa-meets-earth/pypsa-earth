@@ -1,5 +1,6 @@
 from os.path import exists
 from shutil import copyfile, move
+from scripts.helpers import get_last_commit_message
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -18,6 +19,9 @@ PYPSAEARTH_FOLDER = "./pypsa-earth"
 SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
+
+config.update({"git_commit": get_last_commit_message(".")})
+config.update({"submodule_commit": get_last_commit_message(PYPSAEARTH_FOLDER)})
 
 CUTOUTS_PATH = (
     "cutouts/cutout-2013-era5-tutorial.nc"
@@ -414,15 +418,6 @@ rule copy_config:
         "scripts/copy_config.py"
 
 
-rule copy_commit:
-    output:
-        SDIR + "/commit_info.txt",
-    shell:
-        """
-        git log -n 1 --pretty=format:"Commit: %H%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s" > {output}
-        """
-
-
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
@@ -432,7 +427,6 @@ rule solve_network:
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
-        commit=SDIR + "/commit_info.txt",
     output:
         RDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
