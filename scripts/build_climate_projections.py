@@ -176,30 +176,35 @@ if __name__ == "__main__":
         cmip6_xr=cmip6_region, cutout_xr=cutout_xr
     )
 
+    # -----------------------------------------------------------------
+    #       to be replaced after debug
+    # -----------------------------------------------------------------
     # graphical test of interpolation
     fig = plt.figure()
     cmip6_region_interp["t"].mean("time").mean("member").plot()
     fig.savefig("test_cmip6_interp.png", dpi=700)
 
-    # test of projection
-    dt_interp_2070vs2020 = calculate_proj_of_average(
-        cmip6_xr=cmip6_region_interp,
-        month=5,
-        year0=2020,
-        year1=2070,
-        years_window=month_in_focus,
-    )
-    print("dt_interp_2070vs2020")
-    print(dt_interp_2070vs2020)
+    fig = plt.figure()
+    (cutout_xr["temperature"] - 273.15).mean("time").plot(cmap="OrRd")
+    fig.savefig("results/test_present.png", dpi=700)
+    # -----------------------------------------------------------------
 
+    # TODO Add a check for time match
     cutout_future = build_cutout_future(
         cutout_xr=cutout_xr,
         cmip6_xr=cmip6_region_interp,
-        months=5,
-        year0=2020,
-        year1=2070,
-        years_window=5,
+        months=season_in_focus,
+        year0=present_year,
+        year1=future_year,
+        years_window=years_window,
     )
-    cutout_future.to_netcdf(
-        "cutout_2070_" + str(month_in_focus) + "_" + region_name + ".nc"
-    )
+
+    cutout_future.to_netcdf(snakemake.output[0])
+
+    # -----------------------------------------------------------------
+    #       to be replaced after debug
+    # -----------------------------------------------------------------
+    # graphical test of projection
+    fig = plt.figure()
+    (cutout_future["temperature"] - 273.15).mean("time").plot(cmap="OrRd")
+    fig.savefig("results/test_cmip6_project.png", dpi=700)
