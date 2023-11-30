@@ -68,7 +68,7 @@ The expected output should resemble the following:
     Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
     Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
 
-In case you don't have Java, you have to install it from the `official website <https://www.oracle.com/java/technologies/downloads/>`_ or equivalent.
+In case you don't have Java, you have to install it from the `official website <https://www.oracle.com/java/technologies/downloads/>`_ or equivalent. Depending on the version of OS, download and install ``JDK 21`` or ``JDK 17`` from the link.
 
 
 PyPSA-Earth Installation
