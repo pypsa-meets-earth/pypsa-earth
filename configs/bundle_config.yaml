@@ -188,12 +188,12 @@ databundles:
   bundle_natura_earth:
     countries: [Earth]
     category: natura
-    destination: "data"
+    destination: "data/natura/"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/natura_global.zip?download=1
-      gdrive: https://drive.google.com/file/d/1WmAAwY0TAcHg8YZyAGof0bPewFacm7my/view
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
-    - data/natura.tiff
+    - data/natura/natura.tiff
 
   # # data bundle of the data folder for the african continent
   # bundle_landclassification:
