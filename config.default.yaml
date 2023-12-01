@@ -343,8 +343,21 @@ costs:
 monte_carlo:
   options:
     add_to_snakefile: false
-    samples: 7    # number of optimizations
-    sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
+    # Uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
+    # Normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
+    # LogNormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
+    # Triange: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
+    # Beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
+    # Gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
+    distribution: "Uniform" # "Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma"
+    # [mean, std] for Normal and LogNormal
+    # [lower_bound, upper_bound] for Uniform
+    # [lower_bound, midpoint, upper_bound] for Triangle 
+    # [alpha, beta] for Beta
+    # [shape, scale] for Gamma
+    distribution_params: [0,1]
+    samples: 4 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
+    sampling_strategy: "scipy"  # "pydoe2", "chaospy", "scipy", packages that are supported
   pypsa_standard:
       # User can add here flexibly more features for the Monte-Carlo sampling.
       # Given as "key: value" format
