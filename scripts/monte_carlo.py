@@ -87,7 +87,9 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging, create_logger
 from pyDOE2 import lhs
-from scipy.stats import qmc
+import chaospy
+from scipy.stats import qmc, norm, lognorm, beta, gamma, triang
+from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
 logger = create_logger(__name__)
@@ -142,11 +144,7 @@ def monte_carlo_sampling_chaospy(
 
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
-
     """
-    import chaospy
-    from scipy.stats import qmc
-    from sklearn.preprocessing import MinMaxScaler
 
     params = tuple(DISTRIBUTION_PARAMS)
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
@@ -191,7 +189,6 @@ def monte_carlo_sampling_scipy(
     Documentation for Latin Hypercube: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.LatinHypercube.html#scipy.stats.qmc.LatinHypercube
     Orthogonal LHS is better than basic LHS: https://github.com/scipy/scipy/pull/14546/files, https://en.wikipedia.org/wiki/Latin_hypercube_sampling
     """
-    from scipy.stats import qmc
 
     sampler = qmc.LatinHypercube(
         d=N_FEATURES,
@@ -230,8 +227,6 @@ def rescale_distribution(latin_hypercube: np.array, distribution: str,
     - The function supports rescaling for Uniform, Normal, LogNormal, Triangle, Beta, and Gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
-    from scipy.stats import norm, lognorm, beta, gamma, triang
-    from sklearn.preprocessing import MinMaxScaler
 
     if distribution == "Uniform":
         pass
