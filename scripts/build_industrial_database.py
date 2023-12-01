@@ -258,7 +258,7 @@ def create_cement_db():
     # Dropping the null capacities reduces the dataframe from 3000+  rows to 1672 rows
     na_index = df_cement[df_cement.capacity.isna()].index
     print(
-        "There are {} out of {} total cement plants with unknown capcities, setting value to country average".format(
+        "There are {} out of {} total cement plants with unknown capacities, setting value to country average".format(
             len(na_index), len(df_cement)
         )
     )
@@ -434,7 +434,7 @@ def create_paper_df():
     # Dropping the null capacities reduces the dataframe from 3000+  rows to 1672 rows
     na_index = df_paper[df_paper.capacity.isna()].index
     print(
-        "There are {} out of {} total paper plants with unknown capcities, setting value to country average".format(
+        "There are {} out of {} total paper plants with unknown capacities, setting value to country average".format(
             len(na_index), len(df_paper)
         )
     )
