@@ -35,6 +35,8 @@ data/costs*
 /data/transport_data.csv
 /data/switzerland*
 /data/.nfs*
+/data/demand/unsd/data
+/data/industrial_database.csv
 #/data/Industrial_Database.csv
 /data/retro/tabula-calculator-calcsetbuilding.csv
 /data/nuts*

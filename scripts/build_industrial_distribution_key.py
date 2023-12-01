@@ -147,6 +147,8 @@ if __name__ == "__main__":
     # Call the function to add the "industry" column
     df_with_industry = match_technology(geo_locs)
 
+    geo_locs.capacity = pd.to_numeric(geo_locs.capacity)
+
     gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
 
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]
