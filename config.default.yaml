@@ -352,10 +352,10 @@ monte_carlo:
     distribution: "Uniform" # "Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma"
     # [mean, std] for Normal and LogNormal
     # [lower_bound, upper_bound] for Uniform
-    # [lower_bound, midpoint, upper_bound] for Triangle 
+    # [lower_bound, midpoint, upper_bound] for Triangle
     # [alpha, beta] for Beta
     # [shape, scale] for Gamma
-    distribution_params: [0,1]
+    distribution_params: [0, 1]
     samples: 4 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "scipy"  # "pydoe2", "chaospy", "scipy", packages that are supported
   pypsa_standard:

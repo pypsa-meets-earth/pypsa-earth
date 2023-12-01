@@ -18,13 +18,13 @@ Relevant Settings
         # Uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
         # Normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
         # LogNormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
-        # Triange: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
+        # Triangle: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
         # Beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
         # Gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
         distribution: "Uniform" # "Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma"
         # [mean, std] for Normal and LogNormal
         # [lower_bound, upper_bound] for Uniform
-        # [lower_bound, midpoint, upper_bound] for Triangle 
+        # [lower_bound, midpoint, upper_bound] for Triangle
         # [alpha, beta] for Beta
         # [shape, scale] for Gamma
         distribution_params: [0,1]
@@ -87,8 +87,7 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging, create_logger
 from pyDOE2 import lhs
-import chaospy
-from scipy.stats import qmc, norm, lognorm, beta, gamma, triang
+from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
 from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
@@ -125,8 +124,9 @@ def monte_carlo_sampling_pydoe2(
 
     lh = rescale_distribution(lh, DISTRIBUTION, DISTRIBUTION_PARAMS)
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Discrepancy is:", discrepancy,
-          " more details in function documentation.")
+    logger.info(
+        "Discrepancy is:", discrepancy, " more details in function documentation."
+    )
 
     return lh
 
@@ -159,8 +159,9 @@ def monte_carlo_sampling_chaospy(
     lh = mm.fit_transform(lh)
 
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Discrepancy is:", discrepancy,
-          " more details in function documentation.")
+    logger.info(
+        "Discrepancy is:", discrepancy, " more details in function documentation."
+    )
 
     return lh
 
@@ -176,7 +177,9 @@ def monte_carlo_sampling_scipy(
     seed=42,
 ):
     """
-    Creates Latin Hypercube Sample (LHS) implementation from SciPy with various options:
+    Creates Latin Hypercube Sample (LHS) implementation from SciPy with various
+    options:
+
     - Center the point within the multi-dimensional grid, centered=True
     - optimization scheme, optimization="random-cd"
     - strength=1, classical LHS
@@ -202,22 +205,25 @@ def monte_carlo_sampling_scipy(
 
     lh = rescale_distribution(lh, DISTRIBUTION, DISTRIBUTION_PARAMS)
     discrepancy = qmc.discrepancy(lh)
-    logger.info("Discrepancy is:", discrepancy,
-          " more details in function documentation.")
+    logger.info(
+        "Discrepancy is:", discrepancy, " more details in function documentation."
+    )
 
     return lh
 
 
-def rescale_distribution(latin_hypercube: np.array, distribution: str,
-                         distribution_params: list):
+def rescale_distribution(
+    latin_hypercube: np.array, distribution: str, distribution_params: list
+):
     """
-    Rescales a Latin hypercube sampling (LHS) using specified distribution parameters.
+    Rescales a Latin hypercube sampling (LHS) using specified distribution
+    parameters.
 
     Parameters:
     - latin_hypercube (np.array): The Latin hypercube sampling to be rescaled.
-    - distribution (str): The target distribution for rescaling. Supported options: 
+    - distribution (str): The target distribution for rescaling. Supported options:
                           "Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma".
-    - distribution_params (list): Parameters specific to the chosen distribution. 
+    - distribution_params (list): Parameters specific to the chosen distribution.
                                   For example, for Normal distribution, it should be [mean, std].
 
     Returns:
@@ -257,8 +263,9 @@ def validate_parameters(
     sampling_strategy: str, samples: int, distribution: str, distribution_params: list
 ) -> None:
     """
-    Validates the parameters for a given probability distribution.
-    Inputs from user through the config file needs to be validated before proceeding to perform monte-carlo simulations.
+    Validates the parameters for a given probability distribution. Inputs from
+    user through the config file needs to be validated before proceeding to
+    perform monte-carlo simulations.
 
     Parameters:
     - sampling_strategy: str
@@ -343,14 +350,14 @@ if __name__ == "__main__":
     ### SCENARIO INPUTS
     ###
     MONTE_CARLO_PYPSA_FEATURES = {
-        k: v
-        for k, v in monte_carlo_config["pypsa_standard"].items() if v
+        k: v for k, v in monte_carlo_config["pypsa_standard"].items() if v
     }  # removes key value pairs with empty value e.g. []
     MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
     L_BOUNDS = [item[0] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
     U_BOUNDS = [item[1] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
-    N_FEATURES = len(MONTE_CARLO_PYPSA_FEATURES
-                     )  # only counts features when specified in config
+    N_FEATURES = len(
+        MONTE_CARLO_PYPSA_FEATURES
+    )  # only counts features when specified in config
     SAMPLES = MONTE_CARLO_OPTIONS.get(
         "samples"
     )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
@@ -360,8 +367,7 @@ if __name__ == "__main__":
 
     ### PARAMETERS VALIDATION
     # validates the parameters supplied from config file
-    validate_parameters(SAMPLING_STRATEGY, SAMPLES, DISTRIBUTION,
-                        DISTRIBUTION_PARAMS)
+    validate_parameters(SAMPLING_STRATEGY, SAMPLES, DISTRIBUTION, DISTRIBUTION_PARAMS)
 
     ### SCENARIO CREATION / SAMPLING STRATEGY
     ###
@@ -411,13 +417,13 @@ if __name__ == "__main__":
         # i, j interaction number to pick values of experimental setup
         # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh_scaled[0,0]
         exec(f"n.{k} = n.{k} * {lh_scaled[i,j]}")
-        logger.info(
-            f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
+        logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
         j = j + 1
 
     ### EXPORT AND METADATA
     #
-    latin_hypercube_dict = (pd.DataFrame(lh_scaled).rename_axis(
-        "Nruns").add_suffix("_feature")).to_dict()
+    latin_hypercube_dict = (
+        pd.DataFrame(lh_scaled).rename_axis("Nruns").add_suffix("_feature")
+    ).to_dict()
     n.meta.update(latin_hypercube_dict)
     n.export_to_netcdf(snakemake.output[0])
