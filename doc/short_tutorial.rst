@@ -6,24 +6,27 @@
 
 
 ##########################################
-Getting started
+Tutorial
 ##########################################
 
 The installation procedure installs PyPSA-Earth model with all the software dependencies needed to build and run it.
-To properly model any region of the Earth, PyPSA-Earth needs to download and fetch different datasets.
-This section explains how to perform this data management.
+To properly model any region of the Earth, it is first crucial to get familiar with a tutorial where a simpler model is considered.
+This section explains how to run and analyze the tutorial model.
 
-How to build the tutorial model?
---------------------------------
+Build the tutorial model
+---------------------------
 
 The user can explore the majority of the model's functions on a local machine by running the tutorial, which uses fewer computational resources than the entire model does. A tutorial data kit was developed to facilitate exploring the model.
 You can build it using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`).
-To do that, you may want to do a reserve copy of your current configuration file and then overwrite it by a tutorial configuration:
+By default, PyPSA-Earth reads configuration parameters of simulation from `config.yaml` file located in `pypsa-earth` folder. 
+Thus, to run the tutorial model, `config.tutorial.yaml` needs to be stored as `config.yaml`: 
 
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) % cp config.tutorial.yaml config.yaml
 
+.. note::
+    You may want to do a reserve copy of your current configuration file (`config.yaml`) as it will be overwritten by a tutorial configuration.
 
 In the configuration file `config.yaml` there is a flag `retrieve_databundle` which triggers data loading and a `tutorial` flag which determines that the loaded data belong to the tutorial kit. Currently the tutorial can be run only for Nigeria ("NG"), Benin ("BJ"), Botswana ("BW") and Morocco ("MA").
 
@@ -37,7 +40,7 @@ In the configuration file `config.yaml` there is a flag `retrieve_databundle` wh
 It's recommended to set `retrieve_databundle: true` when building the model for the first time to download all needed common data files.
 When the first run is completed and all the necessary data are extracted, it may be a good idea to set `retrieve_databundle: false` to avoid data loss.
 
-How to run the model?
+Run the model
 ---------------------
 
 After configuration set-up, the model is ready to be built and run.
@@ -60,7 +63,7 @@ both `tutorial` and `retrieve_databundle` flags are on. The tutorial model will 
 Note that data load will need about 1.6Gb and model building will take a while (about 20..50 minutes).
 
 
-How to analyse the solved networks?
+Analyse the solved networks
 ------------------------------------
 
 The solved networks can be analysed just like any other PyPSA network (e.g. in Jupyter Notebooks).
