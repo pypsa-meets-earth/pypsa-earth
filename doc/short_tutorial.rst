@@ -103,4 +103,5 @@ It is also possible to make manual clean-up removing folders "resources", "netwo
   This tutorial only covers Nigeria. To make the workflow run on other regions you need to use the ``config.default.yaml`` as ``config.yaml``.
   To use the model in and outside Africa, you should also read
   `How to create a model for you region of interest with PyPSA-Earth? <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/505>`_
-  The next section elaborates on building and running a full PyPSA-Earth model.
+  
+:ref:`tutorial` section elaborates on building and running a full PyPSA-Earth model.
