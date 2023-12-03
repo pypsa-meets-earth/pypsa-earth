@@ -18,8 +18,8 @@ Build the tutorial model
 
 The user can explore the majority of the model's functions on a local machine by running the tutorial, which uses fewer computational resources than the entire model does. A tutorial data kit was developed to facilitate exploring the model.
 You can build it using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`).
-By default, PyPSA-Earth reads configuration parameters of simulation from `config.yaml` file located in `pypsa-earth` folder. 
-Thus, to run the tutorial model, `config.tutorial.yaml` needs to be stored as `config.yaml`: 
+By default, PyPSA-Earth reads configuration parameters of simulation from `config.yaml` file located in `pypsa-earth` folder.
+Thus, to run the tutorial model, `config.tutorial.yaml` needs to be stored as `config.yaml`:
 
 .. code:: bash
 
