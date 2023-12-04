@@ -481,18 +481,16 @@ def add_biomass(n, costs):
     print("adding biomass")
 
     # TODO get biomass potentials dataset and enable spatially resolved potentials
-    biomass_potentials = pd.read_csv(snakemake.input.biomass_potentials, index_col=0)
 
-    # if options["biomass_transport"]:
-    #     biomass_potentials_spatial = biomass_potentials.rename(
-    #         index=lambda x: x + " solid biomass"
-    #     )
-    # else:
-    #     biomass_potentials_spatial = biomass_potentials.sum()
-    biomass_potentials_spatial = biomass_potentials.sum() / len(biomass_potentials)
-    print(
-        "Solid Biomass potentials are not spatially resolved, the dummy value is the average solid Biomass of European countries"
-    )
+    # Get biomass and biogas potentials from config and convert from TWh to MWh
+    biomass_pot = snakemake.config["sector"]["solid_biomass_potential"] * 1e6  # MWh
+    biogas_pot = snakemake.config["sector"]["biogas_potential"] * 1e6  # MWh
+    print("Biomass and Biogas potential fetched from config")
+
+    # Convert from total to nodal potentials,
+    biomass_pot_spatial = biomass_pot / len(spatial.biomass.nodes)
+    biogas_pot_spatial = biogas_pot / len(spatial.gas.biogas)
+    print("Biomass potentials spatially resolved equally across all nodes")
 
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
@@ -513,9 +511,9 @@ def add_biomass(n, costs):
         spatial.gas.biogas,
         bus=spatial.gas.biogas,
         carrier="biogas",
-        e_nom=biomass_potentials["biogas"].sum(),
+        e_nom=biogas_pot_spatial,
         marginal_cost=costs.at["biogas", "fuel"],
-        e_initial=biomass_potentials["biogas"].sum(),
+        e_initial=biogas_pot_spatial,
     )
 
     n.madd(
@@ -523,9 +521,9 @@ def add_biomass(n, costs):
         spatial.biomass.nodes,
         bus=spatial.biomass.nodes,
         carrier="solid biomass",
-        e_nom=biomass_potentials_spatial["solid biomass"],
+        e_nom=biomass_pot_spatial,
         marginal_cost=costs.at["solid biomass", "fuel"],
-        e_initial=biomass_potentials_spatial["solid biomass"],
+        e_initial=biomass_pot_spatial,
     )
 
     biomass_gen = "biomass EOP"
@@ -2323,12 +2321,12 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1",
-            opts="Co2L",
+            ll="c1.0",
+            opts="Co2L1.0",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="2000H",
             discountrate="0.071",
-            demand="AB",
+            demand="DF",
         )
 
     # Load population layout
