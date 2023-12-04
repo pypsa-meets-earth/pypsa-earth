@@ -229,6 +229,8 @@ sector:
   industry_util_factor: 0.7
 
   biomass_transport: true  # biomass transport between nodes
+  solid_biomass_potential: 2 # TWh/a, Potential of whole modelled area
+  biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
   efficiency_heat_oil_to_elec: 0.9
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
