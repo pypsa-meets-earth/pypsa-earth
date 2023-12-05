@@ -666,8 +666,6 @@ def aggregate_fuels(sector):
     biomass_fuels = [
         "Bagasse",
         "Fuelwood",
-        # "Peat",
-        # "Peat products",
     ]
 
     coal_fuels = [
@@ -683,6 +681,8 @@ def aggregate_fuels(sector):
         "Petroleum Coke",
         "Hrad coal",
         "Lignite",
+        "Peat",
+        "Peat products",
     ]
 
     electricity = ["Electricity"]
