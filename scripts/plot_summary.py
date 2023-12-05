@@ -27,14 +27,15 @@ def rename_techs(label):
         "ground heat pump",
         "resistive heater",
         "Fischer-Tropsch",
+        "electricity",
     ]
 
     rename_if_contains_dict = {
         "water tanks": "hot water storage",
         "retrofitting": "building retrofitting",
-        "H2 Electrolysis": "hydrogen storage",
-        "H2 Fuel Cell": "hydrogen storage",
-        "H2 pipeline": "hydrogen storage",
+        "H2 Electrolysis": "H2 electrolysis",
+        "H2 Fuel Cell": "H2 Fuel Cell",
+        "H2 pipeline": "H2 pipeline",
         "battery": "battery storage",
         # "CC": "CC"
     }
@@ -51,7 +52,7 @@ def rename_techs(label):
         "PHS": "hydroelectricity",
         "co2 Store": "DAC",
         "co2 stored": "CO2 sequestration",
-        "AC": "transmission lines",
+        "AC": "electricity",
         "DC": "transmission lines",
         "B2B": "transmission lines",
     }
@@ -76,7 +77,13 @@ def rename_techs(label):
 
 preferred_order = pd.Index(
     [
+        "electricity",
+        "H2 electrolysis",
         "transmission lines",
+        "resistive heater",
+        "BEV charger",
+        "DAC",
+        "air heat pump",
         "hydroelectricity",
         "hydro reservoir",
         "run of river",
@@ -95,7 +102,7 @@ preferred_order = pd.Index(
         "ground heat pump",
         "air heat pump",
         "heat pump",
-        "resistive heater",
+        # "resistive heater",
         "power-to-heat",
         "gas-to-power/heat",
         "CHP",
@@ -276,16 +283,17 @@ def plot_balances():
 
         print("dropping")
 
-        print(df.loc[to_drop])
+        # print(df.loc[to_drop])
 
         df = df.drop(to_drop)
 
-        print(df.sum())
+        # print(df.sum())
 
         if df.empty:
             continue
 
         df.index = df.index.str.strip()
+
         new_index = preferred_order.intersection(df.index).append(
             df.index.difference(preferred_order)
         )
