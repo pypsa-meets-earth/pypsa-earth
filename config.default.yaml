@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 4
+  - 56
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -23,7 +23,7 @@ scenario:
   sopts:
   - "144H"
   demand:
-  - "DF"
+  - "AB"
 
 policy_config:
   policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching"
@@ -35,9 +35,9 @@ policy_config:
 
 
 clustering_options:
-  alternative_clustering: true
+  alternative_clustering: false
 
-countries: ['MA']
+countries: ["NG"]
 
 demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
@@ -79,7 +79,9 @@ custom_data:
   h2_underground: false
   add_existing: false
   custom_sectors: false
-  gas_grid: false
+  gas_grid: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , 
+                 # If "False" the user can choose btw unifrom, none-spatial gas network or Model built-in datasets
+                 # Please refer to "sector" below.
 
 # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard "planning_horizon" in the scenario section
 costs:
@@ -163,7 +165,9 @@ solar_thermal:
     azimuth: 180.
 
 sector:
-  gas_network: true
+  gas_network: true # If "false" & gas_grid is "false" -> Then distance between shapes centroids will be taken for pipelines only, without capacity weighting ++ AND ++ NO SPATIAL GAS AT ALL !!!!!
+  gas_network_dataset: GGIT # Global dataset -> 'GGIT' , European dataset -> 'IGGIELGN'
+  gas_network_GGIT_dataset_status: ['Construction', 'Operating', 'Idle', 'Shelved', 'Mothballed', 'Proposed']
   oil_network: true
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating

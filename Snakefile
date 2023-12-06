@@ -110,6 +110,19 @@ rule prepare_airports:
     script:
         "scripts/prepare_airports.py"
 
+if not config["custom_data"]["gas_grid"]:
+    rule prepare_gas_network:
+        input:
+            # gas_network="data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson",
+            regions_onshore=pypsaearth(
+                "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+        output:
+            clustered_gas_network="resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
+            gas_network_fig="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
+        script:
+            "scripts/prepare_gas_network.py"
+
 
 rule prepare_sector_network:
     input:
@@ -138,6 +151,7 @@ rule prepare_sector_network:
         shapes_path=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
+        pipelines="resources/custom_data/pipelines.csv" if config["custom_data"]["gas_grid"] else "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",

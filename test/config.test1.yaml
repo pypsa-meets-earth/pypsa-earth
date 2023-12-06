@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 4
+  - 56
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -165,7 +165,9 @@ solar_thermal:
     azimuth: 180.
 
 sector:
-  gas_network: true
+  gas_network: true # If "false" & gas_grid is "false" -> Then distance between shapes centroids will be taken for pipelines only, without capacity weighting ++ AND ++ NO SPATIAL GAS AT ALL !!!!!
+  gas_network_dataset: GGIT # Global dataset -> 'GGIT' , European dataset -> 'IGGIELGN'
+  gas_network_GGIT_dataset_status: ['Construction', 'Operating', 'Idle', 'Shelved', 'Mothballed', 'Proposed']
   oil_network: true
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating

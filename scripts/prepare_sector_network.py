@@ -328,27 +328,32 @@ def add_hydrogen(n, costs):
         carrier="H2 Store",
         capital_cost=h2_capital_cost,
     )
-    if snakemake.config["custom_data"]["gas_grid"]:
+
+    if (
+        snakemake.config["custom_data"]["gas_grid"]
+        or snakemake.config["sector"]["gas_network"]
+    ):
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
         buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-        # Appending string for carrier specification '_AC'
-        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+        if snakemake.config["clustering_options"]["alternative_clustering"]:
+            # Appending string for carrier specification '_AC'
+            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
-        # Conversion of GADM id to from 3 to 2-digit
-        h2_links["bus0"] = (
-            h2_links["bus0"]
-            .str.split(".")
-            .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-        )
-        h2_links["bus1"] = (
-            h2_links["bus1"]
-            .str.split(".")
-            .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-        )
+            # Conversion of GADM id to from 3 to 2-digit
+            h2_links["bus0"] = (
+                h2_links["bus0"]
+                .str.split(".")
+                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            )
+            h2_links["bus1"] = (
+                h2_links["bus1"]
+                .str.split(".")
+                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            )
 
         # Create index column
         h2_links["buses_idx"] = (
@@ -2107,7 +2112,7 @@ def add_residential(n, costs):
     )
 
     heat_shape = heat_shape.groupby(
-        lambda x: next((substring for substring in nodes if substring in x), x), axis=1
+        lambda x: next((substring for substring in sorted(nodes, key=len, reverse=True) if substring in x), x), axis=1
     ).sum()
 
     heat_oil_demand = (
@@ -2322,7 +2327,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
+            clusters="56",
             ll="c1",
             opts="Co2L",
             planning_horizons="2030",

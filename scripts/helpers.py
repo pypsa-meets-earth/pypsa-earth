@@ -693,3 +693,16 @@ def aggregate_fuels(sector):
     heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
 
     return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
+
+
+def progress_retrieve(url, file):
+    import urllib
+
+    from progressbar import ProgressBar
+
+    pbar = ProgressBar(0, 100)
+
+    def dlProgress(count, blockSize, totalSize):
+        pbar.update(int(count * blockSize * 100 / totalSize))
+
+    urllib.request.urlretrieve(url, file, reporthook=dlProgress)
