@@ -696,7 +696,6 @@ def aggregate_fuels(sector):
     return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
 
 
-
 def progress_retrieve(url, file):
     import urllib
 
@@ -708,6 +707,7 @@ def progress_retrieve(url, file):
         pbar.update(int(count * blockSize * 100 / totalSize))
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress)
+
 
 def get_last_commit_message(path):
     """
@@ -734,4 +734,3 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
-

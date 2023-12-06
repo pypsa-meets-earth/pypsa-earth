@@ -2110,7 +2110,15 @@ def add_residential(n, costs):
     )
 
     heat_shape = heat_shape.groupby(
-        lambda x: next((substring for substring in sorted(nodes, key=len, reverse=True) if substring in x), x), axis=1
+        lambda x: next(
+            (
+                substring
+                for substring in sorted(nodes, key=len, reverse=True)
+                if substring in x
+            ),
+            x,
+        ),
+        axis=1,
     ).sum()
 
     heat_oil_demand = (
@@ -2325,7 +2333,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-
             clusters="56",
             ll="c1",
             opts="Co2L",
