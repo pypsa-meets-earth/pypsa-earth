@@ -1,5 +1,6 @@
 from os.path import exists
 from shutil import copyfile, move
+from scripts.helpers import get_last_commit_message
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -18,6 +19,9 @@ PYPSAEARTH_FOLDER = "./pypsa-earth"
 SDIR = config["summary_dir"] + config["run"]
 RDIR = config["results_dir"] + config["run"]
 CDIR = config["costs_dir"]
+
+config.update({"git_commit": get_last_commit_message(".")})
+config.update({"submodule_commit": get_last_commit_message(PYPSAEARTH_FOLDER)})
 
 CUTOUTS_PATH = (
     "cutouts/cutout-2013-era5-tutorial.nc"
@@ -146,7 +150,6 @@ rule prepare_sector_network:
         gshp_cop="resources/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         solar_thermal="resources/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        biomass_potentials="data/temp_hard_coded/biomass_potentials_s_37.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
         shapes_path=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
@@ -428,15 +431,6 @@ rule copy_config:
         "scripts/copy_config.py"
 
 
-rule copy_commit:
-    output:
-        SDIR + "/commit_info.txt",
-    shell:
-        """
-        git log -n 1 --pretty=format:"Commit: %H%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s" > {output}
-        """
-
-
 rule solve_network:
     input:
         overrides="data/override_component_attrs",
@@ -446,7 +440,6 @@ rule solve_network:
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         costs=CDIR + "costs_{planning_horizons}.csv",
         configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
-        commit=SDIR + "/commit_info.txt",
     output:
         RDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -550,6 +543,13 @@ rule plot_summary:
         SDIR + "/benchmarks/plot_summary"
     script:
         "scripts/plot_summary.py"
+
+
+rule build_industrial_database:
+    output:
+        industrial_database="data/industrial_database.csv",
+    script:
+        "scripts/build_industrial_database.py"
 
 
 rule prepare_db:
