@@ -89,6 +89,7 @@ import os
 import sys
 from functools import reduce
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
@@ -105,6 +106,7 @@ from pypsa.clustering.spatial import (
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
 from scipy.spatial import cKDTree
+from shapely.geometry import Point
 
 sys.settrace
 
@@ -789,13 +791,17 @@ def merge_into_network(n, aggregation_strategies=dict()):
         list(zip(n.buses.loc[i_islands].x, n.buses.loc[i_islands].y))
     )
 
-    btree = cKDTree(points_buses)
-    dist0, idx0 = btree.query(islands_points, k=1)
+    gds_buses = gpd.GeoSeries(map(Point, points_buses))
+    gds_islands = gpd.GeoSeries(map(Point, islands_points))
 
-    points_nearest = [points_buses[i] for i in idx0]
+    gdf_buses = gpd.GeoDataFrame(geometry=gds_buses)
+    gdf_islands = gpd.GeoDataFrame(geometry=gds_islands)
+
+    gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_buses, how="left")
 
     nearest_bus_list = [
-        n.buses.loc[(n.buses.x == x) & (n.buses.y == y)] for x, y in points_nearest
+        n.buses.loc[(n.buses.x == x) & (n.buses.y == y)]
+        for x, y in zip(gdf_map["geometry"].x, gdf_map["geometry"].y)
     ]
     nearest_bus_df = pd.concat(nearest_bus_list)
 
