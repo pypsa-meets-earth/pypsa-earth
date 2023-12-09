@@ -324,5 +324,5 @@ databundles:
     category: landcover
     destination: "data/landcover/world_protected_areas"
     urls:
-      protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_Oct2023_Public_shp.zip
+      protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
     output: [data/landcover/world_protected_areas/*]

@@ -33,7 +33,7 @@ Each data bundle entry has the following structure:
     urls:  # list of urls by source, e.g. zenodo or google
       zenodo: {zenodo url}  # key to download data from zenodo
       gdrive: {google url}  # key to download data from google drive
-      protectedplanet: {url}  # key to download data from protected planet
+      protectedplanet: {url}  # key to download data from protected planet; the url can contain {month:s} and {year:d} to let the workflow specify the current month and year
       direct: {url}  # key to download data directly from a url; if unzip option is enabled data are unzipped
       post:  # key to download data using an url post request; if unzip option is enabled data are unzipped
         url: {url}
@@ -80,6 +80,7 @@ according to the following rules:
 - ``cutouts``: input data unzipped into the cutouts folder
 
 """
+import datetime as dt
 import os
 import re
 from zipfile import ZipFile
@@ -236,7 +237,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
 
 
 def download_and_unzip_protectedplanet(
-    config, rootpath, hot_run=True, disable_progress=False
+    config, rootpath, attempts=3, hot_run=True, disable_progress=False
 ):
     """
     download_and_unzip_protectedplanet(config, rootpath, dest_path,
@@ -250,6 +251,9 @@ def download_and_unzip_protectedplanet(
         Configuration data for the category to download
     rootpath : str
         Absolute path of the repository
+    attempts : int (default 3)
+        Number of attempts to download the data by month.
+        The download is attempted for the current and previous months according to the number of attempts
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
@@ -265,51 +269,91 @@ def download_and_unzip_protectedplanet(
 
     url = config["urls"]["protectedplanet"]
 
+    def get_first_day_of_month(date):
+        return date.replace(day=1)
+
+    def get_first_day_of_previous_month(date):
+        return get_first_day_of_month(date - dt.timedelta(days=1))
+
+    current_first_day = get_first_day_of_month(dt.datetime.today())
+
     if hot_run:
         if os.path.exists(file_path):
             os.remove(file_path)
 
-        try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
+        downloaded = False
 
-            zip_obj = ZipFile(file_path, "r")
+        for i in range(attempts + 1):
+            # customize url to current month
+            month_MMM = current_first_day.strftime("%b")
+            year_YYYY = current_first_day.year
+            url_iter = url.format(month=month_MMM, year=year_YYYY)
 
-            # list of zip files, which contains the shape files
-            zip_files = [
-                fname for fname in zip_obj.namelist() if fname.endswith(".zip")
-            ]
+            resource_iter = resource + " - " + month_MMM + " " + str(year_YYYY)
 
-            # extract the nested zip files
-            for fzip in zip_files:
-                # final path of the file
-                try:
-                    inner_zipname = os.path.join(config["destination"], fzip)
+            try:
+                logger.info(
+                    f"Downloading resource '{resource_iter}' from cloud '{url}'."
+                )
+                progress_retrieve(
+                    url_iter, file_path, disable_progress=disable_progress
+                )
 
-                    zip_obj.extract(fzip, path=config["destination"])
+                zip_obj = ZipFile(file_path, "r")
 
-                    with ZipFile(inner_zipname, "r") as nested_zip:
-                        nested_zip.extractall(path=config["destination"])
+                # list of zip files, which contains the shape files
+                zip_files = [
+                    fname for fname in zip_obj.namelist() if fname.endswith(".zip")
+                ]
 
-                    # remove inner zip file
-                    os.remove(inner_zipname)
-
-                    logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
-                except:
-                    logger.warning(
-                        f"Exception while unzipping file '{fzip}' for {resource}: skipped"
+                # if empty, the download failed
+                if not zip_files:
+                    raise Exception(
+                        "Corrupted zip file downloaded from protectedplanet"
                     )
 
-            # close and remove outer zip file
-            zip_obj.close()
-            os.remove(file_path)
+                # extract the nested zip files
+                for fzip in zip_files:
+                    # final path of the file
+                    try:
+                        inner_zipname = os.path.join(config["destination"], fzip)
 
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
-            return False
+                        zip_obj.extract(fzip, path=config["destination"])
 
-    return True
+                        with ZipFile(inner_zipname, "r") as nested_zip:
+                            nested_zip.extractall(path=config["destination"])
+
+                        # remove inner zip file
+                        os.remove(inner_zipname)
+
+                        logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
+                    except:
+                        logger.warning(
+                            f"Exception while unzipping file '{fzip}' for {resource_iter}: skipped file"
+                        )
+
+                # close and remove outer zip file
+                zip_obj.close()
+                os.remove(file_path)
+
+                logger.info(
+                    f"Downloaded resource '{resource_iter}' from cloud '{url_iter}'."
+                )
+
+                downloaded = True
+                break
+            except:
+                logger.warning(
+                    f"Failed download resource '{resource_iter}' from cloud '{url_iter}'."
+                )
+                current_first_day = get_first_day_of_previous_month(current_first_day)
+
+    if not downloaded:
+        logger.warning(
+            f"All attempts ({attempts}) to download resource '{resource}' from protected planet failed."
+        )
+
+    return downloaded
 
 
 def download_and_unpack(
