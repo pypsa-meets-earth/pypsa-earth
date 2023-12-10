@@ -12,7 +12,7 @@ Full model
 Prerequisite
 ==============
 To build the model of regions outside of Africa, it is important to access to `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_ to build custom cutouts.
-The same is true if the weather year other than 2013 is considered for the region of interest in Africa.   
+The same is true if the weather year other than 2013 is considered for the region of interest in Africa.
 
 .. note::
     Skip this recommendation if the region of your interest is within Africa and you are fine with the 2013 weather year
