@@ -47,8 +47,11 @@ def get_cocode_from_coords(df):
             except:
                 tries += 1
                 if tries == 10:
-                    print("Country code of location ({},{}) could not be geocoded after 10 tries.".format(latitude, longitude))
-
+                    print(
+                        "Country code of location ({},{}) could not be geocoded after 10 tries.".format(
+                            latitude, longitude
+                        )
+                    )
 
         if location and location.raw.get("address", {}).get("country_code"):
             # Extract and append the country code to the list
