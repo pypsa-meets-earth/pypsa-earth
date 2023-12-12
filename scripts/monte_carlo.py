@@ -97,8 +97,7 @@ logger = create_logger(__name__)
 def monte_carlo_sampling_pydoe2(
     N_FEATURES,
     SAMPLES,
-    DISTRIBUTION,
-    DISTRIBUTION_PARAMS,
+    uncertainties_values,
     criterion=None,
     iteration=None,
     random_state=42,
@@ -111,6 +110,8 @@ def monte_carlo_sampling_pydoe2(
     Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
     Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     """
+    from pyDOE2 import lhs
+    from scipy.stats import qmc
 
     # Generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     lh = lhs(
@@ -122,7 +123,7 @@ def monte_carlo_sampling_pydoe2(
         correlation_matrix=correlation_matrix,
     )
 
-    lh = rescale_distribution(lh, DISTRIBUTION, DISTRIBUTION_PARAMS)
+    lh = rescale_distribution(lh, uncertainties_values)
     discrepancy = qmc.discrepancy(lh)
     logger.info(
         "Discrepancy is:", discrepancy, " more details in function documentation."
@@ -134,8 +135,7 @@ def monte_carlo_sampling_pydoe2(
 def monte_carlo_sampling_chaospy(
     N_FEATURES,
     SAMPLES,
-    DISTRIBUTION,
-    DISTRIBUTION_PARAMS,
+    uncertainties_values,
     rule="latin_hypercube",
     seed=42,
 ):
@@ -145,19 +145,17 @@ def monte_carlo_sampling_chaospy(
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
     """
+    import chaospy
+    from scipy.stats import qmc
 
-    params = tuple(DISTRIBUTION_PARAMS)
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
-    N_FEATURES = f"chaospy.{DISTRIBUTION}{params}, " * N_FEATURES
-    cube = eval(
+    N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
+    uniform_cube = eval(
         f"chaospy.J({N_FEATURES})"
     )  # writes Nfeatures times the chaospy.uniform... command)
-    lh = cube.sample(SAMPLES, rule=rule, seed=seed).T
+    lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T
 
-    # to check the discrepancy of the samples, the values needs to be from 0-1
-    mm = MinMaxScaler(feature_range=(0, 1), clip=True)
-    lh = mm.fit_transform(lh)
-
+    lh = rescale_distribution(lh, uncertainties_values)
     discrepancy = qmc.discrepancy(lh)
     logger.info(
         "Discrepancy is:", discrepancy, " more details in function documentation."
@@ -169,8 +167,7 @@ def monte_carlo_sampling_chaospy(
 def monte_carlo_sampling_scipy(
     N_FEATURES,
     SAMPLES,
-    DISTRIBUTION,
-    DISTRIBUTION_PARAMS,
+    uncertainties_values,
     centered=False,
     strength=2,
     optimization=None,
@@ -192,6 +189,7 @@ def monte_carlo_sampling_scipy(
     Documentation for Latin Hypercube: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.LatinHypercube.html#scipy.stats.qmc.LatinHypercube
     Orthogonal LHS is better than basic LHS: https://github.com/scipy/scipy/pull/14546/files, https://en.wikipedia.org/wiki/Latin_hypercube_sampling
     """
+    from scipy.stats import qmc
 
     sampler = qmc.LatinHypercube(
         d=N_FEATURES,
@@ -203,7 +201,7 @@ def monte_carlo_sampling_scipy(
 
     lh = sampler.random(n=SAMPLES)
 
-    lh = rescale_distribution(lh, DISTRIBUTION, DISTRIBUTION_PARAMS)
+    lh = rescale_distribution(lh, uncertainties_values)
     discrepancy = qmc.discrepancy(lh)
     logger.info(
         "Discrepancy is:", discrepancy, " more details in function documentation."
@@ -213,44 +211,57 @@ def monte_carlo_sampling_scipy(
 
 
 def rescale_distribution(
-    latin_hypercube: np.array, distribution: str, distribution_params: list
-):
+    latin_hypercube: np.array, uncertainties_values: dict
+) -> np.array:
     """
     Rescales a Latin hypercube sampling (LHS) using specified distribution
     parameters.
 
     Parameters:
     - latin_hypercube (np.array): The Latin hypercube sampling to be rescaled.
-    - distribution (str): The target distribution for rescaling. Supported options:
-                          "Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma".
-    - distribution_params (list): Parameters specific to the chosen distribution.
-                                  For example, for Normal distribution, it should be [mean, std].
+    - uncertainties_values (list): List of dictionaries containing distribution information.
+        Each dictionary should have 'type' key specifying the distribution type and 'args' key
+        containing parameters specific to the chosen distribution.
 
     Returns:
-    - np.array: Rescaled Latin hypercube sampling.
+    - np.array: Rescaled Latin hypercube sampling with values in the range [0, 1].
+
+    Supported Distributions:
+    - "Uniform": No rescaling applied.
+    - "Normal": Rescaled using the inverse of the normal distribution function with specified mean and std.
+    - "LogNormal": Rescaled using the inverse of the log-normal distribution function with specified mean and std.
+    - "Triangle": Rescaled using the inverse of the triangular distribution function with mean calculated from given parameters.
+    - "Beta": Rescaled using the inverse of the beta distribution function with specified shape parameters.
+    - "Gamma": Rescaled using the inverse of the gamma distribution function with specified shape and scale parameters.
 
     Note:
     - The function supports rescaling for Uniform, Normal, LogNormal, Triangle, Beta, and Gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
+    from scipy.stats import beta, gamma, lognorm, norm, triang
+    from sklearn.preprocessing import MinMaxScaler
 
-    if distribution == "Uniform":
-        pass
-    elif distribution == "Normal":
-        mean, std = distribution_params
-        latin_hypercube = norm.ppf(latin_hypercube, mean, std)
-    elif distribution == "LogNormal":
-        mean, std = distribution_params
-        latin_hypercube = lognorm.ppf(latin_hypercube, s=0.90)
-    elif distribution == "Triangle":
-        tri_mean = np.mean(distribution_params)
-        latin_hypercube = triang.ppf(latin_hypercube, tri_mean)
-    elif distribution == "Beta":
-        a, b = distribution_params
-        latin_hypercube = beta.ppf(latin_hypercube, a, b)
-    elif distribution == "Gamma":
-        shape, scale = distribution_params
-        latin_hypercube = gamma.ppf(latin_hypercube, shape, scale)
+    for idx, value in enumerate(uncertainties_values):
+        dist = value.get("type")
+        params = value.get("args")
+
+        if dist == "Uniform":
+            pass
+        elif dist == "Normal":
+            mean, std = params
+            latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
+        elif dist == "LogNormal":
+            mean, std = params
+            latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=0.90)
+        elif dist == "Triangle":
+            tri_mean = np.mean(params)
+            latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
+        elif dist == "Beta":
+            a, b = params
+            latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
+        elif dist == "Gamma":
+            shape, scale = params
+            latin_hypercube[:, idx] = gamma.ppf(latin_hypercube[:, idx], shape, scale)
 
     # samples space needs to be from 0 to 1
     mm = MinMaxScaler(feature_range=(0, 1), clip=True)
@@ -260,7 +271,7 @@ def rescale_distribution(
 
 
 def validate_parameters(
-    sampling_strategy: str, samples: int, distribution: str, distribution_params: list
+    sampling_strategy: str, samples: int, uncertainties_values: dict
 ) -> None:
     """
     Validates the parameters for a given probability distribution. Inputs from
@@ -289,8 +300,8 @@ def validate_parameters(
         raise ValueError(f"assign a value to samples")
     elif type(samples) is float or type(samples) is str:
         raise ValueError(f"samples must be an integer")
-    elif distribution_params is None or len(distribution_params) == 0:
-        raise ValueError(f"assign a list of parameters to distribution_params")
+    # elif distribution_params is None or len(distribution_params) == 0:
+    #     raise ValueError(f"assign a list of parameters to distribution_params")
 
     # verify sampling strategy
     if sampling_strategy not in valid_strategy:
@@ -298,35 +309,41 @@ def validate_parameters(
             f" Invalid sampling strategy: {sampling_strategy}. Choose from {valid_strategy}"
         )
 
-    # verify distribution
-    if distribution not in valid_distribution:
-        raise ValueError(
-            f"Unsupported Distribution : {distribution}. Choose from {valid_distribution}"
-        )
+    for idx, value in enumerate(uncertainties_values):
+        dist_type = value.get("type")
+        param = value.get("args")
+        scale = value.get("scale")
 
-    # special case handling for Triangle distribution
-    if distribution == "Triangle":
-        if len(distribution_params) == 2:
-            print(
-                f"{distribution} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
-            )
-            # use the mean as the middle value
-            distribution_params.insert(1, np.mean(distribution_params))
-        elif len(distribution_params) != 3:
+        if dist_type is None or len(param) == 0 or len(scale) == 0:
+            raise ValueError(f"assign a list of parameters to distribution_params")
+
+        if dist_type not in valid_distribution:
             raise ValueError(
-                f"{distribution} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
+                f"Unsupported Distribution : {dist_type}. Choose from {valid_distribution}"
             )
 
-    if distribution in ["Normal", "LogNormal", "Uniform", "Beta", "Gamma"]:
-        if len(distribution_params) != 2:
-            raise ValueError(f"{distribution} distribution must have 2 parameters")
+        if dist_type == "Triangle":
+            if len(param) == 2:
+                print(
+                    f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
+                )
+                # use the mean as the middle value
+                param.insert(1, np.mean(param))
+            elif len(param) != 3:
+                raise ValueError(
+                    f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
+                )
 
-    # handling having 0 as values in Beta and Gamma
-    if distribution in ["Beta", "Gamma"]:
-        if np.min(distribution_params) <= 0:
-            raise ValueError(
-                f"{distribution} distribution cannot have values lower than zero in parameters"
-            )
+        if dist_type in ["Normal", "LogNormal", "Uniform", "Beta", "Gamma"]:
+            if len(param) != 2:
+                raise ValueError(f"{dist_type} distribution must have 2 parameters")
+
+        # handling having 0 as values in Beta and Gamma
+        if dist_type in ["Beta", "Gamma"]:
+            if np.min(param) <= 0:
+                raise ValueError(
+                    f"{dist_type} distribution cannot have values lower than zero in parameters"
+                )
 
     return None
 
@@ -350,7 +367,7 @@ if __name__ == "__main__":
     ### SCENARIO INPUTS
     ###
     MONTE_CARLO_PYPSA_FEATURES = {
-        k: v for k, v in monte_carlo_config["pypsa_standard"].items() if v
+        k: v.get("scale") for k, v in monte_carlo_config["uncertainties"].items() if v
     }  # removes key value pairs with empty value e.g. []
     MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
     L_BOUNDS = [item[0] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
@@ -362,12 +379,11 @@ if __name__ == "__main__":
         "samples"
     )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
     SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
-    DISTRIBUTION = MONTE_CARLO_OPTIONS.get("distribution")
-    DISTRIBUTION_PARAMS = MONTE_CARLO_OPTIONS.get("distribution_params")
+    uncertainties_values = monte_carlo_config["uncertainties"].values()
 
     ### PARAMETERS VALIDATION
     # validates the parameters supplied from config file
-    validate_parameters(SAMPLING_STRATEGY, SAMPLES, DISTRIBUTION, DISTRIBUTION_PARAMS)
+    validate_parameters(SAMPLING_STRATEGY, SAMPLES, uncertainties_values)
 
     ### SCENARIO CREATION / SAMPLING STRATEGY
     ###
@@ -375,8 +391,7 @@ if __name__ == "__main__":
         lh = monte_carlo_sampling_pydoe2(
             N_FEATURES,
             SAMPLES,
-            DISTRIBUTION,
-            DISTRIBUTION_PARAMS,
+            uncertainties_values,
             criterion=None,
             iteration=None,
             random_state=42,
@@ -386,8 +401,7 @@ if __name__ == "__main__":
         lh = monte_carlo_sampling_scipy(
             N_FEATURES,
             SAMPLES,
-            DISTRIBUTION,
-            DISTRIBUTION_PARAMS,
+            uncertainties_values,
             centered=False,
             strength=2,
             optimization=None,
@@ -397,8 +411,7 @@ if __name__ == "__main__":
         lh = monte_carlo_sampling_chaospy(
             N_FEATURES,
             SAMPLES,
-            DISTRIBUTION,
-            DISTRIBUTION_PARAMS,
+            uncertainties_values,
             rule="latin_hypercube",
             seed=42,
         )
