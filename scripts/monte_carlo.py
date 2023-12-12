@@ -300,8 +300,6 @@ def validate_parameters(
         raise ValueError(f"assign a value to samples")
     elif type(samples) is float or type(samples) is str:
         raise ValueError(f"samples must be an integer")
-    # elif distribution_params is None or len(distribution_params) == 0:
-    #     raise ValueError(f"assign a list of parameters to distribution_params")
 
     # verify sampling strategy
     if sampling_strategy not in valid_strategy:
