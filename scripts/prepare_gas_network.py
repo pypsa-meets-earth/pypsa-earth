@@ -32,7 +32,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
-            clusters="22",
+            clusters="56",
         )
         sets_path_to_root("pypsa-earth-sec")
         rootpath = ".."
@@ -313,8 +313,7 @@ def load_bus_region(onshore_path, pipelines):
         # Conversion of GADM id to from 3 to 2-digit
         bus_regions_onshore["gadm_id"] = (
             bus_regions_onshore["gadm_id"]
-            .str.split(".")
-            .apply(lambda id: two_2_three_digits_country(id[0]) + "." + id[1])
+            .apply(lambda x: two_2_three_digits_country(x[:2]) + x[2:])
         )
         bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].str.replace(
             "_AC", ""
