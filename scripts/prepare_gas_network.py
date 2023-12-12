@@ -335,7 +335,7 @@ def get_states_in_order(pipeline, bus_regions_onshore):
 
     if pipeline.geom_type == "LineString":
         # Interpolate points along the LineString with a given step size (e.g., 5)
-        step_size = 10000
+        step_size = 5000
         interpolated_points = [
             pipeline.interpolate(i) for i in range(0, int(pipeline.length), step_size)
         ]
@@ -348,7 +348,7 @@ def get_states_in_order(pipeline, bus_regions_onshore):
         # Iterate over each LineString within the MultiLineString
         for line in pipeline.geoms:
             # Interpolate points along each LineString with a given step size (e.g., 5)
-            step_size = 10000
+            step_size = 5000
             interpolated_points_line = [
                 line.interpolate(i) for i in range(0, int(line.length), step_size)
             ]
