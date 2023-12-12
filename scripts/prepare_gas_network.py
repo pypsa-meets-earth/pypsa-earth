@@ -315,9 +315,8 @@ def load_bus_region(onshore_path, pipelines):
 
     if snakemake.config["clustering_options"]["alternative_clustering"]:
         # Conversion of GADM id to from 3 to 2-digit
-        bus_regions_onshore["gadm_id"] = (
-            bus_regions_onshore["gadm_id"]
-            .apply(lambda x: two_2_three_digits_country(x[:2]) + x[2:])
+        bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].apply(
+            lambda x: two_2_three_digits_country(x[:2]) + x[2:]
         )
         bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].str.replace(
             "_AC", ""
