@@ -481,11 +481,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="12",
+            clusters="4",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="24H",
+            sopts="144H",
             discountrate=0.071,
             demand="DF",
             h2export="120",
@@ -539,6 +539,7 @@ if __name__ == "__main__":
             solver_logfile=snakemake.log.solver,
         )
 
+        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
         n.export_to_netcdf(snakemake.output[0])
 
     logger.info("Maximum memory usage: {}".format(mem.mem_usage))

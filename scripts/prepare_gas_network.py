@@ -164,7 +164,9 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df = df[df["WKTFormat"] != "--"]
 
     # Keep pipelines that are as below
-    df = df[df['Status'].isin(snakemake.config["sector"]["gas_network_GGIT_dataset_status"])]
+    df = df[
+        df["Status"].isin(snakemake.config["sector"]["gas_network_GGIT_dataset_status"])
+    ]
 
     # Convert the WKT column to a GeoDataFrame
     df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"]))
@@ -182,7 +184,9 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df.loc[df["DiameterUnits"] == "in", "diameter_mm"] = (
         df.loc[df["DiameterUnits"] == "in", "Diameter"]
         .apply(correct_Diameter_col)
-        .apply(lambda d: inch_to_mm(float(d)))    #         .apply(lambda ds: pd.Series(ds).apply(lambda d: inch_to_mm(float(d))))
+        .apply(
+            lambda d: inch_to_mm(float(d))
+        )  #         .apply(lambda ds: pd.Series(ds).apply(lambda d: inch_to_mm(float(d))))
     )
 
     # Convert Bcm/y to MW
@@ -587,7 +591,9 @@ if not snakemake.config["custom_data"]["gas_grid"]:
         elif snakemake.config["sector"]["gas_network_dataset"] == "IGGIELGN":
             download_IGGIELGN_gas_network()
 
-            gas_network = "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
+            gas_network = (
+                "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
+            )
 
             pipelines = load_IGGIELGN_data(gas_network)
             pipelines = prepare_IGGIELGN_data(pipelines)
