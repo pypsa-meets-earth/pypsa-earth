@@ -23,7 +23,7 @@ Relevant Settings
 Inputs
 ------
 
-- ``data/raw/protected_areas/WDPA_WDOECM_Aug2021_Public_AF_shp-points.shp``: `WDPA <https://en.wikipedia.org/wiki/Natura_2000>`_ World Database for Protected Areas.
+- ``data/landcover/world_protected_areas/*.shp``: shapefiles representing the world protected areas, such as the `World Database of Protected Areas (WDPA) <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_.
 
     .. image:: /img/natura.png
         :width: 33 %
@@ -31,25 +31,18 @@ Inputs
 Outputs
 -------
 
-- ``resources/natura.tiff``: Rasterized version of `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas to reduce computation times.
+- ``resources/natura/natura.tiff``: Rasterized version of the world protected areas, such as `WDPA <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_ natural protection areas to reduce computation times.
 
     .. image:: /img/natura.png
         :width: 33 %
 
 Description
 -----------
-To operate the script you need all input files. The Snakefile describes what goes in and out. Make sure you didn't skip one of these.
-Maybe not so obvious is the cutout input. An example is this `africa-2013-era5.nc`
+To operate the script you need all input files.
 
-Steps to retrieve the protected area data (as apparently no API is given for the WDPA data):
-    - 1. Download the WPDA Dataset: World Database on Protected Areas. UNEP-WCMC and IUCN (2021), Protected Planet: The World Database on Protected Areas (WDPA) and World Database on Other Effective Area-based Conservation Measures (WD-OECM) [Online], August 2021, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net.
-    - 2. Unzipp and rename the folder containing the .shp file to `protected_areas`
-    - 3. Important! Don't delete the other files which come with the .shp file. They are required to build the shape.
-    - 4. Move the file in such a way that the above path is given
-    - 5. Activate the environment of environment-max.yaml
-    - 6. Ready to run the script
-
-Tip: The output file `natura.tiff` contains now the 100x100m rasters of protective areas. This operation can make the filesize of that TIFF quite large and leads to problems when trying to open. QGIS, an open source tool helps exploring the file.
+This script collects all shapefiles available in the folder `data/landcover/*` describing regions of protected areas,
+merges them to one shapefile, and create a rasterized version of the region, that covers the region described by the cutout.
+The output is a raster file with the name `natura.tiff` in the folder `resources/natura/`.
 """
 import logging
 import os
