@@ -92,16 +92,6 @@ if __name__ == "__main__":
     # material demand per node and industry (kton/a)
     nodal_production_tom = country_to_nodal(production_tom, dist_keys)
 
-    # Transfromation key to map the material demand to the corresponding carrier demand
-    industry_sector_ratios = pd.read_csv(
-        snakemake.input.industry_sector_ratios, index_col=0
-    )
-
-    if snakemake.config["custom_data"]["industry_demand"]:
-        industry_sector_ratios.drop(
-            "Industry Steel Casting Rolling Finishing", axis=1, inplace=True
-        )
-
     clean_industry_list = [
         "iron and steel",
         "chemical and petrochemical",
