@@ -144,8 +144,9 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
-
+    destination = os.path.relpath(config["destination"])
     url = config["urls"]["zenodo"]
+
     if hot_run:
         try:
             logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
@@ -153,7 +154,7 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
             logger.info(f"Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
-                zipObj.extractall(path=config["destination"])
+                zipObj.extractall(path=destination)
             os.remove(file_path)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
@@ -188,7 +189,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
-
+    destination = os.path.relpath(config["destination"])
     url = config["urls"]["gdrive"]
 
     # retrieve file_id from path
@@ -226,7 +227,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
         )
         with ZipFile(file_path, "r") as zipObj:
             # Extract all the contents of zip file in current directory
-            zipObj.extractall(path=config["destination"])
+            zipObj.extractall(path=destination)
 
         logger.info(f"Download resource '{resource}' from cloud '{url}'.")
 
@@ -266,7 +267,7 @@ def download_and_unzip_protectedplanet(
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile_wpda.zip")
-
+    destination = os.path.relpath(config["destination"])
     url = config["urls"]["protectedplanet"]
 
     def get_first_day_of_month(date):
@@ -293,7 +294,7 @@ def download_and_unzip_protectedplanet(
 
             try:
                 logger.info(
-                    f"Downloading resource '{resource_iter}' from cloud '{url}'."
+                    f"Downloading resource '{resource_iter}' from cloud '{url_iter}'."
                 )
                 progress_retrieve(
                     url_iter, file_path, disable_progress=disable_progress
@@ -316,12 +317,14 @@ def download_and_unzip_protectedplanet(
                 for fzip in zip_files:
                     # final path of the file
                     try:
-                        inner_zipname = os.path.join(config["destination"], fzip)
+                        inner_zipname = os.path.join(destination, fzip)
 
-                        zip_obj.extract(fzip, path=config["destination"])
+                        zip_obj.extract(fzip, path=destination)
+
+                        dest_nested = os.path.join(destination, fzip.split(".")[0])
 
                         with ZipFile(inner_zipname, "r") as nested_zip:
-                            nested_zip.extractall(path=config["destination"])
+                            nested_zip.extractall(path=dest_nested)
 
                         # remove inner zip file
                         os.remove(inner_zipname)
@@ -433,10 +436,10 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = config["destination"]
+    destination = os.path.relpath(config["destination"])
     url = config["urls"]["direct"]
 
-    file_path = os.path.join(config["destination"], os.path.basename(url))
+    file_path = os.path.join(destination, os.path.basename(url))
 
     unzip = config.get("unzip", False)
 
@@ -487,7 +490,7 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = config["destination"]
+    destination = os.path.relpath(config["destination"])
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
@@ -498,7 +501,7 @@ def download_and_unzip_hydrobasins(
 
     for rg in suffix_list:
         url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
-        file_path = os.path.join(config["destination"], os.path.basename(url))
+        file_path = os.path.join(destination, os.path.basename(url))
 
         all_downloaded &= download_and_unpack(
             url=url,
@@ -538,13 +541,14 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
     True when download is successful, False otherwise
     """
     resource = config["category"]
+    destination = os.path.relpath(config["destination"])
 
     # load data for post method
     postdata = config["urls"]["post"]
     # remove url feature
     url = postdata.pop("url")
 
-    file_path = os.path.join(config["destination"], os.path.basename(url))
+    file_path = os.path.join(destination, os.path.basename(url))
 
     if hot_run:
         if os.path.exists(file_path):
@@ -564,7 +568,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
         # then unzip it and remove the original file
         if config.get("unzip", False):
             with ZipFile(file_path, "r") as zipfile:
-                zipfile.extractall(config["destination"])
+                zipfile.extractall(destination)
 
             os.remove(file_path)
         logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
