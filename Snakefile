@@ -648,7 +648,7 @@ if config["custom_data"].get("industry_demand", False) == False:
 
     rule build_base_industry_totals:  #default data
         input:
-            industrial_production_per_country="data/industrial_production_per_country.csv",
+            #industrial_production_per_country="data/industrial_production_per_country.csv",
             #unsd_path="data/demand/unsd/data/",
             energy_totals_base="data/energy_totals_base.csv",
         output:
@@ -663,7 +663,6 @@ if config["custom_data"].get("industry_demand", False) == False:
 
     rule build_industry_demand:  #default data
         input:
-            industry_sector_ratios="data/industry_sector_ratios.csv",
             industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
             #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             #industrial_production_per_country="data/industrial_production_per_country.csv",
