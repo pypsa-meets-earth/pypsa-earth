@@ -39,7 +39,19 @@ def get_cocode_from_coords(df):
         longitude = row["Longitude"]
 
         # Perform reverse geocoding to get location information
-        location = geolocator.reverse((latitude, longitude), exactly_one=True)
+        tries = 0
+        while tries < 10:
+            try:
+                location = geolocator.reverse((latitude, longitude), exactly_one=True)
+                break
+            except:
+                tries += 1
+                if tries == 10:
+                    print(
+                        "Country code of location ({},{}) could not be geocoded after 10 tries.".format(
+                            latitude, longitude
+                        )
+                    )
 
         if location and location.raw.get("address", {}).get("country_code"):
             # Extract and append the country code to the list
@@ -493,7 +505,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industrial_database",
             simpl="",
-            clusters="10",
+            clusters="4",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
