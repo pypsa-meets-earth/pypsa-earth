@@ -11,11 +11,17 @@ import os
 import zipfile
 from pathlib import Path
 
+import fiona
 import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-from helpers import progress_retrieve, two_2_three_digits_country, three_2_two_digits_country
+import ruamel.yaml
+from helpers import (
+    progress_retrieve,
+    three_2_two_digits_country,
+    two_2_three_digits_country,
+)
 from matplotlib.lines import Line2D
 from packaging.version import Version, parse
 from pyproj import CRS
@@ -23,9 +29,7 @@ from pypsa.geo import haversine_pts
 from shapely import wkt
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import unary_union
-import fiona
 from shapely.validation import make_valid
-import ruamel.yaml
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -350,7 +354,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_filename = get_GADM_filename(country_code)
 
     GADM_inputfile_gpkg = os.path.join(
-        os.getcwd()+"/pypsa-earth",
+        os.getcwd() + "/pypsa-earth",
         "data",
         "gadm",
         GADM_filename,
@@ -498,8 +502,6 @@ def gadm(
         errors="ignore",
     )
 
-
-
     # renaming 3 letter to 2 letter ISO code before saving GADM file
     # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
     # df_gadm["GADM_ID"] = (
@@ -516,6 +518,7 @@ def gadm(
 
     return df_gadm
 
+
 def load_bus_region(onshore_path, pipelines):
     """
     Load pypsa-earth-sec onshore regions.
@@ -530,13 +533,12 @@ def load_bus_region(onshore_path, pipelines):
     ]
 
     if snakemake.config["clustering_options"]["alternative_clustering"]:
-
         # Read the YAML file
         yaml = ruamel.yaml.YAML()
         file_path = "./config.pypsa-earth.yaml"
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             config_pypsa_earth = yaml.load(file)
-        
+
         countries_list = snakemake.config["countries"]
         layer_id = config_pypsa_earth["build_shape_options"]["gadm_layer_id"]
         update = config_pypsa_earth["build_shape_options"]["update_file"]
@@ -549,19 +551,19 @@ def load_bus_region(onshore_path, pipelines):
         nchunks = config_pypsa_earth["build_shape_options"]["nchunks"]
 
         bus_regions_onshore = gadm(
-        countries_list,
-        geo_crs,
-        contended_flag,
-        layer_id,
-        update,
-        out_logging,
-        year,
-        nprocesses=nprocesses,
-        nchunks=nchunks,
+            countries_list,
+            geo_crs,
+            contended_flag,
+            layer_id,
+            update,
+            out_logging,
+            year,
+            nprocesses=nprocesses,
+            nchunks=nchunks,
         )
 
         # bus_regions_onshore = bus_regions_onshore.reset_index()
-        bus_regions_onshore = bus_regions_onshore.rename(columns={"GADM_ID":"gadm_id"})
+        bus_regions_onshore = bus_regions_onshore.rename(columns={"GADM_ID": "gadm_id"})
         # Conversion of GADM id to from 3 to 2-digit
         # bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].apply(
         #     lambda x: two_2_three_digits_country(x[:2]) + x[2:]
