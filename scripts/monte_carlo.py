@@ -210,9 +210,7 @@ def monte_carlo_sampling_scipy(
     return lh
 
 
-def rescale_distribution(
-    latin_hypercube: np.array, uncertainties_values: dict
-) -> np.array:
+def rescale_distribution(latin_hypercube, uncertainties_values):
     """
     Rescales a Latin hypercube sampling (LHS) using specified distribution
     parameters.
@@ -245,23 +243,26 @@ def rescale_distribution(
         dist = value.get("type")
         params = value.get("args")
 
-        if dist == "Uniform":
-            pass
-        elif dist == "Normal":
-            mean, std = params
-            latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
-        elif dist == "LogNormal":
-            mean, std = params
-            latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=0.90)
-        elif dist == "Triangle":
-            tri_mean = np.mean(params)
-            latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
-        elif dist == "Beta":
-            a, b = params
-            latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
-        elif dist == "Gamma":
-            shape, scale = params
-            latin_hypercube[:, idx] = gamma.ppf(latin_hypercube[:, idx], shape, scale)
+        match dist:
+            case "Uniform":
+                pass
+            case "Normal":
+                mean, std = params
+                latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
+            case "LogNormal":
+                mean, std = params
+                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=0.90)
+            case "Triangle":
+                tri_mean = np.mean(params)
+                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
+            case "Beta":
+                a, b = params
+                latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
+            case "Gamma":
+                shape, scale = params
+                latin_hypercube[:, idx] = gamma.ppf(
+                    latin_hypercube[:, idx], shape, scale
+                )
 
     # samples space needs to be from 0 to 1
     mm = MinMaxScaler(feature_range=(0, 1), clip=True)
@@ -270,9 +271,7 @@ def rescale_distribution(
     return latin_hypercube
 
 
-def validate_parameters(
-    sampling_strategy: str, samples: int, uncertainties_values: dict
-) -> None:
+def validate_parameters(sampling_strategy, samples, uncertainties_values):
     """
     Validates the parameters for a given probability distribution. Inputs from
     user through the config file needs to be validated before proceeding to
@@ -368,8 +367,6 @@ if __name__ == "__main__":
         k: v.get("scale") for k, v in monte_carlo_config["uncertainties"].items() if v
     }  # removes key value pairs with empty value e.g. []
     MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
-    L_BOUNDS = [item[0] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
-    U_BOUNDS = [item[1] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
     N_FEATURES = len(
         MONTE_CARLO_PYPSA_FEATURES
     )  # only counts features when specified in config
@@ -413,7 +410,6 @@ if __name__ == "__main__":
             rule="latin_hypercube",
             seed=42,
         )
-    lh_scaled = qmc.scale(lh, L_BOUNDS, U_BOUNDS)
 
     ### MONTE-CARLO MODIFICATIONS
     ###
@@ -427,14 +423,14 @@ if __name__ == "__main__":
         # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
         # i, j interaction number to pick values of experimental setup
         # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh_scaled[0,0]
-        exec(f"n.{k} = n.{k} * {lh_scaled[i,j]}")
-        logger.info(f"Scaled n.{k} by factor {lh_scaled[i,j]} in the {i} scenario")
+        exec(f"n.{k} = n.{k} * {lh[i,j]}")
+        logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
         j = j + 1
 
     ### EXPORT AND METADATA
     #
     latin_hypercube_dict = (
-        pd.DataFrame(lh_scaled).rename_axis("Nruns").add_suffix("_feature")
+        pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
     ).to_dict()
     n.meta.update(latin_hypercube_dict)
     n.export_to_netcdf(snakemake.output[0])

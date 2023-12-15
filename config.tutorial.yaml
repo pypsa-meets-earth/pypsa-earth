@@ -359,15 +359,12 @@ monte_carlo:
     sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
   uncertainties:
     loads_t.p_set:
-      scale: [0.9, 1.1]
       type: Uniform
       args: [0, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]:
-      scale: [0.9, 1.1]
       type: LogNormal
       args: [0, 2]
     generators_t.p_min_pu.loc[:, n.generators.carrier == "wind"]:
-      scale: [0.5, 1.2]
       type: Beta
       args: [0.5, 2]
 
