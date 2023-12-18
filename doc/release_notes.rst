@@ -24,6 +24,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Use `new CC0 v1 dataset <https://doi.org/10.7910/DVN/XIV9BL>`__ for the natura input and automate download of WDPA protected planet data `PR #913 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/913>`__
 
+* Improve performances of set countryname by shape `PR #829 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/829>`__
+
 **Minor Changes and bug-fixing**
 
 * Revise databundles and improve logging in retrieve_databundle `PR #928 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/928>`__
