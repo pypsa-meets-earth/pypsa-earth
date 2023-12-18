@@ -1,0 +1,378 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+
+# Columns of CLEAN OSM DATA names and dtypes
+osm_clean_columns:
+  substation:
+    bus_id: object
+    station_id: float
+    voltage: float
+    dc: bool
+    symbol: object
+    under_construction: bool
+    tag_substation: str
+    tag_area: str
+    lon: float
+    lat: float
+    country: str
+    geometry: object
+  generator:
+    id: object
+    tags.power: object
+    Type: object
+    Country: str
+    Area: object
+    name: object
+    tags.generator:type: object
+    tags.generator:method: object
+    tags.generator:source: object
+    power_output_MW: object
+    geometry: object
+  line:
+    line_id: object
+    bus0: object
+    bus1: object
+    voltage: float
+    circuits: float
+    length: float
+    underground: bool
+    under_construction: bool
+    tag_type: str
+    tag_frequency: float
+    dc: bool
+    country: object
+    geometry: object
+# Python dictionary of ISO 3166-1-alpha-2 codes, as per publicly
+# available data on official ISO site in July 2015.
+#
+# Available under MIT license
+# Dimitris Karagkasidis, https://github.com/pageflt
+continents:
+  LA: NorthAmerica
+  SA: SouthAmerica
+  AS: Asia
+  OC: Oceania
+  AF: Africa
+  EU: Europe
+
+world_iso:
+  Africa:
+    DZ: "algeria"  # Algeria
+    AO: "angola"
+    BJ: "benin"
+    BW: "botswana"
+    BF: "burkina-faso"
+    BI: "burundi"
+    CM: "cameroon"
+    CV: "cape-verde"
+    CF: "central-african-republic"
+    TD: "chad"
+    KM: "comoros"
+    CG: "congo-brazzaville"
+    CD: "congo-democratic-republic"
+    DJ: "djibouti"
+    EG: "egypt"
+    GQ: "equatorial-guinea"
+    ER: "eritrea"
+    ET: "ethiopia"
+    GA: "gabon"
+    GH: "ghana"
+    GW: "guinea-bissau"  # No Data
+    GN: "guinea"
+    CI: "ivory-coast"
+    KE: "kenya"
+    LS: "lesotho"
+    LR: "liberia"
+    LY: "libya"
+    MA: "morocco"
+    MG: "madagascar"
+    MW: "malawi"
+    ML: "mali"
+    MR: "mauritania"
+    MU: "mauritius"
+    MZ: "mozambique"
+    "NA": "namibia"
+    NE: "niger"
+    NG: "nigeria"
+    RW: "rwanda"
+    ST: "sao-tome-and-principe"
+    SN: "senegal"
+    GM: "gambia"
+    SC: "seychelles"
+    SO: "somalia"
+    ZA: "south-africa"
+    SS: "south-sudan"
+    SD: "sudan"
+    SL: "sierra leone"
+    SZ: "swaziland"
+    TZ: "tanzania"
+    TG: "togo"
+    TN: "tunisia"
+    UG: "uganda"
+    ZM: "zambia"
+    ZW: "zimbabwe"
+    EH: "western-sahara"
+  Asia:
+    AF: "afghanistan"
+    AM: "armenia"
+    AZ: "azerbaijan"
+    BH: "bahrain"
+    BD: "bangladesh"
+    BT: "bhutan"
+    KH: "cambodia"
+    CN: "china"
+    CY: "cyprus"
+    GE: "georgia"
+    IN: "india"
+    ID: "indonesia"
+    IR: "iran"
+    IQ: "iraq"
+    IL: "israel"
+    JP: "japan"
+    JO: "jordan"
+    KZ: "kazakhstan"
+    KP: "north-korea"
+    KR: "south-korea"
+    KW: "kuwait"
+    KG: "kyrgyzstan"
+    LA: "lao-peoples-democratic-republic"
+    LB: "lebanon"
+    MY: "malaysia"
+    BN: "brunei"
+    MV: "maldives"
+    MN: "mongolia"
+    MM: "myanmar"
+    NP: "nepal"
+    OM: "oman"
+    PK: "pakistan"
+    PS: "palestine"
+    PH: "philippines"
+    QA: "qatar"
+    RU: "russian-federation"
+    SA: "saudi-arabia"
+    SG: "singapore"  # merged with MY
+    LK: "sri-lanka"
+    SY: "syria"
+    TW: "taiwan"
+    TJ: "tajikistan"
+    TH: "thailand"
+    TL: "timor-leste"
+    TR: "turkey"
+    TM: "turkmenistan"
+    AE: "united-arab-emirates"
+    UZ: "uzbekistan"
+    VN: "vietnam"
+    YE: "yemen"
+  Oceania:
+    AS: "american-samoa"  # Island
+    AU: "australia"
+    FJ: "fiji"
+    KI: "kiribati"  # Island
+    MH: "marshall-islands"
+    FM: "micronesia"
+    NR: "nauru"
+    NC: "new-caledonia"  # Island
+    NZ: "new-zealand"
+    NU: "niue"  # Island
+    PG: "papua-new-guinea"
+    PW: "palau"
+    WS: "samoa"
+    SB: "solomon-islands"
+    TO: "tonga"
+    TV: "tuvalu"
+    VU: "vanuatu"  # Island
+  Europe:
+    AL: "albania"
+    AD: "andorra"
+    AM: "armenia"
+    AT: "austria"
+    AZ: "Azerbaijan"
+    BY: "belarus"
+    BE: "belgium"
+    BA: "bosnia-herzegovina"
+    BG: "bulgaria"
+    HR: "croatia"
+    CY: "cyprus"
+    CZ: "czech-republic"
+    DK: "denmark"
+    EE: "estonia"
+    FI: "finland"
+    FR: "france"
+    GE: "georgia"
+    DE: "germany"
+    GR: "greece"
+    HU: "hungary"
+    IS: "iceland"
+    IE: "ireland-and-northern-ireland"
+    IT: "italy"
+    KZ: "kazakhstan"
+    XK: "kosovo"
+    LV: "latvia"
+    LI: "liechtenstein"
+    LT: "lithuania"
+    LU: "luxembourg"
+    MK: "macedonia"
+    MT: "malta"
+    MD: "moldova"
+    MC: "monaco"
+    ME: "montenegro"
+    NL: "netherlands"
+    "NO": "norway"
+    PL: "poland"
+    PT: "portugal"
+    RO: "romania"
+    RU: "russia"
+    SM: "san-marino"
+    RS: "serbia"
+    SK: "slovakia"
+    SI: "slovenia"
+    ES: "spain"
+    SE: "sweden"
+    CH: "switzerland"
+    UA: "ukraine"
+    GB: "great-britain"
+    TR: "turkey"
+    VA: "vatican"
+  NorthAmerica:
+    AG: "antigua-and-barbuda"
+    BS: "bahamas"
+    BB: "barbados"
+    CA: "canada"
+    CU: "cuba"
+    DM: "dominica"
+    DO: "dominican-republic"
+    GL: "greenland"
+    GD: "grenada"
+    HT: "haiti"
+    JM: "jamaica"
+    MX: "mexico"
+    US: "united-states-of-america"
+    PR: "puerto-rico"
+    KN: "saint-kitts-and-nevis"
+    LC: "saint-lucia"
+    VC: "saint-vincent-and-the-grenadines"
+    TT: "trinidad-and-tobago"
+    BZ: "belize"
+    CR: "costa-rica"
+    HN: "honduras"
+    GT: "guatemala"
+    NI: "nicaragua"
+    PA: "panama"
+    SV: "el-salvador"
+  SouthAmerica:
+    AR: "argentina"
+    BO: "bolivia"
+    BR: "brazil"
+    CL: "chile"
+    CO: "colombia"
+    EC: "ecuador"
+    FK: "falkland-islands"  # Islands
+    GF: "french-guiana"
+    GY: "guyana"  # No Data
+    PE: "peru"
+    PY: "paraguay"
+    SR: "suriname"
+    UY: "uruguay"
+    VE: "venezuela"
+
+
+
+# Based on: https://waml.org/waml-information-bulletin/46-3/index-to-lc-g-schedule/1-world/
+# Australasia region includes New Caledonia and Papua New Guinea
+continent_regions:
+  SCR: ["DK", "NO", "SE", "FI", "IS"]  # SCANDINAVIAN REGION
+  EER: ["BY", "PL", "CZ", "RU", "SK", "UA", "LT", "LV", "EE", "FI", "MD"]  # EASTERN EUROPEAN REGION
+  CER: ["AT", "CH", "CZ", "DE", "HU", "PL", "SK", "LI"]  # CENTRAL EUROPEAN REGION
+  BPR: ["AL", "BA", "BG", "GR", "HR", "ME", "RO", "SI", "RS", "ME", "MK"]  # BALKAN PENISULAN REGION
+  WER: ["FR", "BE", "GB", "IE", "LU", "MC", "NL", "AD"]  # WESTERN EUROPE
+  SER: ["ES", "AD", "IT", "PT", "SM", "MT"]  # SOUTHERN EUROPEAN REGION
+  NAR: ["EG", "LY", "TN", "DZ", "MA", "EH", "SD", "SS"]  # NORTHERN AFRICAN REGION
+  WAR: ["MR", "ML", "NE", "NG", "BJ", "BF", "TG", "GH", "CI", "LR", "SL", "GN", "SN", "GM"]  # WESTERN AFRICAN REGION
+  CAR: ["TD", "CF", "CM", "GQ", "GA", "CD", "CG", "AO"]  # CENTRAL AFRICAN REGION
+  EAR: ["ER", "ET", "UG", "KE", "RW", "BI", "TZ", "MZ", "DJ", "MG"]  # EASTERN AFRICAN REGION
+  SAR: ["MW", "ZM", "ZW", "BW", "NA", "SZ", "LS", "ZA"]  # SOUTHERN AFRICAN REGION
+  KVR: ["AZ", "GE", "AM"]  # Asian regions
+  WAS: ["TR", "AM", "AZ", "BH", "CY", "GE", "IQ", "IL", "JO", "KW", "LB", "OM", "PS", "QA", "SA", "SY", "AE", "YE"]  # WEST ASIAN REGION
+  FEAR: ["JP", "KP", "KR", "CN", "TW", "MN"]  # FAR EASTERN ASIAN REGION
+  SEAR: ["LA", "TH", "KH", "VN", "PH", "MY", "SG", "BN", "ID"]  # SOUTHEASTERN ASIAN REGION
+  CASR: ["KZ", "KG", "UZ", "TM", "TJ"]  # CENTRAL ASIAN REGION
+  SASR: ["MM", "BD", "BT", "NP", "IN", "LK", "PK", "AF"]  # SOUTHERN ASIAN REGION
+  ASEAN: ["VN", "TH", "ID", "PH", "MY", "MM", "KH", "LA", "SG", "BN"]  # ASEAN
+  MEAR: ["TR", "SY", "LB", "CY", "IQ", "IR", "JO", "IL", "PS", "AE", "YE", "KW", "BH", "QA", "SA", "OM"]  # MIDDLE EASTERN ASIAN REGION
+  NACR: ["CA", "GL", "MX", "US"]  # American continent regions
+  LACR: ["AR", "BO", "BR", "CL", "CO", "EC", "GF", "PE", "PY", "SR", "UY", "VE"]  # SOUTHERN LATIN AMERICAN REGION
+  CACR: ["BZ", "GT", "SV", "HN", "NI", "CR", "PA"]  # CENTRAL AMERICAN REGION
+  AUO: ["AU", "NC", "NZ", "PG"]  # Australasia
+  UnitedNations: ['AF', 'AL', 'DZ', 'AD', 'AO', 'AG', 'AR', 'AM', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BT', 'BO', 'BA', 'BW', 'BR', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'CF', 'TD', 'CL', 'CN', 'CO', 'KM', 'CG', 'CR', 'CI', 'HR', 'CU', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'CD', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GR', 'GD', 'GT', 'GN', 'GW', 'GY', 'HT', 'HN', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KI', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NZ', 'NI', 'NE', 'NG', 'KP', 'NO', 'OM', 'PK', 'PW', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'QA', 'RO', 'RU', 'RW', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'KR', 'SS', 'ES', 'LK', 'KN', 'LC', 'VC', 'SD', 'SR', 'SE', 'CH', 'SY', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TO', 'TT', 'TN', 'TR', 'TM', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'UZ', 'VU', 'VE', 'VN', 'YE', 'ZM', 'ZW']  # UnitedNations
+
+# Geofabrik and iso norm deviate for some countries and domains
+
+# dictionary of correspondence between iso country codes and geofabrik codes containing those information
+# This dictionary instructs the script download_osm_data about how to successfully download data
+# from countries that are aggregated into osm.
+# For example, Senegal (SN) and Gambia (GM) cannot be downloaded from OSM separately, but only jointly as SN-GM
+#   That's the reason why in this dictionary they can be found the following entries:
+#       "SN": "SN-GM"
+#       "GM": "SN-GM"
+#   This instruct the workflow that when the country "SN" is requested, then it shall download the "SN-GM" file
+iso_to_geofk_dict:
+  EH: "MA"  # Western Sahara -> Morocco
+  SN: "SN-GM"  # Senegal -> Senegal-Gambia
+  GM: "SN-GM"  # Gambia -> Senegal-Gambia
+  KM: "comores"  # Comores
+  IC: "canary-islands"  # Canary islands
+  SG: "MY"  # Singapore -> Malaysia-Singapore-Brunei
+  BN: "MY"  # Brunei -> Malaysia-Singapore-Brunei
+  SA: "QA-AE-OM-BH-KW"  # Saudi Arabia -> Gulf Cooperation Council
+  KW: "QA-AE-OM-BH-KW"  # Kuwait -> Gulf Cooperation Council
+  BH: "QA-AE-OM-BH-KW"  # Bahrain -> Gulf Cooperation Council
+  QA: "QA-AE-OM-BH-KW"  # Qatar -> Gulf Cooperation Council
+  AE: "QA-AE-OM-BH-KW"  # United Arab Emirates -> Gulf Cooperation Council
+  OM: "QA-AE-OM-BH-KW"  # Oman -> Gulf Cooperation Council
+  PS: "PS-IL"  # Israel and Palestine are merged in OSM
+  IL: "PS-IL"  # Israel and Palestine are merged in OSM
+  SM: "IT"  # San-Marino is merged to Italy
+  VA: "IT"  # Vatican is merged to Italy
+  HT: "haiti-and-domrep"  # Haiti and Dominican Republic are merged in OSM
+  DO: "haiti-and-domrep"  # Haiti and Dominican Republic are merged in OSM
+  PA: "panama"  # Panama
+  NF: "AU"  # norfolk island is an AU territory
+  MP: "american-oceania"  # northern mariana islands are US territory
+  GU: "american-oceania"  # Guam is a US territory
+  AS: "american-oceania"  # American Samoa is a US territory
+  CP: "ile-de-clipperton"  # Ile de clipperton
+  PF: "polynesie-francaise"  # Polynesie Francaise
+  VU: "vanuatu"  #  Vanuatu
+  TK: "tokelau"  # Tokelau
+  MH: "marshall-islands"  # Marshal islands
+  PN: "pitcairn-islands"  # Pitcairn
+  WF: "wallis-et-futuna"  # Wallis et Fortnuna
+  XK: "RS-KM"  # Kosovo
+  BS: "bahamas"  # Bahamas
+  BB: "central-america"  # Barbados
+  CU: "cuba"  # Cuba
+  RE: "reunion"  # Reunion island (France)
+  YT: "mayotte"  # "Mayotte island (France)"
+  GG: "guernsey-jersey"  # Guernsey
+  JE: "guernsey-jersey"  # Jersey
+  IM: "isle-of-man"  # Isle of man
+  GP: "guadeloupe"  # guadeloupe
+  JM: "jamaica"  # jamaica
+  TT: "central-america"  # Trinidad and Tobago
+  AG: "central-america"  # Antigua e Barbuda
+  DM: "central-america"  # Dominique
+  LC: "central-america"  # Santa Lucia
+  VC: "central-america"  # Saint Vincent e Grenadine
+  KN: "central-america"  # Saint Kitts e Nevis
+  GD: "central-america"  # Grenada
+  AW: "central-america"  # Aruba
+  AX: "finland"  # Aland
+  BM: "north-america"  # Bermuda
+  CW: "central-america"  # Curaçao
+  KY: "central-america"  # Cayman Islands
+  HK: "china"  # Hong Kong
+  MO: "china"  # Macau
+  SX: "central-america"  # Sint Maarten
+  TC: "central-america"  # Turks and Caicos Islands

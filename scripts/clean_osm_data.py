@@ -12,9 +12,15 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import reverse_geocode as rg
-from _helpers import REGION_COLS, configure_logging, save_to_geojson, to_csv_nafix
+from _helpers import (
+    REGION_COLS,
+    configure_logging,
+    create_logger,
+    save_to_geojson,
+    to_csv_nafix,
+)
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def prepare_substation_df(df_all_buses):
@@ -859,12 +865,53 @@ def set_name_by_closestcity(df_all_generators, colname="name"):
     return df_all_generators
 
 
+def load_network_data(network_asset, data_options):
+    """
+    Function to check if OSM or custom data should be considered.
+
+    The network_asset should be a string named "lines", "cables" or
+    "substations".
+    """
+
+    # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)
+    try:
+        cleanning_data_options = data_options[f"use_custom_{network_asset}"]
+        custom_path = data_options[f"path_custom_{network_asset}"]
+
+    except:
+        logger.error(
+            f"Missing use_custom_{network_asset} or path_custom_{network_asset} options in the config file"
+        )
+
+    # creates a dataframe for the network_asset defined
+    if cleanning_data_options == "custom_only":
+        loaded_df = gpd.read_file(custom_path)
+
+    elif cleanning_data_options == "add_custom":
+        loaded_df1 = gpd.read_file(input_files[network_asset])
+        loaded_df2 = gpd.read_file(custom_path)
+        loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
+
+    else:
+        if cleanning_data_options != "OSM_only":
+            logger.warning(
+                f"Unrecognized option {data_options} for handling custom data of {network_asset}."
+                + "Default OSM_only option used. Options available in clean_OSM_data_options configtable"
+            )
+
+        loaded_df = gpd.read_file(input_files[network_asset])
+
+    # returns dataframe to be read in each section of the code depending on the component type (lines, substations or cables)
+    return loaded_df
+
+
 def clean_data(
     input_files,
     output_files,
     df_region,
     geo_crs,
     distance_crs,
+    data_options,
     ext_country_shapes=None,
     names_by_shapes=True,
     tag_substation="transmission",
@@ -876,7 +923,7 @@ def clean_data(
 
     if os.path.getsize(input_files["lines"]) > 0:
         # Load raw data lines
-        df_lines = gpd.read_file(input_files["lines"])
+        df_lines = load_network_data("lines", data_options)
 
         # prepare lines dataframe and data types
         df_lines = prepare_lines_df(df_lines)
@@ -892,7 +939,7 @@ def clean_data(
     if os.path.getsize(input_files["cables"]) > 0:
         logger.info("Add OSM cables to data")
         # Load raw data lines
-        df_cables = gpd.read_file(input_files["cables"])
+        df_cables = load_network_data("cables", data_options)
 
         # prepare cables dataframe and data types
         df_cables = prepare_lines_df(df_cables)
@@ -942,7 +989,7 @@ def clean_data(
     logger.info("Process OSM substations")
 
     if os.path.getsize(input_files["substations"]) > 0:
-        df_all_buses = gpd.read_file(input_files["substations"])
+        df_all_buses = load_network_data("substations", data_options)
 
         # prepare dataset for substations
         df_all_buses = prepare_substation_df(df_all_buses)
@@ -1047,17 +1094,18 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
 
-    tag_substation = snakemake.config["clean_osm_data_options"]["tag_substation"]
-    threshold_voltage = snakemake.config["clean_osm_data_options"]["threshold_voltage"]
-    names_by_shapes = snakemake.config["clean_osm_data_options"]["names_by_shapes"]
-    add_line_endings = snakemake.config["clean_osm_data_options"]["add_line_endings"]
-    generator_name_method = snakemake.config["clean_osm_data_options"].get(
+    tag_substation = snakemake.params.clean_osm_data_options["tag_substation"]
+    threshold_voltage = snakemake.params.clean_osm_data_options["threshold_voltage"]
+    names_by_shapes = snakemake.params.clean_osm_data_options["names_by_shapes"]
+    add_line_endings = snakemake.params.clean_osm_data_options["add_line_endings"]
+    generator_name_method = snakemake.params.clean_osm_data_options.get(
         "generator_name_method", "OSM"
     )
     offshore_shape_path = snakemake.input.offshore_shapes
     onshore_shape_path = snakemake.input.country_shapes
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    distance_crs = snakemake.config["crs"]["distance_crs"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
+    data_options = snakemake.params["clean_osm_data_options"]
 
     input_files = snakemake.input
     output_files = snakemake.output
@@ -1087,6 +1135,7 @@ if __name__ == "__main__":
         df_region,
         geo_crs,
         distance_crs,
+        data_options,
         ext_country_shapes=ext_country_shapes,
         names_by_shapes=names_by_shapes,
         tag_substation=tag_substation,

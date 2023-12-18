@@ -47,11 +47,12 @@ import os
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
+
 
 opt_name = {"Store": "e", "Line": "s", "Transformer": "s"}
 
@@ -474,7 +475,7 @@ outputs = [
 ]
 
 
-def make_summaries(networks_dict, inputs, config, country="all"):
+def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all"):
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
     )
@@ -502,8 +503,8 @@ def make_summaries(networks_dict, inputs, config, country="all"):
         Nyears = n.snapshot_weightings.objective.sum() / 8760.0
         costs = load_costs(
             inputs.tech_costs,
-            config["costs"],
-            config["electricity"],
+            cost_config,
+            elec_config,
             Nyears,
         )
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
@@ -549,10 +550,10 @@ if __name__ == "__main__":
 
     def expand_from_wildcard(key):
         w = getattr(snakemake.wildcards, key)
-        return snakemake.config["scenario"][key] if w == "all" else [w]
+        return snakemake.params.scenario[key] if w == "all" else [w]
 
     if snakemake.wildcards.ll.endswith("all"):
-        ll = snakemake.config["scenario"]["ll"]
+        ll = snakemake.params.ll
         if len(snakemake.wildcards.ll) == 4:
             ll = [l for l in ll if l[0] == snakemake.wildcards.ll[0]]
     else:
@@ -571,7 +572,8 @@ if __name__ == "__main__":
     dfs = make_summaries(
         networks_dict,
         snakemake.input,
-        snakemake.config,
+        snakemake.params.costs,
+        snakemake.params.electricity,
         country=snakemake.wildcards.country,
     )
 

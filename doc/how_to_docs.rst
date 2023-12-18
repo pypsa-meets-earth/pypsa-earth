@@ -48,7 +48,7 @@ form `doc/requirements.txt`. First, we recommend creating a fresh python environ
 
     .../pypsa-earth % conda activate pypsa-earth-docs
 
-Next, install the packages specified in `doc/requiremnts.txt` using `pip`:
+Next, install the packages specified in `doc/requirements.txt` using `pip`:
 
 .. code:: bash
 

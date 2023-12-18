@@ -31,11 +31,10 @@ import os
 import shutil
 from pathlib import Path
 
-from _helpers import configure_logging
-from config_osm_data import iso_to_geofk_dict
+from _helpers import configure_logging, create_logger, read_osm_config
 from earth_osm import eo
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def country_list_to_geofk(country_list):
@@ -62,7 +61,9 @@ def country_list_to_geofk(country_list):
     return full_codes_list
 
 
-def convert_iso_to_geofk(iso_code, iso_coding=True, convert_dict=iso_to_geofk_dict):
+def convert_iso_to_geofk(
+    iso_code, iso_coding=True, convert_dict=read_osm_config("iso_to_geofk_dict")
+):
     """
     Function to convert the iso code name of a country into the corresponding
     geofabrik In Geofabrik, some countries are aggregated, thus if a single
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     RDIR = run["name"] + "/" if run.get("name") else ""
     store_path_resources = Path.joinpath(Path().cwd(), "resources", RDIR, "osm", "raw")
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
-    country_list = country_list_to_geofk(snakemake.config["countries"])
+    country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.get_osm_data(
         primary_name="power",
