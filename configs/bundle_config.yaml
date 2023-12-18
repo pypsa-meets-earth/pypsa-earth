@@ -171,7 +171,7 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/4114/files/bundle_data_earth.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_data_earth.zip?download=1
       gdrive: https://drive.google.com/file/d/1zU4VRRBDVIVqoykhK9lnOAr60unVm_x2/view?usp=drive_link
     output:
     - data/eez/eez_v11.gpkg
@@ -188,91 +188,12 @@ databundles:
   bundle_natura_earth:
     countries: [Earth]
     category: natura
-    destination: "data"
+    destination: "data/natura/"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/natura_global.zip?download=1
-      gdrive: https://drive.google.com/file/d/1WmAAwY0TAcHg8YZyAGof0bPewFacm7my/view
+      # zenodo:
+      gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
-    - data/natura.tiff
-
-  # data bundle of the data folder for the African continent
-  bundle_landcover_africa:
-    countries: [Africa]
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_africa.zip?download=1
-      gdrive: https://drive.google.com/file/d/1qnJ0HAWZ4z_9q3PtDEUrFmZWBZYg-WNW/view
-    output: [data/landcover/*]
-
-  # data bundle of the data folder for the african continent
-  bundle_landcover_asiapacific:
-    countries: [Asia, Oceania]
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_asiapacific.zip?download=1
-      gdrive: https://drive.google.com/file/d/163Uc9F1DPs2pRgDzkTivnblhXCw4nfd5/view
-    output: [data/landcover/*]
-
-  # data bundle of the data folder for the African continent
-  bundle_landcover_latinamerica_caribbean: # excludes North America
-    countries: [SouthAmerica, NorthAmerica]
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_latinamerica_caribbean.zip?download=1
-      gdrive: https://drive.google.com/file/d/1d3l9qxPnM9XbXODWkP4kWxK_t5cDcEIZ/view
-    output: [data/landcover/*]
-
-  # data bundle of the data folder for the African continent
-  bundle_landcover_westasia:
-    countries: [WAS]
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_westasia.zip?download=1
-      gdrive: https://drive.google.com/file/d/1XsZVZDORUFMKyHfAkzqxDVBENiuy4jEM/view
-    output: [data/landcover/*]
-
-  # data bundle of the data folder for Europe
-  bundle_landcover_europe:
-    countries: [Europe]
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_europe.zip?download=1
-      gdrive: https://drive.google.com/file/d/1MfT3cwHJbNTtTjRLzW2T19f9qBNAxdhw/view
-    output: [data/landcover/*]
-
-  # data bundle of the data folder for the Poles
-  bundle_landcover_northamerica:
-    countries: [NorthAmerica] # Greenland and Antartica
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_northamerica.zip?download=1
-      gdrive: https://drive.google.com/file/d/1Dc11J2BZQQeJWxwCC6GiiPd_GWMCN0uF/view
-    output: [data/landcover/*]
-
-  # data bundle of the data folder for the Poles
-  bundle_landcover_poles:
-    countries: [GL, ATA] # Greenland and Antartica
-    category: landcover
-    destination: "data/landcover"
-    urls:
-      zenodo: https://sandbox.zenodo.org/record/1183583/files/landcover_polar.zip?download=1
-      gdrive: https://drive.google.com/file/d/18uODyONQZJGoL15P-URPl0lJs7sphQhX/view
-    output: [data/landcover/*]
-
-  # # data bundle of the data folder for the african continent
-  # bundle_landcover_earth:
-  #   countries: [Earth]
-  #   category: landcover
-  #   destination: "data/landcover"
-  #   urls:
-  #     direct: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_WDOECM_Mar2022_Public_all_shp.zip
-  #   output: [data/landcover/*]
+    - data/natura/natura.tiff
 
   # # data bundle of the data folder for the african continent
   # bundle_landclassification:
@@ -315,7 +236,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/4114/files/bundle_cutouts_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -341,7 +262,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/13539/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -396,3 +317,12 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+
+  # data bundle containing the protected data for the whole world
+  bundle_landcover_earth:
+    countries: [Earth]
+    category: landcover
+    destination: "data/landcover/world_protected_areas"
+    urls:
+      protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
+    output: [data/landcover/world_protected_areas/*]
