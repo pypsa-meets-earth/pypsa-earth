@@ -151,8 +151,8 @@ To further improve performances, commercial solvers like
 
 .. note::
 
-    No need to install ``cbc`` or ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.
-    However, solving capabilities of ``cbc`` and ``glpk`` are limited.
+    No need to install ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.
+    However, solving capabilities of ``glpk`` are limited.
     To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
 A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
