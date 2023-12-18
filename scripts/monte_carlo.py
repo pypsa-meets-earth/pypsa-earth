@@ -101,7 +101,7 @@ def monte_carlo_sampling_pydoe2(
     random_state,
     criterion=None,
     iteration=None,
-    correlation_matrix=None
+    correlation_matrix=None,
 ):
     """
     Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
@@ -133,11 +133,7 @@ def monte_carlo_sampling_pydoe2(
 
 
 def monte_carlo_sampling_chaospy(
-    N_FEATURES,
-    SAMPLES,
-    uncertainties_values,
-    seed,
-    rule="latin_hypercube"
+    N_FEATURES, SAMPLES, uncertainties_values, seed, rule="latin_hypercube"
 ):
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
@@ -171,7 +167,7 @@ def monte_carlo_sampling_scipy(
     seed,
     centered=False,
     strength=2,
-    optimization=None
+    optimization=None,
 ):
     """
     Creates Latin Hypercube Sample (LHS) implementation from SciPy with various
@@ -236,8 +232,8 @@ def rescale_distribution(latin_hypercube, uncertainties_values):
     - The function supports rescaling for Uniform, Normal, LogNormal, Triangle, Beta, and Gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
-    from scipy.stats import beta, gamma, lognorm, norm, triang
-    from sklearn.preprocessing import MinMaxScaler
+    from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
+    from sklearn.preprocessing import MinMaxScaler, minmax_scale
 
     for idx, value in enumerate(uncertainties_values):
         dist = value.get("type")
@@ -245,12 +241,15 @@ def rescale_distribution(latin_hypercube, uncertainties_values):
 
         match dist:
             case "Uniform":
-                pass
+                l_bounds, u_bounds = params
+                latin_hypercube[:, idx] = minmax_scale(
+                    latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
+                )
             case "Normal":
                 mean, std = params
                 latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
             case "LogNormal":
-                mean, std = params
+                shape = params[0]
                 latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=0.90)
             case "Triangle":
                 tri_mean = np.mean(params)
@@ -330,9 +329,10 @@ def validate_parameters(sampling_strategy, samples, uncertainties_values):
                     f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
                 )
 
-        if dist_type in ["Normal", "LogNormal", "Uniform", "Beta", "Gamma"]:
-            if len(param) != 2:
-                raise ValueError(f"{dist_type} distribution must have 2 parameters")
+        if dist_type in ["Normal", "Uniform", "Beta", "Gamma"] and len(param) != 2:
+            raise ValueError(f"{dist_type} distribution must have 2 parameters")
+        elif dist_type == "LogNormal" and len(dist_type) == 1:
+            raise ValueError(f"{dist_type} must have a single parameter")
 
         # handling having 0 as values in Beta and Gamma
         if dist_type in ["Beta", "Gamma"]:
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
     monte_carlo_config = snakemake.params.monte_carlo
 
-    ### SCENARIO INPUTS
+    # SCENARIO INPUTS
     ###
     MONTE_CARLO_PYPSA_FEATURES = {
         k: v.get("scale") for k, v in monte_carlo_config["uncertainties"].items() if v
@@ -373,45 +373,41 @@ if __name__ == "__main__":
         "samples"
     )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
     SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
-    uncertainties_values = monte_carlo_config["uncertainties"].values()
-    seed = MONTE_CARLO_OPTIONS.get("seed")
+    UNCERTAINTIES_VALUES = monte_carlo_config["uncertainties"].values()
+    SEED = MONTE_CARLO_OPTIONS.get("seed")
 
-    ### PARAMETERS VALIDATION
+    # PARAMETERS VALIDATION
     # validates the parameters supplied from config file
-    validate_parameters(SAMPLING_STRATEGY, SAMPLES, uncertainties_values)
+    validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
 
-    ### SCENARIO CREATION / SAMPLING STRATEGY
+    # SCENARIO CREATION / SAMPLING STRATEGY
     ###
     if SAMPLING_STRATEGY == "pydoe2":
         lh = monte_carlo_sampling_pydoe2(
             N_FEATURES,
             SAMPLES,
-            uncertainties_values,
-            random_state=seed,
+            UNCERTAINTIES_VALUES,
+            random_state=SEED,
             criterion=None,
             iteration=None,
-            correlation_matrix=None
+            correlation_matrix=None,
         )
     if SAMPLING_STRATEGY == "scipy":
         lh = monte_carlo_sampling_scipy(
             N_FEATURES,
             SAMPLES,
-            uncertainties_values,
-            seed=seed,
+            UNCERTAINTIES_VALUES,
+            seed=SEED,
             centered=False,
             strength=2,
-            optimization=None
+            optimization=None,
         )
     if SAMPLING_STRATEGY == "chaospy":
         lh = monte_carlo_sampling_chaospy(
-            N_FEATURES,
-            SAMPLES,
-            uncertainties_values,
-            seed=seed,
-            rule="latin_hypercube"
+            N_FEATURES, SAMPLES, UNCERTAINTIES_VALUES, seed=SEED, rule="latin_hypercube"
         )
 
-    ### MONTE-CARLO MODIFICATIONS
+    # MONTE-CARLO MODIFICATIONS
     ###
     n = pypsa.Network(snakemake.input[0])
     unc_wildcards = snakemake.wildcards[-1]
@@ -427,7 +423,7 @@ if __name__ == "__main__":
         logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
         j = j + 1
 
-    ### EXPORT AND METADATA
+    # EXPORT AND METADATA
     #
     latin_hypercube_dict = (
         pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
