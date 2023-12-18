@@ -385,7 +385,7 @@ if not config["enable"].get("build_natura_raster", False):
 
     rule copy_defaultnatura_tiff:
         input:
-            "data/natura.tiff",
+            "data/natura/natura.tiff",
         output:
             "resources/" + RDIR + "natura.tiff",
         run:
