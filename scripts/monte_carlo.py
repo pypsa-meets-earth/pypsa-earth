@@ -309,9 +309,8 @@ def validate_parameters(sampling_strategy, samples, uncertainties_values):
     for idx, value in enumerate(uncertainties_values):
         dist_type = value.get("type")
         param = value.get("args")
-        scale = value.get("scale")
 
-        if dist_type is None or len(param) == 0 or len(scale) == 0:
+        if dist_type is None or len(param) == 0:
             raise ValueError(f"assign a list of parameters to distribution_params")
 
         if dist_type not in valid_distribution:
