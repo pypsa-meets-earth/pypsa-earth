@@ -58,7 +58,7 @@ import os
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -67,7 +67,7 @@ from add_electricity import (
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def attach_storageunits(n, costs, config):

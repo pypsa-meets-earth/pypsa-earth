@@ -29,6 +29,7 @@ from _helpers import (
     aggregate_costs,
     aggregate_p,
     configure_logging,
+    create_logger,
     load_network_for_plots,
 )
 from matplotlib.legend_handler import HandlerPatch
@@ -36,7 +37,7 @@ from matplotlib.patches import Circle, Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
@@ -378,7 +379,7 @@ if __name__ == "__main__":
 
     set_plot_style()
 
-    opts = snakemake.config["plotting"]
+    opts = snakemake.params.plotting
     map_figsize = opts["map"]["figsize"]
     map_boundaries = opts["map"]["boundaries"]
 
@@ -386,7 +387,10 @@ if __name__ == "__main__":
         map_boundaries = africa_shape.boundary.bounds
 
     n = load_network_for_plots(
-        snakemake.input.network, snakemake.input.tech_costs, snakemake.config
+        snakemake.input.network,
+        snakemake.input.tech_costs,
+        snakemake.params.costs,
+        snakemake.params.electricity,
     )
 
     scenario_opts = snakemake.wildcards.opts.split("-")

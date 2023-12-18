@@ -59,16 +59,89 @@ Description
 import logging
 import os
 import re
+from zipfile import ZipFile
 
+import country_converter as cc
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+import requests
+from _helpers import configure_logging, create_logger
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
+
+
+def download_emission_data():
+    """
+    Download emission file from EDGAR.
+
+    Returns
+    -------
+    global emission file for all countries in the world.
+    """
+
+    try:
+        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
+        with requests.get(url) as rq:
+            with open("data/co2.zip", "wb") as file:
+                file.write(rq.content)
+        rootpath = os.getcwd()
+        file_path = os.path.join(rootpath, "data/co2.zip")
+        with ZipFile(file_path, "r") as zipObj:
+            zipObj.extract(
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
+            )
+        os.remove(file_path)
+        return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
+    except:
+        logger.error(f"Failed download resource from '{url}'.")
+        return False
+
+
+def emission_extractor(filename, emission_year, country_names):
+    """
+    Extracts CO2 emission values for given country codes from the global
+    emission file.
+
+    Parameters
+    ----------
+    filename : str
+        Global emission filename
+    emission_year : int
+        Year of CO2 emissions
+    country_names : numpy.ndarray
+        Two letter country codes of analysed countries.
+
+    Returns
+    -------
+    CO2 emission values of studied countries.
+    """
+
+    # data reading process
+    datapath = os.path.join(os.getcwd(), "data", filename)
+    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
+    df.columns = df.iloc[0]
+    df = df.set_index("Country_code_A3")
+    df = df.loc[
+        df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
+    ]
+    df = df.loc[:, "Y_1970":"Y_2018"].ffill(axis=1)
+    df = df.loc[:, "Y_1970":"Y_2018"].bfill(axis=1)
+    cc_iso3 = cc.convert(names=country_names, to="ISO3")
+    if len(country_names) == 1:
+        cc_iso3 = [cc_iso3]
+    emission_by_country = df.loc[
+        df.index.intersection(cc_iso3), "Y_" + str(emission_year)
+    ]
+    missing_ccs = np.setdiff1d(cc_iso3, df.index.intersection(cc_iso3))
+    if missing_ccs.size:
+        logger.warning(
+            f"The emission value for the following countries has not been found: {missing_ccs}"
+        )
+    return emission_by_country
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
@@ -257,11 +330,11 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         Nyears,
     )
-    s_max_pu = snakemake.config["lines"]["s_max_pu"]
+    s_max_pu = snakemake.params.lines["s_max_pu"]
 
     set_line_s_max_pu(n, s_max_pu)
 
@@ -281,14 +354,25 @@ if __name__ == "__main__":
     for o in opts:
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
-            if len(m) > 0:
-                co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
-                add_co2limit(n, co2limit, Nyears)
+            if snakemake.params.electricity["automatic_emission"]:
+                country_names = n.buses.country.unique()
+                emission_year = snakemake.params.electricity[
+                    "automatic_emission_base_year"
+                ]
+                filename = download_emission_data()
+                co2limit = emission_extractor(
+                    filename, emission_year, country_names
+                ).sum()
+                if len(m) > 0:
+                    co2limit = co2limit * float(m[0])
+                logger.info("Setting CO2 limit according to emission base year.")
+            elif len(m) > 0:
+                co2limit = float(m[0]) * snakemake.params.electricity["co2base"]
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.config["electricity"]["co2limit"]
-                add_co2limit(n, co2limit, Nyears)
+                co2limit = snakemake.params.electricity["co2limit"]
                 logger.info("Setting CO2 limit according to config value.")
+            add_co2limit(n, co2limit, Nyears)
             break
 
     for o in opts:
@@ -299,7 +383,7 @@ if __name__ == "__main__":
                 add_gaslimit(n, limit, Nyears)
                 logger.info("Setting gas usage limit according to wildcard value.")
             else:
-                add_gaslimit(n, snakemake.config["electricity"].get("gaslimit"), Nyears)
+                add_gaslimit(n, snakemake.params.electricity.get("gaslimit"), Nyears)
                 logger.info("Setting gas usage limit according to config value.")
 
         for o in opts:
@@ -331,7 +415,7 @@ if __name__ == "__main__":
                     add_emission_prices(n, dict(co2=float(m[0])))
                 else:
                     logger.info("Setting emission prices according to config value.")
-                    add_emission_prices(n, snakemake.config["costs"]["emission_prices"])
+                    add_emission_prices(n, snakemake.params.costs["emission_prices"])
                 break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
@@ -339,8 +423,8 @@ if __name__ == "__main__":
 
     set_line_nom_max(
         n,
-        s_nom_max_set=snakemake.config["lines"].get("s_nom_max,", np.inf),
-        p_nom_max_set=snakemake.config["links"].get("p_nom_max,", np.inf),
+        s_nom_max_set=snakemake.params.lines.get("s_nom_max,", np.inf),
+        p_nom_max_set=snakemake.params.links.get("p_nom_max,", np.inf),
     )
 
     if "ATK" in opts:

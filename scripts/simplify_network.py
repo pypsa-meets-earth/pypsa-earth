@@ -93,7 +93,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import configure_logging, get_aggregation_strategies, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_aggregation_strategies,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
@@ -107,7 +112,7 @@ from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):
@@ -155,24 +160,27 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     return n, trafo_map
 
 
-def _prepare_connection_costs_per_link(n, costs, config):
+def _prepare_connection_costs_per_link(
+    n, costs, renewable_config, hvdc_as_lines, lines_length_factor
+):
     if n.links.empty:
         return {}
 
     connection_costs_per_link = {}
 
-    if not n.links.loc[n.links.carrier == "DC"].empty:
-        dc_lengths = n.links.length
-        unterwater_fractions = n.links.underwater_fraction
-    elif not n.lines.loc[n.lines.carrier == "DC"].empty:
+    # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
+    if hvdc_as_lines:
         dc_lengths = n.lines.length
         unterwater_fractions = n.lines.underwater_fraction
+    else:
+        dc_lengths = n.links.length
+        unterwater_fractions = n.links.underwater_fraction
 
-    for tech in config["renewable"]:
+    for tech in renewable_config:
         if tech.startswith("offwind"):
             connection_costs_per_link[tech] = (
                 dc_lengths
-                * config["lines"]["length_factor"]
+                * lines_length_factor
                 * (
                     unterwater_fractions
                     * costs.at[tech + "-connection-submarine", "capital_cost"]
@@ -185,10 +193,19 @@ def _prepare_connection_costs_per_link(n, costs, config):
 
 
 def _compute_connection_costs_to_bus(
-    n, busmap, costs, config, connection_costs_per_link=None, buses=None
+    n,
+    busmap,
+    costs,
+    renewable_config,
+    hvdc_as_lines,
+    lines_length_factor,
+    connection_costs_per_link=None,
+    buses=None,
 ):
     if connection_costs_per_link is None:
-        connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, config)
+        connection_costs_per_link = _prepare_connection_costs_per_link(
+            n, costs, renewable_config, hvdc_as_lines, lines_length_factor
+        )
 
     if buses is None:
         buses = busmap.index[busmap.index != busmap.values]
@@ -291,7 +308,17 @@ def contains_ac(ls):
     return any(list(map(lambda x: is_ac_branch(x), ls)))
 
 
-def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
+def simplify_links(
+    n,
+    costs,
+    renewable_config,
+    hvdc_as_lines,
+    config_lines,
+    config_links,
+    output,
+    exclude_carriers=[],
+    aggregation_strategies=dict(),
+):
     ## Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
@@ -361,7 +388,9 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     busmap = n.buses.index.to_series()
 
-    connection_costs_per_link = _prepare_connection_costs_per_link(n, costs, config)
+    connection_costs_per_link = _prepare_connection_costs_per_link(
+        n, costs, renewable_config, hvdc_as_lines, config_lines["length_factor"]
+    )
     connection_costs_to_bus = pd.DataFrame(
         0.0, index=n.buses.index, columns=list(connection_costs_per_link)
     )
@@ -379,7 +408,14 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             )
             busmap.loc[buses] = b[np.r_[0, m.argmin(axis=0), 1]]
             connection_costs_to_bus.loc[buses] += _compute_connection_costs_to_bus(
-                n, busmap, costs, config, connection_costs_per_link, buses
+                n,
+                busmap,
+                costs,
+                renewable_config,
+                hvdc_as_lines,
+                config_lines,
+                connection_costs_per_link,
+                buses,
             )
 
             # TODO revise a variable name for `dc_edges` variable
@@ -388,7 +424,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
             all_links = list(set(n.links.index).intersection(all_dc_branches))
             all_dc_lines = list(set(n.lines.index).intersection(all_dc_branches))
 
-            # p_max_pu = config["links"].get("p_max_pu", 1.0)
             all_dc_lengths = pd.concat(
                 [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
             )
@@ -396,7 +431,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
             # HVDC part is represented as "Link" component
             if dc_as_links:
-                p_max_pu = config["links"].get("p_max_pu", 1.0)
+                p_max_pu = config_links.get("p_max_pu", 1.0)
                 lengths = n.links.loc[all_links, "length"]
                 i_links = [i for _, i in sum(dc_edges, []) if _ == "Link"]
                 length = sum(n.links.loc[i_links, "length"].mean() for l in dc_edges)
@@ -406,7 +441,7 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
                 ).sum() / lengths.sum()
             # HVDC part is represented as "Line" component
             else:
-                p_max_pu = config["lines"].get("p_max_pu", 1.0)
+                p_max_pu = config_lines.get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
                 length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
                 p_nom = n.lines.loc[all_dc_lines, "s_nom"].min()
@@ -446,10 +481,6 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
 
     logger.debug("Collecting all components using the busmap")
 
-    exclude_carriers = config["cluster_options"]["simplify_network"].get(
-        "exclude_carriers", []
-    )
-
     _aggregate_and_move_components(
         n,
         busmap,
@@ -461,21 +492,33 @@ def simplify_links(n, costs, config, output, aggregation_strategies=dict()):
     return n, busmap
 
 
-def remove_stubs(n, costs, config, output, aggregation_strategies=dict()):
+def remove_stubs(
+    n,
+    costs,
+    cluster_config,
+    renewable_config,
+    hvdc_as_lines,
+    lines_length_factor,
+    output,
+    aggregation_strategies=dict(),
+):
     logger.info("Removing stubs")
 
-    across_borders = config["cluster_options"]["simplify_network"].get(
-        "remove_stubs_across_borders", True
-    )
+    across_borders = cluster_config.get("remove_stubs_across_borders", True)
     matching_attrs = [] if across_borders else ["country"]
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
-    connection_costs_to_bus = _compute_connection_costs_to_bus(n, busmap, costs, config)
-
-    exclude_carriers = config["cluster_options"]["simplify_network"].get(
-        "exclude_carriers", []
+    connection_costs_to_bus = _compute_connection_costs_to_bus(
+        n,
+        busmap,
+        costs,
+        renewable_config,
+        hvdc_as_lines,
+        lines_length_factor,
     )
+
+    exclude_carriers = cluster_config.get("exclude_carriers", [])
 
     _aggregate_and_move_components(
         n,
@@ -563,21 +606,28 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
 
 
 def cluster(
-    n, n_clusters, config, algorithm="hac", feature=None, aggregation_strategies=dict()
+    n,
+    n_clusters,
+    alternative_clustering,
+    build_shape_options,
+    country_list,
+    distribution_cluster,
+    focus_weights,
+    gadm_layer_id,
+    geo_crs,
+    renewable_config,
+    solver_name,
+    algorithm="hac",
+    feature=None,
+    aggregation_strategies=dict(),
 ):
     logger.info(f"Clustering to {n_clusters} buses")
-
-    focus_weights = config.get("focus_weights", None)
-    alternative_clustering = config["cluster_options"]["alternative_clustering"]
-    gadm_layer_id = config["build_shape_options"]["gadm_layer_id"]
-    geo_crs = config["crs"]["geo_crs"]
-    country_list = config["countries"]
 
     renewable_carriers = pd.Index(
         [
             tech
             for tech in n.generators.carrier.unique()
-            if tech.split("-", 2)[0] in config["renewable"]
+            if tech.split("-", 2)[0] in renewable_config
         ]
     )
 
@@ -591,7 +641,7 @@ def cluster(
     potential_mode = (
         consense(
             pd.Series(
-                [config["renewable"][tech]["potential"] for tech in renewable_carriers]
+                [renewable_config[tech]["potential"] for tech in renewable_carriers]
             )
         )
         if len(renewable_carriers) > 0
@@ -604,10 +654,12 @@ def cluster(
         gadm_layer_id,
         geo_crs,
         country_list,
+        distribution_cluster,
+        build_shape_options,
         custom_busmap=False,
         aggregation_strategies=aggregation_strategies,
         potential_mode=potential_mode,
-        solver_name=config["solving"]["solver"]["name"],
+        solver_name=solver_name,
         algorithm=algorithm,
         feature=feature,
         focus_weights=focus_weights,
@@ -785,10 +837,13 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
-    base_voltage = snakemake.config["electricity"]["base_voltage"]
-    linetype = snakemake.config["lines"]["types"][base_voltage]
-
-    aggregation_strategies = snakemake.config["cluster_options"].get(
+    base_voltage = snakemake.params.electricity["base_voltage"]
+    linetype = snakemake.params.config_lines["types"][base_voltage]
+    exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
+        "exclude_carriers", []
+    )
+    hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
+    aggregation_strategies = snakemake.params.cluster_options.get(
         "aggregation_strategies", {}
     )
     # translate str entries of aggregation_strategies to pd.Series functions:
@@ -802,23 +857,36 @@ if __name__ == "__main__":
 
     technology_costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         Nyears,
     )
 
     n, simplify_links_map = simplify_links(
-        n, technology_costs, snakemake.config, snakemake.output, aggregation_strategies
+        n,
+        technology_costs,
+        snakemake.params.renewable,
+        hvdc_as_lines,
+        snakemake.params.config_lines,
+        snakemake.params.config_links,
+        snakemake.output,
+        exclude_carriers,
+        aggregation_strategies,
     )
 
     busmaps = [trafo_map, simplify_links_map]
 
-    cluster_config = snakemake.config["cluster_options"]["simplify_network"]
+    cluster_config = snakemake.params.cluster_options["simplify_network"]
+    renewable_config = snakemake.params.renewable
+    lines_length_factor = snakemake.params.config_lines["length_factor"]
     if cluster_config.get("remove_stubs", True):
         n, stub_map = remove_stubs(
             n,
             technology_costs,
-            snakemake.config,
+            cluster_config,
+            renewable_config,
+            hvdc_as_lines,
+            lines_length_factor,
             snakemake.output,
             aggregation_strategies=aggregation_strategies,
         )
@@ -861,10 +929,30 @@ if __name__ == "__main__":
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
+        alternative_clustering = snakemake.params.cluster_options[
+            "alternative_clustering"
+        ]
+        build_shape_options = snakemake.params.build_shape_options
+        country_list = snakemake.params.countries
+        distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+        focus_weights = snakemake.params.focus_weights
+        gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
+        geo_crs = snakemake.params.geo_crs
+        renewable_config = snakemake.params.renewable
+        solver_name = snakemake.config["solving"]["solver"]["name"]
+
         n, cluster_map = cluster(
             n,
             int(snakemake.wildcards.simpl),
-            snakemake.config,
+            alternative_clustering,
+            build_shape_options,
+            country_list,
+            distribution_cluster,
+            focus_weights,
+            gadm_layer_id,
+            geo_crs,
+            renewable_config,
+            solver_name,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
             aggregation_strategies,

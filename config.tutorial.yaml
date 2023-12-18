@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.2.2
+version: 0.2.3
 tutorial: true
 
 logging:
@@ -115,6 +115,12 @@ clean_osm_data_options:
   tag_substation: "transmission"  # needed feature tag to be considered for the analysis. If empty, no filtering on the tag_substation is performed
   add_line_endings: true  # When true, the line endings are added to the dataset of the substations
   generator_name_method: OSM  # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
+  use_custom_lines: "OSM_only"  # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  path_custom_lines: false  # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
+  use_custom_substations: "OSM_only"  # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  path_custom_substations: false  # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
+  use_custom_cables: "OSM_only"  # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  path_custom_cables: false  # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
 build_osm_network:  # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true  # When "True", close buses are merged and guarantee the voltage matching among line endings
@@ -140,6 +146,8 @@ electricity:
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
   hvdc_as_lines: false  # should HVDC lines be modeled as `Line` or as `Link` component?
+  automatic_emission: true
+  automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
 
   operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
     activate: false
@@ -282,15 +290,17 @@ renewable:
     extendable: true
   hydro:
     cutout: cutout-2013-era5-tutorial
+    hydrobasins_level: 4
     resource:
       method: hydro
-      hydrobasins: data/hydrobasins/hybas_world_lev04_v1c.shp
+      hydrobasins: data/hydrobasins/hybas_world.shp
       flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # one of energy_capacity_totals_by_country, estimate_by_large_installations or a float
+    hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
     normalization:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling

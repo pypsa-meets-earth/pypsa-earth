@@ -5,15 +5,108 @@
 
 # -*- coding: utf-8 -*-
 
+import logging
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
-import numpy as np
 import pandas as pd
+import yaml
+
+logger = logging.getLogger(__name__)
+
+# list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
+NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """
+    Customise errors traceback.
+    """
+    tb = exc_traceback
+    while tb.tb_next:
+        tb = tb.tb_next
+    flname = tb.tb_frame.f_globals.get("__file__")
+    funcname = tb.tb_frame.f_code.co_name
+
+    if issubclass(exc_type, KeyboardInterrupt):
+        logger.error(
+            "Manual interruption %r, function %r: %s",
+            flname,
+            funcname,
+            exc_value,
+        )
+    else:
+        logger.error(
+            "An error happened in module %r, function %r: %s",
+            flname,
+            funcname,
+            exc_value,
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+
+
+def create_logger(logger_name, level=logging.INFO):
+    """
+    Create a logger for a module and adds a handler needed to capture in logs
+    traceback from exceptions emerging during the workflow.
+    """
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(level)
+    handler = logging.StreamHandler(stream=sys.stdout)
+    logger.addHandler(handler)
+    sys.excepthook = handle_exception
+    return logger
+
+
+def read_osm_config(*args):
+    """
+    Read values from the osm_config.yaml file based on provided key arguments.
+
+    Parameters
+    ----------
+    *args : str
+        One or more key arguments corresponding to the values to retrieve
+        from the config file. Typical arguments include "world_iso",
+        "continent_regions", "iso_to_geofk_dict", and "osm_clean_columns".
+
+    Returns
+    -------
+    tuple or str or dict
+        If a single key is provided, returns the corresponding value from the
+        osm_config.yaml file. If multiple keys are provided, returns a tuple
+        containing values corresponding to the provided keys.
+
+    Examples
+    --------
+    >>> values = read_osm_config("key1", "key2")
+    >>> print(values)
+    ('value1', 'value2')
+
+    >>> world_iso = read_osm_config("world_iso")
+    >>> print(world_iso)
+    {"Africa": {"DZ": "algeria", ...}, ...}
+    """
+    if "__file__" in globals():
+        base_folder = os.path.dirname(__file__)
+        if not os.path.exists(os.path.join(base_folder, "configs")):
+            base_folder = os.path.dirname(base_folder)
+    else:
+        base_folder = os.getcwd()
+    osm_config_path = os.path.join(base_folder, "configs", "osm_config.yaml")
+    with open(osm_config_path, "r") as f:
+        osm_config = yaml.safe_load(f)
+    if len(args) == 0:
+        return osm_config
+    elif len(args) == 1:
+        return osm_config[args[0]]
+    else:
+        return tuple([osm_config[a] for a in args])
 
 
 def sets_path_to_root(root_directory_name):
@@ -104,7 +197,7 @@ def load_network(import_name=None, custom_components=None):
         As in pypsa.Network(import_name)
     custom_components : dict
         Dictionary listing custom components.
-        For using ``snakemake.config["override_components"]``
+        For using ``snakemake.params.override_components"]``
         in ``config.yaml`` define:
 
         .. code:: yaml
@@ -152,7 +245,9 @@ def pdbcast(v, h):
     )
 
 
-def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
+def load_network_for_plots(
+    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
 
@@ -180,7 +275,7 @@ def load_network_for_plots(fn, tech_costs, config, combine_hydro_ps=True):
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(Nyears, tech_costs, config["costs"], config["electricity"])
+    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
     update_transmission_costs(n, costs)
 
     return n
@@ -291,7 +386,9 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
     return costs
 
 
-def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
+def progress_retrieve(
+    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
+):
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -322,6 +419,11 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
 
     if data is not None:
         data = urllib.parse.urlencode(data).encode()
+
+    if headers:
+        opener = urllib.request.build_opener()
+        opener.addheaders = headers
+        urllib.request.install_opener(opener)
 
     urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
@@ -428,7 +530,7 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def getContinent(code):
+def getContinent(code, world_iso=read_osm_config("world_iso")):
     """
     Returns continent names that contains list of iso-code countries.
 
@@ -449,11 +551,10 @@ def getContinent(code):
     getContinent(code)
     >>> ["africa", "europe"]
     """
-    from config_osm_data import world_iso
 
     continent_list = []
     code_set = set(code)
-    for continent in world_iso:
+    for continent in world_iso.keys():
         single_continent_set = set(world_iso[continent])
         if code_set.intersection(single_continent_set):
             continent_list.append(continent)
@@ -572,9 +673,6 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "na", "null"]
-
-
 def read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" not in kwargs:
@@ -665,8 +763,6 @@ def create_country_list(input, iso_coding=True):
     """
     import logging
 
-    from config_osm_data import continent_regions, world_iso
-
     _logger = logging.getLogger(__name__)
     _logger.setLevel(logging.INFO)
 
@@ -697,9 +793,10 @@ def create_country_list(input, iso_coding=True):
 
     full_codes_list = []
 
+    world_iso, continent_regions = read_osm_config("world_iso", "continent_regions")
+
     for value1 in input:
         codes_list = []
-
         # extract countries in world
         if value1 == "Earth":
             for continent in world_iso.keys():
@@ -724,3 +821,31 @@ def create_country_list(input, iso_coding=True):
     full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
 
     return full_codes_list
+
+
+def get_last_commit_message(path):
+    """
+    Function to get the last PyPSA-Earth Git commit message.
+
+    Returns
+    -------
+    result : string
+    """
+    _logger = logging.getLogger(__name__)
+    last_commit_message = None
+    backup_cwd = os.getcwd()
+    try:
+        os.chdir(path)
+        last_commit_message = (
+            subprocess.check_output(
+                ["git", "log", "-n", "1", "--pretty=format:%H %s"],
+                stderr=subprocess.STDOUT,
+            )
+            .decode()
+            .strip()
+        )
+    except subprocess.CalledProcessError as e:
+        _logger.warning(f"Error executing Git: {e}")
+
+    os.chdir(backup_cwd)
+    return last_commit_message

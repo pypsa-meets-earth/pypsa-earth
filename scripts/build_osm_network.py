@@ -11,15 +11,21 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import configure_logging, read_geojson, sets_path_to_root, to_csv_nafix
-from config_osm_data import osm_clean_columns
+from _helpers import (
+    configure_logging,
+    create_logger,
+    read_geojson,
+    read_osm_config,
+    sets_path_to_root,
+    to_csv_nafix,
+)
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import linemerge, nearest_points, split
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def line_endings_to_bus_conversion(lines):
@@ -709,9 +715,17 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
     return buses
 
 
-def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False):
+def built_network(
+    inputs,
+    outputs,
+    build_osm_network_config,
+    countries_config,
+    geo_crs,
+    distance_crs,
+    force_ac=False,
+):
     logger.info("Stage 1/5: Read input data")
-
+    osm_clean_columns = read_osm_config("osm_clean_columns")
     buses = read_geojson(
         inputs["substations"],
         osm_clean_columns["substation"].keys(),
@@ -735,8 +749,8 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False
         logger.info("Stage 2/5: AC and DC network: enabled")
 
     # Address the overpassing line issue Step 3/5
-    if config.get("build_osm_network", {}).get("split_overpassing_lines", False):
-        tol = config["build_osm_network"].get("overpassing_lines_tolerance", 1)
+    if build_osm_network_config.get("split_overpassing_lines", False):
+        tol = build_osm_network_config.get("overpassing_lines_tolerance", 1)
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
         lines, buses = fix_overpassing_lines(lines, buses, distance_crs, tol=tol)
@@ -744,13 +758,11 @@ def built_network(inputs, outputs, config, geo_crs, distance_crs, force_ac=False
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
     # Add bus to countries with no buses
-    buses = add_buses_to_empty_countries(
-        config["countries"], inputs.country_shapes, buses
-    )
+    buses = add_buses_to_empty_countries(countries_config, inputs.country_shapes, buses)
 
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
-    if config.get("build_osm_network", {}).get("group_close_buses", False):
-        tol = config["build_osm_network"].get("group_tolerance_buses", 500)
+    if build_osm_network_config.get("group_close_buses", False):
+        tol = build_osm_network_config.get("group_tolerance_buses", 500)
         logger.info(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
@@ -796,16 +808,19 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # load default crs
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    distance_crs = snakemake.config["crs"]["distance_crs"]
-    force_ac = snakemake.config["build_osm_network"].get("force_ac", False)
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
+    force_ac = snakemake.params.build_osm_network.get("force_ac", False)
+    build_osm_network = snakemake.params.build_osm_network
+    countries = snakemake.params.countries
 
     sets_path_to_root("pypsa-earth")
 
     built_network(
         snakemake.input,
         snakemake.output,
-        snakemake.config,
+        build_osm_network,
+        countries,
         geo_crs,
         distance_crs,
         force_ac=force_ac,

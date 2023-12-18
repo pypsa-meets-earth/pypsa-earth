@@ -70,12 +70,12 @@ import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import qmc
 from solve_network import *
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def monte_carlo_sampling_pydoe2(
@@ -175,14 +175,14 @@ if __name__ == "__main__":
             unc="m0",
         )
     configure_logging(snakemake)
-    config = snakemake.config
+    monte_carlo_config = snakemake.params.monte_carlo
 
     ### SCENARIO INPUTS
     ###
     MONTE_CARLO_PYPSA_FEATURES = {
-        k: v for k, v in config["monte_carlo"]["pypsa_standard"].items() if v
+        k: v for k, v in monte_carlo_config["pypsa_standard"].items() if v
     }  # removes key value pairs with empty value e.g. []
-    MONTE_CARLO_OPTIONS = config["monte_carlo"]["options"]
+    MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
     L_BOUNDS = [item[0] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
     U_BOUNDS = [item[1] for item in MONTE_CARLO_PYPSA_FEATURES.values()]
     N_FEATURES = len(
