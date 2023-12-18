@@ -11,9 +11,9 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from scripts._helpers import create_country_list, get_last_commit_message
-from scripts.build_demand_profiles import get_load_paths_gegis
-from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
+from _helpers import create_country_list, get_last_commit_message
+from build_demand_profiles import get_load_paths_gegis
+from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
@@ -28,7 +28,7 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
 configfile: "configs/bundle_config.yaml"
 
 
-config.update({"git_commit": get_last_commit_message()})
+config.update({"git_commit": get_last_commit_message(".")})
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
@@ -150,6 +150,7 @@ if config["enable"].get("retrieve_databundle", True):
         params:
             countries=config["countries"],
             tutorial=config["tutorial"],
+            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand("{file}", file=datafiles_retrivedatabundle(config)),
             directory("data/landcover"),
@@ -384,7 +385,7 @@ if not config["enable"].get("build_natura_raster", False):
 
     rule copy_defaultnatura_tiff:
         input:
-            "data/natura.tiff",
+            "data/natura/natura.tiff",
         output:
             "resources/" + RDIR + "natura.tiff",
         run:
@@ -1043,7 +1044,7 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from scripts.build_test_configs import create_test_config
+        from build_test_configs import create_test_config
         import yaml
 
         # get base configuration file from diff config
