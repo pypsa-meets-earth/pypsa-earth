@@ -361,6 +361,7 @@ monte_carlo:
     add_to_snakefile: false
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
+    seed: 42 # set seedling for reproducibilty
   uncertainties:
     loads_t.p_set:
       type: Uniform

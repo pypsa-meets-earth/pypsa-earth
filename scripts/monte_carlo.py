@@ -98,10 +98,10 @@ def monte_carlo_sampling_pydoe2(
     N_FEATURES,
     SAMPLES,
     uncertainties_values,
+    random_state,
     criterion=None,
     iteration=None,
-    random_state=42,
-    correlation_matrix=None,
+    correlation_matrix=None
 ):
     """
     Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
@@ -136,8 +136,8 @@ def monte_carlo_sampling_chaospy(
     N_FEATURES,
     SAMPLES,
     uncertainties_values,
-    rule="latin_hypercube",
-    seed=42,
+    seed,
+    rule="latin_hypercube"
 ):
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
@@ -168,10 +168,10 @@ def monte_carlo_sampling_scipy(
     N_FEATURES,
     SAMPLES,
     uncertainties_values,
+    seed,
     centered=False,
     strength=2,
-    optimization=None,
-    seed=42,
+    optimization=None
 ):
     """
     Creates Latin Hypercube Sample (LHS) implementation from SciPy with various
@@ -374,6 +374,7 @@ if __name__ == "__main__":
     )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
     SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
     uncertainties_values = monte_carlo_config["uncertainties"].values()
+    seed = MONTE_CARLO_OPTIONS.get("seed")
 
     ### PARAMETERS VALIDATION
     # validates the parameters supplied from config file
@@ -386,28 +387,28 @@ if __name__ == "__main__":
             N_FEATURES,
             SAMPLES,
             uncertainties_values,
+            random_state=seed,
             criterion=None,
             iteration=None,
-            random_state=42,
-            correlation_matrix=None,
+            correlation_matrix=None
         )
     if SAMPLING_STRATEGY == "scipy":
         lh = monte_carlo_sampling_scipy(
             N_FEATURES,
             SAMPLES,
             uncertainties_values,
+            seed=seed,
             centered=False,
             strength=2,
-            optimization=None,
-            seed=42,
+            optimization=None
         )
     if SAMPLING_STRATEGY == "chaospy":
         lh = monte_carlo_sampling_chaospy(
             N_FEATURES,
             SAMPLES,
             uncertainties_values,
-            rule="latin_hypercube",
-            seed=42,
+            seed=seed,
+            rule="latin_hypercube"
         )
 
     ### MONTE-CARLO MODIFICATIONS
