@@ -250,7 +250,7 @@ def rescale_distribution(latin_hypercube, uncertainties_values):
                 latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
             case "LogNormal":
                 shape = params[0]
-                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=0.90)
+                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
             case "Triangle":
                 tri_mean = np.mean(params)
                 latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
@@ -363,7 +363,7 @@ if __name__ == "__main__":
     # SCENARIO INPUTS
     ###
     MONTE_CARLO_PYPSA_FEATURES = {
-        k: v.get("scale") for k, v in monte_carlo_config["uncertainties"].items() if v
+        k for k in monte_carlo_config["uncertainties"].keys() if k
     }  # removes key value pairs with empty value e.g. []
     MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
     N_FEATURES = len(
@@ -413,7 +413,7 @@ if __name__ == "__main__":
     unc_wildcards = snakemake.wildcards[-1]
     i = int(unc_wildcards[1:])
     j = 0
-    for k, v in MONTE_CARLO_PYPSA_FEATURES.items():
+    for k in MONTE_CARLO_PYPSA_FEATURES:
         # this loop sets in one scenario each "i" feature assumption
         # k is the config input key "loads_t.p_set"
         # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
