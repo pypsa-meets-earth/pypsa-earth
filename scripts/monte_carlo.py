@@ -95,14 +95,14 @@ logger = create_logger(__name__)
 
 
 def monte_carlo_sampling_pydoe2(
-    N_FEATURES,
-    SAMPLES,
-    uncertainties_values,
-    random_state,
-    criterion=None,
-    iteration=None,
-    correlation_matrix=None,
-):
+    N_FEATURES: int,
+    SAMPLES: int,
+    uncertainties_values: dict,
+    random_state: int,
+    criterion: str = None,
+    iteration: int = None,
+    correlation_matrix: np.ndarray = None,
+) -> np.ndarray:
     """
     Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
     various options. Additionally all "corners" are simulated.
@@ -133,8 +133,12 @@ def monte_carlo_sampling_pydoe2(
 
 
 def monte_carlo_sampling_chaospy(
-    N_FEATURES, SAMPLES, uncertainties_values, seed, rule="latin_hypercube"
-):
+    N_FEATURES: int,
+    SAMPLES: int,
+    uncertainties_values: dict,
+    seed: int,
+    rule: str = "latin_hypercube",
+) -> np.ndarray:
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
 
@@ -161,14 +165,14 @@ def monte_carlo_sampling_chaospy(
 
 
 def monte_carlo_sampling_scipy(
-    N_FEATURES,
-    SAMPLES,
-    uncertainties_values,
-    seed,
-    centered=False,
-    strength=2,
-    optimization=None,
-):
+    N_FEATURES: int,
+    SAMPLES: int,
+    uncertainties_values: dict,
+    seed: int,
+    centered: bool = False,
+    strength: int = 2,
+    optimization: str = None,
+) -> np.ndarray:
     """
     Creates Latin Hypercube Sample (LHS) implementation from SciPy with various
     options:
@@ -206,7 +210,9 @@ def monte_carlo_sampling_scipy(
     return lh
 
 
-def rescale_distribution(latin_hypercube, uncertainties_values):
+def rescale_distribution(
+    latin_hypercube: np.ndarray, uncertainties_values: dict
+) -> np.ndarray:
     """
     Rescales a Latin hypercube sampling (LHS) using specified distribution
     parameters.
@@ -270,7 +276,9 @@ def rescale_distribution(latin_hypercube, uncertainties_values):
     return latin_hypercube
 
 
-def validate_parameters(sampling_strategy, samples, uncertainties_values):
+def validate_parameters(
+    sampling_strategy: str, samples: int, uncertainties_values: dict
+) -> None:
     """
     Validates the parameters for a given probability distribution. Inputs from
     user through the config file needs to be validated before proceeding to
