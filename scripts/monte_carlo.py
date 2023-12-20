@@ -85,6 +85,7 @@ import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
+import seaborn as sns
 from _helpers import configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
@@ -92,6 +93,7 @@ from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
 logger = create_logger(__name__)
+sns.set()
 
 
 def monte_carlo_sampling_pydoe2(
@@ -370,9 +372,9 @@ if __name__ == "__main__":
 
     # SCENARIO INPUTS
     ###
-    MONTE_CARLO_PYPSA_FEATURES = {
+    MONTE_CARLO_PYPSA_FEATURES = [
         k for k in monte_carlo_config["uncertainties"].keys() if k
-    }  # removes key value pairs with empty value e.g. []
+    ]  # removes key value pairs with empty value e.g. []
     MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
     N_FEATURES = len(
         MONTE_CARLO_PYPSA_FEATURES
@@ -414,6 +416,12 @@ if __name__ == "__main__":
         lh = monte_carlo_sampling_chaospy(
             N_FEATURES, SAMPLES, UNCERTAINTIES_VALUES, seed=SEED, rule="latin_hypercube"
         )
+
+    # create plot for the rescaled distributions
+    for idx in range(N_FEATURES):
+        sns.displot(lh[:, idx]).set(
+            title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"
+        ).figure.savefig(f"{MONTE_CARLO_PYPSA_FEATURES[idx]}.png", bbox_inches="tight")
 
     # MONTE-CARLO MODIFICATIONS
     ###
