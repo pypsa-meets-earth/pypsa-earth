@@ -38,7 +38,7 @@ policy_config:
 clustering_options:
   alternative_clustering: true
 
-countries: ['NG']
+countries: ['NG','BJ']
 
 demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
