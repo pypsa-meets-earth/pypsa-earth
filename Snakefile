@@ -65,11 +65,19 @@ if config["custom_rules"] is not []:
         include: rule
 
 
-rule clean:
+rule clean_monte:
     run:
-        shell("snakemake -j 1 solve_all_networks --delete-all-output")
         try:
             shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
+        except:
+            pass
+        shell("snakemake -j 1 run_all_scenarios --delete-all-output")
+
+
+rule clean:
+    run:
+        try:
+            shell("snakemake -j 1 solve_all_networks --delete-all-output")
         except:
             pass
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
