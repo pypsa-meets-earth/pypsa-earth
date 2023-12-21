@@ -90,8 +90,6 @@ The following commands can be executed in command prompt of ``miniconda``, termi
 
     /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
 
-For more details regarding the folder structure, visit :ref:`notebooks` section.
-
 Install Dependencies
 -------------------------
 PyPSA-Earth relies on a set of other Python packages to function.
