@@ -50,7 +50,7 @@ It is highly recommended to `learn the git basics <https://git-scm.com/doc>`__.
 
 VSCode
 ------
-In order to write and debug python code, you need an Integrated Development Environment (IDE) that is a software used to write code. We recommend `Visual Studio Code <https://code.visualstudio.com/>`_, which is freely available online and provides an easy to use interface with Git. Obviously, any alternatives like `PyCharm <https://www.jetbrains.com/pycharm/>`_ or `Sublime <https://www.sublimetext.com/>`_ will work as well.
+In order to write and debug python code, you need an Integrated Development Environment (IDE) that is a software used to write code. We recommend `Visual Studio Code <https://code.visualstudio.com/>`_, which is freely available online and provides an easy-to-use interface with Git. Obviously, any alternatives like `PyCharm <https://www.jetbrains.com/pycharm/>`_ or `Sublime <https://www.sublimetext.com/>`_ will work as well.
 
 Java
 ----
