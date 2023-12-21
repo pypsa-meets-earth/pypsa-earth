@@ -16,7 +16,7 @@ Ensure that your system meets the minimum hardware specifications to run PyPSA-E
 
 * 8-16 GB RAM and adequate CPU (at-least 2-cores)
 
-* Storage (HDD/SSD) capacity depends on the region of interest. Africa model requires 40 Gb, the world `--`` 250 Gb, a single country `--` between 1-10 Gb. Tutorial requires just below 10Gb. Thus, considering all required software tools, at least 40 GB of storage space is recommended.
+* Storage (HDD/SSD) capacity depends on the region of interest. Africa model requires 40 GB, the world `--`` 250 GB, a single country `--` between 1-10 GB. Tutorial requires just below 2 GB. Thus, considering all required software tools, at least 40 GB of storage space is recommended.
 
 .. note::
 
