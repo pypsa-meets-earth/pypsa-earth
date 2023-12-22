@@ -255,20 +255,16 @@ def rescale_distribution(
                 )
             case "Normal":
                 mean, std = params
-                latin_hypercube[:, idx] = norm.ppf(
-                    latin_hypercube[:, idx], mean, std)
+                latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
             case "LogNormal":
                 shape = params[0]
-                latin_hypercube[:, idx] = lognorm.ppf(
-                    latin_hypercube[:, idx], s=shape)
+                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
             case "Triangle":
                 tri_mean = np.mean(params)
-                latin_hypercube[:, idx] = triang.ppf(
-                    latin_hypercube[:, idx], tri_mean)
+                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
             case "Beta":
                 a, b = params
-                latin_hypercube[:, idx] = beta.ppf(
-                    latin_hypercube[:, idx], a, b)
+                latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
             case "Gamma":
                 shape, scale = params
                 latin_hypercube[:, idx] = gamma.ppf(
@@ -305,8 +301,7 @@ def validate_parameters(
     """
 
     valid_strategy = ["chaospy", "scipy", "pydoe2"]
-    valid_distribution = ["Uniform", "Normal",
-                          "LogNormal", "Triangle", "Beta", "Gamma"]
+    valid_distribution = ["Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma"]
 
     # verifying samples and distribution_params
     if samples is None:
@@ -325,8 +320,7 @@ def validate_parameters(
         param = value.get("args")
 
         if dist_type is None or len(param) == 0:
-            raise ValueError(
-                f"assign a list of parameters to distribution_params")
+            raise ValueError(f"assign a list of parameters to distribution_params")
 
         if dist_type not in valid_distribution:
             raise ValueError(
@@ -346,8 +340,7 @@ def validate_parameters(
                 )
 
         if dist_type in ["Normal", "Uniform", "Beta", "Gamma"] and len(param) != 2:
-            raise ValueError(
-                f"{dist_type} distribution must have 2 parameters")
+            raise ValueError(f"{dist_type} distribution must have 2 parameters")
         elif dist_type == "LogNormal" and len(param) != 1:
             raise ValueError(f"{dist_type} must have a single parameter")
 
