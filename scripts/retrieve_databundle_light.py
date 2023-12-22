@@ -87,6 +87,7 @@ from zipfile import ZipFile
 
 import geopandas as gpd
 import pandas as pd
+import requests
 import yaml
 from _helpers import (
     configure_logging,
@@ -276,7 +277,28 @@ def download_and_unzip_protectedplanet(
     def get_first_day_of_previous_month(date):
         return get_first_day_of_month(date - dt.timedelta(days=1))
 
+    def get_url(date):
+        month_MMM = date.strftime("%b")
+        year_YYYY = date.year
+        return url.format(month=month_MMM, year=year_YYYY)
+
+    def remote_file_exists(url):
+        response = requests.head(url)
+        return response.status_code == 200
+
     current_first_day = get_first_day_of_month(dt.datetime.today())
+
+    # customize url to current month
+    url_iter = get_url(current_first_day)
+    # resource_iter = resource + " - " + month_MMM + " " + str(year_YYYY)
+
+    # try the next month
+    if not remote_file_exists(url_iter):
+        url_iter = get_url(current_first_day + dt.timedelta(32))
+
+    # try the previous month
+    if not remote_file_exists(url_iter):
+        url_iter = get_url(current_first_day - dt.timedelta(1))
 
     if hot_run:
         if os.path.exists(file_path):
@@ -285,16 +307,9 @@ def download_and_unzip_protectedplanet(
         downloaded = False
 
         for i in range(attempts + 1):
-            # customize url to current month
-            month_MMM = current_first_day.strftime("%b")
-            year_YYYY = current_first_day.year
-            url_iter = url.format(month=month_MMM, year=year_YYYY)
-
-            resource_iter = resource + " - " + month_MMM + " " + str(year_YYYY)
-
             try:
                 logger.info(
-                    f"Downloading resource '{resource_iter}' from cloud '{url_iter}'."
+                    f"Downloading resource '{url_iter}' from cloud '{url_iter}'."
                 )
                 progress_retrieve(
                     url_iter, file_path, disable_progress=disable_progress
