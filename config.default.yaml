@@ -25,7 +25,7 @@ enable:
 custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
 run:
-  name: "" # use this to keep track of runs with different settings
+  name: "NG_BJ" # use this to keep track of runs with different settings
   shared_cutouts: true  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
@@ -347,7 +347,8 @@ monte_carlo:
     # Triange: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
     # Beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
     # Gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
-    # [mean, std] for Normal and LogNormal
+    # [mean, std] for Normal
+    # [shape] for LogNormal
     # [lower_bound, upper_bound] for Uniform
     # [lower_bound, midpoint, upper_bound] for Triangle
     # [alpha, beta] for Beta
@@ -358,7 +359,7 @@ monte_carlo:
     # as key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
     # as value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
   options:
-    add_to_snakefile: false
+    add_to_snakefile: true
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
     seed: 42 # set seedling for reproducibilty
@@ -368,7 +369,7 @@ monte_carlo:
       args: [0, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]:
       type: LogNormal
-      args: [0, 2]
+      args: [1.5]
     generators_t.p_min_pu.loc[:, n.generators.carrier == "wind"]:
       type: Beta
       args: [0.5, 2]
