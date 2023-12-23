@@ -23,7 +23,7 @@ dependencies:
 - xlrd
 - openpyxl
 - seaborn
-- snakemake-minimal
+- snakemake-minimal<8
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
@@ -43,6 +43,8 @@ dependencies:
 - matplotlib<=3.5.2
 - reverse-geocode
 - country_converter
+- pyogrio
+- numba
 - py7zr
 
   # Keep in conda environment when calling ipython

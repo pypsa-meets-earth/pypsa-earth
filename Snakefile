@@ -254,7 +254,7 @@ rule build_shapes:
         "benchmarks/" + RDIR + "build_shapes"
     threads: 1
     resources:
-        mem_mb=500,
+        mem_mb=3096,
     script:
         "scripts/build_shapes.py"
 
