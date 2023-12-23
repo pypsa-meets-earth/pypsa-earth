@@ -276,7 +276,10 @@ def download_and_unzip_protectedplanet(
     def get_first_day_of_previous_month(date):
         return get_first_day_of_month(date - dt.timedelta(days=1))
 
-    current_first_day = get_first_day_of_month(dt.datetime.today())
+    # starting from the next month to check the current and the previous after
+    current_first_day = get_first_day_of_month(
+        dt.datetime.today() + dt.timedelta(days=31)
+    )
 
     if hot_run:
         if os.path.exists(file_path):
