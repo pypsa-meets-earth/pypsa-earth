@@ -106,7 +106,7 @@ if __name__ == "__main__":
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
-    eo.get_osm_data(
+    eo.save_osm_data(
         primary_name="power",
         region_list=country_list,
         feature_list=["substation", "line", "cable", "generator"],
