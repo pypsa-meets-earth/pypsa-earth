@@ -23,12 +23,14 @@ Inputs
 ------
 
 - ``cutouts/cutout.nc``: confer :ref:`cutout`, a cutout file produced by altile
-- ``data/cmip6_avr.cn``:
+- ``data/cmip6_avr.nc``: confer :ref:`cmip6`, a global-scale dataset of the global climate
+CMIP6 projections aggregated into IPCC Global Climate Atlas
 
 Outputs
 -------
 
-- ``cutouts/{cutout}_{future_year}.nc"``: A cutout modified to account for future climate conditions
+- ``cutouts/proj-{cutout}.nc"``: confer :ref:`proj`, a cutout modified to account for future
+climate conditions
 
 Description
 -----------
