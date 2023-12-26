@@ -57,6 +57,8 @@ wildcard_constraints:
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
+    # "^proj-" is reserved for projections, negative lookbehind assertion used in the regexp
+    cutout=".+(?<!proj-)",
 
 
 if config["custom_rules"] is not []:
@@ -376,11 +378,11 @@ if config["enable"].get("modify_cutout", False):
             cutout="cutouts/" + CDIR + "{cutout}.nc",
             cmip6_avr="/Users/ekaterina/Documents/_github_/cmip6/Global Atlas/tas_ssp245/t_CMIP6_ssp245_mon_201501-210012.nc",
         output:
-            "cutouts/" + CDIR + "{cutout}_{future_year}.nc",
+            "cutouts/" + CDIR + "proj-{cutout}.nc",
         log:
-            "logs/" + RDIR + "build_climate_projections/{cutout}_{future_year}.log",
+            "logs/" + RDIR + "build_climate_projections/proj-{cutout}.log",
         benchmark:
-            "benchmarks/" + RDIR + "build_climate_projections_{cutout}_{future_year}"
+            "benchmarks/" + RDIR + "proj-{cutout}"
         threads: ATLITE_NPROCESSES
         resources:
             mem_mb=ATLITE_NPROCESSES * 1000,
