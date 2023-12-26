@@ -283,13 +283,20 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/GridGrapher">
+            <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
+            <br />
+            <sub><b>GridGrapher</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/Emre-Yorat89">
             <img src="https://avatars.githubusercontent.com/u/62134151?v=4" width="100;" alt="Emre-Yorat89"/>
             <br />
             <sub><b>Emre_Yorat</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
@@ -324,15 +331,22 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Tobias</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/doneachh">
             <img src="https://avatars.githubusercontent.com/u/132910766?v=4" width="100;" alt="doneachh"/>
             <br />
             <sub><b>Anton Achhammer</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
+    <td align="center">
+        <a href="https://github.com/GbotemiB">
+            <img src="https://avatars.githubusercontent.com/u/48842684?v=4" width="100;" alt="GbotemiB"/>
+            <br />
+            <sub><b>Emmanuel Bolarinwa</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/carlosfv92">
             <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
@@ -360,7 +374,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>André Cristóvão Neves Ferreira</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/EmreYorat">
             <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
@@ -368,14 +383,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <sub><b>EmreYorat</b></sub>
         </a>
     </td>
-    <td align="center">
-        <a href="https://github.com/GridGrapher">
-            <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
-            <br />
-            <sub><b>GridGrapher</b></sub>
-        </a>
-    </td></tr>
-<tr>
     <td align="center">
         <a href="https://github.com/HanaElattar">
             <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
@@ -405,6 +412,14 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/Netotse">
+            <img src="https://avatars.githubusercontent.com/u/89367243?v=4" width="100;" alt="Netotse"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/pitmonticone">
             <img src="https://avatars.githubusercontent.com/u/38562595?v=4" width="100;" alt="pitmonticone"/>
             <br />
@@ -417,8 +432,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Sylvain Quoilin</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/juli-a-ko">
             <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>

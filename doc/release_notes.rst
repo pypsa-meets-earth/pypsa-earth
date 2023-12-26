@@ -14,6 +14,13 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **New Features and Major Changes**
 
+
+
+PyPSA-Earth 0.3.0
+=================
+
+**New Features and major Changes (24th December 2023)**
+
 * Keep all traceback in logs. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/898>`__
 
 * Function added in clean_osm_data script to allow the use of custom network data instead or on-top of OSM data. `PR #842 <'https://github.com/pypsa-meets-earth/pypsa-earth/pull/842>`__
@@ -22,9 +29,13 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add functionality to load shapefiles for hydrobasins directly from the data source directly `PR #919 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/919>`__
 
+* Use `new CC0 v1 dataset <https://doi.org/10.7910/DVN/XIV9BL>`__ for the natura input and automate download of WDPA protected planet data `PR #913 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/913>`__
+
 **Minor Changes and bug-fixing**
 
 * Revise databundles and improve logging in retrieve_databundle `PR #928 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/928>`__
+
+* Improve documentation on installation and short tutorial `PR #918 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/918>`__
 
 PyPSA-Earth 0.2.3
 =================

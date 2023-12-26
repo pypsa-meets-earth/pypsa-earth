@@ -254,7 +254,7 @@ rule build_shapes:
         "benchmarks/" + RDIR + "build_shapes"
     threads: 1
     resources:
-        mem_mb=500,
+        mem_mb=3096,
     script:
         "scripts/build_shapes.py"
 
@@ -410,7 +410,7 @@ if not config["enable"].get("build_natura_raster", False):
 
     rule copy_defaultnatura_tiff:
         input:
-            "data/natura.tiff",
+            "data/natura/natura.tiff",
         output:
             "resources/" + RDIR + "natura.tiff",
         run:
