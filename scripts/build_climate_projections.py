@@ -173,6 +173,8 @@ def subset_by_time(cmip6_xr, month, year, years_window):
     return cmip6_in_period
 
 
+# TODO fix hardcoding in the parameter name
+# TODO add functionality to customise CMIP6 ensemble
 def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
     """
     Calculate a change in a monthly average value for a climate parameter for
@@ -216,6 +218,7 @@ def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
     return dt_interp
 
 
+# TODO fix hardcoding in the parameter name
 def build_projection_for_month(cutout_xr, dt_xr, month):
     """
     Calculate the projection for the cutout data applying the morphing approach
