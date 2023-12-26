@@ -35,7 +35,31 @@ climate conditions
 Description
 -----------
 
-The rule :mod:`build_climate_projections` creates a cutout file which corresponds to a requested year in the future. Temperature projectons are being calculated combining data for cutout.nc which is assumed to be representative of the past climate and an ensemble of CMIP6 globale climate models to account for the future climate
+The rule :mod:`build_climate_projections` creates a cutout file which corresponds to
+a requested year in the future. The parameter projections is calculated combining data
+for cutout.nc which is assumed to be representative data sample for the past climate and
+an ensemble of CMIP6 global climate models to account for the future climate.
+
+A morphing approach is implemented meaning that the projection value x_future is calculated
+data for a representative period present_year in the past x_past using a combination
+of shift dx and stretch a:
+
+x_future = x_past + dx + a(x_past - <x_past>|month),
+
+where
+x_future and x_past have the highest temporal resolution,
+<x_past>|month is the monthly average for a considered month.
+
+The procedure is applied for each month to account for seasonality.
+
+Methodology notes
+-----------------
+Originally the morphing approach originates from buildings physics, and is still in active
+use for detailed simulation of heat transfer in buildings. See, for example:
+
+J.B. Dias, G.C. da Graça, P.M.M. Soares (2020) Comparison of methodologies for
+generation of future  building thermal energy simulation. Energy and Buildings,
+vol. 206,2020, 109556, https://doi.org/10.1016/j.enbuild.2019.109556.
 """
 
 
