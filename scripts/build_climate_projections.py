@@ -81,6 +81,17 @@ logger = create_logger(__name__)
 
 
 def crop_cmip6(cmip6_xr, cutout_xr):
+    """
+    Crop the global-scale CMIP6 dataset to match the cutout extend.
+
+    Parameters
+    ----------
+    cmip6_xr: xarray
+        CMIP6 climate projections loaded as xarray
+    cutout_xr : xarray of a cutout dataset
+        Cutout dataset loaded as xarray
+    """
+
     # spartial margin needed to avoid data losses during further interpolation
     d_pad = 1
 
@@ -98,6 +109,17 @@ def crop_cmip6(cmip6_xr, cutout_xr):
 
 
 def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
+    """
+    Interpolate CMIP6 dataset to the cutout grid.
+
+    Parameters
+    ----------
+    cmip6_xr: xarray
+        CMIP6 climate projections loaded as xarray
+    cutout_xr : xarray of a cutout dataset
+        Cutout dataset loaded as xarray
+    """
+
     # TODO read from the cutout file instead of hardcoding
     dx_new = 0.3
 
@@ -118,6 +140,27 @@ def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
 
 # TODO fix years_window
 def subset_by_time(cmip6_xr, month, year, years_window):
+    """
+    Filter CMIP6 dataset according to the requested year and the processed
+    month.
+
+    Parameters
+    ----------
+    cmip6_xr: xarray
+        CMIP6 climate projections loaded as xarray
+    month: integer
+        A month value to be considered further for the morphing procedure
+    year: integer
+        The first year of the requested period in the future
+    years_window: integer
+        A width of the considered time period
+
+    Example
+    -------
+    month=3, year=2050, years_window=30
+    filters CMIP6 cmip6_xr dataset to calculate projection for March at 2050-2079
+    """
+
     # TODO add warning in case there are no enough years
     cmip6_in_period = cmip6_xr.where(
         (
@@ -131,6 +174,36 @@ def subset_by_time(cmip6_xr, month, year, years_window):
 
 
 def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
+    """
+    Calculate a change in a monthly average value for a climate parameter for
+    the requested year periods and the processed month (a single value for each
+    grid cell)
+
+    Parameters
+    ----------
+    cmip6_xr: xarray
+        CMIP6 climate projections loaded as xarray
+    month: float
+        A month value to be considered further for the morphing procedure
+    year0: integer
+        The first year of an earlier period in the future
+    year1: integer
+        The first year of a later period in the future
+    years_window: integer
+        Width of the considered time period
+
+    Outputs
+    -------
+    dt_interp: xarray of the changes in the monthly averages for each grid cell
+    Contains a single value for each grid cell.
+
+    Example
+    -------
+    month=3, year0=2020, year0=2070, years_window=30
+    calculates a multimodel change in the monthly average for
+    March in 2020-2049 as compared with 2070-2099
+    """
+
     cmip6_interp_year0 = subset_by_time(
         cmip6_xr,
         month,
@@ -144,6 +217,26 @@ def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
 
 
 def build_projection_for_month(cutout_xr, dt_xr, month):
+    """
+    Calculate the projection for the cutout data applying the morphing approach
+    using a dataset dt_xr for the changes in monthly aggregates for the
+    processed month.
+
+    Parameters
+    ----------
+    cutout_xr: xarray
+        Cutout dataset loaded as xarray
+    dt_xr: xarray
+        Dataset of the changes in the monthly averages for each grid cell
+    month: float
+        A month value to be considered further for the morphing procedure
+
+    Output
+    -------
+    cutout_xr: xarray of the projected changes for each grid cell for a processed month
+    Contains a time series for each grid cell.
+    """
+
     k_time = cutout_xr.time.dt.month.isin(month)
 
     for i in range(0, len(cutout_xr.y)):
@@ -157,6 +250,32 @@ def build_projection_for_month(cutout_xr, dt_xr, month):
 
 
 def build_cutout_future(cutout_xr, cmip6_xr, months, year0, year1, years_window):
+    """
+    Calculate the projection for the cutout data applying the morphing approach
+    for each month in the months.
+
+    Parameters
+    ----------
+    cutout_xr: xarray
+        Cutout dataset loaded as xarray
+    cmip6_xr: xarray
+        CMIP6 climate projections loaded as xarray
+    months: list
+        Months values to be used as a definition of a season to be considered
+        for building projection time series
+    year0: integer
+        The first year of an earlier period in the future
+    year1: integer
+        The first year of a later period in the future
+    years_window: integer
+        Width of the considered time period
+
+    Output
+    -------
+    cutout_xr: xarray
+        Dataset on the projected changes for each grid cell for a processed month
+        Contains a time series for each grid cell.
+    """
     for k_month in [months]:
         dt_k = calculate_proj_of_average(
             cmip6_xr=cmip6_xr, month=k_month, year0=year0, year1=year1, years_window=5
