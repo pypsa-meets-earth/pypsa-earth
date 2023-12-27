@@ -295,6 +295,23 @@ def build_cutout_future(cutout_xr, cmip6_xr, months, year0, year1, years_window)
     return cutout_xr
 
 
+def plot_cmpi6(cmip6_xr, param_name="t"):
+    fig = plt.figure()
+    cmip6_xr[param_name].mean("time").mean("member").plot()
+    fig.savefig("results/test_cmip6_interp.png", dpi=700)
+
+
+def plot_cutout(
+    cutout_xr, param_name="temperature", cmap="OrRd", fl_name="results/test_present.png"
+):
+    fig = plt.figure()
+    if param_name == "temperature":
+        (cutout_xr[param_name] - 273.15).mean("time").plot(cmap=cmap)
+    else:
+        (cutout_xr[param_name]).mean("time").plot(cmap=cmap)
+    fig.savefig(fl_name, dpi=700)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -332,13 +349,10 @@ if __name__ == "__main__":
     #       to be replaced after debug
     # -----------------------------------------------------------------
     # graphical test of interpolation
-    fig = plt.figure()
-    cmip6_region_interp["t"].mean("time").mean("member").plot()
-    fig.savefig("test_cmip6_interp.png", dpi=700)
+    plot_cmpi6(cmip6_region_interp)
 
-    fig = plt.figure()
-    (cutout_xr["temperature"] - 273.15).mean("time").plot(cmap="OrRd")
-    fig.savefig("results/test_present.png", dpi=700)
+    plot_cutout(cutout_xr, fl_name="results/test_present.png")
+
     # -----------------------------------------------------------------
 
     # TODO Add a check for time match
@@ -357,6 +371,4 @@ if __name__ == "__main__":
     #       to be replaced after debug
     # -----------------------------------------------------------------
     # graphical test of projection
-    fig = plt.figure()
-    (cutout_future["temperature"] - 273.15).mean("time").plot(cmap="OrRd")
-    fig.savefig("results/test_cmip6_project.png", dpi=700)
+    plot_cutout(cutout_xr, fl_name="results/test_cmip6_project.png")
