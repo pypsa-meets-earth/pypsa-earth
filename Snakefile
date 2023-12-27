@@ -376,7 +376,7 @@ if config["enable"].get("modify_cutout", False):
             years_window=config["projection"]["years_window"],
         input:
             cutout="cutouts/" + CDIR + "{cutout}.nc",
-            cmip6_avr="/Users/ekaterina/Documents/_github_/cmip6/Global Atlas/tas_ssp245/t_CMIP6_ssp245_mon_201501-210012.nc",
+            cmip6_avr="data/tas_ssp245/t_CMIP6_ssp245_mon_201501-210012.nc",
         output:
             "cutouts/" + CDIR + "proj-{cutout}.nc",
         log:
