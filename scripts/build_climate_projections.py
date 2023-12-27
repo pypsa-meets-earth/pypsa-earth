@@ -175,7 +175,9 @@ def subset_by_time(cmip6_xr, month, year, years_window):
 
 # TODO fix hardcoding in the parameter name
 # TODO add functionality to customise CMIP6 ensemble
-def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
+def calculate_proj_of_average(
+    cmip6_xr, month, year0, year1, years_window, cmip6_param_name="t"
+):
     """
     Calculate a change in a monthly average value for a climate parameter for
     the requested year periods and the processed month (a single value for each
@@ -212,9 +214,9 @@ def calculate_proj_of_average(cmip6_xr, month, year0, year1, years_window):
     cmip6_interp_year1 = subset_by_time(
         cmip6_xr, month=month, year=year1, years_window=years_window
     )
-    dt_interp = cmip6_interp_year1["t"].mean("member").mean(
+    dt_interp = cmip6_interp_year1[cmip6_param_name].mean("member").mean(
         "time"
-    ) - cmip6_interp_year0["t"].mean("member").mean("time")
+    ) - cmip6_interp_year0[cmip6_param_name].mean("member").mean("time")
     return dt_interp
 
 
