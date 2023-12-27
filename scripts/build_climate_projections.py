@@ -335,6 +335,11 @@ if __name__ == "__main__":
     present_year = snakemake.params.present_year
     future_year = snakemake.params.future_year
     years_window = snakemake.params.years_window
+    stretch_input = snakemake.params.stretch_input
+
+    # if stretch_input:
+    #     pass
+
     cutout = snakemake.input.cutout
     cmip6 = snakemake.input.cmip6_avr
 
