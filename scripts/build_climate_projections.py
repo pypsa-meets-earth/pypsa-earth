@@ -221,7 +221,9 @@ def calculate_proj_of_average(
 
 
 # TODO fix hardcoding in the parameter name
-def build_projection_for_month(cutout_xr, dt_xr, month):
+def build_projection_for_month(
+    cutout_xr, dt_xr, month, cutout_param_name="temperature"
+):
     """
     Calculate the projection for the cutout data applying the morphing approach
     using a dataset dt_xr for the changes in monthly aggregates for the
@@ -246,8 +248,8 @@ def build_projection_for_month(cutout_xr, dt_xr, month):
 
     for i in range(0, len(cutout_xr.y)):
         for j in range(0, len(cutout_xr.x)):
-            cutout_xr.temperature[k_time, i, j] = np.add(
-                cutout_xr.temperature[k_time, i, j],
+            cutout_xr[cutout_param_name][k_time, i, j] = np.add(
+                cutout_xr[cutout_param_name][k_time, i, j],
                 np.array([dt_xr[i, j].item()] * k_time.sum().item()),
             )
 
