@@ -195,6 +195,8 @@ def calculate_proj_of_average(
         The first year of a later period in the future
     years_window: integer
         Width of the considered time period
+    cmip6_param_name: string
+        A name of CMIP6 parameter of interest
 
     Outputs
     -------
@@ -237,6 +239,8 @@ def build_projection_for_month(
         Dataset of the changes in the monthly averages for each grid cell
     month: float
         A month value to be considered further for the morphing procedure
+    cutout_param_name: string
+        A name of a cutout parameter for which a projection is being calculated
 
     Output
     -------
