@@ -365,10 +365,10 @@ def build_cutout_future(
     return cutout_xr
 
 
-def plot_cmpi6(cmip6_xr, param_name="t"):
+def plot_cmpi6(cmip6_xr, param_name="t", fl_name="results/test_cmip6.png"):
     fig = plt.figure()
     cmip6_xr[param_name].mean("time").mean("member").plot()
-    fig.savefig("results/test_cmip6_interp.png", dpi=700)
+    fig.savefig(fl_name, dpi=700)
 
 
 def plot_cutout(
@@ -428,7 +428,13 @@ if __name__ == "__main__":
     #       to be replaced after debug
     # -----------------------------------------------------------------
     # graphical test of interpolation
-    plot_cmpi6(cmip6_region_interp)
+    plot_cmpi6(cmip6_region_interp, fl_name="results/test_cmip6.png")
+    plot_cmpi6(
+        cmip6_nn_region_interp, param_name="tnn", fl_name="results/test_cmip6_nn.png"
+    )
+    plot_cmpi6(
+        cmip6_xx_region_interp, param_name="txx", fl_name="results/test_cmip6_xx.png"
+    )
 
     plot_cutout(cutout_xr, fl_name="results/test_present.png")
 
