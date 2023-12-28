@@ -141,6 +141,25 @@ def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
     return cmip6_interp
 
 
+def prepare_cmip6(cmip6_fl, cutout_xr):
+    """
+    Prepare the CMIP6 for calculation projections for the area of interest.
+
+    Parameters
+    ----------
+    cmip6_xr: xarray
+        CMIP6 climate projections loaded as xarray
+    cutout_xr : xarray of a cutout dataset
+        Cutout dataset loaded as xarray
+    """
+    cmip6_xr = xr.open_dataset(cmip6_fl)
+    cmip6_cropped_xr = crop_cmip6(cmip6_xr, cutout_xr)
+    cmip6_interp = interpolate_cmip6_to_cutout_grid(
+        cmip6_xr=cmip6_cropped_xr, cutout_xr=cutout_xr
+    )
+    return cmip6_interp
+
+
 # TODO fix years_window
 def subset_by_time(cmip6_xr, month, year, years_window):
     """
@@ -336,8 +355,8 @@ if __name__ == "__main__":
     present_year = snakemake.params.present_year
     future_year = snakemake.params.future_year
     years_window = snakemake.params.years_window
-    param_nn_fl = snakemake.params.param_nn_fl
-    param_xx_fl = snakemake.params.param_xx_fl
+    cmip6_nn_fl = snakemake.params.cmip6_nn_fl
+    cmip6_xx_fl = snakemake.params.cmip6_xx_fl
 
     cutout = snakemake.input.cutout
     cmip6 = snakemake.input.cmip6_avr
@@ -345,13 +364,19 @@ if __name__ == "__main__":
     snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
     season_in_focus = snapshots.month.unique().to_list()
 
-    cmip6_xr = xr.open_dataset(cmip6)
     cutout_xr = xr.open_dataset(cutout)
-    cmip6_region = crop_cmip6(cmip6_xr, cutout_xr)
 
-    cmip6_region_interp = interpolate_cmip6_to_cutout_grid(
-        cmip6_xr=cmip6_region, cutout_xr=cutout_xr
-    )
+    cmip6_region_interp = prepare_cmip6(cmip6_fl=cmip6, cutout_xr=cutout_xr)
+
+    if param_nn_fl:
+        cmip6_nn_region_interp = prepare_cmip6(
+            cmip6_fl=param_nn_fl, cutout_xr=cutout_xr
+        )
+
+    if param_xx_fl:
+        cmip6_xx_region_interp = prepare_cmip6(
+            cmip6_fl=param_xx_fl, cutout_xr=cutout_xr
+        )
 
     # -----------------------------------------------------------------
     #       to be replaced after debug
