@@ -414,14 +414,14 @@ if __name__ == "__main__":
 
     cmip6_region_interp = prepare_cmip6(cmip6_fl=cmip6, cutout_xr=cutout_xr)
 
-    if param_nn_fl:
+    if cmip6_nn_fl:
         cmip6_nn_region_interp = prepare_cmip6(
-            cmip6_fl=param_nn_fl, cutout_xr=cutout_xr
+            cmip6_fl=cmip6_nn_fl, cutout_xr=cutout_xr
         )
 
-    if param_xx_fl:
+    if cmip6_xx_fl:
         cmip6_xx_region_interp = prepare_cmip6(
-            cmip6_fl=param_xx_fl, cutout_xr=cutout_xr
+            cmip6_fl=cmip6_xx_fl, cutout_xr=cutout_xr
         )
 
     # -----------------------------------------------------------------
