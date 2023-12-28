@@ -378,7 +378,7 @@ if config["enable"].get("modify_cutout", False):
             param_xx_fl=config["projection"]["param_xx_fl"],
         input:
             cutout="cutouts/" + CDIR + "{cutout}.nc",
-            cmip6_avr="data/tas_ssp245/t_CMIP6_ssp245_mon_201501-210012.nc",
+            cmip6_avr="data/cmip6/t_CMIP6_ssp245_mon_201501-210012.nc",
         output:
             "cutouts/" + CDIR + "proj-{cutout}.nc",
         log:
