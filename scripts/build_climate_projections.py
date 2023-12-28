@@ -283,7 +283,18 @@ def build_projection_for_month(
     return cutout_xr
 
 
-def build_cutout_future(cutout_xr, cmip6_xr, months, year0, year1, years_window):
+def build_cutout_future(
+    cutout_xr,
+    cmip6_xr,
+    months,
+    year0,
+    year1,
+    years_window,
+    cutout_param_name="temperature",
+    add_stretch=False,
+    cmip6_nn_xr=False,
+    cmip6_xx_xr=False,
+):
     """
     Calculate the projection for the cutout data applying the morphing approach
     for each month in the months.
@@ -315,7 +326,39 @@ def build_cutout_future(cutout_xr, cmip6_xr, months, year0, year1, years_window)
             cmip6_xr=cmip6_xr, month=k_month, year0=year0, year1=year1, years_window=5
         )
 
-        build_projection_for_month(cutout_xr, dt_k, k_month)
+        a = False
+        t_mean_month = False
+
+        if add_stretch:
+            # TODO Check cmip6_nn_xr and cmip6_xx_xr are not empty
+            dt_nn_k = calculate_proj_of_average(
+                cmip6_xr=cmip6_nn_xr,
+                month=k_month,
+                year0=year0,
+                year1=year1,
+                years_window=5,
+            )
+            dt_xx_k = calculate_proj_of_average(
+                cmip6_xr=cmip6_xx_xr,
+                month=k_month,
+                year0=year0,
+                year1=year1,
+                years_window=5,
+            )
+            ddt_nx = dt_xx_k - dt_nn_k
+            k_time = cutout_xr.time.dt.month.isin(month)
+            t_mean_month = cutout_xr[cutout_param_name][k_time, :, :].mean()
+
+            a = ddt_nx / t_mean_month
+
+        build_projection_for_month(
+            cutout_xr,
+            dt_k,
+            k_month,
+            a=a,
+            t_mean_month=t_mean_month,
+            cutout_param_name=cutout_param_name,
+        )
 
     cutout_xr = cutout_xr.where(cutout_xr.time.dt.month.isin(months), drop=True)
 
