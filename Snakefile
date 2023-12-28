@@ -374,7 +374,8 @@ if config["enable"].get("modify_cutout", False):
             present_year=config["projection"]["present_year"],
             future_year=config["projection"]["future_year"],
             years_window=config["projection"]["years_window"],
-            stretch_input=config["projection"]["stretch_input"],
+            param_nn_fl=config["projection"]["param_nn_fl"],
+            param_xx_fl=config["projection"]["param_xx_fl"],
         input:
             cutout="cutouts/" + CDIR + "{cutout}.nc",
             cmip6_avr="data/tas_ssp245/t_CMIP6_ssp245_mon_201501-210012.nc",
