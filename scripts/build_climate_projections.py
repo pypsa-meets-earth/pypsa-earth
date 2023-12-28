@@ -50,7 +50,8 @@ where
 x_future and x_past have the highest temporal resolution,
 <x_past>|month is the monthly average for a considered month.
 
-The procedure is applied for each month to account for seasonality.
+The procedure is applied for each month to account for seasonality. Snapshots settings
+are used to define for which months to be used in calculating a climate projection.
 
 Methodology notes
 -----------------
