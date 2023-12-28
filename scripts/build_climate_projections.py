@@ -450,4 +450,22 @@ if __name__ == "__main__":
     #       to be replaced after debug
     # -----------------------------------------------------------------
     # graphical test of projection
-    plot_cutout(cutout_xr, fl_name="results/test_cmip6_project.png")
+    plot_cutout(cutout_future, fl_name="results/test_cmip6_project_shift.png")
+
+    cutout_future2 = build_cutout_future(
+        cutout_xr=cutout_xr,
+        cmip6_xr=cmip6_region_interp,
+        months=season_in_focus,
+        year0=present_year,
+        year1=future_year,
+        years_window=years_window,
+        cutout_param_name="temperature",
+        cmip6_nn_xr=cmip6_nn_fl,
+        cmip6_xx_xr=cmip6_xx_fl,
+    )
+
+    # -----------------------------------------------------------------
+    #       to be replaced after debug
+    # -----------------------------------------------------------------
+    # graphical test of projection
+    plot_cutout(cutout_future2, fl_name="results/test_cmip6_project_full.png")
