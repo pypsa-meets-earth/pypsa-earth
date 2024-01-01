@@ -776,6 +776,8 @@ def merge_into_network(n, aggregation_strategies=dict()):
     generators_mean_origin = n.generators.p_nom.mean()
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
+    network_crs = n.meta["crs"]["geo_crs"]
+
     n.determine_network_topology()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
