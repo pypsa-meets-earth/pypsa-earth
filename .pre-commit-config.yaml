@@ -21,7 +21,7 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 5.13.0
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
@@ -43,13 +43,13 @@ repos:
     args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.3.8
+  rev: v0.3.9
   hooks:
   - id: blackdoc
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 23.10.0
+  rev: 23.11.0
   hooks:
   # Format Python files
   - id: black
@@ -65,7 +65,7 @@ repos:
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.32.0
+  rev: v1.33.0
   hooks:
   - id: yamllint
     args: [--format, parsable, -c=.yamllint]

@@ -135,6 +135,7 @@ import shapely
 from _helpers import (
     REGION_COLS,
     configure_logging,
+    create_logger,
     get_aggregation_strategies,
     sets_path_to_root,
     update_p_nom_max,
@@ -151,7 +152,7 @@ from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def normed(x):
