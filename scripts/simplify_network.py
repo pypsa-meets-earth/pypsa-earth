@@ -800,7 +800,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     i_connected = n.buses.loc[n.buses.carrier == "AC"].index.difference(i_islands)
-    gdf_buses = transform_to_gdf(
+    gdf_backbone_buses = transform_to_gdf(
         buses_df=n.buses, i_buses=i_connected, network_crs=network_crs
     )
     gdf_islands = transform_to_gdf(
@@ -808,8 +808,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
     )
 
     # map each isolated bus into the closest non-isolated
-    gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_buses, how="left")
-
+    gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_backbone_buses, how="left")
     nearest_bus_df = n.buses.loc[n.buses.bus_id.isin(gdf_map.bus_id_right)]
 
     # each isolated node should be mapped into the closes non-isolated node
