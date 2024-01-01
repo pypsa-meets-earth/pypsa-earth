@@ -746,6 +746,14 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
+def transform_to_gdf(buses_df, i_buses):
+    points_buses = np.array(list(zip(buses_df.loc[i_buses].x, buses_df.loc[i_buses].y)))
+    gds_buses = gpd.GeoSeries(map(Point, points_buses))
+    gdf_buses = gpd.GeoDataFrame(geometry=gds_buses)
+
+    return gdf_buses
+
+
 def merge_into_network(n, aggregation_strategies=dict()):
     """
     Find isolated nodes in the network and merge those of them which have load
@@ -788,19 +796,8 @@ def merge_into_network(n, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     i_connected = n.buses.loc[n.buses.carrier == "AC"].index.difference(i_islands)
-
-    points_buses = np.array(
-        list(zip(n.buses.loc[i_connected].x, n.buses.loc[i_connected].y))
-    )
-    islands_points = np.array(
-        list(zip(n.buses.loc[i_islands].x, n.buses.loc[i_islands].y))
-    )
-
-    gds_buses = gpd.GeoSeries(map(Point, points_buses))
-    gds_islands = gpd.GeoSeries(map(Point, islands_points))
-
-    gdf_buses = gpd.GeoDataFrame(geometry=gds_buses)
-    gdf_islands = gpd.GeoDataFrame(geometry=gds_islands)
+    gdf_buses = transform_to_gdf(buses_df=n.buses, i_buses=i_connected)
+    gdf_islands = transform_to_gdf(buses_df=n.buses, i_buses=i_islands)
 
     gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_buses, how="left")
 
