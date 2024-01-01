@@ -801,9 +801,12 @@ def merge_into_network(n, aggregation_strategies=dict()):
 
     gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_buses, how="left")
 
+    buses_to_merge_with = gdf_buses.loc[gdf_map.index_right]
     nearest_bus_list = [
         n.buses.loc[(n.buses.x == x) & (n.buses.y == y)]
-        for x, y in zip(gdf_map["geometry"].x, gdf_map["geometry"].y)
+        for x, y in zip(
+            buses_to_merge_with["geometry"].x, buses_to_merge_with["geometry"].y
+        )
     ]
     nearest_bus_df = pd.concat(nearest_bus_list)
 
