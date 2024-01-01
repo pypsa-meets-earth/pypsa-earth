@@ -746,11 +746,13 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
-def transform_to_gdf(buses_df, i_buses):
-    points_buses = np.array(list(zip(buses_df.loc[i_buses].x, buses_df.loc[i_buses].y)))
-    gds_buses = gpd.GeoSeries(map(Point, points_buses))
-    gdf_buses = gpd.GeoDataFrame(geometry=gds_buses)
-
+def transform_to_gdf(buses_df, i_buses, network_crs):
+    points_buses = buses_df.loc[i_buses, ["bus_id", "x", "y"]]
+    gdf_buses = gpd.GeoDataFrame(
+        points_buses,
+        geometry=gpd.points_from_xy(points_buses.x, points_buses.y),
+        crs=network_crs,
+    )
     return gdf_buses
 
 
@@ -798,19 +800,17 @@ def merge_into_network(n, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     i_connected = n.buses.loc[n.buses.carrier == "AC"].index.difference(i_islands)
-    gdf_buses = transform_to_gdf(buses_df=n.buses, i_buses=i_connected)
-    gdf_islands = transform_to_gdf(buses_df=n.buses, i_buses=i_islands)
+    gdf_buses = transform_to_gdf(
+        buses_df=n.buses, i_buses=i_connected, network_crs=network_crs
+    )
+    gdf_islands = transform_to_gdf(
+        buses_df=n.buses, i_buses=i_islands, network_crs=network_crs
+    )
 
+    # map each isolated bus into the closest non-isolated
     gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_buses, how="left")
 
-    buses_to_merge_with = gdf_buses.loc[gdf_map.index_right]
-    nearest_bus_list = [
-        n.buses.loc[(n.buses.x == x) & (n.buses.y == y)]
-        for x, y in zip(
-            buses_to_merge_with["geometry"].x, buses_to_merge_with["geometry"].y
-        )
-    ]
-    nearest_bus_df = pd.concat(nearest_bus_list)
+    nearest_bus_df = n.buses.loc[n.buses.bus_id.isin(gdf_map.bus_id_right)]
 
     # each isolated node should be mapped into the closes non-isolated node
     map_isolated_node_by_country = (
@@ -854,7 +854,7 @@ def merge_into_network(n, aggregation_strategies=dict()):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Fetched {len(islands_points)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
+        f"Fetched {len(gdf_islands)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
     return clustering.network, busmap
