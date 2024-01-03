@@ -765,7 +765,7 @@ def transform_to_gdf(buses_df, i_buses, network_crs):
     return gdf_buses
 
 
-def merge_into_network(n, aggregation_strategies=dict()):
+def merge_into_network(n, isol_threshold_n=5, aggregation_strategies=dict()):
     """
     Find isolated nodes in the network and merge those of them which have load
     value below than a specified threshold into a single isolated node which
@@ -791,11 +791,16 @@ def merge_into_network(n, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    # duplicated sub-networks mean that there is at least one interconnection between buses
-    i_islands = n.buses[
-        (~n.buses.duplicated(subset=["sub_network"], keep=False))
-        & (n.buses.carrier == "AC")
-    ].index
+    if isol_threshold_n > 1:
+        i_islands = find_isolated_sub_networks(
+            buses_df=n.buses, n_buses_thresh=isol_threshold_n
+        ).index
+    else:
+        # duplicated sub-networks mean that there is at least one interconnection between buses
+        i_islands = n.buses[
+            (~n.buses.duplicated(subset=["sub_network"], keep=False))
+            & (n.buses.carrier == "AC")
+        ].index
 
     # TODO filtering may be applied to decide if the isolated buses should be fetched
     # # isolated buses with load below than a specified threshold should be merged
