@@ -15,18 +15,18 @@ Relevant Settings
     monte_carlo:
     options:
         add_to_snakefile: false
-        # Uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
-        # Normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
-        # LogNormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
-        # Triangle: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
-        # Beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
-        # Gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
-        distribution: "Uniform" # "Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma"
-        # [mean, std] for Normal and LogNormal
-        # [lower_bound, upper_bound] for Uniform
-        # [lower_bound, midpoint, upper_bound] for Triangle
-        # [alpha, beta] for Beta
-        # [shape, scale] for Gamma
+        # uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
+        # normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
+        # lognormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
+        # triangle: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
+        # beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
+        # gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
+        distribution: "uniform" # "uniform", "normal", "lognormal", "triangle", "beta", "gamma"
+        # [mean, std] for normal and lognormal
+        # [lower_bound, upper_bound] for uniform
+        # [lower_bound, midpoint, upper_bound] for triangle
+        # [alpha, beta] for beta
+        # [shape, scale] for gamma
         distribution_params: [0,1]
         samples: 4 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
         sampling_strategy: "scipy"  # "pydoe2", "chaospy", "scipy", packages that are supported
@@ -229,15 +229,15 @@ def rescale_distribution(
     - np.array: Rescaled Latin hypercube sampling with values in the range [0, 1].
 
     Supported Distributions:
-    - "Uniform": No rescaling applied.
-    - "Normal": Rescaled using the inverse of the normal distribution function with specified mean and std.
-    - "LogNormal": Rescaled using the inverse of the log-normal distribution function with specified mean and std.
-    - "Triangle": Rescaled using the inverse of the triangular distribution function with mean calculated from given parameters.
-    - "Beta": Rescaled using the inverse of the beta distribution function with specified shape parameters.
-    - "Gamma": Rescaled using the inverse of the gamma distribution function with specified shape and scale parameters.
+    - "uniform": No rescaling applied.
+    - "normal": Rescaled using the inverse of the normal distribution function with specified mean and std.
+    - "lognormal": Rescaled using the inverse of the log-normal distribution function with specified mean and std.
+    - "triangle": Rescaled using the inverse of the triangular distribution function with mean calculated from given parameters.
+    - "beta": Rescaled using the inverse of the beta distribution function with specified shape parameters.
+    - "gamma": Rescaled using the inverse of the gamma distribution function with specified shape and scale parameters.
 
     Note:
-    - The function supports rescaling for Uniform, Normal, LogNormal, Triangle, Beta, and Gamma distributions.
+    - The function supports rescaling for uniform, normal, lognormal, triangle, beta, and gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
     from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
@@ -248,24 +248,28 @@ def rescale_distribution(
         params = value.get("args")
 
         match dist:
-            case "Uniform":
+            case "uniform":
                 l_bounds, u_bounds = params
                 latin_hypercube[:, idx] = minmax_scale(
                     latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
                 )
-            case "Normal":
+            case "normal":
                 mean, std = params
-                latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
-            case "LogNormal":
+                latin_hypercube[:, idx] = norm.ppf(
+                    latin_hypercube[:, idx], mean, std)
+            case "lognormal":
                 shape = params[0]
-                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
-            case "Triangle":
+                latin_hypercube[:, idx] = lognorm.ppf(
+                    latin_hypercube[:, idx], s=shape)
+            case "triangle":
                 tri_mean = np.mean(params)
-                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
-            case "Beta":
+                latin_hypercube[:, idx] = triang.ppf(
+                    latin_hypercube[:, idx], tri_mean)
+            case "beta":
                 a, b = params
-                latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
-            case "Gamma":
+                latin_hypercube[:, idx] = beta.ppf(
+                    latin_hypercube[:, idx], a, b)
+            case "gamma":
                 shape, scale = params
                 latin_hypercube[:, idx] = gamma.ppf(
                     latin_hypercube[:, idx], shape, scale
@@ -301,7 +305,8 @@ def validate_parameters(
     """
 
     valid_strategy = ["chaospy", "scipy", "pydoe2"]
-    valid_distribution = ["Uniform", "Normal", "LogNormal", "Triangle", "Beta", "Gamma"]
+    valid_distribution = ["uniform", "normal",
+                          "lognormal", "triangle", "beta", "gamma"]
 
     # verifying samples and distribution_params
     if samples is None:
@@ -320,14 +325,15 @@ def validate_parameters(
         param = value.get("args")
 
         if dist_type is None or len(param) == 0:
-            raise ValueError(f"assign a list of parameters to distribution_params")
+            raise ValueError(
+                f"assign a list of parameters to distribution_params")
 
         if dist_type not in valid_distribution:
             raise ValueError(
                 f"Unsupported Distribution : {dist_type}. Choose from {valid_distribution}"
             )
 
-        if dist_type == "Triangle":
+        if dist_type == "triangle":
             if len(param) == 2:
                 print(
                     f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
@@ -339,13 +345,14 @@ def validate_parameters(
                     f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
                 )
 
-        if dist_type in ["Normal", "Uniform", "Beta", "Gamma"] and len(param) != 2:
-            raise ValueError(f"{dist_type} distribution must have 2 parameters")
-        elif dist_type == "LogNormal" and len(param) != 1:
+        if dist_type in ["normal", "uniform", "beta", "gamma"] and len(param) != 2:
+            raise ValueError(
+                f"{dist_type} distribution must have 2 parameters")
+        elif dist_type == "lognormal" and len(param) != 1:
             raise ValueError(f"{dist_type} must have a single parameter")
 
-        # handling having 0 as values in Beta and Gamma
-        if dist_type in ["Beta", "Gamma"]:
+        # handling having 0 as values in beta and gamma
+        if dist_type in ["beta", "gamma"]:
             if np.min(param) <= 0:
                 raise ValueError(
                     f"{dist_type} distribution cannot have values lower than zero in parameters"

@@ -336,18 +336,18 @@ costs:
 
 
 monte_carlo:
-  # Uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
-  # Normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
-  # LogNormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
-  # Triange: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
-  # Beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
-  # Gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
-  # [mean, std] for Normal
-  # [shape] for LogNormal
-  # [lower_bound, upper_bound] for Uniform
-  # [lower_bound, midpoint, upper_bound] for Triangle
-  # [alpha, beta] for Beta
-  # [shape, scale] for Gamma
+  # uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
+  # normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
+  # lognormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
+  # triange: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
+  # beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
+  # gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
+  # [mean, std] for normal
+  # [shape] for lognormal
+  # [lower_bound, upper_bound] for uniform
+  # [lower_bound, midpoint, upper_bound] for triangle
+  # [alpha, beta] for beta
+  # [shape, scale] for gamma
   # TODO: Support inputs to simulate outages biggest lines "lines.p_nom_opt.max(): [-3000MW 0MW]""
   # TODO: Support inputs to simulate outages of biggest power plant "generators.p_nom.max()": [-1000MW 0MW]
   # ... user can add flexibly more features for the Monte-Carlo sampling
@@ -360,13 +360,13 @@ monte_carlo:
     seed: 42 # set seedling for reproducibilty
   uncertainties:
     loads_t.p_set:
-      type: Uniform
+      type: uniform
       args: [0, 1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]:
-      type: LogNormal
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
+      type: lognormal
       args: [1.5]
-    generators_t.p_min_pu.loc[:, n.generators.carrier == "wind"]:
-      type: Beta
+    generators_t.p_min_pu.loc[:, n.generators.carrier == "onwind"]:
+      type: beta
       args: [0.5, 2]
 
 
