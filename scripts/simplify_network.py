@@ -749,7 +749,7 @@ def drop_isolated_nodes(n, threshold):
 def find_isolated_sub_networks(buses_df, n_buses_thresh):
     buses_df["bus_id"] = buses_df.index
     grouped_by_subnw = buses_df.groupby("sub_network").count()
-    i_isol_subnetw = grouped_by_subnw[grouped_by_subnw.bus_id < n_buses_thresh].index
+    i_isol_subnetw = grouped_by_subnw[grouped_by_subnw.bus_id <= n_buses_thresh].index
     i_islands = buses_df.loc[buses_df.sub_network.isin(i_isol_subnetw)]
     return i_islands
 
