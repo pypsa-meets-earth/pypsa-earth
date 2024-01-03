@@ -825,6 +825,9 @@ def merge_into_network(n, isol_threshold_n=5, aggregation_strategies=dict()):
     gdf_map = gpd.sjoin_nearest(gdf_islands, gdf_backbone_buses, how="left")
     nearest_bus_df = n.buses.loc[n.buses.bus_id.isin(gdf_map.bus_id_right)]
 
+    i_lines_islands = n.lines.loc[n.lines.bus1.isin(i_islands)].index
+    n.mremove("Line", i_lines_islands)
+
     # each isolated node should be mapped into the closes non-isolated node
     map_isolated_node_by_country = (
         n.buses.assign(bus_id=n.buses.index)
