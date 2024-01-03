@@ -747,6 +747,7 @@ def drop_isolated_nodes(n, threshold):
 
 
 def transform_to_gdf(buses_df, i_buses, network_crs):
+    buses_df["bus_id"] = buses_df.index
     points_buses = buses_df.loc[i_buses, ["bus_id", "x", "y"]]
     gdf_buses = gpd.GeoDataFrame(
         points_buses,
