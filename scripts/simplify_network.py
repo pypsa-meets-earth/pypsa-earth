@@ -789,7 +789,8 @@ def merge_into_network(n, isol_threshold_n=5, aggregation_strategies=dict()):
     generators_mean_origin = n.generators.p_nom.mean()
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
-    network_crs = n.meta["crs"]["geo_crs"]
+    # TODO Replace by reading from the config
+    network_crs = "EPSG:4326"
 
     n.determine_network_topology()
 
