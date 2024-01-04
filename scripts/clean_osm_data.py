@@ -48,6 +48,9 @@ def prepare_substation_df(df_all_substations):
         }
     )
 
+    # Convert polygons to points
+    df_all_substations["geometry"] = df_all_substations["geometry"].centroid
+
     # Add longitude (lon) and latitude (lat) coordinates in the dataset
     df_all_substations["lon"] = df_all_substations["geometry"].x
     df_all_substations["lat"] = df_all_substations["geometry"].y
