@@ -170,19 +170,15 @@ def build_demand_profiles(
             gdp_n = pd.Series(
                 transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
             )
-            # TODO replace quick-and-dirty fix with a more appropriate approach
-            # pop_n = pd.Series(
-            #     transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
-            # )
+            pop_n = pd.Series(
+                transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
+            )
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to EU continent load data
             # (refer to vresutils.load._upsampling_weights)
             # TODO: require adjustment for Africa
-            # factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
-
-            # TODO replace quick-and-dirty fix with a more appropriate approach
-            factors = normed(gdp_n)
+            factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
             return pd.DataFrame(
                 factors.values * l.values[:, np.newaxis],
                 index=l.index,
