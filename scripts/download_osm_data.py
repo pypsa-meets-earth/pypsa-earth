@@ -126,7 +126,7 @@ if __name__ == "__main__":
     # If the file is empty, it is not created
     # This is a workaround to create empty files for the workflow
 
-    # Rename and move osm files to the resources folder
+    # Rename and move osm files to the resources folder output
     for file in new_files:
         for name in names:
             for f in format:
