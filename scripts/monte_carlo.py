@@ -419,7 +419,7 @@ if __name__ == "__main__":
 
     # create plot for the rescaled distributions
     for idx in range(N_FEATURES):
-        sns.histplot(lh[:, idx], kde=True).set(
+        sns.displot(lh[:, idx], kde=True).set(
             title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"
         ).figure.savefig(f"{MONTE_CARLO_PYPSA_FEATURES[idx]}.png", bbox_inches="tight")
 
