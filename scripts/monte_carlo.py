@@ -93,7 +93,7 @@ from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
 logger = create_logger(__name__)
-sns.set()
+sns.set(style="whitegrid")
 
 
 def monte_carlo_sampling_pydoe2(
@@ -419,7 +419,7 @@ if __name__ == "__main__":
 
     # create plot for the rescaled distributions
     for idx in range(N_FEATURES):
-        sns.displot(lh[:, idx]).set(
+        sns.histplot(lh[:, idx], kde=True).set(
             title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"
         ).figure.savefig(f"{MONTE_CARLO_PYPSA_FEATURES[idx]}.png", bbox_inches="tight")
 
