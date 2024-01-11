@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 74
+  - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
