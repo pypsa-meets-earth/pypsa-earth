@@ -10,18 +10,11 @@ The structure
 
 The main workflow structure built within PyPSA-Earth is as follows:
 
-**1. Download and filter data**: first raw input data shall be downloaded. PyPSA-Earth provides automated
-   procedures to successfully download all the needed data from scratch, such as OpenStreetMap data,
-   specific potential of renewable sources, population, GDP, etc. Moreover, raw data shall be filtered to remove non-valid data and normalize the data
-   gathered from multiple sources.
+**1. Download and filter data**: first raw input data shall be downloaded. PyPSA-Earth provides automated procedures to successfully download all the needed data from scratch, such as OpenStreetMap data, specific potential of renewable sources, population, GDP, etc. Moreover, raw data shall be filtered to remove non-valid data and normalize the data gathered from multiple sources.
 
-**2. Populate data**: filtered data are then processed by means of specific methods to derive the
-   main input data of the optimization methods, such as renewable energy production, demand, etc.
-   Just to give an example, when the option is enabled, the renewable energy source potential
-   is transformed into time series for desired locations by using the tool `Atlite <https://github.com/PyPSA/atlite/>`_.
+**2. Populate data**: filtered data are then processed by means of specific methods to derive the main input data of the optimization methods, such as renewable energy production, demand, etc. Just to give an example, when the option is enabled, the renewable energy source potential is transformed into time series for desired locations by using the tool `Atlite <https://github.com/PyPSA/atlite/>`_.
 
-**3. Create network model**: once the necessary model inputs are drawn, then the network model is
-   developed using `PyPSA <https://github.com/PyPSA/PyPSA>`_
+**3. Create network model**: once the necessary model inputs are drawn, then the network model is developed using `PyPSA <https://github.com/PyPSA/PyPSA>`_
 
 **4. Solve network**: execute the optimization for the desired problem, e.g. dispatch, planning, etc.
 
