@@ -417,11 +417,11 @@ if __name__ == "__main__":
             N_FEATURES, SAMPLES, UNCERTAINTIES_VALUES, seed=SEED, rule="latin_hypercube"
         )
 
-    # create plot for the rescaled distributions
-    for idx in range(N_FEATURES):
-        sns.displot(lh[:, idx], kde=True).set(
-            title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"
-        ).figure.savefig(f"{MONTE_CARLO_PYPSA_FEATURES[idx]}.png", bbox_inches="tight")
+    # create plot for the rescaled distributions (for development usage, commented by default)
+    # for idx in range(N_FEATURES):
+    #     sns.displot(lh[:, idx], kde=True).set(
+    #         title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"
+    #     ).figure.savefig(f"{MONTE_CARLO_PYPSA_FEATURES[idx]}.png", bbox_inches="tight")
 
     # MONTE-CARLO MODIFICATIONS
     ###
