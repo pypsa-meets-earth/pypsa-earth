@@ -49,7 +49,7 @@ Description
 -----------
 
 Total annual system costs are minimised with PyPSA. The full formulation of the
-linear optimal power flow (plus investment planning
+linear optimal power flow (plus investment planning)
 is provided in the
 `documentation of PyPSA <https://pypsa.readthedocs.io/en/latest/optimal_power_flow.html#linear-optimal-power-flow>`_.
 The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
