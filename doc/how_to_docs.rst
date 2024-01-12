@@ -15,7 +15,7 @@ Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-
 code scripts which then will automatically generate the documentation you might see here.
 
 Thank you Eric Holscher & team for your wonderful *Readthedocs* open source project.
-You can find an emotional speach by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
+You can find an emotional speech by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
 
 Structure and Syntax example
 -----------------------------
