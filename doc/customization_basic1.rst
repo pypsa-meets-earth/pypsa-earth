@@ -22,8 +22,8 @@ The model can be adapted to include any country, multiple countries (e.g. Nigeri
 
 .. note::
 
-    To build the model of regions outside of Africa, it is important to setup ``Copernicus Climate Data Store (CDS) API`` to build custom cutouts. 
-    The same is true if the weather year other than 2013 is considered even for Africa. The detailed instructions for setting up the Copernicus API can be found in :ref:`customization_copernicus`.  
+    To build the model of regions outside of Africa, it is important to setup ``Copernicus Climate Data Store (CDS) API`` to build custom cutouts.
+    The same is true if the weather year other than 2013 is considered even for Africa. The detailed instructions for setting up the Copernicus API can be found in :ref:`customization_copernicus`.
 
 Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
 
