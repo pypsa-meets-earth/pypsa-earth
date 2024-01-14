@@ -6,8 +6,19 @@
 
 
 ##########################################
-Full model
+Model customization
 ##########################################
+
+* :doc:`customization_basic1`
+* :doc:`customization_copernicus`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Model customization
+
+   customization_basic1
+   customization_copernicus
 
 How to customise PyPSA-Earth?
 =============================
