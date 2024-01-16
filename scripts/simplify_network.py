@@ -769,9 +769,9 @@ def transform_to_gdf(buses_df, i_buses, network_crs):
 
 def merge_into_network(n, isol_threshold_n=5, aggregation_strategies=dict()):
     """
-    Find isolated nodes in the network and merge those of them which have load
-    value below than a specified threshold into a single isolated node which
-    represents all the remote generation.
+    Find isolated AC nodes and sub-networks in the network and merge those of
+    them which have load value and a number of buses below than the specified
+    thresholds into a backbone network.
 
     Parameters
     ----------
@@ -779,6 +779,8 @@ def merge_into_network(n, isol_threshold_n=5, aggregation_strategies=dict()):
         Original network
     threshold : float
         Load power used as a threshold to merge isolated nodes
+    aggregation_strategies: dictionary
+        Functions to be applied to calculate parameters of the aggregated grid
 
     Returns
     -------
@@ -891,6 +893,8 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         Original network
     threshold : float
         Load power used as a threshold to merge isolated nodes
+    aggregation_strategies: dictionary
+        Functions to be applied to calculate parameters of the aggregated grid
 
     Returns
     -------
