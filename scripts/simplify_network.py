@@ -791,8 +791,7 @@ def merge_into_network(n, threshold, threshold_n=5, aggregation_strategies=dict(
     generators_mean_origin = n.generators.p_nom.mean()
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
-    # TODO Replace by reading from the config
-    network_crs = "EPSG:4326"
+    network_crs = snakemake.params.geo_crs
 
     n.determine_network_topology()
 
