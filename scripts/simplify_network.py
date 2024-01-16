@@ -795,9 +795,9 @@ def merge_into_network(n, threshold, threshold_n=5, aggregation_strategies=dict(
 
     n.determine_network_topology()
 
-    if isol_threshold_n > 1:
+    if threshold_n > 1:
         i_islands = find_isolated_sub_networks(
-            buses_df=n.buses, n_buses_thresh=isol_threshold_n
+            buses_df=n.buses, n_buses_thresh=threshold_n
         ).index
     else:
         # duplicated sub-networks mean that there is at least one interconnection between buses
@@ -914,19 +914,19 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     # isolated buses with load below than a specified threshold should be merged
     i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
-    i_suffic_load = i_load_islands[
+    i_islands_fetch = i_load_islands[
         n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
     ]
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
         n.buses.assign(bus_id=n.buses.index)
-        .loc[i_suffic_load]
+        .loc[i_islands_fetch]
         .groupby("country")["bus_id"]
         .first()
         .to_dict()
     )
-    isolated_buses_mapping = n.buses.loc[i_suffic_load, "country"].replace(
+    isolated_buses_mapping = n.buses.loc[i_islands_fetch, "country"].replace(
         map_isolated_node_by_country
     )
     busmap = (
@@ -960,7 +960,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Merged {len(i_suffic_load)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
+        f"Merged {len(i_islands_fetch)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
     return clustering.network, busmap
