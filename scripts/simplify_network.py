@@ -807,11 +807,11 @@ def merge_into_network(n, threshold, threshold_n=5, aggregation_strategies=dict(
         ].index
 
     # TODO filtering may be applied to decide if the isolated buses should be fetched
-    # # isolated buses with load below than a specified threshold should be merged
-    # i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
-    # i_suffic_load = i_load_islands[
-    #     n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
-    # ]
+    # isolated buses with load below than a specified threshold should be merged
+    i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
+    i_islands_fetch = i_load_islands[
+        n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
+    ]
 
     # return the original network if no isolated nodes are detected
     if len(i_islands) == 0:
