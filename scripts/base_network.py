@@ -328,7 +328,7 @@ def _set_electrical_parameters_links(links_config, links):
 def _set_electrical_parameters_transformers(transformers_config, transformers):
     config = transformers_config
 
-    ## Add transformer parameters
+    # Add transformer parameters
     transformers["x"] = config.get("x", 0.1)
     transformers["s_nom"] = config.get("s_nom", 2000)
     transformers["type"] = config.get("type", "")
@@ -352,7 +352,7 @@ def _set_electrical_parameters_converters(links_config, converters):
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
-    n.lines["s_nom"] = (
+    n.lines["s_nom_min"] = (
         np.sqrt(3)
         * n.lines["type"].map(n.line_types.i_nom)
         * n.lines.eval("v_nom * num_parallel")
