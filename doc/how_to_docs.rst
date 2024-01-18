@@ -10,12 +10,12 @@ How to docs?
 We add the code documentation along the way.
 You might think that cost a lot of time and is not efficient - but that's not really true anymore!
 Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speed up the overall process.
-Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add
-on `sphinx.ext.autodoc  <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ we document in our
+Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add-on
+`sphinx.ext.autodoc  <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ we document in our
 code scripts which then will automatically generate the documentation you might see here.
 
 Thank you Eric Holscher & team for your wonderful *Readthedocs* open source project.
-You can find an emotional speak by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
+You can find an emotional speech by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
 
 Structure and Syntax example
 -----------------------------
