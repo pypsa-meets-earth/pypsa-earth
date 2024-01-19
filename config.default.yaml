@@ -348,12 +348,14 @@ monte_carlo:
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
     seed: 42 # set seedling for reproducibilty
-
-  # Different distributions can be specified for various PyPSA network parameters.
+  # Different distributions can be specified for various PyPSA network object.
   # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
   # More info on the distributions are documented in the Chaospy reference guide...
   # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
-  # ... users can add flexibly more features for the Monte-Carlo sampling
+  # ... users can add flexibly more features for the Monte-Carlo sampling using the description below
+  # {pypsa network object, e.g. "loads_t.p_set"}:
+  # type: {any distribution among: "uniform", "normal", "lognormal", "triangle", "beta" and "gamma"}
+  # args: {arguments passed as a list depending on the distribution, see arguments description in Chaospy reference guide}
   uncertainties:
     loads_t.p_set:
       type: uniform
@@ -364,7 +366,6 @@ monte_carlo:
     generators_t.p_min_pu.loc[:, n.generators.carrier == "onwind"]:
       type: beta
       args: [0.5, 2]
-
   # TODO: Support inputs to simulate outages biggest lines "lines.p_nom_opt.max()": [-3000MW 0MW]
   # TODO: Support inputs to simulate outages of biggest power plant "generators.p_nom.max()": [-1000MW 0MW]
 
