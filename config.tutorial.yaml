@@ -224,8 +224,8 @@ projection:
   future_year: 2050
   years_window: 5 # a half of width currently
   gcm_selection: false # false to use all the available global climate models
-  cmip6_nn_fl: data/cmip6/tnn_CMIP6_ssp245_mon_201501-210012.nc # false or names of the files with trends for extrema values
-  cmip6_xx_fl: data/cmip6/txx_CMIP6_ssp245_mon_201501-210012.nc
+  cmip6_nn_fl: data/cmip6/tnn_CMIP6_ssp245_mon_201501-210012.nc # false or names of min-extremal files of climate inputs
+  cmip6_xx_fl: data/cmip6/txx_CMIP6_ssp245_mon_201501-210012.nc # false or names of max-extremal files of climate inputs
 
 
 renewable:
