@@ -270,6 +270,7 @@ def build_projection_for_month(
 
     k_time = cutout_xr.time.dt.month.isin(month)
 
+    # stretch calculations
     if a & t_mean_month:
         dt_xr = dt_xr + a * (cutout_xr[cutout_param_name][k_time, :, :] - t_mean_month)
 
@@ -277,6 +278,8 @@ def build_projection_for_month(
         for j in range(0, len(cutout_xr.x)):
             cutout_xr[cutout_param_name][k_time, i, j] = np.add(
                 cutout_xr[cutout_param_name][k_time, i, j],
+                # spreading dt_xr which is of monthly resolution across the whole time dimension of a cutout
+                # which is normally of hourly resolution
                 np.array([dt_xr[i, j].item()] * k_time.sum().item()),
             )
 
