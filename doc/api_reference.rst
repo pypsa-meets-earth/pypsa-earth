@@ -103,3 +103,9 @@ make_statistics
 
 .. automodule:: make_statistics
     :members:
+
+monte-carlo
+-------------------------------
+
+.. automodule:: monte-carlo
+    :members:
