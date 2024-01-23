@@ -13,31 +13,32 @@ Relevant Settings
 .. code:: yaml
 
     monte_carlo:
+    # Description: Specify Monte Carlo sampling options for uncertainty analysis.
+    # Define the option list for Monte Carlo sampling.
+    # Make sure add_to_snakefile is set to true to enable Monte-Carlo
     options:
-        add_to_snakefile: false
-        # uniform: https://chaospy.readthedocs.io/en/master/api/chaospy.Uniform.html
-        # normal: https://chaospy.readthedocs.io/en/master/api/chaospy.Normal.html
-        # lognormal: https://chaospy.readthedocs.io/en/master/api/chaospy.LogNormal.html
-        # triangle: https://chaospy.readthedocs.io/en/master/api/chaospy.Triangle.html
-        # beta: https://chaospy.readthedocs.io/en/master/api/chaospy.Beta.html
-        # gamma: https://chaospy.readthedocs.io/en/master/api/chaospy.Gamma.html
-        distribution: "uniform" # "uniform", "normal", "lognormal", "triangle", "beta", "gamma"
-        # [mean, std] for normal and lognormal
-        # [lower_bound, upper_bound] for uniform
-        # [lower_bound, midpoint, upper_bound] for triangle
-        # [alpha, beta] for beta
-        # [shape, scale] for gamma
-        distribution_params: [0,1]
-        samples: 4 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
-        sampling_strategy: "scipy"  # "pydoe2", "chaospy", "scipy", packages that are supported
-    pypsa_standard:
-        # User can add here flexibly more features for the Monte-Carlo sampling.
-        # Given as "key: value" format
-        # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
-        # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
-        loads_t.p_set: [0.9, 1.1]
-        # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-        # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
+        add_to_snakefile: false # When set to true, enables Monte Carlo sampling
+        samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
+        sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
+        seed: 42 # set seedling for reproducibilty
+    # Different distributions can be specified for various PyPSA network object.
+    # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
+    # More info on the distributions are documented in the Chaospy reference guide...
+    # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
+    # ... users can add flexibly more features for the Monte-Carlo sampling using the description below
+    # {pypsa network object, e.g. "loads_t.p_set"}:
+    # type: {any distribution among: "uniform", "normal", "lognormal", "triangle", "beta" and "gamma"}
+    # args: {arguments passed as a list depending on the distribution, see arguments description in Chaospy reference guide}
+    uncertainties:
+        loads_t.p_set:
+        type: uniform
+        args: [0, 1]
+        generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
+        type: lognormal
+        args: [1.5]
+        generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
+        type: beta
+        args: [0.5, 2]
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at :ref:`_monte_cf`
