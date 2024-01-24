@@ -25,7 +25,7 @@ Relevant Settings
     # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
     # More info on the distributions are documented in the Chaospy reference guide...
     # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
-    # ... users can add flexibly more features for the Monte-Carlo sampling using the description below
+    # ... users can flexibly add more features for the Monte-Carlo sampling in the uncertainties tab using the description below
     # {pypsa network object, e.g. "loads_t.p_set"}:
     # type: {any distribution among: "uniform", "normal", "lognormal", "triangle", "beta" and "gamma"}
     # args: {arguments passed as a list depending on the distribution, see arguments description in Chaospy reference guide}
@@ -41,7 +41,7 @@ Relevant Settings
         args: [0.5, 2]
 
 .. seealso::
-    Documentation of the configuration file ``config.yaml`` at :ref:`_monte_cf`
+    Documentation of the configuration file ``config.yaml`` at :ref:`monte_cf`
 
 Inputs
 ------
@@ -68,13 +68,11 @@ the other, modifies and outputs the network file. Building the experimental desi
 supported by the packages pyDOE2, chaospy and scipy. This should give users the freedom to
 explore alternative approaches. The orthogonal latin hypercube sampling is thereby found as most
 performant, hence, implemented here. Sampling the multi-dimensional uncertainty space is relatively
-easy. It only requires two things: The number of *samples* (e.g. PyPSA networks) and *features* (e.g.
-load or solar timeseries). This results in an experimental design of the dimension (samples X features).
+easy. It only requires two things: The number of *samples* (defines the number of total networks to
+be optimized) and *features* (pypsa network object e.g loads_t.p_set or generators_t.p_max_pu). This
+results in an experimental design of the dimension (samples X features).
 
-Additionally, upper and lower bounds *per feature* need to be provided such that the experimental
-design can be scaled accordingly. Currently the user can define uncertainty ranges e.g. bounds,
-for all PyPSA objects that are `int` or `float`. Boolean values could be used but require testing.
-The experimental design `lhs_scaled` (dimension: sample X features) is then used to modify the PyPSA
+The experimental design `lh` (dimension: sample X features) is used to modify the PyPSA
 networks. Thereby, this script creates samples x amount of networks. The iterators comes from the
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
 0 to (total number of) SAMPLES.
