@@ -23,11 +23,8 @@ Relevant Settings
         seed: 42 # set seedling for reproducibilty
     # Different distributions can be specified for various PyPSA network object.
     # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
-    # [mean, std] for Normal and LogNormal
-    # [lower_bound, upper_bound] for Uniform
-    # [mid_point (between 0 - 1)] for Triangle
-    # [alpha, beta] for Beta
-    # [shape, scale] for Gamma
+    # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
+    # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
     # More info on the distributions are documented in the Chaospy reference guide...
     # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
     # ... users can flexibly add more features for the Monte-Carlo sampling in the uncertainties tab using the description below

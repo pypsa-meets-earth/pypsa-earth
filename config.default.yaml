@@ -350,11 +350,8 @@ monte_carlo:
     seed: 42 # set seedling for reproducibilty
   # Different distributions can be specified for various PyPSA network object.
   # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
-  # [mean, std] for Normal and LogNormal
-  # [lower_bound, upper_bound] for Uniform
-  # [mid_point (between 0 - 1)] for Triangle
-  # [alpha, beta] for Beta
-  # [shape, scale] for Gamma
+  # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
+  # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
   # More info on the distributions are documented in the Chaospy reference guide...
   # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
   # ... users can add flexibly more features for the Monte-Carlo sampling using the description below
@@ -368,7 +365,7 @@ monte_carlo:
     generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
       type: lognormal
       args: [1.5]
-    generators_t.p_min_pu.loc[:, n.generators.carrier == "onwind"]:
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
       type: beta
       args: [0.5, 2]
   # TODO: Support inputs to simulate outages biggest lines "lines.p_nom_opt.max()": [-3000MW 0MW]
