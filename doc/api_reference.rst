@@ -104,8 +104,8 @@ make_statistics
 .. automodule:: make_statistics
     :members:
 
-monte-carlo
+monte_carlo
 -------------------------------
 
-.. automodule:: monte-carlo
+.. automodule:: monte_carlo
     :members:
