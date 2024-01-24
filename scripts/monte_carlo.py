@@ -23,6 +23,11 @@ Relevant Settings
         seed: 42 # set seedling for reproducibilty
     # Different distributions can be specified for various PyPSA network object.
     # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
+    # [mean, std] for Normal and LogNormal
+    # [lower_bound, upper_bound] for Uniform
+    # [mid_point (between 0 - 1)] for Triangle
+    # [alpha, beta] for Beta
+    # [shape, scale] for Gamma
     # More info on the distributions are documented in the Chaospy reference guide...
     # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
     # ... users can flexibly add more features for the Monte-Carlo sampling in the uncertainties tab using the description below
@@ -179,9 +184,9 @@ def monte_carlo_sampling_scipy(
     options:
 
     - Center the point within the multi-dimensional grid, centered=True
-    - optimization scheme, optimization="random-cd"
-    - strength=1, classical LHS
-    - strength=2, performant orthogonal LHS, requires the sample to be a prime or square of a prime e.g. sqr(121)=11
+    - Optimization scheme, optimization="random-cd"
+    - Strength=1, classical LHS
+    - Strength=2, performant orthogonal LHS, requires the sample to be square of a prime e.g. sq(11)=121
 
     Options could be combined to produce an optimized centered orthogonal array
     based LHS. After optimization, the result would not be guaranteed to be of strength 2.
@@ -216,26 +221,31 @@ def rescale_distribution(
 ) -> np.ndarray:
     """
     Rescales a Latin hypercube sampling (LHS) using specified distribution
-    parameters.
+    parameters. More information on the distributions can be found
+    here https://docs.scipy.org/doc/scipy/reference/stats.html
 
-    Parameters:
+    **Parameters**:
+
     - latin_hypercube (np.array): The Latin hypercube sampling to be rescaled.
     - uncertainties_values (list): List of dictionaries containing distribution information.
-        Each dictionary should have 'type' key specifying the distribution type and 'args' key
-        containing parameters specific to the chosen distribution.
+    Each dictionary should have 'type' key specifying the distribution type and 'args' key
+    containing parameters specific to the chosen distribution.
 
-    Returns:
+    **Returns**:
+
     - np.array: Rescaled Latin hypercube sampling with values in the range [0, 1].
 
-    Supported Distributions:
-    - "uniform": No rescaling applied.
+    **Supported Distributions**:
+
+    - "uniform": Rescaled to the specified lower and upper bounds.
     - "normal": Rescaled using the inverse of the normal distribution function with specified mean and std.
     - "lognormal": Rescaled using the inverse of the log-normal distribution function with specified mean and std.
     - "triangle": Rescaled using the inverse of the triangular distribution function with mean calculated from given parameters.
     - "beta": Rescaled using the inverse of the beta distribution function with specified shape parameters.
     - "gamma": Rescaled using the inverse of the gamma distribution function with specified shape and scale parameters.
 
-    Note:
+    **Note**:
+
     - The function supports rescaling for uniform, normal, lognormal, triangle, beta, and gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
@@ -259,8 +269,8 @@ def rescale_distribution(
                 shape = params[0]
                 latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
             case "triangle":
-                tri_mean = np.mean(params)
-                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], tri_mean)
+                mid_point = params[0]
+                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], mid_point)
             case "beta":
                 a, b = params
                 latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
@@ -285,7 +295,8 @@ def validate_parameters(
     user through the config file needs to be validated before proceeding to
     perform monte-carlo simulations.
 
-    Parameters:
+    **Parameters**:
+
     - sampling_strategy: str
         The chosen sampling strategy from chaospy, scipy and pydoe2
     - samples: int
@@ -295,7 +306,8 @@ def validate_parameters(
     - distribution_params: list
         The parameters associated with the probability distribution.
 
-    Raises:
+    **Raises**:
+
     - ValueError: If the parameters are invalid for the specified distribution.
     """
 
@@ -327,15 +339,9 @@ def validate_parameters(
             )
 
         if dist_type == "triangle":
-            if len(param) == 2:
-                print(
-                    f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
-                )
-                # use the mean as the middle value
-                param.insert(1, np.mean(param))
-            elif len(param) != 3:
+            if len(param) != 1:
                 raise ValueError(
-                    f"{dist_type} distribution has to be 3 parameters in the order of [lower_bound, mid_range, upper_bound]"
+                    f"{dist_type} distribution has to be 1 parameter [midpoint_between_0_and_1]"
                 )
 
         if dist_type in ["normal", "uniform", "beta", "gamma"] and len(param) != 2:
