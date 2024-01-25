@@ -13,24 +13,11 @@ Relevant Settings
 .. code:: yaml
 
     monte_carlo:
-    # Description: Specify Monte Carlo sampling options for uncertainty analysis.
-    # Define the option list for Monte Carlo sampling.
-    # Make sure add_to_snakefile is set to true to enable Monte-Carlo
     options:
         add_to_snakefile: false # When set to true, enables Monte Carlo sampling
         samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
         sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
         seed: 42 # set seedling for reproducibilty
-    # Different distributions can be specified for various PyPSA network object.
-    # Supported distributions for uncertainties are uniform, normal, lognormal, triangle, beta and gamma.
-    # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
-    # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
-    # More info on the distributions are documented in the Chaospy reference guide...
-    # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
-    # ... users can flexibly add more features for the Monte-Carlo sampling in the uncertainties tab using the description below
-    # {pypsa network object, e.g. "loads_t.p_set"}:
-    # type: {any distribution among: "uniform", "normal", "lognormal", "triangle", "beta" and "gamma"}
-    # args: {arguments passed as a list depending on the distribution, see arguments description in Chaospy reference guide}
     uncertainties:
         loads_t.p_set:
         type: uniform
