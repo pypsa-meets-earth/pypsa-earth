@@ -159,7 +159,6 @@ def monte_carlo_sampling_scipy(
     SAMPLES: int,
     uncertainties_values: dict,
     seed: int,
-    centered: bool = False,
     strength: int = 2,
     optimization: str = None,
 ) -> np.ndarray:
@@ -183,7 +182,6 @@ def monte_carlo_sampling_scipy(
 
     sampler = qmc.LatinHypercube(
         d=N_FEATURES,
-        centered=centered,
         strength=strength,
         optimization=optimization,
         seed=seed,
@@ -327,6 +325,10 @@ def validate_parameters(
                 raise ValueError(
                     f"{dist_type} distribution has to be 1 parameter [midpoint_between_0_and_1]"
                 )
+            elif param[0] < 0 or param[0] > 1:
+                raise ValueError(
+                    f"{dist_type} distribution has to have a midpoint between 0 and 1"
+                )
 
         if dist_type in ["normal", "uniform", "beta", "gamma"] and len(param) != 2:
             raise ValueError(f"{dist_type} distribution must have 2 parameters")
@@ -397,7 +399,6 @@ if __name__ == "__main__":
             SAMPLES,
             UNCERTAINTIES_VALUES,
             seed=SEED,
-            centered=False,
             strength=2,
             optimization=None,
         )
