@@ -20,8 +20,7 @@ def download_ports():
     The following csv file was downloaded from the webpage https://msi.nga.mil/Publications/WPI as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
     """
     fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
-    storage_options = {"User-Agent": "Mozilla/5.0"}
-    wpi_csv = pd.read_csv(fn, index_col=0, storage_options=storage_options)
+    wpi_csv = pd.read_csv(fn, index_col=0)
 
     return wpi_csv
 
