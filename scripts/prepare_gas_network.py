@@ -66,9 +66,6 @@ def download_IGGIELGN_gas_network():
     zip_fn = Path(f"{rootpath}/IGGIELGN.zip")
     to_fn = Path(f"{rootpath}/data/gas_network/scigrid-gas")
 
-    # zip_fn = Path("/nfs/home/edd32710/projects/HyPAT/PES/pypsa-earth-sec/IGGIELGN.zip")
-    # to_fn = Path("/nfs/home/edd32710/projects/HyPAT/PES/pypsa-earth-sec/data/gas_network/scigrid-gas")
-
     logger.info(f"Downloading databundle from '{url}'.")
     progress_retrieve(url, zip_fn)
 
@@ -172,7 +169,7 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
 
     # Keep pipelines that are as below
     df = df[
-        df["Status"].isin(snakemake.config["sector"]["gas_network_GGIT_dataset_status"])
+        df["Status"].isin(snakemake.config["sector"]["gas"]["network_data_GGIT_status"])
     ]
 
     # Convert the WKT column to a GeoDataFrame
@@ -654,7 +651,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
 
     column_set = ["ProjectID", "nodes", "gadm_id", "capacity [MW]"]
 
-    if snakemake.config["sector"]["gas_network_dataset"] == "IGGIELGN":
+    if snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
         pipelines_per_state = (
             pipelines_interstate.rename(
                 {"p_nom": "capacity [MW]", "name": "ProjectID"}, axis=1
@@ -662,7 +659,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
             .loc[:, column_set]
             .reset_index(drop=True)
         )
-    elif snakemake.config["sector"]["gas_network_dataset"] == "GGIT":
+    elif snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
         pipelines_per_state = pipelines_interstate.loc[:, column_set].reset_index(
             drop=True
         )
@@ -758,7 +755,7 @@ def plot_gas_network(pipelines, country_borders, bus_regions_onshore):
     df = pipelines.copy()
     df = gpd.overlay(df, country_borders, how="intersection")
 
-    if snakemake.config["sector"]["gas_network_dataset"] == "IGGIELGN":
+    if snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
         df = df.rename({"p_nom": "capacity [MW]"}, axis=1)
 
     fig, ax = plt.subplots(1, 1)
@@ -826,42 +823,96 @@ def plot_gas_network(pipelines, country_borders, bus_regions_onshore):
     ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
 
     ax.set_axis_off()
-    fig.savefig(snakemake.output.gas_network_fig, dpi=300, bbox_inches="tight")
+    fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
 
 
-if not snakemake.config["custom_data"]["gas_grid"]:
-    if snakemake.config["sector"]["gas_network"]:
-        if snakemake.config["sector"]["gas_network_dataset"] == "GGIT":
-            pipelines = download_GGIT_gas_network()
-            pipelines = prepare_GGIT_data(pipelines)
+def plot_clustered_gas_network(pipelines, bus_regions_onshore):
+    # Create a new GeoDataFrame with centroids
+    centroids = bus_regions_onshore.copy()
+    centroids["geometry"] = centroids["geometry"].centroid
 
-        elif snakemake.config["sector"]["gas_network_dataset"] == "IGGIELGN":
-            download_IGGIELGN_gas_network()
+    gdf1 = pd.merge(
+        pipelines, centroids, left_on=["bus0"], right_on=["gadm_id"], how="left"
+    )
+    gdf1.rename(columns={"geometry": "geometry_bus0"}, inplace=True)
+    pipe_links = pd.merge(
+        gdf1, centroids, left_on=["bus1"], right_on=["gadm_id"], how="left"
+    )
+    pipe_links.rename(columns={"geometry": "geometry_bus1"}, inplace=True)
 
-            gas_network = (
-                "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
-            )
+    # Create LineString geometries from the points
+    pipe_links["geometry"] = pipe_links.apply(
+        lambda row: LineString([row["geometry_bus0"], row["geometry_bus1"]]), axis=1
+    )
 
-            pipelines = load_IGGIELGN_data(gas_network)
-            pipelines = prepare_IGGIELGN_data(pipelines)
+    clustered = gpd.GeoDataFrame(pipe_links, geometry=pipe_links["geometry"])
 
-        bus_regions_onshore = load_bus_region(
-            snakemake.input.regions_onshore, pipelines
-        )[0]
-        country_borders = load_bus_region(snakemake.input.regions_onshore, pipelines)[1]
+    # Optional: Set the coordinate reference system (CRS) if needed
+    clustered.crs = "EPSG:3857"  # For example, WGS84
 
-        pipelines = parse_states(pipelines, bus_regions_onshore)
+    # plot pipelines
+    fig, ax = plt.subplots(1, 1)
+    fig.set_size_inches(12, 7)
+    bus_regions_onshore.to_crs(epsg=3857).plot(
+        ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
+    )
+    clustered.to_crs(epsg=3857).plot(
+        ax=ax,
+        column="capacity",
+        linewidth=1.5,
+        categorical=False,
+        cmap="plasma",
+    )
 
-        plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+    centroids.to_crs(epsg=3857).plot(
+        ax=ax,
+        color="red",
+        markersize=35,
+        alpha=0.5,
+    )
 
-        pipelines = cluster_gas_network(
-            pipelines, bus_regions_onshore, length_factor=1.25
-        )
+    norm = colors.Normalize(
+        vmin=pipelines["capacity"].min(), vmax=pipelines["capacity"].max()
+    )
+    cbar = plt.cm.ScalarMappable(norm=norm, cmap="plasma")
 
-        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+    # add colorbar
+    ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
+    # add label for the colorbar
+    ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
 
-        average_length = pipelines["length"].mean
-        print("average_length = ", average_length)
+    ax.set_axis_off()
+    fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
-        total_system_capacity = pipelines["GWKm"].sum()
-        print("total_system_capacity = ", total_system_capacity)
+
+if not snakemake.config["custom_data"]["gas_network"]:
+    if snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
+        pipelines = download_GGIT_gas_network()
+        pipelines = prepare_GGIT_data(pipelines)
+
+    elif snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
+        download_IGGIELGN_gas_network()
+
+        gas_network = "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
+
+        pipelines = load_IGGIELGN_data(gas_network)
+        pipelines = prepare_IGGIELGN_data(pipelines)
+
+    bus_regions_onshore = load_bus_region(snakemake.input.regions_onshore, pipelines)[0]
+    country_borders = load_bus_region(snakemake.input.regions_onshore, pipelines)[1]
+
+    pipelines = parse_states(pipelines, bus_regions_onshore)
+
+    plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+
+    pipelines = cluster_gas_network(pipelines, bus_regions_onshore, length_factor=1.25)
+
+    pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+
+    plot_clustered_gas_network(pipelines, bus_regions_onshore)
+
+    average_length = pipelines["length"].mean
+    print("average_length = ", average_length)
+
+    total_system_capacity = pipelines["GWKm"].sum()
+    print("total_system_capacity = ", total_system_capacity)

@@ -101,29 +101,29 @@ rule solve_all_networks:
 
 rule prepare_ports:
     output:
-        ports="data/ports.csv",
-        # TODO move from data to resources
+        ports="data/ports.csv",  # TODO move from data to resources
     script:
         "scripts/prepare_ports.py"
 
 
 rule prepare_airports:
     output:
-        ports="data/airports.csv",
-        # TODO move from data to resources
+        ports="data/airports.csv",  # TODO move from data to resources
     script:
         "scripts/prepare_airports.py"
 
-if not config["custom_data"]["gas_grid"]:
+
+if not config["custom_data"]["gas_network"]:
+
     rule prepare_gas_network:
         input:
-            # gas_network="data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson",
             regions_onshore=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
         output:
             clustered_gas_network="resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
-            gas_network_fig="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
+            gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
+            gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
         script:
             "scripts/prepare_gas_network.py"
 
@@ -154,7 +154,9 @@ rule prepare_sector_network:
         shapes_path=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        pipelines="resources/custom_data/pipelines.csv" if config["custom_data"]["gas_grid"] else "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
+        pipelines="resources/custom_data/pipelines.csv"
+        if config["custom_data"]["gas_network"]
+        else "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -191,7 +193,6 @@ rule add_export:
     output:
         RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-        # TODO output file name must be adjusted and integrated in workflow
     script:
         "scripts/add_export.py"
 
@@ -572,6 +573,8 @@ rule prepare_db:
 
 
 rule run_test:
+    params:
+        dummy="This is a dummy parameter to satisfy snakefmt",
     run:
         import yaml
 
@@ -587,6 +590,7 @@ rule run_test:
 
         shell("cp test/config.test1.yaml config.yaml")
         shell("snakemake --cores all solve_all_networks --forceall")
+
 
 
 rule clean:

@@ -118,7 +118,7 @@ def add_oil(n, costs):
 
     spatial.oil = SimpleNamespace()
 
-    if options["oil_network"]:
+    if options["oil"]["spatial_oil"]:
         spatial.oil.nodes = nodes + " oil"
         spatial.oil.locations = nodes
     else:
@@ -171,7 +171,7 @@ def add_oil(n, costs):
 def add_gas(n, costs):
     spatial.gas = SimpleNamespace()
 
-    if options["gas_network"]:
+    if options["gas"]["spatial_gas"]:
         spatial.gas.nodes = nodes + " gas"
         spatial.gas.locations = nodes
         spatial.gas.biogas = nodes + " biogas"
@@ -329,10 +329,7 @@ def add_hydrogen(n, costs):
         capital_cost=h2_capital_cost,
     )
 
-    if (
-        snakemake.config["custom_data"]["gas_grid"]
-        or snakemake.config["sector"]["gas_network"]
-    ):
+    if not snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
@@ -385,8 +382,8 @@ def add_hydrogen(n, costs):
                 h2_links.at[name, "length"] = candidates.at[candidate, "length"]
 
     # TODO Add efficiency losses
-    if snakemake.config["H2_network"]:
-        if snakemake.config["H2_repurposed_network"]:
+    if snakemake.config["sector"]["hydrogen"]["network"]:
+        if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
             n.madd(
                 "Link",
                 h2_links.index + " repurposed",
@@ -1169,7 +1166,7 @@ def add_industry(n, costs):
 
     gas_demand = industrial_demand.loc[nodes, "gas"] / 8760.0
 
-    if options["gas_network"]:
+    if options["gas"]["spatial_gas"]:
         spatial_gas_demand = gas_demand.rename(index=lambda x: x + " gas for industry")
     else:
         spatial_gas_demand = gas_demand.sum()
