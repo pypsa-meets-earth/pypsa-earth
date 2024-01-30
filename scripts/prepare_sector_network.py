@@ -263,7 +263,7 @@ def add_hydrogen(n, costs):
 
     cavern_nodes = pd.DataFrame()
 
-    if snakemake.config["hydrogen_underground_storage"]:
+    if snakemake.config["sector"]["hydrogen"]["underground_storage"]:
         if snakemake.config["custom_data"]["h2_underground"]:
             custom_cavern = pd.read_csv("resources/custom_data/h2_underground.csv")
             # countries = n.buses.country.unique().to_list()
