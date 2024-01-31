@@ -404,6 +404,4 @@ if __name__ == "__main__":
         calc_sector(sector)
 
     # Export the base energy totals file
-    energy_totals_base.to_csv(
-        snakemake.output.energy_totals_base
-    )
+    energy_totals_base.to_csv(snakemake.output.energy_totals_base)
