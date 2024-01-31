@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import glob
+import logging
 import os
 import sys
-import logging
 from io import BytesIO
 from pathlib import Path
 from urllib.request import urlopen
@@ -42,7 +42,6 @@ def calc_sector(sector):
             ]
 
         if df_sector.empty:
-
             if sector == "consumption by households":
                 energy_totals_base.at[country, "electricity residential"] = np.NaN
                 energy_totals_base.at[country, "residential oil"] = np.NaN
@@ -77,7 +76,9 @@ def calc_sector(sector):
                 energy_totals_base.at[country, "total domestic aviation"] = np.NaN
 
             elif sector == "navigation":
-                energy_totals_base.at[country, "total international navigation"] = np.NaN
+                energy_totals_base.at[
+                    country, "total international navigation"
+                ] = np.NaN
                 energy_totals_base.at[country, "total domestic navigation"] = np.NaN
 
             _logger.warning("No data for" + country + " in the sector " + sector + ".")
