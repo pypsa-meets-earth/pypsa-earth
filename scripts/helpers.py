@@ -19,6 +19,7 @@ from vresutils.costdata import annuity
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
+
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
     """
     Search and sets path to the given root directory (root/path/file).
@@ -719,6 +720,7 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
 
 def read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"

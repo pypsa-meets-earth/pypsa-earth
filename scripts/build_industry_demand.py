@@ -11,8 +11,7 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
-from helpers import sets_path_to_root, three_2_two_digits_country, read_csv_nafix
-
+from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
 
 
 def calculate_end_values(df):

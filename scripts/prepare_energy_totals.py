@@ -13,8 +13,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from helpers import sets_path_to_root, three_2_two_digits_country, read_csv_nafix
-
+from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
 
 
 def get(item, investment_year=None):
