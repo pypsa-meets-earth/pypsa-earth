@@ -16,6 +16,8 @@ from pypsa.descriptors import Dict
 from shapely.geometry import Point
 from vresutils.costdata import annuity
 
+# list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
+NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 def sets_path_to_root(root_directory_name):  # Imported from pypsa-africa
     """
@@ -717,3 +719,15 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
+def read_csv_nafix(file, **kwargs):
+    "Function to open a csv as pandas file and standardize the na value"
+    if "keep_default_na" not in kwargs:
+        kwargs["keep_default_na"] = False
+    if "na_values" not in kwargs:
+        kwargs["na_values"] = NA_VALUES
+
+    if os.stat(file).st_size > 0:
+        return pd.read_csv(file, **kwargs)
+    else:
+        return pd.DataFrame()

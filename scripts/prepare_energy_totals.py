@@ -13,7 +13,8 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from helpers import sets_path_to_root, three_2_two_digits_country
+from helpers import sets_path_to_root, three_2_two_digits_country, read_csv_nafix
+
 
 
 def get(item, investment_year=None):
@@ -48,15 +49,15 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
-    base_energy_totals = pd.read_csv("data/energy_totals_base.csv", index_col=0)
-    growth_factors_cagr = pd.read_csv(
+    base_energy_totals = read_csv_nafix("data/energy_totals_base.csv", index_col=0)
+    growth_factors_cagr = read_csv_nafix(
         "data/demand/growth_factors_cagr.csv", index_col=0
     )
-    efficiency_gains_cagr = pd.read_csv(
+    efficiency_gains_cagr = read_csv_nafix(
         "data/demand/efficiency_gains_cagr.csv", index_col=0
     )
-    fuel_shares = pd.read_csv("data/demand/fuel_shares.csv", index_col=0)
-    district_heating = pd.read_csv("data/demand/district_heating.csv", index_col=0)
+    fuel_shares = read_csv_nafix("data/demand/fuel_shares.csv", index_col=0)
+    district_heating = read_csv_nafix("data/demand/district_heating.csv", index_col=0)
 
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.config["demand_data"]["base_year"]
