@@ -81,7 +81,7 @@ def calc_sector(sector):
                 ] = np.NaN
                 energy_totals_base.at[country, "total domestic navigation"] = np.NaN
 
-            _logger.warning("No data for" + country + " in the sector " + sector + ".")
+            _logger.warning("No data for " + country + " in the sector " + sector + ".")
 
         else:
             index_mass = df_sector.loc[
@@ -404,6 +404,6 @@ if __name__ == "__main__":
         calc_sector(sector)
 
     # Export the base energy totals file
-    energy_totals_base.dropna(axis=1, how="all").to_csv(
+    energy_totals_base.to_csv(
         snakemake.output.energy_totals_base
     )
