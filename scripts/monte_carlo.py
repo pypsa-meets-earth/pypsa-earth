@@ -20,14 +20,14 @@ Relevant Settings
         seed: 42 # set seedling for reproducibilty
     uncertainties:
         loads_t.p_set:
-        type: uniform
-        args: [0, 1]
+          type: uniform
+          args: [0, 1]
         generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
-        type: lognormal
-        args: [1.5]
+          type: lognormal
+          args: [1.5]
         generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
-        type: beta
-        args: [0.5, 2]
+          type: beta
+          args: [0.5, 2]
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at :ref:`monte_cf`
@@ -39,6 +39,7 @@ Inputs
 Outputs
 -------
 - ``networks/elec_s_10_ec_lcopt_Co2L-24H_{unc}.nc``
+
 e.g.    networks/elec_s_10_ec_lcopt_Co2L-24H_m0.nc
         networks/elec_s_10_ec_lcopt_Co2L-24H_m1.nc
         ...
@@ -210,6 +211,7 @@ def rescale_distribution(
 
     - latin_hypercube (np.array): The Latin hypercube sampling to be rescaled.
     - uncertainties_values (list): List of dictionaries containing distribution information.
+
     Each dictionary should have 'type' key specifying the distribution type and 'args' key
     containing parameters specific to the chosen distribution.
 
