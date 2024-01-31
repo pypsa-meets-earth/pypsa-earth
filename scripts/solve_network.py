@@ -401,9 +401,11 @@ def extra_functionality(n, snapshots):
             'H2 export constraint is invalid, check config["policy_config"]["policy"]'
         )
 
-    if snakemake.config["H2_network"]:
-        if snakemake.config["H2_network_limit"]:
-            add_h2_network_cap(n, snakemake.config["H2_network_limit"])
+    if snakemake.config["sector"]["hydrogen"]["network"]:
+        if snakemake.config["sector"]["hydrogen"]["network_limit"]:
+            add_h2_network_cap(
+                n, snakemake.config["sector"]["hydrogen"]["network_limit"]
+            )
     add_co2_sequestration_limit(n, snapshots)
 
 

@@ -118,7 +118,7 @@ def add_oil(n, costs):
 
     spatial.oil = SimpleNamespace()
 
-    if options["oil_network"]:
+    if options["oil"]["spatial_oil"]:
         spatial.oil.nodes = nodes + " oil"
         spatial.oil.locations = nodes
     else:
@@ -171,7 +171,7 @@ def add_oil(n, costs):
 def add_gas(n, costs):
     spatial.gas = SimpleNamespace()
 
-    if options["gas_network"]:
+    if options["gas"]["spatial_gas"]:
         spatial.gas.nodes = nodes + " gas"
         spatial.gas.locations = nodes
         spatial.gas.biogas = nodes + " biogas"
@@ -263,7 +263,7 @@ def add_hydrogen(n, costs):
 
     cavern_nodes = pd.DataFrame()
 
-    if snakemake.config["hydrogen_underground_storage"]:
+    if snakemake.config["sector"]["hydrogen"]["underground_storage"]:
         if snakemake.config["custom_data"]["h2_underground"]:
             custom_cavern = pd.read_csv("resources/custom_data/h2_underground.csv")
             # countries = n.buses.country.unique().to_list()
@@ -328,27 +328,29 @@ def add_hydrogen(n, costs):
         carrier="H2 Store",
         capital_cost=h2_capital_cost,
     )
-    if snakemake.config["custom_data"]["gas_grid"]:
+
+    if not snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
         buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-        # Appending string for carrier specification '_AC'
-        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+        if snakemake.config["clustering_options"]["alternative_clustering"]:
+            # Appending string for carrier specification '_AC'
+            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
-        # Conversion of GADM id to from 3 to 2-digit
-        h2_links["bus0"] = (
-            h2_links["bus0"]
-            .str.split(".")
-            .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-        )
-        h2_links["bus1"] = (
-            h2_links["bus1"]
-            .str.split(".")
-            .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-        )
+            # Conversion of GADM id to from 3 to 2-digit
+            h2_links["bus0"] = (
+                h2_links["bus0"]
+                .str.split(".")
+                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            )
+            h2_links["bus1"] = (
+                h2_links["bus1"]
+                .str.split(".")
+                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            )
 
         # Create index column
         h2_links["buses_idx"] = (
@@ -380,8 +382,8 @@ def add_hydrogen(n, costs):
                 h2_links.at[name, "length"] = candidates.at[candidate, "length"]
 
     # TODO Add efficiency losses
-    if snakemake.config["H2_network"]:
-        if snakemake.config["H2_repurposed_network"]:
+    if snakemake.config["sector"]["hydrogen"]["network"]:
+        if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
             n.madd(
                 "Link",
                 h2_links.index + " repurposed",
@@ -1164,7 +1166,7 @@ def add_industry(n, costs):
 
     gas_demand = industrial_demand.loc[nodes, "gas"] / 8760.0
 
-    if options["gas_network"]:
+    if options["gas"]["spatial_gas"]:
         spatial_gas_demand = gas_demand.rename(index=lambda x: x + " gas for industry")
     else:
         spatial_gas_demand = gas_demand.sum()
@@ -2105,7 +2107,15 @@ def add_residential(n, costs):
     )
 
     heat_shape = heat_shape.groupby(
-        lambda x: next((substring for substring in nodes if substring in x), x), axis=1
+        lambda x: next(
+            (
+                substring
+                for substring in sorted(nodes, key=len, reverse=True)
+                if substring in x
+            ),
+            x,
+        ),
+        axis=1,
     ).sum()
 
     heat_oil_demand = (
@@ -2320,9 +2330,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1.0",
-            opts="Co2L1.0",
+            clusters="56",
+            ll="c1",
+            opts="Co2L",
             planning_horizons="2030",
             sopts="2000H",
             discountrate="0.071",
