@@ -366,8 +366,6 @@ monte_carlo:
     generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
       type: beta
       args: [0.5, 2]
-  # TODO: Support inputs to simulate outages biggest lines "lines.p_nom_opt.max()": [-3000MW 0MW]
-  # TODO: Support inputs to simulate outages of biggest power plant "generators.p_nom.max()": [-1000MW 0MW]
 
 solving:
   options:
