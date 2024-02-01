@@ -113,6 +113,13 @@ rule prepare_airports:
         "scripts/prepare_airports.py"
 
 
+rule prepare_urban_percent:
+    output:
+        urban_percent="data/urban_percent.csv",  # TODO move from data to resources
+    script:
+        "scripts/prepare_urban_percent.py"
+
+
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:

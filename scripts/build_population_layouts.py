@@ -39,24 +39,31 @@ if __name__ == "__main__":
     Iinv = cutout.indicatormatrix(nuts3.geometry)
 
     countries = np.sort(nuts3.country.unique())
-    # countries = np.array(["MA"])
-    urban_fraction = (
-        pd.read_csv(
-            snakemake.input.urban_percent,
-            header=None,
-            index_col=0,
-            names=["fraction"],
-            keep_default_na=False,
-        ).squeeze()
-        / 100.0
+
+    urban_percent_df = pd.read_csv(
+        snakemake.input.urban_percent,
+        usecols=[0, 1, 4],
+        index_col=0,
     )
 
-    # fill missing Balkans values
-    # missing = ["AL", "ME", "MK"]
-    # reference = ["RS", "BA"]
-    # average = urban_fraction[reference].mean()
-    # fill_values = pd.Series({ct: average for ct in missing})
-    # urban_fraction = urban_fraction.append(fill_values)
+    # Filter for the year used in the workflow
+    urban_percent_df = urban_percent_df.loc[
+        (
+            urban_percent_df["Year"]
+            == snakemake.config["scenario"]["planning_horizons"][0]
+        )
+    ]
+
+    # Filter for urban percent column
+    urban_percent_df = urban_percent_df[
+        ["Urban population as percentage of total population"]
+    ]
+
+    # Remove index header
+    urban_percent_df.index.name = None
+
+    # Squeeze into a Series
+    urban_fraction = urban_percent_df.squeeze() / 100.0
 
     # population in each grid cell
     pop_cells = pd.Series(I.dot(nuts3["pop"]))
