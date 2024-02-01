@@ -10,6 +10,7 @@ Model customization
 ##########################################
 
 * :doc:`customization_basic1`
+* :doc:`customization_run`
 * :doc:`customization_copernicus`
 
 .. toctree::
@@ -18,6 +19,7 @@ Model customization
    :caption: Model customization
 
    customization_basic1
+   customization_run
    customization_copernicus
 
 How to customise PyPSA-Earth?
