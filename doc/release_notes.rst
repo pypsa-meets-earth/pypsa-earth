@@ -14,6 +14,9 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **New Features and Major Changes**
 
+* Improve Monte Carlo feature with more distributions types, independent by PyPSA component. `PR #930 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/930>`__
+
+**Minor Changes and bug-fixing**
 
 
 PyPSA-Earth 0.3.0
