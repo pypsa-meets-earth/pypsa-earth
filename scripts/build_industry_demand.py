@@ -11,6 +11,7 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
+from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
 
 
 def calculate_end_values(df):
@@ -64,14 +65,14 @@ if __name__ == "__main__":
         snakemake.config["demand_data"]["base_year"]
     )
 
-    cagr = pd.read_csv("data/demand/industry_growth_cagr.csv", index_col=0)
+    cagr = read_csv_nafix("data/demand/industry_growth_cagr.csv", index_col=0)
 
     countries = snakemake.config["countries"]
     # countries = ["EG", "BH"]
 
     growth_factors = calculate_end_values(cagr)
 
-    industry_base_totals = pd.read_csv(
+    industry_base_totals = read_csv_nafix(
         snakemake.input["base_industry_totals"], index_col=[0, 1]
     )
 
@@ -148,7 +149,7 @@ if __name__ == "__main__":
 
     geo_locs = match_technology(geo_locs).loc[countries]
 
-    AL = pd.read_csv("data/AL_production.csv", index_col=0)
+    AL = read_csv_nafix("data/AL_production.csv", index_col=0)
     AL_prod_tom = AL["production[ktons/a]"].loc[countries]
     AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
