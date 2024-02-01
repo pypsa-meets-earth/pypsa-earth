@@ -28,7 +28,7 @@ To execute a full model run, the following command needs to be applied:
 
 Here, ``snakemake`` is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur.
 Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
-The flag ``--cores 1`` dictates the number of CPU cores allocated for the process. Notably, the ``solve_all_network`` rule within Snakemake orchestrates the process of solving the network. 
+The flag ``--cores 1`` dictates the number of CPU cores allocated for the process. Notably, the ``solve_all_network`` rule within Snakemake orchestrates the process of solving the network.
 
 .. note::
 
