@@ -79,3 +79,4 @@ Finally, for countries beyond Africa, it is imperative to initially set ``build_
         # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
 
 To delve into the specifics of the provided configurations and explore additional settings, please refer to the :ref:`config` page.
+There are many more configuration options beyond what is adapted for the tutorial!
