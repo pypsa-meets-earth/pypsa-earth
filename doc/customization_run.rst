@@ -19,6 +19,3 @@ on the commercial solvers such as Gurobi or CPLEX (for which free academic licen
 .. note::
 
     ``glpk`` can solve the network with low temporal and spacial resolution. To make a full model run, it is adviced to use ``CPLEX``, ``Gurobi``, or open-source `HIGHs <https://highs.dev/>`__.
-
-
-
