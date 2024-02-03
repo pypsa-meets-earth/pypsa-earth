@@ -128,7 +128,7 @@ The snakemake included in the conda environment pypsa-earth can be used to execu
 
 Starting with essential usability features, the implemented PyPSA-Earth `Snakemake procedure <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile>`_ that allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model the world energy system or any subset of countries only using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, help to execute large workflows with parameter sweeps and various options.
 
-You can execute some parts of the workflow in case you are interested in some specific it's parts.
+You can execute some parts of the workflow in case you are interested in some specific parts.
 E.g. power grid topology may be extracted and cleaned with the following command which refers to the script name:
 
 .. code:: bash
@@ -160,7 +160,7 @@ Apart of that, it's worth to check that there is a proper match between the temp
 
 It could be helpful to keep in mind the following points:
 
-1. the cutout name should be the same across the whole configuration file (there are several entries, one under under `atlite` and some under each of the `renewable` parameters);
+1. the cutout name should be the same across the whole configuration file (there are several entries, one under `atlite` and some under each of the `renewable` parameters);
 
 2. the countries of interest defined with `countries` list in the `config.yaml` should be covered by the cutout area;
 
@@ -190,7 +190,7 @@ These steps are required to use CDS API which allows an automatic file download 
 
 The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident. The `snapshots` values set when generating the cutout, will determine the temporal parameters of the cutout. Accessible years which can be used to build a cutout depend on ERA5 data availability. `ERA5 page <https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5>`_ explains that the data is available from 1950 and updated continuously with about 3 month delay while the data on 1950-1978 should be treated as preliminary as that is a rather recent development.
 
-After the first run, if you don't change country and don't need to increase a considered time span wider than the one you created the cutout with, you may set to false both `retrieve_databundle` and `build_cutout`.
+After the first run, if you don't change country and don't need to increase a considered time span wider than the one you created the cutout with, you may set both `retrieve_databundle` and `build_cutout` to false.
 
 Spatial extent
 ^^^^^^^^^^^^^^
@@ -202,7 +202,7 @@ There is also option to set the cutout extent specifying `x` and `y` values dire
 Temporal extent
 ^^^^^^^^^^^^^^^
 
-If you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of this year, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of 2013. The workflow will automatically subset the cutout archive to extract data for the particular timeframe of interest. If you instead you want to run the 2014 scenario, then rerun `build_cutout` is needed.
+If you create the cutout for a certain year (let's say 2013) and want to run scenarios for a subset of this year, you don't need to rerun the `build_cutout` as the cutout still contains all the hours of 2013. The workflow will automatically subset the cutout archive to extract data for the particular timeframe of interest. If you instead you want to run the 2014 scenario, then it is needed to rerun `build_cutout`.
 
 In case you need model a number of years, a convenient approach may be to create the cutout for the whole period under interest (e.g. 2013-2015) so that you don't need to build any additional cutouts. Note, however, that the disk requirements increase in this case.
 
@@ -227,7 +227,7 @@ To validate the data obtained with PyPSA-Earth, we recommend to go through the p
 Simulation procedure
 --------------------
 
-It may be recommended to check the following quantities the validation:
+It may be recommended to check the following quantities in the validation:
 
 #. inputs used by the model:
 
@@ -255,8 +255,6 @@ Data availability for many parts of the world is still quite limited. Usually th
 * International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
 
 * `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy;
-
-* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
 
 * `Ember <https://ember-climate.org/data/data-explorer/>`_ Data Explorer.
 

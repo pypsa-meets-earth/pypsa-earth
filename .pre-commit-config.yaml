@@ -21,7 +21,7 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 5.13.0
+  rev: 5.13.2
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
@@ -49,7 +49,7 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 23.11.0
+  rev: 23.12.1
   hooks:
   # Format Python files
   - id: black
@@ -58,7 +58,7 @@ repos:
 
 # Do YAML formatting (before the linter checks it for misses)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.11.0
+  rev: v2.12.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2', --preserve-quotes]
@@ -72,12 +72,12 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.8.5
+  rev: v0.9.0
   hooks:
   - id: snakefmt
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v2.1.0
+  rev: v3.0.1
   hooks:
   - id: reuse
