@@ -336,19 +336,38 @@ costs:
 
 
 monte_carlo:
+  # Description: Specify Monte Carlo sampling options for uncertainty analysis.
+  # Define the option list for Monte Carlo sampling.
+  # Make sure add_to_snakefile is set to true to enable Monte-Carlo
   options:
-    add_to_snakefile: false
-    samples: 7    # number of optimizations
-    sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
-  pypsa_standard:
-      # User can add here flexibly more features for the Monte-Carlo sampling.
-      # Given as "key: value" format
-      # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
-      # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
-    loads_t.p_set: [0.9, 1.1]
-    # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
-
+    add_to_snakefile: false # When set to true, enables Monte Carlo sampling
+    samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
+    sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
+    seed: 42 # set seedling for reproducibilty
+  # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
+  # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
+  # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
+  # The arguments of the distribution are passed using the key 'args'  as follows, tailored by distribution type
+  # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
+  # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
+  # More info on the distributions are documented in the Chaospy reference guide...
+  # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
+  # An abstract example is as follows:
+  # {pypsa network object, e.g. "loads_t.p_set"}:
+  # type: {any supported distribution among the previous: "uniform", "normal", ...}
+  # args: {arguments passed as a list depending on the distribution, see the above and more at https://pypsa.readthedocs.io/}
+  uncertainties:
+    loads_t.p_set:
+      type: uniform
+      args: [0, 1]
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
+      type: lognormal
+      args: [1.5]
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
+      type: beta
+      args: [0.5, 2]
+  # TODO: Support inputs to simulate outages biggest lines "lines.p_nom_opt.max()": [-3000MW 0MW]
+  # TODO: Support inputs to simulate outages of biggest power plant "generators.p_nom.max()": [-1000MW 0MW]
 
 solving:
   options:
