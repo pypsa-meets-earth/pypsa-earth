@@ -29,7 +29,7 @@ There are a few additional options that needs to be set in the monte_carlo
 configuration options.
 
 Set ``options``
--------------
+----------------
 - ``samples``: The number of samples to be used in the monte-carlo simulation.
 - ``samppling_strategy``: The method used to sample the input parameters. Either of ``pydoe2``, ``chaospy``, or ``scipy``.
 - ``seed``: The seed for the random number generator. It is useful to set the seed to a fixed value to ensure reproducibility of the results.
