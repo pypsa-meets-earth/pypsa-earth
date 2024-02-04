@@ -8,8 +8,8 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from vresutils import shapes as vshapes
 from helpers import read_csv_nafix
+from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
