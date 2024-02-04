@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from vresutils import shapes as vshapes
+from helpers import read_csv_nafix
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -40,7 +41,7 @@ if __name__ == "__main__":
 
     countries = np.sort(nuts3.country.unique())
 
-    urban_percent_df = pd.read_csv(
+    urban_percent_df = read_csv_nafix(
         snakemake.input.urban_percent,
         usecols=[0, 1, 4],
         index_col=0,
