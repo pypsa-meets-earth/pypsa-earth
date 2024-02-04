@@ -44,13 +44,13 @@ By activating the ``natura`` option and incorporating the ``natura.tiff`` file, 
 
     By default, the option ``natura: true`` is set for all renewable sources.
 
-It's worth noting that a pre-built ``natura.tiff`` file is included in the dataset and dowloaded through ``retrieve_databundle_light`` rule, offering a global coverage of protected areas. This default file serves as a foundational resource for model execution. 
+It's worth noting that a pre-built ``natura.tiff`` file is included in the dataset and dowloaded through ``retrieve_databundle_light`` rule, offering a global coverage of protected areas. This default file serves as a foundational resource for model execution.
 
 While the default file suffices for most analyses, users seeking the latest updates and revisions can opt to enable the ``build_natura_raster`` rule:
 
 .. code:: yaml
-    
+
     enable:
-        build_natura_raster: true 
+        build_natura_raster: true
 
 However, it's worth noting that generating a customized ``natura.tiff`` file with the latest data may require a significant amount of time due to processing complexities.
