@@ -809,9 +809,11 @@ def create_extended_country_shapes(country_shapes, offshore_shapes, tolerance=0.
             {
                 "name": list(country_shapes.index),
                 "geometry": [
-                    c_geom.unary_union(offshore_shapes[c_code])
-                    if c_code in offshore_shapes
-                    else c_geom
+                    (
+                        c_geom.unary_union(offshore_shapes[c_code])
+                        if c_code in offshore_shapes
+                        else c_geom
+                    )
                     for c_code, c_geom in country_shapes.items()
                 ],
             },

@@ -393,9 +393,9 @@ def eez(
 
     # repeat to simplify after the buffer correction
     ret_df_new = ret_df_new.map(
-        lambda x: x
-        if x is None
-        else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+        lambda x: (
+            x if x is None else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+        )
     )
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
