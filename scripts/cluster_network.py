@@ -531,7 +531,7 @@ def busmap_for_n_clusters(
                 n,
                 n_cluster_c,
                 buses_i=x.index,
-                feature=feature.loc[x.index]
+                feature=feature.loc[x.index],
                 # n, n_clusters[x.name], buses_i=x.index, feature=feature.loc[x.index]
             )
         elif algorithm == "modularity":
@@ -539,7 +539,7 @@ def busmap_for_n_clusters(
                 # TODO Check consistency (fix for TypeError: 'int' object is not subscriptable in case of a single country)
                 n,
                 n_cluster_c,
-                buses_i=x.index
+                buses_i=x.index,
                 # n, n_clusters[x.name], buses_i=x.index
             )
         else:
