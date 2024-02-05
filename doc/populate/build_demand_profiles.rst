@@ -5,7 +5,7 @@
 .. _load_data:
 
 Rule ``build_demand_profiles``
-=============================
+===============================
 
 
 .. automodule:: build_demand_profiles

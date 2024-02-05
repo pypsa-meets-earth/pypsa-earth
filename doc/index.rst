@@ -168,6 +168,17 @@ Documentation
    rules_overview
    api_reference
 
+**Advanced Usage**
+
+* :doc:`monte_carlo`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Advanced Usage
+
+   monte_carlo
+
 **Help and References**
 
 * :doc:`release_notes`

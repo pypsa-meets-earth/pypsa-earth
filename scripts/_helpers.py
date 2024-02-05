@@ -459,13 +459,13 @@ def mock_snakemake(rulename, **wildcards):
     the snakemake project. It returns a snakemake.script.Snakemake object,
     based on the Snakefile.
 
-    If a rule has wildcards, you have to specify them in **wildcards.
+    If a rule has wildcards, you have to specify them in **wildcards**.
 
     Parameters
     ----------
     rulename: str
         name of the rule for which the snakemake object should be generated
-    **wildcards:
+    wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
@@ -718,7 +718,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
     columns specified by the dtype dictionary it not none.
 
     Parameters:
-    ----------
+    ------------
     fn : str
         Path to the file to read
     cols : list
@@ -742,12 +742,12 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
 
 def create_country_list(input, iso_coding=True):
     """
-    Create a country list for defined regions in config_osm_data.py.
+    Create a country list for defined regions in osm_config.yaml.
 
     Parameters
     ----------
     input : str
-        Any two-letter country name, regional name, or continent given in config_osm_data.py
+        Any two-letter country name, regional name, or continent given in osm_config.yaml
         Country name duplications won't distort the result.
         Examples are:
         ["NG","ZA"], downloading osm data for Nigeria and South Africa
