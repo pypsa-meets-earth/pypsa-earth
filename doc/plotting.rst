@@ -41,7 +41,7 @@ Rule ``plot_p_nom_max``
 
 |
 
-.. automodule:: plot_p_nom_max
+.. .. automodule:: plot_p_nom_max
 
 .. _summary:
 
