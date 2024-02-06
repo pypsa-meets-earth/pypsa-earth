@@ -1,8 +1,13 @@
+import sys
+
+sys.path.append("pypsa-earth/scripts")
+
 from os.path import exists
 from shutil import copyfile, move
 from scripts.helpers import get_last_commit_message
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+from _helpers import create_country_list
 
 HTTP = HTTPRemoteProvider()
 
@@ -13,7 +18,10 @@ if not exists("config.yaml"):
 configfile: "config.yaml"
 
 
-PYPSAEARTH_FOLDER = "./pypsa-earth"
+PYPSAEARTH_FOLDER = "pypsa-earth"
+
+# convert country list according to the desired region
+config["countries"] = create_country_list(config["countries"])
 
 
 SDIR = config["summary_dir"] + config["run"]
@@ -41,13 +49,21 @@ wildcard_constraints:
     h2export="[0-9]+m?|all",
 
 
-subworkflow pypsaearth:
-    workdir:
-        PYPSAEARTH_FOLDER
-    snakefile:
-        PYPSAEARTH_FOLDER + "/Snakefile"
-    configfile:
-        "./config.pypsa-earth.yaml"
+if not config.get("disable_subworkflow", False):
+
+    subworkflow pypsaearth:
+        workdir:
+            PYPSAEARTH_FOLDER
+        snakefile:
+            PYPSAEARTH_FOLDER + "/Sddnakefile"
+        configfile:
+            "./config.pypsa-earth.yaml"
+
+
+if config.get("disable_subworkflow", False):
+
+    def pypsaearth(path):
+        return PYPSAEARTH_FOLDER + "/" + path
 
 
 if config["enable"].get("retrieve_cost_data", True):

@@ -9,6 +9,9 @@ run: test_h2_cons_yearly
 
 foresight: overnight
 
+# option to disable the subworkflow to ease the analyses
+disable_subworkflow: false
+
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
