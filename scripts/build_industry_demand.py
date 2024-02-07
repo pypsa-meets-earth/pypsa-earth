@@ -148,7 +148,9 @@ if __name__ == "__main__":
         df["industry"] = df["technology"].map(industry_mapping)
         return df
 
-    geo_locs = match_technology(geo_locs).loc[countries]
+    geo_locs = match_technology(geo_locs).loc[
+        geo_locs.index.unique().intersection(countries)
+    ]
 
     AL = read_csv_nafix("data/AL_production.csv", index_col=0)
     AL_prod_tom = AL["production[ktons/a]"].loc[countries]
@@ -183,6 +185,11 @@ if __name__ == "__main__":
         * industry_util_factor
     )
 
+    # fill industry_base_totals
+    level_2nd = industry_base_totals.index.get_level_values(1).unique()
+    mlv_index = pd.MultiIndex.from_product([countries, level_2nd])
+    industry_base_totals = industry_base_totals.reindex(mlv_index, fill_value=0)
+
     for country in countries:
         industry_base_totals.loc[(country, "process emissions"), :] = 0
         try:
@@ -201,7 +208,7 @@ if __name__ == "__main__":
         try:
             industry_base_totals.loc[
                 (country, "process emissions"), "non-ferrous metals"
-            ] = AL_emissions.loc[country]
+            ] = AL_emissions.loc[country].sum()
         except KeyError:
             pass  # Code to handle the KeyError
         try:
@@ -223,11 +230,19 @@ if __name__ == "__main__":
     ]
 
     for country in countries:
-        carriers_present = industry_base_totals.xs(country, level="country").index
+        carriers_present = industry_base_totals.xs(country, level=0).index
         missing_carriers = set(all_carriers) - set(carriers_present)
         for carrier in missing_carriers:
             # Add the missing carrier with a value of 0
             industry_base_totals.loc[(country, carrier), :] = 0
+
+    # temporary fix: merge other manufacturing, construction and non-fuel into other and drop the column
+    industry_base_totals["other"] += industry_base_totals[
+        "other manufacturing, construction and non-fuel"
+    ]
+    industry_base_totals.drop(
+        columns="other manufacturing, construction and non-fuel", inplace=True
+    )
 
     nodal_df = pd.DataFrame()
 
