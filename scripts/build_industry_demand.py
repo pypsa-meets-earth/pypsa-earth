@@ -79,7 +79,8 @@ if __name__ == "__main__":
     production_base = cagr.applymap(lambda x: 1)
     production_tom = production_base * growth_factors
 
-    industry_totals = (production_tom * industry_base_totals).fillna(0)
+    # not-used line throws error for multicountries
+    # industry_totals = (production_tom * industry_base_totals).fillna(0)
 
     industry_util_factor = snakemake.config["sector"]["industry_util_factor"]
 
