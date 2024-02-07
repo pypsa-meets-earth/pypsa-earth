@@ -55,7 +55,7 @@ if not config.get("disable_subworkflow", False):
         workdir:
             PYPSAEARTH_FOLDER
         snakefile:
-            PYPSAEARTH_FOLDER + "/Sddnakefile"
+            PYPSAEARTH_FOLDER + "/Snakefile"
         configfile:
             "./config.pypsa-earth.yaml"
 
