@@ -801,7 +801,7 @@ def find_isolated_sub_networks(buses_df, n_buses_thresh):
 
 def transform_to_gdf(buses_df, i_buses, network_crs):
     buses_df["bus_id"] = buses_df.index
-    points_buses = buses_df.loc[i_buses, ["bus_id", "x", "y"]]
+    points_buses = buses_df.loc[i_buses, ["bus_id", "x", "y", "country"]]
     gdf_buses = gpd.GeoDataFrame(
         points_buses,
         geometry=gpd.points_from_xy(points_buses.x, points_buses.y),
