@@ -749,18 +749,16 @@ def drop_isolated_nodes(n, threshold):
 def find_isolated_sub_networks(buses_df, threshold):
     buses_df["bus_id"] = buses_df.index
 
-    # don't merge dc networks and sub-networks spanning through multiple countries
     subnetw_ac_df = (
         buses_df.loc[n.buses.carrier == "AC"]
         .groupby(["sub_network", "country"])
         .count()
-        # .apply(lambda x: x)
-        # .to_frame()
     )
-    # subnetw_ac_df = subnetw_ac_df.to_frame()
+    # don't merge dc networks and sub-networks spanning through multiple countries
     multicountry_subnetworks = subnetw_ac_df[
         subnetw_ac_df.index.droplevel("country").duplicated()
     ].index.get_level_values("sub_network")
+
     subnetw_ac_monocountry_df = subnetw_ac_df.loc[
         subnetw_ac_df.index.get_level_values("sub_network").difference(
             multicountry_subnetworks
@@ -847,7 +845,6 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     gdf_islands = transform_to_gdf(
         buses_df=n.buses, i_buses=i_islands, network_crs=network_crs
     )
-    # backbone buses should be from same countries as isolated ones
     i_backbone = (
         n.buses.query("country in @gdf_islands.country.unique()")
         .query("carrier == 'AC'")
@@ -877,6 +874,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     isolated_buses_mapping = n.buses.loc[i_islands, "country"].replace(
         map_isolated_node_by_country
     )
+
     busmap = (
         n.buses.index.to_series()
         .replace(isolated_buses_mapping)
