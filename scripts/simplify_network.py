@@ -748,11 +748,54 @@ def drop_isolated_nodes(n, threshold):
 
 def find_isolated_sub_networks(buses_df, n_buses_thresh):
     buses_df["bus_id"] = buses_df.index
-    grouped_by_subnw = (
-        buses_df.loc[n.buses.carrier == "AC"].groupby("sub_network").count()
+
+    # don't merge dc networks and sub-networks spanning through multiple countries
+    subnetw_ac_df = (
+        buses_df.loc[n.buses.carrier == "AC"]
+        .groupby(["sub_network", "country"])
+        .count()
+        # .apply(lambda x: x)
+        # .to_frame()
     )
-    i_isol_subnetw = grouped_by_subnw[grouped_by_subnw.bus_id <= n_buses_thresh].index
-    i_islands = buses_df.loc[buses_df.sub_network.isin(i_isol_subnetw)]
+    # subnetw_ac_df = subnetw_ac_df.to_frame()
+    multicountry_subnetworks = subnetw_ac_df[
+        subnetw_ac_df.index.droplevel("country").duplicated()
+    ].index.get_level_values("sub_network")
+    subnetw_ac_monocountry_df = subnetw_ac_df.loc[
+        subnetw_ac_df.index.get_level_values("sub_network").difference(
+            multicountry_subnetworks
+        )
+    ]
+
+    island_sbntw = []
+    for cnt in buses_df.country.unique():
+        # load may attached to multi-country networks only
+        country_load = (
+            n.loads_t.p_set[
+                n.loads_t.p_set.columns.intersection(
+                    n.buses.index[n.buses.country == cnt]
+                )
+            ]
+            .sum()
+            .sum()
+        )
+
+        sbntw = subnetw_ac_monocountry_df.query(
+            "country == @cnt"
+        ).index.get_level_values("sub_network")
+
+        i_island_ntw = [
+            s
+            for s in sbntw
+            if (
+                n.loads_t.p_set[n.buses[n.buses.sub_network == s].bus_id].sum().sum()
+                < threshold * country_load
+            )
+        ]
+        island_sbntw.extend(i_island_ntw)
+
+    i_islands = n.buses[n.buses.sub_network.isin(island_sbntw)].bus_id
+
     return i_islands
 
 
