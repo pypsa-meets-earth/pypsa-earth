@@ -864,16 +864,8 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     i_lines_islands = n.lines.loc[n.lines.bus1.isin(i_islands)].index
     n.mremove("Line", i_lines_islands)
 
-    # each isolated node should be mapped into the closes non-isolated node
-    map_isolated_node_by_country = (
-        n.buses.assign(bus_id=n.buses.index)
-        .loc[nearest_bus_df.index]
-        .groupby("country")["bus_id"]
-        .first()
-        .to_dict()
-    )
-    isolated_buses_mapping = n.buses.loc[i_islands, "country"].replace(
-        map_isolated_node_by_country
+    isolated_buses_mapping = (
+        gdf_map[["bus_id_right"]].droplevel("country").to_dict()["bus_id_right"]
     )
 
     busmap = (
