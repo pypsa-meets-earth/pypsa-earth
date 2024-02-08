@@ -844,12 +844,17 @@ def merge_into_network(n, threshold, threshold_n=5, aggregation_strategies=dict(
     if len(i_islands) == 0:
         return n, n.buses.index.to_series()
 
-    i_connected = n.buses.loc[n.buses.carrier == "AC"].index.difference(i_islands)
-    gdf_backbone_buses = transform_to_gdf(
-        buses_df=n.buses, i_buses=i_connected, network_crs=network_crs
-    )
     gdf_islands = transform_to_gdf(
         buses_df=n.buses, i_buses=i_islands, network_crs=network_crs
+    )
+    # backbone buses should be from same countries as isolated ones
+    i_backbone = (
+        n.buses.query("country in @gdf_islands.country.unique()")
+        .query("carrier == 'AC'")
+        .index.difference(i_islands)
+    )
+    gdf_backbone_buses = transform_to_gdf(
+        buses_df=n.buses, i_buses=i_backbone, network_crs=network_crs
     )
 
     # map each isolated bus into the closest non-isolated
