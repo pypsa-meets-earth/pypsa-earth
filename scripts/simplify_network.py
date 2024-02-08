@@ -746,7 +746,7 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
-def find_isolated_sub_networks(buses_df, n_buses_thresh):
+def find_isolated_sub_networks(buses_df, threshold):
     buses_df["bus_id"] = buses_df.index
 
     # don't merge dc networks and sub-networks spanning through multiple countries
@@ -810,7 +810,7 @@ def transform_to_gdf(buses_df, i_buses, network_crs):
     return gdf_buses
 
 
-def merge_into_network(n, threshold, threshold_n=5, aggregation_strategies=dict()):
+def merge_into_network(n, threshold, aggregation_strategies=dict()):
     """
     Find isolated AC nodes and sub-networks in the network and merge those of
     them which have load value and a number of buses below than the specified
@@ -1149,7 +1149,9 @@ if __name__ == "__main__":
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
     )
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
-    p_threshold_fetch_isolated = cluster_config.get("p_threshold_fetch_isolated", False)
+    share_threshold_fetch_isolated = cluster_config.get(
+        "share_threshold_fetch_isolated", False
+    )
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
     if p_threshold_merge_isolated:
@@ -1160,10 +1162,10 @@ if __name__ == "__main__":
         )
         busmaps.append(merged_nodes_map)
 
-    if p_threshold_fetch_isolated:
+    if share_threshold_fetch_isolated:
         n, fetched_nodes_map = merge_into_network(
             n,
-            threshold=p_threshold_fetch_isolated,
+            threshold=share_threshold_fetch_isolated,
             aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
