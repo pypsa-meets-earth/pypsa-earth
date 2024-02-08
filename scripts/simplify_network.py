@@ -846,8 +846,24 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     gdf_islands = transform_to_gdf(
         buses_df=n.buses, i_buses=i_islands, network_crs=network_crs
     )
+
+    multicountry_subnetworks = (
+        n.buses.groupby(["sub_network", "country"])
+        .count()
+        .index.droplevel("country")
+        .duplicated()
+    )
+
+    # don't into sub-networks spanning through multiple countries
+    subnetw_by_countries_df = n.buses.groupby(["sub_network", "country"]).count()
+    multicountry_subnetworks = subnetw_by_countries_df[
+        subnetw_by_countries_df.index.droplevel("country").duplicated()
+    ].index.get_level_values("sub_network")
+
+    # backbone buses should be from the same countries as isolated ones
     i_backbone = (
         n.buses.query("country in @gdf_islands.country.unique()")
+        .query("sub_network not in @multicountry_subnetworks")
         .query("carrier == 'AC'")
         .index.difference(i_islands)
     )
