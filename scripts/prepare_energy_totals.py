@@ -272,6 +272,4 @@ if __name__ == "__main__":
     energy_totals["electricity services space"] = 0
     energy_totals["electricity services water"] = 0
 
-    energy_totals = energy_totals.dropna(axis=1, how="all")
-
     energy_totals.fillna(0).to_csv(snakemake.output.energy_totals)
