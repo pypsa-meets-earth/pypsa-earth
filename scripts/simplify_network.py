@@ -838,23 +838,7 @@ def merge_into_network(n, threshold, threshold_n=5, aggregation_strategies=dict(
 
     n.determine_network_topology()
 
-    if threshold_n > 1:
-        i_islands = find_isolated_sub_networks(
-            buses_df=n.buses, n_buses_thresh=threshold_n
-        ).index
-    else:
-        # duplicated sub-networks mean that there is at least one interconnection between buses
-        i_islands = n.buses[
-            (~n.buses.duplicated(subset=["sub_network"], keep=False))
-            & (n.buses.carrier == "AC")
-        ].index
-
-    # TODO filtering may be applied to decide if the isolated buses should be fetched
-    # isolated buses with load below than a specified threshold should be merged
-    i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
-    i_islands_fetch = i_load_islands[
-        n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
-    ]
+    i_islands = find_isolated_sub_networks(buses_df=n.buses, threshold=threshold)
 
     # return the original network if no isolated nodes are detected
     if len(i_islands) == 0:
