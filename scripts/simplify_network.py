@@ -746,7 +746,8 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
-def find_isolated_sub_networks(buses_df, threshold):
+def find_isolated_sub_networks(n, threshold):
+    buses_df = n.buses
     buses_df["bus_id"] = buses_df.index
 
     subnetw_ac_df = (
@@ -836,7 +837,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    i_islands = find_isolated_sub_networks(buses_df=n.buses, threshold=threshold)
+    i_islands = find_isolated_sub_networks(n=n, threshold=threshold)
 
     # return the original network if no isolated nodes are detected
     if len(i_islands) == 0:
