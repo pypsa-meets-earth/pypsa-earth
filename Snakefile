@@ -105,7 +105,7 @@ rule solve_all_networks:
     input:
         expand(
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-            **config["scenario"]
+            **config["scenario"],
         ),
 
 
@@ -116,7 +116,7 @@ rule plot_all_p_nom:
             + RDIR
             + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.{ext}",
             **config["scenario"],
-            ext=["png", "pdf"]
+            ext=["png", "pdf"],
         ),
 
 
@@ -127,7 +127,7 @@ rule make_all_summaries:
             + RDIR
             + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}",
             **config["scenario"],
-            country=["all"] + config["countries"]
+            country=["all"] + config["countries"],
         ),
 
 
@@ -140,7 +140,7 @@ rule plot_all_summaries:
             summary=["energy", "costs"],
             **config["scenario"],
             country=["all"] + config["countries"],
-            ext=["png", "pdf"]
+            ext=["png", "pdf"],
         ),
 
 
@@ -867,7 +867,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 "networks/"
                 + RDIR
                 + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
+                **config["scenario"],
             ),
 
     rule solve_network:
@@ -912,7 +912,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 "results/"
                 + RDIR
                 + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
+                **config["scenario"],
             ),
 
 
@@ -930,7 +930,7 @@ def input_make_summary(w):
         **{
             k: config["scenario"][k] if getattr(w, k) == "all" else getattr(w, k)
             for k in ["simpl", "clusters", "opts"]
-        }
+        },
     )
 
 
