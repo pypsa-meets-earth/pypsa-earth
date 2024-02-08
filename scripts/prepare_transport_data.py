@@ -94,7 +94,7 @@ def prepare_transport_data(n):
         snakemake.input.transport_name, index_col=0, keep_default_na=False
     )
 
-    nodal_transport_data = transport_data.loc[pop_layout.ct].fillna(0.0)
+    nodal_transport_data = transport_data.reindex(pop_layout.ct, fill_value=0.0)
 
     nodal_transport_data.index = pop_layout.index
     nodal_transport_data["number cars"] = (
@@ -205,7 +205,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_transport_data",
             simpl="",
-            clusters="10",
+            clusters="74",
             demand="AB",
             planning_horizons=2030,
         )
