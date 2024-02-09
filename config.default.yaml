@@ -65,7 +65,7 @@ cluster_options:
     remove_stubs_across_borders: true
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
     p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
-    share_threshold_fetch_isolated: 0.3 # [-] share of the national load to fetch isolated buses and networks into a backbone network
+    p_threshold_fetch_isolated: 20 # [-] isolated buses are being merged into a backbone network if a network mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time

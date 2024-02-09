@@ -768,16 +768,17 @@ def find_isolated_sub_networks(n, threshold):
 
     island_sbntw = []
     for cnt in buses_df.country.unique():
-        # load may attached to multi-country networks only
-        country_load = (
-            n.loads_t.p_set[
-                n.loads_t.p_set.columns.intersection(
-                    n.buses.index[n.buses.country == cnt]
-                )
-            ]
-            .sum()
-            .sum()
-        )
+        ## TODO May be worth to investigate a threshold for the load share
+        ## load may attached to multi-country networks only
+        # country_load = (
+        #    n.loads_t.p_set[
+        #        n.loads_t.p_set.columns.intersection(
+        #            n.buses.index[n.buses.country == cnt]
+        #        )
+        #    ]
+        #    .sum()
+        #    .sum()
+        # )
 
         sbntw = subnetw_ac_monocountry_df.query(
             "country == @cnt"
@@ -787,8 +788,8 @@ def find_isolated_sub_networks(n, threshold):
             s
             for s in sbntw
             if (
-                n.loads_t.p_set[n.buses[n.buses.sub_network == s].bus_id].sum().sum()
-                < threshold * country_load
+                n.loads_t.p_set[n.buses[n.buses.sub_network == s].bus_id].mean().mean()
+                < threshold
             )
         ]
         island_sbntw.extend(i_island_ntw)
@@ -1156,9 +1157,7 @@ if __name__ == "__main__":
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
     )
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
-    share_threshold_fetch_isolated = cluster_config.get(
-        "share_threshold_fetch_isolated", False
-    )
+    p_threshold_fetch_isolated = cluster_config.get("p_threshold_fetch_isolated", False)
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
     if p_threshold_merge_isolated:
@@ -1169,10 +1168,10 @@ if __name__ == "__main__":
         )
         busmaps.append(merged_nodes_map)
 
-    if share_threshold_fetch_isolated:
+    if p_threshold_fetch_isolated:
         n, fetched_nodes_map = merge_into_network(
             n,
-            threshold=share_threshold_fetch_isolated,
+            threshold=p_threshold_fetch_isolated,
             aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
