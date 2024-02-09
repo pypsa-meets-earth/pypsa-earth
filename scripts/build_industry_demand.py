@@ -54,7 +54,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=4,
+            clusters=74,
             planning_horizons=2030,
             demand="AB",
         )
@@ -237,12 +237,10 @@ if __name__ == "__main__":
             industry_base_totals.loc[(country, carrier), :] = 0
 
     # temporary fix: merge other manufacturing, construction and non-fuel into other and drop the column
-    industry_base_totals["other"] += industry_base_totals[
-        "other manufacturing, construction and non-fuel"
-    ]
-    industry_base_totals.drop(
-        columns="other manufacturing, construction and non-fuel", inplace=True
-    )
+    other_cols = list(set(industry_base_totals.columns) - set(clean_industry_list))
+    if len(other_cols) > 0:
+        industry_base_totals["other"] += industry_base_totals[other_cols].sum(axis=1)
+        industry_base_totals.drop(columns=other_cols, inplace=True)
 
     nodal_df = pd.DataFrame()
 
