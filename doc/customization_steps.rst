@@ -18,7 +18,7 @@ Pay particular attention to regional-dependent parameters such as:
 
 * ``countries``: This parameter allows you to specify the countries to be included in your model. It's crucial for accurately representing the geographical scope of your analysis.
 
-* ``cutouts``: These parameters refer to the climate data archive name used for calculating renewable potential. By defining appropriate cutouts, you ensure that your model is equipped with the necessary weather data for accurate simulations.
+* ``cutouts``: These parameters refer to the climate data archive name used for calculating renewable potential. By defining appropriate cutouts, you ensure that your model is equipped with the necessary weather data for accurate simulations. By default, pre-compiled cutouts have standard name of ``cutout-2013-era5``. Adjust it accordingly, if custom cutouts are utilized.
 
 2. Generate Custom Cutout
 -------------------------
