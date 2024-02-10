@@ -23,8 +23,8 @@ The model can be adapted to include any country, multiple countries (e.g. `Niger
 .. note::
 
     To build the model for countries of Oceania region, it is important to setup ``Copernicus Climate Data Store (CDS) API`` to build custom cutouts.
-    The same is true if the weather year other than 2013 is considered for any country or continents. The detailed instructions for setting up the Copernicus API can be found in :ref:`customization_copernicus`. 
-    However, if you are using default weather year of 2013, there is no need to configure ``Copernicus API`` as pre-compiled cutouts are downloaded automatically. 
+    The same is true if the weather year other than 2013 is considered for any country or continents. The detailed instructions for setting up the Copernicus API can be found in :ref:`customization_copernicus`.
+    However, if you are using default weather year of 2013, there is no need to configure ``Copernicus API`` as pre-compiled cutouts are downloaded automatically.
 
 Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
 
