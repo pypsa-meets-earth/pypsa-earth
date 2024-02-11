@@ -25,10 +25,9 @@ Pay particular attention to regional-dependent parameters such as:
 
 The concept of a `cutout`` is central to climate data management in the PyPSA ecosystem, facilitated through the ``build_cutout`` rule.
 A cutout essentially represents a spatio-temporal subset of topology and weather datasets, allowing you to focus on specific regions and timeframes relevant to your analysis.
-It's important to understand that the spatial and temporal resolution of your cutout data is determined by the underlying dataset. Typically, a resolution of 30km x 30km grid and hourly data are recommended for optimal results.
 While a pre-built cutout for Africa is readily available for the 2013 year, users interested in other regions or updated data can generate their own cutouts by enabling the ``build_cutout`` rule. This process involves accessing the Copernicus Climate Data Store and installing the necessary packages for data retrieval as described in :ref:`customization_copernicus`.
 
-3. Assess `natura.tiff` Raster
+1. Assess `natura.tiff` Raster
 --------------------------------
 
 The ``natura.tiff`` raster file delineates areas designated as protected and reserved nature zones. These zones impose land use restrictions, influencing the calculation of renewable potential within a given geographical region.
