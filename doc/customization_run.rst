@@ -54,3 +54,7 @@ Solar profile for the requested area may be calculated using the output name:
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) % snakemake -j 1 resources/renewable_profiles/profile_solar.nc
+
+.. note::
+
+    Because of the wildcards in the ``build_renewable_profiles`` rule definition, the only available option to run the rule separately is by directly calling the output file in the snakemake command.
