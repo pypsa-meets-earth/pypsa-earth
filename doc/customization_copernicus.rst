@@ -18,8 +18,7 @@ To build custom cutouts, it is important to access to `Copernicus Climate Data S
 Steps to get access to Copernicus database:
 
 1. Register to  the `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_;
-2. Install `cdsapi` package  (can be installed with `pip`);
-3. Setup your CDS API key as described `on their website <https://cds.climate.copernicus.eu/api-how-to>`_.
+2. Setup your CDS API key as described `on their website <https://cds.climate.copernicus.eu/api-how-to>`_.
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 
@@ -27,6 +26,6 @@ The `build_cutout` flag should be set `true` to generate the cutout. After the c
 
 .. note::
 
-    Building a cutout may require a significant amount of time and storage space. Continental cutouts, such as those for Asia, South America, and Africa, typically require around 20 GB of storage space, while cutouts for individual countries or small regions may occupy approximately 2 GB. The process of building a cutout can take between 2 to 3 hours.
+    Building a cutout may require a significant amount of time and storage space. Continental cutouts, such as those for Asia, South America, and Africa, typically require around 20 GB of storage space, while cutouts for individual countries or small regions may occupy approximately 1-5 GB. The process of building a cutout can take between 2 to 3 hours.
 
 After the first run, if you don't change country and don't need to increase a considered time span wider than the one you created the cutout with, you may set both `retrieve_databundle` and `build_cutout` to false.
