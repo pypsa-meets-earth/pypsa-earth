@@ -33,7 +33,7 @@ A good starting point to customize your model are settings of the default config
 
     .../pypsa-earth (pypsa-earth) % cp config.default.yaml config.yaml
 
-The model can be adapted to include any country, multiple countries (e.g. Nigeria and Benin) or continents (currently `Africa` work as a whole continent) using `countries` argument:
+The model can be adapted to include any country, multiple countries (e.g. Nigeria and Benin) or continents (e.g. Africa) using `countries` argument:
 
 .. code:: yaml
 
