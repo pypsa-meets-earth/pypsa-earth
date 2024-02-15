@@ -103,6 +103,7 @@ import pypsa
 import yaml
 from _helpers import (
     configure_logging,
+    create_logger,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -112,7 +113,7 @@ from scipy.spatial import cKDTree as KDTree
 from shapely import wkt
 from shapely.geometry import Point
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
@@ -253,16 +254,39 @@ def add_custom_powerplants(ppl, inputs, config):
         return add_ppls
 
 
-def replace_natural_gas_technology(df):
-    mapping = {"Steam Turbine": "CCGT", "Combustion Engine": "OCGT"}
-    tech = df.Technology.replace(mapping).fillna("CCGT")
-    return df.Technology.mask(df.Fueltype == "Natural Gas", tech)
-
-
-def replace_natural_gas_fueltype(df):
-    return df.Fueltype.mask(
-        (df.Technology == "OCGT") | (df.Technology == "CCGT"), "Natural Gas"
+def replace_natural_gas_technology(df: pd.DataFrame):
+    """
+    Maps and replaces gas technologies in the powerplants.csv onto model
+    compliant carriers.
+    """
+    mapping = {
+        "Steam Turbine": "CCGT",
+        "Combustion Engine": "OCGT",
+        "NG": "CCGT",
+        "Ng": "CCGT",
+        "NG/FO": "OCGT",
+        "Ng/Fo": "OCGT",
+        "NG/D": "OCGT",
+        "LNG": "OCGT",
+        "CCGT/D": "CCGT",
+        "CCGT/FO": "CCGT",
+        "LCCGT": "CCGT",
+        "CCGT/Fo": "CCGT",
+    }
+    fueltype = df["Fueltype"] == "Natural Gas"
+    df.loc[fueltype, "Technology"] = (
+        df.loc[fueltype, "Technology"].replace(mapping).fillna("CCGT")
     )
+    unique_tech_with_ng = df.loc[fueltype, "Technology"].unique()
+    unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
+    if len(unknown_techs) > 0:
+        df.Technology.where(
+            fueltype,
+            df["Technology"].map({t: "CCGT" for t in unknown_techs}),
+            inplace=True,
+        )
+    df["Fueltype"] = np.where(fueltype, df["Technology"], df["Fueltype"])
+    return df
 
 
 if __name__ == "__main__":
@@ -280,21 +304,32 @@ if __name__ == "__main__":
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
 
-    csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
-
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
     countries_names = list(map(two_digits_2_name_country, countries_codes))
 
     config["target_countries"] = countries_names
 
-    if "EXTERNAL_DATABASE" in config:
+    if (
+        "EXTERNAL_DATABASE"
+        in config["matching_sources"] + config["fully_included_sources"]
+    ):
+        if "EXTERNAL_DATABASE" not in config:
+            logger.error(
+                "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
+                "Please check file configs/powerplantmatching_config.yaml"
+            )
+        logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
+    else:
+        # create an empty file
+        with open(filepath_osm2pm_ppl, "w"):
+            pass
 
     # specify the main query for filtering powerplants
-    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
+    ppl_query = snakemake.params.powerplants_filter
     if isinstance(ppl_query, str):
         config["main_query"] = ppl_query
     else:
@@ -305,10 +340,7 @@ if __name__ == "__main__":
         .powerplant.fill_missing_decommissioning_years()
         .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
         .powerplant.convert_country_to_alpha2()
-        .assign(
-            Technology=replace_natural_gas_technology,
-            Fueltype=replace_natural_gas_fueltype,
-        )
+        .pipe(replace_natural_gas_technology)
     )
 
     ppl = add_custom_powerplants(
@@ -332,10 +364,10 @@ if __name__ == "__main__":
     if bus_null_b.any():
         logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
-    if snakemake.config["cluster_options"]["alternative_clustering"]:
-        gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-        country_list = snakemake.config["countries"]
-        geo_crs = snakemake.config["crs"]["geo_crs"]
+    if snakemake.params.alternative_clustering:
+        gadm_layer_id = snakemake.params.gadm_layer_id
+        country_list = snakemake.params.countries
+        geo_crs = snakemake.params.geo_crs
 
         gdf = gpd.read_file(snakemake.input.gadm_shapes)
 

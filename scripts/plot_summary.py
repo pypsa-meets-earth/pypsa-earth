@@ -21,9 +21,9 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def rename_techs(label):
