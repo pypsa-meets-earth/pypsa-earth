@@ -49,7 +49,7 @@ Description
 -----------
 
 Total annual system costs are minimised with PyPSA. The full formulation of the
-linear optimal power flow (plus investment planning
+linear optimal power flow (plus investment planning)
 is provided in the
 `documentation of PyPSA <https://pypsa.readthedocs.io/en/latest/optimal_power_flow.html#linear-optimal-power-flow>`_.
 The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
@@ -571,18 +571,18 @@ if __name__ == "__main__":
         )
     configure_logging(snakemake)
 
-    # tmpdir = snakemake.config["solving"].get("tmpdir")
+    # tmpdir = snakemake.params.solving.get("tmpdir")
     # if tmpdir is not None:
     #     Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
-    solve_opts = snakemake.config["solving"]["options"]
+    solve_opts = snakemake.params.solving["options"]
 
     n = pypsa.Network(snakemake.input[0])
     # TODO Double-check handling the augmented case
-    # if snakemake.config["augmented_line_connection"].get("add_to_snakefile"):
-    #     n.lines.loc[
-    #         n.lines.index.str.contains("new"), "s_nom_min"
-    #     ] = snakemake.config["augmented_line_connection"].get("min_expansion")
+    # if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
+    #    n.lines.loc[
+    #        n.lines.index.str.contains("new"), "s_nom_min"
+    #    ] = snakemake.params.augmented_line_connection.get("min_expansion")
     n = prepare_network(n, solve_opts, config=solve_opts)
     n = solve_network(
         n, config=snakemake.config, opts=opts, solver_logfile=snakemake.log.solver

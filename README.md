@@ -362,46 +362,46 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AlexanderMeisinger">
-            <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
+        <a href="https://github.com/stephenjlee">
+            <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Stephen J Lee</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AndreCNF">
-            <img src="https://avatars.githubusercontent.com/u/19359510?v=4" width="100;" alt="AndreCNF"/>
+        <a href="https://github.com/juli-a-ko">
+            <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>
             <br />
-            <sub><b>André Cristóvão Neves Ferreira</b></sub>
+            <sub><b>Juli-a-ko</b></sub>
         </a>
     </td></tr>
 <tr>
     <td align="center">
-        <a href="https://github.com/EmreYorat">
-            <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
+        <a href="https://github.com/squoilin">
+            <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
             <br />
-            <sub><b>EmreYorat</b></sub>
+            <sub><b>Sylvain Quoilin</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/HanaElattar">
-            <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
+        <a href="https://github.com/siddharth-krishna">
+            <img src="https://avatars.githubusercontent.com/u/10712637?v=4" width="100;" alt="siddharth-krishna"/>
             <br />
-            <sub><b>HanaElattar</b></sub>
+            <sub><b>Siddharth Krishna</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/jarry7">
-            <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
+        <a href="https://github.com/pitmonticone">
+            <img src="https://avatars.githubusercontent.com/u/38562595?v=4" width="100;" alt="pitmonticone"/>
             <br />
-            <sub><b>Jarrad Wright</b></sub>
+            <sub><b>Pietro Monticone</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/jessLryan">
-            <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
+        <a href="https://github.com/Netotse">
+            <img src="https://avatars.githubusercontent.com/u/89367243?v=4" width="100;" alt="Netotse"/>
             <br />
-            <sub><b>Jess</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
@@ -412,39 +412,46 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/Netotse">
-            <img src="https://avatars.githubusercontent.com/u/89367243?v=4" width="100;" alt="Netotse"/>
+        <a href="https://github.com/jessLryan">
+            <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Jess</b></sub>
         </a>
     </td></tr>
 <tr>
     <td align="center">
-        <a href="https://github.com/pitmonticone">
-            <img src="https://avatars.githubusercontent.com/u/38562595?v=4" width="100;" alt="pitmonticone"/>
+        <a href="https://github.com/jarry7">
+            <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
             <br />
-            <sub><b>Pietro Monticone</b></sub>
+            <sub><b>Jarrad Wright</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/squoilin">
-            <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
+        <a href="https://github.com/HanaElattar">
+            <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
             <br />
-            <sub><b>Sylvain Quoilin</b></sub>
+            <sub><b>HanaElattar</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/juli-a-ko">
-            <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>
+        <a href="https://github.com/EmreYorat">
+            <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
             <br />
-            <sub><b>Juli-a-ko</b></sub>
+            <sub><b>EmreYorat</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/stephenjlee">
-            <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
+        <a href="https://github.com/AndreCNF">
+            <img src="https://avatars.githubusercontent.com/u/19359510?v=4" width="100;" alt="AndreCNF"/>
             <br />
-            <sub><b>Stephen J Lee</b></sub>
+            <sub><b>André Cristóvão Neves Ferreira</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/AlexanderMeisinger">
+            <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
+            <br />
+            <sub><b>Null</b></sub>
         </a>
     </td></tr>
 </table>
