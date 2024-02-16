@@ -50,13 +50,13 @@ if __name__ == "__main__":
 
     base_energy_totals = read_csv_nafix("data/energy_totals_base.csv", index_col=0)
     growth_factors_cagr = read_csv_nafix(
-        "data/demand/growth_factors_cagr.csv", index_col=0
+        snakemake.input.growth_factors_cagr, index_col=0
     )
     efficiency_gains_cagr = read_csv_nafix(
-        "data/demand/efficiency_gains_cagr.csv", index_col=0
+        snakemake.input.efficiency_gains_cagr, index_col=0
     )
-    fuel_shares = read_csv_nafix("data/demand/fuel_shares.csv", index_col=0)
-    district_heating = read_csv_nafix("data/demand/district_heating.csv", index_col=0)
+    fuel_shares = read_csv_nafix(snakemake.input.fuel_shares, index_col=0)
+    district_heating = read_csv_nafix(snakemake.input.district_heating, index_col=0)
 
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.config["demand_data"]["base_year"]
