@@ -13,7 +13,7 @@ To build custom cutouts, it is important to access to `Copernicus Climate Data S
 
 .. note::
 
-    Skip this recommendation if the region of your interest is anywhere except Oceania and you are fine with the 2013 weather year.
+    Skip this recommendation if you are fine with the 2013 weather year.
 
 Steps to get access to Copernicus database:
 
