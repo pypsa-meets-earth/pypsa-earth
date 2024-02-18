@@ -23,38 +23,6 @@ The model can be adapted to include any country, multiple countries (e.g. `Niger
 
     countries: ["NG", "BJ"]
 
-Specify the weather year scope
-------------------------------
-
-Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
-
-.. code:: yaml
-
-    snapshots:
-        start: "2013-03-01"
-        end: "2013-03-07"
-        inclusive: "left" # end is not inclusive
-
-.. note::
-
-    Ensure that the selected data range aligns with the dates available in the cutout dataset. By default, the pre-compiled cutouts that are automatically downloaded correspond to the weather year of 2013. So, if the weather data within the cutouts corresponds to the year 2013, then the range of snapshots should fall within that same year.
-
-Specify the demand year
------------------------
-
-Year-related parameters are also being used when specifying `load_options`:
-
-.. code:: yaml
-
-    load_options:
-      ssp: "ssp2-2.6"
-      weather_year: 2013
-      prediction_year: 2030
-      scale: 1
-
-The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` correspond to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
-The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
-
 Configure ``enable`` section to download/build data
 ---------------------------------------------------------
 
@@ -81,6 +49,38 @@ After initial run and successful generation of custom cutouts, ``build_cutout`` 
 .. note::
 
     No need to configure the `Copernicus API` if the weather year 2013 is used, as pre-compiled cutouts are automatically downloaded.
+
+Specify the weather year scope
+------------------------------
+
+Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
+
+.. code:: yaml
+
+    snapshots:
+        start: "2013-03-01"
+        end: "2013-03-07"
+        inclusive: "left" # end is not inclusive
+
+.. note::
+
+    Ensure that the selected data range aligns with the dates available in the cutout dataset. If the weather data within the cutouts corresponds to the year 2013, then the range of snapshots should fall within that same year.
+
+Specify the demand year
+-----------------------
+
+Year-related parameters are also being used when specifying `load_options`:
+
+.. code:: yaml
+
+    load_options:
+      ssp: "ssp2-2.6"
+      weather_year: 2013
+      prediction_year: 2030
+      scale: 1
+
+The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` correspond to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
+The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
 
 Configure `atlite` section
 --------------------------
