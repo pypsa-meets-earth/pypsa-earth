@@ -8,17 +8,11 @@
 2. Running the model
 ####################
 
-To solve full optimization problem, it is important to pick a solver in `config.yaml` file. For instance, this tutorial uses the open-source solver glpk and does not rely
-on the commercial solvers such as Gurobi or CPLEX (for which free academic licenses are available).
+Run full model
+--------------
 
-.. code:: yaml
-
-    solver:
-        name: glpk
-
-.. note::
-
-    ``glpk`` can solve the network with low temporal and spatial resolution. To make a full model run, it is advised to use ``CPLEX``, ``Gurobi``, or open-source `HIGHs <https://highs.dev/>`__.
+PyPSA-Earth utilized ``snakemake`` workflow management tool inherited from PyPSA-Eur.
+Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
 
 To execute a full model run, the following command needs to be applied:
 
@@ -26,13 +20,14 @@ To execute a full model run, the following command needs to be applied:
 
     .../pypsa-earth (pypsa-earth) % snakemake --cores 1 solve_all_networks
 
-Here, ``snakemake`` is a workflow management tool inherited by PyPSA-Earth from PyPSA-Eur.
-Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
-The flag ``--cores 1`` dictates the number of CPU cores allocated for the process. Notably, the ``solve_all_network`` rule within Snakemake orchestrates the process of solving the network.
+Here, the flag ``--cores 1`` dictates the number of CPU cores allocated for the process. Notably, the ``solve_all_network`` rule within Snakemake orchestrates the process of solving the network.
 
 .. note::
 
   ``Snakemake``, which is one of the major dependencies, will be automatically installed in ``pypsa-earth`` environment, thereby there is no need to install it manually.
+
+Execute different part of the workflow
+--------------------------------------
 
 The snakemake included in the ``pypsa-earth`` conda environment pypsa-earth can be used to execute any custom rule with the following command:
 
@@ -58,3 +53,18 @@ Solar profile for the requested area may be calculated using the output name:
 .. note::
 
     Because of the wildcards in the ``build_renewable_profiles`` rule definition, the only available option to run the rule separately is by directly calling the output file in the snakemake command.
+
+Choose the solver
+-----------------
+
+To solve full optimization problem, it is important to pick a solver in `config.yaml` file. For instance, this tutorial uses the open-source solver glpk and does not rely
+on the commercial solvers such as Gurobi or CPLEX (for which free academic licenses are available).
+
+.. code:: yaml
+
+    solver:
+        name: glpk
+
+.. note::
+
+    ``glpk`` can solve the network with low temporal and spatial resolution. To make a full model run, it is advised to use ``CPLEX``, ``Gurobi``, or open-source `HIGHs <https://highs.dev/>`__.
