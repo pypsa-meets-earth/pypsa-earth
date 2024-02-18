@@ -58,7 +58,7 @@ The available values for `weather_year` and `prediction_year` can be checked by 
 Configure ``enable`` section to download/build data
 ---------------------------------------------------------
 
-For a successful model run, ensure the download of essential open-source data, including databundle and cost data, is activated in the ``enable`` section: 
+For a successful model run, ensure the download of essential open-source data, including databundle and cost data, is activated in the ``enable`` section:
 
 .. code:: yaml
 
