@@ -31,7 +31,7 @@ run:
 
 scenario:
   simpl: ['']
-  ll: ['copt']
+  ll: ["copt"]
   clusters: [10]
   opts: [Co2L-3H]
 
@@ -70,7 +70,7 @@ cluster_options:
     feature: solar+onwind-time
     exclude_carriers: []
   alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
-  distribute_cluster: ['load'] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
+  distribute_cluster: ["load"] # Distributes cluster nodes per country according to ["load"],["pop"] or ["gdp"]
   out_logging: true  # When "True", logging is printed to console
   aggregation_strategies:
     generators:  # use "min" for more conservative assumptions
