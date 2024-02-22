@@ -10,11 +10,13 @@ myst-parser  # recommark is deprecated, https://stackoverflow.com/a/71660856/135
 
 pypsa
 vresutils>=0.3.1
-powerplantmatching>=0.4.8
-atlite>=0.2.2
-dask<=2021.3.1
+powerplantmatching>=0.5.5
+atlite>=0.2.9
+dask[distributed]
+matplotlib<=3.5.2
+tabula-py
 
-# cartopy
+cartopy
 scikit-learn
 pycountry
 pyyaml
@@ -23,9 +25,15 @@ memory_profiler
 tables
 descartes
 
-esy-osm-pbf
-esy-osmfilter
 rioxarray
 git+https://github.com/davide-f/google-drive-downloader@master  # if not included will create error in docs `make html`
 
 gitpython
+
+chaospy
+numba
+ruamel.yaml<=0.17.26
+earth-osm>=0.1.0, <0.2.0
+reverse-geocode
+pyDOE2
+# graphviz

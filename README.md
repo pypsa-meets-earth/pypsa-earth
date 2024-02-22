@@ -276,20 +276,27 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/GbotemiB">
+            <img src="https://avatars.githubusercontent.com/u/48842684?v=4" width="100;" alt="GbotemiB"/>
+            <br />
+            <sub><b>Emmanuel Bolarinwa</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Tomkourou">
             <img src="https://avatars.githubusercontent.com/u/5240283?v=4" width="100;" alt="Tomkourou"/>
             <br />
             <sub><b>Thomas Kouroughli</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/GridGrapher">
             <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
             <br />
             <sub><b>GridGrapher</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Emre-Yorat89">
             <img src="https://avatars.githubusercontent.com/u/62134151?v=4" width="100;" alt="Emre-Yorat89"/>
@@ -324,27 +331,20 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Cschau-ieg</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
             <br />
             <sub><b>Tobias</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/doneachh">
             <img src="https://avatars.githubusercontent.com/u/132910766?v=4" width="100;" alt="doneachh"/>
             <br />
             <sub><b>Anton Achhammer</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/GbotemiB">
-            <img src="https://avatars.githubusercontent.com/u/48842684?v=4" width="100;" alt="GbotemiB"/>
-            <br />
-            <sub><b>Emmanuel Bolarinwa</b></sub>
         </a>
     </td>
     <td align="center">
