@@ -30,7 +30,7 @@ enable:
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
-  build_natura_raster: true  # If True, then build_natura_raster can be run
+  build_natura_raster: false  # If True, then build_natura_raster can be run
 
 custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
@@ -83,7 +83,7 @@ cluster_options:
     feature: solar+onwind-time
     exclude_carriers: []
   alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
-  distribute_cluster: ['load'] # ['load'],['pop'] or ['gdp']
+  distribute_cluster: ["load"] # ["load"],["pop"] or ["gdp"]
   out_logging: true  # When true, logging is printed to console
   aggregation_strategies:
     generators:  # use "min" for more conservative assumptions
