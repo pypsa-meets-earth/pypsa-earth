@@ -101,7 +101,6 @@ from _helpers import (
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
-    aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
     get_clustering_from_busmap,
@@ -277,8 +276,12 @@ def _aggregate_and_move_components(
     _, generator_strategies = get_aggregation_strategies(aggregation_strategies)
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
-    generators, generators_pnl = aggregategenerators(
-        n, busmap, carriers=carriers, custom_strategies=generator_strategies
+    generators, generators_pnl = aggregateoneport(
+        n,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=generator_strategies,
     )
 
     replace_components(n, "Generator", generators, generators_pnl)
