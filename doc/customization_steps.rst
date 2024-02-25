@@ -18,7 +18,7 @@ Pay particular attention to parameters such as:
 
 * ``countries``: This parameter allows you to specify the countries to be included in your model. It's crucial for accurately representing the geographical scope of your analysis.
 
-* ``enable``: This section contains parameters such as `retrieve_databundle`, `retrieve_cost_data`, `download_osm_data`, `build_natura_raster`, and `build_cutouts`. The parameter `retrieve_databundle` is used to download all required technological data. Set it to `false` after initial run to prevent redownload. To build custom cutouts and natura exclusion raster, set `build_cutout` and `build_natura_raster` to `true`, respectively. More details on custom cutouts and natura raster are provided below.  
+* ``enable``: This section contains parameters such as `retrieve_databundle`, `retrieve_cost_data`, `download_osm_data`, `build_natura_raster`, and `build_cutouts`. The parameter `retrieve_databundle` is used to download all required technological data. Set it to `false` after initial run to prevent redownload. To build custom cutouts and natura exclusion raster, set `build_cutout` and `build_natura_raster` to `true`, respectively. More details on custom cutouts and natura raster are provided below.
 
 * ``cutouts``: These parameters refer to the climate data archive name used for calculating renewable potential. By defining appropriate cutouts, you ensure that your model is equipped with the necessary weather data for accurate simulations. By default, pre-compiled cutouts have standard name of ``cutout-2013-era5``. Adjust it accordingly, if custom cutouts are utilized.
 
@@ -62,6 +62,3 @@ However, it's worth noting that generating a customized ``natura.tiff`` file wit
 
 4. Model Validation
 -------------------
-
-
-
