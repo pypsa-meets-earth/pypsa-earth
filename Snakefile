@@ -556,6 +556,7 @@ rule add_electricity:
 
 rule simplify_network:
     params:
+        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
         renewable=config["renewable"],
         geo_crs=config["crs"]["geo_crs"],
         cluster_options=config["cluster_options"],
