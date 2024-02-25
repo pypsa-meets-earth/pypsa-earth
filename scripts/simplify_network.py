@@ -874,7 +874,7 @@ if __name__ == "__main__":
         snakemake.params.config_links,
         snakemake.output,
         exclude_carriers,
-        aggregation_strategies,
+        snakemake.params.aggregation_strategies,
     )
 
     busmaps = [trafo_map, simplify_links_map]
@@ -891,12 +891,14 @@ if __name__ == "__main__":
             hvdc_as_lines,
             lines_length_factor,
             snakemake.output,
-            aggregation_strategies=aggregation_strategies,
+            aggregation_strategies=snakemake.params.aggregation_strategies,
         )
         busmaps.append(stub_map)
 
     if cluster_config.get("to_substations", False):
-        n, substation_map = aggregate_to_substations(n, aggregation_strategies)
+        n, substation_map = aggregate_to_substations(
+            n, snakemake.params.aggregation_strategies
+        )
         busmaps.append(substation_map)
 
     # treatment of outliers (nodes without a profile for considered carrier):
@@ -928,7 +930,9 @@ if __name__ == "__main__":
             logger.info(
                 f"clustering preparation (hac): aggregating {len(buses_i)} buses of type {carrier}."
             )
-            n, busmap_hac = aggregate_to_substations(n, aggregation_strategies, buses_i)
+            n, busmap_hac = aggregate_to_substations(
+                n, params.aggregation_strategies, buses_i
+            )
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
@@ -958,7 +962,7 @@ if __name__ == "__main__":
             solver_name,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
-            aggregation_strategies,
+            aggregation_strategies=snakemake.params.aggregation_strategies,
         )
         busmaps.append(cluster_map)
 
