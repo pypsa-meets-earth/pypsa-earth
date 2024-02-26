@@ -576,9 +576,9 @@ def clustering_for_n_clusters(
     extended_link_costs=0,
     focus_weights=None,
 ):
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
+    line_strategies = aggregation_strategies.get("lines", dict())
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
@@ -604,12 +604,13 @@ def clustering_for_n_clusters(
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=aggregate_carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
+        line_strategies=line_strategies,
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
 
