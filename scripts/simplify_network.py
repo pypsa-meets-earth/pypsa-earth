@@ -988,13 +988,13 @@ if __name__ == "__main__":
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
-    if p_threshold_merge_isolated:
-        n, merged_nodes_map = merge_isolated_nodes(
-            n,
-            threshold=p_threshold_merge_isolated,
-            aggregation_strategies=snakemake.params.aggregation_strategies,
-        )
-        busmaps.append(merged_nodes_map)
+    # if p_threshold_merge_isolated:
+    #     n, merged_nodes_map = merge_isolated_nodes(
+    #         n,
+    #         threshold=p_threshold_merge_isolated,
+    #         aggregation_strategies=snakemake.params.aggregation_strategies,
+    #     )
+    #     busmaps.append(merged_nodes_map)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
