@@ -496,8 +496,15 @@ def base_network(
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
     lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
+    lines_ac.num_parallel = lines_ac.num_parallel * (
+        lines_ac.v_nom_original / lines_ac.v_nom
+    )
+
     lines_dc = _set_electrical_parameters_dc_lines(
         lines_config, voltages_config, lines_dc
+    )
+    lines_dc.num_parallel = lines_dc.num_parallel * (
+        lines_dc.v_nom_original / lines_dc.v_nom
     )
 
     transformers = _set_electrical_parameters_transformers(
