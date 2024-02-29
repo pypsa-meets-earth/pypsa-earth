@@ -125,6 +125,7 @@ import os
 from functools import reduce
 
 import geopandas as gpd
+import linopy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -351,7 +352,8 @@ def distribute_clusters(
         logger.info(
             f"The configured solver `{solver_name}` does not support quadratic objectives. Falling back to `scip`."
         )
-        solver_name = "scip"
+        # solver_name = "scip"
+        solver_name = "ipopt"
     m.solve(solver_name=solver_name)
     return m.solution["n"].to_series().astype(int)
 
