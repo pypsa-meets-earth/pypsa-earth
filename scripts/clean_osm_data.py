@@ -457,6 +457,7 @@ def split_and_match_voltage_frequency_size(df):
     last value in the column.
 
     The function does as follows:
+
     1. First, it splits voltage and frequency columns by semicolon
        For example, the following lines
        row 1: '50', '220000
@@ -517,6 +518,7 @@ def fill_circuits(df):
     element matches the size of the list in the frequency column.
 
     Multiple procedure are adopted:
+
     1. In the rows of circuits where the number of elements matches
        the number of the frequency column, nothing is done
     2. Where the number of elements in the cables column match the ones
@@ -810,9 +812,11 @@ def create_extended_country_shapes(country_shapes, offshore_shapes, tolerance=0.
             {
                 "name": list(country_shapes.index),
                 "geometry": [
-                    c_geom.unary_union(offshore_shapes[c_code])
-                    if c_code in offshore_shapes
-                    else c_geom
+                    (
+                        c_geom.unary_union(offshore_shapes[c_code])
+                        if c_code in offshore_shapes
+                        else c_geom
+                    )
                     for c_code, c_geom in country_shapes.items()
                 ],
             },

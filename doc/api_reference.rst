@@ -80,12 +80,6 @@ clean_osm_data
 .. automodule:: clean_osm_data
     :members:
 
-config_osm_data
--------------------------------
-
-.. automodule:: config_osm_data
-    :members:
-
 download_osm_data
 -------------------------------
 

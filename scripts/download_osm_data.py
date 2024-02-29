@@ -44,7 +44,7 @@ def country_list_to_geofk(country_list):
     Parameters
     ----------
     input : str
-        Any two-letter country name or aggregation of countries given in config_osm_data.py
+        Any two-letter country name or aggregation of countries given in osm_config.yaml
         Country name duplications won't distort the result.
         Examples are:
         ["NG","ZA"], downloading osm data for Nigeria and South Africa

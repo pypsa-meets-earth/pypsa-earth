@@ -30,6 +30,9 @@ from _helpers import (
     two_2_three_digits_country,
     two_digits_2_name_country,
 )
+from numba import njit
+from numba.core import types
+from numba.typed import Dict
 from rasterio.mask import mask
 from rasterio.windows import Window
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
@@ -40,9 +43,6 @@ from tqdm import tqdm
 
 sets_path_to_root("pypsa-earth")
 
-from numba import njit
-from numba.core import types
-from numba.typed import Dict
 
 logger = create_logger(__name__)
 
@@ -360,11 +360,9 @@ def eez(
     tolerance=0.01,
 ):
     """
-    Creates offshore shapes by.
-
-    - buffer smooth countryshape (=offset country shape)
-    - and differ that with the offshore shape
-    Leads to for instance a 100m non-build coastline
+    Creates offshore shapes by buffer smooth countryshape (=offset country
+    shape) and differ that with the offshore shape which leads to for instance
+    a 100m non-build coastline.
     """
 
     if out_logging:
@@ -395,9 +393,9 @@ def eez(
 
     # repeat to simplify after the buffer correction
     ret_df_new = ret_df_new.map(
-        lambda x: x
-        if x is None
-        else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+        lambda x: (
+            x if x is None else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+        )
     )
     ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
@@ -729,11 +727,13 @@ def process_function_population(row_id):
     Function that reads the task from df_tasks and executes all the methods.
 
     to obtain population values for the specified region
-    -------
+
     Inputs:
+    -------
         row_id: integer which indicates a specific row of df_tasks
-    --------
+
     Outputs:
+    --------
         windowed_pop_count: Dataframe containing "GADM_ID" and "pop" columns
         It represents the amount of population per region (GADM_ID),
         for the settings given by the row in df_tasks
@@ -776,13 +776,15 @@ def process_function_population(row_id):
 
 def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
     """
-    Function to extract data from .tif input file
-    -------
+    Function to extract data from .tif input file.
+
     Inputs:
+    -------
         WorldPop_inputfile: file location of worldpop file
         window_dimensions: dimensions of window used when reading file
-    --------
+
     Outputs:
+    --------
         np_pop_valid: array filled with values for each nonzero pixel in the worldpop file
         np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
     """
@@ -820,16 +822,18 @@ def compute_geomask_region(
     country_rows, affine_transform, window_dimensions, latlong_topleft, latlong_botright
 ):
     """
-    Function to mask geometries into np_map_ID using an incrementing counter
-    -------
+    Function to mask geometries into np_map_ID using an incrementing counter.
+
     Inputs:
+    -------
         country_rows: geoDataFrame filled with geometries and their GADM_ID
         affine_transform: affine transform of current window
         window_dimensions: dimensions of window used when reading file
         latlong_topleft: [latitude, longitude] of top left corner of the window
         latlong_botright: [latitude, longitude] of bottom right corner of the window
-    --------
+
     Outputs:
+    --------
         np_map_ID.astype("H"): np_map_ID contains an ID for each location (undefined is 0)
             dimensions are taken from window_dimensions, .astype("H") for memory savings
         id_result:
@@ -894,14 +898,16 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
     GADM_ID It uses np_pop_xy to access the key stored in region_geomask[x][y]
 
     The relation of this key to GADM_ID is stored in id_mapping
-    -------
+
     Inputs:
+    -------
         np_pop_val: array filled with values for each nonzero pixel in the worldpop file
         np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
         region_geomask: array with dimensions of window, values are keys that map to GADM_ID using id_mapping
         id_mapping: Dataframe that contains mappings of region_geomask values to GADM_IDs
-    --------
+
     Outputs:
+    --------
         df_pop_count: Dataframe with columns
             - "GADM_ID"
             - "pop" containing population of GADM_ID region
@@ -942,15 +948,17 @@ def loop_and_extact_val_x_y(
     population values from np_pop_val and stores them in np_pop_count.
 
     where each location in np_pop_count is mapped to a GADM_ID through dict_id (id_mapping by extension)
-    -------
+
     Inputs:
+    -------
         np_pop_count: np.zeros array, which will store population counts
         np_pop_val: array filled with values for each nonzero pixel in the worldpop file
         np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
         region_geomask: array with dimensions of window, values are keys that map to GADM_ID using id_mapping
         dict_id: numba typed.dict containing id_mapping.index -> location in np_pop_count
-    --------
+
     Outputs:
+    --------
         np_pop_count: np.array containing population counts
     """
     # Loop the population data
@@ -972,21 +980,21 @@ def calculate_transform_and_coords_for_window(
 ):
     """
     Function which calculates the [lat,long] corners of the window given
-    window_dimensions,
+    window_dimensions, if not(original_window) it also changes the affine
+    transform to match the window.
 
-    if not(original_window) it also changes the affine transform to match the window
-    -------
     Inputs:
-        current_transform: affine transform of source image
-        window_dimensions: dimensions of window used when reading file
-        original_window: boolean to track if window covers entire country
-    --------
+    -------
+        - current_transform: affine transform of source image
+        - window_dimensions: dimensions of window used when reading file
+        - original_window: boolean to track if window covers entire country
+
     Outputs:
+    --------
         A list of: [
             adjusted_transform: affine transform adjusted to window
             coordinate_topleft: [latitude, longitude] of top left corner of the window
-            coordinate_botright: [latitude, longitude] of bottom right corner of the window
-        ]
+            coordinate_botright: [latitude, longitude] of bottom right corner of the window ]
     """
     col_offset, row_offset, x_axis_len, y_axis_len = window_dimensions
 
@@ -1028,13 +1036,15 @@ def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
     Function to generate a list of tasks based on the memory constraints.
 
     One task represents a single window of the image
-    -------
+
     Inputs:
+    -------
         c_code: country code
         mem_read_limit_per_process: memory limit for src.read() operation
         WorldPop_inputfile: file location of worldpop file
-    --------
+
     Outputs:
+    --------
         Dataframe of task_list
     """
     task_list = []
@@ -1125,6 +1135,7 @@ def add_population_data(
     shape is identified by summing over all pixels mapped to that region.
 
     This is performed with an iterative approach:
+
     1. All necessary WorldPop data tiff file are downloaded
     2. The so-called windows are created to handle RAM limitations related to large WorldPop files.
        Large WorldPop files require significant RAM to handle, which may not be available,
@@ -1285,10 +1296,8 @@ def gadm(
         )
 
     # renaming 3 letter to 2 letter ISO code before saving GADM file
-    # In the case of a contested territory in the form 'Z00.00_0', save 'AA.Z00.00_0'
-    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].apply(
-        lambda x: "." + x if x[0] == "Z" else x[3:]
-    )
+    # In the case of a contested territory in the form 'Z00.00_0', save 'AA.00_0'
+    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].str[3:]
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(
