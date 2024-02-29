@@ -451,6 +451,8 @@ def _rebase_voltage_to_config(base_network_config, voltages_config, component):
     config : dictionary (by snakemake)
     component : dataframe
     """
+    component["v_nom_original"] = component["v_nom"]
+
     v_min = (
         base_network_config["min_voltage_rebase_voltage"] / 1000
     )  # min. filtered value in dataset
