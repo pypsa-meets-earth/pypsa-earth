@@ -16,11 +16,14 @@
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/VHH8TCwn)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
-Sector-coupled PyPSA-Earth is the first of its kind: an open-source, sector-coupled energy system model with global coverage. It is designed to facilitate transparent analysis and informed decision-making for a sustainable energy future. The model's workflow leverages open datasets to customize the model according to the specific needs of any country or region, delivering complete optimization results that encompass policy, technical, economic, and environmental impacts. It is built on top of [PyPSA-Earth](https://github.com/pypsa-meets-earth/pypsa-earth), the two models are soon to be merged into one encompassing the scope of both models.
+Sector-coupled PyPSA-Earth is the first of its kind: an open-source, sector-coupled energy system model with global coverage. It is designed to facilitate transparent analysis and informed decision-making for a sustainable energy future. 
+The model's workflow leverages open datasets to customize the model according to the specific needs of any country or region, delivering complete optimization results that encompass policy, technical, economic, and environmental impacts. 
+It is built on top of [PyPSA-Earth](https://github.com/pypsa-meets-earth/pypsa-earth), the two models are soon to be merged into one encompassing the scope of both models.
 
-Our mission with Sector-coupled PyPSA-Earth is to empower stakeholders around the globe with the ability to transparently analyze and plan the transition to a decarbonized, integrated energy system. By making this tool openly available, we aim to foster collaboration, innovation, and informed policy-making that leads to sustainable and efficient energy solutions for the future.
+Our mission with Sector-coupled PyPSA-Earth is to empower stakeholders around the globe with the ability to transparently analyze and plan the transition to a decarbonized, integrated energy system. 
+By making this tool openly available, we aim to foster collaboration, innovation, and informed policy-making that leads to sustainable and efficient energy solutions for the future.
 
-The paper describing the model in details is currently under review. The preprint is already available here.
+The paper describing the model in details is currently under review. The preprint is already available [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4743242).
 
 ## Key Features
 
