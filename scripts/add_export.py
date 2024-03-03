@@ -36,7 +36,9 @@ def select_ports(n):
 
     ports = ports[ports.country.isin(countries)]
     if len(ports) < 1:
-        logger.error("No export ports chosen, please add ports to the file data/export_ports.csv")
+        logger.error(
+            "No export ports chosen, please add ports to the file data/export_ports.csv"
+        )
     gadm_level = snakemake.config["sector"]["gadm_level"]
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(

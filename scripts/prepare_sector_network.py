@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import re
 from types import SimpleNamespace
 
-import logging
 import numpy as np
 import pandas as pd
 import pypsa
@@ -133,8 +133,8 @@ def add_oil(n, costs):
         n.add("Carrier", "oil")
 
     # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted seperately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
-    #n.carriers.loc["oil", "co2_emissions"] = 0
-    #print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
+    # n.carriers.loc["oil", "co2_emissions"] = 0
+    # print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
 
     n.madd(
         "Bus",
@@ -579,12 +579,23 @@ def add_biomass(n, costs):
         # costs
         countries_not_in_index = set(countries) - set(biomass_transport.index)
         if countries_not_in_index:
-            logger.info("No transport values found for {0}, using default value of {1}".format(
-                ', '.join(countries_not_in_index), snakemake.config["sector"]["biomass_transport_default_cost"]
-            ))
+            logger.info(
+                "No transport values found for {0}, using default value of {1}".format(
+                    ", ".join(countries_not_in_index),
+                    snakemake.config["sector"]["biomass_transport_default_cost"],
+                )
+            )
 
-        bus0_costs = biomass_transport.bus0.apply(lambda x: transport_costs.get(x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]))
-        bus1_costs = biomass_transport.bus1.apply(lambda x: transport_costs.get(x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]))
+        bus0_costs = biomass_transport.bus0.apply(
+            lambda x: transport_costs.get(
+                x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]
+            )
+        )
+        bus1_costs = biomass_transport.bus1.apply(
+            lambda x: transport_costs.get(
+                x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]
+            )
+        )
         biomass_transport["costs"] = pd.concat([bus0_costs, bus1_costs], axis=1).mean(
             axis=1
         )
@@ -1629,7 +1640,7 @@ def add_heat(n, costs):
     # exogenously reduce space heat demand
     if options["reduce_space_heat_exogenously"]:
         dE = get(options["reduce_space_heat_exogenously_factor"], investment_year)
-        #print(f"assumed space heat reduction of {dE*100} %")
+        # print(f"assumed space heat reduction of {dE*100} %")
         for sector in sectors:
             heat_demand[sector + " space"] = (1 - dE) * heat_demand[sector + " space"]
 
@@ -2151,7 +2162,6 @@ def add_residential(n, costs):
         )
         * 1e6
     )
-
 
     # TODO make compatible with more counties
     profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
