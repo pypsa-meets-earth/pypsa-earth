@@ -1616,11 +1616,11 @@ def create_nodes_for_heat_sector():
     diff = (urban_fraction * central_fraction) - dist_fraction_node
     progress = get(options["district_heating"]["progress"], investment_year)
     dist_fraction_node += diff * progress
-    logger.info(
-        "The current district heating share compared to the maximum",
-        f"possible is increased by a progress factor of\n{progress}",
-        "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
-    )
+    # logger.info(
+    #     "The current district heating share compared to the maximum",
+    #     f"possible is increased by a progress factor of\n{progress}",
+    #     "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
+    # )
 
     return nodes, dist_fraction_node, urban_fraction
 
