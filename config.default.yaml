@@ -13,7 +13,7 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 74
+  - 10
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -26,7 +26,7 @@ scenario:
   - "AB"
 
 policy_config:
-  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching"
+  policy: "no_res_matching" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching"
   monthly: # Specify attributes for the monthly constraint
     allowed_excess: 1.0
     reference_case: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
@@ -235,7 +235,8 @@ sector:
   industry_util_factor: 0.7
 
   biomass_transport: true  # biomass transport between nodes
-  solid_biomass_potential: 2 # TWh/a, Potential of whole modelled area
+  biomass_transport_default_cost: 0.1 #EUR/km/MWh
+  solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
   biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
 
   efficiency_heat_oil_to_elec: 0.9

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import re
 from types import SimpleNamespace
@@ -21,6 +22,8 @@ from helpers import (
     two_2_three_digits_country,
 )
 from prepare_transport_data import prepare_transport_data
+
+logger = logging.getLogger(__name__)
 
 spatial = SimpleNamespace()
 
@@ -77,7 +80,7 @@ def add_generation(n, costs):
         _type_: _description_
     """ """"""
 
-    print("adding electricity generation")
+    logger.info("adding electricity generation")
 
     # Not required, because nodes are already defined in "nodes"
     # nodes = pop_layout.index
@@ -130,8 +133,8 @@ def add_oil(n, costs):
         n.add("Carrier", "oil")
 
     # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted seperately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
-    n.carriers.loc["oil", "co2_emissions"] = 0
-    print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
+    # n.carriers.loc["oil", "co2_emissions"] = 0
+    # print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
 
     n.madd(
         "Bus",
@@ -481,19 +484,19 @@ def define_spatial(nodes):
 
 
 def add_biomass(n, costs):
-    print("adding biomass")
+    logger.info("adding biomass")
 
     # TODO get biomass potentials dataset and enable spatially resolved potentials
 
     # Get biomass and biogas potentials from config and convert from TWh to MWh
     biomass_pot = snakemake.config["sector"]["solid_biomass_potential"] * 1e6  # MWh
     biogas_pot = snakemake.config["sector"]["biogas_potential"] * 1e6  # MWh
-    print("Biomass and Biogas potential fetched from config")
+    logger.info("Biomass and Biogas potential fetched from config")
 
     # Convert from total to nodal potentials,
     biomass_pot_spatial = biomass_pot / len(spatial.biomass.nodes)
     biogas_pot_spatial = biogas_pot / len(spatial.gas.biogas)
-    print("Biomass potentials spatially resolved equally across all nodes")
+    logger.info("Biomass potentials spatially resolved equally across all nodes")
 
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
@@ -574,8 +577,25 @@ def add_biomass(n, costs):
         )
 
         # costs
-        bus0_costs = biomass_transport.bus0.apply(lambda x: transport_costs[x[:2]])
-        bus1_costs = biomass_transport.bus1.apply(lambda x: transport_costs[x[:2]])
+        countries_not_in_index = set(countries) - set(biomass_transport.index)
+        if countries_not_in_index:
+            logger.info(
+                "No transport values found for {0}, using default value of {1}".format(
+                    ", ".join(countries_not_in_index),
+                    snakemake.config["sector"]["biomass_transport_default_cost"],
+                )
+            )
+
+        bus0_costs = biomass_transport.bus0.apply(
+            lambda x: transport_costs.get(
+                x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]
+            )
+        )
+        bus1_costs = biomass_transport.bus1.apply(
+            lambda x: transport_costs.get(
+                x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]
+            )
+        )
         biomass_transport["costs"] = pd.concat([bus0_costs, bus1_costs], axis=1).mean(
             axis=1
         )
@@ -1085,7 +1105,7 @@ def add_shipping(n, costs):
 
 
 def add_industry(n, costs):
-    print("adding industrial demand")
+    logger.info("adding industrial demand")
     # 1e6 to convert TWh to MWh
 
     # industrial_demand.reset_index(inplace=True)
@@ -1397,7 +1417,7 @@ def add_land_transport(n, costs):
     """
     # TODO options?
 
-    print("adding land transport")
+    logger.info("adding land transport")
 
     if options["dynamic_transport"]["enable"] == False:
         fuel_cell_share = get(
@@ -1419,9 +1439,9 @@ def add_land_transport(n, costs):
 
     ice_share = 1 - fuel_cell_share - electric_share
 
-    print("FCEV share", fuel_cell_share)
-    print("EV share", electric_share)
-    print("ICEV share", ice_share)
+    logger.info("FCEV share: {}".format(fuel_cell_share))
+    logger.info("EV share: {}".format(electric_share))
+    logger.info("ICEV share: {}".format(ice_share))
 
     assert ice_share >= 0, "Error, more FCEV and EV share than 1."
 
@@ -1596,11 +1616,11 @@ def create_nodes_for_heat_sector():
     diff = (urban_fraction * central_fraction) - dist_fraction_node
     progress = get(options["district_heating"]["progress"], investment_year)
     dist_fraction_node += diff * progress
-    print(
-        "The current district heating share compared to the maximum",
-        f"possible is increased by a progress factor of\n{progress}",
-        "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
-    )
+    # logger.info(
+    #     "The current district heating share compared to the maximum",
+    #     f"possible is increased by a progress factor of\n{progress}",
+    #     "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
+    # )
 
     return nodes, dist_fraction_node, urban_fraction
 
@@ -1609,7 +1629,7 @@ def add_heat(n, costs):
     # TODO options?
     # TODO pop_layout?
 
-    print("adding heat")
+    logger.info("adding heat")
 
     sectors = ["residential", "services"]
 
@@ -1620,7 +1640,7 @@ def add_heat(n, costs):
     # exogenously reduce space heat demand
     if options["reduce_space_heat_exogenously"]:
         dE = get(options["reduce_space_heat_exogenously_factor"], investment_year)
-        print(f"assumed space heat reduction of {dE*100} %")
+        # print(f"assumed space heat reduction of {dE*100} %")
         for sector in sectors:
             heat_demand[sector + " space"] = (1 - dE) * heat_demand[sector + " space"]
 
@@ -2143,18 +2163,6 @@ def add_residential(n, costs):
         * 1e6
     )
 
-    print("#############################################")
-    print("#############################################")
-    print("#############################################")
-    print(nodes)
-    print("#############################################")
-    print("#############################################")
-    print("#############################################")
-    print(heat_shape)
-    print("#############################################")
-    print("#############################################")
-    print("#############################################")
-
     # TODO make compatible with more counties
     profile_residential = n.loads_t.p_set[nodes] / n.loads_t.p_set[nodes].sum().sum()
 
@@ -2331,13 +2339,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="56",
-            ll="c1",
+            clusters="10",
+            ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="2000H",
+            sopts="144H",
             discountrate="0.071",
-            demand="DF",
+            demand="AB",
         )
 
     # Load population layout
