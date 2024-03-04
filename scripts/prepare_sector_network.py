@@ -2077,6 +2077,37 @@ def add_agriculture(n, costs):
     )
 
 
+def normalize_by_country(df, droplevel=False):
+    """
+    Auxiliary function to normalize a dataframe by the country.
+
+    If droplevel is False (default), the country level is added to the column index
+    If droplevel is True, the original column format is preserved
+    """
+    ret = df.T.groupby(df.columns.str[:2]).apply(lambda x: x / x.sum().sum()).T
+    if droplevel:
+        return ret.droplevel(0, axis=1)
+    else:
+        return ret
+
+
+def group_by_node(df, multiindex=False):
+    """
+    Auxiliary function to group a dataframe by the node name
+    """
+    ret = df.T.groupby(df.columns.str.split(" ").str[0]).sum().T
+    if multiindex:
+        ret.columns = pd.MultiIndex.from_tuples(zip(ret.columns.str[:2], ret.columns))
+    return ret
+
+
+def normalize_and_group(df, multiindex=False):
+    """Function to concatenate normalize_by_country and group_by_node"""
+    return group_by_node(
+        normalize_by_country(df, droplevel=True), multiindex=multiindex
+    )
+
+
 def add_residential(n, costs):
     # need to adapt for many countries #TODO
 
@@ -2110,46 +2141,29 @@ def add_residential(n, costs):
         .columns
     )
 
-    heat_shape = (
-        n.loads_t.p_set.loc[:, heat_ind] / n.loads_t.p_set.loc[:, heat_ind].sum().sum()
+    heat_shape_raw = normalize_by_country(n.loads_t.p_set[heat_ind])
+
+    n.loads_t.p_set[heat_ind] = 1e6 * heat_shape_raw.mul(
+        energy_totals["total residential space"]
+        + energy_totals["total residential water"]
+        - energy_totals["residential heat biomass"]
+        - energy_totals["residential heat oil"]
+        - energy_totals["residential heat gas"],
+        level=0,
+    ).droplevel(level=0, axis=1)
+
+    heat_shape = group_by_node(heat_shape_raw.droplevel(0, axis=True), multiindex=True)
+
+    heat_oil_demand = 1e6 * heat_shape.mul(
+        energy_totals["residential heat oil"], level=0
     )
 
-    heat_shape = heat_shape.groupby(
-        lambda x: next(
-            (
-                substring
-                for substring in sorted(spatial.nodes, key=len, reverse=True)
-                if substring in x
-            ),
-            x,
-        ),
-        axis=1,
-    ).sum()
-
-    heat_oil_demand = (
-        heat_shape * energy_totals.loc[countries, "residential heat oil"].sum() * 1e6
+    heat_biomass_demand = 1e6 * heat_shape.mul(
+        energy_totals["residential heat biomass"], level=0
     )
 
-    heat_biomass_demand = (
-        heat_shape
-        * energy_totals.loc[countries, "residential heat biomass"].sum()
-        * 1e6
-    )
-
-    heat_gas_demand = (
-        heat_shape * energy_totals.loc[countries, "residential heat gas"].sum() * 1e6
-    )
-
-    n.loads_t.p_set.loc[:, heat_ind] = (
-        heat_shape
-        * (
-            energy_totals.loc[countries, "total residential space"].sum()
-            + energy_totals.loc[countries, "total residential water"].sum()
-            - energy_totals.loc[countries[0], "residential heat biomass"]
-            - energy_totals.loc[countries[0], "residential heat oil"]
-            - energy_totals.loc[countries[0], "residential heat gas"]
-        )
-        * 1e6
+    heat_gas_demand = 1e6 * heat_shape.mul(
+        energy_totals["residential heat gas"], level=0
     )
 
     print("#############################################")
@@ -2164,28 +2178,25 @@ def add_residential(n, costs):
     print("#############################################")
     print("#############################################")
 
-    # TODO make compatible with more counties
-    profile_residential = (
-        n.loads_t.p_set[spatial.nodes] / n.loads_t.p_set[spatial.nodes].sum().sum()
-    )
+    res_index = spatial.nodes.intersection(n.loads_t.p_set.columns)
+    profile_residential = normalize_and_group(
+        n.loads_t.p_set[res_index], multiindex=True
+    ).fillna(0)
 
-    p_set_oil = (
-        profile_residential
-        * energy_totals.loc[countries, "residential oil"].sum()
-        * 1e6
-    ) + heat_oil_demand.values
+    p_set_oil = 1e6 * (
+        profile_residential.mul(energy_totals["residential oil"], level=0)
+        + heat_oil_demand
+    ).droplevel(level=0, axis=1)
 
-    p_set_biomass = (
-        profile_residential
-        * energy_totals.loc[countries, "residential biomass"].sum()
-        * 1e6
-    ) + heat_biomass_demand.values
+    p_set_biomass = 1e6 * (
+        profile_residential.mul(energy_totals["residential biomass"], level=0)
+        + heat_biomass_demand
+    ).droplevel(level=0, axis=1)
 
-    p_set_gas = (
-        profile_residential
-        * energy_totals.loc[countries, "residential gas"].sum()
-        * 1e6
-    ) + heat_gas_demand.values
+    p_set_gas = 1e6 * (
+        profile_residential.mul(energy_totals["residential gas"], level=0)
+        + heat_gas_demand
+    ).droplevel(level=0, axis=1)
 
     n.madd(
         "Load",
@@ -2256,11 +2267,12 @@ def add_residential(n, costs):
 
         buses = n.buses[(n.buses.carrier == "AC") & (n.buses.country == country)].index
 
+        loads_t_filter = n.loads_t.p_set.filter(like=country)
+        if loads_t_filter.empty:
+            continue
+
         n.loads_t.p_set.loc[:, buses] = (
-            (
-                n.loads_t.p_set.filter(like=country)[buses]
-                / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
-            )
+            (loads_t_filter[buses] / loads_t_filter[buses].sum().sum())
             * energy_totals.loc[country, "electricity residential"]
             * 1e6
         )
