@@ -113,6 +113,7 @@ if __name__ == "__main__":
         update=False,
         mp=True,
         data_dir=store_path_data,
+        out_dir=store_path_data,
         out_format=["csv", "geojson"],
         out_aggregate=True,
     )
