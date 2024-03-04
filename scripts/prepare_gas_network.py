@@ -480,7 +480,6 @@ def gadm(
     out_logging=False,
     year=2020,
     nprocesses=None,
-    nchunks=None,
 ):
     if out_logging:
         logger.info("Stage 4/4: Creation GADM GeoDataFrame")
@@ -545,7 +544,6 @@ def load_bus_region(onshore_path, pipelines):
         contended_flag = config_pypsa_earth["build_shape_options"]["contended_flag"]
         geo_crs = config_pypsa_earth["crs"]["geo_crs"]
         distance_crs = config_pypsa_earth["crs"]["distance_crs"]
-        nchunks = config_pypsa_earth["build_shape_options"]["nchunks"]
 
         bus_regions_onshore = gadm(
             countries_list,
@@ -556,7 +554,6 @@ def load_bus_region(onshore_path, pipelines):
             out_logging,
             year,
             nprocesses=nprocesses,
-            nchunks=nchunks,
         )
 
         # bus_regions_onshore = bus_regions_onshore.reset_index()
