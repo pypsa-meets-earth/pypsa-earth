@@ -158,6 +158,7 @@ def add_oil(n, costs):
         marginal_cost=costs.at["oil", "fuel"],
     )
 
+    # TODO check non-unique generators
     n.madd(
         "Generator",
         spatial.oil.nodes,
@@ -1949,16 +1950,15 @@ def add_dac(n, costs):
 
 
 def add_services(n, costs):
-    # TODO make compatible with more counties
-    profile_residential = (
-        n.loads_t.p_set[spatial.nodes] / n.loads_t.p_set[spatial.nodes].sum().sum()
-    )
+    buses = spatial.nodes.intersection(n.loads_t.p_set.columns)
 
-    p_set_elec = (
-        profile_residential
-        * energy_totals.loc[countries, "services electricity"].sum()
-        * 1e6
-    )
+    profile_residential = normalize_by_country(
+        n.loads_t.p_set[buses].reindex(columns=spatial.nodes, fill_value=0.0)
+    ).fillna(0)
+
+    p_set_elec = 1e6 * profile_residential.mul(
+        energy_totals["services electricity"], level=0
+    ).droplevel(level=0, axis=1)
 
     n.madd(
         "Load",
@@ -1968,11 +1968,9 @@ def add_services(n, costs):
         carrier="services electricity",
         p_set=p_set_elec,
     )
-    p_set_biomass = (
-        profile_residential
-        * energy_totals.loc[countries, "services biomass"].sum()
-        * 1e6
-    )
+    p_set_biomass = 1e6 * profile_residential.mul(
+        energy_totals["services biomass"], level=0
+    ).droplevel(level=0, axis=1)
 
     n.madd(
         "Load",
@@ -1994,9 +1992,9 @@ def add_services(n, costs):
     #     carrier="biomass emissions",
     #     p_set=-co2,
     # )
-    p_set_oil = (
-        profile_residential * energy_totals.loc[countries, "services oil"].sum() * 1e6
-    )
+    p_set_oil = 1e6 * profile_residential.mul(
+        energy_totals["services oil"], level=0
+    ).droplevel(level=0, axis=1)
 
     n.madd(
         "Load",
@@ -2007,7 +2005,8 @@ def add_services(n, costs):
         p_set=p_set_oil,
     )
 
-    co2 = (p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]) / 8760
+    # TODO check with different snapshot settings
+    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"] * 8760
 
     n.add(
         "Load",
@@ -2017,9 +2016,9 @@ def add_services(n, costs):
         p_set=-co2,
     )
 
-    p_set_gas = (
-        profile_residential * energy_totals.loc[countries, "services gas"].sum() * 1e6
-    )
+    p_set_gas = 1e6 * profile_residential.mul(
+        energy_totals["services gas"], level=0
+    ).droplevel(level=0, axis=1)
 
     n.madd(
         "Load",
@@ -2030,7 +2029,8 @@ def add_services(n, costs):
         p_set=p_set_gas,
     )
 
-    co2 = (p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]) / 8760
+    # TODO check with different snapshot settings
+    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"] * 8760
 
     n.add(
         "Load",
@@ -2268,7 +2268,7 @@ def add_residential(n, costs):
     # Revise residential electricity demand
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
 
-    profile_pu = normalize_and_group(n.loads_t.p_set[buses], multiindex=True).fillna(0)
+    profile_pu = normalize_by_country(n.loads_t.p_set[buses]).fillna(0)
     n.loads_t.p_set.loc[:, buses] = 1e6 * profile_pu.mul(
         energy_totals["electricity residential"], level=0
     ).droplevel(level=0, axis=1)
