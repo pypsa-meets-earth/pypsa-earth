@@ -2261,21 +2261,13 @@ def add_residential(n, costs):
             * 1e6
         )
 
-        # if snakemake.config["custom_data"]["elec_demand"]:
-    for country in countries:
-        # indd=n.loads_t.p_set[n.loads_t.p_set.columns.str.contains(country)]
+    # Revise residential electricity demand
+    buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
 
-        buses = n.buses[(n.buses.carrier == "AC") & (n.buses.country == country)].index
-
-        loads_t_filter = n.loads_t.p_set.filter(like=country)
-        if loads_t_filter.empty:
-            continue
-
-        n.loads_t.p_set.loc[:, buses] = (
-            (loads_t_filter[buses] / loads_t_filter[buses].sum().sum())
-            * energy_totals.loc[country, "electricity residential"]
-            * 1e6
-        )
+    profile_pu = normalize_and_group(n.loads_t.p_set[buses], multiindex=True).fillna(0)
+    n.loads_t.p_set.loc[:, buses] = 1e6 * profile_pu.mul(
+        energy_totals["electricity residential"], level=0
+    ).droplevel(level=0, axis=1)
 
 
 # def add_co2limit(n, Nyears=1.0, limit=0.0):
