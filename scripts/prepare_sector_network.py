@@ -1226,7 +1226,7 @@ def add_industry(n, costs):
         suffix=" H2 for industry",
         bus=spatial.nodes + " H2",
         carrier="H2 for industry",
-        p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
+        p_set=industrial_demand["hydrogen"] / 8760,
     )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -1236,7 +1236,7 @@ def add_industry(n, costs):
         suffix=" naphtha for industry",
         bus=spatial.oil.nodes,
         carrier="naphtha for industry",
-        p_set=industrial_demand["oil"].apply(lambda frac: frac / 8760),
+        p_set=industrial_demand["oil"] / 8760,
     )
 
     #     #NB: CO2 gets released again to atmosphere when plastics decay or kerosene is burned
@@ -1319,7 +1319,7 @@ def add_industry(n, costs):
     #     )
 
     # else:
-    industrial_elec = industrial_demand["electricity"].apply(lambda frac: frac / 8760)
+    industrial_elec = industrial_demand["electricity"] / 8760
 
     n.madd(
         "Load",
@@ -2206,7 +2206,9 @@ def add_residential(n, costs):
         carrier="residential oil",
         p_set=p_set_oil,
     )
-    co2 = (p_set_oil.sum().sum() * costs.at["oil", "CO2 intensity"]) / 8760
+
+    # TODO: check 8760 compatibility with different snapshot settings
+    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"] * 8760
 
     n.add(
         "Load",
@@ -2232,7 +2234,9 @@ def add_residential(n, costs):
         carrier="residential gas",
         p_set=p_set_gas,
     )
-    co2 = (p_set_gas.sum().sum() * costs.at["gas", "CO2 intensity"]) / 8760
+
+    # TODO: check 8760 compatibility with different snapshot settings
+    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"] * 8760
 
     n.add(
         "Load",
