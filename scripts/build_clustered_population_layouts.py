@@ -6,6 +6,7 @@ import atlite
 import geopandas as gpd
 import pandas as pd
 import xarray as xr
+from helpers import read_csv_nafix, to_csv_nafix
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -43,9 +44,9 @@ if __name__ == "__main__":
 
     pop["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
     country_population = pop.total.groupby(pop.ct).sum()
-    pop["fraction"] = pop.total / pop.ct.map(country_population)
+    pop["fraction"] = (pop.total / pop.ct.map(country_population)).fillna(0.0)
 
-    pop.to_csv(snakemake.output.clustered_pop_layout)
+    to_csv_nafix(pop, snakemake.output.clustered_pop_layout)
 
     gdp_layout = xr.open_dataarray(snakemake.input["gdp_layout"])
     gdp = I.dot(gdp_layout.stack(spatial=("y", "x")))
@@ -53,5 +54,5 @@ if __name__ == "__main__":
 
     gdp["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
     country_gdp = gdp.total.groupby(gdp.ct).sum()
-    gdp["fraction"] = gdp.total / gdp.ct.map(country_gdp)
-    gdp.to_csv(snakemake.output.clustered_gdp_layout)
+    gdp["fraction"] = (gdp.total / gdp.ct.map(country_gdp)).fillna(0.0)
+    to_csv_nafix(gdp, snakemake.output.clustered_gdp_layout)
