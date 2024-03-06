@@ -352,8 +352,7 @@ def distribute_clusters(
         logger.info(
             f"The configured solver `{solver_name}` does not support quadratic objectives. Falling back to `scip`."
         )
-        # solver_name = "scip"
-        solver_name = "ipopt"
+        solver_name = "scip"
     m.solve(solver_name=solver_name)
     return m.solution["n"].to_series().astype(int)
 
