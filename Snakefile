@@ -120,6 +120,13 @@ rule prepare_urban_percent:
         "scripts/prepare_urban_percent.py"
 
 
+rule prepare_transport_data_input:
+    output:
+        transport_data_input="resources/transport_data.csv",
+    script:
+        "scripts/prepare_transport_data_input.py"
+
+
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
@@ -353,10 +360,8 @@ rule build_population_layouts:
 rule move_hardcoded_files_temp:
     input:
         "data/temp_hard_coded/energy_totals.csv",
-        "data/temp_hard_coded/transport_data.csv",
     output:
         "resources/energy_totals.csv",
-        "resources/transport_data.csv",
     shell:
         "cp -a data/temp_hard_coded/. resources"
 
