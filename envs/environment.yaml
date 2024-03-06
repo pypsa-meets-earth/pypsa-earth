@@ -27,6 +27,7 @@ dependencies:
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
+- pyscipopt # added to compy with the quadratic objective requirement of the clustering script
 - lxml
 - numpy
 - pandas
