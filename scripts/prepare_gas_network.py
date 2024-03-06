@@ -483,7 +483,6 @@ def gadm(
     out_logging=False,
     year=2020,
     nprocesses=None,
-    nchunks=None,
 ):
     if out_logging:
         logger.info("Stage 4/4: Creation GADM GeoDataFrame")

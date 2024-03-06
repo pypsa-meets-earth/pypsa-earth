@@ -1,8 +1,9 @@
 
 
-# PyPSA-Earth-Sec: A Sector-Coupled Open Optimisation Model of the Global Energy System
+# Sector-coupled PyPSA-Earth: A Global Open Source Multi-Energy System Model
 
-## Development Status: Version 0.0.2
+
+## Development Status: Version 0.1
 
 [![Status Linux](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-linux.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-linux.yaml)
 [![Status Mac](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-mac.yaml/badge.svg?branch=main&event=push)](https://github.com/pypsa-meets-earth/pypsa-earth-sec/actions/workflows/ci-mac.yaml)
@@ -15,22 +16,27 @@
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/VHH8TCwn)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
-**Disclaimer: PyPSA-Earth-Sec is still under development.**
+Sector-coupled PyPSA-Earth is the first of its kind: an open-source, sector-coupled energy system model with global coverage. It is designed to facilitate transparent analysis and informed decision-making for a sustainable energy future.
+The model's workflow leverages open datasets to customize the model according to the specific needs of any country or region, delivering complete optimization results that encompass policy, technical, economic, and environmental impacts.
+It is built on top of [PyPSA-Earth](https://github.com/pypsa-meets-earth/pypsa-earth), the two models are soon to be merged into one encompassing the scope of both models.
 
-The workflow is adaped to work smoothly for the following countries: Morocco, Namibia, Nigeria and Benin. The spatial and temporal resolution of the model are flexible. It's advisable to use more than 3 nodes per country and a timestep not smaller than 3-hours.
+Our mission with Sector-coupled PyPSA-Earth is to empower stakeholders around the globe with the ability to transparently analyze and plan the transition to a decarbonized, integrated energy system.
+By making this tool openly available, we aim to foster collaboration, innovation, and informed policy-making that leads to sustainable and efficient energy solutions for the future.
 
+The paper describing the model in details is currently under review. The preprint is already available [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4743242).
 
-Currently, no real sectoral demand data is used for the country inspected, instead, we use dummy data. The collection, compilation and processing of real data is underway.
+## Key Features
 
+Sector-coupled PyPSA-Earth model introduces several novel features that set it apart:
 
-The model now includes the following energy carriers: **electricity**, **hydrogen**, **gas**, *oil** and biomass as well as **carbon** as gas emissions and feedstock for the synthesis of the carriers.
-
-The demand sectors covered are: **residential**, **industry**, **land transport**, **aviation**, **shipping**, **services** and agriculture.
+1. **Global Coverage:** It is the first open-source model capable of simulating sector-coupled energy systems on a global scale.
+2. **Adaptable Demand Projection Tool:** The model includes a flexible tool for projecting energy demand, tailored to the specifics of the region or country under study.
+3. **Global Geo-Asset Dataset:** A comprehensive dataset compiled from open sources forms the backbone of the model, providing detailed insights into energy assets worldwide.
+4. **Custom Dataset Integration:** While the model extensively uses open datasets, it also allows for the easy integration of custom datasets, offering flexibility to users who have specific data at their disposal.
 
 The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included.
 
-![alt text](https://github.com/pypsa-meets-earth/pypsa-earth-sec/blob/main/docs/pes_v0.0.2.png?raw=true)
-
+![alt text](https://github.com/pypsa-meets-earth/pypsa-earth-sec/blob/documentation/docs/SCPE.png?raw=true)
 
 
 ## Installation

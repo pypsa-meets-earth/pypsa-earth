@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
+import logging
 import os
 import sys
 from io import BytesIO
@@ -14,6 +15,8 @@ import pandas as pd
 import py7zr
 import requests
 from helpers import sets_path_to_root, three_2_two_digits_country
+
+_logger = logging.getLogger(__name__)
 
 pd.options.mode.chained_assignment = None
 
@@ -39,7 +42,47 @@ def calc_sector(sector):
             ]
 
         if df_sector.empty:
-            pass
+            if sector == "consumption by households":
+                energy_totals_base.at[country, "electricity residential"] = np.NaN
+                energy_totals_base.at[country, "residential oil"] = np.NaN
+                energy_totals_base.at[country, "residential biomass"] = np.NaN
+                energy_totals_base.at[country, "residential gas"] = np.NaN
+                energy_totals_base.at[country, "total residential space"] = np.NaN
+                energy_totals_base.at[country, "total residential water"] = np.NaN
+
+            elif sector == "services":
+                energy_totals_base.at[country, "services electricity"] = np.NaN
+                energy_totals_base.at[country, "services oil"] = np.NaN
+                energy_totals_base.at[country, "services biomass"] = np.NaN
+                energy_totals_base.at[country, "services gas"] = np.NaN
+                energy_totals_base.at[country, "total services space"] = np.NaN
+                energy_totals_base.at[country, "total services water"] = np.NaN
+
+            elif sector == "road":
+                energy_totals_base.at[country, "total road"] = np.NaN
+
+            elif sector == "agriculture":
+                energy_totals_base.at[country, "agriculture electricity"] = np.NaN
+                energy_totals_base.at[country, "agriculture oil"] = np.NaN
+                energy_totals_base.at[country, "agriculture biomass"] = np.NaN
+                # energy_totals_base.at[country, "electricity rail"] = np.NaN
+
+            elif sector == "rail":
+                energy_totals_base.at[country, "total rail"] = np.NaN
+                energy_totals_base.at[country, "electricity rail"] = np.NaN
+
+            elif sector == "aviation":
+                energy_totals_base.at[country, "total international aviation"] = np.NaN
+                energy_totals_base.at[country, "total domestic aviation"] = np.NaN
+
+            elif sector == "navigation":
+                energy_totals_base.at[
+                    country, "total international navigation"
+                ] = np.NaN
+                energy_totals_base.at[country, "total domestic navigation"] = np.NaN
+
+            _logger.warning("No data for " + country + " in the sector " + sector + ".")
+
         else:
             index_mass = df_sector.loc[
                 df_sector["Unit"] == "Metric tons,  thousand"
@@ -361,6 +404,4 @@ if __name__ == "__main__":
         calc_sector(sector)
 
     # Export the base energy totals file
-    energy_totals_base.dropna(axis=1, how="all").to_csv(
-        snakemake.output.energy_totals_base
-    )
+    energy_totals_base.to_csv(snakemake.output.energy_totals_base)
