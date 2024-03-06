@@ -1297,7 +1297,10 @@ def gadm(
 
     # renaming 3 letter to 2 letter ISO code before saving GADM file
     # In the case of a contested territory in the form 'Z00.00_0', save 'AA.00_0'
-    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].str[3:]
+    # Include bugfix for the case of 'XXX00_0' where the "." is missing, such as for Ghana
+    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].str[3:].apply(
+        lambda x: x if x[0] == "." else "." + x
+    )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(

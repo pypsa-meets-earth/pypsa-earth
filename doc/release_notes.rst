@@ -18,6 +18,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **Minor Changes and bug-fixing**
 
+* Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__ and `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__
+
 
 * Keep data on the original voltage value when rebasing voltages to the standard values and adjust the transmission capacity accordingly. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/978>`__
 
