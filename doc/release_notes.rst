@@ -23,6 +23,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__
 
+* Fix download_osm_data compatibility for earth-osm v2.1. `PR #954 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/954>`__
+
 PyPSA-Earth 0.3.0
 =================
 
