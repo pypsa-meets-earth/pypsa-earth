@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
+import logging
 import os
 import sys
 from io import BytesIO
@@ -14,6 +15,8 @@ import pandas as pd
 import py7zr
 import requests
 from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
+
+_logger = logging.getLogger(__name__)
 
 
 def get(item, investment_year=None):
@@ -63,9 +66,37 @@ if __name__ == "__main__":
     )
     growth_factors = calculate_end_values(growth_factors_cagr)
     efficiency_gains = calculate_end_values(efficiency_gains_cagr)
-    # efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
-    # fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
-    # district_heating = district_heating[district_heating.index.isin(countries)]
+
+    for country in countries:
+        if country not in efficiency_gains.index:
+            efficiency_gains.loc[country] = efficiency_gains.loc["DEFAULT"]
+            _logger.warning(
+                "No efficiency gains cagr data for "
+                + country
+                + " using default data instead."
+            )
+        if country not in growth_factors.index:
+            growth_factors.loc[country] = growth_factors.loc["DEFAULT"]
+            _logger.warning(
+                "No growth factors cagr data for "
+                + country
+                + " using default data instead."
+            )
+        if country not in fuel_shares.index:
+            fuel_shares.loc[country] = fuel_shares.loc["DEFAULT"]
+            _logger.warning(
+                "No fuel share data for " + country + " using default data instead."
+            )
+        if country not in district_heating.index:
+            district_heating.loc[country] = district_heating.loc["DEFAULT"]
+            _logger.warning(
+                "No heating data for " + country + " using default data instead."
+            )
+
+    efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
+    fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
+    district_heating = district_heating[district_heating.index.isin(countries)]
+    growth_factors = growth_factors[growth_factors.index.isin(countries)]
 
     options = snakemake.config["sector"]
 
