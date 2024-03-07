@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
+import logging
 import os
 import sys
 from io import BytesIO
@@ -14,6 +15,8 @@ import pandas as pd
 import py7zr
 import requests
 from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
+
+_logger = logging.getLogger(__name__)
 
 
 def get(item, investment_year=None):
@@ -50,22 +53,50 @@ if __name__ == "__main__":
 
     base_energy_totals = read_csv_nafix("data/energy_totals_base.csv", index_col=0)
     growth_factors_cagr = read_csv_nafix(
-        "data/demand/growth_factors_cagr.csv", index_col=0
+        snakemake.input.growth_factors_cagr, index_col=0
     )
     efficiency_gains_cagr = read_csv_nafix(
-        "data/demand/efficiency_gains_cagr.csv", index_col=0
+        snakemake.input.efficiency_gains_cagr, index_col=0
     )
-    fuel_shares = read_csv_nafix("data/demand/fuel_shares.csv", index_col=0)
-    district_heating = read_csv_nafix("data/demand/district_heating.csv", index_col=0)
+    fuel_shares = read_csv_nafix(snakemake.input.fuel_shares, index_col=0)
+    district_heating = read_csv_nafix(snakemake.input.district_heating, index_col=0)
 
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.config["demand_data"]["base_year"]
     )
     growth_factors = calculate_end_values(growth_factors_cagr)
     efficiency_gains = calculate_end_values(efficiency_gains_cagr)
-    # efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
-    # fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
-    # district_heating = district_heating[district_heating.index.isin(countries)]
+
+    for country in countries:
+        if country not in efficiency_gains.index:
+            efficiency_gains.loc[country] = efficiency_gains.loc["DEFAULT"]
+            _logger.warning(
+                "No efficiency gains cagr data for "
+                + country
+                + " using default data instead."
+            )
+        if country not in growth_factors.index:
+            growth_factors.loc[country] = growth_factors.loc["DEFAULT"]
+            _logger.warning(
+                "No growth factors cagr data for "
+                + country
+                + " using default data instead."
+            )
+        if country not in fuel_shares.index:
+            fuel_shares.loc[country] = fuel_shares.loc["DEFAULT"]
+            _logger.warning(
+                "No fuel share data for " + country + " using default data instead."
+            )
+        if country not in district_heating.index:
+            district_heating.loc[country] = district_heating.loc["DEFAULT"]
+            _logger.warning(
+                "No heating data for " + country + " using default data instead."
+            )
+
+    efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
+    fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
+    district_heating = district_heating[district_heating.index.isin(countries)]
+    growth_factors = growth_factors[growth_factors.index.isin(countries)]
 
     options = snakemake.config["sector"]
 

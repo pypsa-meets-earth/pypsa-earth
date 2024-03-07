@@ -77,12 +77,9 @@ custom_data:
   h2_underground: false
   add_existing: false
   custom_sectors: false
-  gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" ,
-                 # If "False" the user can choose btw "greenfield" or Model built-in datasets
-                 # Please refer to ["sector"] below.
+  gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
 
-# Costs used in PyPSA-Earth-Sec. Year depends on the wildcard "planning_horizon" in the scenario section
-costs:
+costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_horizon in the scenario section
   version: v0.6.2
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016

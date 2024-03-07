@@ -311,6 +311,10 @@ rule build_base_energy_totals:
 rule prepare_energy_totals:
     input:
         unsd_paths="data/energy_totals_base.csv",
+        efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
+        growth_factors_cagr="data/demand/growth_factors_cagr.csv",
+        district_heating="data/demand/district_heating.csv",
+        fuel_shares="data/demand/fuel_shares.csv",
     output:
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
     script:
@@ -642,6 +646,7 @@ if config["custom_data"].get("industry_demand", False) == True:
             industrial_production_per_country_tomorrow="resources/custom_data/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            industry_growth_cagr="data/demand/industry_growth_cagr.csv",
         output:
             industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         threads: 1
@@ -700,6 +705,7 @@ if config["custom_data"].get("industry_demand", False) == False:
             industrial_database="data/industrial_database.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            industry_growth_cagr="data/demand/industry_growth_cagr.csv",
         output:
             industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         threads: 1

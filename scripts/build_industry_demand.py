@@ -6,12 +6,15 @@ Created on Thu Jul 14 21:18:06 2022
 @author: user
 """
 
+import logging
 import os
 from itertools import product
 
 import numpy as np
 import pandas as pd
 from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
+
+_logger = logging.getLogger(__name__)
 
 
 def calculate_end_values(df):
@@ -65,10 +68,21 @@ if __name__ == "__main__":
         snakemake.config["demand_data"]["base_year"]
     )
 
-    cagr = read_csv_nafix("data/demand/industry_growth_cagr.csv", index_col=0)
+    cagr = read_csv_nafix(snakemake.input.industry_growth_cagr, index_col=0)
 
     countries = snakemake.config["countries"]
     # countries = ["EG", "BH"]
+
+    for country in countries:
+        if country not in cagr.index:
+            cagr.loc[country] = cagr.loc["DEFAULT"]
+            _logger.warning(
+                "No industry growth data for "
+                + country
+                + " using default data instead."
+            )
+
+    cagr = cagr[cagr.index.isin(countries)]
 
     growth_factors = calculate_end_values(cagr)
 
