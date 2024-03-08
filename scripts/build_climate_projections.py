@@ -220,7 +220,7 @@ def subset_by_time(cmip6_xr, month, year, years_window):
 
 # TODO add functionality to customise CMIP6 ensemble
 def calculate_proj_of_average(
-    cmip6_xr, month, year0, year1, years_window, cmip6_param_name="t"
+    cmip6_xr, month, base_year, predict_year, years_window, cmip6_param_name="t"
 ):
     """
     Calculate a change in a monthly average value for a climate parameter for
@@ -233,9 +233,9 @@ def calculate_proj_of_average(
         CMIP6 climate projections loaded as xarray
     month: float
         A month value to be considered further for the morphing procedure
-    year0: integer
+    base_year: integer
         The first year of an earlier period in the future
-    year1: integer
+    predict_year: integer
         The first year of a later period in the future
     years_window: integer
         Width of the considered time period
@@ -249,20 +249,20 @@ def calculate_proj_of_average(
 
     Example
     -------
-    month=3, year0=2020, year0=2070, years_window=30
+    month=3, base_year=2020, base_year=2070, years_window=30
     calculates a multimodel change in the monthly average for
     March in 2020-2049 as compared with 2070-2099
     """
 
-    cmip6_interp_year0 = subset_by_time(
-        cmip6_xr, month, year=year0, years_window=years_window
+    cmip6_interp_base_year = subset_by_time(
+        cmip6_xr, month, year=base_year, years_window=years_window
     )
-    cmip6_interp_year1 = subset_by_time(
-        cmip6_xr, month=month, year=year1, years_window=years_window
+    cmip6_interp_predict_year = subset_by_time(
+        cmip6_xr, month=month, year=predict_year, years_window=years_window
     )
-    dt_interp = cmip6_interp_year1[cmip6_param_name].mean("member").mean(
+    dt_interp = cmip6_interp_predict_year[cmip6_param_name].mean("member").mean(
         "time"
-    ) - cmip6_interp_year0[cmip6_param_name].mean("member").mean("time")
+    ) - cmip6_interp_base_year[cmip6_param_name].mean("member").mean("time")
     return dt_interp
 
 
@@ -313,8 +313,8 @@ def build_cutout_future(
     cutout_xr,
     cmip6_xr,
     months,
-    year0,
-    year1,
+    base_year,
+    predict_year,
     years_window,
     cutout_param_name="temperature",
     add_stretch=False,
@@ -334,9 +334,9 @@ def build_cutout_future(
     months: list
         Months values to be used as a definition of a season to be considered
         for building projection time series
-    year0: integer
+    base_year: integer
         The first year of an earlier period in the future
-    year1: integer
+    predict_year: integer
         The first year of a later period in the future
     years_window: integer
         Width of the considered time period
@@ -349,7 +349,11 @@ def build_cutout_future(
     """
     for k_month in [months]:
         dt_k = calculate_proj_of_average(
-            cmip6_xr=cmip6_xr, month=k_month, year0=year0, year1=year1, years_window=5
+            cmip6_xr=cmip6_xr,
+            month=k_month,
+            base_year=base_year,
+            predict_year=predict_year,
+            years_window=5,
         )
 
         a = False
@@ -360,15 +364,15 @@ def build_cutout_future(
             dt_nn_k = calculate_proj_of_average(
                 cmip6_xr=cmip6_nn_xr,
                 month=k_month,
-                year0=year0,
-                year1=year1,
+                base_year=base_year,
+                predict_year=predict_year,
                 years_window=5,
             )
             dt_xx_k = calculate_proj_of_average(
                 cmip6_xr=cmip6_xx_xr,
                 month=k_month,
-                year0=year0,
-                year1=year1,
+                base_year=base_year,
+                predict_year=predict_year,
                 years_window=5,
             )
             ddt_nx = dt_xx_k - dt_nn_k
@@ -471,8 +475,8 @@ if __name__ == "__main__":
         cutout_xr=cutout_xr,
         cmip6_xr=cmip6_region_interp,
         months=season_in_focus,
-        year0=present_year,
-        year1=future_year,
+        base_year=present_year,
+        predict_year=future_year,
         years_window=years_window,
     )
 
@@ -488,8 +492,8 @@ if __name__ == "__main__":
         cutout_xr=cutout_xr,
         cmip6_xr=cmip6_region_interp,
         months=season_in_focus,
-        year0=present_year,
-        year1=future_year,
+        base_year=present_year,
+        predict_year=future_year,
         years_window=years_window,
         cutout_param_name="temperature",
         cmip6_nn_xr=cmip6_nn_fl,
