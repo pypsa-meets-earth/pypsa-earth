@@ -353,7 +353,7 @@ def build_cutout_future(
             month=k_month,
             base_year=base_year,
             predict_year=predict_year,
-            years_window=5,
+            years_window=years_window,
         )
 
         a = False
@@ -366,14 +366,14 @@ def build_cutout_future(
                 month=k_month,
                 base_year=base_year,
                 predict_year=predict_year,
-                years_window=5,
+                years_window=years_window,
             )
             dt_xx_k = calculate_proj_of_average(
                 cmip6_xr=cmip6_xx_xr,
                 month=k_month,
                 base_year=base_year,
                 predict_year=predict_year,
-                years_window=5,
+                years_window=years_window,
             )
             ddt_nx = dt_xx_k - dt_nn_k
             k_time = cutout_xr.time.dt.month.isin(month)
