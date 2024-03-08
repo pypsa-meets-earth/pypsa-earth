@@ -49,7 +49,7 @@ Description
 -----------
 
 Total annual system costs are minimised with PyPSA. The full formulation of the
-linear optimal power flow (plus investment planning
+linear optimal power flow (plus investment planning)
 is provided in the
 `documentation of PyPSA <https://pypsa.readthedocs.io/en/latest/optimal_power_flow.html#linear-optimal-power-flow>`_.
 The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
@@ -563,9 +563,9 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
-        n.lines.loc[
-            n.lines.index.str.contains("new"), "s_nom_min"
-        ] = snakemake.params.augmented_line_connection.get("min_expansion")
+        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
+            snakemake.params.augmented_line_connection.get("min_expansion")
+        )
     n = prepare_network(n, solve_opts)
 
     n = solve_network(
