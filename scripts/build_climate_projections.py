@@ -62,7 +62,10 @@ J.B. Dias, G.C. da Graça, P.M.M. Soares (2020) Comparison of methodologies for
 generation of future  building thermal energy simulation. Energy and Buildings,
 vol. 206, 109556, https://doi.org/10.1016/j.enbuild.2019.109556.
 
-J. Pulkkinen, J.-N. Louis (2021) Near- and medium-term hourly morphed mean and extreme future temperature datasets for Jyväskylä, Finland, for building thermal energy demand simulations. Data in Brief, vol. 37, 107209, https://doi.org/10.1016/j.dib.2021.107209.
+J. Pulkkinen, J.-N. Louis (2021) Near- and medium-term hourly morphed mean and
+extreme future temperature datasets for Jyväskylä, Finland, for building thermal
+energy demand simulations. Data in Brief, vol. 37, 107209,
+https://doi.org/10.1016/j.dib.2021.107209.
 """
 
 
