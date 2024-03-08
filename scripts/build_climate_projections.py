@@ -96,6 +96,11 @@ def crop_cmip6(cmip6_xr, cutout_xr):
         CMIP6 climate projections loaded as xarray
     cutout_xr : xarray of a cutout dataset
         Cutout dataset loaded as xarray
+
+    Returns
+    -------
+    cmip6_region: xarray
+        Clipped according to an area of interest
     """
 
     # spartial margin needed to avoid data losses during further interpolation
@@ -124,6 +129,11 @@ def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
         CMIP6 climate projections loaded as xarray
     cutout_xr : xarray of a cutout dataset
         Cutout dataset loaded as xarray
+
+    Returns
+    -------
+    cmip6_interp: xarray
+        Interpolated to the grid identical to the cutout one
     """
 
     # TODO read from the cutout file instead of hardcoding
@@ -154,6 +164,11 @@ def prepare_cmip6(cmip6_fl, cutout_xr):
         CMIP6 climate projections loaded as xarray
     cutout_xr : xarray of a cutout dataset
         Cutout dataset loaded as xarray
+
+    Returns
+    -------
+    cmip6_interp: xarray
+        Now clipped to the region and interpolated to match with the cutour grid
     """
     cmip6_xr = xr.open_dataset(cmip6_fl)
     cmip6_cropped_xr = crop_cmip6(cmip6_xr, cutout_xr)
@@ -179,6 +194,11 @@ def subset_by_time(cmip6_xr, month, year, years_window):
         The first year of the requested period in the future
     years_window: integer
         A width of the considered time period
+
+    Returns
+    -------
+    cmip6_in_period: xarray
+        Sub-setted for a month and a years range of interest
 
     Example
     -------
@@ -225,7 +245,7 @@ def calculate_proj_of_average(
     Outputs
     -------
     dt_interp: xarray of the changes in the monthly averages for each grid cell
-    Contains a single value for each grid cell.
+        Contains a single value for each grid cell.
 
     Example
     -------
@@ -268,7 +288,7 @@ def build_projection_for_month(
     Output
     -------
     cutout_xr: xarray of the projected changes for each grid cell for a processed month
-    Contains a time series for each grid cell.
+        Contains a time series for each grid cell.
     """
 
     k_time = cutout_xr.time.dt.month.isin(month)
