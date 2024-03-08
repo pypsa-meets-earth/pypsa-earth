@@ -328,7 +328,7 @@ def _set_electrical_parameters_links(links_config, links):
 def _set_electrical_parameters_transformers(transformers_config, transformers):
     config = transformers_config
 
-    ## Add transformer parameters
+    # Add transformer parameters
     transformers["x"] = config.get("x", 0.1)
     transformers["s_nom"] = config.get("s_nom", 2000)
     transformers["type"] = config.get("type", "")
@@ -513,7 +513,7 @@ def base_network(
     converters = _set_electrical_parameters_converters(links_config, converters)
 
     n = pypsa.Network()
-    n.name = "PyPSA-Eur"
+    n.name = "PyPSA-Earth"
 
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
