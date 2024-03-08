@@ -50,6 +50,9 @@ where
 x_future and x_past have the highest temporal resolution,
 <x_past>|month is the monthly average for a considered month.
 
+A value of the stretch is calculated using projections for minimal and maximal values
+of the climate parameter.
+
 The procedure is applied for each month to account for seasonality. Snapshots settings
 are used to define for which months to be used in calculating a climate projection.
 
@@ -340,6 +343,14 @@ def build_cutout_future(
         The first year of a later period in the future
     years_window: integer
         Width of the considered time period
+    cutout_param_name: string
+        A name of the variable to be read from the cutout
+    add_stretch: boolean
+        Add a stretch transformation to a shift when calculating a projection
+    cmip6_nn_xr: xarray
+        CMIP6 projection for the minimum of the climate parameter
+    cmip6_xx_xr: xarray
+        CMIP6 projection for the maximum of the climate parameter
 
     Output
     -------
