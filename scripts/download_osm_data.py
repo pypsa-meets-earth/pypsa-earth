@@ -113,12 +113,12 @@ if __name__ == "__main__":
         update=False,
         mp=True,
         data_dir=store_path_data,
-        out_dir=store_path_data,
+        out_dir=store_path_resources,
         out_format=["csv", "geojson"],
         out_aggregate=True,
     )
 
-    out_path = Path.joinpath(store_path_data, "out")
+    out_path = Path.joinpath(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]
     format = ["csv", "geojson"]
     new_files = os.listdir(out_path)  # list downloaded osm files
