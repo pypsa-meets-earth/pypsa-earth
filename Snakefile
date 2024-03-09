@@ -365,7 +365,7 @@ if config["enable"].get("build_cutout", False):
             "scripts/build_cutout.py"
 
 
-if config["enable"].get("modify_cutout", False):
+if config["enable"].get("climate_projection_cutout", False):
 
     rule build_climate_projections:
         params:
