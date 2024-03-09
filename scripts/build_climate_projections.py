@@ -14,7 +14,7 @@ Relevant Settings
 
     projection:
         climate_scenario:
-        present_year:
+        base_year:
         future_year:
         years_window:
         gcm_selection:
@@ -41,7 +41,7 @@ for cutout.nc which is assumed to be representative data sample for the past cli
 an ensemble of CMIP6 global climate models to account for the future climate.
 
 A morphing approach is implemented meaning that the projection value x_future is calculated
-data for a representative period present_year in the past x_past using a combination
+data for a representative period base_year in the past x_past using a combination
 of shift dx and stretch a:
 
 x_future = x_past + dx + a(x_past - <x_past>|month),
@@ -427,7 +427,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_climate_projections",
             climate_scenario="ssp2-2.6",
-            present_year=2020,
+            base_year=2020,
             future_year=2050,
             years_window=5,
             cutout="africa-2013-era5",
@@ -435,7 +435,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     climate_scenario = snakemake.params.climate_scenario
-    present_year = snakemake.params.present_year
+    base_year = snakemake.params.base_year
     future_year = snakemake.params.future_year
     years_window = snakemake.params.years_window
     cmip6_nn_fl = snakemake.params.cmip6_nn_fl
@@ -482,7 +482,7 @@ if __name__ == "__main__":
         cutout_xr=cutout_xr,
         cmip6_xr=cmip6_region_interp,
         months=season_in_focus,
-        base_year=present_year,
+        base_year=base_year,
         predict_year=future_year,
         years_window=years_window,
     )
@@ -499,7 +499,7 @@ if __name__ == "__main__":
         cutout_xr=cutout_xr,
         cmip6_xr=cmip6_region_interp,
         months=season_in_focus,
-        base_year=present_year,
+        base_year=base_year,
         predict_year=future_year,
         years_window=years_window,
         cutout_param_name="temperature",

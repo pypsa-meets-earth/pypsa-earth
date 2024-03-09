@@ -206,7 +206,7 @@ atlite:
 
 projection:
   climate_scenario: ssp245
-  present_year: 2020
+  base_year: 2020
   future_year: 2050
   years_window: 5 # a half of width currently
   gcm_selection: false # false to use all the available global climate models
