@@ -387,7 +387,7 @@ def build_cutout_future(
                 years_window=years_window,
             )
             ddt_nx = dt_xx_k - dt_nn_k
-            k_time = cutout_xr.time.dt.month.isin(month)
+            k_time = cutout_xr.time.dt.month.isin(k_month)
             t_mean_month = cutout_xr[cutout_param_name][k_time, :, :].mean()
 
             a = ddt_nx / t_mean_month
