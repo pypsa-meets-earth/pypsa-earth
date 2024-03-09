@@ -371,7 +371,7 @@ if config["enable"].get("climate_projection_cutout", False):
         params:
             snapshots=config["snapshots"],
             climate_scenario=config["projection"]["climate_scenario"],
-            present_year=config["projection"]["present_year"],
+            base_year=config["projection"]["base_year"],
             future_year=config["projection"]["future_year"],
             years_window=config["projection"]["years_window"],
             cmip6_nn_fl=config["projection"]["cmip6_nn_fl"],
