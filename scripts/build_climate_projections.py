@@ -153,7 +153,14 @@ def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
     return cmip6_interp
 
 
-def prepare_cmip6(cmip6_fl, cutout_xr):
+def prepare_cmip6(
+    cmip6_fl,
+    cutout_xr,
+    months,
+    base_year,
+    predict_year,
+    years_window,
+):
     """
     Prepare the CMIP6 for calculation projections for the area of interest.
 
@@ -163,6 +170,14 @@ def prepare_cmip6(cmip6_fl, cutout_xr):
         CMIP6 climate projections loaded as xarray
     cutout_xr : xarray of a cutout dataset
         Cutout dataset loaded as xarray
+    months: list
+        A list of month numbers to be considered further projection
+    base_year: integer
+        The first year of an earlier period in the future
+    predict_year: integer
+        The first year of a later period in the future
+    years_window: integer
+        Width of the considered time period
 
     Returns
     -------
