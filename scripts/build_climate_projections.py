@@ -235,7 +235,6 @@ def prepare_cmip6(
     return cmip6_interp
 
 
-# TODO fix years_window
 def subset_by_time(cmip6_xr, month, year, years_window):
     """
     Filter CMIP6 dataset according to the requested year and the processed
@@ -263,7 +262,6 @@ def subset_by_time(cmip6_xr, month, year, years_window):
     filters CMIP6 cmip6_xr dataset to calculate projection for March at 2050-2079
     """
 
-    # TODO add warning in case there are no enough years
     cmip6_in_period = cmip6_xr.where(
         (
             (cmip6_xr["time.month"] == month)
@@ -542,7 +540,6 @@ if __name__ == "__main__":
 
     # -----------------------------------------------------------------
 
-    # TODO Add a check for time match
     cutout_future = build_cutout_future(
         cutout_xr=cutout_xr,
         cmip6_xr=cmip6_region_interp,
