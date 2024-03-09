@@ -170,6 +170,49 @@ def prepare_cmip6(cmip6_fl, cutout_xr):
         Now clipped to the region and interpolated to match with the cutour grid
     """
     cmip6_xr = xr.open_dataset(cmip6_fl)
+
+    # All the requested data from the projection period should present in the CMIP6 datasets
+    year_month_df = pd.DataFrame(
+        {
+            "year": cmip6_xr.time.dt.year.to_series(),
+            "month": cmip6_xr.time.dt.month.to_series(),
+        }
+    )
+    cmip6_in_base = year_month_df.apply(
+        lambda row: (row["year"] >= (base_year))
+        & (row["year"] < (base_year + years_window))
+        & (row["month"] in months),
+        axis=1,
+    )
+    cmip6_in_future = year_month_df.apply(
+        lambda row: (row["year"] <= (predict_year))
+        & (row["year"] > (predict_year - years_window))
+        & (row["month"] in months),
+        axis=1,
+    )
+
+    if sum(cmip6_in_base) == 0:
+        raise Exception(
+            f"No data to build a projection are available in the provided CMIP6 data "
+            f"for the base year {base_year}-{base_year + years_window - 1}.\n\r"
+        )
+    if sum(cmip6_in_future) == 0:
+        raise Exception(
+            f"No data to build a projection are available in the provided CMIP6 data "
+            f"for the base year {predict_year}-{predict_year - years_window + 1}.\n\r"
+        )
+
+    if sum(cmip6_in_base) < (len(months) * years_window):
+        logger.warning(
+            f"The requested projection period is not fully covered by the provided CMIP6 data. "
+            f"The requested base period is {base_year}-{base_year + years_window - 1}\n\r"
+        )
+    if sum(cmip6_in_future) < (len(months) * years_window):
+        logger.warning(
+            f"The requested projection period is not fully covered by the provided CMIP6 data. "
+            f"The requested base period is {predict_year}-{predict_year - years_window + 1}\n\r"
+        )
+
     cmip6_cropped_xr = crop_cmip6(cmip6_xr, cutout_xr)
     cmip6_interp = interpolate_cmip6_to_cutout_grid(
         cmip6_xr=cmip6_cropped_xr, cutout_xr=cutout_xr
@@ -449,7 +492,14 @@ if __name__ == "__main__":
 
     cutout_xr = xr.open_dataset(cutout)
 
-    cmip6_region_interp = prepare_cmip6(cmip6_fl=cmip6, cutout_xr=cutout_xr)
+    cmip6_region_interp = prepare_cmip6(
+        cmip6_fl=cmip6,
+        cutout_xr=cutout_xr,
+        months=season_in_focus,
+        base_year=base_year,
+        predict_year=future_year,
+        years_window=years_window,
+    )
 
     if cmip6_nn_fl:
         cmip6_nn_region_interp = prepare_cmip6(
