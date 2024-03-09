@@ -138,19 +138,15 @@ def interpolate_cmip6_to_cutout_grid(cmip6_xr, cutout_xr):
     cmip6_interp: xarray
         Interpolated to the grid identical to the cutout one
     """
-
-    # TODO read from the cutout file instead of hardcoding
-    dx_new = 0.3
-
     newlon = np.arange(
         round(np.min(cutout_xr.coords["x"].values), 1),
-        round(np.max(cutout_xr.coords["x"].values) + dx_new, 1),
-        dx_new,
+        round(np.max(cutout_xr.coords["x"].values) + cutout_xr.attrs["dx"], 1),
+        cutout_xr.attrs["dx"],
     )
     newlat = np.arange(
         round(np.min(cutout_xr.coords["y"].values), 1),
-        round(np.max(cutout_xr.coords["y"].values) + dx_new, 1),
-        dx_new,
+        round(np.max(cutout_xr.coords["y"].values) + cutout_xr.attrs["dy"], 1),
+        cutout_xr.attrs["dy"],
     )
     cmip6_interp = cmip6_xr.interp(time=cmip6_xr.time, lat=newlat, lon=newlon)
 
