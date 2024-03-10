@@ -106,36 +106,36 @@ if __name__ == "__main__":
     store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
-    eo.get_osm_data(
+    eo.save_osm_data(
         primary_name="power",
         region_list=country_list,
         feature_list=["substation", "line", "cable", "generator"],
         update=False,
         mp=True,
         data_dir=store_path_data,
+        out_dir=store_path_resources,
         out_format=["csv", "geojson"],
         out_aggregate=True,
     )
 
-    out_path = Path.joinpath(store_path_data, "out")
-    names = ["generators", "cables", "lines", "substations"]
+    out_path = Path.joinpath(store_path_resources, "out")
+    names = ["generator", "cable", "line", "substation"]
     format = ["csv", "geojson"]
+    new_files = os.listdir(out_path)  # list downloaded osm files
 
     # earth-osm (eo) only outputs files with content
     # If the file is empty, it is not created
     # This is a workaround to create empty files for the workflow
-    for name in names:
-        for f in format:
-            filename = Path.joinpath(out_path, f"all_{name}.{f}")
-            # Create file if not exist
-            if not Path.exists(filename):
-                logger.info(f"{filename} does not exist, create empty file")
-                open(filename, "w").close()
-            # Move and rename
-            old_path = Path.joinpath(out_path, f"all_{name}.{f}")
-            new_path = Path.joinpath(store_path_resources, f"all_raw_{name}.{f}")
-            # Create directory if not exist (required for shutil)
-            if not os.path.exists(store_path_resources):
-                os.makedirs(store_path_resources)
-            logger.info(f"Create {old_path} and move to {new_path}")
-            shutil.move(old_path, new_path)
+
+    # Rename and move osm files to the resources folder output
+    for file in new_files:
+        for name in names:
+            for f in format:
+                ext = f"{name}.{f}"
+                if ext in file:
+                    new_file_name = Path.joinpath(
+                        store_path_resources, f"all_raw_{name}s.{f}"
+                    )
+                    old_file_name = Path.joinpath(out_path, file)
+                    logger.info(f"Move {old_file_name} to {new_file_name}")
+                    shutil.move(old_file_name, new_file_name)
