@@ -131,7 +131,7 @@ if __name__ == "__main__":
     for name in names:
         for f in out_formats:
             new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
-            old_files = list(Path(out_path).glob(f"*{name}*.{f}"))
+            old_files = list(Path(out_path).glob(f"*{name}.{f}"))
             # if file is missing, create empty file, otherwise rename it an move it
             if not old_files:
                 with open(new_file_name, "w") as f:
