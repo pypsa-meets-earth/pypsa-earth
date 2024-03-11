@@ -36,7 +36,7 @@ Data availability for many parts of the world is still quite limited. Usually th
 
 * `World Bank <https://energydata.info/>`_;
 
-* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/IRENASTAT__Power%20Capacity%20and%20Generation/ELECCAP_2022_cycle2.px/>`_;
+* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/>`_;
 
 * International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
 
