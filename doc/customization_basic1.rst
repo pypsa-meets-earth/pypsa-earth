@@ -5,7 +5,7 @@
 .. _customization_basic1:
 
 #######################
-1. Basic customization
+2. Basic customization
 #######################
 
 A good starting point to customize your model are settings of the default configuration file `config.default`. You may want to do a reserve copy of your current configuration file and then overwrite it by a default configuration:

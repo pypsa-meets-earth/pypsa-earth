@@ -4,9 +4,9 @@
 
 .. _customization_copernicus:
 
-####################
-Setup Copernicus API
-####################
+#######################
+5. Setup Copernicus API
+#######################
 
 
 To build custom cutouts, it is important to access to `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`__.

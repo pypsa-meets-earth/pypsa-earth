@@ -5,7 +5,7 @@
 .. _customization_run:
 
 ####################
-2. Running the model
+3. Running the model
 ####################
 
 Run full model
