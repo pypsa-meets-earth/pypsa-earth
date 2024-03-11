@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     out_path = Path.joinpath(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]
-    format = ["csv", "geojson"]
+    out_formats = ["csv", "geojson"]
     new_files = os.listdir(out_path)  # list downloaded osm files
 
     # earth-osm (eo) only outputs files with content
@@ -128,14 +128,14 @@ if __name__ == "__main__":
     # This is a workaround to create empty files for the workflow
 
     # Rename and move osm files to the resources folder output
-    for file in new_files:
-        for name in names:
-            for f in format:
-                ext = f"{name}.{f}"
-                if ext in file:
-                    new_file_name = Path.joinpath(
-                        store_path_resources, f"all_raw_{name}s.{f}"
-                    )
-                    old_file_name = Path.joinpath(out_path, file)
-                    logger.info(f"Move {old_file_name} to {new_file_name}")
-                    shutil.move(old_file_name, new_file_name)
+    for name in names:
+        for f in out_formats:
+            new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
+            old_files = list(Path(out_path).glob(f"*{name}.{f}"))
+            # if file is missing, create empty file, otherwise rename it an move it
+            if not old_files:
+                with open(new_file_name, "w") as f:
+                    pass
+            else:
+                logger.info(f"Move {old_files[0]} to {new_file_name}")
+                shutil.move(old_files[0], new_file_name)
