@@ -57,7 +57,7 @@ Solar profile for the requested area may be calculated using the output name:
 Choose the solver
 -----------------
 
-To solve full optimization problem, it is important to pick a solver in `config.yaml` file. For instance, this tutorial uses the open-source solver glpk and does not rely
+To solve a full optimization problem, it is important to pick a solver in `config.yaml` file. For instance, this tutorial uses the open-source solver glpk and does not rely
 on the commercial solvers such as Gurobi or CPLEX (for which free academic licenses are available).
 
 .. code:: yaml

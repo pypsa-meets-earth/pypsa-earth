@@ -8,7 +8,7 @@
 2. Basic customization
 #######################
 
-A good starting point to customize your model are settings of the default configuration file `config.default`. You may want to do a reserve copy of your current configuration file and then overwrite it by a default configuration:
+A good starting point to customize your model are settings of the default configuration file `config.default.yaml`. You may want to do a reserve copy of your current configuration file and then overwrite it by a default configuration:
 
 .. code:: bash
 
@@ -64,7 +64,7 @@ Likewise, the example's temporal scope can be restricted (e.g. to 7 days):
 
 .. note::
 
-    Ensure that the selected data range aligns with the dates available in the cutout dataset. If the weather data within the cutouts corresponds to the year 2013, then the range of snapshots should fall within that same year.
+    Ensure that the selected date range aligns with the dates available in the cutout dataset. If the weather data within the cutouts corresponds to the year 2013, then the range of snapshots should fall within that same year.
 
 Specify the demand year
 -----------------------
@@ -79,7 +79,7 @@ Year-related parameters are also being used when specifying `load_options`:
       prediction_year: 2030
       scale: 1
 
-The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` correspond to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
+The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` corresponds to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
 The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
 
 Configure `atlite` section
