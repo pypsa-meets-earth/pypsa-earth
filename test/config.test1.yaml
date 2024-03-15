@@ -72,6 +72,7 @@ custom_data:
   elec_demand: false
   heat_demand: false
   industry_demand: false
+  industry_database: false
   transport_demand: false
   water_costs: false
   h2_underground: false
