@@ -139,30 +139,30 @@ if __name__ == "__main__":
             lambda name: three_2_two_digits_country(name[:3]) + name[3:]
         )
 
-
     if snakemake.config["custom_data"]["industry_database"]:
-        logger.info("Using custom industry database from 'data_custom/industrial_database.csv' instead of default")
+        logger.info(
+            "Using custom industry database from 'data_custom/industrial_database.csv' instead of default"
+        )
         geo_locs = pd.read_csv(
-        "data_custom/industrial_database.csv",
-        sep=",",
-        header=0,
-        keep_default_na=False,  # , index_col=0
+            "data_custom/industrial_database.csv",
+            sep=",",
+            header=0,
+            keep_default_na=False,  # , index_col=0
         )
         geo_locs["industry"] = geo_locs["technology"]
     else:
         logger.info("Using default industry database")
         geo_locs = pd.read_csv(
-        snakemake.input.industrial_database,
-        sep=",",
-        header=0,
-        keep_default_na=False,  # , index_col=0
+            snakemake.input.industrial_database,
+            sep=",",
+            header=0,
+            keep_default_na=False,  # , index_col=0
         )
-        geo_locs = geo_locs[geo_locs['country'].isin(countries)]
+        geo_locs = geo_locs[geo_locs["country"].isin(countries)]
         geo_locs["capacity"] = pd.to_numeric(geo_locs.capacity)
 
         # Call the function to add the "industry" column
         df_with_industry = match_technology(geo_locs)
-
 
     geo_locs.capacity = pd.to_numeric(geo_locs.capacity)
 

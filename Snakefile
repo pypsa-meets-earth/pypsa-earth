@@ -614,6 +614,7 @@ rule clean:
         shell("rm -r " + PYPSAEARTH_FOLDER + "/resources")
         shell("rm -r " + PYPSAEARTH_FOLDER + "/networks")
 
+
 rule build_industrial_distribution_key:  #default data
     input:
         regions_onshore=pypsaearth(
@@ -635,6 +636,7 @@ rule build_industrial_distribution_key:  #default data
     script:
         "scripts/build_industrial_distribution_key.py"
 
+
 rule build_base_industry_totals:  #default data
     input:
         #industrial_production_per_country="data/industrial_production_per_country.csv",
@@ -650,6 +652,7 @@ rule build_base_industry_totals:  #default data
     script:
         "scripts/build_base_industry_totals.py"
 
+
 rule build_industry_demand:  #default data
     input:
         industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
@@ -657,8 +660,7 @@ rule build_industry_demand:  #default data
         #industrial_production_per_country="data/industrial_production_per_country.csv",
         base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         industrial_database="data/industrial_database.csv",
-        costs=CDIR
-        + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+        costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
         industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",

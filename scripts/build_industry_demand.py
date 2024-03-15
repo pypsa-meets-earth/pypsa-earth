@@ -40,7 +40,7 @@ def country_to_nodal(industrial_production, keys):
             mapping = sector
 
         key = keys.loc[buses, mapping]
-        #print(sector)
+        # print(sector)
         nodal_production.loc[buses, sector] = (
             industrial_production.at[country, sector] * key
         )
@@ -66,18 +66,27 @@ if __name__ == "__main__":
 
     countries = snakemake.config["countries"]
 
-
     if snakemake.config["custom_data"]["industry_demand"]:
+        _logger.info(
+            "Fetching custom industry demand data.. expecting file at 'data_custom/industry_demand_{0}_{1}.csv'".format(
+                snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
+            )
+        )
 
-        _logger.info("Fetching custom industry demand data.. expecting file at 'data_custom/industry_demand_{0}_{1}.csv'".format(snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]))
-
-        industry_demand = pd.read_csv("data_custom/industry_demand_{0}_{1}.csv".format(snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]), index_col=[0,1])
+        industry_demand = pd.read_csv(
+            "data_custom/industry_demand_{0}_{1}.csv".format(
+                snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
+            ),
+            index_col=[0, 1],
+        )
         keys_path = snakemake.input.industrial_distribution_key
 
         dist_keys = pd.read_csv(
             keys_path, index_col=0, keep_default_na=False, na_values=[""]
         )
-        production_base = pd.DataFrame(1, columns=industry_demand.columns, index=countries)
+        production_base = pd.DataFrame(
+            1, columns=industry_demand.columns, index=countries
+        )
         nodal_keys = country_to_nodal(production_base, dist_keys)
 
         nodal_df = pd.DataFrame()
@@ -98,9 +107,7 @@ if __name__ == "__main__":
 
         cagr = read_csv_nafix(snakemake.input.industry_growth_cagr, index_col=0)
 
-
-
-        # Building nodal industry production growth 
+        # Building nodal industry production growth
 
         for country in countries:
             if country not in cagr.index:
@@ -135,7 +142,6 @@ if __name__ == "__main__":
 
         # production of industries per node compared to current
         nodal_production_tom = country_to_nodal(production_tom, dist_keys)
-
 
         clean_industry_list = [
             "iron and steel",
@@ -267,7 +273,7 @@ if __name__ == "__main__":
             "low-temperature heat",
         ]
 
-        #Fill missing carriers with 0s
+        # Fill missing carriers with 0s
         for country in countries:
             carriers_present = industry_base_totals.xs(country, level="country").index
             missing_carriers = set(all_carriers) - set(carriers_present)
