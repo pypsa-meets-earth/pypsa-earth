@@ -332,19 +332,81 @@ def add_hydrogen(n, costs):
 
     # Hydrogen network:
     # -----------------
+    def add_links_repurposed_H2_pipelines():
+        n.madd(
+            "Link",
+            h2_links.index + " repurposed",
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            p_nom_max=h2_links.capacity.values
+            * 0.8,  # https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline repurposed", "fixed"]
+            * h2_links.length.values,
+            carrier="H2 pipeline repurposed",
+            lifetime=costs.at["H2 (g) pipeline repurposed", "lifetime"],
+        )
+
+    def add_links_new_H2_pipelines():
+        n.madd(
+            "Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
+            carrier="H2 pipeline",
+            lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+        )
+
+    def add_links_elec_routing_new_H2_pipelines():
+        attrs = ["bus0", "bus1", "length"]
+        h2_links = pd.DataFrame(columns=attrs)
+
+        candidates = pd.concat(
+            {
+                "lines": n.lines[attrs],
+                "links": n.links.loc[n.links.carrier == "DC", attrs],
+            }
+        )
+
+        for candidate in candidates.index:
+            buses = [
+                candidates.at[candidate, "bus0"],
+                candidates.at[candidate, "bus1"],
+            ]
+            buses.sort()
+            name = f"H2 pipeline {buses[0]} -> {buses[1]}"
+            if name not in h2_links.index:
+                h2_links.at[name, "bus0"] = buses[0]
+                h2_links.at[name, "bus1"] = buses[1]
+                h2_links.at[name, "length"] = candidates.at[candidate, "length"]
+
+        n.madd(
+            "Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
+            carrier="H2 pipeline",
+            lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+        )
+
+    # Add H2 Links:
     if snakemake.config["sector"]["hydrogen"]["network"]:
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
         buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-        # Read the config.pypsa-earth.yaml file
-        yaml = ruamel.yaml.YAML()
-        file_path = "./config.pypsa-earth.yaml"
-        with open(file_path, "r") as file:
-            config_pypsa_earth = yaml.load(file)
-
-        if config_pypsa_earth["build_osm_network"]["force_ac"]:
+        if snakemake.config["build_osm_network"]["force_ac"]:
             # Appending string for carrier specification '_AC'
             h2_links["bus0"] = buses_ordered.str[0] + "_AC"
             h2_links["bus1"] = buses_ordered.str[1] + "_AC"
@@ -371,148 +433,87 @@ def add_hydrogen(n, costs):
             {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
         )
 
-        if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
+        if len(h2_links) > 0:
+            # Option 1: Greenfield:
             if (
-                not snakemake.config["sector"]["hydrogen"]["network_routes"]
+                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
                 == "greenfield"
             ):
-                # If NOT greenfield, then the existing pipelines routing is used for new and repurposed piepelines.
-                # Else, existing pipelines routing is used for new piepelines only.
-                n.madd(
-                    "Link",
-                    h2_links.index + " repurposed",
-                    bus0=h2_links.bus0.values + " H2",
-                    bus1=h2_links.bus1.values + " H2",
-                    p_min_pu=-1,
-                    p_nom_extendable=True,
-                    p_nom_max=h2_links.capacity.values
-                    * 0.8,  # https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
-                    length=h2_links.length.values,
-                    capital_cost=costs.at["H2 (g) pipeline repurposed", "fixed"]
-                    * h2_links.length.values,
-                    carrier="H2 pipeline repurposed",
-                    lifetime=costs.at["H2 (g) pipeline repurposed", "lifetime"],
+                add_links_elec_routing_new_H2_pipelines()
+
+            # Option 2: Only New H2 pipelines following gas network:
+            elif (
+                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                != "greenfield"
+            ):
+                add_links_new_H2_pipelines()
+
+            # Option 3: New H2 pipelines following gas network + Repurposing:
+            elif (
+                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                != "greenfield"
+            ):
+                add_links_repurposed_H2_pipelines()
+                add_links_new_H2_pipelines()
+
+            # Option 4: New H2 pipelines following electrical transmission lines + Repurposing:
+            elif (
+                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                == "greenfield"
+            ):
+                add_links_repurposed_H2_pipelines()
+                add_links_elec_routing_new_H2_pipelines()
+
+        elif len(h2_links) == 0:
+            # Option 1: Greenfield:
+            if (
+                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                == "greenfield"
+            ):
+                add_links_elec_routing_new_H2_pipelines()
+
+            # Option 2: Only New H2 pipelines following gas network:
+            elif (
+                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                != "greenfield"
+            ):
+                # print('\033[93mWarning: No existing gas network --> Reverting back to ["sector"]["hydrogen"]["network_routes"] == "greenfield" for new H2 pipelines\033[0m')
+                print("#" * 10)
+                print(
+                    'WARNING: No existing gas network --> Reverting back to ["sector"]["hydrogen"]["network_routes"] == "greenfield" for new H2 pipelines'
                 )
-                n.madd(
-                    "Link",
-                    h2_links.index,
-                    bus0=h2_links.bus0.values + " H2",
-                    bus1=h2_links.bus1.values + " H2",
-                    p_min_pu=-1,
-                    p_nom_extendable=True,
-                    length=h2_links.length.values,
-                    capital_cost=costs.at["H2 (g) pipeline", "fixed"]
-                    * h2_links.length.values,
-                    carrier="H2 pipeline",
-                    lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+                print("#" * 10)
+                add_links_elec_routing_new_H2_pipelines()
+
+            # Option 3: New H2 pipelines following gas network + Repurposing:
+            elif (
+                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                != "greenfield"
+            ):
+                print("#" * 10)
+                print(
+                    'WARNING: No existing gas network --> Reverting back to ["sector"]["hydrogen"]["network_routes"] == "greenfield" for new H2 pipelines + No Repurposing'
                 )
-            else:
-                n.madd(
-                    "Link",
-                    h2_links.index + " repurposed",
-                    bus0=h2_links.bus0.values + " H2",
-                    bus1=h2_links.bus1.values + " H2",
-                    p_min_pu=-1,
-                    p_nom_extendable=True,
-                    p_nom_max=h2_links.capacity.values
-                    * 0.8,  # https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
-                    length=h2_links.length.values,
-                    capital_cost=costs.at["H2 (g) pipeline repurposed", "fixed"]
-                    * h2_links.length.values,
-                    carrier="H2 pipeline repurposed",
-                    lifetime=costs.at["H2 (g) pipeline repurposed", "lifetime"],
-                )
+                print("#" * 10)
+                add_links_elec_routing_new_H2_pipelines()
 
-                attrs = ["bus0", "bus1", "length"]
-                h2_links = pd.DataFrame(columns=attrs)
-
-                candidates = pd.concat(
-                    {
-                        "lines": n.lines[attrs],
-                        "links": n.links.loc[n.links.carrier == "DC", attrs],
-                    }
-                )
-
-                for candidate in candidates.index:
-                    buses = [
-                        candidates.at[candidate, "bus0"],
-                        candidates.at[candidate, "bus1"],
-                    ]
-                    buses.sort()
-                    name = f"H2 pipeline {buses[0]} -> {buses[1]}"
-                    if name not in h2_links.index:
-                        h2_links.at[name, "bus0"] = buses[0]
-                        h2_links.at[name, "bus1"] = buses[1]
-                        h2_links.at[name, "length"] = candidates.at[candidate, "length"]
-
-                n.madd(
-                    "Link",
-                    h2_links.index,
-                    bus0=h2_links.bus0.values + " H2",
-                    bus1=h2_links.bus1.values + " H2",
-                    p_min_pu=-1,
-                    p_nom_extendable=True,
-                    length=h2_links.length.values,
-                    capital_cost=costs.at["H2 (g) pipeline", "fixed"]
-                    * h2_links.length.values,
-                    carrier="H2 pipeline",
-                    lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-                )
-
-        # Else, then the electrical transmission lines routing is considered for new H2 pipelines.
-        elif (
-            not snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield"
-        ):
-            n.madd(
-                "Link",
-                h2_links.index,
-                bus0=h2_links.bus0.values + " H2",
-                bus1=h2_links.bus1.values + " H2",
-                p_min_pu=-1,
-                p_nom_extendable=True,
-                length=h2_links.length.values,
-                capital_cost=costs.at["H2 (g) pipeline", "fixed"]
-                * h2_links.length.values,
-                carrier="H2 pipeline",
-                lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-            )
-
-        else:
-            attrs = ["bus0", "bus1", "length"]
-            h2_links = pd.DataFrame(columns=attrs)
-
-            candidates = pd.concat(
-                {
-                    "lines": n.lines[attrs],
-                    "links": n.links.loc[n.links.carrier == "DC", attrs],
-                }
-            )
-
-            for candidate in candidates.index:
-                buses = [
-                    candidates.at[candidate, "bus0"],
-                    candidates.at[candidate, "bus1"],
-                ]
-                buses.sort()
-                name = f"H2 pipeline {buses[0]} -> {buses[1]}"
-                if name not in h2_links.index:
-                    h2_links.at[name, "bus0"] = buses[0]
-                    h2_links.at[name, "bus1"] = buses[1]
-                    h2_links.at[name, "length"] = candidates.at[candidate, "length"]
-
-            n.madd(
-                "Link",
-                h2_links.index,
-                bus0=h2_links.bus0.values + " H2",
-                bus1=h2_links.bus1.values + " H2",
-                p_min_pu=-1,
-                p_nom_extendable=True,
-                length=h2_links.length.values,
-                capital_cost=costs.at["H2 (g) pipeline", "fixed"]
-                * h2_links.length.values,
-                carrier="H2 pipeline",
-                lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-            )
+            # Option 4: New H2 pipelines following electrical transmission lines + Repurposing:
+            elif (
+                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
+                and snakemake.config["sector"]["hydrogen"]["network_routes"]
+                == "greenfield"
+            ):
+                print("#" * 10)
+                print("WARNING: No existing gas network --> No Repurposing is possible")
+                print("#" * 10)
+                add_links_elec_routing_new_H2_pipelines()
 
 
 def define_spatial(nodes):
@@ -2417,13 +2418,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="74",
-            ll="c1",
+            clusters="10",
+            ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
             discountrate="0.071",
-            demand="DF",
+            demand="AB",
         )
 
     # Load population layout
