@@ -51,7 +51,7 @@ import powerplantmatching as pm
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, getContinent, update_p_nom_max
+from _helpers import configure_logging, create_logger, getContinent, read_osm_config
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -60,6 +60,36 @@ logger = create_logger(__name__)
 
 def normed(s):
     return s / s.sum()
+
+
+def get_gegis_regions(countries):
+    """
+    Get the GEGIS region from the config file.
+
+    Parameters
+    ----------
+    region : str
+        The region of the bus
+
+    Returns
+    -------
+    str
+        The GEGIS region
+    """
+    gegis_dict, world_iso = read_osm_config("gegis_regions", "world_iso")
+
+    regions = []
+
+    for d_region in [gegis_dict, world_iso]:
+        for key, value in d_region.items():
+            # ignore if the key is already in the regions list
+            if key in regions:
+                continue
+            # if a country is in the regions values, then load it
+            cintersect = set(countries).intersection(set(value.keys()))
+            if len(cintersect) > 0:
+                regions.append(key)
+    return regions
 
 
 def get_load_paths_gegis(ssp_parentfolder, config):
@@ -74,7 +104,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
     """
     countries = config.get("countries")
-    region_load = getContinent(countries)
+    region_load = get_gegis_regions(countries)
     weather_year = config.get("load_options")["weather_year"]
     prediction_year = config.get("load_options")["prediction_year"]
     ssp = config.get("load_options")["ssp"]
