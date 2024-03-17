@@ -355,7 +355,7 @@ def add_hydrogen(n, costs):
             #     .str.split(".")
             #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
             # )
-            
+
         # Create index column
         h2_links["buses_idx"] = (
             "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
