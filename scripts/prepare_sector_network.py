@@ -792,12 +792,10 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    
     if snakemake.config["sector"]["international_bunkers"]:
         all_aviation = ["total international aviation", "total domestic aviation"]
     else:
         all_aviation = ["total domestic aviation"]
-
 
     aviation_demand = (
         energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -962,7 +960,6 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["SMR"]:
-
         n.madd(
             "Link",
             nodes + " SMR",
@@ -990,7 +987,6 @@ def add_shipping(n, costs):
         all_navigation = ["total international navigation", "total domestic navigation"]
     else:
         all_navigation = ["total domestic navigation"]
-
 
     navigation_demand = (
         energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
