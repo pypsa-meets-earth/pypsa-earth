@@ -1056,14 +1056,15 @@ def add_shipping(n, costs):
     else:
         shipping_bus = nodes + " H2"
 
-    n.madd(
-        "Load",
-        nodes,
-        suffix=" H2 for shipping",
-        bus=shipping_bus,
-        carrier="H2 for shipping",
-        p_set=ports["p_set"],
-    )
+    if not (snakemake.config["policy_config"]["hydrogen"]["is_reference"] and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]):
+        n.madd(
+            "Load",
+            nodes,
+            suffix=" H2 for shipping",
+            bus=shipping_bus,
+            carrier="H2 for shipping",
+            p_set=ports["p_set"],
+        )
 
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
@@ -1248,14 +1249,15 @@ def add_industry(n, costs):
 
     #################################################### CARRIER = HYDROGEN
 
-    n.madd(
-        "Load",
-        nodes,
-        suffix=" H2 for industry",
-        bus=nodes + " H2",
-        carrier="H2 for industry",
-        p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
-    )
+    if not (snakemake.config["policy_config"]["hydrogen"]["is_reference"] and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]):
+        n.madd(
+            "Load",
+            nodes,
+            suffix=" H2 for industry",
+            bus=nodes + " H2",
+            carrier="H2 for industry",
+            p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
+        )
 
     # CARRIER = LIQUID HYDROCARBONS
     n.madd(
@@ -1547,16 +1549,17 @@ def add_land_transport(n, costs):
         )
 
     if fuel_cell_share > 0:
-        n.madd(
-            "Load",
-            nodes,
-            suffix=" land transport fuel cell",
-            bus=nodes + " H2",
-            carrier="land transport fuel cell",
-            p_set=fuel_cell_share
-            / options["transport_fuel_cell_efficiency"]
-            * transport[nodes],
-        )
+        if not (snakemake.config["policy_config"]["hydrogen"]["is_reference"] and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]):
+            n.madd(
+                "Load",
+                nodes,
+                suffix=" land transport fuel cell",
+                bus=nodes + " H2",
+                carrier="land transport fuel cell",
+                p_set=fuel_cell_share
+                / options["transport_fuel_cell_efficiency"]
+                * transport[nodes],
+            )
 
     if ice_share > 0:
         if "oil" not in n.buses.carrier.unique():
