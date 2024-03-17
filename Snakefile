@@ -168,7 +168,7 @@ rule prepare_sector_network:
         shapes_path=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
-        pipelines="resources/custom_data/pipelines.csv"
+        pipelines="data_custom/pipelines.csv"
         if config["custom_data"]["gas_network"]
         else "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
     output:
