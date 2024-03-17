@@ -57,7 +57,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=12,
+            clusters=13,
             planning_horizons=2030,
             demand="AB",
         )
@@ -292,12 +292,12 @@ if __name__ == "__main__":
             nodal_df_co = nodal_production_tom_co.dot(industry_base_totals_co.T)
             nodal_df = pd.concat([nodal_df, nodal_df_co])
 
-        rename_sectors = {
-            "elec": "electricity",
-            "biomass": "solid biomass",
-            "heat": "low-temperature heat",
-        }
-        nodal_df.rename(columns=rename_sectors, inplace=True)
+    rename_sectors = {
+        "elec": "electricity",
+        "biomass": "solid biomass",
+        "heat": "low-temperature heat",
+    }
+    nodal_df.rename(columns=rename_sectors, inplace=True)
 
     nodal_df.index.name = "MWh/a (tCO2/a)"
 
