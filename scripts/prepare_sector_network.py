@@ -133,7 +133,7 @@ def add_oil(n, costs):
         n.add("Carrier", "oil")
 
     # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted seperately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
-    # n.carriers.loc["oil", "co2_emissions"] = 0
+    n.carriers.loc["oil", "co2_emissions"] = 0
     # print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
 
     n.madd(
@@ -344,18 +344,18 @@ def add_hydrogen(n, costs):
             h2_links["bus0"] = buses_ordered.str[0] + "_AC"
             h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
-            # Conversion of GADM id to from 3 to 2-digit
-            h2_links["bus0"] = (
-                h2_links["bus0"]
-                .str.split(".")
-                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            )
-            h2_links["bus1"] = (
-                h2_links["bus1"]
-                .str.split(".")
-                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            )
-
+            # # Conversion of GADM id to from 3 to 2-digit
+            # h2_links["bus0"] = (
+            #     h2_links["bus0"]
+            #     .str.split(".")
+            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            # )
+            # h2_links["bus1"] = (
+            #     h2_links["bus1"]
+            #     .str.split(".")
+            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            # )
+            
         # Create index column
         h2_links["buses_idx"] = (
             "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
@@ -2339,7 +2339,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="10",
+            clusters="13",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
