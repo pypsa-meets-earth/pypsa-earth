@@ -2204,18 +2204,18 @@ def add_residential(n, costs):
         n.loads_t.p_set[res_index], multiindex=True
     ).fillna(0)
 
-    p_set_oil = 1e6 * (
-        profile_residential.mul(energy_totals["residential oil"], level=0)
+    p_set_oil = (
+        1e6 * profile_residential.mul(energy_totals["residential oil"], level=0)
         + heat_oil_demand
     ).droplevel(level=0, axis=1)
 
-    p_set_biomass = 1e6 * (
-        profile_residential.mul(energy_totals["residential biomass"], level=0)
+    p_set_biomass = (
+        1e6 * profile_residential.mul(energy_totals["residential biomass"], level=0)
         + heat_biomass_demand
     ).droplevel(level=0, axis=1)
 
-    p_set_gas = 1e6 * (
-        profile_residential.mul(energy_totals["residential gas"], level=0)
+    p_set_gas = (
+        1e6 * profile_residential.mul(energy_totals["residential gas"], level=0)
         + heat_gas_demand
     ).droplevel(level=0, axis=1)
 
@@ -2371,7 +2371,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="74",
+            clusters="10",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
