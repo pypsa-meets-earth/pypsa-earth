@@ -748,7 +748,6 @@ def drop_isolated_nodes(n, threshold):
 
 def find_isolated_sub_networks(n, threshold):
     buses_df = n.buses
-    buses_df["bus_id"] = buses_df.index
 
     subnetw_ac_df = (
         buses_df.loc[n.buses.carrier == "AC"]
@@ -788,13 +787,13 @@ def find_isolated_sub_networks(n, threshold):
             s
             for s in sbntw
             if (
-                n.loads_t.p_set[n.buses[n.buses.sub_network == s].bus_id].mean().mean()
+                n.loads_t.p_set[n.buses[n.buses.sub_network == s].index].mean().mean()
                 < threshold
             )
         ]
         island_sbntw.extend(i_island_ntw)
 
-    i_islands = n.buses[n.buses.sub_network.isin(island_sbntw)].bus_id
+    i_islands = n.buses[n.buses.sub_network.isin(island_sbntw)].index
 
     return i_islands
 
@@ -876,7 +875,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     gdf_map = gdf_backbone_buses.groupby("country").apply(
         lambda d: gpd.sjoin_nearest(islands_bcountry[d["country"].values[0]], d)
     )
-    nearest_bus_df = n.buses.loc[n.buses.bus_id.isin(gdf_map.bus_id_right)]
+    nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
 
     i_lines_islands = n.lines.loc[n.lines.bus1.isin(i_islands)].index
     n.mremove("Line", i_lines_islands)
