@@ -23,6 +23,9 @@ NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
 REGION_COLS = ["geometry", "name", "x", "y", "country"]
 
+# filename of the regions definition config file
+REGIONS_CONFIG = "regions_definition_config.yaml"
+
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     """
@@ -66,7 +69,7 @@ def create_logger(logger_name, level=logging.INFO):
 
 def read_osm_config(*args):
     """
-    Read values from the osm_config.yaml file based on provided key arguments.
+    Read values from the regions config file based on provided key arguments.
 
     Parameters
     ----------
@@ -79,7 +82,7 @@ def read_osm_config(*args):
     -------
     tuple or str or dict
         If a single key is provided, returns the corresponding value from the
-        osm_config.yaml file. If multiple keys are provided, returns a tuple
+        regions config file. If multiple keys are provided, returns a tuple
         containing values corresponding to the provided keys.
 
     Examples
@@ -98,7 +101,7 @@ def read_osm_config(*args):
             base_folder = os.path.dirname(base_folder)
     else:
         base_folder = os.getcwd()
-    osm_config_path = os.path.join(base_folder, "configs", "osm_config.yaml")
+    osm_config_path = os.path.join(base_folder, "configs", REGIONS_CONFIG)
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
@@ -530,37 +533,6 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def getContinent(code, world_iso=read_osm_config("world_iso")):
-    """
-    Returns continent names that contains list of iso-code countries.
-
-    Parameters
-    ----------
-    code : str
-        List of two letter country ISO codes
-
-    Returns
-    -------
-    continent_list : str
-        List of continent names
-
-    Example
-    -------
-    from helpers import getContinent
-    code = ["DE", "GB", "NG", "ZA"]
-    getContinent(code)
-    >>> ["africa", "europe"]
-    """
-
-    continent_list = []
-    code_set = set(code)
-    for continent in world_iso.keys():
-        single_continent_set = set(world_iso[continent])
-        if code_set.intersection(single_continent_set):
-            continent_list.append(continent)
-    return continent_list
-
-
 def two_2_three_digits_country(two_code_country):
     """
     Convert 2-digit to 3-digit country code:
@@ -742,12 +714,12 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
 
 def create_country_list(input, iso_coding=True):
     """
-    Create a country list for defined regions in osm_config.yaml.
+    Create a country list for defined regions..
 
     Parameters
     ----------
     input : str
-        Any two-letter country name, regional name, or continent given in osm_config.yaml
+        Any two-letter country name, regional name, or continent given in the regions config file.
         Country name duplications won't distort the result.
         Examples are:
         ["NG","ZA"], downloading osm data for Nigeria and South Africa
