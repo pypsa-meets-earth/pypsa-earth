@@ -749,6 +749,7 @@ def drop_isolated_nodes(n, threshold):
 def find_isolated_sub_networks(n, threshold):
     buses_df = n.buses
 
+    # handling isolated networks make sense primarily for AC networks
     subnetw_ac_df = (
         buses_df.loc[n.buses.carrier == "AC"]
         .groupby(["sub_network", "country"])
@@ -758,13 +759,14 @@ def find_isolated_sub_networks(n, threshold):
     multicountry_subnetworks = subnetw_ac_df[
         subnetw_ac_df.index.droplevel("country").duplicated()
     ].index.get_level_values("sub_network")
-
+    # process further only networks which entirely belongs to a single country
     subnetw_ac_monocountry_df = subnetw_ac_df.loc[
         subnetw_ac_df.index.get_level_values("sub_network").difference(
             multicountry_subnetworks
         )
     ]
 
+    # all relevant isolated sub-networks should be identified across all the countries
     island_sbntw = []
     for cnt in buses_df.country.unique():
         ## TODO May be worth to investigate a threshold for the load share
@@ -783,6 +785,7 @@ def find_isolated_sub_networks(n, threshold):
             "country == @cnt"
         ).index.get_level_values("sub_network")
 
+        # power threshold should be accounted to identify the relevant networks
         i_island_ntw = [
             s
             for s in sbntw
@@ -854,7 +857,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         .duplicated()
     )
 
-    # don't into sub-networks spanning through multiple countries
+    # don't go into sub-networks spanning through multiple countries
     subnetw_by_countries_df = n.buses.groupby(["sub_network", "country"]).count()
     multicountry_subnetworks = subnetw_by_countries_df[
         subnetw_by_countries_df.index.droplevel("country").duplicated()
