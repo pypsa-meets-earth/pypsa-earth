@@ -83,12 +83,11 @@ def get_gegis_regions(countries):
     for d_region in [gegis_dict, world_iso]:
         for key, value in d_region.items():
             # ignore if the key is already in the regions list
-            if key in regions:
-                continue
-            # if a country is in the regions values, then load it
-            cintersect = set(countries).intersection(set(value.keys()))
-            if len(cintersect) > 0:
-                regions.append(key)
+            if key not in regions:
+                # if a country is in the regions values, then load it
+                cintersect = set(countries).intersection(set(value.keys()))
+                if cintersect:
+                    regions.append(key)
     return regions
 
 
