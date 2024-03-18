@@ -1977,9 +1977,9 @@ def add_services(n, costs):
         n.loads_t.p_set[buses].reindex(columns=spatial.nodes, fill_value=0.0)
     ).fillna(0)
 
-    p_set_elec = 1e6 * profile_residential.mul(
-        energy_totals["services electricity"], level=0
-    ).droplevel(level=0, axis=1)
+    p_set_elec = p_set_from_scaling(
+        "services electricity", profile_residential, energy_totals
+    )
 
     n.madd(
         "Load",
@@ -1989,9 +1989,9 @@ def add_services(n, costs):
         carrier="services electricity",
         p_set=p_set_elec,
     )
-    p_set_biomass = 1e6 * profile_residential.mul(
-        energy_totals["services biomass"], level=0
-    ).droplevel(level=0, axis=1)
+    p_set_biomass = p_set_from_scaling(
+        "services biomass", profile_residential, energy_totals
+    )
 
     n.madd(
         "Load",
@@ -2013,9 +2013,7 @@ def add_services(n, costs):
     #     carrier="biomass emissions",
     #     p_set=-co2,
     # )
-    p_set_oil = 1e6 * profile_residential.mul(
-        energy_totals["services oil"], level=0
-    ).droplevel(level=0, axis=1)
+    p_set_oil = p_set_from_scaling("services oil", profile_residential, energy_totals)
 
     n.madd(
         "Load",
@@ -2037,9 +2035,7 @@ def add_services(n, costs):
         p_set=-co2,
     )
 
-    p_set_gas = 1e6 * profile_residential.mul(
-        energy_totals["services gas"], level=0
-    ).droplevel(level=0, axis=1)
+    p_set_gas = p_set_from_scaling("services gas", profile_residential, energy_totals)
 
     n.madd(
         "Load",
@@ -2129,6 +2125,11 @@ def normalize_and_group(df, multiindex=False):
     )
 
 
+def p_set_from_scaling(col, scaling, energy_totals):
+    """Function to create p_set from energy_totals, using the per-unit scaling dataframe"""
+    return 1e6 * scaling.mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
+
+
 def add_residential(n, costs):
     # need to adapt for many countries #TODO
 
@@ -2175,16 +2176,16 @@ def add_residential(n, costs):
 
     heat_shape = group_by_node(heat_shape_raw.droplevel(0, axis=True), multiindex=True)
 
-    heat_oil_demand = 1e6 * heat_shape.mul(
-        energy_totals["residential heat oil"], level=0
+    heat_oil_demand = p_set_from_scaling(
+        "residential heat oil", heat_shape, energy_totals
     )
 
-    heat_biomass_demand = 1e6 * heat_shape.mul(
-        energy_totals["residential heat biomass"], level=0
+    heat_biomass_demand = p_set_from_scaling(
+        "residential heat biomass", heat_shape, energy_totals
     )
 
-    heat_gas_demand = 1e6 * heat_shape.mul(
-        energy_totals["residential heat gas"], level=0
+    heat_gas_demand = p_set_from_scaling(
+        "residential heat gas", heat_shape, energy_totals
     )
 
     print("#############################################")
@@ -2205,19 +2206,19 @@ def add_residential(n, costs):
     ).fillna(0)
 
     p_set_oil = (
-        1e6 * profile_residential.mul(energy_totals["residential oil"], level=0)
+        p_set_from_scaling("residential oil", profile_residential, energy_totals)
         + heat_oil_demand
-    ).droplevel(level=0, axis=1)
+    )
 
     p_set_biomass = (
-        1e6 * profile_residential.mul(energy_totals["residential biomass"], level=0)
+        p_set_from_scaling("residential biomass", profile_residential, energy_totals)
         + heat_biomass_demand
-    ).droplevel(level=0, axis=1)
+    )
 
     p_set_gas = (
-        1e6 * profile_residential.mul(energy_totals["residential gas"], level=0)
+        p_set_from_scaling("residential gas", profile_residential, energy_totals)
         + heat_gas_demand
-    ).droplevel(level=0, axis=1)
+    )
 
     n.madd(
         "Load",
@@ -2290,9 +2291,9 @@ def add_residential(n, costs):
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
 
     profile_pu = normalize_by_country(n.loads_t.p_set[buses]).fillna(0)
-    n.loads_t.p_set.loc[:, buses] = 1e6 * profile_pu.mul(
-        energy_totals["electricity residential"], level=0
-    ).droplevel(level=0, axis=1)
+    n.loads_t.p_set.loc[:, buses] = p_set_from_scaling(
+        "electricity residential", profile_pu, energy_totals
+    )
 
 
 # def add_co2limit(n, Nyears=1.0, limit=0.0):
