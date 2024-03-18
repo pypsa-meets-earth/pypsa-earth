@@ -12,7 +12,7 @@ dependencies:
 - pip
 - mamba   # esp for windows build
 
-- pypsa>=0.24, <0.25
+- pypsa>=0.24, <0.26
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
 - powerplantmatching>=0.5.7
@@ -77,7 +77,7 @@ dependencies:
 
 # Default solver for tests (required for CI)
 - glpk
-- ipopt<3.13.3
+- ipopt #<3.13.3
 - gurobi
 
 - pip:

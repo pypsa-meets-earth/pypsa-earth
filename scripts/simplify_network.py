@@ -102,7 +102,6 @@ from _helpers import (
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
-    aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
     get_clustering_from_busmap,
@@ -275,11 +274,15 @@ def _aggregate_and_move_components(
 
     _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, output)
 
-    _, generator_strategies = get_aggregation_strategies(aggregation_strategies)
+    generator_strategies = aggregation_strategies["generators"]
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
-    generators, generators_pnl = aggregategenerators(
-        n, busmap, carriers=carriers, custom_strategies=generator_strategies
+    generators, generators_pnl = aggregateoneport(
+        n,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=generator_strategies,
     )
 
     replace_components(n, "Generator", generators, generators_pnl)
@@ -587,9 +590,9 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
     if not dist.empty:
         busmap.loc[buses_i] = dist.idxmin(1)
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
+    line_strategies = aggregation_strategies.get("lines", dict())
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     clustering = get_clustering_from_busmap(
         n,
@@ -599,7 +602,9 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
+        line_strategies=line_strategies,
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
     return clustering.network, busmap
@@ -801,19 +806,20 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     if (busmap.index == busmap).all():
         return n, n.buses.index.to_series()
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
+    line_strategies = aggregation_strategies.get("lines", dict())
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
+        line_strategies=line_strategies,
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
 
@@ -843,14 +849,14 @@ if __name__ == "__main__":
         "exclude_carriers", []
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
-    aggregation_strategies = snakemake.params.cluster_options.get(
-        "aggregation_strategies", {}
-    )
-    # translate str entries of aggregation_strategies to pd.Series functions:
-    aggregation_strategies = {
-        p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
-        for p in aggregation_strategies.keys()
-    }
+    # aggregation_strategies = snakemake.params.cluster_options.get(
+    #    "aggregation_strategies", {}
+    # )
+    ## translate str entries of aggregation_strategies to pd.Series functions:
+    # aggregation_strategies = {
+    #    p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
+    #    for p in aggregation_strategies.keys()
+    # }
     n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
@@ -871,7 +877,7 @@ if __name__ == "__main__":
         snakemake.params.config_links,
         snakemake.output,
         exclude_carriers,
-        aggregation_strategies,
+        snakemake.params.aggregation_strategies,
     )
 
     busmaps = [trafo_map, simplify_links_map]
@@ -888,12 +894,14 @@ if __name__ == "__main__":
             hvdc_as_lines,
             lines_length_factor,
             snakemake.output,
-            aggregation_strategies=aggregation_strategies,
+            aggregation_strategies=snakemake.params.aggregation_strategies,
         )
         busmaps.append(stub_map)
 
     if cluster_config.get("to_substations", False):
-        n, substation_map = aggregate_to_substations(n, aggregation_strategies)
+        n, substation_map = aggregate_to_substations(
+            n, snakemake.params.aggregation_strategies
+        )
         busmaps.append(substation_map)
 
     # treatment of outliers (nodes without a profile for considered carrier):
@@ -925,7 +933,9 @@ if __name__ == "__main__":
             logger.info(
                 f"clustering preparation (hac): aggregating {len(buses_i)} buses of type {carrier}."
             )
-            n, busmap_hac = aggregate_to_substations(n, aggregation_strategies, buses_i)
+            n, busmap_hac = aggregate_to_substations(
+                n, params.aggregation_strategies, buses_i
+            )
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
@@ -955,7 +965,7 @@ if __name__ == "__main__":
             solver_name,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
-            aggregation_strategies,
+            aggregation_strategies=snakemake.params.aggregation_strategies,
         )
         busmaps.append(cluster_map)
 
@@ -978,13 +988,13 @@ if __name__ == "__main__":
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
-    if p_threshold_merge_isolated:
-        n, merged_nodes_map = merge_isolated_nodes(
-            n,
-            threshold=p_threshold_merge_isolated,
-            aggregation_strategies=aggregation_strategies,
-        )
-        busmaps.append(merged_nodes_map)
+    # if p_threshold_merge_isolated:
+    #     n, merged_nodes_map = merge_isolated_nodes(
+    #         n,
+    #         threshold=p_threshold_merge_isolated,
+    #         aggregation_strategies=snakemake.params.aggregation_strategies,
+    #     )
+    #     busmaps.append(merged_nodes_map)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
