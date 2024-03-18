@@ -2027,7 +2027,7 @@ def add_services(n, costs):
     )
 
     # TODO check with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"] * 8760
+    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -2229,7 +2229,7 @@ def add_residential(n, costs):
     )
 
     # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"] * 8760
+    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
