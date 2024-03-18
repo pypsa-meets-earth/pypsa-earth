@@ -1173,9 +1173,7 @@ def add_industry(n, costs):
 
     # CARRIER = FOSSIL GAS
 
-    # nodes = (
-    #     pop_layout.index
-    # )  # TODO where to change country code? 2 letter country codes.
+    # nodes = pop_layout.index
 
     # industrial_demand['TWh/a (MtCO2/a)'] = industrial_demand['TWh/a (MtCO2/a)'].apply(
     #     lambda cocode: two_2_three_digits_country(cocode[:2]) + "." + cocode[3:])
