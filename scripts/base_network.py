@@ -352,7 +352,7 @@ def _set_electrical_parameters_converters(links_config, converters):
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
-    n.lines["s_nom"] = (
+    n.lines["s_nom_min"] = (
         np.sqrt(3)
         * n.lines["type"].map(n.line_types.i_nom)
         * n.lines.eval("v_nom * num_parallel")
