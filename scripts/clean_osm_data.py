@@ -48,6 +48,9 @@ def prepare_substation_df(df_all_substations):
         }
     )
 
+    # Convert polygons to points
+    df_all_substations["geometry"] = df_all_substations["geometry"].centroid
+
     # Add longitude (lon) and latitude (lat) coordinates in the dataset
     df_all_substations["lon"] = df_all_substations["geometry"].x
     df_all_substations["lat"] = df_all_substations["geometry"].y
@@ -454,6 +457,7 @@ def split_and_match_voltage_frequency_size(df):
     last value in the column.
 
     The function does as follows:
+
     1. First, it splits voltage and frequency columns by semicolon
        For example, the following lines
        row 1: '50', '220000
@@ -514,6 +518,7 @@ def fill_circuits(df):
     element matches the size of the list in the frequency column.
 
     Multiple procedure are adopted:
+
     1. In the rows of circuits where the number of elements matches
        the number of the frequency column, nothing is done
     2. Where the number of elements in the cables column match the ones
@@ -726,10 +731,8 @@ def filter_lines_by_geometry(df_all_lines):
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
-    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
-    df_all_lines = df_all_lines[
-        df_all_lines["geometry"].map(lambda g: len(g.boundary.geoms) >= 2)
-    ]
+    # remove lines represented as Polygons
+    df_all_lines = df_all_lines[df_all_lines.geometry.geom_type == "LineString"]
 
     return df_all_lines
 
@@ -807,9 +810,11 @@ def create_extended_country_shapes(country_shapes, offshore_shapes, tolerance=0.
             {
                 "name": list(country_shapes.index),
                 "geometry": [
-                    c_geom.unary_union(offshore_shapes[c_code])
-                    if c_code in offshore_shapes
-                    else c_geom
+                    (
+                        c_geom.unary_union(offshore_shapes[c_code])
+                        if c_code in offshore_shapes
+                        else c_geom
+                    )
                     for c_code, c_geom in country_shapes.items()
                 ],
             },

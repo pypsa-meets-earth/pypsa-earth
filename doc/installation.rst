@@ -129,7 +129,7 @@ To confirm the installation, run the following command in the activated environm
 
 
 Solver Installation
-------------------
+--------------------
 An optimization solver is needed to solve the mathematical problem that is build with the automated workflow of PyPSA-Earth.
 With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as
 

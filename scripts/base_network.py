@@ -328,7 +328,7 @@ def _set_electrical_parameters_links(links_config, links):
 def _set_electrical_parameters_transformers(transformers_config, transformers):
     config = transformers_config
 
-    ## Add transformer parameters
+    # Add transformer parameters
     transformers["x"] = config.get("x", 0.1)
     transformers["s_nom"] = config.get("s_nom", 2000)
     transformers["type"] = config.get("type", "")
@@ -451,6 +451,8 @@ def _rebase_voltage_to_config(base_network_config, voltages_config, component):
     config : dictionary (by snakemake)
     component : dataframe
     """
+    component["v_nom_original"] = component["v_nom"]
+
     v_min = (
         base_network_config["min_voltage_rebase_voltage"] / 1000
     )  # min. filtered value in dataset
@@ -494,8 +496,15 @@ def base_network(
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
     lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
+    lines_ac.num_parallel = lines_ac.num_parallel * (
+        lines_ac.v_nom_original / lines_ac.v_nom
+    )
+
     lines_dc = _set_electrical_parameters_dc_lines(
         lines_config, voltages_config, lines_dc
+    )
+    lines_dc.num_parallel = lines_dc.num_parallel * (
+        lines_dc.v_nom_original / lines_dc.v_nom
     )
 
     transformers = _set_electrical_parameters_transformers(
@@ -504,7 +513,7 @@ def base_network(
     converters = _set_electrical_parameters_converters(links_config, converters)
 
     n = pypsa.Network()
-    n.name = "PyPSA-Eur"
+    n.name = "PyPSA-Earth"
 
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
@@ -518,7 +527,7 @@ def base_network(
         lines_dc = _set_electrical_parameters_links(links_config, lines_dc)
         # parse line information into p_nom required for converters
         lines_dc["p_nom"] = lines_dc.apply(
-            lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
+            lambda x: x["v_nom_original"] * n.line_types.i_nom[x["type"]],
             axis=1,
             result_type="reduce",
         )

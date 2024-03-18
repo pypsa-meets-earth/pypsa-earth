@@ -10,7 +10,7 @@ Data used by the model
 
 To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the :ref:`Tutorial <tutorial>` section.
 
-Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart of that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
+Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart from that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
 
 1. Grid topology data
 ===================================
@@ -83,9 +83,9 @@ Technological
 4. Pre-calculated datasets
 ===================================
 
-There are some datasets which were prepared to ensure smooth run of the model. However, they may (and in some cases) must be replaced by custom ones.
+There are some datasets which were prepared to ensure smooth run of the model. However, they may (and, in some cases, must) be replaced by custom ones.
 
-* **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as mask the exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
+* **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as a mask to exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
 
 Currently the pre-build file is calculated for Africa, global `natura.tiff` raster is under development.
 
