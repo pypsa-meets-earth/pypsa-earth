@@ -109,14 +109,34 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     ssp = config.get("load_options")["ssp"]
 
     load_paths = []
-    for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
+    load_dir = os.path.join(
+        ssp_parentfolder,
+        str(ssp),
+        str(prediction_year),
+        "era5_" + str(weather_year),
+    )
+    regions_in_nc = [
+        cnt
+        for cnt in region_load
+        if os.path.exists(os.path.join(load_dir, str(cnt) + ".nc"))
+    ]
+    regions_in_csv = [
+        cnt
+        for cnt in region_load
+        if os.path.exists(os.path.join(load_dir, str(cnt) + ".csv"))
+    ]
+
+    if len(regions_in_nc) == len(region_load):
+        fl_ext = ".nc"
+    elif len(regions_in_csv) == len(region_load):
+        fl_ext = ".csv"
+    else:
+        logger.error(
+            "No demand data file for {set(region_load).difference(regions_in_nc)}"
         )
+
+    for continent in region_load:
+        load_path = os.path.join(load_dir, str(continent) + fl_ext)
         load_paths.append(load_path)
 
     return load_paths
