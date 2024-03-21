@@ -42,6 +42,7 @@ it returns a csv file called "demand_profiles.csv", that allocates the load to t
 """
 import logging
 import os
+import os.path
 from itertools import product
 
 import geopandas as gpd
