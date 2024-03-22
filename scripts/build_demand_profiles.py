@@ -116,29 +116,23 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         str(prediction_year),
         "era5_" + str(weather_year),
     )
-    regions_in_nc = [
-        cnt
-        for cnt in region_load
-        if os.path.exists(os.path.join(load_dir, str(cnt) + ".nc"))
-    ]
-    regions_in_csv = [
-        cnt
-        for cnt in region_load
-        if os.path.exists(os.path.join(load_dir, str(cnt) + ".csv"))
-    ]
 
-    if len(regions_in_nc) == len(region_load):
-        fl_ext = ".nc"
-    elif len(regions_in_csv) == len(region_load):
-        fl_ext = ".csv"
-    else:
-        logger.error(
-            f"No demand data file for {set(region_load).difference(regions_in_nc)}"
+    for ext in [".nc", ".csv"]:
+        avail_regions = [
+            cnt
+            for cnt in region_load
+            if os.path.exists(os.path.join(load_dir, cnt + ext))
+        ]
+        if len(avail_regions) == len(region_load):
+            for continent in region_load:
+                load_path = os.path.join(load_dir, continent + ext)
+                load_paths.append(load_path)
+            break
+
+    if len(avail_regions) != len(region_load):
+        raise AssertionError(
+            f"No demand data file for {set(region_load).difference(avail_regions)}"
         )
-
-    for continent in region_load:
-        load_path = os.path.join(load_dir, str(continent) + fl_ext)
-        load_paths.append(load_path)
 
     return load_paths
 
