@@ -133,7 +133,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         fl_ext = ".csv"
     else:
         logger.error(
-            "No demand data file for {set(region_load).difference(regions_in_nc)}"
+            f"No demand data file for {set(region_load).difference(regions_in_nc)}"
         )
 
     for continent in region_load:
