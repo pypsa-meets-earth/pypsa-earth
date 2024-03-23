@@ -385,6 +385,39 @@ def attach_wind_and_solar(
                 efficiency=costs.at[suptech, "efficiency"],
             )
 
+            if tech == "csp":  # add store and link for CSP
+                csp_buses_i = n.madd(
+                    "Bus",
+                    ds.indexes["bus"],
+                    " " + tech,
+                    carrier=tech,
+                    unit="MW",
+                )
+
+                n.madd(
+                    "Store",
+                    ds.indexes["bus"],
+                    " " + tech,
+                    bus=ds.indexes["bus"],
+                    carrier=tech,
+                    e_nom_extendable=True,
+                    e_cyclic=True,
+                    capital_cost=costs.at[tech, "capital_cost"],
+                )
+
+                n.madd(
+                    "Link",
+                    ds.indexes["bus"],
+                    " " + tech,
+                    bus0=csp_buses_i,
+                    bus1=ds.indexes["bus"],
+                    carrier=tech,
+                    p_nom_extendable=True,
+                    efficiency=costs.at[tech, "efficiency"],
+                    capital_cost=costs.at[tech, "capital_cost"],
+                    marginal_cost=costs.at[tech, "marginal_cost"],
+                )
+
 
 def attach_conventional_generators(
     n,
