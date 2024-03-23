@@ -42,6 +42,7 @@ it returns a csv file called "demand_profiles.csv", that allocates the load to t
 """
 import logging
 import os
+import os.path
 from itertools import product
 
 import geopandas as gpd
@@ -109,15 +110,29 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     ssp = config.get("load_options")["ssp"]
 
     load_paths = []
-    for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
-        )
-        load_paths.append(load_path)
+    load_dir = os.path.join(
+        ssp_parentfolder,
+        str(ssp),
+        str(prediction_year),
+        "era5_" + str(weather_year),
+    )
+
+    for ext in [".nc", ".csv"]:
+        avail_regions = [
+            cnt
+            for cnt in region_load
+            if os.path.exists(os.path.join(load_dir, cnt + ext))
+        ]
+        if len(avail_regions) == len(region_load):
+            for continent in region_load:
+                load_path = os.path.join(load_dir, continent + ext)
+                load_paths.append(load_path)
+            break
+
+    # if len(load_paths) == 0:
+    #    raise AssertionError(
+    #        f"No demand data file for {set(region_load).difference(avail_regions)}"
+    #    )
 
     return load_paths
 
@@ -176,8 +191,42 @@ def build_demand_profiles(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     load_paths = load_paths
-    # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-    gegis_load = xr.open_mfdataset(load_paths, combine="nested")
+
+    if str(load_paths[0]).endswith(".csv"):
+        df = pd.concat(
+            [
+                pd.read_csv(
+                    pth,
+                    sep=";",
+                    dtype={
+                        "region_code": str,
+                        "time": str,
+                        "region_name": str,
+                        "Electricity demand": np.float64,
+                    },
+                    keep_default_na=False,
+                    na_values=["_", ""],
+                )
+                for pth in load_paths
+            ],
+            axis=0,
+        )
+        df.time = pd.to_datetime(df.time, format="%Y-%m-%d %H:%M:%S")
+        load_regions = {c: n for c, n in zip(df.region_code, df.region_name)}
+
+        gegis_load = df.set_index(["region_code", "time"]).to_xarray()
+        gegis_load = gegis_load.assign_coords(
+            {
+                "region_name": (
+                    "region_code",
+                    [name for (code, name) in load_regions.items()],
+                )
+            }
+        )
+    else:
+        # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+        gegis_load = xr.open_mfdataset(load_paths, combine="nested")
+
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
