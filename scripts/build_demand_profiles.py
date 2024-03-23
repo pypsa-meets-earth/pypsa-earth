@@ -129,7 +129,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
                 load_paths.append(load_path)
             break
 
-    if len(avail_regions) != len(region_load):
+    if len(load_paths) == 0:
         raise AssertionError(
             f"No demand data file for {set(region_load).difference(avail_regions)}"
         )
