@@ -71,15 +71,15 @@ coal,2030,efficiency,0.464,per unit,DIW DataDoc http://hdl.handle.net/10419/8034
 coal,2030,fuel,8.4,EUR/MWhth,IEA2011b
 coal,2030,investment,1300.0,EUR/kWel,DIW DataDoc http://hdl.handle.net/10419/80348 PC (Advanced/SuperC)
 coal,2030,lifetime,40.0,years,IEA2010
-csp,2030,FOM,1.1,%/year,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
-csp,2030,investment,108.37,"EUR/kW_th,dp",ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
-csp,2030,lifetime,30.0,years,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
-csp TES,2030,FOM,1.1,%/year,see solar-tower.
-csp TES,2030,investment,14.52,EUR/kWh_th,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
-csp TES,2030,lifetime,30.0,years,see solar-tower.
-csp power block,2030,FOM,1.1,%/year,see solar-tower.
-csp power block,2030,investment,759.17,EUR/kW_e,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
-csp power block,2030,lifetime,30.0,years,see solar-tower.
+csp-tower,2030,FOM,1.1,%/year,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
+csp-tower,2030,investment,108.37,"EUR/kW_th,dp",ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
+csp-tower,2030,lifetime,30.0,years,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
+csp-tower TES,2030,FOM,1.1,%/year,see solar-tower.
+csp-tower TES,2030,investment,14.52,EUR/kWh_th,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
+csp-tower TES,2030,lifetime,30.0,years,see solar-tower.
+csp-tower power block,2030,FOM,1.1,%/year,see solar-tower.
+csp-tower power block,2030,investment,759.17,EUR/kW_e,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
+csp-tower power block,2030,lifetime,30.0,years,see solar-tower.
 decentral CHP,2030,FOM,3.0,%/year,HP
 decentral CHP,2030,discount rate,0.04,per unit,Palzer thesis
 decentral CHP,2030,investment,1400.0,EUR/kWel,HP
