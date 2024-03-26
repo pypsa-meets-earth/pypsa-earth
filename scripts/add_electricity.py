@@ -386,12 +386,18 @@ def attach_wind_and_solar(
             )
 
             if tech == "csp":  # add store and link for CSP
+                csp_buses_i = n.madd(
+                    "Bus",
+                    ds.indexes["bus"] + " csp",
+                    carrier=tech,
+                    unit="MW",
+                )
 
                 n.madd(
                     "Store",
-                    ds.indexes["bus"],
+                    csp_buses_i,
                     " " + tech,
-                    bus=ds.indexes["bus"],
+                    bus=csp_buses_i,
                     carrier=tech,
                     e_nom_extendable=True,
                     e_cyclic=True,
@@ -404,9 +410,9 @@ def attach_wind_and_solar(
 
                 n.madd(
                     "Link",
-                    ds.indexes["bus"],
+                    csp_buses_i,
                     " " + tech,
-                    bus0=ds.indexes["bus"],
+                    bus0=csp_buses_i,
                     bus1=available_csp_buses_i,
                     carrier=tech,
                     p_nom_extendable=True,
