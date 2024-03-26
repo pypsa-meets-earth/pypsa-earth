@@ -89,6 +89,7 @@ import os
 import sys
 from functools import reduce
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
@@ -109,6 +110,8 @@ from pypsa.clustering.spatial import (
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
+from scipy.spatial import cKDTree
+from shapely.geometry import Point
 
 sys.settrace
 
@@ -743,6 +746,184 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
+def find_isolated_sub_networks(n, threshold):
+    buses_df = n.buses
+
+    # handling isolated networks make sense primarily for AC networks
+    subnetw_ac_df = (
+        buses_df.loc[n.buses.carrier == "AC"]
+        .groupby(["sub_network", "country"])
+        .count()
+    )
+    # don't merge dc networks and sub-networks spanning through multiple countries
+    multicountry_subnetworks = subnetw_ac_df[
+        subnetw_ac_df.index.droplevel("country").duplicated()
+    ].index.get_level_values("sub_network")
+    # process further only networks which entirely belongs to a single country
+    subnetw_ac_monocountry_df = subnetw_ac_df.loc[
+        subnetw_ac_df.index.get_level_values("sub_network").difference(
+            multicountry_subnetworks
+        )
+    ]
+
+    # all relevant isolated sub-networks should be identified across all the countries
+    island_sbntw = []
+    for cnt in buses_df.country.unique():
+        ## TODO May be worth to investigate a threshold for the load share
+        ## load may attached to multi-country networks only
+        # country_load = (
+        #    n.loads_t.p_set[
+        #        n.loads_t.p_set.columns.intersection(
+        #            n.buses.index[n.buses.country == cnt]
+        #        )
+        #    ]
+        #    .sum()
+        #    .sum()
+        # )
+
+        sbntw = subnetw_ac_monocountry_df.query(
+            "country == @cnt"
+        ).index.get_level_values("sub_network")
+
+        # power threshold should be accounted to identify the relevant networks
+        i_island_ntw = [
+            s
+            for s in sbntw
+            if (
+                n.loads_t.p_set[n.buses[n.buses.sub_network == s].index].mean().mean()
+                < threshold
+            )
+        ]
+        island_sbntw.extend(i_island_ntw)
+
+    i_islands = n.buses[n.buses.sub_network.isin(island_sbntw)].index
+
+    return i_islands
+
+
+def transform_to_gdf(buses_df, i_buses, network_crs):
+    buses_df["bus_id"] = buses_df.index
+    points_buses = buses_df.loc[i_buses, ["bus_id", "x", "y", "country"]]
+    gdf_buses = gpd.GeoDataFrame(
+        points_buses,
+        geometry=gpd.points_from_xy(points_buses.x, points_buses.y),
+        crs=network_crs,
+    )
+    return gdf_buses
+
+
+def merge_into_network(n, threshold, aggregation_strategies=dict()):
+    """
+    Find isolated AC nodes and sub-networks in the network and merge those of
+    them which have load value and a number of buses below than the specified
+    thresholds into a backbone network.
+
+    Parameters
+    ----------
+    n : PyPSA.Network
+        Original network
+    threshold : float
+        Load power used as a threshold to merge isolated nodes
+    aggregation_strategies: dictionary
+        Functions to be applied to calculate parameters of the aggregated grid
+
+    Returns
+    -------
+    modified network
+    """
+    # keep original values of the overall load and generation in the network
+    # to track changes due to drop of buses
+    generators_mean_origin = n.generators.p_nom.mean()
+    load_mean_origin = n.loads_t.p_set.mean().mean()
+
+    network_crs = snakemake.params.geo_crs
+
+    n.determine_network_topology()
+
+    i_islands = find_isolated_sub_networks(n=n, threshold=threshold)
+
+    # return the original network if no isolated nodes are detected
+    if len(i_islands) == 0:
+        return n, n.buses.index.to_series()
+
+    gdf_islands = transform_to_gdf(
+        buses_df=n.buses, i_buses=i_islands, network_crs=network_crs
+    )
+
+    multicountry_subnetworks = (
+        n.buses.groupby(["sub_network", "country"])
+        .count()
+        .index.droplevel("country")
+        .duplicated()
+    )
+
+    # don't go into sub-networks spanning through multiple countries
+    subnetw_by_countries_df = n.buses.groupby(["sub_network", "country"]).count()
+    multicountry_subnetworks = subnetw_by_countries_df[
+        subnetw_by_countries_df.index.droplevel("country").duplicated()
+    ].index.get_level_values("sub_network")
+
+    # backbone buses should be from the same countries as isolated ones
+    i_backbone = (
+        n.buses.query("country in @gdf_islands.country.unique()")
+        .query("sub_network not in @multicountry_subnetworks")
+        .query("carrier == 'AC'")
+        .index.difference(i_islands)
+    )
+    gdf_backbone_buses = transform_to_gdf(
+        buses_df=n.buses, i_buses=i_backbone, network_crs=network_crs
+    )
+
+    islands_bcountry = {k: d for k, d in gdf_islands.groupby("country")}
+    gdf_map = gdf_backbone_buses.groupby("country").apply(
+        lambda d: gpd.sjoin_nearest(islands_bcountry[d["country"].values[0]], d)
+    )
+    nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
+
+    i_lines_islands = n.lines.loc[n.lines.bus1.isin(i_islands)].index
+    n.mremove("Line", i_lines_islands)
+
+    isolated_buses_mapping = (
+        gdf_map[["bus_id_right"]].droplevel("country").to_dict()["bus_id_right"]
+    )
+
+    busmap = (
+        n.buses.index.to_series()
+        .replace(isolated_buses_mapping)
+        .astype(str)
+        .rename("busmap")
+    )
+
+    # return the original network if no changes are detected
+    if (busmap.index == busmap).all():
+        return n, n.buses.index.to_series()
+
+    bus_strategies, generator_strategies = get_aggregation_strategies(
+        aggregation_strategies
+    )
+
+    clustering = get_clustering_from_busmap(
+        n,
+        busmap,
+        bus_strategies=bus_strategies,
+        aggregate_generators_weighted=True,
+        aggregate_generators_carriers=None,
+        aggregate_one_ports=["Load", "StorageUnit"],
+        line_length_factor=1.0,
+        generator_strategies=generator_strategies,
+        scale_link_capital_costs=False,
+    )
+
+    load_mean_final = n.loads_t.p_set.mean().mean()
+    generators_mean_final = n.generators.p_nom.mean()
+
+    logger.info(
+        f"Fetched {len(gdf_islands)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
+    )
+
+    return clustering.network, busmap
+
+
 def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     """
     Find isolated nodes in the network and merge those of them which have load
@@ -755,6 +936,8 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         Original network
     threshold : float
         Load power used as a threshold to merge isolated nodes
+    aggregation_strategies: dictionary
+        Functions to be applied to calculate parameters of the aggregated grid
 
     Returns
     -------
@@ -775,19 +958,19 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     # isolated buses with load below than a specified threshold should be merged
     i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
-    i_suffic_load = i_load_islands[
+    i_islands_fetch = i_load_islands[
         n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
     ]
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
         n.buses.assign(bus_id=n.buses.index)
-        .loc[i_suffic_load]
+        .loc[i_islands_fetch]
         .groupby("country")["bus_id"]
         .first()
         .to_dict()
     )
-    isolated_buses_mapping = n.buses.loc[i_suffic_load, "country"].replace(
+    isolated_buses_mapping = n.buses.loc[i_islands_fetch, "country"].replace(
         map_isolated_node_by_country
     )
     busmap = (
@@ -821,7 +1004,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Merged {len(i_suffic_load)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
+        f"Merged {len(i_islands_fetch)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
     return clustering.network, busmap
@@ -976,6 +1159,7 @@ if __name__ == "__main__":
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
     )
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
+    p_threshold_fetch_isolated = cluster_config.get("p_threshold_fetch_isolated", False)
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
     if p_threshold_merge_isolated:
@@ -985,6 +1169,14 @@ if __name__ == "__main__":
             aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(merged_nodes_map)
+
+    if p_threshold_fetch_isolated:
+        n, fetched_nodes_map = merge_into_network(
+            n,
+            threshold=p_threshold_fetch_isolated,
+            aggregation_strategies=aggregation_strategies,
+        )
+        busmaps.append(fetched_nodes_map)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
