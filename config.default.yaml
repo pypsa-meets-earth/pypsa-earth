@@ -328,6 +328,7 @@ renewable:
     potential: simple # or conservative
     clip_p_max_pu: 1.e-2
     extendable: true
+    architecture: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration (Do not remove, needed for Sphynx documentation).
