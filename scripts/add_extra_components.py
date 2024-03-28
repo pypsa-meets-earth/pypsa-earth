@@ -185,6 +185,40 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
+    if "csp" in config["renewable"].keys():
+        if (
+            config["renewable"]["csp"]["architecture"] == "advanced"
+            and "csp" in carriers
+        ):
+            csp_buses_i = n.madd("Bus", buses_i + " csp", carrier="csp", **bus_sub_dict)
+
+            # change bus of existing csp generators
+            old_csp_bus_vector = buses_i + " csp"
+            n.generators.loc[old_csp_bus_vector, "bus"] = csp_buses_i
+
+            n.madd(
+                "Store",
+                csp_buses_i,
+                bus=csp_buses_i,
+                carrier="csp",
+                e_cyclic=True,
+                e_nom_extendable=True,
+                capital_cost=costs.at["csp TES", "capital_cost"],
+                marginal_cost=costs.at["csp TES", "marginal_cost"],
+            )
+
+            n.madd(
+                "Link",
+                csp_buses_i,
+                bus0=csp_buses_i,
+                bus1=buses_i,
+                carrier="csp",
+                efficiency=costs.at["csp", "efficiency"],
+                capital_cost=costs.at["csp", "capital_cost"],
+                p_nom_extendable=True,
+                marginal_cost=costs.at["csp", "marginal_cost"],
+            )
+
 
 def attach_hydrogen_pipelines(n, costs, config):
     elec_opts = config["electricity"]
@@ -232,7 +266,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)
+        snakemake = mock_snakemake("add_extra_components", simpl="", clusters=6)
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

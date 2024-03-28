@@ -368,73 +368,22 @@ def attach_wind_and_solar(
             else:
                 caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
 
-            if tech != "csp":
-                n.madd(
-                    "Generator",
-                    ds.indexes["bus"],
-                    " " + tech,
-                    bus=ds.indexes["bus"],
-                    carrier=tech,
-                    p_nom=caps,
-                    p_nom_extendable=tech in extendable_carriers["Generator"],
-                    p_nom_min=caps,
-                    p_nom_max=ds["p_nom_max"].to_pandas(),
-                    p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
-                    weight=ds["weight"].to_pandas(),
-                    marginal_cost=costs.at[suptech, "marginal_cost"],
-                    capital_cost=capital_cost,
-                    efficiency=costs.at[suptech, "efficiency"],
-                )
-
-            elif tech == "csp":  # add store and link for CSP
-                n.madd(
-                    "Bus",
-                    ds.indexes["bus"] + " csp",
-                    carrier=tech,
-                    x=ds["x"].values,
-                    y=ds["y"].values,
-                )
-
-                n.madd(
-                    "Generator",
-                    ds.indexes["bus"] + " csp",
-                    " " + tech,
-                    bus=ds.indexes["bus"] + " csp",
-                    carrier=tech,
-                    p_nom=caps,
-                    p_nom_extendable=tech in extendable_carriers["Generator"],
-                    p_nom_min=caps,
-                    p_nom_max=ds["p_nom_max"].to_pandas(),
-                    p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
-                    weight=ds["weight"].to_pandas(),
-                    marginal_cost=costs.at[suptech, "marginal_cost"],
-                    capital_cost=capital_cost,
-                    efficiency=costs.at[suptech, "efficiency"],
-                )
-
-                n.madd(
-                    "Store",
-                    ds.indexes["bus"] + " csp",
-                    " " + tech,
-                    bus=ds.indexes["bus"] + " csp",
-                    carrier=tech,
-                    e_nom_extendable=True,
-                    e_cyclic=True,
-                    capital_cost=costs.at[tech, "capital_cost"],
-                )
-
-                n.madd(
-                    "Link",
-                    ds.indexes["bus"] + " csp",
-                    " " + tech,
-                    bus0=ds.indexes["bus"] + " csp",
-                    bus1=ds.indexes["bus"],
-                    carrier=tech,
-                    p_nom_extendable=tech in extendable_carriers["Generator"],
-                    efficiency=costs.at[tech, "efficiency"],
-                    capital_cost=costs.at[tech, "capital_cost"],
-                    marginal_cost=costs.at[tech, "marginal_cost"],
-                )
+            n.madd(
+                "Generator",
+                ds.indexes["bus"],
+                " " + tech,
+                bus=ds.indexes["bus"],
+                carrier=tech,
+                p_nom=caps,
+                p_nom_extendable=tech in extendable_carriers["Generator"],
+                p_nom_min=caps,
+                p_nom_max=ds["p_nom_max"].to_pandas(),
+                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
+                weight=ds["weight"].to_pandas(),
+                marginal_cost=costs.at[suptech, "marginal_cost"],
+                capital_cost=capital_cost,
+                efficiency=costs.at[suptech, "efficiency"],
+            )
 
 
 def attach_conventional_generators(

@@ -319,10 +319,10 @@ def simplify_links(
     exclude_carriers=[],
     aggregation_strategies=dict(),
 ):
-    ## Complex multi-node links are folded into end-points
+    # Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
-    if n.links.empty:
+    if n.links.empty or "csp" in renewable_config:
         with open(output.connection_costs, "w") as fp:
             pass
         return n, n.buses.index.to_series()
