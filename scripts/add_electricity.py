@@ -368,54 +368,69 @@ def attach_wind_and_solar(
             else:
                 caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
 
-            n.madd(
-                "Generator",
-                ds.indexes["bus"],
-                " " + tech,
-                bus=ds.indexes["bus"],
-                carrier=tech,
-                p_nom=caps,
-                p_nom_extendable=tech in extendable_carriers["Generator"],
-                p_nom_min=caps,
-                p_nom_max=ds["p_nom_max"].to_pandas(),
-                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
-                weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[suptech, "marginal_cost"],
-                capital_cost=capital_cost,
-                efficiency=costs.at[suptech, "efficiency"],
-            )
+            if tech != "csp":
+                n.madd(
+                    "Generator",
+                    ds.indexes["bus"],
+                    " " + tech,
+                    bus=ds.indexes["bus"],
+                    carrier=tech,
+                    p_nom=caps,
+                    p_nom_extendable=tech in extendable_carriers["Generator"],
+                    p_nom_min=caps,
+                    p_nom_max=ds["p_nom_max"].to_pandas(),
+                    p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
+                    weight=ds["weight"].to_pandas(),
+                    marginal_cost=costs.at[suptech, "marginal_cost"],
+                    capital_cost=capital_cost,
+                    efficiency=costs.at[suptech, "efficiency"],
+                )
 
-            if tech == "csp":  # add store and link for CSP
-                csp_buses_i = n.madd(
+            elif tech == "csp":  # add store and link for CSP
+                n.madd(
                     "Bus",
                     ds.indexes["bus"] + " csp",
                     carrier=tech,
-                    unit="MW",
+                    x=ds["x"].values,
+                    y=ds["y"].values,
+                )
+
+                n.madd(
+                    "Generator",
+                    ds.indexes["bus"] + " csp",
+                    " " + tech,
+                    bus=ds.indexes["bus"] + " csp",
+                    carrier=tech,
+                    p_nom=caps,
+                    p_nom_extendable=tech in extendable_carriers["Generator"],
+                    p_nom_min=caps,
+                    p_nom_max=ds["p_nom_max"].to_pandas(),
+                    p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
+                    weight=ds["weight"].to_pandas(),
+                    marginal_cost=costs.at[suptech, "marginal_cost"],
+                    capital_cost=capital_cost,
+                    efficiency=costs.at[suptech, "efficiency"],
                 )
 
                 n.madd(
                     "Store",
-                    csp_buses_i,
+                    ds.indexes["bus"] + " csp",
                     " " + tech,
-                    bus=csp_buses_i,
+                    bus=ds.indexes["bus"] + " csp",
                     carrier=tech,
                     e_nom_extendable=True,
                     e_cyclic=True,
                     capital_cost=costs.at[tech, "capital_cost"],
                 )
 
-                available_csp_buses_i = n.buses.index[
-                    n.buses.index.isin(ds.indexes["bus"])
-                ]
-
                 n.madd(
                     "Link",
-                    csp_buses_i,
+                    ds.indexes["bus"] + " csp",
                     " " + tech,
-                    bus0=csp_buses_i,
-                    bus1=available_csp_buses_i,
+                    bus0=ds.indexes["bus"] + " csp",
+                    bus1=ds.indexes["bus"],
                     carrier=tech,
-                    p_nom_extendable=True,
+                    p_nom_extendable=tech in extendable_carriers["Generator"],
                     efficiency=costs.at[tech, "efficiency"],
                     capital_cost=costs.at[tech, "capital_cost"],
                     marginal_cost=costs.at[tech, "marginal_cost"],
