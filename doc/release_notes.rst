@@ -18,6 +18,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Introduce flexible regional selection of the demand files of GEGIS. `PR #991 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/991>`__
 
+* Generalize line types for AC and DC networks. `PR #991 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/991>`__
+
 **Minor Changes and bug-fixing**
 
 * Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
