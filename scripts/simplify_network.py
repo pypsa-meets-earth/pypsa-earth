@@ -748,6 +748,7 @@ def drop_isolated_nodes(n, threshold):
 
 def transform_to_gdf(n, network_crs):
     buses_df = n.buses.copy()
+    buses_df["bus_id"] = buses_df.index
 
     # load data are crucial to deal with sub-networks
     buses_df = buses_df.join(n.loads_t.p_set.sum().T.rename("load"))
