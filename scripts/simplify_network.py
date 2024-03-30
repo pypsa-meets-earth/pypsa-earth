@@ -830,8 +830,10 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
 
     # find the closest buses of the backbone networks for each isolated network and each country
     islands_bcountry = {k: d for k, d in gdf_islands.groupby("country")}
-    gdf_map = gdf_backbone_buses.groupby("country").apply(
-        lambda d: gpd.sjoin_nearest(islands_bcountry[d["country"].values[0]], d)
+    gdf_map = (
+        gdf_backbone_buses.query("country in @islands_bcountry")
+        .groupby("country")
+        .apply(lambda d: gpd.sjoin_nearest(islands_bcountry[d["country"].values[0]], d))
     )
     nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
 
