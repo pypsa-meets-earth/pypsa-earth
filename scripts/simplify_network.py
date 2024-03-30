@@ -765,7 +765,7 @@ def transform_to_gdf(n, network_crs):
         buses_df.groupby(["country"], as_index=True)[
             "sbntw_share_of_country_load"
         ].transform("max")
-        == buses_df["sbntw_share_of_country_load"]
+        <= buses_df["sbntw_share_of_country_load"]
     )
 
     gdf_buses = gpd.GeoDataFrame(
