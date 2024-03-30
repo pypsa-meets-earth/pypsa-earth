@@ -746,61 +746,6 @@ def drop_isolated_nodes(n, threshold):
     return n
 
 
-def find_isolated_sub_networks(n, threshold):
-    buses_df = n.buses
-
-    # handling isolated networks make sense primarily for AC networks
-    subnetw_ac_df = (
-        buses_df.loc[n.buses.carrier == "AC"]
-        .groupby(["sub_network", "country"])
-        .count()
-    )
-    # don't merge dc networks and sub-networks spanning through multiple countries
-    multicountry_subnetworks = subnetw_ac_df[
-        subnetw_ac_df.index.droplevel("country").duplicated()
-    ].index.get_level_values("sub_network")
-    # process further only networks which entirely belongs to a single country
-    subnetw_ac_monocountry_df = subnetw_ac_df.loc[
-        subnetw_ac_df.index.get_level_values("sub_network").difference(
-            multicountry_subnetworks
-        )
-    ]
-
-    # all relevant isolated sub-networks should be identified across all the countries
-    island_sbntw = []
-    for cnt in buses_df.country.unique():
-        ## TODO May be worth to investigate a threshold for the load share
-        ## load may attached to multi-country networks only
-        # country_load = (
-        #    n.loads_t.p_set[
-        #        n.loads_t.p_set.columns.intersection(
-        #            n.buses.index[n.buses.country == cnt]
-        #        )
-        #    ]
-        #    .sum()
-        #    .sum()
-        # )
-
-        sbntw = subnetw_ac_monocountry_df.query(
-            "country == @cnt"
-        ).index.get_level_values("sub_network")
-
-        # power threshold should be accounted to identify the relevant networks
-        i_island_ntw = [
-            s
-            for s in sbntw
-            if (
-                n.loads_t.p_set[n.buses[n.buses.sub_network == s].index].mean().mean()
-                < threshold
-            )
-        ]
-        island_sbntw.extend(i_island_ntw)
-
-    i_islands = n.buses[n.buses.sub_network.isin(island_sbntw)].index
-
-    return i_islands
-
-
 def transform_to_gdf(n, network_crs):
     buses_df = n.buses.copy()
 
