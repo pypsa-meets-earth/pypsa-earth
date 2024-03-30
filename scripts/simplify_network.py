@@ -801,12 +801,31 @@ def find_isolated_sub_networks(n, threshold):
     return i_islands
 
 
-def transform_to_gdf(buses_df, i_buses, network_crs):
-    buses_df["bus_id"] = buses_df.index
-    points_buses = buses_df.loc[i_buses, ["bus_id", "x", "y", "country"]]
+def transform_to_gdf(n, network_crs):
+    buses_df = n.buses.copy()
+
+    # load data are crucial to deal with sub-networks
+    buses_df = buses_df.join(n.loads_t.p_set.sum().T.rename("load"))
+    buses_df["load_in_subnetw"] = buses_df.groupby(["country", "sub_network"])[
+        "load"
+    ].transform("sum")
+    buses_df["load_in_country"] = buses_df.groupby(["country"])["load"].transform("sum")
+    buses_df["sbntw_share_of_country_load"] = buses_df.apply(
+        lambda row: (
+            row.load_in_subnetw / row.load_in_country if row.load_in_country > 0 else 0
+        ),
+        axis=1,
+    )
+    buses_df["is_backbone_sbntw"] = (
+        buses_df.groupby(["country"], as_index=True)[
+            "sbntw_share_of_country_load"
+        ].transform("max")
+        == buses_df["sbntw_share_of_country_load"]
+    )
+
     gdf_buses = gpd.GeoDataFrame(
-        points_buses,
-        geometry=gpd.points_from_xy(points_buses.x, points_buses.y),
+        buses_df,
+        geometry=gpd.points_from_xy(buses_df.x, buses_df.y),
         crs=network_crs,
     )
     return gdf_buses
