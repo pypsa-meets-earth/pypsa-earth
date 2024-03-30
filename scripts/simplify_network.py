@@ -806,6 +806,12 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
 
     n_buses_gdf = transform_to_gdf(n, network_crs=network_crs)
 
+    # do not merge sub-networks spanned through a number of countries
+    n_buses_gdf["is_multicnt_subntw"] = n_buses_gdf.sub_network.map(
+        n_buses_gdf.groupby(["sub_network"])["country"].apply(
+            lambda x: len(pd.unique(x)) > 1
+        )
+    )
     gdf_islands = (
         n_buses_gdf.query("~is_multicnt_subntw")
         .query("carrier=='AC'")
@@ -815,12 +821,6 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     if len(gdf_islands) == 0:
         return n, n.buses.index.to_series()
 
-    # do not merge sub-networks spanned through a number of countries
-    n_buses_gdf["is_multicnt_subntw"] = n_buses_gdf.sub_network.map(
-        n_buses_gdf.groupby(["sub_network"])["country"].apply(
-            lambda x: len(pd.unique(x)) > 1
-        )
-    )
     gdf_backbone_buses = (
         n_buses_gdf.query("is_backbone_sbntw")
         .query("carrier=='AC'")
