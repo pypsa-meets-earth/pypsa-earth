@@ -818,9 +818,9 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         .query("sbntw_share_of_country_load < @threshold")
     )
 
-    ## return the original network if no isolated nodes are detected
-    # if len(gdf_islands) == 0:
-    #    return n, n.buses.index.to_series()
+    # return the original network if no isolated nodes are detected
+    if len(gdf_islands) == 0:
+        return n, n.buses.index.to_series()
 
     gdf_backbone_buses = (
         n_buses_gdf.query("is_backbone_sbntw")
