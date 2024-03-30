@@ -859,38 +859,28 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    i_islands = find_isolated_sub_networks(n=n, threshold=threshold)
-
-    # return the original network if no isolated nodes are detected
-    if len(i_islands) == 0:
-        return n, n.buses.index.to_series()
-
-    gdf_islands = transform_to_gdf(
-        buses_df=n.buses, i_buses=i_islands, network_crs=network_crs
+    n_buses_gdf = transform_to_gdf(n, network_crs=network_crs)
+    # do not merge sub-networks spanned through a number of countries
+    n_buses_gdf["is_multicnt_subntw"] = n_buses_gdf.sub_network.map(
+        n_buses_gdf.groupby(["sub_network"])["country"].apply(
+            lambda x: len(pd.unique(x)) > 1
+        )
     )
 
-    multicountry_subnetworks = (
-        n.buses.groupby(["sub_network", "country"])
-        .count()
-        .index.droplevel("country")
-        .duplicated()
+    gdf_islands = (
+        n_buses_gdf.query("~is_multicnt_subntw")
+        .query("carrier=='AC'")
+        .query("sbntw_share_of_country_load < @threshold")
     )
 
-    # don't go into sub-networks spanning through multiple countries
-    subnetw_by_countries_df = n.buses.groupby(["sub_network", "country"]).count()
-    multicountry_subnetworks = subnetw_by_countries_df[
-        subnetw_by_countries_df.index.droplevel("country").duplicated()
-    ].index.get_level_values("sub_network")
+    ## return the original network if no isolated nodes are detected
+    # if len(gdf_islands) == 0:
+    #    return n, n.buses.index.to_series()
 
-    # backbone buses should be from the same countries as isolated ones
-    i_backbone = (
-        n.buses.query("country in @gdf_islands.country.unique()")
-        .query("sub_network not in @multicountry_subnetworks")
-        .query("carrier == 'AC'")
-        .index.difference(i_islands)
-    )
-    gdf_backbone_buses = transform_to_gdf(
-        buses_df=n.buses, i_buses=i_backbone, network_crs=network_crs
+    gdf_backbone_buses = (
+        n_buses_gdf.query("is_backbone_sbntw")
+        .query("carrier=='AC'")
+        .query("load_in_subnetw>0")
     )
 
     islands_bcountry = {k: d for k, d in gdf_islands.groupby("country")}
@@ -899,7 +889,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     )
     nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
 
-    i_lines_islands = n.lines.loc[n.lines.bus1.isin(i_islands)].index
+    i_lines_islands = n.lines.loc[n.lines.bus1.isin(gdf_islands.index)].index
     n.mremove("Line", i_lines_islands)
 
     isolated_buses_mapping = (
