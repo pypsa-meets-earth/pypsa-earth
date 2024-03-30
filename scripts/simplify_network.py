@@ -1116,7 +1116,7 @@ if __name__ == "__main__":
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
     )
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
-    p_threshold_fetch_isolated = cluster_config.get("p_threshold_fetch_isolated", False)
+    s_threshold_fetch_isolated = cluster_config.get("s_threshold_fetch_isolated", False)
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
     if p_threshold_merge_isolated:
@@ -1127,10 +1127,10 @@ if __name__ == "__main__":
         )
         busmaps.append(merged_nodes_map)
 
-    if p_threshold_fetch_isolated:
+    if s_threshold_fetch_isolated:
         n, fetched_nodes_map = merge_into_network(
             n,
-            threshold=p_threshold_fetch_isolated,
+            threshold=s_threshold_fetch_isolated,
             aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
