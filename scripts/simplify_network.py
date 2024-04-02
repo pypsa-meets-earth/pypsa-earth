@@ -838,7 +838,7 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetype = snakemake.params.config_lines["types"][base_voltage]
+    linetype = snakemake.params.config_lines["ac_types"][base_voltage]
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
         "exclude_carriers", []
     )
