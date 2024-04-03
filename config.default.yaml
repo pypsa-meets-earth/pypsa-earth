@@ -484,7 +484,7 @@ plotting:
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
     "load": "#ff0000"
-    "csp": "#fdd404"
+    "csp-tower": "#fdd404"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"
