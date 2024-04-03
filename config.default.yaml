@@ -145,16 +145,16 @@ electricity:
     H2: 168
 
   extendable_carriers:
-    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT, csp]
+    Generator: [solar, csp, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: []  # battery, H2
-    Store: [battery, H2, csp]
+    Store: [battery, H2]
     Link: []  # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
-  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro, csp]
+  renewable_carriers: [solar, csp, onwind, offwind-ac, offwind-dc, hydrox]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
