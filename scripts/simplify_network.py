@@ -322,7 +322,7 @@ def simplify_links(
     # Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
-    if n.links.empty or "csp" in renewable_config:
+    if n.links.empty:
         with open(output.connection_costs, "w") as fp:
             pass
         return n, n.buses.index.to_series()
