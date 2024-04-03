@@ -159,7 +159,7 @@ electricity:
     H2: 168
 
   extendable_carriers:
-    Generator: [solar, csp, onwind, offwind-ac, offwind-dc, OCGT]
+    Generator: [solar, csp-tower, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
     Link: []  # H2 pipeline
