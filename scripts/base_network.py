@@ -111,7 +111,7 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
     )
 
 
-def _load_buses_from_osm(fp_buses, base_network_config, voltages_config):
+def _load_buses_from_osm(fp_buses):
     buses = (
         read_csv_nafix(fp_buses, dtype=dict(bus_id="str", voltage="float"))
         .set_index("bus_id")
@@ -127,12 +127,6 @@ def _load_buses_from_osm(fp_buses, base_network_config, voltages_config):
     buses["y"] = buses["lat"]
     # TODO: Drop NAN maybe somewhere else?
     buses = buses.dropna(axis="index", subset=["x", "y", "country"])
-
-    logger.info(
-        "Removing buses with voltages {}".format(
-            pd.Index(buses.v_nom.unique()).dropna().difference(voltages_config)
-        )
-    )
 
     return buses
 
@@ -183,7 +177,7 @@ def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
                 )
 
 
-def _load_lines_from_osm(fp_osm_lines, base_network_config, voltages_config, buses):
+def _load_lines_from_osm(fp_osm_lines):
     lines = (
         read_csv_nafix(
             fp_osm_lines,
@@ -272,10 +266,24 @@ def _load_transformers_from_osm(fp_osm_transformers, buses):
     return transformers
 
 
-def _get_linetypes(line_types, voltages):
+def _get_linetypes_config(line_types, voltages):
     """
-    Return the linetypes for selected voltages.
+    Return the dictionary of linetypes for selected voltages. The dictionary is
+    a subset of the dictionary line_types, whose keys match the selected
+    voltages.
+
+    Parameters
+    ----------
+    line_types : dict
+        Dictionary of linetypes: keys are nominal voltages and values are linetypes.
+    voltages : list
+        List of selected voltages.
+
+    Returns
+    -------
+        Dictionary of linetypes for selected voltages.
     """
+    # get voltages value that are not availabile in the line types
     vnoms_diff = set(voltages).symmetric_difference(set(line_types.keys()))
     if vnoms_diff:
         logger.warning(
@@ -286,7 +294,18 @@ def _get_linetypes(line_types, voltages):
 
 def _get_linetype_by_voltage(v_nom, d_linetypes):
     """
-    Return the linetype based on the voltage.
+    Return the linetype of a specific line based on its voltage v_nom.
+
+    Parameters
+    ----------
+    v_nom : float
+        The voltage of the line.
+    d_linetypes : dict
+        Dictionary of linetypes: keys are nominal voltages and values are linetypes.
+
+    Returns
+    -------
+        The linetype of the line whose nominal voltage is closest to the line voltage.
     """
     v_nom_min, line_type_min = min(
         d_linetypes.items(),
@@ -300,7 +319,7 @@ def _set_electrical_parameters_lines(lines_config, voltages, lines):
         lines["type"] = []
         return lines
 
-    linetypes = _get_linetypes(lines_config["ac_types"], voltages)
+    linetypes = _get_linetypes_config(lines_config["ac_types"], voltages)
 
     lines["carrier"] = "AC"
     lines["dc"] = False
@@ -319,7 +338,7 @@ def _set_electrical_parameters_dc_lines(lines_config, voltages, lines):
         lines["type"] = []
         return lines
 
-    linetypes = _get_linetypes(lines_config["dc_types"], voltages)
+    linetypes = _get_linetypes_config(lines_config["dc_types"], voltages)
 
     lines["carrier"] = "DC"
     lines["dc"] = True
@@ -469,12 +488,8 @@ def base_network(
     transformers_config,
     voltages_config,
 ):
-    buses = _load_buses_from_osm(
-        inputs.osm_buses, base_network_config, voltages_config
-    ).reset_index()
-    lines = _load_lines_from_osm(
-        inputs.osm_lines, base_network_config, voltages_config, buses
-    )
+    buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
+    lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
