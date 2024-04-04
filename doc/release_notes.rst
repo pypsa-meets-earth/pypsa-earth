@@ -16,8 +16,19 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Improve Monte Carlo feature with more distributions types, independent by PyPSA component. `PR #930 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/930>`__
 
+* Introduce flexible regional selection of the demand files of GEGIS. `PR #991 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/991>`__
+
+* Generalize line types for AC and DC networks. `PR #999 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/999>`__
+
 **Minor Changes and bug-fixing**
 
+* Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
+
+* Keep data on the original voltage value when rebasing voltages to the standard values and adjust the transmission capacity accordingly. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/978>`__
+
+* Fix download_osm_data compatibility for earth-osm v2.1. `PR #954 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/954>`__ and `PR #988 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/988>`__
+
+* Improve geometry filtering in clean_osm_data. `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
 
 PyPSA-Earth 0.3.0
 =================
