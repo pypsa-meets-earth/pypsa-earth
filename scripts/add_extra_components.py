@@ -186,15 +186,15 @@ def attach_stores(n, costs, config):
         )
 
     if ("csp" in config["renewable"].keys()) and (
-        config["renewable"]["csp"]["architecture"] == "advanced"
+        config["renewable"]["csp"]["csp_model"] == "advanced"
     ):
         # add buses for csp
-        n.madd("Bus", buses_i + " csp-tower", carrier="csp-tower", **bus_sub_dict)
+        n.madd("Bus", buses_i + " csp", carrier="csp", **bus_sub_dict)
 
-        csp_buses_i = n.buses.index[n.buses.index.str.contains("csp-tower")]
+        csp_buses_i = n.buses.index[n.buses.index.str.contains("csp")]
 
         # change bus of existing csp generators
-        old_csp_bus_vector = buses_i + " csp-tower"
+        old_csp_bus_vector = buses_i + " csp"
         n.generators.loc[old_csp_bus_vector, "bus"] = csp_buses_i
 
         # add stores for csp
@@ -202,7 +202,7 @@ def attach_stores(n, costs, config):
             "Store",
             csp_buses_i,
             bus=csp_buses_i,
-            carrier="csp-tower",
+            carrier="csp",
             e_cyclic=True,
             e_nom_extendable=True,
             capital_cost=costs.at["csp-tower TES", "capital_cost"],
@@ -215,7 +215,7 @@ def attach_stores(n, costs, config):
             csp_buses_i,
             bus0=csp_buses_i,
             bus1=buses_i,
-            carrier="csp-tower",
+            carrier="csp",
             efficiency=costs.at["csp-tower", "efficiency"],
             capital_cost=costs.at["csp-tower", "capital_cost"],
             p_nom_extendable=True,

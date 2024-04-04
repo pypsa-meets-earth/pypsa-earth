@@ -360,10 +360,9 @@ def attach_wind_and_solar(
                     )
                 )
             else:
-                if "csp" == tech:
-                    tech = suptech = "csp-tower"
-
-                capital_cost = costs.at[tech, "capital_cost"]
+                capital_cost = costs.at[
+                    "csp-tower" if tech == "csp" else tech, "capital_cost"
+                ]
 
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
@@ -385,9 +384,13 @@ def attach_wind_and_solar(
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[suptech, "marginal_cost"],
+                marginal_cost=costs.at[
+                    "csp-tower" if suptech == "csp" else suptech, "marginal_cost"
+                ],
                 capital_cost=capital_cost,
-                efficiency=costs.at[suptech, "efficiency"],
+                efficiency=costs.at[
+                    "csp-tower" if suptech == "csp" else suptech, "efficiency"
+                ],
             )
 
 
