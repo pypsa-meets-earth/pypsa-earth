@@ -589,6 +589,13 @@ def clustering_for_n_clusters(
         line_length_factor=line_length_factor,
         line_strategies=line_strategies,
         generator_strategies=generator_strategies,
+        bus_strategies={
+            "lat": "mean",
+            "lon": "mean",
+            "tag_substation": "first",
+            "tag_area": "first",
+            "country": "first",
+        },
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
