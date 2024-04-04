@@ -145,7 +145,7 @@ electricity:
     H2: 168
 
   extendable_carriers:
-    Generator: [solar, csp-tower, onwind, offwind-ac, offwind-dc, OCGT]
+    Generator: [solar, csp, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: []  # battery, H2
     Store: [battery, H2]
     Link: []  # H2 pipeline
@@ -488,7 +488,7 @@ plotting:
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
     "load": "#ff0000"
-    "csp-tower": "#fdd404"
+    "csp": "#fdd404"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"
