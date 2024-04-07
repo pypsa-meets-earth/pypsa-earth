@@ -807,10 +807,9 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
 
     # do not merge sub-networks spanned through a number of countries
     n_buses_gdf["is_multicnt_subntw"] = n_buses_gdf.sub_network.map(
-        n_buses_gdf.groupby(["sub_network"])["country"].apply(
-            lambda x: len(pd.unique(x)) > 1
-        )
+        n_buses_gdf.groupby(["sub_network"]).country.nunique() > 1
     )
+
     gdf_islands = (
         n_buses_gdf.query("~is_multicnt_subntw")
         .query("carrier=='AC'")
