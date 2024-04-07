@@ -819,11 +819,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     if len(gdf_islands) == 0:
         return n, n.buses.index.to_series()
 
-    gdf_backbone_buses = (
-        n_buses_gdf.query("is_backbone_sbntw")
-        .query("carrier=='AC'")
-        .query("load_in_subnetw>0")
-    )
+    gdf_backbone_buses = n_buses_gdf.query("is_backbone_sbntw").query("carrier=='AC'")
 
     # find the closest buses of the backbone networks for each isolated network and each country
     islands_bcountry = {k: d for k, d in gdf_islands.groupby("country")}
