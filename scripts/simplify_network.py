@@ -110,8 +110,6 @@ from pypsa.clustering.spatial import (
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
-from scipy.spatial import cKDTree
-from shapely.geometry import Point
 
 sys.settrace
 
