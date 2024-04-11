@@ -179,6 +179,7 @@ def load_demand_csv(path):
             )
         }
     )
+    return gegis_load
 
 
 def build_demand_profiles(
