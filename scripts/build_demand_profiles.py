@@ -117,15 +117,10 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         "era5_" + str(weather_year),
     )
 
-    for ext in [".nc", ".csv"]:
-        avail_regions = [
-            cnt
-            for cnt in region_load
-            if os.path.exists(os.path.join(load_dir, cnt + ext))
-        ]
-        if len(avail_regions) == len(region_load):
-            for continent in region_load:
-                load_path = os.path.join(load_dir, continent + ext)
+    for continent in region_load:
+        for ext in [".nc", ".csv"]:
+            load_path = os.path.join(load_dir, continent + ext)
+            if os.path.exists(load_path):
                 load_paths.append(load_path)
             break
 
