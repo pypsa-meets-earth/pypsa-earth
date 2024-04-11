@@ -222,13 +222,17 @@ def build_demand_profiles(
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     load_paths = load_paths
 
+    gegis_load_list = []
+
     for path in load_paths:
         if str(path).endswith(".csv"):
-            gegis_load = load_demand_csv(path)
+            gegis_load_xr = load_demand_csv(path)
         else:
             # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-            gegis_load = xr.open_mfdataset(path, combine="nested")
+            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
+        gegis_load_list.append(gegis_load_xr)
 
+    gegis_load = xr.merge(gegis_load_list)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
