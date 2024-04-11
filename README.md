@@ -326,10 +326,10 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/cschau-ieg">
-            <img src="https://avatars.githubusercontent.com/u/124347782?v=4" width="100;" alt="cschau-ieg"/>
+        <a href="https://github.com/cpschau">
+            <img src="https://avatars.githubusercontent.com/u/124347782?v=4" width="100;" alt="cpschau"/>
             <br />
-            <sub><b>Cschau-ieg</b></sub>
+            <sub><b>Cschau</b></sub>
         </a>
     </td></tr>
 <tr>
