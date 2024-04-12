@@ -402,6 +402,19 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
 
+``csp``
+---------------
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at:   csp:
+   :end-at: csp_model:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/csp.csv
+
 .. _costs_cf:
 
 ``costs``
