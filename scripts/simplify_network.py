@@ -591,18 +591,25 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         busmap.loc[buses_i] = dist.idxmin(1)
 
     line_strategies = aggregation_strategies.get("lines", dict())
+    line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         line_strategies=line_strategies,
+        bus_strategies={
+            "lat": "mean",
+            "lon": "mean",
+            "tag_substation": "first",
+            "tag_area": "first",
+            "country": "first",
+        },
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
@@ -807,6 +814,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     line_strategies = aggregation_strategies.get("lines", dict())
+    line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
@@ -818,6 +826,13 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         line_strategies=line_strategies,
+        bus_strategies={
+            "lat": "mean",
+            "lon": "mean",
+            "tag_substation": "first",
+            "tag_area": "first",
+            "country": "first",
+        },
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
