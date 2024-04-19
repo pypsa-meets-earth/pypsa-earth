@@ -186,9 +186,11 @@ def build_demand_profiles(
         if isinstance(scale, dict):
             logger.info(f"Using custom scaling factor for load data.")
             for country, scale_country in scale.items():
-                gegis_load.loc[gegis_load.region_code == country,"Electricity demand"] *= scale_country
-        
-        elif isinstance(scale, (int,float)):
+                gegis_load.loc[
+                    gegis_load.region_code == country, "Electricity demand"
+                ] *= scale_country
+
+        elif isinstance(scale, (int, float)):
             logger.info(f"Load data scaled with scaling factor {scale}.")
             gegis_load["Electricity demand"] *= scale
 
