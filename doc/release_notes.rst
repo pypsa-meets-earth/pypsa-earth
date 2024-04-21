@@ -30,6 +30,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Improve geometry filtering in clean_osm_data. `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
 
+* Documentation improvements. `PR ##1007 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1007>`__
+
 PyPSA-Earth 0.3.0
 =================
 
