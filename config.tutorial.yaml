@@ -140,7 +140,7 @@ load_options:
 
 electricity:
   base_voltage: 380.
-  voltages: [220., 300., 380.]
+  voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 1.487e+9
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
