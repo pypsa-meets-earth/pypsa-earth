@@ -14,16 +14,16 @@ A short video explaining the logic of PyPSA-Eur which is similar to PyPSA-Earth:
 
     <iframe width="832" height="468" src="https://www.youtube.com/embed/ty47YU1_eeQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-For more details on PyPSA-Earth read our milestone paper: Parzen et al., "PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa", 2022, https://arxiv.org/abs/2209.04663.
-Please use the following BibTeX: ::
+For more details on PyPSA-Earth read the below milestone paper.
+For citations, please use the following BibTeX: ::
 
   @misc{PyPSAEarth,
   author = {Parzen, Maximilian and Abdel-Khalek, Hazem and Fedorova, Ekaterina and Mahmood, Matin and Frysztacki, Martha Maria and Hampp, Johannes and Franken, Lukas and Schumm, Leon and Neumann, Fabian and Poli, Davide and Kiprakis, Aristides and Fioriti, Davide},
-  title = {PyPSA-Earth. A New Global Open Energy System Optimization Model Demonstrated in Africa},
-  publisher = {arXiv},
-  year = {2022},
-  url = {https://arxiv.org/abs/2209.04663},
-  doi = {10.48550/ARXIV.2209.04663},
+  title = {PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa},
+  publisher = {Applied Energy},
+  year = {2023},
+  url = {https://www.sciencedirect.com/science/article/pii/S030626192300460},
+  doi = {https://doi.org/10.1016/j.apenergy.2023.121096},
   }
 
 
