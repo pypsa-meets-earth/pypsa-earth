@@ -173,6 +173,8 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+    hydrogen_colors: false
+
 
   oil:
     spatial_oil: true
@@ -560,3 +562,4 @@ plotting:
     H2 for shipping: "#6495ED"
     biomass EOP: "green"
     biomass: "green"
+    high-temp electrolysis: "magenta"
