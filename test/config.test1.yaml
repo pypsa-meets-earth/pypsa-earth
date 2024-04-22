@@ -324,6 +324,7 @@ sector:
   helmeth: true
   dac: true
   SMR: true
+  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
