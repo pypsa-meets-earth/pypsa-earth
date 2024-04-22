@@ -379,6 +379,59 @@ def add_co2_sequestration_limit(n, sns):
         n, lhs, "<=", rhs, "GlobalConstraint", "mu", axes=pd.Index([name]), spec=name
     )
 
+def set_h2_colors(n):
+   
+    blue_h2 = get_var(n, "Link", "p")[
+        n.links.index[n.links.index.str.contains("blue H2")]
+    ]
+
+    pink_h2 = get_var(n, "Link", "p")[
+        n.links.index[n.links.index.str.contains("pink H2")]
+    ]
+
+    fuelcell_ind = n.loads[n.loads.carrier=="land transport fuel cell"].index
+
+    other_ind = n.loads[(n.loads.carrier=="H2 for industry") | (n.loads.carrier=="H2 for shipping") |
+                        (n.loads.carrier=="H2")].index
+    
+    load_fuelcell = (
+        n.loads_t.p_set[fuelcell_ind].sum(axis=1) * n.snapshot_weightings["generators"]
+    ).sum()
+
+    load_other_h2 = n.loads.loc[other_ind].p_set.sum() * 8760
+   
+    load_h2 = load_fuelcell + load_other_h2
+
+    weightings_blue = pd.DataFrame(
+        np.outer(
+            n.snapshot_weightings["generators"], [1.0] * len(blue_h2.columns)
+        ),
+        index=n.snapshots,
+        columns=blue_h2.columns,
+    )
+
+    weightings_pink = pd.DataFrame(
+        np.outer(
+            n.snapshot_weightings["generators"], [1.0] * len(pink_h2.columns)
+        ),
+        index=n.snapshots,
+        columns=pink_h2.columns,
+    )
+
+    total_blue = linexpr((weightings_blue, blue_h2)).sum().sum()
+
+    total_pink = linexpr((weightings_pink, pink_h2)).sum().sum()
+
+    rhs_blue = load_h2 * snakemake.config["sector"]["hydrogen"]["blue_share"]
+    rhs_pink = load_h2 * snakemake.config["sector"]["hydrogen"]["pink_share"]
+
+    define_constraints(
+        n, total_blue, "=", rhs_blue, "blue_h2_share"
+    )
+
+    define_constraints(
+        n, total_pink, "=", rhs_pink, "pink_h2_share"
+    )
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
@@ -411,6 +464,11 @@ def extra_functionality(n, snapshots):
             add_h2_network_cap(
                 n, snakemake.config["sector"]["hydrogen"]["network_limit"]
             )
+
+    if snakemake.config["sector"]["hydrogen"]["set_color_shares"]:
+        logger.info("setting H2 color mix")
+        set_h2_colors(n)
+
     add_co2_sequestration_limit(n, snapshots)
 
 
@@ -488,14 +546,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="4",
+            clusters="18",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="24H",
             discountrate=0.071,
-            demand="DF",
-            h2export="120",
+            demand="AB",
+            h2export="0",
         )
 
         sets_path_to_root("pypsa-earth-sec")
