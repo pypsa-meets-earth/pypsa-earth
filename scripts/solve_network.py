@@ -259,9 +259,7 @@ def monthly_constraints(n, n_ref):
 
     elec_input = elec_input.groupby(elec_input.index.month).sum()
 
-    if (
-        snakemake.config["policy_config"]["hydrogen"]["additionality"]
-    ):
+    if snakemake.config["policy_config"]["hydrogen"]["additionality"]:
         res_ref = n_ref.generators_t.p[res_index] * weightings
         res_ref = res_ref.groupby(n_ref.generators_t.p.index.month).sum().sum(axis=1)
 
@@ -379,8 +377,8 @@ def add_co2_sequestration_limit(n, sns):
         n, lhs, "<=", rhs, "GlobalConstraint", "mu", axes=pd.Index([name]), spec=name
     )
 
+
 def set_h2_colors(n):
-   
     blue_h2 = get_var(n, "Link", "p")[
         n.links.index[n.links.index.str.contains("blue H2")]
     ]
@@ -389,31 +387,30 @@ def set_h2_colors(n):
         n.links.index[n.links.index.str.contains("pink H2")]
     ]
 
-    fuelcell_ind = n.loads[n.loads.carrier=="land transport fuel cell"].index
+    fuelcell_ind = n.loads[n.loads.carrier == "land transport fuel cell"].index
 
-    other_ind = n.loads[(n.loads.carrier=="H2 for industry") | (n.loads.carrier=="H2 for shipping") |
-                        (n.loads.carrier=="H2")].index
-    
+    other_ind = n.loads[
+        (n.loads.carrier == "H2 for industry")
+        | (n.loads.carrier == "H2 for shipping")
+        | (n.loads.carrier == "H2")
+    ].index
+
     load_fuelcell = (
         n.loads_t.p_set[fuelcell_ind].sum(axis=1) * n.snapshot_weightings["generators"]
     ).sum()
 
     load_other_h2 = n.loads.loc[other_ind].p_set.sum() * 8760
-   
+
     load_h2 = load_fuelcell + load_other_h2
 
     weightings_blue = pd.DataFrame(
-        np.outer(
-            n.snapshot_weightings["generators"], [1.0] * len(blue_h2.columns)
-        ),
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(blue_h2.columns)),
         index=n.snapshots,
         columns=blue_h2.columns,
     )
 
     weightings_pink = pd.DataFrame(
-        np.outer(
-            n.snapshot_weightings["generators"], [1.0] * len(pink_h2.columns)
-        ),
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(pink_h2.columns)),
         index=n.snapshots,
         columns=pink_h2.columns,
     )
@@ -425,31 +422,34 @@ def set_h2_colors(n):
     rhs_blue = load_h2 * snakemake.config["sector"]["hydrogen"]["blue_share"]
     rhs_pink = load_h2 * snakemake.config["sector"]["hydrogen"]["pink_share"]
 
-    define_constraints(
-        n, total_blue, "=", rhs_blue, "blue_h2_share"
-    )
+    define_constraints(n, total_blue, "=", rhs_blue, "blue_h2_share")
 
-    define_constraints(
-        n, total_pink, "=", rhs_pink, "pink_h2_share"
-    )
+    define_constraints(n, total_pink, "=", rhs_pink, "pink_h2_share")
+
 
 def extra_functionality(n, snapshots):
     add_battery_constraints(n)
 
-    if snakemake.config["policy_config"]["hydrogen"]["temporal_matching"] == "h2_yearly_matching":
-
+    if (
+        snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
+        == "h2_yearly_matching"
+    ):
         if snakemake.config["policy_config"]["hydrogen"]["additionality"] == True:
-            logger.info("additionality is currently not supported for yearly constraints, proceeding without additionality")
+            logger.info(
+                "additionality is currently not supported for yearly constraints, proceeding without additionality"
+            )
         logger.info("setting h2 export to yearly greenness constraint")
         H2_export_yearly_constraint(n)
 
-    elif snakemake.config["policy_config"]["hydrogen"]["temporal_matching"] == "h2_monthly_matching":
+    elif (
+        snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
+        == "h2_monthly_matching"
+    ):
         if not snakemake.config["policy_config"]["hydrogen"]["is_reference"]:
             logger.info("setting h2 export to monthly greenness constraint")
             monthly_constraints(n, n_ref)
-        else:  
+        else:
             logger.info("preparing reference case for additionality constraint")
-
 
     elif snakemake.config["policy_config"]["temporal_matching"] == "no_res_matching":
         logger.info("no h2 export constraint set")
@@ -581,12 +581,11 @@ if __name__ == "__main__":
 
         if (
             snakemake.config["policy_config"]["hydrogen"]["additionality"]
-            and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"] != "no_res_matching"
+            and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
+            != "no_res_matching"
         ):
             n_ref_path = snakemake.config["policy_config"]["hydrogen"]["path_to_ref"]
-            n_ref = pypsa.Network(
-                n_ref_path
-            )
+            n_ref = pypsa.Network(n_ref_path)
         else:
             n_ref = None
 

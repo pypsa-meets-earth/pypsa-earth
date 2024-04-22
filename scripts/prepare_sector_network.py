@@ -240,7 +240,6 @@ def add_hydrogen(n, costs):
     )
 
     if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-    
         n.madd(
             "Bus",
             nodes + " grid H2",
@@ -270,11 +269,10 @@ def add_hydrogen(n, costs):
             p_nom_extendable=True,
             carrier="grid H2",
             efficiency=1,
-            capital_cost=0
+            capital_cost=0,
         )
 
     else:
-            
         n.madd(
             "Link",
             nodes + " H2 Electrolysis",
@@ -322,7 +320,7 @@ def add_hydrogen(n, costs):
 
             # h2_pot.index = cavern_nodes.index
 
-            #n.add("Carrier", "H2 UHS")
+            # n.add("Carrier", "H2 UHS")
 
             n.madd(
                 "Bus",
@@ -350,10 +348,10 @@ def add_hydrogen(n, costs):
                 bus0=nodes + " H2",
                 bus1=nodes + " H2 UHS",
                 carrier="H2 UHS charger",
-                #efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-                #capital_cost=costs.at["battery inverter", "fixed"],
+                # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+                # capital_cost=costs.at["battery inverter", "fixed"],
                 p_nom_extendable=True,
-                #lifetime=costs.at["battery inverter", "lifetime"],
+                # lifetime=costs.at["battery inverter", "lifetime"],
             )
 
             n.madd(
@@ -363,11 +361,11 @@ def add_hydrogen(n, costs):
                 bus1=nodes + " H2",
                 carrier="H2 UHS discharger",
                 efficiency=0.95,
-                #capital_cost=costs.at["battery inverter", "fixed"],
+                # capital_cost=costs.at["battery inverter", "fixed"],
                 p_nom_extendable=True,
-                #lifetime=costs.at["battery inverter", "lifetime"],
+                # lifetime=costs.at["battery inverter", "lifetime"],
             )
-            
+
         else:
             h2_salt_cavern_potential = pd.read_csv(
                 snakemake.input.h2_cavern, index_col=0
@@ -412,10 +410,10 @@ def add_hydrogen(n, costs):
                 bus0=nodes,
                 bus1=nodes + " H2 UHS",
                 carrier="H2 UHS charger",
-                #efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+                # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
                 capital_cost=0,
                 p_nom_extendable=True,
-                #lifetime=costs.at["battery inverter", "lifetime"],
+                # lifetime=costs.at["battery inverter", "lifetime"],
             )
 
             n.madd(
@@ -427,9 +425,8 @@ def add_hydrogen(n, costs):
                 efficiency=0.83,
                 capital_cost=0,
                 p_nom_extendable=True,
-                #lifetime=costs.at["battery inverter", "lifetime"],
+                # lifetime=costs.at["battery inverter", "lifetime"],
             )
-
 
     # hydrogen stored overground (where not already underground)
     h2_capital_cost = costs.at[
@@ -545,9 +542,10 @@ def add_hydrogen(n, costs):
                 lifetime=costs.at["H2 (g) pipeline", "lifetime"],
             )
 
-
         if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-            nuclear_gens_bus = n.generators[n.generators.carrier=="nuclear"].bus.values
+            nuclear_gens_bus = n.generators[
+                n.generators.carrier == "nuclear"
+            ].bus.values
             buses_with_nuclear = n.buses.loc[nuclear_gens_bus]
             buses_with_nuclear_ind = n.buses.loc[nuclear_gens_bus].index
 
@@ -572,44 +570,47 @@ def add_hydrogen(n, costs):
                 y=buses_with_nuclear.y.values,
             )
 
-
-            n.generators.loc[n.generators.carrier=="nuclear", "bus"] = n.generators.loc[n.generators.carrier=="nuclear", "bus"] + " nuclear electricity"
-
-            n.madd(
-                    "Link",
-                    buses_with_nuclear_ind + " nuclear-to-grid",
-                    bus0=buses_with_nuclear_ind + " nuclear electricity",
-                    bus1=buses_with_nuclear_ind,
-                    carrier="nuclear-to-grid",
-                    capital_cost=0,
-                    p_nom_extendable=True,
-                    #lifetime=costs.at["battery inverter", "lifetime"],
-                )
+            n.generators.loc[n.generators.carrier == "nuclear", "bus"] = (
+                n.generators.loc[n.generators.carrier == "nuclear", "bus"]
+                + " nuclear electricity"
+            )
 
             n.madd(
-                    "Link",
-                    buses_with_nuclear_ind + " high-temp electrolysis",
-                    bus0=buses_with_nuclear_ind + " nuclear electricity",
-                    bus1=buses_with_nuclear_ind + " pink H2",
-                    carrier="high-temp electrolysis",
-                    #capital_cost=0,
-                    p_nom_extendable=True,
-                    efficiency=costs.at["electrolysis", "efficiency"] + 0.1,
-                    capital_cost=costs.at["electrolysis", "fixed"] + costs.at["electrolysis", "fixed"]*0.1,
-                    lifetime=costs.at["electrolysis", "lifetime"],
-                )
+                "Link",
+                buses_with_nuclear_ind + " nuclear-to-grid",
+                bus0=buses_with_nuclear_ind + " nuclear electricity",
+                bus1=buses_with_nuclear_ind,
+                carrier="nuclear-to-grid",
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
+            )
 
             n.madd(
-                    "Link",
-                    buses_with_nuclear_ind + " pink H2",
-                    bus0=buses_with_nuclear_ind + " pink H2",
-                    bus1=buses_with_nuclear_ind + " H2",
-                    carrier="pink H2",
-                    #efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-                    capital_cost=0,
-                    p_nom_extendable=True,
-                    #lifetime=costs.at["battery inverter", "lifetime"],
-                )
+                "Link",
+                buses_with_nuclear_ind + " high-temp electrolysis",
+                bus0=buses_with_nuclear_ind + " nuclear electricity",
+                bus1=buses_with_nuclear_ind + " pink H2",
+                carrier="high-temp electrolysis",
+                # capital_cost=0,
+                p_nom_extendable=True,
+                efficiency=costs.at["electrolysis", "efficiency"] + 0.1,
+                capital_cost=costs.at["electrolysis", "fixed"]
+                + costs.at["electrolysis", "fixed"] * 0.1,
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
+
+            n.madd(
+                "Link",
+                buses_with_nuclear_ind + " pink H2",
+                bus0=buses_with_nuclear_ind + " pink H2",
+                bus1=buses_with_nuclear_ind + " H2",
+                carrier="pink H2",
+                # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
+            )
 
 
 def define_spatial(nodes):
@@ -972,7 +973,6 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
@@ -1024,9 +1024,15 @@ def add_aviation(n, cost):
     if snakemake.config["sector"]["international_bunkers"]:
         co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
     else:
-        domestic_to_international = energy_totals["total international aviation"] / energy_totals["total domestic aviation"]
-        co2 = airports["p_set"].sum() * domestic_to_international * costs.at["oil", "CO2 intensity"]
-
+        domestic_to_international = (
+            energy_totals["total international aviation"]
+            / energy_totals["total domestic aviation"]
+        )
+        co2 = (
+            airports["p_set"].sum()
+            * domestic_to_international
+            * costs.at["oil", "CO2 intensity"]
+        )
 
     n.add(
         "Load",
@@ -1125,9 +1131,7 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["SMR CC"]:
-
         if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-            
             n.madd(
                 "Bus",
                 nodes + " blue H2",
@@ -1142,53 +1146,51 @@ def h2_hc_conversions(n, costs):
                 spatial.nodes,
                 suffix=" SMR CC",
                 bus0=spatial.gas.nodes,
-                bus1= nodes + " blue H2",
+                bus1=nodes + " blue H2",
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
                 p_nom_extendable=True,
                 carrier="SMR CC",
                 efficiency=costs.at["SMR CC", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"] * (1 - options["cc_fraction"]),
+                efficiency2=costs.at["gas", "CO2 intensity"]
+                * (1 - options["cc_fraction"]),
                 efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
                 capital_cost=costs.at["SMR CC", "fixed"],
                 lifetime=costs.at["SMR CC", "lifetime"],
             )
 
             n.madd(
-                    "Link",
-                    nodes + " blue H2",
-                    bus0=nodes + " blue H2",
-                    bus1=nodes + " H2",
-                    carrier="blue H2",
-                    capital_cost=0,
-                    p_nom_extendable=True,
-                    #lifetime=costs.at["battery inverter", "lifetime"],
-                )
-      
+                "Link",
+                nodes + " blue H2",
+                bus0=nodes + " blue H2",
+                bus1=nodes + " H2",
+                carrier="blue H2",
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
+            )
 
         else:
-                
             n.madd(
                 "Link",
                 spatial.nodes,
                 suffix=" SMR CC",
                 bus0=spatial.gas.nodes,
-                bus1= nodes + " H2",
+                bus1=nodes + " H2",
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
                 p_nom_extendable=True,
                 carrier="SMR CC",
                 efficiency=costs.at["SMR CC", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"] * (1 - options["cc_fraction"]),
+                efficiency2=costs.at["gas", "CO2 intensity"]
+                * (1 - options["cc_fraction"]),
                 efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
                 capital_cost=costs.at["SMR CC", "fixed"],
                 lifetime=costs.at["SMR CC", "lifetime"],
             )
 
     if options["SMR"]:
-
         if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-            
             n.madd(
                 "Bus",
                 nodes + " grey H2",
@@ -1213,16 +1215,15 @@ def h2_hc_conversions(n, costs):
             )
 
             n.madd(
-                    "Link",
-                    nodes + " grey H2",
-                    bus0=nodes + " grey H2",
-                    bus1=nodes + " H2",
-                    carrier="grey H2",
-                    capital_cost=0,
-                    p_nom_extendable=True,
-                    #lifetime=costs.at["battery inverter", "lifetime"],
-                )
-      
+                "Link",
+                nodes + " grey H2",
+                bus0=nodes + " grey H2",
+                bus1=nodes + " H2",
+                carrier="grey H2",
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
+            )
 
         else:
             n.madd(
@@ -1314,7 +1315,10 @@ def add_shipping(n, costs):
     else:
         shipping_bus = nodes + " H2"
 
-    if not (snakemake.config["policy_config"]["hydrogen"]["is_reference"] and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]):
+    if not (
+        snakemake.config["policy_config"]["hydrogen"]["is_reference"]
+        and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
+    ):
         n.madd(
             "Load",
             nodes,
@@ -1343,10 +1347,15 @@ def add_shipping(n, costs):
         if snakemake.config["sector"]["international_bunkers"]:
             co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
         else:
-            domestic_to_international = energy_totals["total international navigation"] / energy_totals["total domestic navigation"]
-            co2 = ports["p_set"].sum() *  domestic_to_international  * costs.at["oil", "CO2 intensity"]
-
-
+            domestic_to_international = (
+                energy_totals["total international navigation"]
+                / energy_totals["total domestic navigation"]
+            )
+            co2 = (
+                ports["p_set"].sum()
+                * domestic_to_international
+                * costs.at["oil", "CO2 intensity"]
+            )
 
         n.add(
             "Load",
@@ -1513,7 +1522,10 @@ def add_industry(n, costs):
 
     #################################################### CARRIER = HYDROGEN
 
-    if not (snakemake.config["policy_config"]["hydrogen"]["is_reference"] and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]):
+    if not (
+        snakemake.config["policy_config"]["hydrogen"]["is_reference"]
+        and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
+    ):
         n.madd(
             "Load",
             nodes,
@@ -1813,7 +1825,10 @@ def add_land_transport(n, costs):
         )
 
     if fuel_cell_share > 0:
-        if not (snakemake.config["policy_config"]["hydrogen"]["is_reference"] and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]):
+        if not (
+            snakemake.config["policy_config"]["hydrogen"]["is_reference"]
+            and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
+        ):
             n.madd(
                 "Load",
                 nodes,
