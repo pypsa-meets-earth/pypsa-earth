@@ -522,7 +522,7 @@ def base_network(
         lines_dc = _set_electrical_parameters_links(links_config, lines_dc)
         # parse line information into p_nom required for converters
         lines_dc["p_nom"] = lines_dc.apply(
-            lambda x: x["v_nom_original"] * n.line_types.i_nom[x["type"]],
+            lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
             axis=1,
             result_type="reduce",
         )
