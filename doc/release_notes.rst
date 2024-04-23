@@ -20,6 +20,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Generalize line types for AC and DC networks. `PR #999 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/999>`__
 
+* Add an option to merge isolated networks into respective backbone networks by countries. `PR #903 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/903>`__
+
 **Minor Changes and bug-fixing**
 
 * Minor bug-fixing to get the generalised line types work for DC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__
