@@ -175,6 +175,7 @@ sector:
     underground_storage: false
     hydrogen_colors: false
 
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
   oil:
     spatial_oil: true
