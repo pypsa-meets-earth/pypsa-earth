@@ -182,17 +182,19 @@ def build_demand_profiles(
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
 
-    if scale is not None:
-        if isinstance(scale, dict):
-            logger.info(f"Using custom scaling factor for load data.")
-            for country, scale_country in scale.items():
-                gegis_load.loc[
-                    gegis_load.region_code == country, "Electricity demand"
-                ] *= scale_country
+    if isinstance(scale, dict):
+        logger.info(f"Using custom scaling factor for load data.")
+        for country in countries: 
+            scale.setdefault(country,1.0) 
+            
+        for country, scale_country in scale.items():
+            gegis_load.loc[
+                gegis_load.region_code == country, "Electricity demand"
+            ] *= scale_country
 
-        elif isinstance(scale, (int, float)):
-            logger.info(f"Load data scaled with scaling factor {scale}.")
-            gegis_load["Electricity demand"] *= scale
+    elif isinstance(scale, (int, float)):
+        logger.info(f"Load data scaled with scaling factor {scale}.")
+        gegis_load["Electricity demand"] *= scale
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
@@ -257,7 +259,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.params.load_options.get("scale")
+    scale = snakemake.params.load_options.get("scale",1.0)
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
