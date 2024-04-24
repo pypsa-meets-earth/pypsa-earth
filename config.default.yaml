@@ -172,7 +172,7 @@ sector:
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
 
-  international_bunkers: false #Whether or not to count the demand of international aviation and navigation
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
   oil:
     spatial_oil: true
