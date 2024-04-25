@@ -878,16 +878,14 @@ def built_network(
     logger.info("Save outputs")
 
     # create clean directory if not already exist
-    if not os.path.exists(outputs["lines"]):
-        os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
+    pathlib.Path(outputs["lines"]).parent.mkdir(exist_ok=True)
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
     to_csv_nafix(converters, outputs["converters"])  # Generate CSV
     to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
 
     # create clean directory if not already exist
-    if not os.path.exists(outputs["substations"]):
-        os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
+    pathlib.Path(outputs["substations"]).parent.mkdir(exist_ok=True)
     # Generate CSV
     to_csv_nafix(buses, outputs["substations"])
 
