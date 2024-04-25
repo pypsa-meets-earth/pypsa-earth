@@ -84,6 +84,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pathlib
 import pypsa
 from _helpers import configure_logging, create_logger
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
@@ -545,7 +546,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",

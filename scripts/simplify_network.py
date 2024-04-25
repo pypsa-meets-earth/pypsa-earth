@@ -92,6 +92,7 @@ from functools import reduce
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pathlib
 import pypsa
 import scipy as sp
 from _helpers import (
@@ -964,7 +965,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("simplify_network", simpl="")
     configure_logging(snakemake)
 
