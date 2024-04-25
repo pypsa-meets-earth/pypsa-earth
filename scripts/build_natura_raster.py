@@ -50,6 +50,7 @@ import os
 import atlite
 import geopandas as gpd
 import numpy as np
+import pathlib
 import rasterio as rio
 from _helpers import configure_logging, create_logger
 from rasterio.features import geometry_mask
@@ -66,14 +67,14 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
     list_fileshapes = []
     for lf in list_paths:
-        if os.path.isdir(lf):  # if it is a folder, then list all shapes files contained
+        if pathlib.Path(lf).is_dir():  # if it is a folder, then list all shapes files contained
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
                 # loop over all files
                 for subfile in files:
                     # add the subfile if it is a shape file
                     if subfile.endswith(accepted_formats):
-                        list_fileshapes.append(os.path.join(path, subfile))
+                        list_fileshapes.append(pathlib.Path(path).joinpath(subfile))
 
         elif lf.endswith(accepted_formats):
             list_fileshapes.append(lf)
@@ -179,7 +180,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake(
             "build_natura_raster", cutouts=["cutouts/africa-2013-era5.nc"]
         )

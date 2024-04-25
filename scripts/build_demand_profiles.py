@@ -48,6 +48,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
+import pathlib
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
@@ -110,13 +111,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     load_paths = []
     for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
-        )
+        load_path = str(pathlib.Path(ssp_parentfolder).joinpath(str(ssp), str(prediction_year), "era5_" + str(weather_year), str(continent) + ".nc"))
         load_paths.append(load_path)
 
     return load_paths
@@ -234,7 +229,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("build_demand_profiles")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
