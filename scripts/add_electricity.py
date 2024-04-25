@@ -91,6 +91,7 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pathlib
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
@@ -802,7 +803,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("add_electricity")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
