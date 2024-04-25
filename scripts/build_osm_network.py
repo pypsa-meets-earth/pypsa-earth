@@ -11,6 +11,7 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pathlib
 from _helpers import (
     configure_logging,
     create_logger,
@@ -897,7 +898,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 

@@ -128,6 +128,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pathlib
 import pyomo.environ as po
 import pypsa
 import seaborn as sns
@@ -661,7 +662,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )

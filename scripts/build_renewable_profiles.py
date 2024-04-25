@@ -201,6 +201,7 @@ import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pathlib
 import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, create_logger, read_csv_nafix, sets_path_to_root
@@ -489,7 +490,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

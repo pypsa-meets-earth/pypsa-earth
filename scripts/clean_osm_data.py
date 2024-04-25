@@ -11,6 +11,7 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pathlib
 import reverse_geocode as rg
 from _helpers import (
     REGION_COLS,
@@ -1064,7 +1065,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
 
