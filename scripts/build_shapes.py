@@ -18,6 +18,7 @@ import fiona
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pathlib
 import rasterio
 import requests
 import rioxarray as rx
@@ -93,21 +94,16 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
-    GADM_inputfile_gpkg = os.path.join(
-        os.getcwd(),
-        "data",
-        "gadm",
-        GADM_filename,
-        GADM_filename + ".gpkg",
-    )  # Input filepath gpkg
+    GADM_inputfile_gpkg = pathlib.Path(pathlib.Path.cwd()).joinpath("data",
+        "gadm", GADM_filename, GADM_filename + ".gpkg") # Input filepath gpkg
 
-    if not os.path.exists(GADM_inputfile_gpkg) or update is True:
+    if not pathlib.Path(GADM_inputfile_gpkg).exists() or update is True:
         if out_logging:
             logger.warning(
                 f"Stage 5 of 5: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
-        os.makedirs(os.path.dirname(GADM_inputfile_gpkg), exist_ok=True)
+        pathlib.Path(GADM_inputfile_gpkg).parent.mkdir(exist_ok=True)
 
         try:
             r = requests.get(GADM_url, stream=True, timeout=300)
@@ -301,8 +297,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
 
 
 def save_to_geojson(df, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)  # remove file if it exists
+    pathlib.Path(fn).unlink(missing_ok=True) # remove file if it exists
     if not isinstance(df, gpd.GeoDataFrame):
         df = gpd.GeoDataFrame(dict(geometry=df))
 
