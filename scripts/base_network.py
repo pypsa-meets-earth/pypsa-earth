@@ -62,6 +62,7 @@ import geopandas as gpd
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pathlib
 import pypsa
 import scipy as sp
 import shapely.prepared
@@ -206,7 +207,7 @@ def _load_lines_from_osm(fp_osm_lines):
 # TODO Seems to be not needed anymore
 def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config):
     # the links file can be empty
-    if os.path.getsize(fp_osm_converters) == 0:
+    if pathlib.Path(fp_osm_converters).stat().st_size == 0:
         links = pd.DataFrame()
         return links
 
@@ -235,7 +236,7 @@ def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config
 
 def _load_converters_from_osm(fp_osm_converters, buses):
     # the links file can be empty
-    if os.path.getsize(fp_osm_converters) == 0:
+    if pathlib.Path(fp_osm_converters).stat().st_size == 0:
         converters = pd.DataFrame()
         return converters
 
@@ -560,7 +561,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
 
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)
