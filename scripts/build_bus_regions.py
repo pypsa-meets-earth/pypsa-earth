@@ -47,6 +47,7 @@ import os
 
 import geopandas as gpd
 import pandas as pd
+import pathlib
 import pypsa
 from _helpers import REGION_COLS, configure_logging, create_logger
 from shapely.geometry import Point
@@ -163,7 +164,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("build_bus_regions")
     configure_logging(snakemake)
 
