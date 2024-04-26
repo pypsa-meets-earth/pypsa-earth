@@ -498,7 +498,7 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
     for label, filename in networks_dict.items():
         print(label, filename)
-        if not os.path.exists(filename):
+        if not pathlib.Path(filename).exists():
             print("does not exist!!")
             continue
 
@@ -529,9 +529,9 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
 
 def to_csv(dfs, dir):
-    os.makedirs(dir, exist_ok=True)
+    pathlib.Path(dir).mkdir(exist_ok=True)
     for key, df in dfs.items():
-        df.to_csv(os.path.join(dir, f"{key}.csv"))
+        df.to_csv(pathlib.Path(dir, f"{key}.csv"))
 
 
 if __name__ == "__main__":
@@ -553,9 +553,9 @@ if __name__ == "__main__":
 
     scenario_name = snakemake.config.get("run", {}).get("name", "")
     if scenario_name:
-        network_dir = os.path.join(network_dir, "results", scenario_name, "networks")
+        network_dir = pathlib.Path(network_dir, "results", scenario_name, "networks")
     else:
-        network_dir = os.path.join(network_dir, "results", "networks")
+        network_dir = pathlib.Path(network_dir, "results", "networks")
 
     configure_logging(snakemake)
 
@@ -571,9 +571,7 @@ if __name__ == "__main__":
         ll = [snakemake.wildcards.ll]
 
     networks_dict = {
-        (simpl, clusters, l, opts): os.path.join(
-            network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"
-        )
+        (simpl, clusters, l, opts): pathlib.Path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc")
         for simpl in expand_from_wildcard("simpl")
         for clusters in expand_from_wildcard("clusters")
         for l in ll
