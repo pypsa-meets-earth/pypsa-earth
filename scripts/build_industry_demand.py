@@ -57,7 +57,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=4,
+            clusters=10,
             planning_horizons=2030,
             demand="AB",
         )
@@ -164,7 +164,9 @@ if __name__ == "__main__":
     geo_locs = match_technology(geo_locs).loc[countries]
 
     AL = read_csv_nafix("data/AL_production.csv", index_col=0)
-    AL_prod_tom = AL["production[ktons/a]"].loc[countries]
+    AL_prod_tom = AL[AL.Year == snakemake.config["demand_data"]["aluminium_year"]][
+        "production[ktons/a]"
+    ].loc[countries]
     AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
     Steel_emissions = (
