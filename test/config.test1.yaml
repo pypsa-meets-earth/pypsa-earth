@@ -45,7 +45,7 @@ demand_data:
   base_year: 2019
 
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exageratted numbers, check carefully.
-
+  aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
 
 enable:
