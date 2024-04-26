@@ -432,7 +432,7 @@ def add_hydrogen(n, costs):
         h2_links = h2_links.groupby("buses_idx").agg(
             {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
         )
-        
+
         if len(h2_links) > 0:
             if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
                 add_links_elec_routing_new_H2_pipelines()
