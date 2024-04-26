@@ -9,7 +9,7 @@ import logging
 import os
 import subprocess
 import sys
-from pathlib import Path
+import pathlib
 
 import country_converter as coco
 import geopandas as gpd
@@ -96,12 +96,12 @@ def read_osm_config(*args):
     {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
-        base_folder = os.path.dirname(__file__)
-        if not os.path.exists(os.path.join(base_folder, "configs")):
-            base_folder = os.path.dirname(base_folder)
+        base_folder = str(pathlib.Path(__file__).parent)
+        if not pathlib.Path(base_folder, "configs").exists():
+            base_folder = str(pathlib.Path(base_folder).parent)
     else:
-        base_folder = os.getcwd()
-    osm_config_path = os.path.join(base_folder, "configs", REGIONS_CONFIG)
+        base_folder = str(pathlib.Path.cwd())
+    osm_config_path = str(pathlib.Path(base_folder, "configs", REGIONS_CONFIG))
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
@@ -123,7 +123,6 @@ def sets_path_to_root(root_directory_name):
     n : int
         Number of folders the function will check upwards/root directed.
     """
-    import os
 
     repo_name = root_directory_name
     n = 8  # check max 8 levels above. Random default.
@@ -132,8 +131,8 @@ def sets_path_to_root(root_directory_name):
     while n >= 0:
         n -= 1
         # if repo_name is current folder name, stop and set path
-        if repo_name == os.path.basename(os.path.abspath(".")):
-            repo_path = os.getcwd()  # os.getcwd() = current_path
+        if repo_name == pathlib.Path(".").absolute().name:
+            repo_path = str(pathlib.Path.cwd())  # current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
             print("Had to go %d folder(s) up." % (n0 - 1 - n))
@@ -143,8 +142,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
-            os.chdir(upper_path)
+            os.chdir(pathlib.Path(".").parent.absolute()) # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -472,13 +470,12 @@ def mock_snakemake(rulename, **wildcards):
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
-    import os
 
     import snakemake as sm
     from pypsa.descriptors import Dict
     from snakemake.script import Snakemake
 
-    script_dir = Path(__file__).parent.resolve()
+    script_dir = pathlib.Path(__file__).parent.resolve()
     assert (
         Path.cwd().resolve() == script_dir
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
