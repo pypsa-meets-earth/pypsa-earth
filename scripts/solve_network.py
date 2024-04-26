@@ -451,7 +451,10 @@ def extra_functionality(n, snapshots):
         else:
             logger.info("preparing reference case for additionality constraint")
 
-    elif snakemake.config["policy_config"]["hydrogen"]["temporal_matching"] == "no_res_matching":
+    elif (
+        snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
+        == "no_res_matching"
+    ):
         logger.info("no h2 export constraint set")
 
     else:
