@@ -169,7 +169,7 @@ def configure_logging(snakemake, skip_handlers=False):
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        fallback_path = Path(__file__).parent.joinpath(
+        fallback_path = pathlib.Path(__file__).parent.joinpath(
             "..", "logs", f"{snakemake.rule}.log"
         )
         logfile = snakemake.log.get(
@@ -477,7 +477,7 @@ def mock_snakemake(rulename, **wildcards):
 
     script_dir = pathlib.Path(__file__).parent.resolve()
     assert (
-        Path.cwd().resolve() == script_dir
+        pathlib.Path.cwd().resolve() == script_dir
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
@@ -524,7 +524,7 @@ def mock_snakemake(rulename, **wildcards):
 
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
 
     os.chdir(script_dir)
     return snakemake
