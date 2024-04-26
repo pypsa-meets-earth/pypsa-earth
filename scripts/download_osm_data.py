@@ -101,8 +101,8 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = pathlib.Path(pathlib.Path().cwd(), "resources", RDIR, "osm", "raw")
-    store_path_data = pathlib.Path(pathlib.Path().cwd(), "data", "osm")
+    store_path_resources = str(pathlib.Path(pathlib.Path().cwd(), "resources", RDIR, "osm", "raw"))
+    store_path_data = str(pathlib.Path(pathlib.Path().cwd(), "data", "osm"))
     country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.save_osm_data(
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         out_aggregate=True,
     )
 
-    out_path = pathlib.Path(store_path_resources, "out")
+    out_path = str(pathlib.Path(store_path_resources, "out"))
     names = ["generator", "cable", "line", "substation"]
     out_formats = ["csv", "geojson"]
     new_files = os.listdir(out_path)  # list downloaded osm files
@@ -129,8 +129,8 @@ if __name__ == "__main__":
     # Rename and move osm files to the resources folder output
     for name in names:
         for f in out_formats:
-            new_file_name = pathlib.Path(store_path_resources, f"all_raw_{name}s.{f}")
-            old_files = list(pathlib.Path(out_path).glob(f"*{name}.{f}"))
+            new_file_name = str(pathlib.Path(store_path_resources, f"all_raw_{name}s.{f}"))
+            old_files = list(str(pathlib.Path(out_path).glob(f"*{name}.{f}")))
             # if file is missing, create empty file, otherwise rename it an move it
             if not old_files:
                 with open(new_file_name, "w") as f:
