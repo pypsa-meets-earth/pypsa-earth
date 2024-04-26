@@ -140,7 +140,6 @@ if __name__ == "__main__":
             keys_path, index_col=0, keep_default_na=False, na_values=[""]
         )
 
-
         # production of industries per node compared to current
         nodal_production_tom = country_to_nodal(production_tom, dist_keys)
 
@@ -207,7 +206,7 @@ if __name__ == "__main__":
             "production[ktons/a]"
         ].loc[countries]
         AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
-        
+
         Steel_emissions = (
             geo_locs[geo_locs.industry == "iron and steel"]
             .groupby("country")
