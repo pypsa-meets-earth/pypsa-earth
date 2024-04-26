@@ -432,89 +432,19 @@ def add_hydrogen(n, costs):
         h2_links = h2_links.groupby("buses_idx").agg(
             {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
         )
-
+        
         if len(h2_links) > 0:
-            # Option 1: Greenfield:
-            if (
-                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                == "greenfield"
-            ):
+            if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
                 add_links_elec_routing_new_H2_pipelines()
-
-            # Option 2: Only New H2 pipelines following gas network:
-            elif (
-                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                != "greenfield"
-            ):
+            if snakemake.config["sector"]["hydrogen"]["network_routes"]
+                == "greenfield":
+                add_links_elec_routing_new_H2_pipelines()
+            else:
                 add_links_new_H2_pipelines()
-
-            # Option 3: New H2 pipelines following gas network + Repurposing:
-            elif (
-                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                != "greenfield"
-            ):
-                add_links_repurposed_H2_pipelines()
-                add_links_new_H2_pipelines()
-
-            # Option 4: New H2 pipelines following electrical transmission lines + Repurposing:
-            elif (
-                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                == "greenfield"
-            ):
-                add_links_repurposed_H2_pipelines()
-                add_links_elec_routing_new_H2_pipelines()
-
-        elif len(h2_links) == 0:
-            # Option 1: Greenfield:
-            if (
-                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                == "greenfield"
-            ):
-                add_links_elec_routing_new_H2_pipelines()
-
-            # Option 2: Only New H2 pipelines following gas network:
-            elif (
-                not snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                != "greenfield"
-            ):
-                # print('\033[93mWarning: No existing gas network --> Reverting back to ["sector"]["hydrogen"]["network_routes"] == "greenfield" for new H2 pipelines\033[0m')
-                print("#" * 10)
-                print(
-                    'WARNING: No existing gas network --> Reverting back to ["sector"]["hydrogen"]["network_routes"] == "greenfield" for new H2 pipelines'
-                )
-                print("#" * 10)
-                add_links_elec_routing_new_H2_pipelines()
-
-            # Option 3: New H2 pipelines following gas network + Repurposing:
-            elif (
-                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                != "greenfield"
-            ):
-                print("#" * 10)
-                print(
-                    'WARNING: No existing gas network --> Reverting back to ["sector"]["hydrogen"]["network_routes"] == "greenfield" for new H2 pipelines + No Repurposing'
-                )
-                print("#" * 10)
-                add_links_elec_routing_new_H2_pipelines()
-
-            # Option 4: New H2 pipelines following electrical transmission lines + Repurposing:
-            elif (
-                snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]
-                and snakemake.config["sector"]["hydrogen"]["network_routes"]
-                == "greenfield"
-            ):
-                print("#" * 10)
-                print("WARNING: No existing gas network --> No Repurposing is possible")
-                print("#" * 10)
-                add_links_elec_routing_new_H2_pipelines()
-
+        else:
+            print("No existing gas network; applying greenfield for H2 network") #TODO change to logger.info
+            add_links_elec_routing_new_H2_pipelines()        
+         
 
 def define_spatial(nodes):
     """
