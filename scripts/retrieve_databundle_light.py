@@ -69,7 +69,7 @@ according to the following rules:
     tutorial:  # configuration stating whether the tutorial is needed
 
 
-.. seealso::
+.. see also::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`toplevel_cf`
 
@@ -87,6 +87,7 @@ from zipfile import ZipFile
 
 import geopandas as gpd
 import pandas as pd
+import pathlib
 import yaml
 from _helpers import (
     configure_logging,
@@ -119,9 +120,9 @@ def load_databundle_config(config):
     return config
 
 
-def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_zenodo(config, root_path, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True,
+    download_and_unzip_zenodo(config, root_path, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download and unzip the data from zenodo
@@ -130,7 +131,7 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     ------
     config : Dict
         Configuration data for the category to download
-    rootpath : str
+    root_path : str
         Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
@@ -143,8 +144,8 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = os.path.join(rootpath, "tempfile.zip")
-    destination = os.path.relpath(config["destination"])
+    file_path = str(pathlib.Path(root_path, "tempfile.zip"))
+    destination = str(pathlib.Path(config["destination"]).relative_to())
     url = config["urls"]["zenodo"]
 
     if hot_run:
@@ -155,7 +156,7 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=destination)
-            os.remove(file_path)
+            pathlib.Path(file_path).unlink(missing_ok=True)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except:
             logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
@@ -164,9 +165,9 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     return True
 
 
-def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_gdrive(config, root_path, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True,
+    download_and_unzip_gdrive(config, root_path, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download and unzip the data from google drive
@@ -175,7 +176,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     ------
     config : Dict
         Configuration data for the category to download
-    rootpath : str
+    root_path : str
         Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
@@ -188,8 +189,8 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = os.path.join(rootpath, "tempfile.zip")
-    destination = os.path.relpath(config["destination"])
+    file_path = str(pathlib.Path(root_path, "tempfile.zip"))
+    destination = str(pathlib.Path(config["destination"]).relative_to())
     url = config["urls"]["gdrive"]
 
     # retrieve file_id from path
@@ -216,8 +217,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     # if hot run enabled
     if hot_run:
         # remove file
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        pathlib.Path(file_path).unlink(missing_ok=True)
         # download file from google drive
         gdd.download_file_from_google_drive(
             file_id=file_id,
@@ -237,11 +237,9 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
         return False
 
 
-def download_and_unzip_protectedplanet(
-    config, rootpath, attempts=3, hot_run=True, disable_progress=False
-):
+def download_and_unzip_protectedplanet(config, root_path, attempts=3, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_protectedplanet(config, rootpath, dest_path,
+    download_and_unzip_protectedplanet(config, root_path, dest_path,
     hot_run=True, disable_progress=False)
 
     Function to download and unzip the data by category from protectedplanet
@@ -250,7 +248,7 @@ def download_and_unzip_protectedplanet(
     ------
     config : Dict
         Configuration data for the category to download
-    rootpath : str
+    root_path : str
         Absolute path of the repository
     attempts : int (default 3)
         Number of attempts to download the data by month.
@@ -266,8 +264,8 @@ def download_and_unzip_protectedplanet(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = os.path.join(rootpath, "tempfile_wpda.zip")
-    destination = os.path.relpath(config["destination"])
+    file_path = str(pathlib.Path(root_path, "tempfile_wpda.zip"))
+    destination = str(pathlib.Path(config["destination"]).relative_to())
     url = config["urls"]["protectedplanet"]
 
     def get_first_day_of_month(date):
@@ -282,8 +280,7 @@ def download_and_unzip_protectedplanet(
     )
 
     if hot_run:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        pathlib.Path(file_path).unlink(missing_ok=True)
 
         downloaded = False
 
@@ -320,17 +317,17 @@ def download_and_unzip_protectedplanet(
                 for fzip in zip_files:
                     # final path of the file
                     try:
-                        inner_zipname = os.path.join(destination, fzip)
+                        inner_zipname = str(pathlib.Path(destination, fzip))
 
                         zip_obj.extract(fzip, path=destination)
 
-                        dest_nested = os.path.join(destination, fzip.split(".")[0])
+                        dest_nested = str(pathlib.Path(destination, fzip.split(".")[0]))
 
                         with ZipFile(inner_zipname, "r") as nested_zip:
                             nested_zip.extractall(path=dest_nested)
 
                         # remove inner zip file
-                        os.remove(inner_zipname)
+                        pathlib.Path(inner_zipname).unlink(missing_ok=True)
 
                         logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
                     except:
@@ -340,7 +337,7 @@ def download_and_unzip_protectedplanet(
 
                 # close and remove outer zip file
                 zip_obj.close()
-                os.remove(file_path)
+                pathlib.Path(file_path).unlink(missing_ok=True)
 
                 logger.info(
                     f"Downloaded resource '{resource_iter}' from cloud '{url_iter}'."
@@ -391,8 +388,7 @@ def download_and_unpack(
     True when download is successful, False otherwise
     """
     if hot_run:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        pathlib.Path(file_path).unlink(missing_ok=True)
 
         try:
             logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
@@ -404,9 +400,9 @@ def download_and_unpack(
             # then unzip it and remove the original file
             if unzip:
                 with ZipFile(file_path, "r") as zipfile:
-                    zipfile.extractall(destination)
+                    zipfile.extractall(path=destination)
 
-                os.remove(file_path)
+                pathlib.Path(file_path).unlink(missing_ok=True)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
             return True
         except:
@@ -414,9 +410,9 @@ def download_and_unpack(
             return False
 
 
-def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_direct(config, rootpath, dest_path, hot_run=True,
+    download_and_unzip_direct(config, root_path, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download the data by category from a direct url with no processing.
@@ -426,7 +422,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     ------
     config : Dict
         Configuration data for the category to download
-    rootpath : str
+    root_path : str
         Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
@@ -439,10 +435,10 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = os.path.relpath(config["destination"])
+    destination = str(pathlib.Path(config["destination"]).relative_to())
     url = config["urls"]["direct"]
 
-    file_path = os.path.join(destination, os.path.basename(url))
+    file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
 
     unzip = config.get("unzip", False)
 
@@ -457,10 +453,10 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
 
 
 def download_and_unzip_hydrobasins(
-    config, rootpath, hot_run=True, disable_progress=False
+    config, root_path, hot_run=True, disable_progress=False
 ):
     """
-    download_and_unzip_basins(config, rootpath, dest_path, hot_run=True,
+    download_and_unzip_basins(config, root_path, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download and unzip the data for hydrobasins from HydroBASINS database
@@ -480,7 +476,7 @@ def download_and_unzip_hydrobasins(
     ------
     config : Dict
         Configuration data for the category to download
-    rootpath : str
+    root_path : str
         Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
@@ -493,7 +489,7 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = os.path.relpath(config["destination"])
+    destination = str(pathlib.Path(config["destination"]).relative_to())
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
@@ -504,7 +500,7 @@ def download_and_unzip_hydrobasins(
 
     for rg in suffix_list:
         url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
-        file_path = os.path.join(destination, os.path.basename(url))
+        file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
 
         all_downloaded &= download_and_unpack(
             url=url,
@@ -520,9 +516,9 @@ def download_and_unzip_hydrobasins(
     return all_downloaded
 
 
-def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_post(config, rootpath, dest_path, hot_run=True,
+    download_and_unzip_post(config, root_path, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download the data by category from a post request.
@@ -531,7 +527,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
     ------
     config : Dict
         Configuration data for the category to download
-    rootpath : str
+    root_path : str
         Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
@@ -544,18 +540,17 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = os.path.relpath(config["destination"])
+    destination = str(pathlib.Path(config["destination"]).relative_to())
 
     # load data for post method
     postdata = config["urls"]["post"]
     # remove url feature
     url = postdata.pop("url")
 
-    file_path = os.path.join(destination, os.path.basename(url))
+    file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
 
     if hot_run:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        pathlib.Path(file_path).unlink(missing_ok=True)
 
         # try:
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
@@ -571,9 +566,9 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
         # then unzip it and remove the original file
         if config.get("unzip", False):
             with ZipFile(file_path, "r") as zipfile:
-                zipfile.extractall(destination)
+                zipfile.extractall(path=destination)
 
-            os.remove(file_path)
+            pathlib.Path(file_path).unlink(missing_ok=True)
         logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         # except:
         #     logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
@@ -804,7 +799,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     gpdf_list = [None] * len(files_to_merge)
     logger.info("Merging hydrobasins files into: " + output_fl)
     for i, f_name in tqdm(enumerate(files_to_merge)):
-        gpdf_list[i] = gpd.read_file(os.path.join(basins_path, f_name))
+        gpdf_list[i] = gpd.read_file(str(pathlib.Path(basins_path, f_name)))
     fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
         subset="HYBAS_ID", ignore_index=True
     )
@@ -813,7 +808,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_databundle_light")
@@ -822,7 +817,7 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    rootpath = os.getcwd()
+    root_path = str(pathlib.Path.cwd())
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
