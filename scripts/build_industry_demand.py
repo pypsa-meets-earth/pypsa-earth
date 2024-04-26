@@ -203,10 +203,10 @@ if __name__ == "__main__":
 
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
         AL_prod_tom = AL[AL.Year == snakemake.config["demand_data"]["aluminium_year"]][
-        "production[ktons/a]"
+            "production[ktons/a]"
         ].loc[countries]
         AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
-        
+
         Steel_emissions = (
             geo_locs[geo_locs.industry == "iron and steel"]
             .groupby("country")
