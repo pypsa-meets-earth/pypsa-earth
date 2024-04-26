@@ -42,7 +42,6 @@ Outputs
 Description
 -----------
 """
-import logging
 import os
 
 import geopandas as gpd

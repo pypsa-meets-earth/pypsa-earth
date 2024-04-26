@@ -44,7 +44,6 @@ This script collects all shapefiles available in the folder `data/landcover/*` d
 merges them to one shapefile, and create a rasterized version of the region, that covers the region described by the cutout.
 The output is a raster file with the name `natura.tiff` in the folder `resources/natura/`.
 """
-import logging
 import os
 
 import atlite

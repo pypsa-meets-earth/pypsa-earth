@@ -55,7 +55,6 @@ Outputs
 Description
 -----------
 """
-import logging
 import os
 
 import geopandas as gpd
@@ -67,10 +66,7 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-import yaml
 from _helpers import configure_logging, create_logger, read_csv_nafix
-from scipy.sparse import csgraph
-from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 
 logger = create_logger(__name__)

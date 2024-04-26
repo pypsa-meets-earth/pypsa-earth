@@ -96,7 +96,7 @@ from _helpers import (
     progress_retrieve,
     sets_path_to_root,
 )
-from google_drive_downloader import GoogleDriveDownloader as gdd
+from googledrivedownloader import GoogleDriveDownloader as gdd
 from tqdm import tqdm
 
 logger = create_logger(__name__)

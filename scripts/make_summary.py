@@ -51,7 +51,6 @@ The line volume/cost cap field can be set to one of the following:
 
 Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
-import logging
 import os
 
 import pandas as pd

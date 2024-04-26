@@ -77,7 +77,6 @@ Details (and errors made through this heuristic) are discussed in the paper
     for all ``scenario`` s in the configuration file
     the rule :mod:`solve_network`.
 """
-import logging
 import os
 import re
 from pathlib import Path
