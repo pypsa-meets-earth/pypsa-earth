@@ -97,7 +97,7 @@ VScode provides a so called Liveserver extension such that the html file can be 
     1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow.
 
 .. note::
-  
+
     The documentation is built automatically by the CI for every pull request. The documentation is hosted on `ReadTheDocs <https://pypsa-earth.readthedocs.io/en/latest/>`_.
     For more information on our documentation infrastructure and syntax tips, see `this page <https://pypsa-earth.readthedocs.io/en/latest/how_to_docs.html>`_.
 
