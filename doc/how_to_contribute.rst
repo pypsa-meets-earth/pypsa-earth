@@ -60,6 +60,48 @@ like `snakeviz <https://jiffyclub.github.io/snakeviz/>`_. See a detailed example
 in `this discussion #557 <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/557>`_.
 
 
+Documentation
+-------------
+
+To create the documentation locally, you need `Sphinx <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ . It can be installed using specifications
+from `doc/requirements.txt`. First, we recommend creating a fresh conda environment and activate it:
+
+.. code:: bash
+
+    .../pypsa-earth % conda create --name pypsa-earth-docs python
+
+    .../pypsa-earth % conda activate pypsa-earth-docs
+
+Next, install the packages specified in `doc/requirements.txt` using `pip`:
+
+.. code:: bash
+
+    .../pypsa-earth % pip install -r doc/requirements.txt
+
+
+Once installation is completed, the following commands allow you to create the documentation locally:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth-docs) % cd doc
+
+    .../pypsa-earth/doc (pypsa-earth-docs) % make html
+
+This will create html files in `pypsa-earth/doc/_build/html`.
+VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
+
+.. warning::
+
+    Windows users might face some challenges when building the documentation locally using `make`. A workaround can be found, but might be time consuming. For instance:
+
+    1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow.
+
+.. note::
+  
+    The documentation is built automatically by the CI for every pull request. The documentation is hosted on `ReadTheDocs <https://pypsa-earth.readthedocs.io/en/latest/>`_.
+    For more information on our documentation infrastructure and syntax tips, see `this page <https://pypsa-earth.readthedocs.io/en/latest/how_to_docs.html>`_.
+
+
 No-Code
 ========
 Instead of contributing code there are alternatives to support the PyPSA-Earth goals.
