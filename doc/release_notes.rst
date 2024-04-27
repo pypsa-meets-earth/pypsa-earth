@@ -20,11 +20,13 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Generalize line types for AC and DC networks. `PR #999 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/999>`__
 
+* Add an option to merge isolated networks into respective backbone networks by countries. `PR #903 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/903>`__
+
 **Minor Changes and bug-fixing**
 
-* Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
+* Minor bug-fixing to get the generalised line types work for DC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__
 
-* Keep data on the original voltage value when rebasing voltages to the standard values and adjust the transmission capacity accordingly. `PR #898 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/978>`__
+* Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
 
 * Fix download_osm_data compatibility for earth-osm v2.1. `PR #954 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/954>`__ and `PR #988 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/988>`__
 
