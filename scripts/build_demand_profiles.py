@@ -122,7 +122,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
             load_path = os.path.join(load_dir, continent + ext)
             if os.path.exists(load_path):
                 load_paths.append(load_path)
-            break
+                break
 
     # TODO Remember to remove after debug
     # if len(load_paths) == 0:
