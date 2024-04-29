@@ -184,8 +184,9 @@ def build_demand_profiles(
 
     if isinstance(scale, dict):
         logger.info(f"Using custom scaling factor for load data.")
+        DEFAULT_VAL = scale.get("DEFAULT", 1.0)
         for country in countries: 
-            scale.setdefault(country,1.0) 
+            scale.setdefault(country, DEFAULT_VAL) 
             
         for country, scale_country in scale.items():
             gegis_load.loc[
