@@ -5,13 +5,10 @@
 
 # -*- coding: utf-8 -*-
 
-import logging
 import multiprocessing as mp
 import os
 import shutil
-import zipfile
 from itertools import takewhile
-from math import ceil
 from operator import attrgetter
 
 import fiona

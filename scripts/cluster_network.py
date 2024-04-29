@@ -634,8 +634,7 @@ def clustering_for_n_clusters(
 
 
 def save_to_geojson(s, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)
+    pathlib.Path(fn).unlink(missing_ok=True)
     df = s.reset_index()
     schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
     df.to_file(fn, driver="GeoJSON", schema=schema)

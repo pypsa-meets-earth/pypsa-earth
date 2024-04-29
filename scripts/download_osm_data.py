@@ -120,7 +120,7 @@ if __name__ == "__main__":
     out_path = str(pathlib.Path(store_path_resources, "out"))
     names = ["generator", "cable", "line", "substation"]
     out_formats = ["csv", "geojson"]
-    new_files = os.listdir(out_path)  # list downloaded osm files
+    new_files = [x.name for x in pathlib.Path(out_path).iterdir()] # list downloaded osm files
 
     # earth-osm (eo) only outputs files with content
     # If the file is empty, it is not created
