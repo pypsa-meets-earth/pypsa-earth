@@ -24,7 +24,7 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **Minor Changes and bug-fixing**
 
-* Minor bug-fixing to get the generalised line types work for DC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__
+* Minor bug-fixing to get the generalised line types work for DC lines and AC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__ and `PR #1011 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1011>`__
 
 * Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
 
@@ -33,8 +33,6 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 * Improve geometry filtering in clean_osm_data. `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
 
 * Revise bus region definition by gadm. `PR #1001 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1001>`__
-
-* Minor bug-fixing for the generalised AC line types. `PR #1011 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1011>`__
 
 PyPSA-Earth 0.3.0
 =================
