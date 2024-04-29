@@ -39,7 +39,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
-            clusters="56",
+            clusters="10",
         )
         sets_path_to_root("pypsa-earth-sec")
         rootpath = ".."
@@ -900,16 +900,32 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
     pipelines = parse_states(pipelines, bus_regions_onshore)
 
-    plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+    if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
+        plot_gas_network(pipelines, country_borders, bus_regions_onshore)
 
-    pipelines = cluster_gas_network(pipelines, bus_regions_onshore, length_factor=1.25)
+        pipelines = cluster_gas_network(
+            pipelines, bus_regions_onshore, length_factor=1.25
+        )
 
-    pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
-    plot_clustered_gas_network(pipelines, bus_regions_onshore)
+        plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
-    average_length = pipelines["length"].mean
-    print("average_length = ", average_length)
+        average_length = pipelines["length"].mean
+        print("average_length = ", average_length)
 
-    total_system_capacity = pipelines["GWKm"].sum()
-    print("total_system_capacity = ", total_system_capacity)
+        total_system_capacity = pipelines["GWKm"].sum()
+        print("total_system_capacity = ", total_system_capacity)
+
+    else:
+        print(
+            "Countries:"
+            + bus_regions_onshore.country.unique().tolist()
+            + "has no existing Natral Gas network between the chosen bus regions"
+        )
+
+        # Create an empty DataFrame with the specified column names
+        pipelines = {"bus0": [], "bus1": [], "capacity": [], "length": [], "GWKm": []}
+
+        pipelines = pd.DataFrame(pipelines)
+        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
