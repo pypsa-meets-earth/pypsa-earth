@@ -296,7 +296,7 @@ rule base_network:
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        area_crs=config["crs"]["area_crs"],
+        crs=config["crs"],
         countries=config["countries"],
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
