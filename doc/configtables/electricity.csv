@@ -1,6 +1,6 @@
 ,Unit,Values,Description
 base_voltage, kV, float, "Base voltage to which all lines are simplified/aggregated. Simplification preserves transmission capacities."
-voltages, kV, "Any subset of {220., 300., 380.}", "Voltage levels considered."
+voltages, kV, "A subset of 'standard' voltages considered to map OSM-extracted voltages into 'standard' linetypes."
 co2limit,:math:`t_{CO_2-eq}/a`, float, "Cap on system total annual carbon dioxide equivalent emissions."
 co2base,:math:`t_{CO_2-eq}/a`, float, "Reference value of system total annual carbon dioxide equivalent emissions. Used only if relative emission reduction target is specified in ``{opts}`` wildcard."
 automatic_emission, bool, "{True, False}", "True: Emissions are obtained from automatic emission extraction procedure. False: Emissions are obtained manually"

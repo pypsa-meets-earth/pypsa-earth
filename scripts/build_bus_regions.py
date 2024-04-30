@@ -129,34 +129,25 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     return polygons_arr
 
 
-def get_gadm_shape(onshore_locs, gadm_shapes):
-    def locate_bus(coords):
-        point = Point(Point(coords["x"], coords["y"]))
-        gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)
+def get_gadm_shape(
+    onshore_buses, gadm_shapes, geo_crs="EPSG:4326", metric_crs="EPSG:3857"
+):
+    geo_regions = gpd.GeoDataFrame(
+        onshore_buses[["x", "y"]],
+        geometry=gpd.points_from_xy(onshore_buses["x"], onshore_buses["y"]),
+        crs=geo_crs,
+    ).to_crs(metric_crs)
 
-        try:
-            return gadm_shapes[gadm_shapes.contains(point)].item()
-        except ValueError:
-            return min(
-                gadm_shapes_country, key=(point.distance)
-            )  # TODO returns closest shape if the point was not inside one. Works well but will not catch an outlier bus.
+    join_geos = gpd.sjoin_nearest(
+        geo_regions, gadm_shapes.to_crs(metric_crs), how="left"
+    )
 
-    def get_id(coords):
-        point = Point(Point(coords["x"], coords["y"]))
-        gadm_shapes_country = gadm_shapes.filter(like=country, axis=0)
+    # when duplicates, keep only the first entry
+    join_geos = join_geos[~join_geos.index.duplicated()]
 
-        try:
-            return gadm_shapes[gadm_shapes.contains(point)].index.item()
-        except ValueError:
-            # return 'not_found'
-            return gadm_shapes_country[
-                gadm_shapes_country.geometry
-                == min(gadm_shapes_country, key=(point.distance))
-            ].index.item()  # TODO returns closest shape if the point was not inside one.
+    gadm_sel = gadm_shapes.loc[join_geos["index_right"].values]
 
-    regions = onshore_locs[["x", "y"]].apply(locate_bus, axis=1)
-    ids = onshore_locs[["x", "y"]].apply(get_id, axis=1)
-    return regions.values, ids.values
+    return gadm_sel.geometry.values, gadm_sel.index.values
 
 
 if __name__ == "__main__":
@@ -168,7 +159,9 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     countries = snakemake.params.countries
-    area_crs = snakemake.params.area_crs
+    geo_crs = snakemake.params.crs["geo_crs"]
+    area_crs = snakemake.params.crs["area_crs"]
+    metric_crs = snakemake.params.crs["distance_crs"]
 
     n = pypsa.Network(snakemake.input.base_network)
 
@@ -182,9 +175,7 @@ if __name__ == "__main__":
         "geometry"
     ]
 
-    gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")[
-        "geometry"
-    ]
+    gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")
 
     onshore_regions = []
     offshore_regions = []
@@ -197,9 +188,14 @@ if __name__ == "__main__":
 
         onshore_shape = country_shapes[country]
         onshore_locs = n.buses.loc[c_b & n.buses.substation_lv, ["x", "y"]]
+        gadm_country = gadm_shapes[gadm_shapes.country == country]
         if snakemake.params.alternative_clustering:
-            onshore_geometry = get_gadm_shape(onshore_locs, gadm_shapes)[0]
-            shape_id = get_gadm_shape(onshore_locs, gadm_shapes)[1]
+            onshore_geometry, shape_id = get_gadm_shape(
+                onshore_locs,
+                gadm_country,
+                geo_crs,
+                metric_crs,
+            )
         else:
             onshore_geometry = custom_voronoi_partition_pts(
                 onshore_locs.values, onshore_shape
@@ -215,7 +211,7 @@ if __name__ == "__main__":
                 "country": country,
                 "shape_id": shape_id,
             },
-            crs=country_shapes.crs,
+            crs=geo_crs,
         )
         temp_region = temp_region[
             temp_region.geometry.is_valid & ~temp_region.geometry.is_empty
