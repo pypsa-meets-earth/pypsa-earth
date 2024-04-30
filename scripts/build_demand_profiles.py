@@ -185,9 +185,9 @@ def build_demand_profiles(
     if isinstance(scale, dict):
         logger.info(f"Using custom scaling factor for load data.")
         DEFAULT_VAL = scale.get("DEFAULT", 1.0)
-        for country in countries: 
-            scale.setdefault(country, DEFAULT_VAL) 
-            
+        for country in countries:
+            scale.setdefault(country, DEFAULT_VAL)
+
         for country, scale_country in scale.items():
             gegis_load.loc[
                 gegis_load.region_code == country, "Electricity demand"
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.params.load_options.get("scale",1.0)
+    scale = snakemake.params.load_options.get("scale", 1.0)
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
