@@ -56,12 +56,12 @@ Description
 -----------
 """
 import os
+import pathlib
 
 import geopandas as gpd
 import networkx as nx
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 import scipy as sp
 import shapely.prepared

@@ -52,10 +52,10 @@ The line volume/cost cap field can be set to one of the following:
 Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
 import os
+import pathlib
 
 import pandas as pd
 import pypsa
-import pathlib
 from _helpers import configure_logging
 from add_electricity import create_logger, load_costs, update_transmission_costs
 
@@ -552,7 +552,9 @@ if __name__ == "__main__":
 
     scenario_name = snakemake.config.get("run", {}).get("name", "")
     if scenario_name:
-        network_dir = str(pathlib.Path(network_dir, "results", scenario_name, "networks"))
+        network_dir = str(
+            pathlib.Path(network_dir, "results", scenario_name, "networks")
+        )
     else:
         network_dir = str(pathlib.Path(network_dir, "results", "networks"))
 
@@ -570,7 +572,9 @@ if __name__ == "__main__":
         ll = [snakemake.wildcards.ll]
 
     networks_dict = {
-        (simpl, clusters, l, opts): str(pathlib.Path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"))
+        (simpl, clusters, l, opts): str(
+            pathlib.Path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc")
+        )
         for simpl in expand_from_wildcard("simpl")
         for clusters in expand_from_wildcard("clusters")
         for l in ll

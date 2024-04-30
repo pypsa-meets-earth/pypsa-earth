@@ -57,13 +57,13 @@ Description
     the rule :mod:`prepare_network`.
 """
 import os
+import pathlib
 import re
 from zipfile import ZipFile
 
 import country_converter as cc
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 import requests
 from _helpers import configure_logging, create_logger

@@ -192,6 +192,7 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 """
 import functools
 import os
+import pathlib
 import time
 from math import isnan
 
@@ -200,7 +201,6 @@ import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 import progressbar as pgb
 import xarray as xr
 from _helpers import configure_logging, create_logger, sets_path_to_root

@@ -29,11 +29,11 @@ Description
 -----------
 """
 import os
+import pathlib
 
 import networkx as nx
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 from _helpers import configure_logging, create_logger
 from add_electricity import load_costs

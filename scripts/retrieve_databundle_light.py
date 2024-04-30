@@ -82,12 +82,12 @@ according to the following rules:
 """
 import datetime as dt
 import os
+import pathlib
 import re
 from zipfile import ZipFile
 
 import geopandas as gpd
 import pandas as pd
-import pathlib
 import yaml
 from _helpers import (
     configure_logging,
@@ -237,7 +237,9 @@ def download_and_unzip_gdrive(config, root_path, hot_run=True, disable_progress=
         return False
 
 
-def download_and_unzip_protectedplanet(config, root_path, attempts=3, hot_run=True, disable_progress=False):
+def download_and_unzip_protectedplanet(
+    config, root_path, attempts=3, hot_run=True, disable_progress=False
+):
     """
     download_and_unzip_protectedplanet(config, root_path, dest_path,
     hot_run=True, disable_progress=False)

@@ -69,11 +69,11 @@ wildcard {unc}, which is described in the config.yaml and created in the Snakefi
 """
 import logging
 import os
+import pathlib
 
 import chaospy
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 import seaborn as sns
 from _helpers import configure_logging, create_logger

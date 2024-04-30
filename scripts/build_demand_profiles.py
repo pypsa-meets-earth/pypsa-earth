@@ -41,12 +41,12 @@ Then with a function that takes in the PyPSA network "base.nc", region and gadm 
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
 import os
+import pathlib
 from itertools import product
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
@@ -109,7 +109,15 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     load_paths = []
     for continent in region_load:
-        load_path = str(pathlib.Path(ssp_parentfolder, str(ssp), str(prediction_year), "era5_" + str(weather_year), str(continent) + ".nc"))
+        load_path = str(
+            pathlib.Path(
+                ssp_parentfolder,
+                str(ssp),
+                str(prediction_year),
+                "era5_" + str(weather_year),
+                str(continent) + ".nc",
+            )
+        )
         load_paths.append(load_path)
 
     return load_paths

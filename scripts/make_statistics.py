@@ -24,11 +24,11 @@ Outputs
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
 import os
+import pathlib
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 import xarray as xr
 from _helpers import create_logger, sets_path_to_root, to_csv_nafix

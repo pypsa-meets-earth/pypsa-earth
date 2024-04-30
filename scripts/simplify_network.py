@@ -85,13 +85,13 @@ The rule :mod:`simplify_network` does up to four things:
 4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), the network is clustered to this number of clusters with the routines from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. This step is usually skipped!
 """
 import os
+import pathlib
 import sys
 from functools import reduce
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 import scipy as sp
 from _helpers import (

@@ -122,12 +122,12 @@ Exemplary unsolved network clustered to 37 nodes:
 """
 
 import os
+import pathlib
 from functools import reduce
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 import pyomo.environ as po
 import pypsa
 from _helpers import (

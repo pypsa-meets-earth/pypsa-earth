@@ -95,11 +95,11 @@ Description
 """
 import logging
 import os
+import pathlib
 
 import atlite
 import geopandas as gpd
 import pandas as pd
-import pathlib
 from _helpers import configure_logging, create_logger
 
 logger = create_logger(__name__)

@@ -7,9 +7,9 @@
 
 import logging
 import os
+import pathlib
 import subprocess
 import sys
-import pathlib
 
 import country_converter as coco
 import geopandas as gpd
@@ -142,7 +142,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            os.chdir(pathlib.Path(".").parent.absolute()) # change to the upper folder
+            os.chdir(pathlib.Path(".").parent.absolute())  # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -476,7 +476,9 @@ def mock_snakemake(rulename, **wildcards):
     from snakemake.script import Snakemake
 
     script_dir = pathlib.Path(__file__).parent.resolve()
-    assert (pathlib.Path.cwd().resolve() == script_dir), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
+    assert (
+        pathlib.Path.cwd().resolve() == script_dir
+    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
         if pathlib.Path(p).exists():
@@ -665,7 +667,7 @@ def to_csv_nafix(df, path, **kwargs):
 
 
 def save_to_geojson(df, fn):
-    pathlib.Path(fn).unlink(missing_ok=True) # remove file if it exists
+    pathlib.Path(fn).unlink(missing_ok=True)  # remove file if it exists
 
     # save file if the (Geo)DataFrame is non-empty
     if df.empty:

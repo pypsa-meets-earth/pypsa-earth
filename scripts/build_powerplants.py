@@ -101,11 +101,11 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 """
 import logging
 import os
+import pathlib
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 import powerplantmatching as pm
 import pypsa
 import yaml
@@ -326,7 +326,9 @@ if __name__ == "__main__":
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = str(pathlib.Path(pathlib.Path.cwd(), filepath_osm2pm_ppl))
+        config["EXTERNAL_DATABASE"]["fn"] = str(
+            pathlib.Path(pathlib.Path.cwd(), filepath_osm2pm_ppl)
+        )
     else:
         # create an empty file
         with open(filepath_osm2pm_ppl, "w"):

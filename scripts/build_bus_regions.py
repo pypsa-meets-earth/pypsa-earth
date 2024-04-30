@@ -43,10 +43,10 @@ Description
 -----------
 """
 import os
+import pathlib
 
 import geopandas as gpd
 import pandas as pd
-import pathlib
 import pypsa
 from _helpers import REGION_COLS, configure_logging, create_logger
 from shapely.geometry import Point

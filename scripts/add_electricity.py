@@ -85,9 +85,10 @@ It further adds extendable ``generators`` with **zero** capacity for
 """
 
 import os
+import pathlib
+
 import numpy as np
 import pandas as pd
-import pathlib
 import powerplantmatching as pm
 import pypsa
 import xarray as xr

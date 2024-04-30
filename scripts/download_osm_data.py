@@ -27,8 +27,8 @@ Outputs
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
 import os
-import shutil
 import pathlib
+import shutil
 
 from _helpers import configure_logging, create_logger, read_osm_config
 from earth_osm import eo
@@ -101,7 +101,9 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = str(pathlib.Path(pathlib.Path().cwd(), "resources", RDIR, "osm", "raw"))
+    store_path_resources = str(
+        pathlib.Path(pathlib.Path().cwd(), "resources", RDIR, "osm", "raw")
+    )
     store_path_data = str(pathlib.Path(pathlib.Path().cwd(), "data", "osm"))
     country_list = country_list_to_geofk(snakemake.params.countries)
 

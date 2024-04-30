@@ -78,12 +78,12 @@ Details (and errors made through this heuristic) are discussed in the paper
     the rule :mod:`solve_network`.
 """
 import os
+import pathlib
 import re
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pathlib
 import pypsa
 from _helpers import configure_logging, create_logger
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense

@@ -18,6 +18,7 @@ Description
 """
 
 import os
+import pathlib
 
 import cartopy.crs as ccrs
 import geopandas as gpd
@@ -25,7 +26,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pathlib
 from _helpers import (
     aggregate_costs,
     aggregate_p,

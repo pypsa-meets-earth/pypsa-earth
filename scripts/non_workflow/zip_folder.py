@@ -8,8 +8,8 @@
 Module to zip the desired folders to be stored in google drive, or equivalent.
 """
 import os
-import zipfile
 import pathlib
+import zipfile
 
 from _helpers import sets_path_to_root
 

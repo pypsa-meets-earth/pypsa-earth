@@ -6,11 +6,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pathlib
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pathlib
 from _helpers import (
     configure_logging,
     create_logger,
