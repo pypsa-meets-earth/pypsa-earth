@@ -39,6 +39,8 @@ The model is described in the Applied Energy article "PyPSA-Earth. A new global 
   <img src="https://forum.openmod.org/uploads/db8804/original/1X/6af089c376b19b72ad148e4e4326c162b94db68f.png" width=35%>
 </p>
 
+<p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a>https://zenodo.org/records/10080766</a></p>
+
 ## Livetracker. Most popular global models:
 
 <p align="center">

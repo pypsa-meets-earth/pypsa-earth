@@ -34,6 +34,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Revise bus region definition by gadm. `PR #1001 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1001>`__
 
+* Documentation improvements. `PR ##1007 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1007>`__
+
 PyPSA-Earth 0.3.0
 =================
 
