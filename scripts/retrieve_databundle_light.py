@@ -145,7 +145,7 @@ def download_and_unzip_zenodo(config, root_path, hot_run=True, disable_progress=
     """
     resource = config["category"]
     file_path = str(pathlib.Path(root_path, "tempfile.zip"))
-    destination = str(pathlib.Path(config["destination"]).relative_to())
+    destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["zenodo"]
 
     if hot_run:
@@ -190,7 +190,7 @@ def download_and_unzip_gdrive(config, root_path, hot_run=True, disable_progress=
     """
     resource = config["category"]
     file_path = str(pathlib.Path(root_path, "tempfile.zip"))
-    destination = str(pathlib.Path(config["destination"]).relative_to())
+    destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["gdrive"]
 
     # retrieve file_id from path
@@ -265,7 +265,7 @@ def download_and_unzip_protectedplanet(config, root_path, attempts=3, hot_run=Tr
     """
     resource = config["category"]
     file_path = str(pathlib.Path(root_path, "tempfile_wpda.zip"))
-    destination = str(pathlib.Path(config["destination"]).relative_to())
+    destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["protectedplanet"]
 
     def get_first_day_of_month(date):
@@ -435,7 +435,7 @@ def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = str(pathlib.Path(config["destination"]).relative_to())
+    destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["direct"]
 
     file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
@@ -489,7 +489,7 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = str(pathlib.Path(config["destination"]).relative_to())
+    destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
@@ -540,7 +540,7 @@ def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=Fa
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = str(pathlib.Path(config["destination"]).relative_to())
+    destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
 
     # load data for post method
     postdata = config["urls"]["post"]
@@ -861,7 +861,7 @@ if __name__ == "__main__":
             try:
                 download_and_unzip = globals()[f"download_and_unzip_{host}"]
                 if download_and_unzip(
-                    config_bundles[b_name], rootpath, disable_progress=disable_progress
+                    config_bundles[b_name], root_path, disable_progress=disable_progress
                 ):
                     downloaded_bundle = True
             except Exception:

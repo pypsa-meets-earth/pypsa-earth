@@ -120,7 +120,6 @@ if __name__ == "__main__":
     out_path = str(pathlib.Path(store_path_resources, "out"))
     names = ["generator", "cable", "line", "substation"]
     out_formats = ["csv", "geojson"]
-    new_files = [x.name for x in pathlib.Path(out_path).iterdir()] # list downloaded osm files
 
     # earth-osm (eo) only outputs files with content
     # If the file is empty, it is not created
@@ -129,8 +128,8 @@ if __name__ == "__main__":
     # Rename and move osm files to the resources folder output
     for name in names:
         for f in out_formats:
-            new_file_name = str(pathlib.Path(store_path_resources, f"all_raw_{name}s.{f}"))
-            old_files = list(str(pathlib.Path(out_path).glob(f"*{name}.{f}")))
+            new_file_name = pathlib.Path(store_path_resources, f"all_raw_{name}s.{f}")
+            old_files = list(pathlib.Path(out_path).glob(f"*{name}.{f}"))
             # if file is missing, create empty file, otherwise rename it an move it
             if not old_files:
                 with open(new_file_name, "w") as f:
