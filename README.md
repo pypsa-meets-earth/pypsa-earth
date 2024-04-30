@@ -314,17 +314,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/Ekaterina-Vo">
-            <img src="https://avatars.githubusercontent.com/u/99509555?v=4" width="100;" alt="Ekaterina-Vo"/>
-            <br />
-            <sub><b>Ekaterina-Vo</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/virio-andreyana">
             <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
             <br />
             <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Ekaterina-Vo">
+            <img src="https://avatars.githubusercontent.com/u/99509555?v=4" width="100;" alt="Ekaterina-Vo"/>
+            <br />
+            <sub><b>Ekaterina-Vo</b></sub>
         </a>
     </td>
     <td align="center">
