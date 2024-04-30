@@ -71,9 +71,16 @@ myopic and perfect pathway expansion capabilities.
 *PyPSA meets Earth initiative* members are maintaining the *PyPSA-Earth* repository as well as many other tools.
 The `website <https://pypsa-meets-earth.github.io/>`_ provides more context of the initiative and the associated projects.
 
-.. image:: img/africa_osm_map.png
-    :width: 60%
-    :align: center
+.. list-table::
+   :width: 100%
+   :class: borderless
+
+   * - .. image:: https://forum.openmod.org/uploads/db8804/original/1X/ddf041d1b98ca8f8c310f1c6393ec426ab5594cf.png
+     - .. image:: https://forum.openmod.org/uploads/db8804/original/1X/940b2673cfc31c4a6f01b7908f546d39d67df27e.png
+     - .. image:: https://forum.openmod.org/uploads/db8804/original/1X/6af089c376b19b72ad148e4e4326c162b94db68f.png
+
+**Figure:** Example power systems build with PyPSA-Earth. See images of ~193 more countries at https://zenodo.org/records/10080766
+
 
 ==============
 Get Involved
