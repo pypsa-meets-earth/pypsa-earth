@@ -561,17 +561,15 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "GDP", name_file_nc)  # Input filepath nc
+    GDP_nc = str(pathlib.Path(pathlib.Path.cwd(), "data", "GDP", name_file_nc))  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath nc
+    GDP_tif = str(pathlib.Path(pathlib.Path.cwd(), "data", "GDP", name_file_tif))  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
-    if not os.path.exists(GDP_nc):
+    if not pathlib.Path(GDP_nc).exists():
         raise Exception(
-            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {os.path.dirname(GDP_nc)}"
+            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {str(pathlib.Path(GDP_nc).parent)}"
         )
 
     # open nc dataset
@@ -610,11 +608,9 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath tif
+    GDP_tif = str(pathlib.Path(pathlib.Path.cwd(), "data", "GDP", name_file_tif))  # Input filepath tif
 
-    if update | (not os.path.exists(GDP_tif)):
+    if update | (not pathlib.Path(GDP_tif).exists()):
         if out_logging:
             logger.warning(
                 f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
@@ -1300,7 +1296,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(pathlib.Path(__file__).parent.absolute())
         snakemake = mock_snakemake("build_shapes")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

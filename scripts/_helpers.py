@@ -476,12 +476,10 @@ def mock_snakemake(rulename, **wildcards):
     from snakemake.script import Snakemake
 
     script_dir = pathlib.Path(__file__).parent.resolve()
-    assert (
-        pathlib.Path.cwd().resolve() == script_dir
-    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
+    assert (pathlib.Path.cwd().resolve() == script_dir), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
-        if os.path.exists(p):
+        if pathlib.Path(p).exists():
             snakefile = p
             break
     workflow = sm.Workflow(
@@ -505,7 +503,7 @@ def mock_snakemake(rulename, **wildcards):
     def make_accessable(*ios):
         for io in ios:
             for i in range(len(io)):
-                io[i] = os.path.abspath(io[i])
+                io[i] = str(pathlib.Path(io[i]).absolute())
 
     make_accessable(job.input, job.output, job.log)
     snakemake = Snakemake(
@@ -649,7 +647,7 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if os.stat(file).st_size > 0:
+    if pathlib.Path(file).stat().st_size > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
@@ -667,8 +665,7 @@ def to_csv_nafix(df, path, **kwargs):
 
 
 def save_to_geojson(df, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)  # remove file if it exists
+    pathlib.Path(fn).unlink(missing_ok=True) # remove file if it exists
 
     # save file if the (Geo)DataFrame is non-empty
     if df.empty:
@@ -698,7 +695,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
         CRS of the GeoDataFrame
     """
     # if the file is non-zero, read the geodataframe and return it
-    if os.path.getsize(fn) > 0:
+    if pathlib.Path(fn).stat().st_size > 0:
         return gpd.read_file(fn)
     else:
         # else return an empty GeoDataFrame
@@ -802,7 +799,7 @@ def get_last_commit_message(path):
     """
     _logger = logging.getLogger(__name__)
     last_commit_message = None
-    backup_cwd = os.getcwd()
+    backup_cwd = str(pathlib.Path.cwd())
     try:
         os.chdir(path)
         last_commit_message = (

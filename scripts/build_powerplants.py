@@ -123,7 +123,7 @@ logger = create_logger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
-    if os.stat(filepath_ppl_osm).st_size == 0:
+    if pathlib.Path(filepath_ppl_osm).stat().st_size == 0:
         return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
 
     add_ppls = read_csv_nafix(filepath_ppl_osm, index_col=0, dtype={"bus": "str"})
@@ -326,9 +326,7 @@ if __name__ == "__main__":
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
-            os.getcwd(), filepath_osm2pm_ppl
-        )
+        config["EXTERNAL_DATABASE"]["fn"] = str(pathlib.Path(pathlib.Path.cwd(), filepath_osm2pm_ppl))
     else:
         # create an empty file
         with open(filepath_osm2pm_ppl, "w"):
