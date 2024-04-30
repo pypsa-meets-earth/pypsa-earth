@@ -139,7 +139,7 @@ if __name__ == "__main__":
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=snakemake.params.lines.get("dc_type"),
+            type=snakemake.params.lines.get("dc_types"),
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
@@ -158,7 +158,7 @@ if __name__ == "__main__":
             suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
-            type=snakemake.params.lines["types"].get(380),
+            type=snakemake.params.lines["ac_types"].get(380),
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,

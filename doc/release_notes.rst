@@ -24,13 +24,15 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **Minor Changes and bug-fixing**
 
-* Minor bug-fixing to get the generalised line types work for DC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__
+* Minor bug-fixing to get the generalised line types work for DC lines and AC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__ , `PR #1011 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1011>`__ and `PR #1013 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1013>`__
 
 * Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
 
 * Fix download_osm_data compatibility for earth-osm v2.1. `PR #954 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/954>`__ and `PR #988 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/988>`__
 
 * Improve geometry filtering in clean_osm_data. `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
+
+* Revise bus region definition by gadm. `PR #1001 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1001>`__
 
 * Documentation improvements. `PR ##1007 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1007>`__
 
