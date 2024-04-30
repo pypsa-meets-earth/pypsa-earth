@@ -39,7 +39,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
-            clusters="56",
+            clusters="10",
         )
         sets_path_to_root("pypsa-earth-sec")
         rootpath = ".."
@@ -900,27 +900,44 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
     pipelines = parse_states(pipelines, bus_regions_onshore)
 
-    plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+    if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
+        plot_gas_network(pipelines, country_borders, bus_regions_onshore)
 
-    pipelines = cluster_gas_network(pipelines, bus_regions_onshore, length_factor=1.25)
-    
-    # Conversion of GADM id to from 3 to 2-digit
-    pipelines["bus0"] = (
-        pipelines["bus0"]
-        .apply(lambda id: three_2_two_digits_country(id[:3]) + id[3:])
-    )
 
-    pipelines["bus1"] = (
-        pipelines["bus1"]
-        .apply(lambda id: three_2_two_digits_country(id[:3]) + id[3:])
-    )
-    
-    pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+        pipelines = cluster_gas_network(
+            pipelines, bus_regions_onshore, length_factor=1.25
+        )
+  
+        # Conversion of GADM id to from 3 to 2-digit
+        pipelines["bus0"] = (
+            pipelines["bus0"]
+            .apply(lambda id: three_2_two_digits_country(id[:3]) + id[3:])
+        )
 
-    plot_clustered_gas_network(pipelines, bus_regions_onshore)
+        pipelines["bus1"] = (
+            pipelines["bus1"]
+            .apply(lambda id: three_2_two_digits_country(id[:3]) + id[3:])
+        )
+  
+        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
-    average_length = pipelines["length"].mean
-    print("average_length = ", average_length)
+        plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
-    total_system_capacity = pipelines["GWKm"].sum()
-    print("total_system_capacity = ", total_system_capacity)
+        average_length = pipelines["length"].mean
+        print("average_length = ", average_length)
+
+        total_system_capacity = pipelines["GWKm"].sum()
+        print("total_system_capacity = ", total_system_capacity)
+
+    else:
+        print(
+            "Countries:"
+            + bus_regions_onshore.country.unique().tolist()
+            + "has no existing Natral Gas network between the chosen bus regions"
+        )
+
+        # Create an empty DataFrame with the specified column names
+        pipelines = {"bus0": [], "bus1": [], "capacity": [], "length": [], "GWKm": []}
+
+        pipelines = pd.DataFrame(pipelines)
+        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
