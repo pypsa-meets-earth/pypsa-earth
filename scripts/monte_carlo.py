@@ -96,7 +96,7 @@ def monte_carlo_sampling_pydoe2(
 ) -> np.ndarray:
     """
     Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
-    various options. Additionally all "corners" are simulated.
+    various options. Additionally, all "corners" are simulated.
 
     Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
     Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)

@@ -69,7 +69,7 @@ according to the following rules:
     tutorial:  # configuration stating whether the tutorial is needed
 
 
-.. seealso::
+.. see also::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`toplevel_cf`
 

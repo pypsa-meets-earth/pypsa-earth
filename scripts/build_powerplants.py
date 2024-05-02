@@ -115,9 +115,7 @@ from _helpers import (
     to_csv_nafix,
     two_digits_2_name_country,
 )
-from build_shapes import get_GADM_layer
 from scipy.spatial import cKDTree as KDTree
-from shapely import wkt
 from shapely.geometry import Point
 
 logger = create_logger(__name__)
