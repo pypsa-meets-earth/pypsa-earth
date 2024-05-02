@@ -96,11 +96,10 @@ def read_osm_config(*args):
     {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
-        base_folder = str(pathlib.Path(__file__).parent)
-        if not pathlib.Path(base_folder, "configs").exists():
-            base_folder = str(pathlib.Path(base_folder).parent)
+        if not pathlib.Path(pathlib.Path(__file__).parent, "configs").exists():
+            base_folder = pathlib.Path(__file__).parent
     else:
-        base_folder = str(pathlib.Path.cwd())
+        base_folder = pathlib.Path.cwd()
     osm_config_path = str(pathlib.Path(base_folder, "configs", REGIONS_CONFIG))
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
