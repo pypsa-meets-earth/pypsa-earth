@@ -307,17 +307,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/giacfalk">
-            <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
-            <br />
-            <sub><b>Giacomo Falchetta</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/virio-andreyana">
             <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
             <br />
             <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/giacfalk">
+            <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
+            <br />
+            <sub><b>Giacomo Falchetta</b></sub>
         </a>
     </td>
     <td align="center">
@@ -350,10 +350,10 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/asolavi">
-            <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
+        <a href="https://github.com/carlosfv92">
+            <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>Carlos Fernandez</b></sub>
         </a>
     </td>
     <td align="center">
@@ -364,10 +364,10 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/carlosfv92">
-            <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
+        <a href="https://github.com/asolavi">
+            <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
             <br />
-            <sub><b>Carlos Fernandez</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
