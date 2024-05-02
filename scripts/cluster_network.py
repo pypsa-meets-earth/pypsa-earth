@@ -691,6 +691,8 @@ if __name__ == "__main__":
         "exclude_carriers", []
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
+
+    n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
         aggregate_carriers = snakemake.params.electricity.get("conventional_carriers")
@@ -699,9 +701,7 @@ if __name__ == "__main__":
     elif snakemake.wildcards.clusters == "all":
         n_clusters = len(n.buses)
     elif snakemake.wildcards.clusters == "min":
-        m = n.copy()
-        m.determine_network_topology()
-        n_clusters = m.buses.groupby(["country", "sub_network"]).size().count()
+        n_clusters = n.buses.groupby(["country", "sub_network"]).size().count()
     else:
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
