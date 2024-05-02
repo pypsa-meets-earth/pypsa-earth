@@ -964,7 +964,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).parent.absolute())
+        os.chdir(pathlib.Path(__file__).absolute().parent)
         snakemake = mock_snakemake("simplify_network", simpl="")
     configure_logging(snakemake)
 

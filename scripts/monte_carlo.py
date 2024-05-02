@@ -17,7 +17,7 @@ Relevant Settings
         add_to_snakefile: false # When set to true, enables Monte Carlo sampling
         samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
         sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
-        seed: 42 # set seedling for reproducibilty
+        seed: 42 # set seedling for reproducibility
     uncertainties:
         loads_t.p_set:
           type: uniform
@@ -29,7 +29,7 @@ Relevant Settings
           type: beta
           args: [0.5, 2]
 
-.. seealso::
+.. see also::
     Documentation of the configuration file ``config.yaml`` at :ref:`monte_cf`
 
 Inputs
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).parent.absolute())
+        os.chdir(pathlib.Path(__file__).absolute().parent)
         snakemake = mock_snakemake(
             "monte_carlo",
             simpl="",

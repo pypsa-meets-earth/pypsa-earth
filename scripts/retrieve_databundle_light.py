@@ -810,7 +810,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(pathlib.Path(__file__).parent.absolute())
+        os.chdir(pathlib.Path(__file__).absolute().parent)
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_databundle_light")

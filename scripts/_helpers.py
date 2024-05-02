@@ -96,8 +96,9 @@ def read_osm_config(*args):
     {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
-        if not pathlib.Path(pathlib.Path(__file__).parent, "configs").exists():
-            base_folder = pathlib.Path(__file__).parent
+        base_folder = pathlib.Path(__file__).parent
+        if not pathlib.Path(base_folder, "configs").exists():
+            base_folder = pathlib.Path(base_folder).parent
     else:
         base_folder = pathlib.Path.cwd()
     osm_config_path = str(pathlib.Path(base_folder, "configs", REGIONS_CONFIG))
@@ -122,6 +123,7 @@ def sets_path_to_root(root_directory_name):
     n : int
         Number of folders the function will check upwards/root directed.
     """
+    import os
 
     repo_name = root_directory_name
     n = 8  # check max 8 levels above. Random default.
@@ -141,7 +143,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            os.chdir(pathlib.Path(".").parent.absolute())  # change to the upper folder
+            os.chdir(pathlib.Path(".").absolute().parent)  # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):

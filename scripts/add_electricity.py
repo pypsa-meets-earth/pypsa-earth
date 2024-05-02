@@ -800,7 +800,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
-        os.chdir(pathlib.Path(__file__).parent.absolute())
+        os.chdir(pathlib.Path(__file__).absolute().parent)
         snakemake = mock_snakemake("add_electricity")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
