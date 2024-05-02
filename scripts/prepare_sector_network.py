@@ -134,7 +134,7 @@ def add_oil(n, costs):
         n.add("Carrier", "oil")
 
     # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted seperately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
-    # n.carriers.loc["oil", "co2_emissions"] = 0
+    n.carriers.loc["oil", "co2_emissions"] = 0
     # print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
 
     n.madd(
@@ -415,17 +415,17 @@ def add_hydrogen(n, costs):
             h2_links["bus0"] = buses_ordered.str[0] + "_AC"
             h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
-            # Conversion of GADM id to from 3 to 2-digit
-            h2_links["bus0"] = (
-                h2_links["bus0"]
-                .str.split(".")
-                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            )
-            h2_links["bus1"] = (
-                h2_links["bus1"]
-                .str.split(".")
-                .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            )
+            # # Conversion of GADM id to from 3 to 2-digit
+            # h2_links["bus0"] = (
+            #     h2_links["bus0"]
+            #     .str.split(".")
+            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            # )
+            # h2_links["bus1"] = (
+            #     h2_links["bus1"]
+            #     .str.split(".")
+            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            # )
 
         # Create index column
         h2_links["buses_idx"] = (
@@ -811,7 +811,10 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    all_aviation = ["total international aviation", "total domestic aviation"]
+    if snakemake.config["sector"]["international_bunkers"]:
+        all_aviation = ["total international aviation", "total domestic aviation"]
+    else:
+        all_aviation = ["total domestic aviation"]
 
     aviation_demand = (
         energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -957,7 +960,7 @@ def h2_hc_conversions(n, costs):
             lifetime=costs.at["helmeth", "lifetime"],
         )
 
-    if options["SMR"]:
+    if options["SMR CC"]:
         n.madd(
             "Link",
             spatial.nodes,
@@ -975,6 +978,7 @@ def h2_hc_conversions(n, costs):
             lifetime=costs.at["SMR CC", "lifetime"],
         )
 
+    if options["SMR"]:
         n.madd(
             "Link",
             nodes + " SMR",
@@ -998,7 +1002,10 @@ def add_shipping(n, costs):
 
     gadm_level = options["gadm_level"]
 
-    all_navigation = ["total international navigation", "total domestic navigation"]
+    if snakemake.config["sector"]["international_bunkers"]:
+        all_navigation = ["total international navigation", "total domestic navigation"]
+    else:
+        all_navigation = ["total domestic navigation"]
 
     navigation_demand = (
         energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -2358,7 +2365,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="10",
+            clusters="13",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",

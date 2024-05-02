@@ -72,6 +72,7 @@ custom_data:
   elec_demand: false
   heat_demand: false
   industry_demand: false
+  industry_database: false
   transport_demand: false
   water_costs: false
   h2_underground: false
@@ -171,6 +172,8 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
   oil:
     spatial_oil: true
@@ -320,6 +323,7 @@ sector:
   helmeth: true
   dac: true
   SMR: true
+  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.

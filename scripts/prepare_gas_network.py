@@ -827,7 +827,9 @@ def plot_clustered_gas_network(pipelines, bus_regions_onshore):
     # Create a new GeoDataFrame with centroids
     centroids = bus_regions_onshore.copy()
     centroids["geometry"] = centroids["geometry"].centroid
-
+    centroids["gadm_id"] = centroids["gadm_id"].apply(
+        lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+    )
     gdf1 = pd.merge(
         pipelines, centroids, left_on=["bus0"], right_on=["gadm_id"], how="left"
     )
@@ -905,6 +907,15 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
         pipelines = cluster_gas_network(
             pipelines, bus_regions_onshore, length_factor=1.25
+        )
+
+        # Conversion of GADM id to from 3 to 2-digit
+        pipelines["bus0"] = pipelines["bus0"].apply(
+            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        )
+
+        pipelines["bus1"] = pipelines["bus1"].apply(
+            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
         )
 
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)

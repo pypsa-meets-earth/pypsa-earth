@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_h2_cons_yearly
+run: test_run
 
 foresight: overnight
 
@@ -55,7 +55,7 @@ fossil_reserves:
 
 
 export:
-  h2export: [120] # Yearly export demand in TWh
+  h2export: [10] # Yearly export demand in TWh
   store: true # [True, False] # specifies wether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   export_profile: "ship" # use "ship" or "constant"
@@ -70,6 +70,7 @@ custom_data:
   elec_demand: false
   heat_demand: false
   industry_demand: false
+  industry_database: false
   transport_demand: false
   water_costs: false
   h2_underground: false
@@ -170,6 +171,8 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
   oil:
     spatial_oil: true
@@ -313,13 +316,14 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 2
+  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
   helmeth: true
   dac: true
   SMR: true
+  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
@@ -559,3 +563,4 @@ plotting:
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
     biomass EOP: "green"
+    biomass: "green"
