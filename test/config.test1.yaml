@@ -181,6 +181,8 @@ sector:
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
 
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
+
   oil:
     spatial_oil: true
 
@@ -350,6 +352,9 @@ snapshots:
 
 # atlite:
 #   cutout: ./cutouts/africa-2013-era5.nc
+
+build_osm_network:  # TODO: To Remove this once we merge pypsa-earth and pypsa-earth-sec
+  force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 solving:
   #tmpdir: "path/to/tmp"
