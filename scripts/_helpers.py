@@ -143,7 +143,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            os.chdir(get_dirname_abs_path(".")) # change to the upper folder
+            os.chdir(get_dirname_abs_path("."))  # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -819,8 +819,10 @@ def get_last_commit_message(path):
     os.chdir(backup_cwd)
     return last_commit_message
 
+
 def get_dirname_abs_path(path):
     """
-    It returns the directory name of a normalized absolutized version of the pathname path.
+    It returns the directory name of a normalized absolutized version of the
+    pathname path.
     """
     return str(pathlib.Path(path).absolute().parent)

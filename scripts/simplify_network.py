@@ -96,8 +96,8 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
     get_aggregation_strategies,
+    get_dirname_abs_path,
     update_p_nom_max,
 )
 from add_electricity import load_costs
