@@ -85,7 +85,6 @@ The rule :mod:`simplify_network` does up to four things:
 4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), the network is clustered to this number of clusters with the routines from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. This step is usually skipped!
 """
 import os
-import pathlib
 import sys
 from functools import reduce
 
@@ -97,6 +96,7 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
+    get_dirname_abs_path,
     get_aggregation_strategies,
     update_p_nom_max,
 )
@@ -964,7 +964,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("simplify_network", simpl="")
     configure_logging(snakemake)
 

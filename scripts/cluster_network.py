@@ -135,6 +135,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_aggregation_strategies,
+    get_dirname_abs_path,
     sets_path_to_root,
     update_p_nom_max,
 )
@@ -658,7 +659,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )

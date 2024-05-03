@@ -76,7 +76,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import seaborn as sns
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, get_dirname_abs_path
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
 from sklearn.preprocessing import MinMaxScaler
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake(
             "monte_carlo",
             simpl="",

@@ -66,7 +66,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, get_dirname_abs_path
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",

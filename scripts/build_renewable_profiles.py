@@ -192,7 +192,6 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 """
 import functools
 import os
-import pathlib
 import time
 from math import isnan
 
@@ -203,7 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, create_logger, sets_path_to_root
+from _helpers import configure_logging, create_logger, get_dirname_abs_path, sets_path_to_root
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
@@ -489,7 +488,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

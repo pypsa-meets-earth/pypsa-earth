@@ -112,6 +112,7 @@ import yaml
 from _helpers import (
     configure_logging,
     create_logger,
+    get_dirname_abs_path,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -299,7 +300,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("build_powerplants")
 
     configure_logging(snakemake)

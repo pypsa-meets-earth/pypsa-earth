@@ -56,7 +56,7 @@ import pathlib
 
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, get_dirname_abs_path
 from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -537,7 +537,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",

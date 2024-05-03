@@ -16,6 +16,7 @@ import collections.abc
 import copy
 import os
 import pathlib
+from _helpers import get_dirname_abs_path
 
 from ruamel.yaml import YAML
 
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("build_test_configs")
 
     # Input paths

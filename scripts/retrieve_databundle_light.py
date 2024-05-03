@@ -93,6 +93,7 @@ from _helpers import (
     configure_logging,
     create_country_list,
     create_logger,
+    get_dirname_abs_path,
     progress_retrieve,
     sets_path_to_root,
 )
@@ -810,7 +811,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_databundle_light")

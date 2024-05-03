@@ -53,12 +53,11 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 - ``Stores`` of carrier 'H2' and/or 'battery' in combination with ``Links``. If this option is chosen, the script adds extra buses with corresponding carrier where energy ``Stores`` are attached and which are connected to the corresponding power buses via two links, one each for charging and discharging. This leads to three investment variables for the energy capacity, charging and discharging capacity of the storage unit.
 """
 import os
-import pathlib
 
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, get_dirname_abs_path
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -231,7 +230,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)
     configure_logging(snakemake)
 

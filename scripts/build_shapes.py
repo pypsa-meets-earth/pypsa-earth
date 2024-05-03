@@ -22,6 +22,7 @@ import xarray as xr
 from _helpers import (
     configure_logging,
     create_logger,
+    get_dirname_abs_path,
     sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -1310,7 +1311,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("build_shapes")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

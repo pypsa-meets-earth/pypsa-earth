@@ -50,7 +50,7 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_osm_config
+from _helpers import configure_logging, create_logger, get_dirname_abs_path, read_osm_config
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
-        os.chdir(pathlib.Path(__file__).absolute().parent)
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("build_demand_profiles")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

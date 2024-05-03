@@ -30,7 +30,7 @@ import os
 import pathlib
 import shutil
 
-from _helpers import configure_logging, create_logger, read_osm_config
+from _helpers import configure_logging, create_logger, get_dirname_abs_path, read_osm_config
 from earth_osm import eo
 
 logger = create_logger(__name__)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
-        os.chdir(pathlib.Path(__file__).parent.absolute())
+        os.chdir(get_dirname_abs_path(__file__))
         snakemake = mock_snakemake("download_osm_data")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
