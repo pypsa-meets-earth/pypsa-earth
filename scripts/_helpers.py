@@ -101,7 +101,7 @@ def read_osm_config(*args):
             base_folder = pathlib.Path(base_folder).parent
     else:
         base_folder = pathlib.Path.cwd()
-    osm_config_path = str(pathlib.Path(base_folder, "configs", REGIONS_CONFIG))
+    osm_config_path = str(get_path(base_folder, "configs", REGIONS_CONFIG))
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
@@ -170,12 +170,8 @@ def configure_logging(snakemake, skip_handlers=False):
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        fallback_path = pathlib.Path(__file__).parent.joinpath(
-            "..", "logs", f"{snakemake.rule}.log"
-        )
-        logfile = snakemake.log.get(
-            "python", snakemake.log[0] if snakemake.log else fallback_path
-        )
+        fallback_path = get_path(pathlib.Path(__file__).parent, "..", "logs", f"{snakemake.rule}.log")
+        logfile = snakemake.log.get("python", snakemake.log[0] if snakemake.log else fallback_path)
         kwargs.update(
             {
                 "handlers": [
@@ -822,7 +818,13 @@ def get_last_commit_message(path):
 
 def get_dirname_abs_path(path):
     """
-    It returns the directory name of a normalized absolutized version of the
+    It returns the directory name of a normalized and absolutized version of the
     pathname path.
     """
     return str(pathlib.Path(path).absolute().parent)
+
+def get_path(*args):
+    """
+    It returns a new PosixPath object.
+    """
+    return pathlib.Path(*args)

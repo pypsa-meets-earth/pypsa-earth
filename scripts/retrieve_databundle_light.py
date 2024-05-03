@@ -69,7 +69,7 @@ according to the following rules:
     tutorial:  # configuration stating whether the tutorial is needed
 
 
-.. see also::
+.. seealso::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`toplevel_cf`
 
@@ -94,6 +94,7 @@ from _helpers import (
     create_country_list,
     create_logger,
     get_dirname_abs_path,
+    get_path,
     progress_retrieve,
     sets_path_to_root,
 )
@@ -145,7 +146,7 @@ def download_and_unzip_zenodo(config, root_path, hot_run=True, disable_progress=
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = str(pathlib.Path(root_path, "tempfile.zip"))
+    file_path = str(get_path(root_path, "tempfile.zip"))
     destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["zenodo"]
 
@@ -190,7 +191,7 @@ def download_and_unzip_gdrive(config, root_path, hot_run=True, disable_progress=
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = str(pathlib.Path(root_path, "tempfile.zip"))
+    file_path = str(get_path(root_path, "tempfile.zip"))
     destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["gdrive"]
 
@@ -267,7 +268,7 @@ def download_and_unzip_protectedplanet(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = str(pathlib.Path(root_path, "tempfile_wpda.zip"))
+    file_path = str(get_path(root_path, "tempfile_wpda.zip"))
     destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["protectedplanet"]
 
@@ -320,11 +321,11 @@ def download_and_unzip_protectedplanet(
                 for fzip in zip_files:
                     # final path of the file
                     try:
-                        inner_zipname = str(pathlib.Path(destination, fzip))
+                        inner_zipname = str(get_path(destination, fzip))
 
                         zip_obj.extract(fzip, path=destination)
 
-                        dest_nested = str(pathlib.Path(destination, fzip.split(".")[0]))
+                        dest_nested = str(get_path(destination, fzip.split(".")[0]))
 
                         with ZipFile(inner_zipname, "r") as nested_zip:
                             nested_zip.extractall(path=dest_nested)
@@ -441,7 +442,7 @@ def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=
     destination = str(pathlib.Path(str(config["destination"])).relative_to("."))
     url = config["urls"]["direct"]
 
-    file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
+    file_path = str(get_path(destination, pathlib.Path(url).name))
 
     unzip = config.get("unzip", False)
 
@@ -503,7 +504,7 @@ def download_and_unzip_hydrobasins(
 
     for rg in suffix_list:
         url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
-        file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
+        file_path = str(get_path(destination, pathlib.Path(url).name))
 
         all_downloaded &= download_and_unpack(
             url=url,
@@ -550,7 +551,7 @@ def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=Fa
     # remove url feature
     url = postdata.pop("url")
 
-    file_path = str(pathlib.Path(destination, pathlib.Path(url).name))
+    file_path = str(get_path(destination, pathlib.Path(url).name))
 
     if hot_run:
         pathlib.Path(file_path).unlink(missing_ok=True)
@@ -802,7 +803,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     gpdf_list = [None] * len(files_to_merge)
     logger.info("Merging hydrobasins files into: " + output_fl)
     for i, f_name in tqdm(enumerate(files_to_merge)):
-        gpdf_list[i] = gpd.read_file(str(pathlib.Path(basins_path, f_name)))
+        gpdf_list[i] = gpd.read_file(str(get_path(basins_path, f_name)))
     fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
         subset="HYBAS_ID", ignore_index=True
     )

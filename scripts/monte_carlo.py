@@ -29,7 +29,7 @@ Relevant Settings
           type: beta
           args: [0.5, 2]
 
-.. see also::
+.. seealso::
     Documentation of the configuration file ``config.yaml`` at :ref:`monte_cf`
 
 Inputs
@@ -69,7 +69,6 @@ wildcard {unc}, which is described in the config.yaml and created in the Snakefi
 """
 import logging
 import os
-import pathlib
 
 import chaospy
 import numpy as np

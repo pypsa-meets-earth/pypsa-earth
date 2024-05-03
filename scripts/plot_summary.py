@@ -17,11 +17,10 @@ Description
 -----------
 """
 import os
-import pathlib
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import configure_logging, create_logger, get_dirname_abs_path
+from _helpers import configure_logging, create_logger, get_dirname_abs_path, get_path
 
 logger = create_logger(__name__)
 
@@ -242,7 +241,7 @@ if __name__ == "__main__":
         logger.error(f"plotting function for {summary} has not been defined")
 
     func(
-        str(pathlib.Path(snakemake.input[0], f"{summary}.csv")),
+        str(get_path(snakemake.input[0], f"{summary}.csv")),
         snakemake,
         snakemake.output[0],
     )

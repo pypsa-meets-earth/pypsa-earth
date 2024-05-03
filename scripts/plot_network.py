@@ -18,7 +18,6 @@ Description
 """
 
 import os
-import pathlib
 
 import cartopy.crs as ccrs
 import geopandas as gpd

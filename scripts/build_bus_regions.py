@@ -43,7 +43,6 @@ Description
 -----------
 """
 import os
-import pathlib
 
 import geopandas as gpd
 import pandas as pd

@@ -56,7 +56,7 @@ import pathlib
 
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, get_dirname_abs_path
+from _helpers import configure_logging, get_dirname_abs_path, get_path
 from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -552,11 +552,9 @@ if __name__ == "__main__":
 
     scenario_name = snakemake.config.get("run", {}).get("name", "")
     if scenario_name:
-        network_dir = str(
-            pathlib.Path(network_dir, "results", scenario_name, "networks")
-        )
+        network_dir = str(get_path(network_dir, "results", scenario_name, "networks"))
     else:
-        network_dir = str(pathlib.Path(network_dir, "results", "networks"))
+        network_dir = str(get_path(network_dir, "results", "networks"))
 
     configure_logging(snakemake)
 
@@ -572,9 +570,7 @@ if __name__ == "__main__":
         ll = [snakemake.wildcards.ll]
 
     networks_dict = {
-        (simpl, clusters, l, opts): str(
-            pathlib.Path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc")
-        )
+        (simpl, clusters, l, opts): str(get_path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"))
         for simpl in expand_from_wildcard("simpl")
         for clusters in expand_from_wildcard("clusters")
         for l in ll

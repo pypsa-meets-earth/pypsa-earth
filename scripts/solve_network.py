@@ -80,7 +80,6 @@ Details (and errors made through this heuristic) are discussed in the paper
 import os
 import pathlib
 import re
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -557,7 +556,7 @@ if __name__ == "__main__":
 
     tmpdir = snakemake.params.solving.get("tmpdir")
     if tmpdir is not None:
-        Path(tmpdir).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
     solve_opts = snakemake.params.solving["options"]
 

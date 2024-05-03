@@ -51,7 +51,7 @@ import atlite
 import geopandas as gpd
 import numpy as np
 import rasterio as rio
-from _helpers import configure_logging, create_logger, get_dirname_abs_path
+from _helpers import configure_logging, create_logger, get_dirname_abs_path, get_path
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
@@ -75,7 +75,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
                 for subfile in files:
                     # add the subfile if it is a shape file
                     if subfile.endswith(accepted_formats):
-                        list_fileshapes.append(str(pathlib.Path(path, subfile)))
+                        list_fileshapes.append(str(get_path(path, subfile)))
 
         elif lf.endswith(accepted_formats):
             list_fileshapes.append(lf)

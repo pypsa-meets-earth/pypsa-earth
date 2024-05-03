@@ -113,6 +113,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_dirname_abs_path,
+    get_path,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -327,9 +328,7 @@ if __name__ == "__main__":
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = str(
-            pathlib.Path(pathlib.Path.cwd(), filepath_osm2pm_ppl)
-        )
+        config["EXTERNAL_DATABASE"]["fn"] = str(get_path(pathlib.Path.cwd(), filepath_osm2pm_ppl))
     else:
         # create an empty file
         with open(filepath_osm2pm_ppl, "w"):
