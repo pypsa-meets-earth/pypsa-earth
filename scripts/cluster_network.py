@@ -120,18 +120,15 @@ Exemplary unsolved network clustered to 37 nodes:
     :width: 40  %
     :align: center
 """
-import logging
+
 import os
 from functools import reduce
 
 import geopandas as gpd
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyomo.environ as po
 import pypsa
-import seaborn as sns
-import shapely
 from _helpers import (
     REGION_COLS,
     configure_logging,
@@ -141,7 +138,7 @@ from _helpers import (
     update_p_nom_max,
 )
 from add_electricity import load_costs
-from build_shapes import add_gdp_data, add_population_data, get_GADM_layer
+from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
     busmap_by_greedy_modularity,
     busmap_by_hac,

@@ -26,7 +26,6 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-import logging
 import os
 import shutil
 from pathlib import Path

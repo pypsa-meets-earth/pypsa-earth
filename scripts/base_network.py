@@ -55,7 +55,6 @@ Outputs
 Description
 -----------
 """
-import logging
 import os
 
 import geopandas as gpd
@@ -66,10 +65,7 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-import yaml
 from _helpers import configure_logging, create_logger, read_csv_nafix
-from scipy.sparse import csgraph
-from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 
 logger = create_logger(__name__)
@@ -283,7 +279,7 @@ def _get_linetypes_config(line_types, voltages):
     -------
         Dictionary of linetypes for selected voltages.
     """
-    # get voltages value that are not availabile in the line types
+    # get voltages value that are not available in the line types
     vnoms_diff = set(voltages).symmetric_difference(set(line_types.keys()))
     if vnoms_diff:
         logger.warning(
