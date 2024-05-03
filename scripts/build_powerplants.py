@@ -99,7 +99,7 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
 """
-import logging
+
 import os
 
 import geopandas as gpd
@@ -363,11 +363,11 @@ if __name__ == "__main__":
         ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
     if cntries_without_ppl:
-        logging.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+        logger.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
-        logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
+        logger.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
     if snakemake.params.alternative_clustering:
         gadm_layer_id = snakemake.params.gadm_layer_id
