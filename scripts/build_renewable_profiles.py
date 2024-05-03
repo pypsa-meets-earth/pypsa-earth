@@ -202,12 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import (
-    configure_logging,
-    create_logger,
-    get_dirname_abs_path,
-    sets_path_to_root,
-)
+from _helpers import configure_logging, create_logger, get_dirname_abs_path, sets_path_to_root
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine

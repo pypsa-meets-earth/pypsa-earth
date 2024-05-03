@@ -40,8 +40,9 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Documentation improvements. `PR ##1007 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1007>`__
 
-* Replace the os package with the pathlib package. `PR #1017 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1017.>`__
+* Remove unnecessary imports. `PR ##1020 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1020>`__
 
+* Replace the os package with the pathlib package. `PR #1017 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1017.>`__
 
 PyPSA-Earth 0.3.0
 =================
