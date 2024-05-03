@@ -170,8 +170,12 @@ def configure_logging(snakemake, skip_handlers=False):
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        fallback_path = get_path(pathlib.Path(__file__).parent, "..", "logs", f"{snakemake.rule}.log")
-        logfile = snakemake.log.get("python", snakemake.log[0] if snakemake.log else fallback_path)
+        fallback_path = get_path(
+            pathlib.Path(__file__).parent, "..", "logs", f"{snakemake.rule}.log"
+        )
+        logfile = snakemake.log.get(
+            "python", snakemake.log[0] if snakemake.log else fallback_path
+        )
         kwargs.update(
             {
                 "handlers": [
@@ -818,10 +822,11 @@ def get_last_commit_message(path):
 
 def get_dirname_abs_path(path):
     """
-    It returns the directory name of a normalized and absolutized version of the
-    pathname path.
+    It returns the directory name of a normalized and absolutized version of
+    the pathname path.
     """
     return str(pathlib.Path(path).absolute().parent)
+
 
 def get_path(*args):
     """

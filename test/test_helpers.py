@@ -27,6 +27,21 @@ def test_get_path():
     """
     path_cwd = str(pathlib.Path.cwd().parent)
     path_new = str(get_path(pathlib.Path(__file__).parent, "..", "logs", "rule.log"))
-    path = str(get_path(path_cwd, "sub_path_1", "sub_path_2", "sub_path_3", "sub_path_4", "sub_path_5", "file.nc"))
-    assert path == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
-    assert path_new == str(pathlib.Path(__file__).parent.joinpath("..", "logs", "rule.log"))
+    path = str(
+        get_path(
+            path_cwd,
+            "sub_path_1",
+            "sub_path_2",
+            "sub_path_3",
+            "sub_path_4",
+            "sub_path_5",
+            "file.nc",
+        )
+    )
+    assert (
+        path
+        == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
+    )
+    assert path_new == str(
+        pathlib.Path(__file__).parent.joinpath("..", "logs", "rule.log")
+    )

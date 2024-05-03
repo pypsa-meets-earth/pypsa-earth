@@ -107,7 +107,9 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = str(get_path(pathlib.Path().cwd(), "resources", RDIR, "osm", "raw"))
+    store_path_resources = str(
+        get_path(pathlib.Path().cwd(), "resources", RDIR, "osm", "raw")
+    )
     store_path_data = str(get_path(pathlib.Path().cwd(), "data", "osm"))
     country_list = country_list_to_geofk(snakemake.params.countries)
 

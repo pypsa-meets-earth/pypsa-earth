@@ -66,7 +66,12 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-from _helpers import configure_logging, create_logger, get_dirname_abs_path, read_csv_nafix
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_dirname_abs_path,
+    read_csv_nafix,
+)
 from shapely.ops import unary_union
 
 logger = create_logger(__name__)
