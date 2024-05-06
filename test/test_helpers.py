@@ -5,11 +5,9 @@
 
 # -*- coding: utf-8 -*-
 
-import os
 import pathlib
-import pytest
 from test.conftest import _content_temp_file, get_temp_file
-from scripts._helpers import build_directory, get_abs_path, get_basename_abs_path, get_dirname_abs_path, get_dirname_path, get_path, get_path_size
+from scripts._helpers import get_abs_path, get_basename_abs_path, get_dirname_abs_path, get_dirname_path, get_path, get_path_size
 
 path_cwd = str(pathlib.Path.cwd())
 
