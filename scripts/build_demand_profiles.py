@@ -114,7 +114,13 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     load_paths = []
     for continent in region_load:
-        load_path = get_path(ssp_parentfolder, str(ssp), str(prediction_year), "era5_" + str(weather_year), str(continent) + ".nc")
+        load_path = get_path(
+            ssp_parentfolder,
+            str(ssp),
+            str(prediction_year),
+            "era5_" + str(weather_year),
+            str(continent) + ".nc",
+        )
         load_paths.append(load_path)
 
     return load_paths

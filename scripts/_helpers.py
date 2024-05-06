@@ -170,8 +170,12 @@ def configure_logging(snakemake, skip_handlers=False):
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        fallback_path = get_path(get_dirname_path(__file__), "..", "logs", f"{snakemake.rule}.log")
-        logfile = snakemake.log.get("python", snakemake.log[0] if snakemake.log else fallback_path)
+        fallback_path = get_path(
+            get_dirname_path(__file__), "..", "logs", f"{snakemake.rule}.log"
+        )
+        logfile = snakemake.log.get(
+            "python", snakemake.log[0] if snakemake.log else fallback_path
+        )
         kwargs.update(
             {
                 "handlers": [
@@ -818,7 +822,8 @@ def get_last_commit_message(path):
 
 def get_dirname_abs_path(path):
     """
-    It returns the directory name of a normalized and absolutized version of the path.
+    It returns the directory name of a normalized and absolutized version of
+    the path.
     """
     return str(pathlib.Path(path).absolute().parent)
 
@@ -839,14 +844,15 @@ def get_abs_path(path):
 
 def get_basename_abs_path(path):
     """
-    It returns the base name of a normalized and absolutized version of the path
+    It returns the base name of a normalized and absolutized version of the
+    path.
     """
     return pathlib.Path(path).absolute().name
 
 
 def get_basename_path(path):
     """
-    It returns the base name of the path
+    It returns the base name of the path.
     """
     return pathlib.Path(path).name
 
@@ -874,7 +880,6 @@ def get_path_size(path):
 
 def build_directory(path):
     """
-    It creates recursively the directory and its leaf directories
+    It creates recursively the directory and its leaf directories.
     """
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
