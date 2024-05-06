@@ -38,7 +38,7 @@ def _parse_inputconfig(input_config, yaml):
         return input_config
 
     if isinstance(input_config, str):
-        input_config = get_path(pathlib.Path.cwd(), input_config)
+        input_config = get_path(str(pathlib.Path.cwd()), input_config)
 
     with open(input_config) as fp:
         return yaml.load(fp)
@@ -77,7 +77,7 @@ def create_test_config(default_config, diff_config, output_path):
 
     # Output path
     if isinstance(output_path, str):
-        output_path = get_path(pathlib.Path.cwd(), output_path)
+        output_path = get_path(str(pathlib.Path.cwd()), output_path)
 
     # Save file
     yaml.dump(merged_config, output_path)

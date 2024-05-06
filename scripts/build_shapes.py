@@ -20,9 +20,11 @@ import rasterio
 import requests
 import xarray as xr
 from _helpers import (
+    build_directory,
     configure_logging,
     create_logger,
     get_dirname_abs_path,
+    get_dirname_path,
     get_path,
     sets_path_to_root,
     three_2_two_digits_country,
@@ -91,7 +93,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
-    GADM_inputfile_gpkg = str(get_path(pathlib.Path.cwd(), "data", "gadm", GADM_filename, GADM_filename + ".gpkg"))  # Input filepath gpkg
+    GADM_inputfile_gpkg = get_path(str(pathlib.Path.cwd()), "data", "gadm", GADM_filename, GADM_filename + ".gpkg")  # Input filepath gpkg
 
     if not pathlib.Path(GADM_inputfile_gpkg).exists() or update is True:
         if out_logging:
@@ -99,7 +101,7 @@ def download_GADM(country_code, update=False, out_logging=False):
                 f"Stage 5 of 5: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
-        pathlib.Path(GADM_inputfile_gpkg).parent.mkdir(parents=True, exist_ok=True)
+        build_directory(get_dirname_path(GADM_inputfile_gpkg))
 
         try:
             r = requests.get(GADM_url, stream=True, timeout=300)
@@ -317,7 +319,7 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     if not pathlib.Path(EEZ_gpkg).exists():
         raise Exception(
-            f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {str(pathlib.Path(EEZ_gpkg).parent)}"
+            f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {get_dirname_path(EEZ_gpkg)}"
         )
 
     geodf_EEZ = gpd.read_file(EEZ_gpkg, engine="pyogrio").to_crs(geo_crs)
@@ -475,9 +477,7 @@ def download_WorldPop_standard(
             f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
         ]
 
-    WorldPop_inputfile = str(
-        pathlib.Path(str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename)
-    )  # Input filepath tif
+    WorldPop_inputfile = get_path(str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename)  # Input filepath tif
 
     if not pathlib.Path(WorldPop_inputfile).exists() or update is True:
         if out_logging:
@@ -485,7 +485,7 @@ def download_WorldPop_standard(
                 f"Stage 3 of 5: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
-        pathlib.Path(WorldPop_inputfile).parent.mkdir(exist_ok=True)
+        build_directory(get_dirname_path(WorldPop_inputfile))
 
         loaded = False
         for WorldPop_url in WorldPop_urls:
@@ -529,10 +529,8 @@ def download_WorldPop_API(
 
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
-    WorldPop_inputfile = str(
-        get_path(str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename)
-    )  # Input filepath tif
-    pathlib.Path(WorldPop_inputfile).parent.mkdir(exist_ok=True)
+    WorldPop_inputfile = get_path(str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename) # Input filepath tif
+    build_directory(get_dirname_path(WorldPop_inputfile))
     year_api = int(str(year)[2:])
     loaded = False
     WorldPop_api_urls = [
@@ -567,15 +565,15 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = str(get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_nc))  # Input filepath nc
+    GDP_nc = get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_nc)  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = str(get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_tif))  # Input filepath nc
+    GDP_tif = get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_tif)  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not pathlib.Path(GDP_nc).exists():
         raise Exception(
-            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {str(pathlib.Path(GDP_nc).parent)}"
+            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {get_dirname_path(GDP_nc)}"
         )
 
     # open nc dataset
@@ -614,7 +612,7 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = str(get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_tif))  # Input filepath tif
+    GDP_tif = get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_tif)  # Input filepath tif
 
     if update | (not pathlib.Path(GDP_tif).exists()):
         if out_logging:

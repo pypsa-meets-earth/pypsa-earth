@@ -75,7 +75,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
                 for subfile in files:
                     # add the subfile if it is a shape file
                     if subfile.endswith(accepted_formats):
-                        list_fileshapes.append(str(get_path(path, subfile)))
+                        list_fileshapes.append(get_path(path, subfile))
 
         elif lf.endswith(accepted_formats):
             list_fileshapes.append(lf)

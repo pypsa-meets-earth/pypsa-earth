@@ -56,7 +56,7 @@ import pathlib
 
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, get_dirname_abs_path, get_path
+from _helpers import build_directory, configure_logging, get_dirname_abs_path, get_path
 from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -528,9 +528,9 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
 
 def to_csv(dfs, dir):
-    pathlib.Path(dir).mkdir(exist_ok=True)
+    build_directory(dir)
     for key, df in dfs.items():
-        df.to_csv(str(pathlib.Path(dir, f"{key}.csv")))
+        df.to_csv(get_path(dir, f"{key}.csv"))
 
 
 if __name__ == "__main__":
@@ -552,9 +552,9 @@ if __name__ == "__main__":
 
     scenario_name = snakemake.config.get("run", {}).get("name", "")
     if scenario_name:
-        network_dir = str(get_path(network_dir, "results", scenario_name, "networks"))
+        network_dir = get_path(network_dir, "results", scenario_name, "networks")
     else:
-        network_dir = str(get_path(network_dir, "results", "networks"))
+        network_dir = get_path(network_dir, "results", "networks")
 
     configure_logging(snakemake)
 
@@ -570,7 +570,7 @@ if __name__ == "__main__":
         ll = [snakemake.wildcards.ll]
 
     networks_dict = {
-        (simpl, clusters, l, opts): str(get_path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"))
+        (simpl, clusters, l, opts): get_path(network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc")
         for simpl in expand_from_wildcard("simpl")
         for clusters in expand_from_wildcard("clusters")
         for l in ll

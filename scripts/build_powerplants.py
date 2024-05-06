@@ -114,6 +114,7 @@ from _helpers import (
     create_logger,
     get_dirname_abs_path,
     get_path,
+    get_path_size,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -125,7 +126,7 @@ logger = create_logger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
-    if pathlib.Path(filepath_ppl_osm).stat().st_size == 0:
+    if get_path_size(filepath_ppl_osm) == 0:
         return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
 
     add_ppls = read_csv_nafix(filepath_ppl_osm, index_col=0, dtype={"bus": "str"})
@@ -328,7 +329,7 @@ if __name__ == "__main__":
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = str(get_path(pathlib.Path.cwd(), filepath_osm2pm_ppl))
+        config["EXTERNAL_DATABASE"]["fn"] = get_path(str(pathlib.Path.cwd()), filepath_osm2pm_ppl)
     else:
         # create an empty file
         with open(filepath_osm2pm_ppl, "w"):

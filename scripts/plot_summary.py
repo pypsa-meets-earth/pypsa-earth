@@ -241,7 +241,7 @@ if __name__ == "__main__":
         logger.error(f"plotting function for {summary} has not been defined")
 
     func(
-        str(get_path(snakemake.input[0], f"{summary}.csv")),
+        get_path(snakemake.input[0], f"{summary}.csv"),
         snakemake,
         snakemake.output[0],
     )

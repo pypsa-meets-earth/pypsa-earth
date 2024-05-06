@@ -12,9 +12,11 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import (
+    build_directory,
     configure_logging,
     create_logger,
     get_dirname_abs_path,
+    get_dirname_path,
     read_geojson,
     read_osm_config,
     sets_path_to_root,
@@ -878,14 +880,14 @@ def built_network(
     logger.info("Save outputs")
 
     # create clean directory if not already exist
-    pathlib.Path(outputs["lines"]).parent.mkdir(exist_ok=True)
+    build_directory(get_dirname_path(outputs["lines"]))
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
     to_csv_nafix(converters, outputs["converters"])  # Generate CSV
     to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
 
     # create clean directory if not already exist
-    pathlib.Path(outputs["substations"]).parent.mkdir(exist_ok=True)
+    build_directory(get_dirname_path(outputs["substations"]))
     # Generate CSV
     to_csv_nafix(buses, outputs["substations"])
 

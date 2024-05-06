@@ -17,6 +17,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_dirname_abs_path,
+    get_path_size,
     save_to_geojson,
     to_csv_nafix,
 )
@@ -903,7 +904,7 @@ def clean_data(
 ):
     logger.info("Process OSM lines")
 
-    if pathlib.Path(input_files["lines"]).stat().st_size > 0:
+    if get_path_size(input_files["lines"]) > 0:
         # Load raw data lines
         df_lines = load_network_data("lines", data_options)
 
@@ -918,7 +919,7 @@ def clean_data(
     df_all_lines = df_lines
 
     # load cables only if data are stored
-    if pathlib.Path(input_files["cables"]).stat().st_size > 0:
+    if get_path_size(input_files["cables"]) > 0:
         logger.info("Add OSM cables to data")
         # Load raw data lines
         df_cables = load_network_data("cables", data_options)
@@ -968,7 +969,7 @@ def clean_data(
 
     logger.info("Process OSM substations")
 
-    if pathlib.Path(input_files["substations"]).stat().st_size > 0:
+    if get_path_size(input_files["substations"]) > 0:
         df_all_substations = load_network_data("substations", data_options)
 
         # prepare dataset for substations
@@ -1028,7 +1029,7 @@ def clean_data(
 
     logger.info("Process OSM generators")
 
-    if pathlib.Path(input_files["generators"]).stat().st_size > 0:
+    if get_path_size(input_files["generators"]) > 0:
         df_all_generators = gpd.read_file(input_files["generators"])
 
         # prepare the generator dataset

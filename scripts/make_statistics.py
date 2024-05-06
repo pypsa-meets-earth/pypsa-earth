@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import create_logger, get_dirname_abs_path, mock_snakemake, sets_path_to_root, to_csv_nafix
+from _helpers import create_logger, get_dirname_abs_path, get_path_size, mock_snakemake, sets_path_to_root, to_csv_nafix
 from build_test_configs import create_test_config
 from shapely.validation import make_valid
 
@@ -123,7 +123,7 @@ def collect_basic_osm_stats(path, rulename, header):
     """
     Collect basic statistics on OSM data: number of items
     """
-    if pathlib.Path(path).is_file() and pathlib.Path(path).stat().st_size > 0:
+    if pathlib.Path(path).is_file() and get_path_size(path) > 0:
         df = gpd.read_file(path)
         n_elem = len(df)
 
@@ -142,7 +142,7 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
     - length of the stored shapes
     - length of objects with tag_frequency == 0 (DC elements)
     """
-    if pathlib.Path(path).is_file() and pathlib.Path(path).stat().st_size > 0:
+    if pathlib.Path(path).is_file() and get_path_size(path) > 0:
         df = gpd.read_file(path)
         n_elem = len(df)
         obj_length = (

@@ -96,12 +96,12 @@ def read_osm_config(*args):
     {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
-        base_folder = pathlib.Path(__file__).parent
+        base_folder = get_dirname_path(__file__)
         if not pathlib.Path(base_folder, "configs").exists():
-            base_folder = pathlib.Path(base_folder).parent
+            base_folder = get_dirname_path(base_folder)
     else:
-        base_folder = pathlib.Path.cwd()
-    osm_config_path = str(get_path(base_folder, "configs", REGIONS_CONFIG))
+        base_folder = str(pathlib.Path.cwd())
+    osm_config_path = get_path(base_folder, "configs", REGIONS_CONFIG)
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
@@ -132,7 +132,7 @@ def sets_path_to_root(root_directory_name):
     while n >= 0:
         n -= 1
         # if repo_name is current folder name, stop and set path
-        if repo_name == pathlib.Path(".").absolute().name:
+        if repo_name == get_basename_abs_path("."):
             repo_path = str(pathlib.Path.cwd())  # current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
@@ -170,7 +170,7 @@ def configure_logging(snakemake, skip_handlers=False):
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        fallback_path = get_path(pathlib.Path(__file__).parent, "..", "logs", f"{snakemake.rule}.log")
+        fallback_path = get_path(get_dirname_path(__file__), "..", "logs", f"{snakemake.rule}.log")
         logfile = snakemake.log.get("python", snakemake.log[0] if snakemake.log else fallback_path)
         kwargs.update(
             {
@@ -502,7 +502,7 @@ def mock_snakemake(rulename, **wildcards):
     def make_accessable(*ios):
         for io in ios:
             for i in range(len(io)):
-                io[i] = str(pathlib.Path(io[i]).absolute())
+                io[i] = get_abs_path(io[i])
 
     make_accessable(job.input, job.output, job.log)
     snakemake = Snakemake(
@@ -521,7 +521,7 @@ def mock_snakemake(rulename, **wildcards):
 
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
-        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+        build_directory(get_dirname_path(path))
 
     os.chdir(script_dir)
     return snakemake
@@ -646,7 +646,7 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if pathlib.Path(file).stat().st_size > 0:
+    if get_path_size(file) > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
@@ -694,7 +694,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
         CRS of the GeoDataFrame
     """
     # if the file is non-zero, read the geodataframe and return it
-    if pathlib.Path(fn).stat().st_size > 0:
+    if get_path_size(fn) > 0:
         return gpd.read_file(fn)
     else:
         # else return an empty GeoDataFrame
@@ -818,13 +818,56 @@ def get_last_commit_message(path):
 
 def get_dirname_abs_path(path):
     """
-    It returns the directory name of a normalized and absolutized version of the
-    pathname path.
+    It returns the directory name of a normalized and absolutized version of the path.
     """
     return str(pathlib.Path(path).absolute().parent)
+
+
+def get_dirname_path(path):
+    """
+    It returns the directory name of the path.
+    """
+    return str(pathlib.Path(path).parent)
+
+
+def get_abs_path(path):
+    """
+    It returns the absolutized version of the path.
+    """
+    return str(pathlib.Path(path).absolute())
+
+
+def get_basename_abs_path(path):
+    """
+    It returns the base name of a normalized and absolutized version of the path
+    """
+    return pathlib.Path(path).absolute().name
+
+
+def get_basename_path(path):
+    """
+    It returns the base name of the path
+    """
+    return pathlib.Path(path).name
+
 
 def get_path(*args):
     """
     It returns a new PosixPath object.
     """
-    return pathlib.Path(*args)
+    return str(pathlib.Path(*args))
+
+
+def get_path_size(path):
+    """
+    It returns the size of a path (in bytes)
+    """
+    return pathlib.Path(path).stat().st_size
+
+
+def build_directory(path):
+    """
+    It creates recursively the directory and its leaf directories
+    """
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
