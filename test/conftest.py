@@ -5,8 +5,9 @@
 
 # -*- coding: utf-8 -*-
 
-import pytest
 import pathlib
+
+import pytest
 
 _content_temp_file = "content"
 
@@ -17,6 +18,3 @@ def get_temp_file(tmpdir):
     p.write(_content_temp_file)
     yield p
     pathlib.Path(p).unlink(missing_ok=True)
-
-
-

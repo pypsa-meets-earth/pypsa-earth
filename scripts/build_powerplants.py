@@ -329,7 +329,9 @@ if __name__ == "__main__":
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = get_path(str(pathlib.Path.cwd()), filepath_osm2pm_ppl)
+        config["EXTERNAL_DATABASE"]["fn"] = get_path(
+            str(pathlib.Path.cwd()), filepath_osm2pm_ppl
+        )
     else:
         # create an empty file
         with open(filepath_osm2pm_ppl, "w"):

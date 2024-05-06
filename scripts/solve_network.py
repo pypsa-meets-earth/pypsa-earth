@@ -83,7 +83,12 @@ import re
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import build_directory, configure_logging, create_logger, get_dirname_abs_path
+from _helpers import (
+    build_directory,
+    configure_logging,
+    create_logger,
+    get_dirname_abs_path,
+)
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,

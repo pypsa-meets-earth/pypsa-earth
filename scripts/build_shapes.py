@@ -93,7 +93,9 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
-    GADM_inputfile_gpkg = get_path(str(pathlib.Path.cwd()), "data", "gadm", GADM_filename, GADM_filename + ".gpkg")  # Input filepath gpkg
+    GADM_inputfile_gpkg = get_path(
+        str(pathlib.Path.cwd()), "data", "gadm", GADM_filename, GADM_filename + ".gpkg"
+    )  # Input filepath gpkg
 
     if not pathlib.Path(GADM_inputfile_gpkg).exists() or update is True:
         if out_logging:
@@ -477,7 +479,9 @@ def download_WorldPop_standard(
             f"https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}",
         ]
 
-    WorldPop_inputfile = get_path(str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename)  # Input filepath tif
+    WorldPop_inputfile = get_path(
+        str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
 
     if not pathlib.Path(WorldPop_inputfile).exists() or update is True:
         if out_logging:
@@ -529,7 +533,9 @@ def download_WorldPop_API(
 
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
-    WorldPop_inputfile = get_path(str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename) # Input filepath tif
+    WorldPop_inputfile = get_path(
+        str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename
+    )  # Input filepath tif
     build_directory(get_dirname_path(WorldPop_inputfile))
     year_api = int(str(year)[2:])
     loaded = False
@@ -565,10 +571,14 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_nc)  # Input filepath nc
+    GDP_nc = get_path(
+        str(pathlib.Path.cwd()), "data", "GDP", name_file_nc
+    )  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_tif)  # Input filepath nc
+    GDP_tif = get_path(
+        str(pathlib.Path.cwd()), "data", "GDP", name_file_tif
+    )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not pathlib.Path(GDP_nc).exists():
@@ -612,7 +622,9 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = get_path(str(pathlib.Path.cwd()), "data", "GDP", name_file_tif)  # Input filepath tif
+    GDP_tif = get_path(
+        str(pathlib.Path.cwd()), "data", "GDP", name_file_tif
+    )  # Input filepath tif
 
     if update | (not pathlib.Path(GDP_tif).exists()):
         if out_logging:
