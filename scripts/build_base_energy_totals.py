@@ -383,7 +383,7 @@ if __name__ == "__main__":
         "Liquefied petroleum gas (LPG)",
     ]
     gas_fuels = ["Natural gas (including LNG)", "Gasworks Gas", "Natural Gas (including LNG)"]
-    biomass_fuels = ["Biodiesel", "Biogases", "Fuelwood"]
+    biomass_fuels = ["Biodiesel", "Biogases", "Fuelwood", "Biogasoline"]
     other_fuels = ["Charcoal", "Brown coal briquettes", "Other bituminous coal"]
     heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
 
