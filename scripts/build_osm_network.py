@@ -6,7 +6,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pathlib
 
 import geopandas as gpd
 import numpy as np
