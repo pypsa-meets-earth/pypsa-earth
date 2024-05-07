@@ -5,13 +5,10 @@
 
 # -*- coding: utf-8 -*-
 
-import logging
 import multiprocessing as mp
 import os
 import shutil
-import zipfile
 from itertools import takewhile
-from math import ceil
 from operator import attrgetter
 
 import fiona
@@ -20,7 +17,6 @@ import numpy as np
 import pandas as pd
 import rasterio
 import requests
-import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
@@ -35,8 +31,7 @@ from numba.core import types
 from numba.typed import Dict
 from rasterio.mask import mask
 from rasterio.windows import Window
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon
-from shapely.geometry.base import BaseGeometry
+from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm

@@ -28,7 +28,6 @@ Outputs
 Description
 -----------
 """
-import logging
 import os
 
 import networkx as nx
@@ -37,7 +36,6 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging, create_logger
 from add_electricity import load_costs
-from base_network import _set_dc_underwater_fraction
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
@@ -139,7 +137,7 @@ if __name__ == "__main__":
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=snakemake.params.lines.get("dc_type"),
+            type=snakemake.params.lines.get("dc_types"),
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
