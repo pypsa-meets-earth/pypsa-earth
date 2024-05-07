@@ -84,7 +84,8 @@ def test_get_path():
         "sub_path_3",
         "sub_path_4",
         "sub_path_5",
-        "file.nc",)
+        "file.nc",
+    )
     assert (
         file_name_path_one
         == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
