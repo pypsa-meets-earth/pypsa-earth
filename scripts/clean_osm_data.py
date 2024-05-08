@@ -666,7 +666,7 @@ def explode_rows(df, cols):
     row 2: 50, 110000
     """
     # check if all row elements are list
-    is_all_list = df[cols].apply(lambda x: isinstance(x, list)).all(axis=1)
+    is_all_list = df[cols].map(lambda x: isinstance(x, list)).all(axis=1)
     if not is_all_list.all():
         df_nonlist = df[~is_all_list]
         logger.warning(
