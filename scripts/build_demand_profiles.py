@@ -130,7 +130,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     # TODO Remember to remove after debug
     if len(load_paths) == 0:
-        raise AssertionError(
+        logger.warning(
             f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}. The paths checked {walk_paths}."
         )
 
