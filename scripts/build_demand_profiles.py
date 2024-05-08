@@ -108,6 +108,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     ssp = config.get("load_options")["ssp"]
 
     load_paths = []
+    walk_paths = []
     load_dir = os.path.join(
         ssp_parentfolder,
         str(ssp),
@@ -118,6 +119,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         for ext in [".nc", ".csv"]:
             load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            walk_paths.append(load_path)
             if os.path.exists(load_path):
                 load_paths.append(load_path)
                 break
@@ -129,7 +131,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     # TODO Remember to remove after debug
     if len(load_paths) == 0:
         raise AssertionError(
-            f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
+            f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}. The paths checked {walk_paths}."
         )
 
     return load_paths
