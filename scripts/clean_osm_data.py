@@ -638,6 +638,7 @@ def fill_circuits(df):
         lambda x: ";".join([str(x["multiplier"] * v) for v in x["basic_cables"]]),
         axis=1,
     )
+    logger.info(f"filled_values is {filled_values}")
     df.loc[filled_values.index, "circuits"] = filled_values
 
     # otherwise assume a circuit per element
