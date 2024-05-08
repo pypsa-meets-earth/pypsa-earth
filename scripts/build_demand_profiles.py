@@ -236,8 +236,12 @@ def build_demand_profiles(
             gegis_load_xr = xr.open_mfdataset(path, combine="nested")
         gegis_load_list.append(gegis_load_xr)
 
+    logger.info(
+        f"Merging {gegis_load_list} from paths {load_paths} into the load data frame"
+    )
     gegis_load = xr.merge(gegis_load_list)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
 
