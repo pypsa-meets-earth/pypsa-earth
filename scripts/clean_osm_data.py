@@ -666,7 +666,7 @@ def explode_rows(df, cols):
     row 2: 50, 110000
     """
     # check if all row elements are list
-    is_all_list = df[cols].applymap(lambda x: isinstance(x, list)).all(axis=1)
+    is_all_list = df[cols].apply(lambda x: isinstance(x, list)).all(axis=1)
     if not is_all_list.all():
         df_nonlist = df[~is_all_list]
         logger.warning(
@@ -675,7 +675,7 @@ def explode_rows(df, cols):
         df.drop(df_nonlist.index, inplace=True)
 
     # check if errors in the columns
-    nunique_values = df[cols].applymap(len).nunique(axis=1)
+    nunique_values = df[cols].map(len).nunique(axis=1)
     df_nunique = df[nunique_values != 1]
     if not df_nunique.empty:
         logger.warning(
@@ -933,7 +933,7 @@ def clean_data(
     if not df_all_lines.empty:
         # Add underground, under_construction, frequency and circuits columns to the dataframe
         # and drop corresponding unused columns
-        df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
+        df_all_lines = integrate_lines_df(df_all_lines)
 
         logger.info("Filter lines by voltage, frequency, circuits and geometry")
 
