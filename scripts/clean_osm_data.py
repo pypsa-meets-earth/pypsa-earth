@@ -933,7 +933,7 @@ def clean_data(
     if not df_all_lines.empty:
         # Add underground, under_construction, frequency and circuits columns to the dataframe
         # and drop corresponding unused columns
-        df_all_lines = integrate_lines_df(df_all_lines)
+        df_all_lines = integrate_lines_df(df_all_lines, distance_crs)
 
         logger.info("Filter lines by voltage, frequency, circuits and geometry")
 
