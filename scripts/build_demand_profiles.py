@@ -90,7 +90,9 @@ def get_gegis_regions(countries):
     return regions
 
 
-def get_load_paths_gegis(ssp_parentfolder, config):
+def get_load_paths_gegis(
+    ssp_parentfolder, countries, weather_year, prediction_year, ssp
+):
     """
     Create load paths for GEGIS outputs.
 
@@ -101,11 +103,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     -------
     ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
     """
-    countries = config.get("countries")
     region_load = get_gegis_regions(countries)
-    weather_year = config.get("load_options")["weather_year"]
-    prediction_year = config.get("load_options")["prediction_year"]
-    ssp = config.get("load_options")["ssp"]
 
     load_paths = []
     walk_paths = []
@@ -320,13 +318,25 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     regions = snakemake.input.regions
-    load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
+
+    weather_year = snakemake.params.load_options["weather_year"]
+    prediction_year = snakemake.params.load_options["prediction_year"]
+    ssp = snakemake.params.load_options["ssp"]
+
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.params.load_options.get("scale", 1.0)
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
+
+    load_paths = get_load_paths_gegis(
+        ssp_parentfolder="data",
+        countries=countries,
+        weather_year=weather_year,
+        prediction_year=prediction_year,
+        ssp=ssp,
+    )
 
     build_demand_profiles(
         n,
