@@ -117,7 +117,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
 
     for continent in region_load:
         for ext in [".nc", ".csv"]:
-            load_path = os.path.join(load_dir, str(continent) + str(ext))
+            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
             if os.path.exists(load_path):
                 load_paths.append(load_path)
                 break
