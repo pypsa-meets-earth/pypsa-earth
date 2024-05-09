@@ -719,10 +719,12 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     # remove original lines
     lines.drop(lines_to_split, inplace=True)
 
-    lines = gpd.GeoDataFrame(
+    if lines.empty:
+        lines = gpd.GeoDataFrame(df_to_add, crs=lines.crs)
+    else:
+        lines = gpd.GeoDataFrame(
         pd.concat([lines, df_to_add], ignore_index=True).reset_index(drop=True),
-        crs=lines.crs,
-    )
+        crs=lines.crs)
 
     return lines, buses
 
