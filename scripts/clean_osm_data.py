@@ -855,7 +855,7 @@ def load_network_data(network_asset, data_options):
 
     # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)
     try:
-        cleanning_data_options = data_options[f"use_custom_{network_asset}"]
+        cleaning_data_options = data_options[f"use_custom_{network_asset}"]
         custom_path = data_options[f"path_custom_{network_asset}"]
 
     except:
@@ -864,16 +864,16 @@ def load_network_data(network_asset, data_options):
         )
 
     # creates a dataframe for the network_asset defined
-    if cleanning_data_options == "custom_only":
+    if cleaning_data_options == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
-    elif cleanning_data_options == "add_custom":
+    elif cleaning_data_options == "add_custom":
         loaded_df1 = gpd.read_file(input_files[network_asset])
         loaded_df2 = gpd.read_file(custom_path)
         loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
 
     else:
-        if cleanning_data_options != "OSM_only":
+        if cleaning_data_options != "OSM_only":
             logger.warning(
                 f"Unrecognized option {data_options} for handling custom data of {network_asset}."
                 + "Default OSM_only option used. Options available in clean_OSM_data_options configtable"
