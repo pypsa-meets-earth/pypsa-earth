@@ -723,8 +723,9 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         lines = gpd.GeoDataFrame(df_to_add, crs=lines.crs)
     else:
         lines = gpd.GeoDataFrame(
-        pd.concat([lines, df_to_add], ignore_index=True).reset_index(drop=True),
-        crs=lines.crs)
+            pd.concat([lines, df_to_add], ignore_index=True).reset_index(drop=True),
+            crs=lines.crs,
+        )
 
     return lines, buses
 
