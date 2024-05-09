@@ -526,7 +526,7 @@ def fill_circuits(df):
        the cables elements are downscaled and the last values of cables
        are summed.
        Let's assume that cables is [3,3,3] but frequency is [50,50].
-       With this procedures, cables is treated as [3,6] and used for
+       With this procedure, cables is treated as [3,6] and used for
        calculating the circuits
     4. Where the number in cables has an unique number, e.g. ['6'],
        but frequency does not, e.g. ['50', '50'],
