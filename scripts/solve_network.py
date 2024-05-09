@@ -593,7 +593,7 @@ if __name__ == "__main__":
         n,
         config=snakemake.config,
         solving=snakemake.params.solving,
-        solver_logfile=snakemake.log.solver,
+        log_fn=snakemake.log.solver,
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
