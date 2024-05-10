@@ -305,8 +305,8 @@ def enforce_autarky(n, only_crossborder=False):
 
 
 def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-    n.lines.s_nom_max.clip(upper=s_nom_max_set, inplace=True)
-    n.links.p_nom_max.clip(upper=p_nom_max_set, inplace=True)
+    n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
+    n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
 
 
 if __name__ == "__main__":
