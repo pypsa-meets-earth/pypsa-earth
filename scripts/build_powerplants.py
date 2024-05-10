@@ -100,9 +100,6 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
 """
 
-import os
-import pathlib
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -110,9 +107,10 @@ import powerplantmatching as pm
 import pypsa
 import yaml
 from _helpers import (
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
+    get_current_directory_path,
     get_path,
     get_path_size,
     read_csv_nafix,
@@ -302,7 +300,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_powerplants")
 
     configure_logging(snakemake)
@@ -330,7 +328,7 @@ if __name__ == "__main__":
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = get_path(
-            str(pathlib.Path.cwd()), filepath_osm2pm_ppl
+            get_current_directory_path(), filepath_osm2pm_ppl
         )
     else:
         # create an empty file

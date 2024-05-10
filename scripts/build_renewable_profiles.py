@@ -191,7 +191,6 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
   reached.
 """
 import functools
-import os
 import time
 from math import isnan
 
@@ -203,9 +202,9 @@ import pandas as pd
 import progressbar as pgb
 import xarray as xr
 from _helpers import (
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
     sets_path_to_root,
 )
 from add_electricity import load_powerplants
@@ -493,7 +492,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

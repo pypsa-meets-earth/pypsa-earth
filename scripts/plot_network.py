@@ -17,8 +17,6 @@ Description
 -----------
 """
 
-import os
-
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib as mpl
@@ -28,9 +26,9 @@ import pandas as pd
 from _helpers import (
     aggregate_costs,
     aggregate_p,
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
     load_network_for_plots,
 )
 from matplotlib.legend_handler import HandlerPatch
@@ -361,7 +359,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "plot_network",
             network="elec",

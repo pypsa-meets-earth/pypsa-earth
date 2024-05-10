@@ -81,7 +81,6 @@ according to the following rules:
 
 """
 import datetime as dt
-import os
 import pathlib
 import re
 from zipfile import ZipFile
@@ -91,10 +90,11 @@ import pandas as pd
 import yaml
 from _helpers import (
     configure_logging,
+    change_to_script_dir,
     create_country_list,
     create_logger,
     get_basename_path,
-    get_dirname_abs_path,
+    get_current_directory_path,
     get_path,
     progress_retrieve,
     sets_path_to_root,
@@ -813,7 +813,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_databundle_light")
@@ -822,7 +822,7 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
-    root_path = str(pathlib.Path.cwd())
+    root_path = get_current_directory_path()
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")

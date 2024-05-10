@@ -16,11 +16,10 @@ Outputs
 Description
 -----------
 """
-import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import configure_logging, create_logger, get_dirname_abs_path, get_path
+from _helpers import change_to_script_dir, configure_logging, create_logger, get_path
 
 logger = create_logger(__name__)
 
@@ -219,7 +218,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "plot_summary",
             summary="energy",

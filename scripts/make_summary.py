@@ -51,12 +51,11 @@ The line volume/cost cap field can be set to one of the following:
 
 Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
-import os
 import pathlib
 
 import pandas as pd
 import pypsa
-from _helpers import build_directory, configure_logging, get_dirname_abs_path, get_path
+from _helpers import build_directory, change_to_script_dir, configure_logging, get_path
 from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -537,7 +536,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",

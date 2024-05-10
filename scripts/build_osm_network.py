@@ -5,16 +5,14 @@
 
 # -*- coding: utf-8 -*-
 
-import os
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import (
     build_directory,
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
     get_dirname_path,
     read_geojson,
     read_osm_config,
@@ -897,7 +895,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 

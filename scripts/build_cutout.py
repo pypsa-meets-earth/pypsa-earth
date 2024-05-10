@@ -93,12 +93,11 @@ Description
 -----------
 
 """
-import os
 
 import atlite
 import geopandas as gpd
 import pandas as pd
-from _helpers import configure_logging, create_logger, get_dirname_abs_path
+from _helpers import change_to_script_dir, configure_logging, create_logger
 
 logger = create_logger(__name__)
 
@@ -107,7 +106,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_cutout", cutout="africa-2013-era5")
     configure_logging(snakemake)
 

@@ -100,7 +100,7 @@ def read_osm_config(*args):
         if not pathlib.Path(base_folder, "configs").exists():
             base_folder = get_dirname_path(base_folder)
     else:
-        base_folder = str(pathlib.Path.cwd())
+        base_folder = get_current_directory_path()
     osm_config_path = get_path(base_folder, "configs", REGIONS_CONFIG)
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
@@ -133,7 +133,7 @@ def sets_path_to_root(root_directory_name):
         n -= 1
         # if repo_name is current folder name, stop and set path
         if repo_name == get_basename_abs_path("."):
-            repo_path = str(pathlib.Path.cwd())  # current_path
+            repo_path = get_current_directory_path()  # current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
             print("Had to go %d folder(s) up." % (n0 - 1 - n))
@@ -143,7 +143,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            os.chdir(get_dirname_abs_path("."))  # change to the upper folder
+            change_to_script_dir(".") # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -802,7 +802,7 @@ def get_last_commit_message(path):
     """
     _logger = logging.getLogger(__name__)
     last_commit_message = None
-    backup_cwd = str(pathlib.Path.cwd())
+    backup_cwd = get_current_directory_path()
     try:
         os.chdir(path)
         last_commit_message = (
@@ -818,14 +818,6 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
-
-
-def get_dirname_abs_path(path):
-    """
-    It returns the directory name of a normalized and absolutized version of
-    the path.
-    """
-    return str(pathlib.Path(path).absolute().parent)
 
 
 def get_dirname_path(path):
@@ -861,7 +853,7 @@ def get_path(*args):
     """
     It returns a new path string.
     """
-    return pathlib.Path(*args)
+    return str(pathlib.Path(*args))
 
 
 def get_posixpath(*args):
@@ -881,5 +873,31 @@ def get_path_size(path):
 def build_directory(path):
     """
     It creates recursively the directory and its leaf directories.
+
+    Parameters:
+        path (str): The path to the file
     """
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
+
+def change_to_script_dir(path):
+    """
+    Change the current working directory to the directory containing the given script.
+
+    Parameters:
+        path (str): The path to the file.
+    """
+
+    # Get the absolutized and normalized path of directory containing the file
+    directory_path = pathlib.Path(path).absolute().parent
+
+    # Change the current working directory to the script directory
+    os.chdir(directory_path)
+
+
+def get_current_directory_path():
+    """
+    It returns the current directory path.
+    """
+    return str(pathlib.Path.cwd())
+

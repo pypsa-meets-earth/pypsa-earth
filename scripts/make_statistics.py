@@ -23,7 +23,6 @@ Outputs
 -------
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
-import os
 import pathlib
 
 import geopandas as gpd
@@ -32,8 +31,8 @@ import pandas as pd
 import pypsa
 import xarray as xr
 from _helpers import (
+    change_to_script_dir,
     create_logger,
-    get_dirname_abs_path,
     get_path_size,
     mock_snakemake,
     sets_path_to_root,
@@ -50,7 +49,7 @@ def _multi_index_scen(rulename, keys):
 
 
 def _mock_snakemake(rule, **kwargs):
-    os.chdir(get_dirname_abs_path(__file__))
+    change_to_script_dir(__file__)
     snakemake = mock_snakemake(rule, **kwargs)
     sets_path_to_root("pypsa-earth")
     return snakemake
@@ -588,7 +587,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("make_statistics")
 
     sets_path_to_root("pypsa-earth")

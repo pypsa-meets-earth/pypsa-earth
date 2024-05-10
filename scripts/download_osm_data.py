@@ -26,14 +26,14 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-import os
 import pathlib
 import shutil
 
 from _helpers import (
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
+    get_current_directory_path,
     get_path,
     read_osm_config,
 )
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("download_osm_data")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
@@ -108,9 +108,9 @@ if __name__ == "__main__":
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
     store_path_resources = get_path(
-        pathlib.Path().cwd(), "resources", RDIR, "osm", "raw"
+        get_current_directory_path(), "resources", RDIR, "osm", "raw"
     )
-    store_path_data = get_path(pathlib.Path().cwd(), "data", "osm")
+    store_path_data = get_path(get_current_directory_path(), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.save_osm_data(

@@ -10,9 +10,10 @@ import pathlib
 from test.conftest import _content_temp_file, get_temp_file
 
 from scripts._helpers import (
+    change_to_script_dir,
     get_abs_path,
     get_basename_abs_path,
-    get_dirname_abs_path,
+    get_current_directory_path,
     get_dirname_path,
     get_path,
     get_path_size,
@@ -30,15 +31,14 @@ def test_get_abs_path():
     assert abs_file == __file__
 
 
-def test_get_dirname_abs_path():
+def test_change_to_script_dir():
     """
-    Verify the path returned by get_dirname_abs_path()
+    Verify the path returned by change_to_script_dir()
     """
-    dir_abs_name_file = get_dirname_abs_path(__file__)
-    dir_abs_name_cwd = get_dirname_abs_path(".")
-    assert dir_abs_name_file == os.path.dirname(os.path.abspath(__file__))
-    assert dir_abs_name_file == path_cwd + "/test"
-    assert dir_abs_name_cwd == str(pathlib.Path(path_cwd).parent)
+    change_to_script_dir(__file__)
+    assert str(pathlib.Path.cwd()) == path_cwd + "/test"
+    change_to_script_dir(".")
+    assert str(pathlib.Path.cwd()) == path_cwd
 
 
 def test_get_dirname_path():
@@ -103,3 +103,12 @@ def test_get_path_size(get_temp_file):
     file_size = get_path_size(str(path))
     assert file_size == os.stat(path).st_size
     assert file_size == len(_content_temp_file)
+
+
+def test_get_current_directory_path():
+    """
+    Verify the current directory path returned by get_current_directory_path()
+    """
+    path = get_current_directory_path()
+    assert path == os.getcwd()
+    assert path == path_cwd

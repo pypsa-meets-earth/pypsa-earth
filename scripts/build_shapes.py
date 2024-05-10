@@ -6,7 +6,6 @@
 # -*- coding: utf-8 -*-
 
 import multiprocessing as mp
-import os
 import pathlib
 import shutil
 from itertools import takewhile
@@ -21,9 +20,10 @@ import requests
 import xarray as xr
 from _helpers import (
     build_directory,
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_abs_path,
+    get_current_directory_path,
     get_dirname_path,
     get_path,
     sets_path_to_root,
@@ -94,7 +94,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = get_path(
-        str(pathlib.Path.cwd()), "data", "gadm", GADM_filename, GADM_filename + ".gpkg"
+        get_current_directory_path(), "data", "gadm", GADM_filename, GADM_filename + ".gpkg"
     )  # Input filepath gpkg
 
     if not pathlib.Path(GADM_inputfile_gpkg).exists() or update is True:
@@ -480,7 +480,7 @@ def download_WorldPop_standard(
         ]
 
     WorldPop_inputfile = get_path(
-        str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename
+        get_current_directory_path(), "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
 
     if not pathlib.Path(WorldPop_inputfile).exists() or update is True:
@@ -534,7 +534,7 @@ def download_WorldPop_API(
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
     WorldPop_inputfile = get_path(
-        str(pathlib.Path.cwd()), "data", "WorldPop", WorldPop_filename
+        get_current_directory_path(), "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
     build_directory(get_dirname_path(WorldPop_inputfile))
     year_api = int(str(year)[2:])
@@ -572,12 +572,12 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
 
     # path of the nc file
     GDP_nc = get_path(
-        str(pathlib.Path.cwd()), "data", "GDP", name_file_nc
+        get_current_directory_path(), "data", "GDP", name_file_nc
     )  # Input filepath nc
 
     # path of the tif file
     GDP_tif = get_path(
-        str(pathlib.Path.cwd()), "data", "GDP", name_file_tif
+        get_current_directory_path(), "data", "GDP", name_file_tif
     )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
@@ -623,7 +623,7 @@ def load_GDP(
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
     GDP_tif = get_path(
-        str(pathlib.Path.cwd()), "data", "GDP", name_file_tif
+        get_current_directory_path(), "data", "GDP", name_file_tif
     )  # Input filepath tif
 
     if update | (not pathlib.Path(GDP_tif).exists()):
@@ -1312,7 +1312,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_shapes")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)

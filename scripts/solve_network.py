@@ -77,7 +77,6 @@ Details (and errors made through this heuristic) are discussed in the paper
     for all ``scenario`` s in the configuration file
     the rule :mod:`solve_network`.
 """
-import os
 import re
 
 import numpy as np
@@ -85,9 +84,9 @@ import pandas as pd
 import pypsa
 from _helpers import (
     build_directory,
+    change_to_script_dir,
     configure_logging,
-    create_logger,
-    get_dirname_abs_path,
+    create_logger
 )
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
@@ -548,7 +547,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",

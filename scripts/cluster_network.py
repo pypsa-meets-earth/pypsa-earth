@@ -121,7 +121,6 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
-import os
 import pathlib
 from functools import reduce
 
@@ -132,10 +131,10 @@ import pyomo.environ as po
 import pypsa
 from _helpers import (
     REGION_COLS,
+    change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
-    get_dirname_abs_path,
     sets_path_to_root,
     update_p_nom_max,
 )
@@ -659,7 +658,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )

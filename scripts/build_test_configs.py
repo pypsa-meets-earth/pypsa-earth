@@ -14,10 +14,8 @@ tutorial config.
 """
 import collections.abc
 import copy
-import os
-import pathlib
 
-from _helpers import get_dirname_abs_path, get_posixpath
+from _helpers import change_to_script_dir, get_current_directory_path, get_posixpath
 from ruamel.yaml import YAML
 
 
@@ -38,7 +36,7 @@ def _parse_inputconfig(input_config, yaml):
         return input_config
 
     if isinstance(input_config, str):
-        input_config = get_posixpath(str(pathlib.Path.cwd()), input_config)
+        input_config = get_posixpath(get_current_directory_path(), input_config)
 
     with open(input_config) as fp:
         return yaml.load(fp)
@@ -77,7 +75,7 @@ def create_test_config(default_config, diff_config, output_path):
 
     # Output path
     if isinstance(output_path, str):
-        output_path = get_posixpath(str(pathlib.Path.cwd()), output_path)
+        output_path = get_posixpath(get_current_directory_path(), output_path)
 
     # Save file
     yaml.dump(merged_config, output_path)
@@ -89,7 +87,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_test_configs")
 
     # Input paths

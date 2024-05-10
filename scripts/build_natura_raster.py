@@ -51,7 +51,7 @@ import atlite
 import geopandas as gpd
 import numpy as np
 import rasterio as rio
-from _helpers import configure_logging, create_logger, get_dirname_abs_path, get_path
+from _helpers import change_to_script_dir, configure_logging, create_logger, get_path
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(get_dirname_abs_path(__file__))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "build_natura_raster", cutouts=["cutouts/africa-2013-era5.nc"]
         )
