@@ -86,7 +86,7 @@ from _helpers import (
     build_directory,
     change_to_script_dir,
     configure_logging,
-    create_logger
+    create_logger,
 )
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
