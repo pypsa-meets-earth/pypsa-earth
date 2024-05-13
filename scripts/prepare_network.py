@@ -65,6 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
+
 from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
@@ -97,7 +98,8 @@ def download_emission_data():
         file_path = get_path(root_path, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
             zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", get_path(root_path, "data")
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                get_path(root_path, "data"),
             )
         pathlib.Path(file_path).unlink(missing_ok=True)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"

@@ -7,6 +7,7 @@
 
 from scripts.prepare_network import download_emission_data
 
+
 def test_download_emission_data():
     filename = download_emission_data()
     assert filename == "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
