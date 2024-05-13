@@ -7,7 +7,7 @@
 
 import os
 import pathlib
-from test.conftest import _content_temp_file, get_temp_file
+from test.conftest import _content_temp_file, _name_temp_file, get_temp_file
 
 from scripts._helpers import (
     change_to_script_dir,
@@ -17,6 +17,7 @@ from scripts._helpers import (
     get_dirname_path,
     get_path,
     get_path_size,
+    get_relative_path,
     is_directory_path,
     is_file_path,
 )
@@ -133,3 +134,14 @@ def test_is_file_path(get_temp_file, tmpdir):
     assert is_file_path(path)
     assert is_file_path(path) == os.path.isfile(path)
     assert not is_file_path(tmpdir)
+
+
+def test_get_relative_path(get_temp_file):
+    """
+    Verify the relative path returned by get_relative_path()
+    """
+    path = get_temp_file
+    # path relative to the parent directory of the temp file
+    relative_path = get_relative_path(path, get_path(path).parent)
+    assert str(relative_path) == _name_temp_file
+    assert str(relative_path) == os.path.relpath(path, start=get_path(path).parent)

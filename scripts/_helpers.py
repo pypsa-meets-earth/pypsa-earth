@@ -917,3 +917,12 @@ def is_file_path(path):
     False otherwise.
     """
     return pathlib.Path(path).is_file()
+
+
+def get_relative_path(input_path, start_path="."):
+    """
+    It returns a relative path to input_path from start_path.
+
+    Default for start_path is the current directory
+    """
+    return pathlib.Path(input_path).relative_to(start_path)

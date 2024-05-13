@@ -10,11 +10,12 @@ import pathlib
 import pytest
 
 _content_temp_file = "content"
+_name_temp_file = "hello.txt"
 
 
 @pytest.fixture(scope="function")
 def get_temp_file(tmpdir):
-    p = tmpdir.join("hello.txt")
+    p = tmpdir.join(_name_temp_file)
     p.write(_content_temp_file)
     yield p
     pathlib.Path(p).unlink(missing_ok=True)
