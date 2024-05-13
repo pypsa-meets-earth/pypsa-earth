@@ -151,24 +151,7 @@ def shapes_to_shapes(orig, dest):
 
 
 def load_demand_csv(path):
-    df = pd.concat(
-        [
-            read_csv_nafix(
-                pth,
-                sep=";",
-                dtype={
-                    "region_code": str,
-                    "time": str,
-                    "region_name": str,
-                    "Electricity demand": np.float64,
-                },
-                keep_default_na=False,
-                na_values=["_", ""],
-            )
-            for pth in path
-        ],
-        axis=0,
-    )
+    df = read_csv_nafix(path, sep=";")
     df.time = pd.to_datetime(df.time, format="%Y-%m-%d %H:%M:%S")
     load_regions = {c: n for c, n in zip(df.region_code, df.region_name)}
 
