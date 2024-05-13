@@ -820,33 +820,33 @@ def get_last_commit_message(path):
     return last_commit_message
 
 
-def get_dirname_path(input_path):
+def get_dirname_path(path):
     """
     It returns the directory name of the path.
     """
-    return pathlib.Path(input_path).parent
+    return str(pathlib.Path(path).parent)
 
 
-def get_abs_path(input_path):
+def get_abs_path(path):
     """
     It returns the absolutized version of the path.
     """
-    return pathlib.Path(input_path).absolute()
+    return str(pathlib.Path(path).absolute())
 
 
-def get_basename_abs_path(input_path):
+def get_basename_abs_path(path):
     """
     It returns the base name of a normalized and absolutized version of the
     path.
     """
-    return pathlib.Path(input_path).absolute().name
+    return pathlib.Path(path).absolute().name
 
 
-def get_basename_path(input_path):
+def get_basename_path(path):
     """
     It returns the base name of the path.
     """
-    return pathlib.Path(input_path).name
+    return pathlib.Path(path).name
 
 
 def get_path(*args):
@@ -856,39 +856,39 @@ def get_path(*args):
     return pathlib.Path(*args)
 
 
-def get_path_size(input_path):
+def get_path_size(path):
     """
     It returns the size of a path (in bytes)
     """
-    return pathlib.Path(input_path).stat().st_size
+    return pathlib.Path(path).stat().st_size
 
 
-def build_directory(input_path):
+def build_directory(path):
     """
     It creates recursively the directory and its leaf directories.
 
     Parameters:
-        input_path (str): The path to the file
+        path (str): The path to the file
     """
 
     # Check if the provided path points to a directory
-    if is_directory_path(input_path):
-        pathlib.Path(input_path).mkdir(parents=True, exist_ok=True)
+    if is_directory_path(path):
+        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
     else:
-        pathlib.Path(input_path).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
 
 
-def change_to_script_dir(input_path):
+def change_to_script_dir(path):
     """
     Change the current working directory to the directory containing the given
     script.
 
     Parameters:
-        input_path (str): The path to the file.
+        path (str): The path to the file.
     """
 
     # Get the absolutized and normalized path of directory containing the file
-    directory_path = pathlib.Path(input_path).absolute().parent
+    directory_path = pathlib.Path(path).absolute().parent
 
     # Change the current working directory to the script directory
     os.chdir(directory_path)
@@ -901,28 +901,28 @@ def get_current_directory_path():
     return pathlib.Path.cwd()
 
 
-def is_directory_path(input_path):
+def is_directory_path(path):
     """
     It returns True if the path points to a directory.
 
     False otherwise.
     """
-    return pathlib.Path(input_path).is_dir()
+    return pathlib.Path(path).is_dir()
 
 
-def is_file_path(input_path):
+def is_file_path(path):
     """
     It returns True if the path points to a file.
 
     False otherwise.
     """
-    return pathlib.Path(input_path).is_file()
+    return pathlib.Path(path).is_file()
 
 
-def get_relative_path(input_path, start_path="."):
+def get_relative_path(path, start_path="."):
     """
-    It returns a relative path to input_path from start_path.
+    It returns a relative path to path from start_path.
 
     Default for start_path is the current directory
     """
-    return pathlib.Path(input_path).relative_to(start_path)
+    return pathlib.Path(path).relative_to(start_path)
