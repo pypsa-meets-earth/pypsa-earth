@@ -39,6 +39,8 @@ The model is described in the Applied Energy article "PyPSA-Earth. A new global 
   <img src="https://forum.openmod.org/uploads/db8804/original/1X/6af089c376b19b72ad148e4e4326c162b94db68f.png" width=35%>
 </p>
 
+<p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a>https://zenodo.org/records/10080766</a></p>
+
 ## Livetracker. Most popular global models:
 
 <p align="center">
@@ -305,6 +307,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/virio-andreyana">
+            <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/giacfalk">
             <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
             <br />
@@ -319,13 +328,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/virio-andreyana">
-            <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/cpschau">
             <img src="https://avatars.githubusercontent.com/u/124347782?v=4" width="100;" alt="cpschau"/>
             <br />
@@ -333,6 +335,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td></tr>
 <tr>
+    <td align="center">
+        <a href="https://github.com/finozzifa">
+            <img src="https://avatars.githubusercontent.com/u/167071962?v=4" width="100;" alt="finozzifa"/>
+            <br />
+            <sub><b>Finozzifa</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/Tooblippe">
             <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
@@ -367,15 +376,15 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Stephen J Lee</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/juli-a-ko">
             <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>
             <br />
             <sub><b>Juli-a-ko</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/squoilin">
             <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
@@ -410,15 +419,15 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Katherine M. Antonio</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/jessLryan">
             <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
             <br />
             <sub><b>Jess</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/jarry7">
             <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
