@@ -84,11 +84,8 @@ It further adds extendable ``generators`` with **zero** capacity for
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
-
-import logging
 import os
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm

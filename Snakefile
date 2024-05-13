@@ -53,7 +53,7 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+(m|flex|min)?|all",
+    clusters="[0-9]+(m|flex)?|all|min",
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
@@ -296,7 +296,7 @@ rule base_network:
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        area_crs=config["crs"]["area_crs"],
+        crs=config["crs"],
         countries=config["countries"],
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
