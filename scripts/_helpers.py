@@ -853,7 +853,7 @@ def get_path(*args):
     """
     It returns a new path string.
     """
-    return str(pathlib.Path(*args))
+    return pathlib.Path(*args)
 
 
 def get_posixpath(*args):
