@@ -65,14 +65,14 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
     get_path,
 )
-from add_electricity import load_costs, update_transmission_costs
+from scripts.add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -93,11 +93,11 @@ def download_emission_data():
         with requests.get(url) as rq:
             with open("data/co2.zip", "wb") as file:
                 file.write(rq.content)
-        rootpath = get_current_directory_path()
-        file_path = get_path(rootpath, "data/co2.zip")
+        root_path = get_current_directory_path()
+        file_path = get_path(root_path, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
             zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", get_path(root_path, "data")
             )
         pathlib.Path(file_path).unlink(missing_ok=True)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"

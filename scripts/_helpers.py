@@ -898,7 +898,7 @@ def get_current_directory_path():
     """
     It returns the current directory path.
     """
-    return str(pathlib.Path.cwd())
+    return pathlib.Path.cwd()
 
 
 def is_directory_path(path):
