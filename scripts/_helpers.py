@@ -853,13 +853,6 @@ def get_path(*args):
     """
     It returns a new path string.
     """
-    return str(pathlib.Path(*args))
-
-
-def get_posixpath(*args):
-    """
-    It returns a new PosixPath object.
-    """
     return pathlib.Path(*args)
 
 
@@ -905,7 +898,7 @@ def get_current_directory_path():
     """
     It returns the current directory path.
     """
-    return pathlib.Path.cwd()
+    return str(pathlib.Path.cwd())
 
 
 def is_directory_path(path):
