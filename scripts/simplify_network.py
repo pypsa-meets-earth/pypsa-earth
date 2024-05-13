@@ -1134,9 +1134,9 @@ if __name__ == "__main__":
     )
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
     s_threshold_fetch_isolated = cluster_config.get("s_threshold_fetch_isolated", False)
-    
+
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
-    
+
     if p_threshold_merge_isolated:
         n, merged_nodes_map = merge_isolated_nodes(
             n,
