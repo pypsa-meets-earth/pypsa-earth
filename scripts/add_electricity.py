@@ -91,7 +91,7 @@ import pypsa
 import xarray as xr
 from powerplantmatching.export import map_country_bus
 
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
