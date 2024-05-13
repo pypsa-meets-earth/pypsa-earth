@@ -856,13 +856,6 @@ def get_path(*args):
     return pathlib.Path(*args)
 
 
-def get_posixpath(*args):
-    """
-    It returns a new PosixPath object.
-    """
-    return pathlib.Path(*args)
-
-
 def get_path_size(path):
     """
     It returns the size of a path (in bytes)

@@ -79,7 +79,7 @@ def test_get_path():
     path_name_path_two = get_path(
         pathlib.Path(__file__).parent, "..", "logs", "rule.log"
     )
-    assert file_name_path_one == os.path.join(
+    assert str(file_name_path_one) == os.path.join(
         path_cwd,
         "sub_path_1",
         "sub_path_2",
@@ -89,10 +89,10 @@ def test_get_path():
         "file.nc",
     )
     assert (
-        file_name_path_one
+        str(file_name_path_one)
         == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
     )
-    assert path_name_path_two == str(
+    assert str(path_name_path_two) == str(
         pathlib.Path(__file__).parent.joinpath("..", "logs", "rule.log")
     )
 
