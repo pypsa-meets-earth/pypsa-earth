@@ -103,7 +103,7 @@ def download_GADM(country_code, update=False, out_logging=False):
                 f"Stage 5 of 5: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_gpkg}"
             )
         #  create data/osm directory
-        build_directory(get_dirname_path(GADM_inputfile_gpkg))
+        build_directory(GADM_inputfile_gpkg)
 
         try:
             r = requests.get(GADM_url, stream=True, timeout=300)
@@ -489,7 +489,7 @@ def download_WorldPop_standard(
                 f"Stage 3 of 5: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
             )
         #  create data/osm directory
-        build_directory(get_dirname_path(WorldPop_inputfile))
+        build_directory(WorldPop_inputfile)
 
         loaded = False
         for WorldPop_url in WorldPop_urls:
@@ -536,7 +536,7 @@ def download_WorldPop_API(
     WorldPop_inputfile = get_path(
         get_current_directory_path(), "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
-    build_directory(get_dirname_path(WorldPop_inputfile))
+    build_directory(WorldPop_inputfile)
     year_api = int(str(year)[2:])
     loaded = False
     WorldPop_api_urls = [

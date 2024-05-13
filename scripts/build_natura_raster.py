@@ -45,13 +45,12 @@ merges them to one shapefile, and create a rasterized version of the region, tha
 The output is a raster file with the name `natura.tiff` in the folder `resources/natura/`.
 """
 import os
-import pathlib
 
 import atlite
 import geopandas as gpd
 import numpy as np
 import rasterio as rio
-from _helpers import change_to_script_dir, configure_logging, create_logger, get_path
+from _helpers import change_to_script_dir, configure_logging, create_logger, get_path, is_directory_path
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
@@ -66,9 +65,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
     list_fileshapes = []
     for lf in list_paths:
-        if pathlib.Path(
-            lf
-        ).is_dir():  # if it is a folder, then list all shapes files contained
+        if is_directory_path(lf):  # if it is a folder, then list all shapes files contained
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
                 # loop over all files

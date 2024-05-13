@@ -525,7 +525,7 @@ def mock_snakemake(rulename, **wildcards):
 
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
-        build_directory(get_dirname_path(path))
+        build_directory(path)
 
     os.chdir(script_dir)
     return snakemake
@@ -877,7 +877,12 @@ def build_directory(path):
     Parameters:
         path (str): The path to the file
     """
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
+    # Check if the provided path points to a directory
+    if is_directory_path(path):
+        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+    else:
+        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
 
 
 def change_to_script_dir(path):
@@ -900,4 +905,18 @@ def get_current_directory_path():
     It returns the current directory path.
     """
     return str(pathlib.Path.cwd())
+
+
+def is_directory_path(path):
+    """
+    It returns True if the path points to a directory. False otherwise.
+    """
+    return pathlib.Path(path).is_dir()
+
+
+def is_file_path(path):
+    """
+    It returns True if the path points to a file. False otherwise.
+    """
+    return pathlib.Path(path).is_file()
 

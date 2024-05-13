@@ -11,6 +11,8 @@ from test.conftest import _content_temp_file, get_temp_file
 
 from scripts._helpers import (
     change_to_script_dir,
+    is_directory_path,
+    is_file_path,
     get_abs_path,
     get_basename_abs_path,
     get_current_directory_path,
@@ -87,8 +89,8 @@ def test_get_path():
         "file.nc",
     )
     assert (
-        file_name_path_one
-        == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
+            file_name_path_one
+            == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
     )
     assert path_name_path_two == str(
         pathlib.Path(__file__).parent.joinpath("..", "logs", "rule.log")
@@ -112,3 +114,22 @@ def test_get_current_directory_path():
     path = get_current_directory_path()
     assert path == os.getcwd()
     assert path == path_cwd
+
+
+def test_is_directory_path(tmpdir):
+    """
+    Verify if is_directory_path() returns True when path points to directory
+    """
+    assert is_directory_path(tmpdir)
+    assert is_directory_path(tmpdir) == os.path.isdir(tmpdir)
+    assert not is_directory_path(__file__)
+
+
+def test_is_file_path(get_temp_file, tmpdir):
+    """
+    Verify if is_file_path() returns True when path points to file
+    """
+    path = get_temp_file
+    assert is_file_path(path)
+    assert is_file_path(path) == os.path.isfile(path)
+    assert not is_file_path(tmpdir)

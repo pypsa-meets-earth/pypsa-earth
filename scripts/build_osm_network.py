@@ -877,14 +877,14 @@ def built_network(
     logger.info("Save outputs")
 
     # create clean directory if not already exist
-    build_directory(get_dirname_path(outputs["lines"]))
+    build_directory(outputs["lines"])
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
     to_csv_nafix(converters, outputs["converters"])  # Generate CSV
     to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
 
     # create clean directory if not already exist
-    build_directory(get_dirname_path(outputs["substations"]))
+    build_directory(outputs["substations"])
     # Generate CSV
     to_csv_nafix(buses, outputs["substations"])
 
