@@ -16,7 +16,7 @@ Outputs
 Description
 -----------
 """
-import logging
+
 import os
 
 import cartopy.crs as ccrs

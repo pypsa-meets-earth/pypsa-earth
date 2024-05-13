@@ -9,7 +9,7 @@ exclude: ^(LICENSES)
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.5.0
+  rev: v4.6.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
@@ -49,7 +49,7 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 24.3.0
+  rev: 24.4.2
   hooks:
   # Format Python files
   - id: black
@@ -72,12 +72,12 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.10.0
+  rev: v0.10.1
   hooks:
   - id: snakefmt
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v3.0.1
+  rev: v3.0.2
   hooks:
   - id: reuse
