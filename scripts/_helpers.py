@@ -851,7 +851,7 @@ def get_basename_path(path):
 
 def get_path(*args):
     """
-    It returns a new path string.
+    It returns a new posixPath object.
     """
     return pathlib.Path(*args)
 
