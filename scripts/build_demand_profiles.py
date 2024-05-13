@@ -106,7 +106,6 @@ def get_load_paths_gegis(
     region_load = get_gegis_regions(countries)
 
     load_paths = []
-    walk_paths = []
     load_dir = os.path.join(
         ssp_parentfolder,
         str(ssp),
@@ -117,7 +116,6 @@ def get_load_paths_gegis(
     for continent in region_load:
         for ext in [".nc", ".csv"]:
             load_path = os.path.join(str(load_dir), str(continent) + str(ext))
-            walk_paths.append(load_path)
             if os.path.exists(load_path):
                 load_paths.append(load_path)
                 break
@@ -125,11 +123,9 @@ def get_load_paths_gegis(
     avail_regions = [
         os.path.split(os.path.abspath(pth))[1].split(".nc")[0] for pth in load_paths
     ]
-
-    # TODO Remember to remove after debug
     if len(load_paths) == 0:
         logger.warning(
-            f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}. The paths checked {walk_paths}."
+            f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
         )
 
     return load_paths
