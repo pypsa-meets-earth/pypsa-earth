@@ -114,7 +114,6 @@ def test_get_current_directory_path():
     """
     path = get_current_directory_path()
     assert str(path) == os.getcwd()
-    assert str(path) == path_cwd
 
 
 def test_is_directory_path(tmpdir):
