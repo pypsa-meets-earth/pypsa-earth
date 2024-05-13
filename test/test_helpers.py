@@ -30,8 +30,8 @@ def test_get_abs_path():
     Verify the path returned by get_abs_path()
     """
     abs_file = get_abs_path(__file__)
-    assert abs_file == os.path.abspath(__file__)
-    assert abs_file == __file__
+    assert str(abs_file) == os.path.abspath(__file__)
+    assert str(abs_file) == __file__
 
 
 def test_change_to_script_dir():
@@ -50,9 +50,9 @@ def test_get_dirname_path():
     """
     dir_name_file = get_dirname_path(__file__)
     dir_name_cwd = get_dirname_path(".")
-    assert dir_name_file == os.path.dirname(__file__)
-    assert dir_name_file == path_cwd + "/test"
-    assert dir_name_cwd == "."
+    assert str(dir_name_file) == os.path.dirname(__file__)
+    assert str(dir_name_file) == path_cwd + "/test"
+    assert str(dir_name_cwd) == "."
 
 
 def test_get_basename_abs_path():
@@ -60,8 +60,8 @@ def test_get_basename_abs_path():
     Verify the path returned by get_basename_abs_path()
     """
     base_name_file = get_basename_abs_path(__file__)
-    assert base_name_file == os.path.basename(os.path.abspath(__file__))
-    assert base_name_file == "test_helpers.py"
+    assert str(base_name_file) == os.path.basename(os.path.abspath(__file__))
+    assert str(base_name_file) == "test_helpers.py"
 
 
 def test_get_path():
@@ -103,7 +103,7 @@ def test_get_path_size(get_temp_file):
     Verify the path size (in bytes) returned by get_path_size()
     """
     path = get_temp_file
-    file_size = get_path_size(str(path))
+    file_size = get_path_size(path)
     assert file_size == os.stat(path).st_size
     assert file_size == len(_content_temp_file)
 
@@ -113,8 +113,8 @@ def test_get_current_directory_path():
     Verify the current directory path returned by get_current_directory_path()
     """
     path = get_current_directory_path()
-    assert path == os.getcwd()
-    assert path == path_cwd
+    assert str(path) == os.getcwd()
+    assert str(path) == path_cwd
 
 
 def test_is_directory_path(tmpdir):

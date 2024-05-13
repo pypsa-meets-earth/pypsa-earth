@@ -824,14 +824,14 @@ def get_dirname_path(path):
     """
     It returns the directory name of the path.
     """
-    return str(pathlib.Path(path).parent)
+    return pathlib.Path(path).parent
 
 
 def get_abs_path(path):
     """
     It returns the absolutized version of the path.
     """
-    return str(pathlib.Path(path).absolute())
+    return pathlib.Path(path).absolute()
 
 
 def get_basename_abs_path(path):
@@ -898,7 +898,7 @@ def get_current_directory_path():
     """
     It returns the current directory path.
     """
-    return str(pathlib.Path.cwd())
+    return pathlib.Path.cwd()
 
 
 def is_directory_path(path):
