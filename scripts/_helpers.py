@@ -910,13 +910,17 @@ def get_current_directory_path():
 
 def is_directory_path(path):
     """
-    It returns True if the path points to a directory. False otherwise.
+    It returns True if the path points to a directory.
+
+    False otherwise.
     """
     return pathlib.Path(path).is_dir()
 
 
 def is_file_path(path):
     """
-    It returns True if the path points to a file. False otherwise.
+    It returns True if the path points to a file.
+
+    False otherwise.
     """
     return pathlib.Path(path).is_file()
