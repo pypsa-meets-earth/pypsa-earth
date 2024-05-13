@@ -143,7 +143,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            change_to_script_dir(".") # change to the upper folder
+            change_to_script_dir(".")  # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -887,7 +887,8 @@ def build_directory(path):
 
 def change_to_script_dir(path):
     """
-    Change the current working directory to the directory containing the given script.
+    Change the current working directory to the directory containing the given
+    script.
 
     Parameters:
         path (str): The path to the file.
@@ -919,4 +920,3 @@ def is_file_path(path):
     It returns True if the path points to a file. False otherwise.
     """
     return pathlib.Path(path).is_file()
-

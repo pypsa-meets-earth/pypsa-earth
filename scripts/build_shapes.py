@@ -94,7 +94,11 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = get_path(
-        get_current_directory_path(), "data", "gadm", GADM_filename, GADM_filename + ".gpkg"
+        get_current_directory_path(),
+        "data",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".gpkg",
     )  # Input filepath gpkg
 
     if not pathlib.Path(GADM_inputfile_gpkg).exists() or update is True:
