@@ -20,6 +20,7 @@ from scripts._helpers import (
     get_relative_path,
     is_directory_path,
     is_file_path,
+    path_exists,
 )
 
 path_cwd = str(pathlib.Path.cwd())
@@ -144,3 +145,14 @@ def test_get_relative_path(get_temp_file):
     relative_path = get_relative_path(path, get_path(path).parent)
     assert str(relative_path) == _name_temp_file
     assert str(relative_path) == os.path.relpath(path, start=get_path(path).parent)
+
+
+def test_path_exists(get_temp_file):
+    """
+    Verify if path_exists() returns True when path exists.
+    """
+    path = get_temp_file
+    pathlib_path = get_path(path)
+    assert path_exists(path)
+    assert path_exists(pathlib_path)
+    assert path_exists(path) == os.path.exists(path)

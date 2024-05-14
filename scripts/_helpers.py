@@ -97,7 +97,7 @@ def read_osm_config(*args):
     """
     if "__file__" in globals():
         base_folder = get_dirname_path(__file__)
-        if not pathlib.Path(base_folder, "configs").exists():
+        if not path_exists(get_path(base_folder, "configs")):
             base_folder = get_dirname_path(base_folder)
     else:
         base_folder = get_current_directory_path()
@@ -482,7 +482,7 @@ def mock_snakemake(rulename, **wildcards):
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
-        if pathlib.Path(p).exists():
+        if path_exists(p):
             snakefile = p
             break
     workflow = sm.Workflow(
@@ -926,3 +926,12 @@ def get_relative_path(path, start_path="."):
     Default for start_path is the current directory
     """
     return pathlib.Path(path).relative_to(start_path)
+
+
+def path_exists(path):
+    """
+    It returns True if the path exists.
+
+    False otherwise.
+    """
+    return pathlib.Path(path).exists()
