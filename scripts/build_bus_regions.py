@@ -44,12 +44,19 @@ Description
 """
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pypsa
-import numpy as np
 from scipy.spatial import Voronoi
 from shapely.geometry import Polygon
-from scripts._helpers import REGION_COLS, change_to_script_dir, configure_logging, create_logger, mock_snakemake
+
+from scripts._helpers import (
+    REGION_COLS,
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+)
 
 logger = create_logger(__name__)
 

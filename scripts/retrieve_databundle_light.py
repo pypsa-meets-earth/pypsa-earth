@@ -88,6 +88,9 @@ from zipfile import ZipFile
 import geopandas as gpd
 import pandas as pd
 import yaml
+from google_drive_downloader import GoogleDriveDownloader as gdd
+from tqdm import tqdm
+
 from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
@@ -101,8 +104,6 @@ from scripts._helpers import (
     progress_retrieve,
     sets_path_to_root,
 )
-from google_drive_downloader import GoogleDriveDownloader as gdd
-from tqdm import tqdm
 
 logger = create_logger(__name__)
 

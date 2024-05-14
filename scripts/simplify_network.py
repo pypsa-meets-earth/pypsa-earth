@@ -92,15 +92,6 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from scripts._helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    get_aggregation_strategies,
-    update_p_nom_max, mock_snakemake,
-)
-from scripts.add_electricity import load_costs
-from scripts.cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregategenerators,
     aggregateoneport,
@@ -109,6 +100,17 @@ from pypsa.clustering.spatial import (
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
+
+from scripts._helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_aggregation_strategies,
+    mock_snakemake,
+    update_p_nom_max,
+)
+from scripts.add_electricity import load_costs
+from scripts.cluster_network import cluster_regions, clustering_for_n_clusters
 
 sys.settrace
 

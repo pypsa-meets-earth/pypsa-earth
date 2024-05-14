@@ -82,12 +82,6 @@ import re
 import numpy as np
 import pandas as pd
 import pypsa
-from scripts._helpers import (
-    build_directory,
-    change_to_script_dir,
-    configure_logging,
-    create_logger, mock_snakemake,
-)
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -97,6 +91,14 @@ from pypsa.linopf import (
     join_exprs,
     linexpr,
     network_lopf,
+)
+
+from scripts._helpers import (
+    build_directory,
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
 )
 
 logger = create_logger(__name__)

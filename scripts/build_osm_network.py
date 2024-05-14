@@ -8,6 +8,10 @@
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from shapely.geometry import LineString, Point
+from shapely.ops import linemerge, split
+from tqdm import tqdm
+
 from scripts._helpers import (
     build_directory,
     change_to_script_dir,
@@ -18,9 +22,6 @@ from scripts._helpers import (
     sets_path_to_root,
     to_csv_nafix,
 )
-from shapely.geometry import LineString, Point
-from shapely.ops import linemerge, split
-from tqdm import tqdm
 
 logger = create_logger(__name__)
 

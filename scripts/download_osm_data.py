@@ -29,6 +29,8 @@ Outputs
 import pathlib
 import shutil
 
+from earth_osm import eo
+
 from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
@@ -37,9 +39,8 @@ from scripts._helpers import (
     get_path,
     mock_snakemake,
     read_osm_config,
-    sets_path_to_root
+    sets_path_to_root,
 )
-from earth_osm import eo
 
 logger = create_logger(__name__)
 
