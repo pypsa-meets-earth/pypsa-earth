@@ -65,14 +65,15 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
     get_path,
+    mock_snakemake,
 )
-from add_electricity import load_costs, update_transmission_costs
+from scripts.add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -318,7 +319,6 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake(

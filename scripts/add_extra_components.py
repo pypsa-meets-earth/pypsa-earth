@@ -56,8 +56,8 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import change_to_script_dir, configure_logging, create_logger
-from add_electricity import (
+from scripts._helpers import change_to_script_dir, configure_logging, create_logger, mock_snakemake
+from scripts.add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
     load_costs,
@@ -227,7 +227,6 @@ def attach_hydrogen_pipelines(n, costs, config):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)

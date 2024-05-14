@@ -8,12 +8,11 @@
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from _helpers import (
+from scripts._helpers import (
     build_directory,
     change_to_script_dir,
     configure_logging,
     create_logger,
-    get_dirname_path,
     read_geojson,
     read_osm_config,
     sets_path_to_root,

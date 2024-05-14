@@ -29,13 +29,15 @@ Outputs
 import pathlib
 import shutil
 
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
     get_path,
+    mock_snakemake,
     read_osm_config,
+    sets_path_to_root
 )
 from earth_osm import eo
 
@@ -98,7 +100,6 @@ def convert_iso_to_geofk(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake, sets_path_to_root
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("download_osm_data")

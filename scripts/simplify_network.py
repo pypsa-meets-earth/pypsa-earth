@@ -92,15 +92,15 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
-    update_p_nom_max,
+    update_p_nom_max, mock_snakemake,
 )
-from add_electricity import load_costs
-from cluster_network import cluster_regions, clustering_for_n_clusters
+from scripts.add_electricity import load_costs
+from scripts.cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregategenerators,
     aggregateoneport,
@@ -961,7 +961,6 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("simplify_network", simpl="")

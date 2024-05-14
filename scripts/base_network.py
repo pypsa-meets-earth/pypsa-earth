@@ -64,11 +64,12 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_path_size,
+    mock_snakemake,
     read_csv_nafix,
 )
 from shapely.ops import unary_union
@@ -559,7 +560,6 @@ def base_network(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
 

@@ -48,12 +48,14 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_path,
+    mock_snakemake,
     read_osm_config,
+    sets_path_to_root
 )
 from shapely.prepared import prep
 from shapely.validation import make_valid
@@ -249,7 +251,6 @@ def build_demand_profiles(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake, sets_path_to_root
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_demand_profiles")

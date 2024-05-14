@@ -50,13 +50,16 @@ import atlite
 import geopandas as gpd
 import numpy as np
 import rasterio as rio
-from _helpers import (
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_path,
     is_directory_path,
+    mock_snakemake,
 )
+import pandas as pd
+from shapely.ops import unary_union
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 
@@ -127,9 +130,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     -------
     unified_shape : GeoDataFrame with a unified "multishape"
     """
-    import pandas as pd
-    from shapely.ops import unary_union
-    from shapely.validation import make_valid
 
     if out_logging:
         logger.info("Stage 3/5: Unify protected shape area.")
@@ -184,7 +184,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake(

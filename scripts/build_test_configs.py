@@ -15,7 +15,7 @@ tutorial config.
 import collections.abc
 import copy
 
-from _helpers import change_to_script_dir, get_current_directory_path, get_path
+from scripts._helpers import change_to_script_dir, get_current_directory_path, get_path, mock_snakemake
 from ruamel.yaml import YAML
 
 
@@ -85,7 +85,6 @@ def create_test_config(default_config, diff_config, output_path):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_test_configs")
