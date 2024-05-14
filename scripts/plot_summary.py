@@ -19,7 +19,14 @@ Description
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from scripts._helpers import change_to_script_dir, configure_logging, create_logger, get_path, mock_snakemake
+
+from scripts._helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_path,
+    mock_snakemake,
+)
 
 logger = create_logger(__name__)
 

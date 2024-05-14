@@ -65,6 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
+
 from scripts._helpers import (
     change_to_script_dir,
     configure_logging,

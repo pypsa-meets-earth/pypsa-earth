@@ -49,7 +49,12 @@ import os
 import atlite
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import rasterio as rio
+from rasterio.features import geometry_mask
+from rasterio.warp import transform_bounds
+from shapely.ops import unary_union
+
 from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
@@ -58,10 +63,6 @@ from scripts._helpers import (
     is_directory_path,
     mock_snakemake,
 )
-import pandas as pd
-from shapely.ops import unary_union
-from rasterio.features import geometry_mask
-from rasterio.warp import transform_bounds
 
 logger = create_logger(__name__)
 

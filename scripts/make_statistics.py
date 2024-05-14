@@ -29,19 +29,20 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
+from shapely.validation import make_valid
+
 from scripts._helpers import (
     change_to_script_dir,
-    create_logger,
     create_country_list,
-    three_2_two_digits_country,
+    create_logger,
     get_path_size,
     is_file_path,
     mock_snakemake,
     sets_path_to_root,
+    three_2_two_digits_country,
     to_csv_nafix,
 )
 from scripts.build_test_configs import create_test_config
-from shapely.validation import make_valid
 
 logger = create_logger(__name__)
 

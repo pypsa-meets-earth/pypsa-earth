@@ -56,7 +56,13 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 import numpy as np
 import pandas as pd
 import pypsa
-from scripts._helpers import change_to_script_dir, configure_logging, create_logger, mock_snakemake
+
+from scripts._helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+)
 from scripts.add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
