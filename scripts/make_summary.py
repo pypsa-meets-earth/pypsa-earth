@@ -55,7 +55,13 @@ import pathlib
 
 import pandas as pd
 import pypsa
-from _helpers import build_directory, change_to_script_dir, configure_logging, get_path, path_exists
+from _helpers import (
+    build_directory,
+    change_to_script_dir,
+    configure_logging,
+    get_path,
+    path_exists,
+)
 from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
