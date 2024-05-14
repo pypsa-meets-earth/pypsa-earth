@@ -4,7 +4,7 @@
 
 import sys
 
-sys.path.append("./scripts")
+#sys.path.append("./scripts")
 
 from os.path import normpath, exists
 from shutil import copyfile, move
