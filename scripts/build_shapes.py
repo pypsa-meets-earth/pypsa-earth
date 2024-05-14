@@ -18,6 +18,19 @@ import pandas as pd
 import rasterio
 import requests
 import xarray as xr
+from _helpers import (
+    build_directory,
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_current_directory_path,
+    get_dirname_path,
+    get_path,
+    sets_path_to_root,
+    three_2_two_digits_country,
+    two_2_three_digits_country,
+    two_digits_2_name_country,
+)
 from numba import njit
 from numba.core import types
 from numba.typed import Dict
@@ -27,21 +40,6 @@ from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
-
-from scripts._helpers import (
-    build_directory,
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    get_current_directory_path,
-    get_dirname_path,
-    get_path,
-    mock_snakemake,
-    sets_path_to_root,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
-    two_digits_2_name_country,
-)
 
 sets_path_to_root("pypsa-earth")
 
@@ -1316,6 +1314,7 @@ def gadm(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_shapes")

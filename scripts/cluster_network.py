@@ -129,27 +129,24 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as po
 import pypsa
+from _helpers import (
+    REGION_COLS,
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_aggregation_strategies,
+    sets_path_to_root,
+    update_p_nom_max,
+)
+from add_electricity import load_costs
+from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
-from scipy.sparse import csgraph
 from shapely.geometry import Point
-
-from scripts._helpers import (
-    REGION_COLS,
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    get_aggregation_strategies,
-    mock_snakemake,
-    sets_path_to_root,
-    update_p_nom_max,
-)
-from scripts.add_electricity import load_costs
-from scripts.build_shapes import add_gdp_data, add_population_data
 
 idx = pd.IndexSlice
 
@@ -432,6 +429,7 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("random_state", 0)
 
     def fix_country_assignment_for_hac(n):
+        from scipy.sparse import csgraph
 
         # overwrite country of nodes that are disconnected from their country-topology
         for country in n.buses.country.unique():
@@ -658,6 +656,7 @@ def cluster_regions(busmaps, inputs, output):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake(

@@ -55,15 +55,8 @@ import pathlib
 
 import pandas as pd
 import pypsa
-
-from scripts._helpers import (
-    build_directory,
-    change_to_script_dir,
-    configure_logging,
-    get_path,
-    mock_snakemake,
-)
-from scripts.add_electricity import create_logger, load_costs, update_transmission_costs
+from _helpers import build_directory, change_to_script_dir, configure_logging, get_path
+from add_electricity import create_logger, load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -541,6 +534,7 @@ def to_csv(dfs, dir):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake(

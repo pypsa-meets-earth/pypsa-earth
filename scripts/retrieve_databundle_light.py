@@ -88,10 +88,7 @@ from zipfile import ZipFile
 import geopandas as gpd
 import pandas as pd
 import yaml
-from google_drive_downloader import GoogleDriveDownloader as gdd
-from tqdm import tqdm
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_country_list,
@@ -100,10 +97,11 @@ from scripts._helpers import (
     get_current_directory_path,
     get_path,
     get_relative_path,
-    mock_snakemake,
     progress_retrieve,
     sets_path_to_root,
 )
+from google_drive_downloader import GoogleDriveDownloader as gdd
+from tqdm import tqdm
 
 logger = create_logger(__name__)
 
@@ -817,6 +815,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 if __name__ == "__main__":
     if "snakemake" not in globals():
         change_to_script_dir(__file__)
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_databundle_light")
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)

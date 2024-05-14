@@ -73,17 +73,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 import seaborn as sns
+from _helpers import change_to_script_dir, configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
-from sklearn.preprocessing import MinMaxScaler, minmax_scale
-
-from scripts._helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    mock_snakemake,
-)
-from scripts.solve_network import *
+from sklearn.preprocessing import MinMaxScaler
+from solve_network import *
 
 logger = create_logger(__name__)
 sns.set(style="whitegrid")
@@ -105,6 +99,8 @@ def monte_carlo_sampling_pydoe2(
     Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
     Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     """
+    from pyDOE2 import lhs
+    from scipy.stats import qmc
 
     # Generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     lh = lhs(
@@ -138,6 +134,7 @@ def monte_carlo_sampling_chaospy(
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
     """
+    from scipy.stats import qmc
 
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
@@ -179,6 +176,7 @@ def monte_carlo_sampling_scipy(
     Documentation for Latin Hypercube: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.LatinHypercube.html#scipy.stats.qmc.LatinHypercube
     Orthogonal LHS is better than basic LHS: https://github.com/scipy/scipy/pull/14546/files, https://en.wikipedia.org/wiki/Latin_hypercube_sampling
     """
+    from scipy.stats import qmc
 
     sampler = qmc.LatinHypercube(
         d=N_FEATURES,
@@ -232,6 +230,8 @@ def rescale_distribution(
     - The function supports rescaling for uniform, normal, lognormal, triangle, beta, and gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
+    from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
+    from sklearn.preprocessing import MinMaxScaler, minmax_scale
 
     for idx, value in enumerate(uncertainties_values):
         dist = value.get("type")
@@ -346,6 +346,7 @@ def validate_parameters(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake(

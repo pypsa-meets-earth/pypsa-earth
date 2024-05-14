@@ -29,20 +29,17 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from shapely.validation import make_valid
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
-    create_country_list,
     create_logger,
     get_path_size,
     is_file_path,
     mock_snakemake,
     sets_path_to_root,
-    three_2_two_digits_country,
     to_csv_nafix,
 )
-from scripts.build_test_configs import create_test_config
+from build_test_configs import create_test_config
+from shapely.validation import make_valid
 
 logger = create_logger(__name__)
 
@@ -80,6 +77,7 @@ def generate_scenario_by_country(
         out_dir : str (optional)
             Output directory where output configuration files are executed
     """
+    from _helpers import create_country_list, three_2_two_digits_country
 
     clean_country_list = create_country_list(country_list)
 
@@ -587,6 +585,7 @@ def calculate_stats(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("make_statistics")
