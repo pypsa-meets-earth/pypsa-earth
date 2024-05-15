@@ -6,6 +6,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import shutil
+import zipfile
+
+import fiona
+import numpy as np
 import os
 import subprocess
 import sys
@@ -14,7 +19,10 @@ from pathlib import Path
 import country_converter as coco
 import geopandas as gpd
 import pandas as pd
+import requests
 import yaml
+from vresutils.costdata import annuity
+from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +120,7 @@ def read_osm_config(*args):
         return tuple([osm_config[a] for a in args])
 
 
-def sets_path_to_root(root_directory_name):
+def sets_path_to_root(root_directory_name):  # SAME AS IN pypsa-earth-sec
     """
     Search and sets path to the given root directory (root/path/file).
 
@@ -456,7 +464,7 @@ def get_aggregation_strategies(aggregation_strategies):
     return bus_strategies, generator_strategies
 
 
-def mock_snakemake(rulename, **wildcards):
+def mock_snakemake(rulename, **wildcards):  # SAME AS IN pypsa-earth-sec
     """
     This function is expected to be executed from the "scripts"-directory of "
     the snakemake project. It returns a snakemake.script.Snakemake object,
@@ -610,7 +618,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
         # return the merged string
         full_name = " ".join(splits)
 
-    # when list is non empty
+    # when list is non-empty
     if remove_start_words:
         # loop over every provided word
         for word in remove_start_words:
@@ -645,7 +653,7 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-def read_csv_nafix(file, **kwargs):
+def read_csv_nafix(file, **kwargs):  # SAME AS IN pypsa-earth-sec
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" not in kwargs:
         kwargs["keep_default_na"] = False
@@ -821,3 +829,413 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
+
+def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):  # COPIED FROM pypsa-earth-sec
+    # set all asset costs and other parameters
+    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
+
+    # correct units to MW and EUR
+    costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
+    costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
+
+    # min_count=1 is important to generate NaNs which are then filled by fillna
+    costs = (
+        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    )
+    costs = costs.fillna(
+        {
+            "CO2 intensity": 0,
+            "FOM": 0,
+            "VOM": 0,
+            "discount rate": discount_rate,
+            "efficiency": 1,
+            "fuel": 0,
+            "investment": 0,
+            "lifetime": lifetime,
+        }
+    )
+
+    def annuity_factor(v):
+        return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
+
+    costs["fixed"] = [
+        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
+    ]
+
+    return costs
+
+
+def create_network_topology(n, prefix, like="ac", connector=" <-> ", bidirectional=True):  # COPIED FROM pypsa-earth-sec
+    """
+    Create a network topology like the power transmission network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    prefix : str
+    connector : str
+    bidirectional : bool, default True
+        True: one link for each connection
+        False: one link for each connection and direction (back and forth)
+
+    Returns
+    -------
+    pd.DataFrame with columns bus0, bus1 and length
+    """
+
+    ln_attrs = ["bus0", "bus1", "length"]
+    lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
+
+    # TODO: temporary fix for whan underwater_fraction is not found
+    if "underwater_fraction" not in n.links.columns:
+        if n.links.empty:
+            n.links["underwater_fraction"] = None
+        else:
+            n.links["underwater_fraction"] = 0.0
+
+    candidates = pd.concat(
+        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
+    ).fillna(0)
+
+    positive_order = candidates.bus0 < candidates.bus1
+    candidates_p = candidates[positive_order]
+    swap_buses = {"bus0": "bus1", "bus1": "bus0"}
+    candidates_n = candidates[~positive_order].rename(columns=swap_buses)
+    candidates = pd.concat([candidates_p, candidates_n])
+
+    def make_index(c):
+        return prefix + c.bus0 + connector + c.bus1
+
+    topo = candidates.groupby(["bus0", "bus1"], as_index=False).mean()
+    topo.index = topo.apply(make_index, axis=1)
+
+    if not bidirectional:
+        topo_reverse = topo.copy()
+        topo_reverse.rename(columns=swap_buses, inplace=True)
+        topo_reverse.index = topo_reverse.apply(make_index, axis=1)
+        topo = pd.concat([topo, topo_reverse])
+
+    return topo
+
+
+def cycling_shift(df, steps=1):  # TAKEN FROM pypsa-earth-sec
+    """Cyclic shift on index of pd.Series|pd.DataFrame by number of steps"""
+    df = df.copy()
+    new_index = np.roll(df.index, steps)
+    df.values[:] = df.reindex(index=new_index).values
+    return df
+
+
+def download_gadm(country_code, update=False, out_logging=False):
+    """
+    Download gpkg file from GADM for a given country code
+
+    Parameters
+    ----------
+    country_code : str
+        Two letter country codes of the downloaded files
+    update : bool
+        Update = true, forces re-download of files
+
+    Returns
+    -------
+    gpkg file per country
+
+    """
+
+    GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
+    GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
+    _logger = logging.getLogger(__name__)
+    GADM_inputfile_zip = os.path.join(
+        os.getcwd(),
+        "data",
+        "raw",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".zip",
+    )  # Input filepath zip
+
+    GADM_inputfile_gpkg = os.path.join(
+        os.getcwd(),
+        "data",
+        "raw",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".gpkg",
+    )  # Input filepath gpkg
+
+    if not os.path.exists(GADM_inputfile_gpkg) or update is True:
+        if out_logging:
+            _logger.warning(
+                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
+            )
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
+
+        with requests.get(GADM_url, stream=True) as r:
+            with open(GADM_inputfile_zip, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
+            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
+
+    return GADM_inputfile_gpkg, GADM_filename
+
+
+def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
+    """
+    Function to retrive a specific layer id of a geopackage for a selection of countries
+
+    Parameters
+    ----------
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+
+    """
+    # initialization of the list of geodataframes
+    geodf_list = []
+
+    for country_code in country_list:
+        # download file gpkg
+        file_gpkg, name_file = download_gadm(country_code, update, outlogging)
+
+        # get layers of a geopackage
+        list_layers = fiona.listlayers(file_gpkg)
+
+        # get layer name
+        if layer_id < 0 | layer_id >= len(list_layers):
+            # when layer id is negative or larger than the number of layers, select the last layer
+            layer_id = len(list_layers) - 1
+        code_layer = np.mod(layer_id, len(list_layers))
+        layer_name = (
+            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        )
+
+        # read gpkg file
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+
+        # convert country name representation of the main country (GID_0 column)
+        geodf_temp["GID_0"] = [
+            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
+        ]
+
+        # create a subindex column that is useful
+        # in the GADM processing of sub-national zones
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
+
+        # concatenate geodataframes
+        geodf_list = pd.concat([geodf_list, geodf_temp])
+
+    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
+
+    return geodf_GADM
+
+
+def locate_bus(
+    coords,
+    co,
+    gadm_level,
+    path_to_gadm=None,
+    gadm_clustering=False,
+    col="name",
+):
+    """
+    Function to locate the right node for a coordinate set
+    input coords of point
+    Parameters
+    ----------
+    coords: pandas dataseries
+        dataseries with 2 rows x & y representing the longitude and latitude
+    co: string (code for country where coords are MA Morocco)
+        code of the countries where the coordinates are
+    """
+    col = "name"
+    if not gadm_clustering:
+        gdf = gpd.read_file(path_to_gadm)
+    else:
+        if path_to_gadm:
+            gdf = gpd.read_file(path_to_gadm)
+            if "GADM_ID" in gdf.columns:
+                col = "GADM_ID"
+
+                if gdf[col][0][
+                    :3
+                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                    gdf[col] = gdf[col].apply(
+                        lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                    )
+        else:
+            gdf = get_gadm_layer(co, gadm_level)
+            col = "GID_{}".format(gadm_level)
+
+        # gdf.set_index("GADM_ID", inplace=True)
+    gdf_co = gdf[
+        gdf[col].str.contains(co)
+    ]  # geodataframe of entire continent - output of prev function {} are placeholders
+    # in strings - conditional formatting
+    # insert any variable into that place using .format - extract string and filter for those containing co (MA)
+    point = Point(coords["x"], coords["y"])  # point object
+
+    try:
+        return gdf_co[gdf_co.contains(point)][
+            col
+        ].item()  # filter gdf_co which contains point and returns the bus
+
+    except ValueError:
+        return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
+            col
+        ].item()  # looks for closest one shape=node
+
+
+def get_conv_factors(sector):
+    """
+    Create a dictionary with all the conversion factors from ktons or m3 to TWh based on
+    https://unstats.un.org/unsd/energy/balance/2014/05.pdf
+    """
+    if sector == "industry":
+        return {
+            "Gas Oil/ Diesel Oil": 0.01194,
+            "Motor Gasoline": 0.01230,
+            "Kerosene-type Jet Fuel": 0.01225,
+            "Aviation gasoline": 0.01230,
+            "Biodiesel": 0.01022,
+            "Natural gas liquids": 0.01228,
+            "Biogasoline": 0.007444,
+            "Bitumen": 0.01117,
+            "Fuel oil": 0.01122,
+            "Liquefied petroleum gas (LPG)": 0.01313,
+            "Liquified Petroleum Gas (LPG)": 0.01313,
+            "Lubricants": 0.01117,
+            "Naphtha": 0.01236,
+            "Fuelwood": 0.00254,
+            "Charcoal": 0.00819,
+            "Patent fuel": 0.00575,
+            "Brown coal briquettes": 0.00575,
+            "Hard coal": 0.007167,
+            "Hrad coal": 0.007167,
+            "Other bituminous coal": 0.005556,
+            "Anthracite": 0.005,
+            "Peat": 0.00271,
+            "Peat products": 0.00271,
+            "Lignite": 0.003889,
+            "Brown coal": 0.003889,
+            "Sub-bituminous coal": 0.005555,
+            "Coke-oven coke": 0.0078334,
+            "Coke oven coke": 0.0078334,
+            "Coke Oven Coke": 0.0078334,
+            "Gasoline-type jet fuel": 0.01230,
+            "Conventional crude oil": 0.01175,
+            "Brown Coal Briquettes": 0.00575,
+            "Refinery Gas": 0.01375,
+            "Petroleum coke": 0.009028,
+            "Coking coal": 0.007833,
+            "Peat Products": 0.00271,
+            "Petroleum Coke": 0.009028,
+            "Additives and Oxygenates": 0.008333,
+            "Bagasse": 0.002144,
+            "Bio jet kerosene": 0.011111,
+            "Crude petroleum": 0.011750,
+            "Gas coke": 0.007326,
+            "Gas Coke": 0.007326,
+            "Refinery gas": 0.01375,
+            "Coal Tar": 0.007778,
+        }
+    else:
+        logger.info(f"No conversion factors available for sector {sector}")
+        return None
+
+
+def aggregate_fuels(sector):
+    gas_fuels = [
+        "Blast Furnace Gas",
+        "Biogases",
+        "Biogasoline",
+        "Coke Oven Gas",
+        "Gas Coke",
+        "Gasworks Gas",
+        "Natural gas (including LNG)",
+        "Natural Gas (including LNG)",
+        "Natural gas liquids",
+        "Refinery gas",
+    ]
+
+    oil_fuels = [
+        "Biodiesel",
+        "Motor Gasoline",
+        "Liquefied petroleum gas (LPG)",
+        "Liquified Petroleum Gas (LPG)",
+        "Fuel oil",
+        "Kerosene-type Jet Fuel",
+        "Conventional crude oil",
+        "Crude petroleum",
+        "Lubricants",
+        "Naphtha",
+        "Gas Oil/ Diesel Oil",
+        "Black Liquor",
+    ]
+
+    coal_fuels = [
+        "Anthracite",
+        "Brown coal",
+        "Brown coal briquettes",
+        "Coke-oven coke",
+        "Coke Oven Coke",
+        "Hard coal",
+        "Other bituminous coal",
+        "Sub-bituminous coal",
+        "Coking coal",
+        "Bitumen",
+    ]
+
+    biomass_fuels = [
+        "Bagasse",
+        "Fuelwood",
+    ]
+
+    coal_fuels = [
+        "Anthracite",
+        "Charcoal",
+        "Coke oven coke",
+        "Coke-oven coke",
+        "Coke Oven Coke",
+        "Coking coal",
+        "Hard coal",
+        "Other bituminous coal",
+        "Petroleum coke",
+        "Petroleum Coke",
+        "Hrad coal",
+        "Lignite",
+        "Peat",
+        "Peat products",
+    ]
+
+    electricity = ["Electricity"]
+
+    heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
+
+    return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
+
+
+def safe_divide(numerator, denominator, default_value=np.nan):
+    """
+    Safe division function that returns NaN when the denominator is zero
+    """
+    if denominator != 0.0:
+        return numerator / denominator
+    else:
+        logging.warning(
+            f"Division by zero: {numerator} / {denominator}, returning NaN."
+        )
+        return np.nan
+
+# NOTES
+
+#def create_dummy_data(n, sector, carriers): --> not copied from pypsa-earth-sec because it is not used there
+# def override_component_attrs(directory):  # --> maybe already implemented in pypsa
+# def get_country(target, **keys): --> not needed as two_2_three_digits_country, three_2_two_digits_country, two_digits_2_name_country do not use it
