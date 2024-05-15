@@ -23,6 +23,8 @@ import requests
 import yaml
 from vresutils.costdata import annuity
 from shapely.geometry import Point
+import snakemake as sm
+from pypsa.descriptors import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -446,7 +448,6 @@ def get_aggregation_strategies(aggregation_strategies):
     the function's definition) they get lost when custom values are specified
     in the config.
     """
-    import numpy as np
 
     # to handle the new version of PyPSA.
     try:
@@ -480,11 +481,6 @@ def mock_snakemake(rulename, **wildcards):  # SAME AS IN pypsa-earth-sec
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
-    import os
-
-    import snakemake as sm
-    from pypsa.descriptors import Dict
-    from snakemake.script import Snakemake
 
     script_dir = Path(__file__).parent.resolve()
     assert (
