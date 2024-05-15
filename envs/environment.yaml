@@ -16,7 +16,7 @@ dependencies:
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
 - powerplantmatching>=0.5.7
-- earth-osm>=0.1.0, <0.2.0
+- earth-osm>=2.1
 - atlite
 
   # Dependencies of the workflow itself
@@ -37,7 +37,7 @@ dependencies:
 - networkx
 - scipy
 - pydoe2
-- shapely>=2
+- shapely!=2.0.4
 - pre-commit
 - pyomo
 - matplotlib<=3.5.2

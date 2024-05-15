@@ -5,7 +5,6 @@
 
 # -*- coding: utf-8 -*-
 
-import logging
 import os
 
 import geopandas as gpd
@@ -47,6 +46,9 @@ def prepare_substation_df(df_all_substations):
             "lonlat": "geometry",
         }
     )
+
+    # Convert polygons to points
+    df_all_substations["geometry"] = df_all_substations["geometry"].centroid
 
     # Add longitude (lon) and latitude (lat) coordinates in the dataset
     df_all_substations["lon"] = df_all_substations["geometry"].x
@@ -728,10 +730,8 @@ def filter_lines_by_geometry(df_all_lines):
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
-    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
-    df_all_lines = df_all_lines[
-        df_all_lines["geometry"].map(lambda g: len(g.boundary.geoms) >= 2)
-    ]
+    # remove lines represented as Polygons
+    df_all_lines = df_all_lines[df_all_lines.geometry.geom_type == "LineString"]
 
     return df_all_lines
 
