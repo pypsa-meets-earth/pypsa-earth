@@ -96,7 +96,6 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
-    get_aggregation_strategies,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -859,19 +858,28 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     if (busmap.index == busmap).all():
         return n, n.buses.index.to_series()
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
-
+    line_strategies = aggregation_strategies.get("lines", dict())
+    line_strategies.update({"geometry": "first", "bounds": "first"})
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
+    
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
+        line_strategies=line_strategies,
+        bus_strategies={
+            "lat": "mean",
+            "lon": "mean",
+            "tag_substation": "first",
+            "tag_area": "first",
+            "country": "first",
+        },
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
 
