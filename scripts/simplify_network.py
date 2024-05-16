@@ -93,11 +93,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import (
-    configure_logging,
-    create_logger,
-    update_p_nom_max,
-)
+from _helpers import configure_logging, create_logger, update_p_nom_max
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
@@ -862,7 +858,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
-    
+
     clustering = get_clustering_from_busmap(
         n,
         busmap,
