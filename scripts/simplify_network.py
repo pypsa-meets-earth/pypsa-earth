@@ -1131,7 +1131,7 @@ if __name__ == "__main__":
         n, fetched_nodes_map = merge_into_network(
             n,
             threshold=s_threshold_fetch_isolated,
-            aggregation_strategies=aggregation_strategies,
+            aggregation_strategies=snakemake.params.aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
 
