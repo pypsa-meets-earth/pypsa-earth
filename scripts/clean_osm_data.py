@@ -526,7 +526,7 @@ def fill_circuits(df):
        the cables elements are downscaled and the last values of cables
        are summed.
        Let's assume that cables is [3,3,3] but frequency is [50,50].
-       With this procedures, cables is treated as [3,6] and used for
+       With this procedure, cables is treated as [3,6] and used for
        calculating the circuits
     4. Where the number in cables has an unique number, e.g. ['6'],
        but frequency does not, e.g. ['50', '50'],
@@ -638,6 +638,7 @@ def fill_circuits(df):
         lambda x: ";".join([str(x["multiplier"] * v) for v in x["basic_cables"]]),
         axis=1,
     )
+    df["circuits"] = df["circuits"].astype(str)
     df.loc[filled_values.index, "circuits"] = filled_values
 
     # otherwise assume a circuit per element
@@ -666,7 +667,7 @@ def explode_rows(df, cols):
     row 2: 50, 110000
     """
     # check if all row elements are list
-    is_all_list = df[cols].applymap(lambda x: isinstance(x, list)).all(axis=1)
+    is_all_list = df[cols].map(lambda x: isinstance(x, list)).all(axis=1)
     if not is_all_list.all():
         df_nonlist = df[~is_all_list]
         logger.warning(
@@ -675,7 +676,7 @@ def explode_rows(df, cols):
         df.drop(df_nonlist.index, inplace=True)
 
     # check if errors in the columns
-    nunique_values = df[cols].applymap(len).nunique(axis=1)
+    nunique_values = df[cols].map(len).nunique(axis=1)
     df_nunique = df[nunique_values != 1]
     if not df_nunique.empty:
         logger.warning(
@@ -855,7 +856,7 @@ def load_network_data(network_asset, data_options):
 
     # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)
     try:
-        cleanning_data_options = data_options[f"use_custom_{network_asset}"]
+        cleaning_data_options = data_options[f"use_custom_{network_asset}"]
         custom_path = data_options[f"path_custom_{network_asset}"]
 
     except:
@@ -864,16 +865,16 @@ def load_network_data(network_asset, data_options):
         )
 
     # creates a dataframe for the network_asset defined
-    if cleanning_data_options == "custom_only":
+    if cleaning_data_options == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
-    elif cleanning_data_options == "add_custom":
+    elif cleaning_data_options == "add_custom":
         loaded_df1 = gpd.read_file(input_files[network_asset])
         loaded_df2 = gpd.read_file(custom_path)
         loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
 
     else:
-        if cleanning_data_options != "OSM_only":
+        if cleaning_data_options != "OSM_only":
             logger.warning(
                 f"Unrecognized option {data_options} for handling custom data of {network_asset}."
                 + "Default OSM_only option used. Options available in clean_OSM_data_options configtable"
