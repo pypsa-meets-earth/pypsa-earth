@@ -323,9 +323,11 @@ def attach_wind_and_solar(
 
         if tech == "offwind-ac":
             # add all offwind wind power plants by default as offwind-ac
-            df.carrier.mask(df.technology == "Offshore", "offwind-ac", inplace=True)
+            df["carrier"] = df["carrier"].mask(
+                df.technology == "Offshore", "offwind-ac"
+            )
 
-        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
+        df["carrier"] = df["carrier"].mask(df.technology == "Onshore", "onwind")
 
         with xr.open_dataset(getattr(input_files, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
