@@ -21,6 +21,7 @@ import geopandas as gpd
 import pandas as pd
 import requests
 import yaml
+from snakemake.script import Snakemake
 from vresutils.costdata import annuity
 from shapely.geometry import Point
 import snakemake as sm
