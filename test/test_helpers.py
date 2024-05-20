@@ -6,8 +6,10 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
+import numpy as np
 from scripts._helpers import (
     country_name_2_two_digits,
+    safe_divide,
     sets_path_to_root,
     two_2_three_digits_country,
     two_digits_2_name_country,
@@ -80,3 +82,11 @@ def test_country_name_2_two_digits():
     assert "DE" == country_name_2_two_digits("Germany")
     # Micronesia (Federated States of)
     assert "FM" == country_name_2_two_digits("Micronesia")
+
+
+def test_safe_divide():
+    """
+    Verify that the method safe_divide prevents divisions by vanishing denominator
+    """
+    assert safe_divide(3.0,2.0) == 1.5
+    assert np.isnan(safe_divide(3.0, 0.0))

@@ -1092,56 +1092,54 @@ def locate_bus(
 
 def get_conv_factors(sector):
     """
-    Create a dictionary with all the conversion factors from ktons or m3 to TWh based on
-    https://unstats.un.org/unsd/energy/balance/2014/05.pdf
+    Create a dictionary with all the conversion factors for the standard net calorific value
+    from Tera Joule per Kilo Metric-ton to Tera Watt-hour based on
+    https://unstats.un.org/unsd/energy/balance/2014/05.pdf.
+
+    Considering that 1 Watt-hour = 3600 Joule, one obtains the values below dividing
+    the standard net calorific values from the pdf by 3600.
+
+    For example, the value "hard coal": 0.007167 is given by 25.8 / 3600, where 25.8 is the standard
+    net calorific value.
     """
     if sector == "industry":
         return {
-            "Gas Oil/ Diesel Oil": 0.01194,
-            "Motor Gasoline": 0.01230,
-            "Kerosene-type Jet Fuel": 0.01225,
-            "Aviation gasoline": 0.01230,
-            "Biodiesel": 0.01022,
-            "Natural gas liquids": 0.01228,
-            "Biogasoline": 0.007444,
-            "Bitumen": 0.01117,
-            "Fuel oil": 0.01122,
-            "Liquefied petroleum gas (LPG)": 0.01313,
-            "Liquified Petroleum Gas (LPG)": 0.01313,
-            "Lubricants": 0.01117,
-            "Naphtha": 0.01236,
-            "Fuelwood": 0.00254,
-            "Charcoal": 0.00819,
-            "Patent fuel": 0.00575,
-            "Brown coal briquettes": 0.00575,
-            "Hard coal": 0.007167,
-            "Hrad coal": 0.007167,
-            "Other bituminous coal": 0.005556,
-            "Anthracite": 0.005,
-            "Peat": 0.00271,
-            "Peat products": 0.00271,
-            "Lignite": 0.003889,
-            "Brown coal": 0.003889,
-            "Sub-bituminous coal": 0.005555,
-            "Coke-oven coke": 0.0078334,
-            "Coke oven coke": 0.0078334,
-            "Coke Oven Coke": 0.0078334,
-            "Gasoline-type jet fuel": 0.01230,
-            "Conventional crude oil": 0.01175,
-            "Brown Coal Briquettes": 0.00575,
-            "Refinery Gas": 0.01375,
-            "Petroleum coke": 0.009028,
-            "Coking coal": 0.007833,
-            "Peat Products": 0.00271,
-            "Petroleum Coke": 0.009028,
-            "Additives and Oxygenates": 0.008333,
-            "Bagasse": 0.002144,
-            "Bio jet kerosene": 0.011111,
-            "Crude petroleum": 0.011750,
-            "Gas coke": 0.007326,
-            "Gas Coke": 0.007326,
-            "Refinery gas": 0.01375,
-            "Coal Tar": 0.007778,
+            "additives and oxygenates": 0.008333,
+            "anthracite": 0.005,
+            "aviation gasoline": 0.01230,
+            "bagasse": 0.002144,
+            "biodiesel": 0.01022,
+            "biogasoline": 0.007444,
+            "bio jet kerosene": 0.011111,
+            "bitumen": 0.01117,
+            "brown coal": 0.003889,
+            "brown coal briquettes": 0.00575,
+            "charcoal": 0.00819,
+            "coal tar": 0.007778,
+            "coke oven coke": 0.0078334,
+            "coking coal": 0.007833,
+            "conventional crude oil": 0.01175,
+            "crude petroleum": 0.011750,
+            "fuel oil": 0.01122,
+            "fuelwood": 0.00254,
+            "gas coke": 0.007326,
+            "gas oil / diesel oil": 0.01194,
+            "gasoline type jet fuel": 0.01230,
+            "hard coal": 0.007167,
+            "kerosene type jet fuel": 0.01225,
+            "lignite": 0.003889,
+            "liquefied petroleum gas (LPG)": 0.01313,
+            "lubricants": 0.01117,
+            "motor gasoline": 0.01230,
+            "naphtha": 0.01236,
+            "natural gas liquids": 0.01228,
+            "other bituminous coal": 0.005556,
+            "patent fuel": 0.00575,
+            "peat": 0.00271,
+            "peat products": 0.00271,
+            "petroleum coke": 0.009028,
+            "refinery gas": 0.01375,
+            "sub bituminous coal": 0.005555,
         }
     else:
         logger.info(f"No conversion factors available for sector {sector}")
@@ -1219,7 +1217,7 @@ def aggregate_fuels(sector):
     return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
 
 
-def safe_divide(numerator, denominator, default_value=np.nan):
+def safe_divide(numerator, denominator):
     """
     Safe division function that returns NaN when the denominator is zero
     """
