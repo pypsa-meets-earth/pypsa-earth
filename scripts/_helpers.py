@@ -1143,7 +1143,7 @@ def get_conv_factors(sector):
         }
     else:
         logger.info(f"No conversion factors available for sector {sector}")
-        return None
+        return np.nan
 
 
 def aggregate_fuels(sector):
