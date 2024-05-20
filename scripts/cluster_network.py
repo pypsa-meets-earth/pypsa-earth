@@ -551,7 +551,7 @@ def busmap_for_n_clusters(
             ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
             group_keys=False,
         )
-        .apply(busmap_for_country)
+        .apply(busmap_for_country, include_groups=False)
         .squeeze(axis=0)
         .rename("busmap")
     )
