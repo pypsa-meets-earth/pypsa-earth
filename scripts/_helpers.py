@@ -580,7 +580,7 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country, name_string="name_short", nocomma=False, remove_start_words=[]):
+def two_digits_2_name_country(two_code_country, name_string="name_short", no_comma=False, remove_start_words=[]):
     """
     Convert 2-digit country code to full name country:
 
@@ -588,7 +588,10 @@ def two_digits_2_name_country(two_code_country, name_string="name_short", nocomm
     ----------
     two_code_country: str
         2-digit country name
-    nocomma: bool (optional, default False)
+    name_string: str (optional, default name_short)
+        When name_short    CD -> DR Congo
+        When name_official CD -> Democratic Republic of the Congo
+    no_comma: bool (optional, default False)
         When true, country names with comma are extended to remove the comma.
         Example CD -> Congo, The Democratic Republic of -> The Democratic Republic of Congo
     remove_start_words: list (optional, default empty)
@@ -605,7 +608,7 @@ def two_digits_2_name_country(two_code_country, name_string="name_short", nocomm
 
     full_name = coco.convert(two_code_country, to=name_string)
 
-    if nocomma:
+    if no_comma:
         # separate list by delimiter
         splits = full_name.split(", ")
 
