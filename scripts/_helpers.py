@@ -603,6 +603,8 @@ def two_digits_2_name_country(two_code_country, name_string="name_short", no_com
     full_name: str
         full country name
     """
+    if remove_start_words is None:
+        remove_start_words = list()
     if two_code_country == "SN-GM":
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
