@@ -580,7 +580,7 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_words=[]):
+def two_digits_2_name_country(two_code_country, name_string="name_short", nocomma=False, remove_start_words=[]):
     """
     Convert 2-digit country code to full name country:
 
@@ -603,10 +603,10 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     if two_code_country == "SN-GM":
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
-    full_name = coco.convert(two_code_country, to="name_short")
+    full_name = coco.convert(two_code_country, to=name_string)
 
     if nocomma:
-        # separate list by delim
+        # separate list by delimiter
         splits = full_name.split(", ")
 
         # reverse the order
@@ -1116,30 +1116,34 @@ def get_conv_factors(sector):
             "brown coal briquettes": 0.00575,
             "charcoal": 0.00819,
             "coal tar": 0.007778,
-            "coke oven coke": 0.0078334,
+            "coke-oven coke": 0.0078334,
+            "coke-oven gas": 0.000277,
             "coking coal": 0.007833,
             "conventional crude oil": 0.01175,
             "crude petroleum": 0.011750,
+            "ethane": 0.012888,
             "fuel oil": 0.01122,
             "fuelwood": 0.00254,
             "gas coke": 0.007326,
-            "gas oil / diesel oil": 0.01194,
-            "gasoline type jet fuel": 0.01230,
+            "gas oil/ diesel oil": 0.01194,
+            "gasoline-type jet fuel": 0.01230,
             "hard coal": 0.007167,
-            "kerosene type jet fuel": 0.01225,
+            "kerosene-type jet fuel": 0.01225,
             "lignite": 0.003889,
-            "liquefied petroleum gas (LPG)": 0.01313,
-            "lubricants": 0.01117,
+            "liquefied petroleum gas (lpg)": 0.01313,
+            "lubricants": 0.011166,
             "motor gasoline": 0.01230,
             "naphtha": 0.01236,
+            "natural gas": 0.00025,
             "natural gas liquids": 0.01228,
             "other bituminous coal": 0.005556,
+            "paraffin waxes": 0.011166,
             "patent fuel": 0.00575,
             "peat": 0.00271,
             "peat products": 0.00271,
             "petroleum coke": 0.009028,
             "refinery gas": 0.01375,
-            "sub bituminous coal": 0.005555,
+            "sub-bituminous coal": 0.005555,
         }
     else:
         logger.info(f"No conversion factors available for sector {sector}")
@@ -1148,73 +1152,82 @@ def get_conv_factors(sector):
 
 def aggregate_fuels(sector):
     gas_fuels = [
-        "Blast Furnace Gas",
-        "Biogases",
-        "Biogasoline",
-        "Coke Oven Gas",
-        "Gas Coke",
-        "Gasworks Gas",
-        "Natural gas (including LNG)",
-        "Natural Gas (including LNG)",
-        "Natural gas liquids",
-        "Refinery gas",
+        "biogasoline",
+        "ethane",
+        "gas coke",
+        "natural gas",
+        "natural gas liquids",
+        "refinery gas",
     ]
 
     oil_fuels = [
-        "Biodiesel",
-        "Motor Gasoline",
-        "Liquefied petroleum gas (LPG)",
-        "Liquified Petroleum Gas (LPG)",
-        "Fuel oil",
-        "Kerosene-type Jet Fuel",
-        "Conventional crude oil",
-        "Crude petroleum",
-        "Lubricants",
-        "Naphtha",
-        "Gas Oil/ Diesel Oil",
-        "Black Liquor",
+        "additives and oxygenates",
+        "aviation gasoline",
+        "biodiesel",
+        "bio jet kerosene",
+        "conventional crude oil",
+        "crude petroleum",
+        "fuel oil",
+        "gas oil/ diesel oil",
+        "gasoline-type jet fuel",
+        "kerosene-type jet fuel",
+        "liquefied petroleum gas (lpg)",
+        "lubricants",
+        "motor gasoline",
+        "naphtha",
+        "paraffin waxes",
     ]
 
     coal_fuels = [
-        "Anthracite",
-        "Brown coal",
-        "Brown coal briquettes",
-        "Coke-oven coke",
-        "Coke Oven Coke",
-        "Hard coal",
-        "Other bituminous coal",
-        "Sub-bituminous coal",
-        "Coking coal",
-        "Bitumen",
+        "anthracite",
+        "bitumen",
+        "brown coal",
+        "brown coal briquettes",
+        "charcoal",
+        "coal tar",
+        "coke-oven coke",
+        "coke-oven gas",
+        "coking coal",
+        "hard coal",
+        "lignite",
+        "other bituminous coal",
+        "patent fuel",
+        "peat",
+        "peat products",
+        "petroleum coke",
+        "sub-bituminous coal",
     ]
 
     biomass_fuels = [
-        "Bagasse",
-        "Fuelwood",
+        "bagasse",
+        "fuelwood",
     ]
 
-    coal_fuels = [
-        "Anthracite",
-        "Charcoal",
-        "Coke oven coke",
-        "Coke-oven coke",
-        "Coke Oven Coke",
-        "Coking coal",
-        "Hard coal",
-        "Other bituminous coal",
-        "Petroleum coke",
-        "Petroleum Coke",
-        "Hrad coal",
-        "Lignite",
-        "Peat",
-        "Peat products",
-    ]
+    electricity = ["electricity"]
 
-    electricity = ["Electricity"]
+    heat = ["heat", "direct use of geothermal heat", "direct use of solar thermal heat"]
 
-    heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
+    if sector == "industry":
+        return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
+    else:
+        logger.info(f"No fuels available for sector {sector}")
+        return np.nan
 
-    return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
+
+def modify_commodity(commodity):
+    if commodity.strip() == "Hrad coal":
+        commodity = "Hard coal"
+    elif commodity.strip().casefold() == "coke oven gas":
+        commodity = "Coke-oven gas"
+    elif commodity.strip().casefold() == "coke oven coke":
+        commodity = "Coke-oven coke"
+    elif commodity.strip() == "Liquified Petroleum Gas (LPG)":
+        commodity = "Liquefied Petroleum Gas (LPG)"
+    elif commodity.strip() == "Gas Oil/Diesel Oil":
+        commodity = "Gas Oil/ Diesel Oil"
+    elif commodity.strip() == "Lignite brown coal- recoverable resources":
+        commodity = "Lignite brown coal - recoverable resources"
+    return commodity.strip().casefold()
 
 
 def safe_divide(numerator, denominator):

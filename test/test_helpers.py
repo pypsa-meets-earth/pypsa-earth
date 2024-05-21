@@ -7,9 +7,12 @@
 
 import pathlib
 import numpy as np
+import pandas as pd
 from scripts._helpers import (
+    aggregate_fuels,
     country_name_2_two_digits,
     get_conv_factors,
+    modify_commodity,
     safe_divide,
     sets_path_to_root,
     two_2_three_digits_country,
@@ -17,6 +20,42 @@ from scripts._helpers import (
     three_2_two_digits_country,)
 
 path_cwd = pathlib.Path.cwd()
+
+original_commodity_data = ["Biogases", "Fuelwood", "of which: fishing", "Natural gas liquids", "Naphtha",
+                           "Motor Gasoline", "Motor gasoline", "Gasoline-type jet fuel", "Peat products",
+                           "Peat Products", "Direct use of geothermal heat", "Additives and Oxygenates", "Electricity",
+                           "Animal waste", "animal waste", "Refinery gas", "Refinery Gas", "Fuel oil", "Oil shale",
+                           "Oil Shale", "Lignite", "Falling water", "Petroleum coke", "Petroleum Coke",
+                           "Aviation gasoline", "Ethane", "Natural gas (including LNG)", "Natural gas",
+                           "Natural Gas (including LNG)", "Other bituminous coal", "Paraffin waxes", "Hard coal",
+                           "Coal", "Hrad coal", "Coke Oven Gas", "Gasworks Gas", "Brown coal briquettes",
+                           "Brown Coal Briquettes", "Liquefied petroleum gas (LPG)", "Liquified Petroleum Gas (LPG)",
+                           "Sub-bituminous coal", "Kerosene-type Jet Fuel", "Charcoal", "Heat", "Gas coke", "Gas Coke",
+                           "Patent fuel", "Peat (for fuel use)", "Peat", "Coal Tar", "Biogasoline", "Coking coal",
+                           "Electricity generating capacity", "Anthracite", "Coke oven coke", "Coke-oven coke",
+                           "Coke Oven Coke", "Conventional crude oil", "Crude petroleum", "Brown coal",
+                           "Lignite brown coal", "Lignite brown coal- recoverable resources", "Biodiesel", "Lubricants",
+                           "Black Liquor", "Gas Oil/ Diesel Oil", "Gas Oil/ Diesel Oil ", "Gas Oil/Diesel Oil",
+                           "Bagasse", "Direct use of solar thermal heat", "Bio jet kerosene", "Blast Furnace Gas",
+                           "Blast furnace gas", "Bitumen"]
+
+modified_commodity_data = ["biogases", "fuelwood", "of which: fishing", "natural gas liquids", "naphtha",
+                           "motor gasoline", "gasoline-type jet fuel", "peat products", "direct use of geothermal heat",
+                           "additives and oxygenates", "electricity", "animal waste", "refinery gas", "fuel oil",
+                           "oil shale", "lignite", "falling water", "petroleum coke", "aviation gasoline", "ethane",
+                           "natural gas (including lng)", "natural gas", "other bituminous coal", "paraffin waxes",
+                           "hard coal", "coal", "coke-oven gas", "gasworks gas", "brown coal briquettes",
+                           "liquefied petroleum gas (lpg)", "sub-bituminous coal", "kerosene-type jet fuel", "charcoal",
+                           "heat", "gas coke", "patent fuel", "peat (for fuel use)", "peat", "coal tar", "biogasoline",
+                           "coking coal", "electricity generating capacity", "anthracite", "coke-oven coke",
+                           "conventional crude oil", "crude petroleum", "brown coal", "lignite brown coal",
+                           "lignite brown coal - recoverable resources", "biodiesel", "lubricants", "black liquor",
+                           "gas oil/ diesel oil", "bagasse", "direct use of solar thermal heat", "bio jet kerosene",
+                           "blast furnace gas", "bitumen"]
+
+original_commodity_dataframe = pd.DataFrame(original_commodity_data, columns=['Commodity'])
+modified_commodity_dataframe = pd.DataFrame(modified_commodity_data, columns=['Commodity'])
+
 
 def test_sets_path_to_root():
     """
@@ -67,6 +106,7 @@ def test_two_digits_2_name_country():
     assert "Micronesia, Fed. Sts." == two_digits_2_name_country("FM")
     assert "Fed. Sts. Micronesia" == two_digits_2_name_country("FM", nocomma=True)
     assert "Sts. Micronesia" == two_digits_2_name_country("FM", nocomma=True, remove_start_words=["Fed. "])
+    assert "Congo" == two_digits_2_name_country("CD")
 
 
 def test_country_name_2_two_digits():
@@ -135,3 +175,19 @@ def test_get_conv_factors():
     assert conversion_factors_dict["refinery gas"] == 0.01375
     assert conversion_factors_dict["sub bituminous coal"] == 0.005555
     assert np.isnan(get_conv_factors("non-industry"))
+
+
+def test_modify_commodity():
+    new_commodity_dataframe = pd.DataFrame()
+    new_commodity_dataframe["Commodity"] = original_commodity_dataframe["Commodity"].map(modify_commodity).unique()
+    df = new_commodity_dataframe.compare(modified_commodity_dataframe)
+    boolean_flag = df.empty
+    if not boolean_flag:
+        assert False
+
+
+def test_aggregate_fuels():
+    """
+    Verify what is returned by aggregate_fuels
+    """
+    assert np.isnan(aggregate_fuels("non-industry"))
