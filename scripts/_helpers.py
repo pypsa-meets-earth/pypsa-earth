@@ -861,7 +861,7 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):  # CO
     return costs
 
 
-def create_network_topology(n, prefix, like="ac", connector=" <-> ", bidirectional=True):  # COPIED FROM pypsa-earth-sec
+def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):  # COPIED FROM pypsa-earth-sec
     """
     Create a network topology like the power transmission network.
 
@@ -1038,7 +1038,6 @@ def locate_bus(
     gadm_level,
     path_to_gadm=None,
     gadm_clustering=False,
-    col="name",
 ):
     """
     Function to locate the right node for a coordinate set
