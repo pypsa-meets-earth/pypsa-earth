@@ -253,12 +253,6 @@ def load_network(import_name=None, custom_components=None):
     )
 
 
-def pdbcast(v, h):
-    return pd.DataFrame(
-        v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
-    )
-
-
 def load_network_for_plots(
     fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
@@ -401,8 +395,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 
 def progress_retrieve(
-    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
-):
+    url, file, data=None, headers=None, disable_progress=False, round_to=1.0):
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -417,7 +410,7 @@ def progress_retrieve(
         Data for the request (default None), when not none Post method is used
     disable_progress : bool
         When true, no progress bar is shown
-    roundto : float
+    round_to : float
         (default 0) Precision used to report the progress
         e.g. 0.1 stands for 88.1, 10 stands for 90, 80
     """
@@ -427,8 +420,8 @@ def progress_retrieve(
 
     pbar = tqdm(total=100, disable=disable_progress)
 
-    def dlProgress(count, blockSize, totalSize, roundto=roundto):
-        pbar.n = round(count * blockSize * 100 / totalSize / roundto) * roundto
+    def dl_progress(count, block_size, total_size, round_to=round_to):
+        pbar.n = round(count * block_size * 100 / total_size / round_to) * round_to
         pbar.refresh()
 
     if data is not None:
@@ -439,7 +432,7 @@ def progress_retrieve(
         opener.addheaders = headers
         urllib.request.install_opener(opener)
 
-    urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
+    urllib.request.urlretrieve(url, file, reporthook=dl_progress, data=data)
 
 
 def get_aggregation_strategies(aggregation_strategies):
