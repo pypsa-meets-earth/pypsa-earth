@@ -1238,9 +1238,3 @@ def safe_divide(numerator, denominator):
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
         return np.nan
-
-# NOTES
-
-#def create_dummy_data(n, sector, carriers): --> not copied from pypsa-earth-sec because it is not used there
-# def override_component_attrs(directory):  # --> maybe already implemented in pypsa
-# def get_country(target, **keys): --> not needed as two_2_three_digits_country, three_2_two_digits_country, two_digits_2_name_country do not use it
