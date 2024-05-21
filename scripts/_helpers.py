@@ -882,7 +882,7 @@ def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):  
     ln_attrs = ["bus0", "bus1", "length"]
     lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
 
-    # TODO: temporary fix for whan underwater_fraction is not found
+    # TODO: temporary fix for when underwater_fraction is not found
     if "underwater_fraction" not in n.links.columns:
         if n.links.empty:
             n.links["underwater_fraction"] = None
