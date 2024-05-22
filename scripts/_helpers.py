@@ -6,26 +6,25 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import shutil
-import zipfile
-
-import fiona
-import numpy as np
 import os
+import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 import country_converter as coco
+import fiona
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import requests
+import snakemake as sm
 import yaml
+from pypsa.descriptors import Dict
+from shapely.geometry import Point
 from snakemake.script import Snakemake
 from vresutils.costdata import annuity
-from shapely.geometry import Point
-import snakemake as sm
-from pypsa.descriptors import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -395,7 +394,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 
 def progress_retrieve(
-    url, file, data=None, headers=None, disable_progress=False, round_to=1.0):
+    url, file, data=None, headers=None, disable_progress=False, round_to=1.0
+):
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -573,7 +573,9 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country, name_string="name_short", no_comma=False, remove_start_words=[]):
+def two_digits_2_name_country(
+    two_code_country, name_string="name_short", no_comma=False, remove_start_words=[]
+):
     """
     Convert 2-digit country code to full name country:
 
@@ -826,7 +828,9 @@ def get_last_commit_message(path):
     return last_commit_message
 
 
-def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):  # COPIED FROM pypsa-earth-sec
+def prepare_costs(
+    cost_file, USD_to_EUR, discount_rate, Nyears, lifetime
+):  # COPIED FROM pypsa-earth-sec
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
@@ -861,7 +865,9 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):  # CO
     return costs
 
 
-def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):  # COPIED FROM pypsa-earth-sec
+def create_network_topology(
+    n, prefix, connector=" <-> ", bidirectional=True
+):  # COPIED FROM pypsa-earth-sec
     """
     Create a network topology like the power transmission network.
 
@@ -915,7 +921,9 @@ def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):  
 
 
 def cycling_shift(df, steps=1):  # TAKEN FROM pypsa-earth-sec
-    """Cyclic shift on index of pd.Series|pd.DataFrame by number of steps"""
+    """
+    Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
+    """
     df = df.copy()
     new_index = np.roll(df.index, steps)
     df.values[:] = df.reindex(index=new_index).values
@@ -924,7 +932,7 @@ def cycling_shift(df, steps=1):  # TAKEN FROM pypsa-earth-sec
 
 def download_gadm(country_code, update=False, out_logging=False):
     """
-    Download gpkg file from GADM for a given country code
+    Download gpkg file from GADM for a given country code.
 
     Parameters
     ----------
@@ -936,7 +944,6 @@ def download_gadm(country_code, update=False, out_logging=False):
     Returns
     -------
     gpkg file per country
-
     """
 
     GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
@@ -980,7 +987,8 @@ def download_gadm(country_code, update=False, out_logging=False):
 
 def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
     """
-    Function to retrive a specific layer id of a geopackage for a selection of countries
+    Function to retrive a specific layer id of a geopackage for a selection of
+    countries.
 
     Parameters
     ----------
@@ -990,7 +998,6 @@ def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
         Layer to consider in the format GID_{layer_id}.
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
-
     """
     # initialization of the list of geodataframes
     geodf_list = []
@@ -1040,8 +1047,9 @@ def locate_bus(
     gadm_clustering=False,
 ):
     """
-    Function to locate the right node for a coordinate set
-    input coords of point
+    Function to locate the right node for a coordinate set input coords of
+    point.
+
     Parameters
     ----------
     coords: pandas dataseries
@@ -1229,7 +1237,7 @@ def modify_commodity(commodity):
 
 def safe_divide(numerator, denominator):
     """
-    Safe division function that returns NaN when the denominator is zero
+    Safe division function that returns NaN when the denominator is zero.
     """
     if denominator != 0.0:
         return numerator / denominator
