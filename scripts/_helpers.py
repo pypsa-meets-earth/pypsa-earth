@@ -396,7 +396,7 @@ def progress_retrieve(
     url, file, data=None, headers=None, disable_progress=False, round_to=1.0
 ):
     """
-    Function to download data from a url with a progress bar progress in
+    Function to download data from an url with a progress bar progress in
     retrieving data.
 
     Parameters
@@ -945,43 +945,43 @@ def download_gadm(country_code, update=False, out_logging=False):
     gpkg file per country
     """
 
-    GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
-    GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
+    gadm_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
+    gadm_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{gadm_filename}_gpkg.zip"
     _logger = logging.getLogger(__name__)
-    GADM_inputfile_zip = os.path.join(
+    gadm_input_file_zip = os.path.join(
         os.getcwd(),
         "data",
         "raw",
         "gadm",
-        GADM_filename,
-        GADM_filename + ".zip",
+        gadm_filename,
+        gadm_filename + ".zip",
     )  # Input filepath zip
 
-    GADM_inputfile_gpkg = os.path.join(
+    gadm_input_file_gpkg = os.path.join(
         os.getcwd(),
         "data",
         "raw",
         "gadm",
-        GADM_filename,
-        GADM_filename + ".gpkg",
+        gadm_filename,
+        gadm_filename + ".gpkg",
     )  # Input filepath gpkg
 
-    if not os.path.exists(GADM_inputfile_gpkg) or update is True:
+    if not os.path.exists(gadm_input_file_gpkg) or update is True:
         if out_logging:
             _logger.warning(
-                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
+                f"Stage 4/4: {gadm_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {gadm_input_file_zip}"
             )
         #  create data/osm directory
-        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
+        os.makedirs(os.path.dirname(gadm_input_file_zip), exist_ok=True)
 
-        with requests.get(GADM_url, stream=True) as r:
-            with open(GADM_inputfile_zip, "wb") as f:
+        with requests.get(gadm_url, stream=True) as r:
+            with open(gadm_input_file_zip, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
-            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
+        with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
+            zip_ref.extractall(os.path.dirname(gadm_input_file_zip))
 
-    return GADM_inputfile_gpkg, GADM_filename
+    return gadm_input_file_gpkg, gadm_filename
 
 
 def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
@@ -1032,10 +1032,10 @@ def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
         # concatenate geodataframes
         geodf_list = pd.concat([geodf_list, geodf_temp])
 
-    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
+    geodf_gadm = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_gadm.set_crs(geodf_list[0].crs, inplace=True)
 
-    return geodf_GADM
+    return geodf_gadm
 
 
 def locate_bus(
