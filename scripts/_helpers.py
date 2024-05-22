@@ -122,7 +122,7 @@ def read_osm_config(*args):
         return tuple([osm_config[a] for a in args])
 
 
-def sets_path_to_root(root_directory_name):  # SAME AS IN pypsa-earth-sec
+def sets_path_to_root(root_directory_name, n=8):
     """
     Search and sets path to the given root directory (root/path/file).
 
@@ -136,7 +136,6 @@ def sets_path_to_root(root_directory_name):  # SAME AS IN pypsa-earth-sec
     import os
 
     repo_name = root_directory_name
-    n = 8  # check max 8 levels above. Random default.
     n0 = n
 
     while n >= 0:
@@ -253,7 +252,7 @@ def load_network(import_name=None, custom_components=None):
 
 
 def load_network_for_plots(
-    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+        fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
@@ -264,7 +263,7 @@ def load_network_for_plots(
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
     n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+            n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
     )
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
@@ -335,8 +334,8 @@ def aggregate_p_curtailed(n):
         [
             (
                 (
-                    n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
-                    - n.generators_t.p.sum()
+                        n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
+                        - n.generators_t.p.sum()
                 )
                 .groupby(n.generators.carrier)
                 .sum()
@@ -362,7 +361,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(components.keys(), skip_empty=False), components.values()
+            n.iterate_components(components.keys(), skip_empty=False), components.values()
     ):
         if c.df.empty:
             continue
@@ -394,7 +393,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 
 def progress_retrieve(
-    url, file, data=None, headers=None, disable_progress=False, round_to=1.0
+        url, file, data=None, headers=None, disable_progress=False, round_to=1.0
 ):
     """
     Function to download data from a url with a progress bar progress in
@@ -478,7 +477,7 @@ def mock_snakemake(rulename, **wildcards):  # SAME AS IN pypsa-earth-sec
 
     script_dir = Path(__file__).parent.resolve()
     assert (
-        Path.cwd().resolve() == script_dir
+            Path.cwd().resolve() == script_dir
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
@@ -574,7 +573,7 @@ def three_2_two_digits_country(three_code_country):
 
 
 def two_digits_2_name_country(
-    two_code_country, name_string="name_short", no_comma=False, remove_start_words=[]
+        two_code_country, name_string="name_short", no_comma=False, remove_start_words=[]
 ):
     """
     Convert 2-digit country code to full name country:
@@ -641,8 +640,8 @@ def country_name_2_two_digits(country_name):
         2-digit country name
     """
     if (
-        country_name
-        == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
+            country_name
+            == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
     ):
         return "SN-GM"
 
@@ -752,7 +751,7 @@ def create_country_list(input, iso_coding=True):
         selected(iso_coding=False), ignore iso-specific names.
         """
         if (
-            iso_coding
+                iso_coding
         ):  # if country lists are in iso coding, then check if they are 2-string
             # 2-code countries
             ret_list = [c for c in c_list if len(c) == 2]
@@ -829,7 +828,7 @@ def get_last_commit_message(path):
 
 
 def prepare_costs(
-    cost_file, USD_to_EUR, discount_rate, Nyears, lifetime
+        cost_file, USD_to_EUR, discount_rate, Nyears, lifetime
 ):  # COPIED FROM pypsa-earth-sec
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
@@ -866,7 +865,7 @@ def prepare_costs(
 
 
 def create_network_topology(
-    n, prefix, connector=" <-> ", bidirectional=True
+        n, prefix, connector=" <-> ", bidirectional=True
 ):  # COPIED FROM pypsa-earth-sec
     """
     Create a network topology like the power transmission network.
@@ -987,7 +986,7 @@ def download_gadm(country_code, update=False, out_logging=False):
 
 def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
     """
-    Function to retrive a specific layer id of a geopackage for a selection of
+    Function to retrieve a specific layer id of a geopackage for a selection of
     countries.
 
     Parameters
@@ -1040,11 +1039,11 @@ def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
 
 
 def locate_bus(
-    coords,
-    co,
-    gadm_level,
-    path_to_gadm=None,
-    gadm_clustering=False,
+        coords,
+        co,
+        gadm_level,
+        path_to_gadm=None,
+        gadm_clustering=False,
 ):
     """
     Function to locate the right node for a coordinate set input coords of
@@ -1067,8 +1066,8 @@ def locate_bus(
                 col = "GADM_ID"
 
                 if gdf[col][0][
-                    :3
-                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                   :3
+                   ].isalpha():  # TODO clean later by changing all codes to 2 letters
                     gdf[col] = gdf[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
