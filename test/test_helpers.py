@@ -6,8 +6,10 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
+
 import numpy as np
 import pandas as pd
+
 from scripts._helpers import (
     aggregate_fuels,
     country_name_2_two_digits,
@@ -15,51 +17,162 @@ from scripts._helpers import (
     modify_commodity,
     safe_divide,
     sets_path_to_root,
+    three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
-    three_2_two_digits_country,)
+)
 
 path_cwd = pathlib.Path.cwd()
 
-original_commodity_data = ["Biogases", "Fuelwood", "of which: fishing", "Natural gas liquids", "Naphtha",
-                           "Motor Gasoline", "Motor gasoline", "Gasoline-type jet fuel", "Peat products",
-                           "Peat Products", "Direct use of geothermal heat", "Additives and Oxygenates", "Electricity",
-                           "Animal waste", "animal waste", "Refinery gas", "Refinery Gas", "Fuel oil", "Oil shale",
-                           "Oil Shale", "Lignite", "Falling water", "Petroleum coke", "Petroleum Coke",
-                           "Aviation gasoline", "Ethane", "Natural gas (including LNG)", "Natural gas",
-                           "Natural Gas (including LNG)", "Other bituminous coal", "Paraffin waxes", "Hard coal",
-                           "Coal", "Hrad coal", "Coke Oven Gas", "Gasworks Gas", "Brown coal briquettes",
-                           "Brown Coal Briquettes", "Liquefied petroleum gas (LPG)", "Liquified Petroleum Gas (LPG)",
-                           "Sub-bituminous coal", "Kerosene-type Jet Fuel", "Charcoal", "Heat", "Gas coke", "Gas Coke",
-                           "Patent fuel", "Peat (for fuel use)", "Peat", "Coal Tar", "Biogasoline", "Coking coal",
-                           "Electricity generating capacity", "Anthracite", "Coke oven coke", "Coke-oven coke",
-                           "Coke Oven Coke", "Conventional crude oil", "Crude petroleum", "Brown coal",
-                           "Lignite brown coal", "Lignite brown coal- recoverable resources", "Biodiesel", "Lubricants",
-                           "Black Liquor", "Gas Oil/ Diesel Oil", "Gas Oil/ Diesel Oil ", "Gas Oil/Diesel Oil",
-                           "Bagasse", "Direct use of solar thermal heat", "Bio jet kerosene", "Blast Furnace Gas",
-                           "Blast furnace gas", "Bitumen"]
+original_commodity_data = [
+    "Biogases",
+    "Fuelwood",
+    "of which: fishing",
+    "Natural gas liquids",
+    "Naphtha",
+    "Motor Gasoline",
+    "Motor gasoline",
+    "Gasoline-type jet fuel",
+    "Peat products",
+    "Peat Products",
+    "Direct use of geothermal heat",
+    "Additives and Oxygenates",
+    "Electricity",
+    "Animal waste",
+    "animal waste",
+    "Refinery gas",
+    "Refinery Gas",
+    "Fuel oil",
+    "Oil shale",
+    "Oil Shale",
+    "Lignite",
+    "Falling water",
+    "Petroleum coke",
+    "Petroleum Coke",
+    "Aviation gasoline",
+    "Ethane",
+    "Natural gas (including LNG)",
+    "Natural gas",
+    "Natural Gas (including LNG)",
+    "Other bituminous coal",
+    "Paraffin waxes",
+    "Hard coal",
+    "Coal",
+    "Hrad coal",
+    "Coke Oven Gas",
+    "Gasworks Gas",
+    "Brown coal briquettes",
+    "Brown Coal Briquettes",
+    "Liquefied petroleum gas (LPG)",
+    "Liquified Petroleum Gas (LPG)",
+    "Sub-bituminous coal",
+    "Kerosene-type Jet Fuel",
+    "Charcoal",
+    "Heat",
+    "Gas coke",
+    "Gas Coke",
+    "Patent fuel",
+    "Peat (for fuel use)",
+    "Peat",
+    "Coal Tar",
+    "Biogasoline",
+    "Coking coal",
+    "Electricity generating capacity",
+    "Anthracite",
+    "Coke oven coke",
+    "Coke-oven coke",
+    "Coke Oven Coke",
+    "Conventional crude oil",
+    "Crude petroleum",
+    "Brown coal",
+    "Lignite brown coal",
+    "Lignite brown coal- recoverable resources",
+    "Biodiesel",
+    "Lubricants",
+    "Black Liquor",
+    "Gas Oil/ Diesel Oil",
+    "Gas Oil/ Diesel Oil ",
+    "Gas Oil/Diesel Oil",
+    "Bagasse",
+    "Direct use of solar thermal heat",
+    "Bio jet kerosene",
+    "Blast Furnace Gas",
+    "Blast furnace gas",
+    "Bitumen",
+]
 
-modified_commodity_data = ["biogases", "fuelwood", "of which: fishing", "natural gas liquids", "naphtha",
-                           "motor gasoline", "gasoline-type jet fuel", "peat products", "direct use of geothermal heat",
-                           "additives and oxygenates", "electricity", "animal waste", "refinery gas", "fuel oil",
-                           "oil shale", "lignite", "falling water", "petroleum coke", "aviation gasoline", "ethane",
-                           "natural gas (including lng)", "natural gas", "other bituminous coal", "paraffin waxes",
-                           "hard coal", "coal", "coke-oven gas", "gasworks gas", "brown coal briquettes",
-                           "liquefied petroleum gas (lpg)", "sub-bituminous coal", "kerosene-type jet fuel", "charcoal",
-                           "heat", "gas coke", "patent fuel", "peat (for fuel use)", "peat", "coal tar", "biogasoline",
-                           "coking coal", "electricity generating capacity", "anthracite", "coke-oven coke",
-                           "conventional crude oil", "crude petroleum", "brown coal", "lignite brown coal",
-                           "lignite brown coal - recoverable resources", "biodiesel", "lubricants", "black liquor",
-                           "gas oil/ diesel oil", "bagasse", "direct use of solar thermal heat", "bio jet kerosene",
-                           "blast furnace gas", "bitumen"]
+modified_commodity_data = [
+    "biogases",
+    "fuelwood",
+    "of which: fishing",
+    "natural gas liquids",
+    "naphtha",
+    "motor gasoline",
+    "gasoline-type jet fuel",
+    "peat products",
+    "direct use of geothermal heat",
+    "additives and oxygenates",
+    "electricity",
+    "animal waste",
+    "refinery gas",
+    "fuel oil",
+    "oil shale",
+    "lignite",
+    "falling water",
+    "petroleum coke",
+    "aviation gasoline",
+    "ethane",
+    "natural gas (including lng)",
+    "natural gas",
+    "other bituminous coal",
+    "paraffin waxes",
+    "hard coal",
+    "coal",
+    "coke-oven gas",
+    "gasworks gas",
+    "brown coal briquettes",
+    "liquefied petroleum gas (lpg)",
+    "sub-bituminous coal",
+    "kerosene-type jet fuel",
+    "charcoal",
+    "heat",
+    "gas coke",
+    "patent fuel",
+    "peat (for fuel use)",
+    "peat",
+    "coal tar",
+    "biogasoline",
+    "coking coal",
+    "electricity generating capacity",
+    "anthracite",
+    "coke-oven coke",
+    "conventional crude oil",
+    "crude petroleum",
+    "brown coal",
+    "lignite brown coal",
+    "lignite brown coal - recoverable resources",
+    "biodiesel",
+    "lubricants",
+    "black liquor",
+    "gas oil/ diesel oil",
+    "bagasse",
+    "direct use of solar thermal heat",
+    "bio jet kerosene",
+    "blast furnace gas",
+    "bitumen",
+]
 
-original_commodity_dataframe = pd.DataFrame(original_commodity_data, columns=['Commodity'])
-modified_commodity_dataframe = pd.DataFrame(modified_commodity_data, columns=['Commodity'])
+original_commodity_dataframe = pd.DataFrame(
+    original_commodity_data, columns=["Commodity"]
+)
+modified_commodity_dataframe = pd.DataFrame(
+    modified_commodity_data, columns=["Commodity"]
+)
 
 
 def test_sets_path_to_root():
     """
-    Verify that the root folder returned by sets_path_to_root is pypsa-earth
+    Verify that the root folder returned by sets_path_to_root is pypsa-earth.
     """
     sets_path_to_root("pypsa-earth")
     current_path = pathlib.Path.cwd()
@@ -68,7 +181,7 @@ def test_sets_path_to_root():
 
 def test_two_2_three_digits_country():
     """
-    Verify the conversion from two-digit to three-digit country code
+    Verify the conversion from two-digit to three-digit country code.
     """
     # Afghanistan
     assert two_2_three_digits_country("AF") == "AFG"
@@ -84,7 +197,7 @@ def test_two_2_three_digits_country():
 
 def test_three_2_two_digits_country():
     """
-    Verify the conversion from three-digit to two-digit country code
+    Verify the conversion from three-digit to two-digit country code.
     """
     # Afghanistan
     assert "AF" == three_2_two_digits_country("AFG")
@@ -100,24 +213,29 @@ def test_three_2_two_digits_country():
 
 def test_two_digits_2_name_country():
     """
-    Verify the conversion from two-digit country code to country name
+    Verify the conversion from two-digit country code to country name.
     """
     # Micronesia (Federated States of)
     assert "Micronesia, Fed. Sts." == two_digits_2_name_country("FM")
-    assert "Federated States of Micronesia" == two_digits_2_name_country("FM", name_string="name_official")
-    assert "States of Micronesia" == two_digits_2_name_country("FM", name_string="name_official",
-                                                               remove_start_words=["Federated "])
+    assert "Federated States of Micronesia" == two_digits_2_name_country(
+        "FM", name_string="name_official"
+    )
+    assert "States of Micronesia" == two_digits_2_name_country(
+        "FM", name_string="name_official", remove_start_words=["Federated "]
+    )
     # Democratic Republic of the Congo
     assert "DR Congo" == two_digits_2_name_country("CD")
-    assert ("Democratic Republic of the Congo" ==
-            two_digits_2_name_country("CD", name_string="name_official"))
-    assert "Republic of the Congo" == two_digits_2_name_country("CD", name_string="name_official",
-                                                               remove_start_words=["Democratic "])
+    assert "Democratic Republic of the Congo" == two_digits_2_name_country(
+        "CD", name_string="name_official"
+    )
+    assert "Republic of the Congo" == two_digits_2_name_country(
+        "CD", name_string="name_official", remove_start_words=["Democratic "]
+    )
 
 
 def test_country_name_2_two_digits():
     """
-    Verify the conversion from country name to two-digit country code
+    Verify the conversion from country name to two-digit country code.
     """
     # Afghanistan
     assert "AF" == country_name_2_two_digits("Afghanistan")
@@ -133,15 +251,17 @@ def test_country_name_2_two_digits():
 
 def test_safe_divide():
     """
-    Verify that the method safe_divide prevents divisions by vanishing denominator
+    Verify that the method safe_divide prevents divisions by vanishing
+    denominator.
     """
-    assert safe_divide(3.0,2.0) == 1.5
+    assert safe_divide(3.0, 2.0) == 1.5
     assert np.isnan(safe_divide(3.0, 0.0))
 
 
 def test_get_conv_factors():
     """
-    Verify that the conversion factors returned by get_conv_factors are correct
+    Verify that the conversion factors returned by get_conv_factors are
+    correct.
     """
     conversion_factors_dict = get_conv_factors("industry")
     assert conversion_factors_dict["additives and oxygenates"] == 0.008333
@@ -188,10 +308,12 @@ def test_get_conv_factors():
 
 def test_modify_commodity():
     """
-    Verify that modify_commodity returns the commodities in wished format
+    Verify that modify_commodity returns the commodities in wished format.
     """
     new_commodity_dataframe = pd.DataFrame()
-    new_commodity_dataframe["Commodity"] = original_commodity_dataframe["Commodity"].map(modify_commodity).unique()
+    new_commodity_dataframe["Commodity"] = (
+        original_commodity_dataframe["Commodity"].map(modify_commodity).unique()
+    )
     df = new_commodity_dataframe.compare(modified_commodity_dataframe)
     boolean_flag = df.empty
     if not boolean_flag:
@@ -200,6 +322,6 @@ def test_modify_commodity():
 
 def test_aggregate_fuels():
     """
-    Verify what is returned by aggregate_fuels
+    Verify what is returned by aggregate_fuels.
     """
     assert np.isnan(aggregate_fuels("non-industry"))
