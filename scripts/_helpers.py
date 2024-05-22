@@ -7,11 +7,11 @@
 
 import logging
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
 import zipfile
-import pathlib
 
 import country_converter as coco
 import fiona
