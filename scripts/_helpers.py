@@ -1108,7 +1108,7 @@ def override_component_attrs(directory):
 
     Returns
     -------
-    Dictionary of override component attributes.
+    Dictionary of overridden component attributes.
     """
 
     attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
