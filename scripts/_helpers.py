@@ -45,21 +45,21 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     tb = exc_traceback
     while tb.tb_next:
         tb = tb.tb_next
-    flname = tb.tb_frame.f_globals.get("__file__")
-    funcname = tb.tb_frame.f_code.co_name
+    fl_name = tb.tb_frame.f_globals.get("__file__")
+    func_name = tb.tb_frame.f_code.co_name
 
     if issubclass(exc_type, KeyboardInterrupt):
         logger.error(
             "Manual interruption %r, function %r: %s",
-            flname,
-            funcname,
+            fl_name,
+            func_name,
             exc_value,
         )
     else:
         logger.error(
             "An error happened in module %r, function %r: %s",
-            flname,
-            funcname,
+            fl_name,
+            func_name,
             exc_value,
             exc_info=(exc_type, exc_value, exc_traceback),
         )
@@ -289,11 +289,12 @@ def load_network_for_plots(
 
 
 def update_p_nom_max(n):
-    # if extendable carriers (solar/onwind/...) have capacity >= 0,
-    # e.g. existing assets from the OPSD project are included to the network,
-    # the installed capacity might exceed the expansion limit.
-    # Hence, we update the assumptions.
-
+    """
+    If extendable carriers (solar/onwind/...) have capacity >= 0,
+    e.g. existing assets from the OPSD project are included to the network,
+    the installed capacity might exceed the expansion limit.
+    Hence, we update the assumptions.
+    """
     n.generators.p_nom_max = n.generators[["p_nom_min", "p_nom_max"]].max(1)
 
 
