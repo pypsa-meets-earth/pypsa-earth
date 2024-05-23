@@ -362,7 +362,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(components_dict.keys(), skip_empty=False), components_dict.values()
+        n.iterate_components(components_dict.keys(), skip_empty=False),
+        components_dict.values(),
     ):
         if c.df.empty:
             continue
@@ -865,9 +866,7 @@ def prepare_costs(
     return costs
 
 
-def create_network_topology(
-    n, prefix, connector=" <-> ", bidirectional=True
-):
+def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):
     """
     Create a network topology like the power transmission network.
 
