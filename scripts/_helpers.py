@@ -290,9 +290,10 @@ def load_network_for_plots(
 
 def update_p_nom_max(n):
     """
-    If extendable carriers (solar/onwind/...) have capacity >= 0,
-    e.g. existing assets from the OPSD project are included to the network,
-    the installed capacity might exceed the expansion limit.
+    If extendable carriers (solar/onwind/...) have capacity >= 0, e.g. existing
+    assets from the OPSD project are included to the network, the installed
+    capacity might exceed the expansion limit.
+
     Hence, we update the assumptions.
     """
     n.generators.p_nom_max = n.generators[["p_nom_min", "p_nom_max"]].max(1)
