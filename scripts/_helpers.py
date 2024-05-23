@@ -1277,13 +1277,3 @@ def safe_divide(numerator, denominator):
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
         return np.nan
-
-
-def get(item, investment_year=None):
-    """
-    Check whether item depends on investment year.
-    """
-    if isinstance(item, dict):
-        return item[investment_year]
-    else:
-        return item
