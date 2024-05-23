@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 14 19:01:13 2022
+Created on Thu Jul 14 19:01:13 2022.
 
 @author: user
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
-from _helpers import aggregate_fuels, get_conv_factors, get
+from _helpers import aggregate_fuels, get, get_conv_factors
 
 # def calc_industry_base(df):
 

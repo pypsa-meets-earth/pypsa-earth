@@ -1122,6 +1122,7 @@ def override_component_attrs(directory):  # --> maybe already implemented in pyp
 
     return attrs
 
+
 def get_conv_factors(sector):
     """
     Create a dictionary with all the conversion factors for the standard net calorific value
@@ -1136,47 +1137,47 @@ def get_conv_factors(sector):
     """
 
     conversion_factors_dict = {
-            "additives and oxygenates": 0.008333,
-            "anthracite": 0.005,
-            "aviation gasoline": 0.01230,
-            "bagasse": 0.002144,
-            "biodiesel": 0.01022,
-            "biogasoline": 0.007444,
-            "bio jet kerosene": 0.011111,
-            "bitumen": 0.01117,
-            "brown coal": 0.003889,
-            "brown coal briquettes": 0.00575,
-            "charcoal": 0.00819,
-            "coal tar": 0.007778,
-            "coke-oven coke": 0.0078334,
-            "coke-oven gas": 0.000277,
-            "coking coal": 0.007833,
-            "conventional crude oil": 0.01175,
-            "crude petroleum": 0.011750,
-            "ethane": 0.012888,
-            "fuel oil": 0.01122,
-            "fuelwood": 0.00254,
-            "gas coke": 0.007326,
-            "gas oil/ diesel oil": 0.01194,
-            "gasoline-type jet fuel": 0.01230,
-            "hard coal": 0.007167,
-            "kerosene-type jet fuel": 0.01225,
-            "lignite": 0.003889,
-            "liquefied petroleum gas (lpg)": 0.01313,
-            "lubricants": 0.011166,
-            "motor gasoline": 0.01230,
-            "naphtha": 0.01236,
-            "natural gas": 0.00025,
-            "natural gas liquids": 0.01228,
-            "other bituminous coal": 0.005556,
-            "paraffin waxes": 0.011166,
-            "patent fuel": 0.00575,
-            "peat": 0.00271,
-            "peat products": 0.00271,
-            "petroleum coke": 0.009028,
-            "refinery gas": 0.01375,
-            "sub-bituminous coal": 0.005555,
-        }
+        "additives and oxygenates": 0.008333,
+        "anthracite": 0.005,
+        "aviation gasoline": 0.01230,
+        "bagasse": 0.002144,
+        "biodiesel": 0.01022,
+        "biogasoline": 0.007444,
+        "bio jet kerosene": 0.011111,
+        "bitumen": 0.01117,
+        "brown coal": 0.003889,
+        "brown coal briquettes": 0.00575,
+        "charcoal": 0.00819,
+        "coal tar": 0.007778,
+        "coke-oven coke": 0.0078334,
+        "coke-oven gas": 0.000277,
+        "coking coal": 0.007833,
+        "conventional crude oil": 0.01175,
+        "crude petroleum": 0.011750,
+        "ethane": 0.012888,
+        "fuel oil": 0.01122,
+        "fuelwood": 0.00254,
+        "gas coke": 0.007326,
+        "gas oil/ diesel oil": 0.01194,
+        "gasoline-type jet fuel": 0.01230,
+        "hard coal": 0.007167,
+        "kerosene-type jet fuel": 0.01225,
+        "lignite": 0.003889,
+        "liquefied petroleum gas (lpg)": 0.01313,
+        "lubricants": 0.011166,
+        "motor gasoline": 0.01230,
+        "naphtha": 0.01236,
+        "natural gas": 0.00025,
+        "natural gas liquids": 0.01228,
+        "other bituminous coal": 0.005556,
+        "paraffin waxes": 0.011166,
+        "patent fuel": 0.00575,
+        "peat": 0.00271,
+        "peat products": 0.00271,
+        "petroleum coke": 0.009028,
+        "refinery gas": 0.01375,
+        "sub-bituminous coal": 0.005555,
+    }
 
     if sector == "industry":
         return conversion_factors_dict
@@ -1279,7 +1280,9 @@ def safe_divide(numerator, denominator):
 
 
 def get(item, investment_year=None):
-    """Check whether item depends on investment year"""
+    """
+    Check whether item depends on investment year.
+    """
     if isinstance(item, dict):
         return item[investment_year]
     else:
