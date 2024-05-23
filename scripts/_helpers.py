@@ -230,16 +230,16 @@ def load_network(import_name=None, custom_components=None):
     from pypsa.descriptors import Dict
 
     override_components = None
-    override_component_attrs = None
+    override_component_attrs_dict = None
 
     if custom_components is not None:
         override_components = pypsa.components.components.copy()
-        override_component_attrs = Dict(
+        override_component_attrs_dict = Dict(
             {k: v.copy() for k, v in pypsa.components.component_attrs.items()}
         )
         for k, v in custom_components.items():
             override_components.loc[k] = v["component"]
-            override_component_attrs[k] = pd.DataFrame(
+            override_component_attrs_dict[k] = pd.DataFrame(
                 columns=["type", "unit", "default", "description", "status"]
             )
             for attr, val in v["attributes"].items():
@@ -248,7 +248,7 @@ def load_network(import_name=None, custom_components=None):
     return pypsa.Network(
         import_name=import_name,
         override_components=override_components,
-        override_component_attrs=override_component_attrs,
+        override_component_attrs=override_component_attrs_dict,
     )
 
 
@@ -351,7 +351,7 @@ def aggregate_p_curtailed(n):
 
 
 def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
-    components = dict(
+    components_dict = dict(
         Link=("p_nom", "p0"),
         Generator=("p_nom", "p"),
         StorageUnit=("p_nom", "p"),
@@ -362,7 +362,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(components.keys(), skip_empty=False), components.values()
+        n.iterate_components(components_dict.keys(), skip_empty=False), components_dict.values()
     ):
         if c.df.empty:
             continue
@@ -459,7 +459,7 @@ def get_aggregation_strategies(aggregation_strategies):
     return bus_strategies, generator_strategies
 
 
-def mock_snakemake(rulename, **wildcards):  # SAME AS IN pypsa-earth-sec
+def mock_snakemake(rule_name, **wildcards):  # SAME AS IN pypsa-earth-sec
     """
     This function is expected to be executed from the "scripts"-directory of "
     the snakemake project. It returns a snakemake.script.Snakemake object,
@@ -469,7 +469,7 @@ def mock_snakemake(rulename, **wildcards):  # SAME AS IN pypsa-earth-sec
 
     Parameters
     ----------
-    rulename: str
+    rule_name: str
         name of the rule for which the snakemake object should be generated
     wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
@@ -491,12 +491,12 @@ def mock_snakemake(rulename, **wildcards):  # SAME AS IN pypsa-earth-sec
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
-        rule = workflow.get_rule(rulename)
+        rule = workflow.get_rule(rule_name)
     except Exception as exception:
         print(
             exception,
-            f"The {rulename} might be a conditional rule in the Snakefile.\n"
-            f"Did you enable {rulename} in the config?",
+            f"The {rule_name} might be a conditional rule in the Snakefile.\n"
+            f"Did you enable {rule_name} in the config?",
         )
         raise
     dag = sm.dag.DAG(workflow, rules=[rule])
@@ -650,7 +650,7 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-def read_csv_nafix(file, **kwargs):  # SAME AS IN pypsa-earth-sec
+def read_csv_nafix(file, **kwargs):
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" not in kwargs:
         kwargs["keep_default_na"] = False
@@ -867,7 +867,7 @@ def prepare_costs(
 
 def create_network_topology(
     n, prefix, connector=" <-> ", bidirectional=True
-):  # COPIED FROM pypsa-earth-sec
+):
     """
     Create a network topology like the power transmission network.
 
@@ -920,7 +920,7 @@ def create_network_topology(
     return topo
 
 
-def cycling_shift(df, steps=1):  # TAKEN FROM pypsa-earth-sec
+def cycling_shift(df, steps=1):
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
     """
@@ -1095,7 +1095,7 @@ def locate_bus(
         ].item()  # looks for closest one shape=node
 
 
-def override_component_attrs(directory):  # --> maybe already implemented in pypsa
+def override_component_attrs(directory):
     """Tell PyPSA that links can have multiple outputs by
     overriding the component_attrs. This can be done for
     as many buses as you need with format busi for i = 2,3,4,5,....
