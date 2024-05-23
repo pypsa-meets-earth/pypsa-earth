@@ -21,6 +21,7 @@ import pandas as pd
 import requests
 import snakemake as sm
 import yaml
+from pypsa.components import component_attrs, components
 from pypsa.descriptors import Dict
 from shapely.geometry import Point
 from snakemake.script import Snakemake
@@ -1094,6 +1095,33 @@ def locate_bus(
         ].item()  # looks for closest one shape=node
 
 
+def override_component_attrs(directory):  # --> maybe already implemented in pypsa
+    """Tell PyPSA that links can have multiple outputs by
+    overriding the component_attrs. This can be done for
+    as many buses as you need with format busi for i = 2,3,4,5,....
+    See https://pypsa.org/doc/components.html#link-with-multiple-outputs-or-inputs
+
+    Parameters
+    ----------
+    directory : string
+        Folder where component attributes to override are stored
+        analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
+
+    Returns
+    -------
+    Dictionary of overriden component attributes.
+    """
+
+    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
+
+    for component, list_name in components.list_name.items():
+        fn = f"{directory}/{list_name}.csv"
+        if os.path.isfile(fn):
+            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
+            attrs[component] = overrides.combine_first(attrs[component])
+
+    return attrs
+
 def get_conv_factors(sector):
     """
     Create a dictionary with all the conversion factors for the standard net calorific value
@@ -1106,8 +1134,8 @@ def get_conv_factors(sector):
     For example, the value "hard coal": 0.007167 is given by 25.8 / 3600, where 25.8 is the standard
     net calorific value.
     """
-    if sector == "industry":
-        return {
+
+    conversion_factors_dict = {
             "additives and oxygenates": 0.008333,
             "anthracite": 0.005,
             "aviation gasoline": 0.01230,
@@ -1149,6 +1177,9 @@ def get_conv_factors(sector):
             "refinery gas": 0.01375,
             "sub-bituminous coal": 0.005555,
         }
+
+    if sector == "industry":
+        return conversion_factors_dict
     else:
         logger.info(f"No conversion factors available for sector {sector}")
         return np.nan
@@ -1245,3 +1276,11 @@ def safe_divide(numerator, denominator):
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
         return np.nan
+
+
+def get(item, investment_year=None):
+    """Check whether item depends on investment year"""
+    if isinstance(item, dict):
+        return item[investment_year]
+    else:
+        return item
