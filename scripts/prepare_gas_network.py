@@ -16,18 +16,15 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-import ruamel.yaml
 from helpers import (
     progress_retrieve,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
 from matplotlib.lines import Line2D
-from packaging.version import Version, parse
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely import wkt
-from shapely.geometry import LineString, MultiLineString, Point
+from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
@@ -529,21 +526,15 @@ def load_bus_region(onshore_path, pipelines):
     ]
 
     if snakemake.config["clustering_options"]["alternative_clustering"]:
-        # Read the YAML file
-        yaml = ruamel.yaml.YAML()
-        file_path = "./config.pypsa-earth.yaml"
-        with open(file_path, "r") as file:
-            config_pypsa_earth = yaml.load(file)
 
         countries_list = snakemake.config["countries"]
-        layer_id = config_pypsa_earth["build_shape_options"]["gadm_layer_id"]
-        update = config_pypsa_earth["build_shape_options"]["update_file"]
-        out_logging = config_pypsa_earth["build_shape_options"]["out_logging"]
-        year = config_pypsa_earth["build_shape_options"]["year"]
-        nprocesses = config_pypsa_earth["build_shape_options"]["nprocesses"]
-        contended_flag = config_pypsa_earth["build_shape_options"]["contended_flag"]
-        geo_crs = config_pypsa_earth["crs"]["geo_crs"]
-        distance_crs = config_pypsa_earth["crs"]["distance_crs"]
+        layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+        update = snakemake.config["build_shape_options"]["update_file"]
+        out_logging = snakemake.config["build_shape_options"]["out_logging"]
+        year = snakemake.config["build_shape_options"]["year"]
+        nprocesses = snakemake.config["build_shape_options"]["nprocesses"]
+        contended_flag = snakemake.config["build_shape_options"]["contended_flag"]
+        geo_crs = snakemake.config["crs"]["geo_crs"]
 
         bus_regions_onshore = gadm(
             countries_list,
