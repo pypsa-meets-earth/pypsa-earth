@@ -269,6 +269,7 @@ rule base_network:
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
         countries=config["countries"],
         base_network=config["base_network"],
+        cooking=config["cooking"]["stove"] # added link to config for cooking
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",

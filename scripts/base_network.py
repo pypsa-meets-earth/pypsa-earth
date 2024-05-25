@@ -124,6 +124,24 @@ def _load_buses_from_osm(fp_buses):
     # TODO: Drop NAN maybe somewhere else?
     buses = buses.dropna(axis="index", subset=["x", "y", "country"])
 
+    # create a function to add the buses
+    stove = snakemake.params.cooking
+    x = [0,0,0,0,0,0]
+    y = [0,0,0,0,0,0]
+    geometry = ['NA','NA','NA','NA','NA','NA']
+    country = ['ZM','ZM','ZM','ZM','ZM','ZM']
+    tag_area = [0,0,0,0,0,0]
+    tag_substation = [0,0,0,0,0,0]
+    under_construction = [False,False,False,False,False,False]
+    symbol = ['substation','substation','substation','substation','substation','substation']
+    v_nom = [0,0,0,0,0,0]
+    substation_lv = [False,False,False,False,False,False]
+
+    stove_df = pd.DataFrame({'v_nom':v_nom, 'symbol':symbol, 'under_construction':under_construction, 'tag_substation':tag_substation, 'tag_area':tag_area,
+                           'lon':y, 'lat':x, 'country':country, 'geometry':geometry, 'substation_lv':substation_lv, 'carrier':stove, 'x':x,'y':y})
+    
+    buses = pd.concat([buses, stove_df], ignore_index=True) # what worked
+
     return buses
 
 
