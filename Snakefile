@@ -43,6 +43,7 @@ run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
 
+load_data_paths = get_load_paths_gegis("data", config)
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
@@ -416,12 +417,10 @@ rule build_demand_profiles:
         snapshots=config["snapshots"],
         load_options=config["load_options"],
         countries=config["countries"],
-        weather_year=config["load_options"]["weather_year"],
-        prediction_year=config["load_options"]["prediction_year"],
-        ssp=config["load_options"]["ssp"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
