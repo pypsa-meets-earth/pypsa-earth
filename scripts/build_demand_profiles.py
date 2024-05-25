@@ -90,7 +90,7 @@ def get_gegis_regions(countries):
     return regions
 
 
-def get_load_paths_gegis(ssp_parentfolder, config):
+def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
     """
     Create load paths for GEGIS outputs.
 
@@ -115,20 +115,21 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         "era5_" + str(weather_year),
     )
 
-    for continent in region_load:
-        for ext in [".nc", ".csv"]:
-            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
-            if os.path.exists(load_path):
-                load_paths.append(load_path)
-                break
+    if check_existence:
+        for continent in region_load:
+            for ext in [".nc", ".csv"]:
+                load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+                if os.path.exists(load_path):
+                    load_paths.append(load_path)
+                    break
 
-    avail_regions = [
-        os.path.split(os.path.abspath(pth))[1].split(".nc")[0] for pth in load_paths
-    ]
-    if len(load_paths) == 0:
-        logger.warning(
-            f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
-        )
+        avail_regions = [
+            os.path.split(os.path.abspath(pth))[1].split(".nc")[0] for pth in load_paths
+        ]
+        if len(load_paths) == 0:
+            logger.warning(
+                f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
+            )
 
     return load_paths
 
