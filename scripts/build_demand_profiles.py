@@ -130,6 +130,13 @@ def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
             logger.warning(
                 f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
             )
+    else:
+        for continent in region_load:
+            load_path = os.path.join(
+                load_dir,
+                str(continent) + ".nc",
+            )
+            load_paths.append(load_path)
 
     return load_paths
 
