@@ -526,7 +526,6 @@ def load_bus_region(onshore_path, pipelines):
     ]
 
     if snakemake.config["clustering_options"]["alternative_clustering"]:
-
         countries_list = snakemake.config["countries"]
         layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
         update = snakemake.config["build_shape_options"]["update_file"]

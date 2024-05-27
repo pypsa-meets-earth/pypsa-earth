@@ -9,6 +9,7 @@ HTTP = HTTPRemoteProvider()
 if not exists("config.yaml"):
     copyfile("config.default.yaml", "config.yaml")
 
+
 configfile: "config.pypsa-earth.yaml"
 configfile: "config.yaml"
 
