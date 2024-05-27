@@ -87,13 +87,15 @@ def get_country(df):
 
 def _find_closest_links(links, new_links, distance_upper_bound=1.5):
     treecoords = np.asarray(
-        [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten() for s in links.geometry]
+        [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten()
+         for s in links.geometry]
     )
     querycoords = np.vstack(
         [new_links[["x1", "y1", "x2", "y2"]], new_links[["x2", "y2", "x1", "y1"]]]
     )
     tree = sp.spatial.KDTree(treecoords)
-    dist, ind = tree.query(querycoords, distance_upper_bound=distance_upper_bound)
+    dist, ind = tree.query(
+        querycoords, distance_upper_bound=distance_upper_bound)
     found_b = ind < len(links)
     found_i = np.arange(len(new_links) * 2)[found_b] % len(new_links)
 
@@ -118,7 +120,8 @@ def _load_buses_from_osm(fp_buses):
     buses = buses.loc[:, ~buses.columns.str.contains("^Unnamed")]
     buses["v_nom"] /= 1e3
     buses["carrier"] = buses.pop("dc").map({True: "DC", False: "AC"})
-    buses["under_construction"] = buses["under_construction"].fillna(False).astype(bool)
+    buses["under_construction"] = buses["under_construction"].fillna(
+        False).astype(bool)
     buses["x"] = buses["lon"]
     buses["y"] = buses["lat"]
     # TODO: Drop NAN maybe somewhere else?
@@ -135,7 +138,8 @@ def add_underwater_links(n, fp_offshore_shapes):
         if offshore_shape is None or offshore_shape.is_empty:
             n.links["underwater_fraction"] = 0.0
         else:
-            links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
+            links = gpd.GeoSeries(
+                n.links.geometry.dropna().map(shapely.wkt.loads))
             n.links["underwater_fraction"] = (
                 links.intersection(offshore_shape).length / links.length
             )
@@ -193,7 +197,8 @@ def _load_lines_from_osm(fp_osm_lines):
 
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
-    lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
+    lines = lines.loc[:, ~lines.columns.str.contains(
+        "^Unnamed")]  # remove unnamed col
     # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
     return lines
@@ -223,7 +228,8 @@ def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config
 
     links["length"] /= 1e3  # m to km conversion
     links["v_nom"] /= 1e3  # V to kV conversion
-    links = links.loc[:, ~links.columns.str.contains("^Unnamed")]  # remove unnamed col
+    links = links.loc[:, ~links.columns.str.contains(
+        "^Unnamed")]  # remove unnamed col
     # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
 
     return links
@@ -388,7 +394,7 @@ def _set_electrical_parameters_converters(links_config, converters):
 
 def _set_lines_s_nom_from_linetypes(n):
     # Info: n.line_types is a lineregister from pypsa/pandapowers
-    n.lines["s_nom_min"] = (
+    n.lines["s_nom"] = (
         np.sqrt(3)
         * n.lines["type"].map(n.line_types.i_nom)
         * n.lines.eval("v_nom * num_parallel")
@@ -401,15 +407,18 @@ def _set_lines_s_nom_from_linetypes(n):
 
 def _remove_dangling_branches(branches, buses):
     return pd.DataFrame(
-        branches.loc[branches.bus0.isin(buses.index) & branches.bus1.isin(buses.index)]
+        branches.loc[branches.bus0.isin(
+            buses.index) & branches.bus1.isin(buses.index)]
     )
 
 
 def _set_countries_and_substations(inputs, base_network_config, countries_config, n):
     countries = countries_config
-    country_shapes = gpd.read_file(inputs.country_shapes).set_index("name")["geometry"]
+    country_shapes = gpd.read_file(
+        inputs.country_shapes).set_index("name")["geometry"]
 
-    offshore_shapes = unary_union(gpd.read_file(inputs.offshore_shapes)["geometry"])
+    offshore_shapes = unary_union(
+        gpd.read_file(inputs.offshore_shapes)["geometry"])
 
     buses = n.buses
     bus_locations = buses
@@ -460,7 +469,8 @@ def _set_countries_and_substations(inputs, base_network_config, countries_config
             assert (
                 not df.empty
             ), "No buses with defined country within 200km of bus `{}`".format(b)
-            n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(), "country"]
+            n.buses.at[b, "country"] = df.loc[df.pathlength.idxmin(),
+                                              "country"]
 
         logger.warning(
             "{} buses are not in any country or offshore shape,"
@@ -492,7 +502,8 @@ def base_network(
     lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
-    lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
+    lines_ac = _set_electrical_parameters_lines(
+        lines_config, voltages_config, lines_ac)
 
     lines_dc = _set_electrical_parameters_dc_lines(
         lines_config, voltages_config, lines_dc
@@ -501,7 +512,8 @@ def base_network(
     transformers = _set_electrical_parameters_transformers(
         transformers_config, transformers
     )
-    converters = _set_electrical_parameters_converters(links_config, converters)
+    converters = _set_electrical_parameters_converters(
+        links_config, converters)
 
     n = pypsa.Network()
     n.name = "PyPSA-Earth"
@@ -544,7 +556,8 @@ def base_network(
 
     _set_lines_s_nom_from_linetypes(n)
 
-    _set_countries_and_substations(inputs, base_network_config, countries_config, n)
+    _set_countries_and_substations(
+        inputs, base_network_config, countries_config, n)
 
     _set_dc_underwater_fraction(n.lines, inputs.offshore_shapes)
     _set_dc_underwater_fraction(n.links, inputs.offshore_shapes)
