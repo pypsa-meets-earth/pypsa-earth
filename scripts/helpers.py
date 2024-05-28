@@ -620,6 +620,9 @@ def get_conv_factors(sector):
             "Gas Coke": 0.007326,
             "Refinery gas": 0.01375,
             "Coal Tar": 0.007778,
+            "Paraffin waxes": 0.01117,
+            "Ethane": 0.01289,
+            "Oil shale": 0.00247,
         }
     return fuels_conv_toTWh
 
@@ -627,19 +630,12 @@ def get_conv_factors(sector):
 def aggregate_fuels(sector):
     gas_fuels = [
         "Blast Furnace Gas",
-        "Biogases",
-        "Biogasoline",
-        "Coke Oven Gas",
-        "Gas Coke",
-        "Gasworks Gas",
         "Natural gas (including LNG)",
         "Natural Gas (including LNG)",
         "Natural gas liquids",
-        "Refinery gas",
     ]
 
     oil_fuels = [
-        "Biodiesel",
         "Motor Gasoline",
         "Liquefied petroleum gas (LPG)",
         "Liquified Petroleum Gas (LPG)",
@@ -650,39 +646,42 @@ def aggregate_fuels(sector):
         "Lubricants",
         "Naphtha",
         "Gas Oil/ Diesel Oil",
+        "Petroleum coke",
+        "Petroleum Coke",
+        "Patent fuel",
+        "Ethane",
+        "Bitumen",
+        "Refinery gas",
+
+    ]
+
+
+    biomass_fuels = [
+        "Bagasse",
+        "Fuelwood",
+        "Biogases",
+        "Biogasoline",
+        "Biodiesel",
+        "Charcoal",
         "Black Liquor",
     ]
+
 
     coal_fuels = [
         "Anthracite",
         "Brown coal",
         "Brown coal briquettes",
-        "Coke-oven coke",
-        "Coke Oven Coke",
-        "Hard coal",
-        "Other bituminous coal",
-        "Sub-bituminous coal",
-        "Coking coal",
-        "Bitumen",
-    ]
-
-    biomass_fuels = [
-        "Bagasse",
-        "Fuelwood",
-    ]
-
-    coal_fuels = [
-        "Anthracite",
-        "Charcoal",
         "Coke oven coke",
         "Coke-oven coke",
         "Coke Oven Coke",
-        "Coking coal",
         "Hard coal",
-        "Other bituminous coal",
-        "Petroleum coke",
-        "Petroleum Coke",
         "Hrad coal",
+        "Other bituminous coal",
+        "Sub-bituminous coal",
+        "Coking coal",
+        "Coke Oven Gas",
+        "Gas Coke",
+        "Gasworks Gas",
         "Lignite",
         "Peat",
         "Peat products",
