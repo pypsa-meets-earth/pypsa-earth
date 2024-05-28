@@ -126,6 +126,10 @@ def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
         avail_regions = [
             os.path.split(os.path.abspath(pth))[1].split(".nc")[0] for pth in load_paths
         ]
+
+        # TODO Remove after debugging
+        logger.info(f" An assumed load folder {load_dir}, load path is {load_paths}.")
+
         if len(load_paths) == 0:
             logger.warning(
                 f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
