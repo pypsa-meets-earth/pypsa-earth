@@ -1209,7 +1209,7 @@ def aggregate_fuels(sector):
         "naphtha",
         "patent fuel",
         "petroleum coke",
-        "refinery gas"
+        "refinery gas",
     ]
 
     coal_fuels = [
@@ -1236,7 +1236,7 @@ def aggregate_fuels(sector):
         "biogasoline",
         "biodiesel",
         "charcoal",
-        "black liquor"
+        "black liquor",
     ]
 
     electricity = ["electricity"]
