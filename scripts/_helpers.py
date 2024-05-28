@@ -1155,7 +1155,7 @@ def get_conv_factors(sector):
         "coking coal": 0.007833,
         "conventional crude oil": 0.01175,
         "crude petroleum": 0.011750,
-        "ethane": 0.012888,
+        "ethane": 0.01289,
         "fuel oil": 0.01122,
         "fuelwood": 0.00254,
         "gas coke": 0.007326,
@@ -1170,8 +1170,9 @@ def get_conv_factors(sector):
         "naphtha": 0.01236,
         "natural gas": 0.00025,
         "natural gas liquids": 0.01228,
+        "oil shale": 0.00247,
         "other bituminous coal": 0.005556,
-        "paraffin waxes": 0.011166,
+        "paraffin waxes": 0.01117,
         "patent fuel": 0.00575,
         "peat": 0.00271,
         "peat products": 0.00271,
@@ -1189,55 +1190,53 @@ def get_conv_factors(sector):
 
 def aggregate_fuels(sector):
     gas_fuels = [
-        "biogasoline",
-        "ethane",
-        "gas coke",
-        "natural gas",
+        "blast furnace gas",
+        "natural gas (including lng)",
         "natural gas liquids",
-        "refinery gas",
     ]
 
     oil_fuels = [
-        "additives and oxygenates",
-        "aviation gasoline",
-        "biodiesel",
-        "bio jet kerosene",
+        "bitumen",
         "conventional crude oil",
         "crude petroleum",
+        "ethane",
         "fuel oil",
         "gas oil/ diesel oil",
-        "gasoline-type jet fuel",
         "kerosene-type jet fuel",
         "liquefied petroleum gas (lpg)",
         "lubricants",
         "motor gasoline",
         "naphtha",
-        "paraffin waxes",
+        "patent fuel",
+        "petroleum coke",
+        "refinery gas"
     ]
 
     coal_fuels = [
         "anthracite",
-        "bitumen",
         "brown coal",
         "brown coal briquettes",
-        "charcoal",
-        "coal tar",
         "coke-oven coke",
         "coke-oven gas",
         "coking coal",
+        "gas coke",
+        "gasworks gas",
         "hard coal",
         "lignite",
         "other bituminous coal",
-        "patent fuel",
         "peat",
         "peat products",
-        "petroleum coke",
         "sub-bituminous coal",
     ]
 
     biomass_fuels = [
         "bagasse",
         "fuelwood",
+        "biogases",
+        "biogasoline",
+        "biodiesel",
+        "charcoal",
+        "black liquor"
     ]
 
     electricity = ["electricity"]

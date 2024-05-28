@@ -281,7 +281,7 @@ def test_get_conv_factors():
     assert conversion_factors_dict["coking coal"] == 0.007833
     assert conversion_factors_dict["conventional crude oil"] == 0.01175
     assert conversion_factors_dict["crude petroleum"] == 0.011750
-    assert conversion_factors_dict["ethane"] == 0.012888
+    assert conversion_factors_dict["ethane"] == 0.01289
     assert conversion_factors_dict["fuel oil"] == 0.01122
     assert conversion_factors_dict["fuelwood"] == 0.00254
     assert conversion_factors_dict["gas coke"] == 0.007326
@@ -295,8 +295,9 @@ def test_get_conv_factors():
     assert conversion_factors_dict["motor gasoline"] == 0.01230
     assert conversion_factors_dict["naphtha"] == 0.01236
     assert conversion_factors_dict["natural gas liquids"] == 0.01228
+    assert conversion_factors_dict["oil shale"] == 0.00247
     assert conversion_factors_dict["other bituminous coal"] == 0.005556
-    assert conversion_factors_dict["paraffin waxes"] == 0.011166
+    assert conversion_factors_dict["paraffin waxes"] == 0.01117
     assert conversion_factors_dict["patent fuel"] == 0.00575
     assert conversion_factors_dict["peat"] == 0.00271
     assert conversion_factors_dict["peat products"] == 0.00271
