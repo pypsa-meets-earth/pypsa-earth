@@ -131,6 +131,7 @@ def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
                 f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
             )
     else:
+        logger.warning("Existence of the load data is not checked")
         for continent in region_load:
             load_path = os.path.join(
                 str(load_dir),
