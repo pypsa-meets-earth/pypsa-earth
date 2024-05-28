@@ -133,7 +133,7 @@ def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
     else:
         for continent in region_load:
             load_path = os.path.join(
-                load_dir,
+                str(load_dir),
                 str(continent) + ".nc",
             )
             load_paths.append(load_path)
