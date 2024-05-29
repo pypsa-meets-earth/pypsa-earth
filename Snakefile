@@ -625,6 +625,8 @@ rule run_test:
 
         shell("cp test/config.test1.yaml config.yaml")
         shell("snakemake --cores all solve_all_networks --forceall")
+        shell("cp test/config.test2.yaml config.yaml")
+        shell("snakemake --cores all solve_all_networks_myopic --forceall")
 
 
 

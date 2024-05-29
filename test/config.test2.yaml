@@ -7,7 +7,7 @@ costs_dir: data/ #TODO change to the equivalent of technology data
 
 run: test3
 
-foresight: overnight
+foresight: myopic
 
 # option to disable the subworkflow to ease the analyses
 disable_subworkflow: false
@@ -19,6 +19,7 @@ scenario:
   - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
+  - 2050
   ll:
   - "c1"
   opts:
@@ -26,7 +27,7 @@ scenario:
   sopts:
   - "144H"
   demand:
-  - "AB"
+  - "DF"
 
 
 policy_config:
