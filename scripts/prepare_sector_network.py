@@ -28,6 +28,15 @@ logger = logging.getLogger(__name__)
 spatial = SimpleNamespace()
 
 
+def add_lifetime_wind_solar(n, costs):
+    """
+    Add lifetime for solar and wind generators.
+    """
+    for carrier in ["solar", "onwind", "offwind"]:
+        gen_i = n.generators.index.str.contains(carrier)
+        n.generators.loc[gen_i, "lifetime"] = costs.at[carrier, "lifetime"]
+
+
 def add_carrier_buses(n, carrier, nodes=None):
     """
     Add buses to connect e.g. coal, nuclear and oil plants
@@ -431,7 +440,7 @@ def add_hydrogen(n, costs):
             )
 
 
-def define_spatial(nodes):
+def define_spatial(nodes, options):
     """
     Namespace for spatial
 
@@ -441,7 +450,6 @@ def define_spatial(nodes):
     """
 
     global spatial
-    global options
 
     spatial.nodes = nodes
 
@@ -470,16 +478,18 @@ def define_spatial(nodes):
         spatial.co2.nodes = nodes + " co2 stored"
         spatial.co2.locations = nodes
         spatial.co2.vents = nodes + " co2 vent"
-        spatial.co2.x = (n.buses.loc[list(nodes)].x.values,)
-        spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
+        # spatial.co2.x = (n.buses.loc[list(nodes)].x.values,)
+        # spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
     else:
         spatial.co2.nodes = ["co2 stored"]
         spatial.co2.locations = ["Africa"]
         spatial.co2.vents = ["co2 vent"]
-        spatial.co2.x = (0,)
-        spatial.co2.y = 0
+        # spatial.co2.x = (0,)
+        # spatial.co2.y = 0
 
     spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
+
+    return spatial
 
 
 def add_biomass(n, costs):
@@ -2398,6 +2408,9 @@ if __name__ == "__main__":
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
 
+    # Add location. TODO: move it into pypsa-earth
+    n.buses.location = n.buses.index
+
     # Set carrier of AC loads
     n.loads.loc[nodes, "carrier"] = "AC"
 
@@ -2418,7 +2431,10 @@ if __name__ == "__main__":
     )
 
     # Define spatial for biomass and co2. They require the same spatial definition
-    define_spatial(pop_layout.index)
+    spatial = define_spatial(pop_layout.index, options)
+
+    if snakemake.config["foresight"] in ["myopic", "perfect"]:
+        add_lifetime_wind_solar(n, costs)
 
     # TODO logging
 
