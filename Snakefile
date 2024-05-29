@@ -694,21 +694,6 @@ rule build_industry_demand:  #default data
         "scripts/build_industry_demand.py"
 
 
-if config["enable"].get("retrieve_irena", True):
-
-    rule retrieve_irena:
-        output:
-            offwind="data/existing_infrastructure/offwind_capacity_IRENA.csv",
-            onwind="data/existing_infrastructure/onwind_capacity_IRENA.csv",
-            solar="data/existing_infrastructure/solar_capacity_IRENA.csv",
-        # log:
-        #     logs("retrieve_irena.log"),
-        resources:
-            mem_mb=1000,
-        script:
-            "./scripts/retrieve_irena.py"
-
-
 if config["foresight"] == "myopic":
 
     rule add_existing_baseyear:
@@ -731,9 +716,6 @@ if config["foresight"] == "myopic":
             cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
             cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}.nc",
             existing_heating_distribution="data/existing_infrastructure/existing_heating_raw.csv",
-            existing_solar="data/existing_infrastructure/solar_capacity_IRENA.csv",
-            existing_onwind="data/existing_infrastructure/onwind_capacity_IRENA.csv",
-            existing_offwind="data/existing_infrastructure/offwind_capacity_IRENA.csv",
         output:
             RDIR
             + "/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",

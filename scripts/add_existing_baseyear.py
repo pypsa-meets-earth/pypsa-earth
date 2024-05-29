@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import country_converter as coco
 import numpy as np
 import pandas as pd
+import powerplantmatching as pm
 import pypsa
 import xarray as xr
 
@@ -62,14 +63,24 @@ def add_existing_renewables(df_agg):
     Append existing renewables to the df_agg pd.DataFrame with the conventional
     power plants.
     """
-    carriers = {"solar": "solar", "onwind": "onwind", "offwind": "offwind-ac"}
+    tech_map = {"solar": "PV", "onwind": "Onshore", "offwind": "Offshore"}
 
-    for tech in ["solar", "onwind", "offwind"]:
-        carrier = carriers[tech]
+    countries = snakemake.config["countries"]
+    irena = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+    irena = irena.query("Country in @countries")
+    irena = irena.groupby(["Technology", "Country", "Year"]).Capacity.sum()
 
-        df = pd.read_csv(snakemake.input[f"existing_{tech}"], index_col=0).fillna(0.0)
+    irena = irena.unstack().reset_index()
+
+    for carrier, tech in tech_map.items():
+        df = (
+            irena[irena.Technology.str.contains(tech)]
+            .drop(columns=["Technology"])
+            .set_index("Country")
+            .reindex(countries, fill_value=0.0)
+            .fillna(0.0)
+        )
         df.columns = df.columns.astype(int)
-        df.index = cc.convert(df.index, to="iso2")
 
         # calculate yearly differences
         df.insert(loc=0, value=0.0, column="1999")
@@ -99,12 +110,16 @@ def add_existing_renewables(df_agg):
 
         for year in nodal_df.columns:
             for node in nodal_df.index:
-                name = f"{node}-{tech}-{year}"
+                name = f"{node}-{carrier}-{year}"
                 capacity = nodal_df.loc[node, year]
                 if capacity > 0.0:
-                    df_agg.at[name, "Fueltype"] = tech
+                    df_agg.at[name, "Fueltype"] = carrier
                     df_agg.at[name, "Capacity"] = capacity
                     df_agg.at[name, "DateIn"] = year
+                    df_agg.at[name, "lifetime"] = costs.at[carrier, "lifetime"]
+                    df_agg.at[name, "DateOut"] = (
+                        year + costs.at[carrier, "lifetime"] - 1
+                    )
                     df_agg.at[name, "cluster_bus"] = node
 
 
@@ -570,13 +585,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_existing_baseyear",
             simpl="",
-            clusters="10",
-            ll="c1.0",
+            clusters="4",
+            ll="c1",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
+            demand="DF",
             h2export="120",
         )
 

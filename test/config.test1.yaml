@@ -53,7 +53,6 @@ demand_data:
 
 enable:
   retrieve_cost_data: true # if true, the workflow overwrites the cost data saved in data/costs again
-  retrieve_irena: true  #If true, downloads the IRENA data
 
 fossil_reserves:
   oil: 100 #TWh Maybe reduntant
