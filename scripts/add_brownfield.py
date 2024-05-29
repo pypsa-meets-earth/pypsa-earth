@@ -176,55 +176,55 @@ def disable_grid_expansion_if_limit_hit(n):
                 n.global_constraints.drop(name, inplace=True)
 
 
-def adjust_renewable_profiles(n, input_profiles, params, year):
-    """
-    Adjusts renewable profiles according to the renewable technology specified,
-    using the latest year below or equal to the selected year.
-    """
+# def adjust_renewable_profiles(n, input_profiles, params, year):
+#     """
+#     Adjusts renewable profiles according to the renewable technology specified,
+#     using the latest year below or equal to the selected year.
+#     """
 
-    # spatial clustering
-    cluster_busmap = pd.read_csv(snakemake.input.cluster_busmap, index_col=0).squeeze()
-    simplify_busmap = pd.read_csv(
-        snakemake.input.simplify_busmap, index_col=0
-    ).squeeze()
-    clustermaps = simplify_busmap.map(cluster_busmap)
-    clustermaps.index = clustermaps.index.astype(str)
+#     # spatial clustering
+#     cluster_busmap = pd.read_csv(snakemake.input.cluster_busmap, index_col=0).squeeze()
+#     simplify_busmap = pd.read_csv(
+#         snakemake.input.simplify_busmap, index_col=0
+#     ).squeeze()
+#     clustermaps = simplify_busmap.map(cluster_busmap)
+#     clustermaps.index = clustermaps.index.astype(str)
 
-    # temporal clustering
-    dr = pd.date_range(**params["snapshots"], freq="h")
-    snapshotmaps = (
-        pd.Series(dr, index=dr).where(lambda x: x.isin(n.snapshots), pd.NA).ffill()
-    )
+#     # temporal clustering
+#     dr = pd.date_range(**params["snapshots"], freq="h")
+#     snapshotmaps = (
+#         pd.Series(dr, index=dr).where(lambda x: x.isin(n.snapshots), pd.NA).ffill()
+#     )
 
-    for carrier in params["carriers"]:
-        if carrier == "hydro":
-            continue
-        with xr.open_dataset(getattr(input_profiles, "profile_" + carrier)) as ds:
-            if ds.indexes["bus"].empty or "year" not in ds.indexes:
-                continue
+#     for carrier in params["carriers"]:
+#         if carrier == "hydro":
+#             continue
+#         with xr.open_dataset(getattr(input_profiles, "profile_" + carrier)) as ds:
+#             if ds.indexes["bus"].empty or "year" not in ds.indexes:
+#                 continue
 
-            closest_year = max(
-                (y for y in ds.year.values if y <= year), default=min(ds.year.values)
-            )
+#             closest_year = max(
+#                 (y for y in ds.year.values if y <= year), default=min(ds.year.values)
+#             )
 
-            p_max_pu = (
-                ds["profile"]
-                .sel(year=closest_year)
-                .transpose("time", "bus")
-                .to_pandas()
-            )
+#             p_max_pu = (
+#                 ds["profile"]
+#                 .sel(year=closest_year)
+#                 .transpose("time", "bus")
+#                 .to_pandas()
+#             )
 
-            # spatial clustering
-            weight = ds["weight"].sel(year=closest_year).to_pandas()
-            weight = weight.groupby(clustermaps).transform(normed_or_uniform)
-            p_max_pu = (p_max_pu * weight).T.groupby(clustermaps).sum().T
-            p_max_pu.columns = p_max_pu.columns + f" {carrier}"
+#             # spatial clustering
+#             weight = ds["weight"].sel(year=closest_year).to_pandas()
+#             weight = weight.groupby(clustermaps).transform(normed_or_uniform)
+#             p_max_pu = (p_max_pu * weight).T.groupby(clustermaps).sum().T
+#             p_max_pu.columns = p_max_pu.columns + f" {carrier}"
 
-            # temporal_clustering
-            p_max_pu = p_max_pu.groupby(snapshotmaps).mean()
+#             # temporal_clustering
+#             p_max_pu = p_max_pu.groupby(snapshotmaps).mean()
 
-            # replace renewable time series
-            n.generators_t.p_max_pu.loc[:, p_max_pu.columns] = p_max_pu
+#             # replace renewable time series
+#             n.generators_t.p_max_pu.loc[:, p_max_pu.columns] = p_max_pu
 
 
 if __name__ == "__main__":
