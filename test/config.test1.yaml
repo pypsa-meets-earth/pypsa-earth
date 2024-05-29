@@ -48,7 +48,7 @@ demand_data:
   base_year: 2019
 
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exageratted numbers, check carefully.
-
+  aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
 
 enable:
@@ -75,6 +75,7 @@ custom_data:
   elec_demand: false
   heat_demand: false
   industry_demand: false
+  industry_database: false
   transport_demand: false
   water_costs: false
   h2_underground: false
@@ -174,6 +175,8 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
   oil:
     spatial_oil: true
@@ -323,6 +326,7 @@ sector:
   helmeth: true
   dac: true
   SMR: true
+  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
@@ -343,6 +347,9 @@ snapshots:
 
 # atlite:
 #   cutout: ./cutouts/africa-2013-era5.nc
+
+build_osm_network:  # TODO: To Remove this once we merge pypsa-earth and pypsa-earth-sec
+  force_ac: false  # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
 solving:
   #tmpdir: "path/to/tmp"
