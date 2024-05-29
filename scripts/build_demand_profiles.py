@@ -142,6 +142,8 @@ def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
                 str(continent) + ".nc",
             )
             load_paths.append(load_path)
+        # TODO Remove after debugging
+        logger.info(f" An assumed load folder {load_dir}, load path is {load_paths}.")
 
     return load_paths
 
