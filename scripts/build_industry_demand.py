@@ -293,9 +293,11 @@ if __name__ == "__main__":
         # temporary fix: merge other manufacturing, construction and non-fuel into other and drop the column
         other_cols = list(set(industry_base_totals.columns) - set(clean_industry_list))
         if len(other_cols) > 0:
-            industry_base_totals["other"] += industry_base_totals[other_cols].sum(axis=1)
+            industry_base_totals["other"] += industry_base_totals[other_cols].sum(
+                axis=1
+            )
             industry_base_totals.drop(columns=other_cols, inplace=True)
-        
+
         nodal_df = pd.DataFrame()
 
         for country in countries:
