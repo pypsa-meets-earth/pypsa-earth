@@ -4,9 +4,8 @@
 
 .. _how_to_docs:
 
-##########################################
-How to docs
-##########################################
+How to docs?
+============
 
 We add the code documentation along the way.
 You might think that cost a lot of time and is not efficient - but that's not really true anymore!

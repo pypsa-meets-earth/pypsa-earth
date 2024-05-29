@@ -190,7 +190,6 @@ Documentation
 
 * :doc:`release_notes`
 * :doc:`how_to_contribute`
-* :doc:`how_to_docs`
 * :doc:`software_hints`
 * :doc:`learning_materials`
 * :doc:`project_structure_and_credits`
@@ -203,7 +202,6 @@ Documentation
 
    release_notes
    how_to_contribute
-   how_to_docs
    software_hints
    learning_materials
    project_structure_and_credits
