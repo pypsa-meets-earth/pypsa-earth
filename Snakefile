@@ -464,6 +464,7 @@ rule copy_config:
     script:
         "scripts/copy_config.py"
 
+
 if config["foresight"] == "overnight":
 
     rule solve_network:
@@ -690,7 +691,9 @@ rule build_industry_demand:  #default data
     script:
         "scripts/build_industry_demand.py"
 
+
 if config["enable"].get("retrieve_irena", True):
+
     rule retrieve_irena:
         output:
             offwind="data/existing_infrastructure/offwind_capacity_IRENA.csv",
@@ -702,6 +705,7 @@ if config["enable"].get("retrieve_irena", True):
             mem_mb=1000,
         script:
             "./scripts/retrieve_irena.py"
+
 
 if config["foresight"] == "myopic":
 
@@ -716,9 +720,12 @@ if config["foresight"] == "myopic":
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             powerplants=pypsaearth("resources/powerplants.csv"),
             busmap_s=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}.csv"),
-            busmap=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"),
+            busmap=pypsaearth(
+                "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+            ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
-            costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            costs=CDIR
+            + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
             cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
             cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}.nc",
             existing_heating_distribution="data/existing_infrastructure/existing_heating_raw.csv",
@@ -747,14 +754,14 @@ if config["foresight"] == "myopic":
         script:
             "scripts/add_existing_baseyear.py"
 
-
     def input_profile_tech_brownfield(w):
         return {
-            f"profile_{tech}": pypsaearth(f"resources/renewable_profiles/profile_{tech}.nc")
+            f"profile_{tech}": pypsaearth(
+                f"resources/renewable_profiles/profile_{tech}.nc"
+            )
             for tech in config["electricity"]["renewable_carriers"]
             if tech != "hydro"
         }
-
 
     def solved_previous_horizon(w):
         planning_horizons = config["scenario"]["planning_horizons"]
@@ -771,7 +778,9 @@ if config["foresight"] == "myopic":
     rule add_brownfield:
         params:
             H2_retrofit=config["sector"]["hydrogen"],
-            H2_retrofit_capacity_per_CH4=config["sector"]["hydrogen"]["H2_retrofit_capacity_per_CH4"],
+            H2_retrofit_capacity_per_CH4=config["sector"]["hydrogen"][
+                "H2_retrofit_capacity_per_CH4"
+            ],
             threshold_capacity=config["existing_capacities"]["threshold_capacity"],
             snapshots=config["snapshots"],
             # drop_leap_day=config["enable"]["drop_leap_day"],
@@ -779,7 +788,9 @@ if config["foresight"] == "myopic":
         input:
             unpack(input_profile_tech_brownfield),
             simplify_busmap=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}.csv"),
-            cluster_busmap=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"),
+            cluster_busmap=pypsaearth(
+                "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+            ),
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
@@ -797,23 +808,22 @@ if config["foresight"] == "myopic":
             + "/logs/add_brownfield_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
         benchmark:
             (
-                
                 RDIR
                 + "/benchmarks/add_brownfield/elec_s{simpl}_ec_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
             )
         script:
             "./scripts/add_brownfield.py"
 
-
     ruleorder: add_existing_baseyear > add_brownfield
-
 
     rule solve_network_myopic:
         params:
             solving=config["solving"],
             foresight=config["foresight"],
             planning_horizons=config["scenario"]["planning_horizons"],
-            co2_sequestration_potential=config["scenario"].get("co2_sequestration_potential", 200),
+            co2_sequestration_potential=config["scenario"].get(
+                "co2_sequestration_potential", 200
+            ),
         input:
             overrides="data/override_component_attrs",
             network=RDIR
@@ -853,4 +863,4 @@ if config["foresight"] == "myopic":
                 **config["scenario"],
                 **config["costs"],
                 **config["export"],
-            )
+            ),

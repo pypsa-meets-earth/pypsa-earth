@@ -12,13 +12,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from helpers import (
-    sets_path_to_root
-#     # configure_logging,
-#     # set_scenario_config,
-#     # update_config_from_wildcards,
-)
 from add_existing_baseyear import add_build_year_to_new_assets
+from helpers import (  # # configure_logging,; # set_scenario_config,; # update_config_from_wildcards,
+    sets_path_to_root,
+)
+
 # from pypsa.clustering.spatial import normed_or_uniform
 
 logger = logging.getLogger(__name__)
@@ -231,8 +229,10 @@ def adjust_renewable_profiles(n, input_profiles, params, year):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
+        import os
+
         from helpers import mock_snakemake
-        import os    
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(

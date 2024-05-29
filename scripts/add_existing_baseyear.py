@@ -8,6 +8,7 @@ horizon.
 """
 
 import logging
+import os
 from types import SimpleNamespace
 
 import country_converter as coco
@@ -15,14 +16,14 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-import os
+
 # from _helpers import (
 #     configure_logging,
 #     set_scenario_config,
 #     update_config_from_wildcards,
 # )
 # from add_electricity import sanitize_carriers
-from prepare_sector_network import define_spatial, prepare_costs #, cluster_heat_buses
+from prepare_sector_network import define_spatial, prepare_costs  # , cluster_heat_buses
 
 logger = logging.getLogger(__name__)
 cc = coco.CountryConverter()
@@ -314,9 +315,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
 
         else:
             if generator not in vars(spatial).keys():
-                logger.debug(
-                    f"Carrier type {generator} not in spatial data, skipping"
-                )
+                logger.debug(f"Carrier type {generator} not in spatial data, skipping")
                 continue
 
             bus0 = vars(spatial)[carrier[generator]].nodes

@@ -18,10 +18,10 @@ This rule downloads the existing capacities from `IRENASTAT <https://www.irena.o
 """
 
 import logging
-
-import pandas as pd
 import os
+
 import country_converter as coco
+import pandas as pd
 
 # from _helpers import configure_logging
 
@@ -30,31 +30,35 @@ import country_converter as coco
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from helpers import mock_snakemake
+
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("retrieve_irena")
     # configure_logging(snakemake)
 
-    irena_raw = pd.read_csv("https://pxweb.irena.org:443/sq/99e64b12-fe03-4a7b-92ea-a22cc3713b92",
-                            skiprows=2, index_col=[0, 1, 3], encoding="latin-1")
+    irena_raw = pd.read_csv(
+        "https://pxweb.irena.org:443/sq/99e64b12-fe03-4a7b-92ea-a22cc3713b92",
+        skiprows=2,
+        index_col=[0, 1, 3],
+        encoding="latin-1",
+    )
 
     var = "Installed electricity capacity (MW)"
-    irena = (
-        irena_raw[var]
-        .unstack(level=2)
-        .reset_index(level=1)
-        .replace(0, "")
-    )
+    irena = irena_raw[var].unstack(level=2).reset_index(level=1).replace(0, "")
 
     cc = coco.CountryConverter()
 
     irena.index = irena.index.str.replace("Congo (the)", "Congo")
-    irena["ISO2"] = coco.convert(names=irena.index, to='ISO2')
+    irena["ISO2"] = coco.convert(names=irena.index, to="ISO2")
     irena.set_index("ISO2", inplace=True)
 
-    df_offwind = irena[irena.Technology.str.contains("Offshore")].drop(columns=['Technology'])
-    df_onwind = irena[irena.Technology.str.contains("Onshore")].drop(columns=['Technology'])
-    df_pv = irena[irena.Technology.str.contains("Solar")].drop(columns=['Technology'])
+    df_offwind = irena[irena.Technology.str.contains("Offshore")].drop(
+        columns=["Technology"]
+    )
+    df_onwind = irena[irena.Technology.str.contains("Onshore")].drop(
+        columns=["Technology"]
+    )
+    df_pv = irena[irena.Technology.str.contains("Solar")].drop(columns=["Technology"])
 
     df_offwind.to_csv(snakemake.output[0])
     df_onwind.to_csv(snakemake.output[1])
