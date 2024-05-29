@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import pytz
+import ruamel.yaml
 import xarray as xr
 from helpers import (
     create_dummy_data,
@@ -142,7 +143,7 @@ def add_oil(n, costs):
         n.add("Carrier", "oil")
 
     # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted seperately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
-    # n.carriers.loc["oil", "co2_emissions"] = 0
+    n.carriers.loc["oil", "co2_emissions"] = 0
     # print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
 
     n.madd(
@@ -343,37 +344,40 @@ def add_hydrogen(n, costs):
         capital_cost=h2_capital_cost,
     )
 
-    if not snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
-        h2_links = pd.read_csv(snakemake.input.pipelines)
-
-        # Order buses to detect equal pairs for bidirectional pipelines
-        buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
-
-        if snakemake.config["clustering_options"]["alternative_clustering"]:
-            # Appending string for carrier specification '_AC'
-            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-            # Conversion of GADM id to from 3 to 2-digit
-            def convert_gadm_to_2_digits(pds):
-                psplit = pds.str.split(".")
-                return (
-                    psplit.str[0].map(three_2_two_digits_country) + "." + psplit.str[1]
-                )
-
-            h2_links["bus0"] = convert_gadm_to_2_digits(h2_links["bus0"])
-            h2_links["bus1"] = convert_gadm_to_2_digits(h2_links["bus1"])
-
-        # Create index column
-        h2_links["buses_idx"] = (
-            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+    # Hydrogen network:
+    # -----------------
+    def add_links_repurposed_H2_pipelines():
+        n.madd(
+            "Link",
+            h2_links.index + " repurposed",
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            p_nom_max=h2_links.capacity.values
+            * 0.8,  # https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline repurposed", "fixed"]
+            * h2_links.length.values,
+            carrier="H2 pipeline repurposed",
+            lifetime=costs.at["H2 (g) pipeline repurposed", "lifetime"],
         )
 
-        # Aggregate pipelines applying mean on length and sum on capacities
-        h2_links = h2_links.groupby("buses_idx").agg(
-            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+    def add_links_new_H2_pipelines():
+        n.madd(
+            "Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
+            carrier="H2 pipeline",
+            lifetime=costs.at["H2 (g) pipeline", "lifetime"],
         )
-    else:
+
+    def add_links_elec_routing_new_H2_pipelines():
         attrs = ["bus0", "bus1", "length"]
         h2_links = pd.DataFrame(columns=attrs)
 
@@ -385,7 +389,10 @@ def add_hydrogen(n, costs):
         )
 
         for candidate in candidates.index:
-            buses = [candidates.at[candidate, "bus0"], candidates.at[candidate, "bus1"]]
+            buses = [
+                candidates.at[candidate, "bus0"],
+                candidates.at[candidate, "bus1"],
+            ]
             buses.sort()
             name = f"H2 pipeline {buses[0]} -> {buses[1]}"
             if name not in h2_links.index:
@@ -393,51 +400,65 @@ def add_hydrogen(n, costs):
                 h2_links.at[name, "bus1"] = buses[1]
                 h2_links.at[name, "length"] = candidates.at[candidate, "length"]
 
-    # TODO Add efficiency losses
+        n.madd(
+            "Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "fixed"] * h2_links.length.values,
+            carrier="H2 pipeline",
+            lifetime=costs.at["H2 (g) pipeline", "lifetime"],
+        )
+
+    # Add H2 Links:
     if snakemake.config["sector"]["hydrogen"]["network"]:
-        if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
-            n.madd(
-                "Link",
-                h2_links.index + " repurposed",
-                bus0=h2_links.bus0.values + " H2",
-                bus1=h2_links.bus1.values + " H2",
-                p_min_pu=-1,
-                p_nom_extendable=True,
-                p_nom_max=h2_links.capacity.values
-                * 0.8,  # https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
-                length=h2_links.length.values,
-                capital_cost=costs.at["H2 (g) pipeline repurposed", "fixed"]
-                * h2_links.length.values,
-                carrier="H2 pipeline repurposed",
-                lifetime=costs.at["H2 (g) pipeline repurposed", "lifetime"],
-            )
-            n.madd(
-                "Link",
-                h2_links.index,
-                bus0=h2_links.bus0.values + " H2",
-                bus1=h2_links.bus1.values + " H2",
-                p_min_pu=-1,
-                p_nom_extendable=True,
-                length=h2_links.length.values,
-                capital_cost=costs.at["H2 (g) pipeline", "fixed"]
-                * h2_links.length.values,
-                carrier="H2 pipeline",
-                lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-            )
+        h2_links = pd.read_csv(snakemake.input.pipelines)
+
+        # Order buses to detect equal pairs for bidirectional pipelines
+        buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
+
+        if snakemake.config["build_osm_network"]["force_ac"]:
+            # Appending string for carrier specification '_AC'
+            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+
+            # # Conversion of GADM id to from 3 to 2-digit
+            # h2_links["bus0"] = (
+            #     h2_links["bus0"]
+            #     .str.split(".")
+            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            # )
+            # h2_links["bus1"] = (
+            #     h2_links["bus1"]
+            #     .str.split(".")
+            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
+            # )
+
+        # Create index column
+        h2_links["buses_idx"] = (
+            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+        )
+
+        # Aggregate pipelines applying mean on length and sum on capacities
+        h2_links = h2_links.groupby("buses_idx").agg(
+            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+        )
+
+        if len(h2_links) > 0:
+            if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
+                add_links_elec_routing_new_H2_pipelines()
+            if snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
+                add_links_elec_routing_new_H2_pipelines()
+            else:
+                add_links_new_H2_pipelines()
         else:
-            n.madd(
-                "Link",
-                h2_links.index,
-                bus0=h2_links.bus0.values + " H2",
-                bus1=h2_links.bus1.values + " H2",
-                p_min_pu=-1,
-                p_nom_extendable=True,
-                length=h2_links.length.values,
-                capital_cost=costs.at["H2 (g) pipeline", "fixed"]
-                * h2_links.length.values,
-                carrier="H2 pipeline",
-                lifetime=costs.at["H2 (g) pipeline", "lifetime"],
-            )
+            print(
+                "No existing gas network; applying greenfield for H2 network"
+            )  # TODO change to logger.info
+            add_links_elec_routing_new_H2_pipelines()
 
 
 def define_spatial(nodes, options):
@@ -801,7 +822,10 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    all_aviation = ["total international aviation", "total domestic aviation"]
+    if snakemake.config["sector"]["international_bunkers"]:
+        all_aviation = ["total international aviation", "total domestic aviation"]
+    else:
+        all_aviation = ["total domestic aviation"]
 
     aviation_demand = (
         energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -947,7 +971,7 @@ def h2_hc_conversions(n, costs):
             lifetime=costs.at["helmeth", "lifetime"],
         )
 
-    if options["SMR"]:
+    if options["SMR CC"]:
         n.madd(
             "Link",
             spatial.nodes,
@@ -965,6 +989,7 @@ def h2_hc_conversions(n, costs):
             lifetime=costs.at["SMR CC", "lifetime"],
         )
 
+    if options["SMR"]:
         n.madd(
             "Link",
             spatial.nodes + " SMR",
@@ -988,7 +1013,10 @@ def add_shipping(n, costs):
 
     gadm_level = options["gadm_level"]
 
-    all_navigation = ["total international navigation", "total domestic navigation"]
+    if snakemake.config["sector"]["international_bunkers"]:
+        all_navigation = ["total international navigation", "total domestic navigation"]
+    else:
+        all_navigation = ["total domestic navigation"]
 
     navigation_demand = (
         energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -2380,7 +2408,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="10",
+            clusters="13",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
