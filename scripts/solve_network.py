@@ -584,6 +584,7 @@ if __name__ == "__main__":
 
         if (
             snakemake.config["policy_config"]["hydrogen"]["additionality"]
+            and not snakemake.config["policy_config"]["hydrogen"]["is_reference"]
             and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
             != "no_res_matching"
         ):
