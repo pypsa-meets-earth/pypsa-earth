@@ -9,6 +9,9 @@ run: test3
 
 foresight: overnight
 
+# option to disable the subworkflow to ease the analyses
+disable_subworkflow: false
+
 scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""

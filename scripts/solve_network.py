@@ -189,7 +189,9 @@ def H2_export_yearly_constraint(n):
         linexpr((weightings, get_var(n, "Generator", "p")[res_index]))
     )  # single line sum
 
-    load_ind = n.loads[n.loads.carrier == "AC"].index
+    load_ind = n.loads[n.loads.carrier == "AC"].index.intersection(
+        n.loads_t.p_set.columns
+    )
 
     load = (
         n.loads_t.p_set[load_ind].sum(axis=1) * n.snapshot_weightings["generators"]
@@ -483,13 +485,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
-            clusters="4",
+            clusters="74",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="DF",
+            demand="AB",
             h2export="120",
         )
 
