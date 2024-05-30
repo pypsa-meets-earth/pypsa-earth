@@ -361,7 +361,7 @@ def add_hydrogen(n, costs):
                 bus0=nodes + " H2 UHS",
                 bus1=nodes + " H2",
                 carrier="H2 UHS discharger",
-                efficiency=0.95,
+                efficiency=1,
                 # capital_cost=costs.at["battery inverter", "fixed"],
                 p_nom_extendable=True,
                 # lifetime=costs.at["battery inverter", "lifetime"],
@@ -381,7 +381,13 @@ def add_hydrogen(n, costs):
             # convert TWh to MWh with 1e6
             h2_pot = h2_cavern_ct.loc[cavern_nodes.country]
             h2_pot.index = cavern_nodes.index
-            # h2_pot = h2_pot * cavern_nodes.fraction * 1e6
+
+            # distribute underground potential equally over all nodes #TODO change with real data
+            s = pd.Series(h2_pot.index, index=h2_pot.index)
+            country_codes = s.str[:2]
+            code_counts = country_codes.value_counts()
+            fractions = country_codes.map(code_counts).rdiv(1)
+            h2_pot = h2_pot * fractions * 1e6
 
             # n.add("Carrier", "H2 UHS")
 
@@ -423,7 +429,7 @@ def add_hydrogen(n, costs):
                 bus0=nodes,
                 bus1=nodes + " H2 UHS",
                 carrier="H2 UHS discharger",
-                efficiency=0.83,
+                efficiency=1,
                 capital_cost=0,
                 p_nom_extendable=True,
                 # lifetime=costs.at["battery inverter", "lifetime"],
@@ -433,7 +439,6 @@ def add_hydrogen(n, costs):
     h2_capital_cost = costs.at[
         "hydrogen storage tank type 1 including compressor", "fixed"
     ]
-    nodes_overground = cavern_nodes.index.symmetric_difference(nodes)
     nodes_overground = nodes
     n.madd(
         "Store",
@@ -992,10 +997,8 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-    if snakemake.config["sector"]["international_bunkers"]:
-        all_aviation = ["total international aviation", "total domestic aviation"]
-    else:
-        all_aviation = ["total domestic aviation"]
+
+    all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
         energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -1046,13 +1049,11 @@ def add_aviation(n, cost):
     if snakemake.config["sector"]["international_bunkers"]:
         co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
     else:
-        domestic_to_international = (
-            energy_totals["total international aviation"]
-            / energy_totals["total domestic aviation"]
-        )
+        domestic_to_total = energy_totals["total domestic aviation"]/ (energy_totals["total international aviation"] + energy_totals["total domestic aviation"])
+        
         co2 = (
             airports["p_set"].sum()
-            * domestic_to_international
+            * domestic_to_total
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -1271,10 +1272,9 @@ def add_shipping(n, costs):
 
     gadm_level = options["gadm_level"]
 
-    if snakemake.config["sector"]["international_bunkers"]:
-        all_navigation = ["total international navigation", "total domestic navigation"]
-    else:
-        all_navigation = ["total domestic navigation"]
+
+    all_navigation = ["total international navigation", "total domestic navigation"]
+
 
     navigation_demand = (
         energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -1372,13 +1372,11 @@ def add_shipping(n, costs):
         if snakemake.config["sector"]["international_bunkers"]:
             co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
         else:
-            domestic_to_international = (
-                energy_totals["total international navigation"]
-                / energy_totals["total domestic navigation"]
-            )
+            domestic_to_total = energy_totals["total domestic navigation"] / (energy_totals["total domestic navigation"] + energy_totals["total international navigation"])
+                
             co2 = (
                 ports["p_set"].sum()
-                * domestic_to_international
+                * domestic_to_total
                 * costs.at["oil", "CO2 intensity"]
             )
 
@@ -2657,11 +2655,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="18",
+            clusters="19",
             ll="c1.0",
             opts="Co2L",
             planning_horizons="2030",
-            sopts="6H",
+            sopts="72H",
             discountrate="0.071",
             demand="AB",
         )
