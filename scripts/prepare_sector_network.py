@@ -997,7 +997,6 @@ def add_co2(n, costs):
 
 
 def add_aviation(n, cost):
-
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
@@ -1049,8 +1048,11 @@ def add_aviation(n, cost):
     if snakemake.config["sector"]["international_bunkers"]:
         co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
     else:
-        domestic_to_total = energy_totals["total domestic aviation"]/ (energy_totals["total international aviation"] + energy_totals["total domestic aviation"])
-        
+        domestic_to_total = energy_totals["total domestic aviation"] / (
+            energy_totals["total international aviation"]
+            + energy_totals["total domestic aviation"]
+        )
+
         co2 = (
             airports["p_set"].sum()
             * domestic_to_total
@@ -1272,9 +1274,7 @@ def add_shipping(n, costs):
 
     gadm_level = options["gadm_level"]
 
-
     all_navigation = ["total international navigation", "total domestic navigation"]
-
 
     navigation_demand = (
         energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
@@ -1372,8 +1372,11 @@ def add_shipping(n, costs):
         if snakemake.config["sector"]["international_bunkers"]:
             co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
         else:
-            domestic_to_total = energy_totals["total domestic navigation"] / (energy_totals["total domestic navigation"] + energy_totals["total international navigation"])
-                
+            domestic_to_total = energy_totals["total domestic navigation"] / (
+                energy_totals["total domestic navigation"]
+                + energy_totals["total international navigation"]
+            )
+
             co2 = (
                 ports["p_set"].sum()
                 * domestic_to_total
