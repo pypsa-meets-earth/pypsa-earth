@@ -208,10 +208,11 @@ if __name__ == "__main__":
         countries_geo = geo_locs.index.unique().intersection(countries)
         geo_locs = match_technology(geo_locs).loc[countries_geo]
 
+        aluminium_year = snakemake.config["demand_data"]["aluminium_year"]
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
-        AL_prod_tom = AL[AL.Year == snakemake.config["demand_data"]["aluminium_year"]][
+        AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"
-        ].loc[countries_geo]
+        ].reindex(countries_geo, fill_value=0.0)
         AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
         Steel_emissions = (
