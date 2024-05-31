@@ -654,9 +654,7 @@ def aggregate_fuels(sector):
         "Ethane",
         "Bitumen",
         "Refinery gas",
-
     ]
-
 
     biomass_fuels = [
         "Bagasse",
@@ -667,7 +665,6 @@ def aggregate_fuels(sector):
         "Charcoal",
         "Black Liquor",
     ]
-
 
     coal_fuels = [
         "Anthracite",
