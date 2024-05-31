@@ -812,6 +812,9 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "results/"
+            + RDIR
+            + "meta/objective_value_{simpl}_{clusters}_ec_l{ll}_{opts}.txt",
         log:
             solver=normpath(
                 "logs/"
@@ -880,6 +883,9 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             "results/"
             + RDIR
             + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            "results/"
+            + RDIR
+            + "meta/objective_value_{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.txt",
         log:
             solver=normpath(
                 "logs/"

@@ -576,3 +576,7 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
+
+    with open(snakemake.output[1], "w") as obj_func_file:
+        obj_func_file.write("Objective function: {} \n".format(n.objective))
+        obj_func_file.write("Objective constant: {} \n".format(n.objective_constant))
