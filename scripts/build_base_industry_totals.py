@@ -26,7 +26,7 @@ def create_industry_base_totals(df):
     # Converting values of mass (ktons) to energy (TWh)
     index_mass = df.loc[df["Unit"] == "Metric tons,  thousand"].index
     df.loc[index_mass, "Quantity_TWh"] = df.loc[index_mass].apply(
-        lambda x: x["Quantity"] * fuels_conv_toTWh.get(x["Commodity"], "not found"),
+        lambda x: x["Quantity"] * fuels_conv_toTWh.get(x["Commodity"], float("nan")),
         axis=1,
     )
 
