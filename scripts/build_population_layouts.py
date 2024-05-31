@@ -65,6 +65,7 @@ if __name__ == "__main__":
 
     # Squeeze into a Series
     urban_fraction = urban_percent_df.squeeze() / 100.0
+    urban_fraction = urban_fraction.groupby(urban_fraction.index).sum()
 
     # population in each grid cell
     pop_cells = pd.Series(I.dot(nuts3["pop"]))

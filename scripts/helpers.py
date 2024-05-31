@@ -568,7 +568,9 @@ def locate_bus(
     except ValueError:
         return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
             col
-        ].item()  # looks for closest one shape=node
+        ].iloc[
+            0
+        ]  # looks for closest one shape=node
 
 
 def get_conv_factors(sector):
@@ -746,6 +748,18 @@ def read_csv_nafix(file, **kwargs):
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
+
+
+def to_csv_nafix(df, path, **kwargs):
+    "Function to export a pandas object into a csv and standardize the na value"
+    if "na_rep" in kwargs:
+        del kwargs["na_rep"]
+    # if len(df) > 0:
+    if not df.empty or not df.columns.empty:
+        return df.to_csv(path, **kwargs, na_rep=NA_VALUES[0])
+    else:
+        with open(path, "w") as fp:
+            pass
 
 
 def safe_divide(numerator, denominator, default_value=np.nan):
