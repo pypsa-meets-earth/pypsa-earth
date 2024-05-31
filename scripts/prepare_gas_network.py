@@ -887,6 +887,13 @@ def plot_clustered_gas_network(pipelines, bus_regions_onshore):
     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
 
+def plot_empty_dataframe():
+    fig, ax = plt.subplots(1, 1)
+    fig.set_size_inches(12, 7)
+    fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
+    fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
+
+
 if not snakemake.config["custom_data"]["gas_network"]:
     if snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
         pipelines = download_GGIT_gas_network()
@@ -943,3 +950,5 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
         pipelines = pd.DataFrame(pipelines)
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+
+        plot_empty_dataframe()
