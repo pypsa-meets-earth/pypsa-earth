@@ -108,7 +108,6 @@ if __name__ == "__main__":
         cagr = read_csv_nafix(snakemake.input.industry_growth_cagr, index_col=0)
 
         # Building nodal industry production growth
-
         for country in countries:
             if country not in cagr.index:
                 cagr.loc[country] = cagr.loc["DEFAULT"]
@@ -129,7 +128,8 @@ if __name__ == "__main__":
         production_base = cagr.applymap(lambda x: 1)
         production_tom = production_base * growth_factors
 
-        industry_totals = (production_tom * industry_base_totals).fillna(0)
+        # non-used line; commented out
+        # industry_totals = (production_tom * industry_base_totals).fillna(0)
 
         industry_util_factor = snakemake.config["sector"]["industry_util_factor"]
 
@@ -175,6 +175,11 @@ if __name__ == "__main__":
             "other": 0,
         }
 
+        # fill industry_base_totals
+        level_2nd = industry_base_totals.index.get_level_values(1).unique()
+        mlv_index = pd.MultiIndex.from_product([countries, level_2nd])
+        industry_base_totals = industry_base_totals.reindex(mlv_index, fill_value=0)
+
         geo_locs = pd.read_csv(
             snakemake.input.industrial_database,
             sep=",",
@@ -199,12 +204,15 @@ if __name__ == "__main__":
 
         # Calculating emissions
 
-        geo_locs = match_technology(geo_locs).loc[countries]
+        # get the subset of countries that al
+        countries_geo = geo_locs.index.unique().intersection(countries)
+        geo_locs = match_technology(geo_locs).loc[countries_geo]
 
+        aluminium_year = snakemake.config["demand_data"]["aluminium_year"]
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
-        AL_prod_tom = AL[AL.Year == snakemake.config["demand_data"]["aluminium_year"]][
+        AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"
-        ].loc[countries]
+        ].reindex(countries_geo, fill_value=0.0)
         AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
         Steel_emissions = (
@@ -277,11 +285,19 @@ if __name__ == "__main__":
 
         # Fill missing carriers with 0s
         for country in countries:
-            carriers_present = industry_base_totals.xs(country, level="country").index
+            carriers_present = industry_base_totals.xs(country, level=0).index
             missing_carriers = set(all_carriers) - set(carriers_present)
             for carrier in missing_carriers:
                 # Add the missing carrier with a value of 0
                 industry_base_totals.loc[(country, carrier), :] = 0
+
+        # temporary fix: merge other manufacturing, construction and non-fuel into other and drop the column
+        other_cols = list(set(industry_base_totals.columns) - set(clean_industry_list))
+        if len(other_cols) > 0:
+            industry_base_totals["other"] += industry_base_totals[other_cols].sum(
+                axis=1
+            )
+            industry_base_totals.drop(columns=other_cols, inplace=True)
 
         nodal_df = pd.DataFrame()
 

@@ -189,7 +189,9 @@ def H2_export_yearly_constraint(n):
         linexpr((weightings, get_var(n, "Generator", "p")[res_index]))
     )  # single line sum
 
-    load_ind = n.loads[n.loads.carrier == "AC"].index
+    load_ind = n.loads[n.loads.carrier == "AC"].index.intersection(
+        n.loads_t.p_set.columns
+    )
 
     load = (
         n.loads_t.p_set[load_ind].sum(axis=1) * n.snapshot_weightings["generators"]
@@ -584,6 +586,7 @@ if __name__ == "__main__":
 
         if (
             snakemake.config["policy_config"]["hydrogen"]["additionality"]
+            and not snakemake.config["policy_config"]["hydrogen"]["is_reference"]
             and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
             != "no_res_matching"
         ):
