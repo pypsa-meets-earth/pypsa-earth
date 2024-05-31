@@ -1157,7 +1157,6 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["SMR CC"]:
-
         if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
             n.madd(
                 "Bus",
@@ -1857,7 +1856,6 @@ def add_land_transport(n, costs):
         )
 
     if fuel_cell_share > 0:
-
         if not (
             snakemake.config["policy_config"]["hydrogen"]["is_reference"]
             and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
@@ -2508,7 +2506,6 @@ def add_residential(n, costs):
     heat_gas_demand = p_set_from_scaling(
         "residential heat gas", heat_shape, energy_totals
     )
-
 
     res_index = spatial.nodes.intersection(n.loads_t.p_set.columns)
     profile_residential = normalize_and_group(
