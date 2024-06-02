@@ -315,7 +315,7 @@ renewable:
     resource:
       method: csp
       installation: SAM_solar_tower
-    capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
+    capacity_per_sqkm: 2.392 # From 1.7 to 4.6 addresses issue #361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
     # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
