@@ -46,6 +46,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Resolve pandas deprecation warning. `PR #1023 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1023>`__
 
+* Create files where the code outputs the value of the objective function. `PR #1033 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1033>`__
+
 PyPSA-Earth 0.3.0
 =================
 
