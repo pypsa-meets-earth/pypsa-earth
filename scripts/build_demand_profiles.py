@@ -107,6 +107,8 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     prediction_year = config.get("load_options")["prediction_year"]
     ssp = config.get("load_options")["ssp"]
 
+    scenario_path = os.path.join(ssp_parentfolder, ssp)
+
     load_paths = []
     load_dir = os.path.join(
         ssp_parentfolder,
@@ -115,7 +117,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         "era5_" + str(weather_year),
     )
 
-    if os.path.exists(os.path.join("data", ssp)):
+    if os.path.exists(scenario_path):
         for continent in region_load:
             for ext in [".nc", ".csv"]:
                 load_path = os.path.join(str(load_dir), str(continent) + str(ext))
