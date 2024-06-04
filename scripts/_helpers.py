@@ -7,9 +7,9 @@
 
 import logging
 import os
+import pathlib
 import subprocess
 import sys
-from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
@@ -96,12 +96,12 @@ def read_osm_config(*args):
     {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
-        base_folder = os.path.dirname(__file__)
-        if not os.path.exists(os.path.join(base_folder, "configs")):
-            base_folder = os.path.dirname(base_folder)
+        base_folder = get_dirname_path(__file__)
+        if not path_exists(get_path(base_folder, "configs")):
+            base_folder = get_dirname_path(base_folder)
     else:
-        base_folder = os.getcwd()
-    osm_config_path = os.path.join(base_folder, "configs", REGIONS_CONFIG)
+        base_folder = get_current_directory_path()
+    osm_config_path = get_path(base_folder, "configs", REGIONS_CONFIG)
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
@@ -132,8 +132,8 @@ def sets_path_to_root(root_directory_name):
     while n >= 0:
         n -= 1
         # if repo_name is current folder name, stop and set path
-        if repo_name == os.path.basename(os.path.abspath(".")):
-            repo_path = os.getcwd()  # os.getcwd() = current_path
+        if repo_name == get_basename_abs_path("."):
+            repo_path = get_current_directory_path()  # current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
             print("Had to go %d folder(s) up." % (n0 - 1 - n))
@@ -143,8 +143,7 @@ def sets_path_to_root(root_directory_name):
             print("Can't find the repo path.")
         # if repo_name NOT current folder name, go one directory higher
         else:
-            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
-            os.chdir(upper_path)
+            change_to_script_dir(".")  # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -171,8 +170,8 @@ def configure_logging(snakemake, skip_handlers=False):
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        fallback_path = Path(__file__).parent.joinpath(
-            "..", "logs", f"{snakemake.rule}.log"
+        fallback_path = get_path(
+            get_dirname_path(__file__), "..", "logs", f"{snakemake.rule}.log"
         )
         logfile = snakemake.log.get(
             "python", snakemake.log[0] if snakemake.log else fallback_path
@@ -249,7 +248,7 @@ def pdbcast(v, h):
 
 
 def load_network_for_plots(
-    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+        fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
@@ -260,7 +259,7 @@ def load_network_for_plots(
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
     n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+            n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
     )
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
@@ -331,8 +330,8 @@ def aggregate_p_curtailed(n):
         [
             (
                 (
-                    n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
-                    - n.generators_t.p.sum()
+                        n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
+                        - n.generators_t.p.sum()
                 )
                 .groupby(n.generators.carrier)
                 .sum()
@@ -358,7 +357,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-        n.iterate_components(components.keys(), skip_empty=False), components.values()
+            n.iterate_components(components.keys(), skip_empty=False), components.values()
     ):
         if c.df.empty:
             continue
@@ -390,7 +389,7 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 
 def progress_retrieve(
-    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
+        url, file, data=None, headers=None, disable_progress=False, roundto=1.0
 ):
     """
     Function to download data from a url with a progress bar progress in
@@ -472,19 +471,18 @@ def mock_snakemake(rulename, **wildcards):
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
-    import os
 
     import snakemake as sm
     from pypsa.descriptors import Dict
     from snakemake.script import Snakemake
 
-    script_dir = Path(__file__).parent.resolve()
+    script_dir = pathlib.Path(__file__).parent.resolve()
     assert (
-        Path.cwd().resolve() == script_dir
+            pathlib.Path.cwd().resolve() == script_dir
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
-        if os.path.exists(p):
+        if path_exists(p):
             snakefile = p
             break
     workflow = sm.Workflow(
@@ -508,7 +506,7 @@ def mock_snakemake(rulename, **wildcards):
     def make_accessable(*ios):
         for io in ios:
             for i in range(len(io)):
-                io[i] = os.path.abspath(io[i])
+                io[i] = get_abs_path(io[i])
 
     make_accessable(job.input, job.output, job.log)
     snakemake = Snakemake(
@@ -527,7 +525,7 @@ def mock_snakemake(rulename, **wildcards):
 
     # create log and output dir if not existent
     for path in list(snakemake.log) + list(snakemake.output):
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        build_directory(path)
 
     os.chdir(script_dir)
     return snakemake
@@ -636,8 +634,8 @@ def country_name_2_two_digits(country_name):
         2-digit country name
     """
     if (
-        country_name
-        == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
+            country_name
+            == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
     ):
         return "SN-GM"
 
@@ -652,7 +650,7 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if os.stat(file).st_size > 0:
+    if get_path_size(file) > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
@@ -670,8 +668,7 @@ def to_csv_nafix(df, path, **kwargs):
 
 
 def save_to_geojson(df, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)  # remove file if it exists
+    pathlib.Path(fn).unlink(missing_ok=True)  # remove file if it exists
 
     # save file if the (Geo)DataFrame is non-empty
     if df.empty:
@@ -701,7 +698,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
         CRS of the GeoDataFrame
     """
     # if the file is non-zero, read the geodataframe and return it
-    if os.path.getsize(fn) > 0:
+    if get_path_size(fn) > 0:
         return gpd.read_file(fn)
     else:
         # else return an empty GeoDataFrame
@@ -747,7 +744,7 @@ def create_country_list(input, iso_coding=True):
         selected(iso_coding=False), ignore iso-specific names.
         """
         if (
-            iso_coding
+                iso_coding
         ):  # if country lists are in iso coding, then check if they are 2-string
             # 2-code countries
             ret_list = [c for c in c_list if len(c) == 2]
@@ -805,7 +802,7 @@ def get_last_commit_message(path):
     """
     _logger = logging.getLogger(__name__)
     last_commit_message = None
-    backup_cwd = os.getcwd()
+    backup_cwd = get_current_directory_path()
     try:
         os.chdir(path)
         last_commit_message = (
@@ -821,3 +818,114 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
+
+def get_dirname_path(path):
+    """
+    It returns the directory name of the path.
+    """
+    return pathlib.Path(path).parent
+
+
+def get_abs_path(path):
+    """
+    It returns the absolutized version of the path.
+    """
+    return pathlib.Path(path).absolute()
+
+
+def get_basename_abs_path(path):
+    """
+    It returns the base name of a normalized and absolutized version of the
+    path.
+    """
+    return pathlib.Path(path).absolute().name
+
+
+def get_basename_path(path):
+    """
+    It returns the base name of the path.
+    """
+    return pathlib.Path(path).name
+
+
+def get_path(*args):
+    """
+    It returns a new path string.
+    """
+    return pathlib.Path(*args)
+
+
+def get_path_size(path):
+    """
+    It returns the size of a path (in bytes)
+    """
+    return pathlib.Path(path).stat().st_size
+
+
+def build_directory(path):
+    """
+    It creates recursively the directory and its leaf directories.
+    Parameters:
+        path (str): The path to the file
+    """
+
+    # Check if the provided path points to a directory
+    if is_directory_path(path):
+        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+    else:
+        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+
+
+def change_to_script_dir(path):
+    """
+    Change the current working directory to the directory containing the given
+    script.
+    Parameters:
+        path (str): The path to the file.
+    """
+
+    # Get the absolutized and normalized path of directory containing the file
+    directory_path = pathlib.Path(path).absolute().parent
+
+    # Change the current working directory to the script directory
+    os.chdir(directory_path)
+
+
+def get_current_directory_path():
+    """
+    It returns the current directory path.
+    """
+    return pathlib.Path.cwd()
+
+
+def is_directory_path(path):
+    """
+    It returns True if the path points to a directory.
+    False otherwise.
+    """
+    return pathlib.Path(path).is_dir()
+
+
+def is_file_path(path):
+    """
+    It returns True if the path points to a file.
+    False otherwise.
+    """
+    return pathlib.Path(path).is_file()
+
+
+def get_relative_path(path, start_path="."):
+    """
+    It returns a relative path to path from start_path.
+    Default for start_path is the current directory
+    """
+    return pathlib.Path(path).relative_to(start_path)
+
+
+def path_exists(path):
+    """
+    It returns True if the path exists.
+    False otherwise.
+    """
+    return pathlib.Path(path).exists()
