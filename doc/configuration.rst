@@ -227,7 +227,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 ``load_options``
 =============================
 
-Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socio-economic pathway (GDP and population growth), to enhance modelling capabilities.
+Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socioeconomic pathway (GDP and population growth), to enhance modelling capabilities.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml

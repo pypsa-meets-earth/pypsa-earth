@@ -576,3 +576,5 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
+    logger.info(f"Objective function: {n.objective}")
+    logger.info(f"Objective constant: {n.objective_constant}")
