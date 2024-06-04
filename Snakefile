@@ -43,11 +43,7 @@ run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
 
-if os.path.exists(os.path.join("data", config["load_options"]["ssp"])):
-    load_data_paths = get_load_paths_gegis("data", config, check_existence=True)
-else:
-    # demand profiles are not available yet -> no opportunity to use custom load files
-    load_data_paths = get_load_paths_gegis("data", config, check_existence=False)
+load_data_paths = get_load_paths_gegis("data", config)
 
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"

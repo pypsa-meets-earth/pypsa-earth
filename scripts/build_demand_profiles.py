@@ -90,7 +90,7 @@ def get_gegis_regions(countries):
     return regions
 
 
-def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
+def get_load_paths_gegis(ssp_parentfolder, config):
     """
     Create load paths for GEGIS outputs.
 
@@ -115,7 +115,7 @@ def get_load_paths_gegis(ssp_parentfolder, config, check_existence=False):
         "era5_" + str(weather_year),
     )
 
-    if check_existence:
+    if os.path.exists(os.path.join("data", ssp)):
         for continent in region_load:
             for ext in [".nc", ".csv"]:
                 load_path = os.path.join(str(load_dir), str(continent) + str(ext))
