@@ -874,19 +874,20 @@ def get_path_size(path):
     return pathlib.Path(path).stat().st_size
 
 
-def build_directory(path):
+def build_directory(path, just_parent_directory=True):
     """
     It creates recursively the directory and its leaf directories.
 
     Parameters:
         path (str): The path to the file
+        just_parent_directory (Boolean) : it creates just the parent directory
     """
 
     # Check if the provided path points to a directory
-    if is_directory_path(path):
-        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-    else:
+    if just_parent_directory:
         pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+    else:
+        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 
 def change_to_script_dir(path):
@@ -1054,14 +1055,14 @@ def download_gadm(country_code, update=False, out_logging=False):
                 f"Stage 4/4: {gadm_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {gadm_input_file_zip}"
             )
         #  create data/osm directory
-        os.makedirs(os.path.dirname(gadm_input_file_zip), exist_ok=True)
+        build_directory(gadm_input_file_zip)
 
         with requests.get(gadm_url, stream=True) as r:
             with open(gadm_input_file_zip, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
         with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
-            zip_ref.extractall(os.path.dirname(gadm_input_file_zip))
+            zip_ref.extractall(get_dirname_path(gadm_input_file_zip))
 
     return gadm_input_file_gpkg, gadm_filename
 
@@ -1197,7 +1198,7 @@ def override_component_attrs(directory):
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"
-        if os.path.isfile(fn):
+        if is_file_path(fn):
             overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
             attrs[component] = overrides.combine_first(attrs[component])
 

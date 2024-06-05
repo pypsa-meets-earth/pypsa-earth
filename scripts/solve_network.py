@@ -559,7 +559,7 @@ if __name__ == "__main__":
 
     tmpdir = snakemake.params.solving.get("tmpdir")
     if tmpdir is not None:
-        build_directory(tmpdir)
+        build_directory(tmpdir, just_parent_directory=False)
     opts = snakemake.wildcards.opts.split("-")
     solve_opts = snakemake.params.solving["options"]
 

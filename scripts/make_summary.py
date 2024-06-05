@@ -532,7 +532,7 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
 
 def to_csv(dfs, dir):
-    build_directory(dir)
+    build_directory(dir, just_parent_directory=False)
     for key, df in dfs.items():
         df.to_csv(get_path(dir, f"{key}.csv"))
 

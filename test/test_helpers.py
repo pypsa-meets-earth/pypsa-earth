@@ -14,6 +14,7 @@ import pandas as pd
 
 from scripts._helpers import (
     aggregate_fuels,
+    build_directory,
     change_to_script_dir,
     country_name_2_two_digits,
     get_abs_path,
@@ -29,7 +30,6 @@ from scripts._helpers import (
     modify_commodity,
     path_exists,
     safe_divide,
-    sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
@@ -182,6 +182,11 @@ original_commodity_dataframe = pd.DataFrame(
 modified_commodity_dataframe = pd.DataFrame(
     modified_commodity_data, columns=["Commodity"]
 )
+
+
+def test_build_directory(tmpdir):
+
+    build_directory(tmpdir)
 
 
 def test_get_abs_path():
