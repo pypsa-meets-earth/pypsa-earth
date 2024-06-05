@@ -7,7 +7,13 @@
 
 import os
 import pathlib
-from test.conftest import _content_temp_file, _name_temp_file, get_temp_file
+from test.conftest import (
+    _content_temp_file,
+    _name_temp_file,
+    _sub_temp_content_dir,
+    _temp_content_dir,
+    get_temp_file,
+)
 
 from scripts._helpers import (
     aggregate_fuels,
@@ -15,6 +21,8 @@ from scripts._helpers import (
     change_to_script_dir,
     get_abs_path,
     get_basename_abs_path,
+    get_basename_path,
+    get_conv_factors,
     get_current_directory_path,
     get_dirname_path,
     get_path,
