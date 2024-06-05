@@ -8,13 +8,23 @@
 import logging
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
+import zipfile
 
 import country_converter as coco
+import fiona
 import geopandas as gpd
+import numpy as np
 import pandas as pd
+import requests
+import snakemake as sm
 import yaml
+from pypsa.components import component_attrs, components
+from pypsa.descriptors import Dict
+from shapely.geometry import Point
+from snakemake.script import Snakemake
 
 logger = logging.getLogger(__name__)
 
@@ -34,21 +44,21 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     tb = exc_traceback
     while tb.tb_next:
         tb = tb.tb_next
-    flname = tb.tb_frame.f_globals.get("__file__")
-    funcname = tb.tb_frame.f_code.co_name
+    fl_name = tb.tb_frame.f_globals.get("__file__")
+    func_name = tb.tb_frame.f_code.co_name
 
     if issubclass(exc_type, KeyboardInterrupt):
         logger.error(
             "Manual interruption %r, function %r: %s",
-            flname,
-            funcname,
+            fl_name,
+            func_name,
             exc_value,
         )
     else:
         logger.error(
             "An error happened in module %r, function %r: %s",
-            flname,
-            funcname,
+            fl_name,
+            func_name,
             exc_value,
             exc_info=(exc_type, exc_value, exc_traceback),
         )
@@ -59,12 +69,12 @@ def create_logger(logger_name, level=logging.INFO):
     Create a logger for a module and adds a handler needed to capture in logs
     traceback from exceptions emerging during the workflow.
     """
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(level)
+    logger_instance = logging.getLogger(logger_name)
+    logger_instance.setLevel(level)
     handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
+    logger_instance.addHandler(handler)
     sys.excepthook = handle_exception
-    return logger
+    return logger_instance
 
 
 def read_osm_config(*args):
@@ -112,7 +122,7 @@ def read_osm_config(*args):
         return tuple([osm_config[a] for a in args])
 
 
-def sets_path_to_root(root_directory_name):
+def sets_path_to_root(root_directory_name, n=8):
     """
     Search and sets path to the given root directory (root/path/file).
 
@@ -123,10 +133,8 @@ def sets_path_to_root(root_directory_name):
     n : int
         Number of folders the function will check upwards/root directed.
     """
-    import os
 
     repo_name = root_directory_name
-    n = 8  # check max 8 levels above. Random default.
     n0 = n
 
     while n >= 0:
@@ -219,36 +227,30 @@ def load_network(import_name=None, custom_components=None):
     from pypsa.descriptors import Dict
 
     override_components = None
-    override_component_attrs = None
+    override_component_attrs_dict = None
 
     if custom_components is not None:
         override_components = pypsa.components.components.copy()
-        override_component_attrs = Dict(
+        override_component_attrs_dict = Dict(
             {k: v.copy() for k, v in pypsa.components.component_attrs.items()}
         )
         for k, v in custom_components.items():
             override_components.loc[k] = v["component"]
-            override_component_attrs[k] = pd.DataFrame(
+            override_component_attrs_dict[k] = pd.DataFrame(
                 columns=["type", "unit", "default", "description", "status"]
             )
             for attr, val in v["attributes"].items():
-                override_component_attrs[k].loc[attr] = val
+                override_component_attrs_dict[k].loc[attr] = val
 
     return pypsa.Network(
         import_name=import_name,
         override_components=override_components,
-        override_component_attrs=override_component_attrs,
-    )
-
-
-def pdbcast(v, h):
-    return pd.DataFrame(
-        v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
+        override_component_attrs=override_component_attrs_dict,
     )
 
 
 def load_network_for_plots(
-        fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
     import pypsa
     from add_electricity import load_costs, update_transmission_costs
@@ -259,7 +261,7 @@ def load_network_for_plots(
     n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
 
     n.links["carrier"] = (
-            n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
     )
     n.lines["carrier"] = "AC line"
     n.transformers["carrier"] = "AC transformer"
@@ -284,11 +286,13 @@ def load_network_for_plots(
 
 
 def update_p_nom_max(n):
-    # if extendable carriers (solar/onwind/...) have capacity >= 0,
-    # e.g. existing assets from the OPSD project are included to the network,
-    # the installed capacity might exceed the expansion limit.
-    # Hence, we update the assumptions.
+    """
+    If extendable carriers (solar/onwind/...) have capacity >= 0, e.g. existing
+    assets from the OPSD project are included to the network, the installed
+    capacity might exceed the expansion limit.
 
+    Hence, we update the assumptions.
+    """
     n.generators.p_nom_max = n.generators[["p_nom_min", "p_nom_max"]].max(1)
 
 
@@ -330,8 +334,8 @@ def aggregate_p_curtailed(n):
         [
             (
                 (
-                        n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
-                        - n.generators_t.p.sum()
+                    n.generators_t.p_max_pu.sum().multiply(n.generators.p_nom_opt)
+                    - n.generators_t.p.sum()
                 )
                 .groupby(n.generators.carrier)
                 .sum()
@@ -346,7 +350,7 @@ def aggregate_p_curtailed(n):
 
 
 def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
-    components = dict(
+    components_dict = dict(
         Link=("p_nom", "p0"),
         Generator=("p_nom", "p"),
         StorageUnit=("p_nom", "p"),
@@ -357,7 +361,8 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
     costs = {}
     for c, (p_nom, p_attr) in zip(
-            n.iterate_components(components.keys(), skip_empty=False), components.values()
+        n.iterate_components(components_dict.keys(), skip_empty=False),
+        components_dict.values(),
     ):
         if c.df.empty:
             continue
@@ -389,10 +394,10 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 
 def progress_retrieve(
-        url, file, data=None, headers=None, disable_progress=False, roundto=1.0
+    url, file, data=None, headers=None, disable_progress=False, round_to_value=1.0
 ):
     """
-    Function to download data from a url with a progress bar progress in
+    Function to download data from an url with a progress bar progress in
     retrieving data.
 
     Parameters
@@ -405,7 +410,7 @@ def progress_retrieve(
         Data for the request (default None), when not none Post method is used
     disable_progress : bool
         When true, no progress bar is shown
-    roundto : float
+    round_to_value : float
         (default 0) Precision used to report the progress
         e.g. 0.1 stands for 88.1, 10 stands for 90, 80
     """
@@ -415,8 +420,11 @@ def progress_retrieve(
 
     pbar = tqdm(total=100, disable=disable_progress)
 
-    def dlProgress(count, blockSize, totalSize, roundto=roundto):
-        pbar.n = round(count * blockSize * 100 / totalSize / roundto) * roundto
+    def dl_progress(count, block_size, total_size):
+        pbar.n = (
+            round(count * block_size * 100 / total_size / round_to_value)
+            * round_to_value
+        )
         pbar.refresh()
 
     if data is not None:
@@ -427,7 +435,7 @@ def progress_retrieve(
         opener.addheaders = headers
         urllib.request.install_opener(opener)
 
-    urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
+    urllib.request.urlretrieve(url, file, reporthook=dl_progress, data=data)
 
 
 def get_aggregation_strategies(aggregation_strategies):
@@ -455,7 +463,7 @@ def get_aggregation_strategies(aggregation_strategies):
     return bus_strategies, generator_strategies
 
 
-def mock_snakemake(rulename, **wildcards):
+def mock_snakemake(rule_name, **wildcards):
     """
     This function is expected to be executed from the "scripts"-directory of "
     the snakemake project. It returns a snakemake.script.Snakemake object,
@@ -465,20 +473,16 @@ def mock_snakemake(rulename, **wildcards):
 
     Parameters
     ----------
-    rulename: str
+    rule_name: str
         name of the rule for which the snakemake object should be generated
     wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
 
-    import snakemake as sm
-    from pypsa.descriptors import Dict
-    from snakemake.script import Snakemake
-
     script_dir = pathlib.Path(__file__).parent.resolve()
     assert (
-            pathlib.Path.cwd().resolve() == script_dir
+        pathlib.Path.cwd().resolve() == script_dir
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
@@ -491,12 +495,12 @@ def mock_snakemake(rulename, **wildcards):
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
-        rule = workflow.get_rule(rulename)
+        rule = workflow.get_rule(rule_name)
     except Exception as exception:
         print(
             exception,
-            f"The {rulename} might be a conditional rule in the Snakefile.\n"
-            f"Did you enable {rulename} in the config?",
+            f"The {rule_name} might be a conditional rule in the Snakefile.\n"
+            f"Did you enable {rule_name} in the config?",
         )
         raise
     dag = sm.dag.DAG(workflow, rules=[rule])
@@ -573,7 +577,9 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_words=[]):
+def two_digits_2_name_country(
+    two_code_country, name_string="name_short", no_comma=False, remove_start_words=[]
+):
     """
     Convert 2-digit country code to full name country:
 
@@ -581,7 +587,10 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     ----------
     two_code_country: str
         2-digit country name
-    nocomma: bool (optional, default False)
+    name_string: str (optional, default name_short)
+        When name_short    CD -> DR Congo
+        When name_official CD -> Democratic Republic of the Congo
+    no_comma: bool (optional, default False)
         When true, country names with comma are extended to remove the comma.
         Example CD -> Congo, The Democratic Republic of -> The Democratic Republic of Congo
     remove_start_words: list (optional, default empty)
@@ -593,13 +602,15 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     full_name: str
         full country name
     """
+    if remove_start_words is None:
+        remove_start_words = list()
     if two_code_country == "SN-GM":
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
-    full_name = coco.convert(two_code_country, to="name_short")
+    full_name = coco.convert(two_code_country, to=name_string)
 
-    if nocomma:
-        # separate list by delim
+    if no_comma:
+        # separate list by delimiter
         splits = full_name.split(", ")
 
         # reverse the order
@@ -608,7 +619,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
         # return the merged string
         full_name = " ".join(splits)
 
-    # when list is non empty
+    # when list is non-empty
     if remove_start_words:
         # loop over every provided word
         for word in remove_start_words:
@@ -634,8 +645,8 @@ def country_name_2_two_digits(country_name):
         2-digit country name
     """
     if (
-            country_name
-            == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
+        country_name
+        == f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
     ):
         return "SN-GM"
 
@@ -744,7 +755,7 @@ def create_country_list(input, iso_coding=True):
         selected(iso_coding=False), ignore iso-specific names.
         """
         if (
-                iso_coding
+            iso_coding
         ):  # if country lists are in iso coding, then check if they are 2-string
             # 2-code countries
             ret_list = [c for c in c_list if len(c) == 2]
@@ -866,6 +877,7 @@ def get_path_size(path):
 def build_directory(path):
     """
     It creates recursively the directory and its leaf directories.
+
     Parameters:
         path (str): The path to the file
     """
@@ -881,6 +893,7 @@ def change_to_script_dir(path):
     """
     Change the current working directory to the directory containing the given
     script.
+
     Parameters:
         path (str): The path to the file.
     """
@@ -902,6 +915,7 @@ def get_current_directory_path():
 def is_directory_path(path):
     """
     It returns True if the path points to a directory.
+
     False otherwise.
     """
     return pathlib.Path(path).is_dir()
@@ -910,6 +924,7 @@ def is_directory_path(path):
 def is_file_path(path):
     """
     It returns True if the path points to a file.
+
     False otherwise.
     """
     return pathlib.Path(path).is_file()
@@ -918,6 +933,7 @@ def is_file_path(path):
 def get_relative_path(path, start_path="."):
     """
     It returns a relative path to path from start_path.
+
     Default for start_path is the current directory
     """
     return pathlib.Path(path).relative_to(start_path)
@@ -926,6 +942,418 @@ def get_relative_path(path, start_path="."):
 def path_exists(path):
     """
     It returns True if the path exists.
+
     False otherwise.
     """
     return pathlib.Path(path).exists()
+
+
+def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):
+    """
+    Create a network topology like the power transmission network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    prefix : str
+    connector : str
+    bidirectional : bool, default True
+        True: one link for each connection
+        False: one link for each connection and direction (back and forth)
+
+    Returns
+    -------
+    pd.DataFrame with columns bus0, bus1 and length
+    """
+
+    ln_attrs = ["bus0", "bus1", "length"]
+    lk_attrs = ["bus0", "bus1", "length", "underwater_fraction"]
+
+    # TODO: temporary fix for when underwater_fraction is not found
+    if "underwater_fraction" not in n.links.columns:
+        if n.links.empty:
+            n.links["underwater_fraction"] = None
+        else:
+            n.links["underwater_fraction"] = 0.0
+
+    candidates = pd.concat(
+        [n.lines[ln_attrs], n.links.loc[n.links.carrier == "DC", lk_attrs]]
+    ).fillna(0)
+
+    positive_order = candidates.bus0 < candidates.bus1
+    candidates_p = candidates[positive_order]
+    swap_buses = {"bus0": "bus1", "bus1": "bus0"}
+    candidates_n = candidates[~positive_order].rename(columns=swap_buses)
+    candidates = pd.concat([candidates_p, candidates_n])
+
+    def make_index(c):
+        return prefix + c.bus0 + connector + c.bus1
+
+    topo = candidates.groupby(["bus0", "bus1"], as_index=False).mean()
+    topo.index = topo.apply(make_index, axis=1)
+
+    if not bidirectional:
+        topo_reverse = topo.copy()
+        topo_reverse.rename(columns=swap_buses, inplace=True)
+        topo_reverse.index = topo_reverse.apply(make_index, axis=1)
+        topo = pd.concat([topo, topo_reverse])
+
+    return topo
+
+
+def cycling_shift(df, steps=1):
+    """
+    Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
+    """
+    df = df.copy()
+    new_index = np.roll(df.index, steps)
+    df.values[:] = df.reindex(index=new_index).values
+    return df
+
+
+def download_gadm(country_code, update=False, out_logging=False):
+    """
+    Download gpkg file from GADM for a given country code.
+
+    Parameters
+    ----------
+    country_code : str
+        Two letter country codes of the downloaded files
+    update : bool
+        Update = true, forces re-download of files
+
+    Returns
+    -------
+    gpkg file per country
+    """
+
+    gadm_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
+    gadm_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{gadm_filename}_gpkg.zip"
+    _logger = logging.getLogger(__name__)
+    gadm_input_file_zip = get_path(
+        get_current_directory_path(),
+        "data",
+        "raw",
+        "gadm",
+        gadm_filename,
+        gadm_filename + ".zip",
+    )  # Input filepath zip
+
+    gadm_input_file_gpkg = get_path(
+        get_current_directory_path(),
+        "data",
+        "raw",
+        "gadm",
+        gadm_filename,
+        gadm_filename + ".gpkg",
+    )  # Input filepath gpkg
+
+    if not path_exists(gadm_input_file_gpkg) or update is True:
+        if out_logging:
+            _logger.warning(
+                f"Stage 4/4: {gadm_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {gadm_input_file_zip}"
+            )
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(gadm_input_file_zip), exist_ok=True)
+
+        with requests.get(gadm_url, stream=True) as r:
+            with open(gadm_input_file_zip, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+        with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
+            zip_ref.extractall(os.path.dirname(gadm_input_file_zip))
+
+    return gadm_input_file_gpkg, gadm_filename
+
+
+def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
+    """
+    Function to retrieve a specific layer id of a geopackage for a selection of
+    countries.
+
+    Parameters
+    ----------
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+    """
+    # initialization of the list of geodataframes
+    geodf_list = []
+
+    for country_code in country_list:
+        # download file gpkg
+        file_gpkg, name_file = download_gadm(country_code, update, outlogging)
+
+        # get layers of a geopackage
+        list_layers = fiona.listlayers(file_gpkg)
+
+        # get layer name
+        if layer_id < 0 | layer_id >= len(list_layers):
+            # when layer id is negative or larger than the number of layers, select the last layer
+            layer_id = len(list_layers) - 1
+        code_layer = np.mod(layer_id, len(list_layers))
+        layer_name = (
+            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        )
+
+        # read gpkg file
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+
+        # convert country name representation of the main country (GID_0 column)
+        geodf_temp["GID_0"] = [
+            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
+        ]
+
+        # create a subindex column that is useful
+        # in the GADM processing of sub-national zones
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
+
+        # concatenate geodataframes
+        geodf_list = pd.concat([geodf_list, geodf_temp])
+
+    geodf_gadm = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_gadm.set_crs(geodf_list[0].crs, inplace=True)
+
+    return geodf_gadm
+
+
+def locate_bus(
+    coords,
+    co,
+    gadm_level,
+    path_to_gadm=None,
+    gadm_clustering=False,
+):
+    """
+    Function to locate the right node for a coordinate set input coords of
+    point.
+
+    Parameters
+    ----------
+    coords: pandas dataseries
+        dataseries with 2 rows x & y representing the longitude and latitude
+    co: string (code for country where coords are MA Morocco)
+        code of the countries where the coordinates are
+    """
+    col = "name"
+    if not gadm_clustering:
+        gdf = gpd.read_file(path_to_gadm)
+    else:
+        if path_to_gadm:
+            gdf = gpd.read_file(path_to_gadm)
+            if "GADM_ID" in gdf.columns:
+                col = "GADM_ID"
+
+                if gdf[col][0][
+                    :3
+                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                    gdf[col] = gdf[col].apply(
+                        lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                    )
+        else:
+            gdf = get_gadm_layer(co, gadm_level)
+            col = "GID_{}".format(gadm_level)
+
+        # gdf.set_index("GADM_ID", inplace=True)
+    gdf_co = gdf[
+        gdf[col].str.contains(co)
+    ]  # geodataframe of entire continent - output of prev function {} are placeholders
+    # in strings - conditional formatting
+    # insert any variable into that place using .format - extract string and filter for those containing co (MA)
+    point = Point(coords["x"], coords["y"])  # point object
+
+    try:
+        return gdf_co[gdf_co.contains(point)][
+            col
+        ].item()  # filter gdf_co which contains point and returns the bus
+
+    except ValueError:
+        return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
+            col
+        ].item()  # looks for closest one shape=node
+
+
+def override_component_attrs(directory):
+    """Tell PyPSA that links can have multiple outputs by
+    overriding the component_attrs. This can be done for
+    as many buses as you need with format busi for i = 2,3,4,5,....
+    See https://pypsa.org/doc/components.html#link-with-multiple-outputs-or-inputs
+
+    Parameters
+    ----------
+    directory : string
+        Folder where component attributes to override are stored
+        analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
+
+    Returns
+    -------
+    Dictionary of overridden component attributes.
+    """
+
+    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
+
+    for component, list_name in components.list_name.items():
+        fn = f"{directory}/{list_name}.csv"
+        if os.path.isfile(fn):
+            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
+            attrs[component] = overrides.combine_first(attrs[component])
+
+    return attrs
+
+
+def get_conv_factors(sector):
+    """
+    Create a dictionary with all the conversion factors for the standard net calorific value
+    from Tera Joule per Kilo Metric-ton to Tera Watt-hour based on
+    https://unstats.un.org/unsd/energy/balance/2014/05.pdf.
+
+    Considering that 1 Watt-hour = 3600 Joule, one obtains the values below dividing
+    the standard net calorific values from the pdf by 3600.
+
+    For example, the value "hard coal": 0.007167 is given by 25.8 / 3600, where 25.8 is the standard
+    net calorific value.
+    """
+
+    conversion_factors_dict = {
+        "additives and oxygenates": 0.008333,
+        "anthracite": 0.005,
+        "aviation gasoline": 0.01230,
+        "bagasse": 0.002144,
+        "biodiesel": 0.01022,
+        "biogasoline": 0.007444,
+        "bio jet kerosene": 0.011111,
+        "bitumen": 0.01117,
+        "brown coal": 0.003889,
+        "brown coal briquettes": 0.00575,
+        "charcoal": 0.00819,
+        "coal tar": 0.007778,
+        "coke-oven coke": 0.0078334,
+        "coke-oven gas": 0.000277,
+        "coking coal": 0.007833,
+        "conventional crude oil": 0.01175,
+        "crude petroleum": 0.011750,
+        "ethane": 0.01289,
+        "fuel oil": 0.01122,
+        "fuelwood": 0.00254,
+        "gas coke": 0.007326,
+        "gas oil/ diesel oil": 0.01194,
+        "gasoline-type jet fuel": 0.01230,
+        "hard coal": 0.007167,
+        "kerosene-type jet fuel": 0.01225,
+        "lignite": 0.003889,
+        "liquefied petroleum gas (lpg)": 0.01313,
+        "lubricants": 0.011166,
+        "motor gasoline": 0.01230,
+        "naphtha": 0.01236,
+        "natural gas": 0.00025,
+        "natural gas liquids": 0.01228,
+        "oil shale": 0.00247,
+        "other bituminous coal": 0.005556,
+        "paraffin waxes": 0.01117,
+        "patent fuel": 0.00575,
+        "peat": 0.00271,
+        "peat products": 0.00271,
+        "petroleum coke": 0.009028,
+        "refinery gas": 0.01375,
+        "sub-bituminous coal": 0.005555,
+    }
+
+    if sector == "industry":
+        return conversion_factors_dict
+    else:
+        logger.info(f"No conversion factors available for sector {sector}")
+        return np.nan
+
+
+def aggregate_fuels(sector):
+    gas_fuels = [
+        "blast furnace gas",
+        "natural gas (including lng)",
+        "natural gas liquids",
+    ]
+
+    oil_fuels = [
+        "bitumen",
+        "conventional crude oil",
+        "crude petroleum",
+        "ethane",
+        "fuel oil",
+        "gas oil/ diesel oil",
+        "kerosene-type jet fuel",
+        "liquefied petroleum gas (lpg)",
+        "lubricants",
+        "motor gasoline",
+        "naphtha",
+        "patent fuel",
+        "petroleum coke",
+        "refinery gas",
+    ]
+
+    coal_fuels = [
+        "anthracite",
+        "brown coal",
+        "brown coal briquettes",
+        "coke-oven coke",
+        "coke-oven gas",
+        "coking coal",
+        "gas coke",
+        "gasworks gas",
+        "hard coal",
+        "lignite",
+        "other bituminous coal",
+        "peat",
+        "peat products",
+        "sub-bituminous coal",
+    ]
+
+    biomass_fuels = [
+        "bagasse",
+        "fuelwood",
+        "biogases",
+        "biogasoline",
+        "biodiesel",
+        "charcoal",
+        "black liquor",
+    ]
+
+    electricity = ["electricity"]
+
+    heat = ["heat", "direct use of geothermal heat", "direct use of solar thermal heat"]
+
+    if sector == "industry":
+        return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
+    else:
+        logger.info(f"No fuels available for sector {sector}")
+        return np.nan
+
+
+def modify_commodity(commodity):
+    if commodity.strip() == "Hrad coal":
+        commodity = "Hard coal"
+    elif commodity.strip().casefold() == "coke oven gas":
+        commodity = "Coke-oven gas"
+    elif commodity.strip().casefold() == "coke oven coke":
+        commodity = "Coke-oven coke"
+    elif commodity.strip() == "Liquified Petroleum Gas (LPG)":
+        commodity = "Liquefied Petroleum Gas (LPG)"
+    elif commodity.strip() == "Gas Oil/Diesel Oil":
+        commodity = "Gas Oil/ Diesel Oil"
+    elif commodity.strip() == "Lignite brown coal- recoverable resources":
+        commodity = "Lignite brown coal - recoverable resources"
+    return commodity.strip().casefold()
+
+
+def safe_divide(numerator, denominator):
+    """
+    Safe division function that returns NaN when the denominator is zero.
+    """
+    if denominator != 0.0:
+        return numerator / denominator
+    else:
+        logging.warning(
+            f"Division by zero: {numerator} / {denominator}, returning NaN."
+        )
+        return np.nan
