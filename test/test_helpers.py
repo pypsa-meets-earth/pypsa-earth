@@ -7,7 +7,13 @@
 
 import os
 import pathlib
-from test.conftest import _content_temp_file, _name_temp_file, get_temp_file
+from test.conftest import (
+    _content_temp_file,
+    _name_temp_file,
+    _sub_temp_content_dir,
+    _temp_content_dir,
+    get_temp_file,
+)
 
 import numpy as np
 import pandas as pd
@@ -19,6 +25,7 @@ from scripts._helpers import (
     country_name_2_two_digits,
     get_abs_path,
     get_basename_abs_path,
+    get_basename_path,
     get_conv_factors,
     get_current_directory_path,
     get_dirname_path,
@@ -184,9 +191,39 @@ modified_commodity_dataframe = pd.DataFrame(
 )
 
 
-def test_build_directory(tmpdir):
+def test_build_directory(get_temp_folder, tmpdir):
+    """
+    Verify the directory tree returned by build_directory()
+    """
 
-    build_directory(tmpdir)
+    # build_directory(path, just_parent_directory=True) is
+    # equivalent to os.makedirs(os.path.dirname(path), exist_ok=True)
+    # Given in fact a path tmpdir/temp_content_dir/sub_temp_content_dir
+    # it will create just tmpdir/temp_content_dir/
+    build_directory(get_temp_folder, just_parent_directory=True)
+    just_parent_list = []
+    for root, dirs, files in os.walk(tmpdir):
+        just_parent_list.append(str(get_path(root)))
+
+    assert len(just_parent_list) == 2
+    assert just_parent_list[0] == str(tmpdir)
+    assert just_parent_list[1] == str(tmpdir.join(_temp_content_dir))
+
+    # build_directory(path, just_parent_directory=False) is
+    # equivalent to os.makedirs(path, exist_ok=True)
+    # Given in fact a path tmpdir/temp_content_dir/sub_temp_content_dir
+    # it will create the full path tmpdir/temp_content_dir/sub_temp_content_dir
+    build_directory(get_temp_folder, just_parent_directory=False)
+    full_tree_list = []
+    for root, dirs, files in os.walk(tmpdir):
+        full_tree_list.append(str(get_path(root)))
+
+    assert len(full_tree_list) == 3
+    assert full_tree_list[0] == str(tmpdir)
+    assert full_tree_list[1] == str(tmpdir.join(_temp_content_dir))
+    assert full_tree_list[2] == str(
+        tmpdir.join(_temp_content_dir, _sub_temp_content_dir)
+    )
 
 
 def test_get_abs_path():

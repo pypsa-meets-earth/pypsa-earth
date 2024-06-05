@@ -880,7 +880,9 @@ def build_directory(path, just_parent_directory=True):
 
     Parameters:
         path (str): The path to the file
-        just_parent_directory (Boolean) : it creates just the parent directory
+        just_parent_directory (Boolean): given a path dir/subdir
+            True: it creates just the parent directory dir
+            False: it creates the full directory tree dir/subdir
     """
 
     # Check if the provided path points to a directory
