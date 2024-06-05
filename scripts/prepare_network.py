@@ -56,7 +56,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
-import os
+import pathlib
 import re
 from zipfile import ZipFile
 
@@ -65,7 +65,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging, create_logger
+from _helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_current_directory_path,
+    get_path,
+)
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -87,13 +93,14 @@ def download_emission_data():
         with requests.get(url) as rq:
             with open("data/co2.zip", "wb") as file:
                 file.write(rq.content)
-        rootpath = os.getcwd()
-        file_path = os.path.join(rootpath, "data/co2.zip")
+        root_path = get_current_directory_path()
+        file_path = get_path(root_path, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
             zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                get_path(root_path, "data"),
             )
-        os.remove(file_path)
+        pathlib.Path(file_path).unlink(missing_ok=True)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
     except:
         logger.error(f"Failed download resource from '{url}'.")
@@ -120,7 +127,7 @@ def emission_extractor(filename, emission_year, country_names):
     """
 
     # data reading process
-    datapath = os.path.join(os.getcwd(), "data", filename)
+    datapath = get_path(get_current_directory_path(), "data", filename)
     df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
     df = df.set_index("Country_code_A3")
@@ -319,7 +326,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",

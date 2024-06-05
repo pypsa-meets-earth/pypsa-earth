@@ -17,7 +17,7 @@ Relevant Settings
         add_to_snakefile: false # When set to true, enables Monte Carlo sampling
         samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
         sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
-        seed: 42 # set seedling for reproducibilty
+        seed: 42 # set seedling for reproducibility
     uncertainties:
         loads_t.p_set:
           type: uniform
@@ -67,14 +67,13 @@ networks. Thereby, this script creates samples x amount of networks. The iterato
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
 0 to (total number of) SAMPLES.
 """
-import os
 
 import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
 import seaborn as sns
-from _helpers import configure_logging, create_logger
+from _helpers import change_to_script_dir, configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
 from sklearn.preprocessing import MinMaxScaler
@@ -135,7 +134,6 @@ def monte_carlo_sampling_chaospy(
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
     """
-    import chaospy
     from scipy.stats import qmc
 
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
@@ -350,7 +348,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "monte_carlo",
             simpl="",
