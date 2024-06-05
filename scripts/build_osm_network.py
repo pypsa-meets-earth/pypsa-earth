@@ -5,12 +5,12 @@
 
 # -*- coding: utf-8 -*-
 
-import os
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import (
+    build_directory,
+    change_to_script_dir,
     configure_logging,
     create_logger,
     read_geojson,
@@ -875,16 +875,14 @@ def built_network(
     logger.info("Save outputs")
 
     # create clean directory if not already exist
-    if not os.path.exists(outputs["lines"]):
-        os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
+    build_directory(outputs["lines"])
 
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
     to_csv_nafix(converters, outputs["converters"])  # Generate CSV
     to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
 
     # create clean directory if not already exist
-    if not os.path.exists(outputs["substations"]):
-        os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
+    build_directory(outputs["substations"])
     # Generate CSV
     to_csv_nafix(buses, outputs["substations"])
 
@@ -895,7 +893,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_osm_network")
     configure_logging(snakemake)
 
