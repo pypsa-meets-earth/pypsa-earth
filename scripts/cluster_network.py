@@ -121,7 +121,7 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
-import os
+import pathlib
 from functools import reduce
 
 import geopandas as gpd
@@ -131,6 +131,7 @@ import pyomo.environ as po
 import pypsa
 from _helpers import (
     REGION_COLS,
+    change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
@@ -633,8 +634,7 @@ def clustering_for_n_clusters(
 
 
 def save_to_geojson(s, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)
+    pathlib.Path(fn).unlink(missing_ok=True)
     df = s.reset_index()
     schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
     df.to_file(fn, driver="GeoJSON", schema=schema)
@@ -658,7 +658,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
