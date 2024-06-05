@@ -948,6 +948,30 @@ def annuity(n, r):
         return r / (1.0 - 1.0 / (1.0 + r) ** n)
     else:
         return 1 / n
+def build_directory(path, just_parent_directory=True):
+    """
+    It creates recursively the directory and its leaf directories.
+
+    Parameters:
+        path (str): The path to the file
+        just_parent_directory (Boolean) : it creates just the parent directory
+    """
+
+    # Check if the provided path points to a directory
+    if just_parent_directory:
+        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+    else:
+        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
+
+def change_to_script_dir(path):
+    """
+    Change the current working directory to the directory containing the given
+    script.
+
+    Parameters:
+        path (str): The path to the file.
+    """
 
 
 def prepare_costs(
@@ -1215,14 +1239,14 @@ def download_GADM(country_code, update=False, out_logging=False):
                 f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
             )
         #  create data/osm directory
-        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
+        build_directory(gadm_input_file_zip)
 
         with requests.get(GADM_url, stream=True) as r:
             with open(GADM_inputfile_zip, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
-            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
+        with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
+            zip_ref.extractall(get_dirname_path(gadm_input_file_zip))
 
     return GADM_inputfile_gpkg, GADM_filename
 
@@ -1310,8 +1334,11 @@ def locate_bus(
 
         df.loc[gdf_merged.index, col_out] = gdf_merged[col]
 
-    if dropnull:
-        df = df[df[col_out].notnull()]
+    for component, list_name in components.list_name.items():
+        fn = f"{directory}/{list_name}.csv"
+        if is_file_path(fn):
+            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
+            attrs[component] = overrides.combine_first(attrs[component])
 
     return df
 

@@ -10,6 +10,8 @@ import pathlib
 from test.conftest import _content_temp_file, _name_temp_file, get_temp_file
 
 from scripts._helpers import (
+    aggregate_fuels,
+    build_directory,
     change_to_script_dir,
     get_abs_path,
     get_basename_abs_path,
