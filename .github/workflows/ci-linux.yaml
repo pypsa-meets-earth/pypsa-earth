@@ -82,6 +82,11 @@ jobs:
         cp test/tmp/config.landlock_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks --forceall
 
+    - name: Unit tests
+      run: |
+        python -m pip install pytest
+        pytest test/
+
       # - name: Test plotting and summaries
       #   run: |
       #     snakemake --cores all plot_all_p_nom
