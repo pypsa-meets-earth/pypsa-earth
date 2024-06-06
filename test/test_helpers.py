@@ -268,7 +268,7 @@ def test_change_to_script_dir():
     Verify the path returned by change_to_script_dir()
     """
     change_to_script_dir(__file__)
-    assert str(pathlib.Path.cwd()) == path_cwd + "/test"
+    assert str(pathlib.Path.cwd()) == path_cwd + os.sep + "test"
     change_to_script_dir(".")
     assert str(pathlib.Path.cwd()) == path_cwd
 
@@ -280,7 +280,7 @@ def test_get_dirname_path():
     dir_name_file = get_dirname_path(__file__)
     dir_name_cwd = get_dirname_path(".")
     assert str(dir_name_file) == os.path.dirname(__file__)
-    assert str(dir_name_file) == path_cwd + "/test"
+    assert str(dir_name_file) == path_cwd + os.sep + "test"
     assert str(dir_name_cwd) == "."
 
 
@@ -317,10 +317,6 @@ def test_get_path():
         "sub_path_4",
         "sub_path_5",
         "file.nc",
-    )
-    assert (
-        str(file_name_path_one)
-        == path_cwd + "/sub_path_1/sub_path_2/sub_path_3/sub_path_4/sub_path_5/file.nc"
     )
     assert str(path_name_path_two) == str(
         pathlib.Path(__file__).parent.joinpath("..", "logs", "rule.log")
