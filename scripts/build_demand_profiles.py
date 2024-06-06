@@ -117,34 +117,26 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         "era5_" + str(weather_year),
     )
 
-    if os.path.exists(scenario_path):
-        regions_found = []
-        file_names = []
-        for continent in region_load:
-            sel_ext = ".nc"
-            for ext in [".nc", ".csv"]:
-                load_path = os.path.join(str(load_dir), str(continent) + str(ext))
-                if os.path.exists(load_path):
-                    sel_ext = ext
-                    regions_found.append(continent)
-                    break
-            file_name = str(continent) + str(sel_ext)
-            load_path = os.path.join(str(load_dir), file_name)
-            load_paths.append(load_path)
-            file_names.append(file_name)
+    regions_found = []
+    file_names = []
+    for continent in region_load:
+        sel_ext = ".nc"
+        for ext in [".nc", ".csv"]:
+            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            if os.path.exists(load_path):
+                sel_ext = ext
+                regions_found.append(continent)
+                break
+        file_name = str(continent) + str(sel_ext)
+        load_path = os.path.join(str(load_dir), file_name)
+        load_paths.append(load_path)
+        file_names.append(file_name)
 
-        logger.info(
-            f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
-            + f"Expected files: "
-            + "; ".join(file_names)
-        )
-    else:
-        for continent in region_load:
-            load_path = os.path.join(
-                str(load_dir),
-                str(continent) + ".nc",
-            )
-            load_paths.append(load_path)
+    logger.info(
+        f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
+        + f"Expected files: "
+        + "; ".join(file_names)
+    )
 
     return load_paths
 
