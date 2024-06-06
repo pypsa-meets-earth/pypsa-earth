@@ -237,29 +237,32 @@ def rescale_distribution(
         dist = value.get("type")
         params = value.get("args")
 
-        match dist:
-            case "uniform":
-                l_bounds, u_bounds = params
-                latin_hypercube[:, idx] = minmax_scale(
-                    latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
-                )
-            case "normal":
-                mean, std = params
-                latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
-            case "lognormal":
-                shape = params[0]
-                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
-            case "triangle":
-                mid_point = params[0]
-                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], mid_point)
-            case "beta":
-                a, b = params
-                latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
-            case "gamma":
-                shape, scale = params
-                latin_hypercube[:, idx] = gamma.ppf(
-                    latin_hypercube[:, idx], shape, scale
-                )
+        if dist == "uniform":
+            l_bounds, u_bounds = params
+            latin_hypercube[:, idx] = minmax_scale(
+                latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
+            )
+        elif dist == "normal":
+            mean, std = params
+            latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
+        elif dist == "lognormal":
+            shape = params[0]
+            latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
+        elif dist == "triangle":
+            mid_point = params[0]
+            latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], mid_point)
+        elif dist == "beta":
+            a, b = params
+            latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
+        elif dist == "gamma":
+            shape, scale = params
+            latin_hypercube[:, idx] = gamma.ppf(latin_hypercube[:, idx], shape, scale)
+        else:
+            exception_message = (
+                f"The value {dist} is not among the allowed ones: uniform, normal, lognormal, "
+                f"triangle, beta, gamma"
+            )
+            raise NotImplementedError(exception_message)
 
     # samples space needs to be from 0 to 1
     mm = MinMaxScaler(feature_range=(0, 1), clip=True)
