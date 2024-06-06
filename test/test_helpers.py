@@ -7,6 +7,7 @@
 
 import os
 import pathlib
+import shutil
 from test.conftest import (
     _content_temp_file,
     _name_temp_file,
@@ -194,36 +195,64 @@ modified_commodity_dataframe = pd.DataFrame(
 def test_build_directory(get_temp_folder, tmpdir):
     """
     Verify the directory tree returned by build_directory()
+
+    Please note:
+    -) build_directory(path, just_parent_directory=True) is equivalent to os.makedirs(os.path.dirname(path)).
+    Given a path tmpdir/temp_content_dir/sub_temp_content_dir, it will create just tmpdir/temp_content_dir/
+    -) build_directory(path, just_parent_directory=False) is equivalent to os.makedirs(path). Given a path
+    tmpdir/temp_content_dir/sub_temp_content_dir, it will create tmpdir/temp_content_dir/sub_temp_content_dir
     """
 
-    # build_directory(path, just_parent_directory=True) is
-    # equivalent to os.makedirs(os.path.dirname(path), exist_ok=True)
-    # Given in fact a path tmpdir/temp_content_dir/sub_temp_content_dir
-    # it will create just tmpdir/temp_content_dir/
+    # test with pathlib
     build_directory(get_temp_folder, just_parent_directory=True)
-    just_parent_list = []
+    just_parent_list_pathlib = []
     for root, dirs, files in os.walk(tmpdir):
-        just_parent_list.append(str(get_path(root)))
+        just_parent_list_pathlib.append(str(get_path(root)))
 
-    assert len(just_parent_list) == 2
-    assert just_parent_list[0] == str(tmpdir)
-    assert just_parent_list[1] == str(tmpdir.join(_temp_content_dir))
+    assert len(just_parent_list_pathlib) == 2
+    assert just_parent_list_pathlib[0] == str(tmpdir)
+    assert just_parent_list_pathlib[1] == str(tmpdir.join(_temp_content_dir))
 
-    # build_directory(path, just_parent_directory=False) is
-    # equivalent to os.makedirs(path, exist_ok=True)
-    # Given in fact a path tmpdir/temp_content_dir/sub_temp_content_dir
-    # it will create the full path tmpdir/temp_content_dir/sub_temp_content_dir
+    # remove the temporary folder tmpdir/temp_content_dir/
+    shutil.rmtree(pathlib.Path(tmpdir, _temp_content_dir))
+
+    # test with os.makedirs. Please note for exist_ok=False,
+    # a FileExistsError is raised if the target directory
+    # already exists. Hence, setting exist_ok=False ensures
+    # that the removal with shutil.rmtree was successful
+    os.makedirs(os.path.dirname(get_temp_folder), exist_ok=False)
+    just_parent_list_os = []
+    for root, dirs, files in os.walk(tmpdir):
+        just_parent_list_os.append(str(get_path(root)))
+
+    assert just_parent_list_pathlib == just_parent_list_os
+
+    # test with pathlib
     build_directory(get_temp_folder, just_parent_directory=False)
-    full_tree_list = []
+    full_tree_list_pathlib = []
     for root, dirs, files in os.walk(tmpdir):
-        full_tree_list.append(str(get_path(root)))
+        full_tree_list_pathlib.append(str(get_path(root)))
 
-    assert len(full_tree_list) == 3
-    assert full_tree_list[0] == str(tmpdir)
-    assert full_tree_list[1] == str(tmpdir.join(_temp_content_dir))
-    assert full_tree_list[2] == str(
+    assert len(full_tree_list_pathlib) == 3
+    assert full_tree_list_pathlib[0] == str(tmpdir)
+    assert full_tree_list_pathlib[1] == str(tmpdir.join(_temp_content_dir))
+    assert full_tree_list_pathlib[2] == str(
         tmpdir.join(_temp_content_dir, _sub_temp_content_dir)
     )
+
+    # remove the temporary folder tmpdir/temp_content_dir/*
+    shutil.rmtree(pathlib.Path(tmpdir, _temp_content_dir))
+
+    # test with os.makedirs. Please note for exist_ok=False,
+    # a FileExistsError is raised if the target directory
+    # already exists. Hence, setting exist_ok=False ensures
+    # that the removal with shutil.rmtree was successful
+    os.makedirs(get_temp_folder, exist_ok=False)
+    full_tree_list_os = []
+    for root, dirs, files in os.walk(tmpdir):
+        full_tree_list_os.append(str(get_path(root)))
+
+    assert full_tree_list_os == full_tree_list_pathlib
 
 
 def test_get_abs_path():
