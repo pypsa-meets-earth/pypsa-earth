@@ -118,23 +118,25 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     )
 
     if os.path.exists(scenario_path):
+        regions_found = []
+        file_names = []
         for continent in region_load:
+            sel_ext = ".nc"
             for ext in [".nc", ".csv"]:
                 load_path = os.path.join(str(load_dir), str(continent) + str(ext))
                 if os.path.exists(load_path):
-                    load_paths.append(load_path)
+                    sel_ext = ext
+                    regions_found.append(continent)
                     break
-
-        avail_regions = [
-            os.path.split(os.path.abspath(pth))[1].split(".nc")[0] for pth in load_paths
-        ]
-
-        logger.info(f" An assumed load folder {load_dir}, load path is {load_paths}.")
-
-        if len(load_paths) == 0:
-            logger.warning(
-                f"No demand data file for {set(region_load).difference(avail_regions)}. An assumed load folder {load_dir}."
-            )
+             file_name = str(continent) + str(sel_ext)
+             load_path = os.path.join(str(load_dir), file_name)
+             load_paths.append(load_path)
+             file_names.append(file_name)
+        
+        logger.info(
+            f"Demand data folder: {load_dir}, load path is {load_paths}.\n" +
+            f"Expected files: " + "; ".join(file_names)
+        )
     else:
         for continent in region_load:
             load_path = os.path.join(
