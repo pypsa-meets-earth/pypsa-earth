@@ -26,7 +26,6 @@ from scripts._helpers import (
     country_name_2_two_digits,
     get_abs_path,
     get_basename_abs_path,
-    get_basename_path,
     get_conv_factors,
     get_current_directory_path,
     get_dirname_path,
