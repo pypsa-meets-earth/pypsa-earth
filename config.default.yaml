@@ -422,24 +422,20 @@ plotting:
   load_carriers: ["AC load"]
   AC_carriers: ["AC line", "AC transformer"]
   link_carriers: ["DC line", "Converter AC-DC"]
-  tech_colors:
+ tech_colors:
     "onwind": "#235ebc"
     "onshore wind": "#235ebc"
     "offwind": "#6895dd"
     "offwind-ac": "#6895dd"
     "offshore wind": "#6895dd"
     "offshore wind ac": "#6895dd"
-    "offshore wind (ac)": "#6895dd"
     "offwind-dc": "#74c6f2"
-    "offshore wind (dc)": "#74c6f2"
     "offshore wind dc": "#74c6f2"
     "hydro": "#08ad97"
     "hydro+PHS": "#08ad97"
     "PHS": "#08ad97"
-    "pumped hydro storage": "#08ad97"
     "hydro reservoir": "#08ad97"
     "hydroelectricity": "#08ad97"
-    "reservoir & dam": "#08ad97"
     "ror": "#4adbc8"
     "run of river": "#4adbc8"
     "solar": "#f9d002"
@@ -454,7 +450,6 @@ plotting:
     "gas": "#d35050"
     "natural gas": "#d35050"
     "CCGT": "#b20101"
-    "combined-cycle gas": "#b20101"
     "nuclear": "#ff9000"
     "coal": "#707070"
     "lignite": "#9e5a01"
@@ -462,7 +457,6 @@ plotting:
     "H2": "#ea048a"
     "hydrogen storage": "#ea048a"
     "battery": "#b8ea04"
-    "battery storage": "#b8ea04"
     "Electric load": "#f9d002"
     "electricity": "#f9d002"
     "lines": "#70af1d"
@@ -475,12 +469,13 @@ plotting:
     "DC-DC": "#8a1caf"
     "dc": "#8a1caf"
     "DC link": "#8a1caf"
-    "load": "#FF0000"
-    "load ac": "#FF0000"
+    "load": "#ff0000"
+    "load ac": "#ff0000"
     "battery discharger": slategray
     "battery charger": slategray
     "h2 fuel cell": '#c251ae'
     "h2 electrolysis": '#ff29d9'
+    "csp": "#fdd404"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"
