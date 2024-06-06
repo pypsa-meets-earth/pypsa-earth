@@ -526,17 +526,13 @@ def solve_network(n, config, solving, **kwargs):
     )
     kwargs["solver_name"] = solving["solver"]["name"]
 
-    # add to network for extra_functionality
-    n.config = config
-
     skip_iterations = cf_solving.get("skip_iterations", False)
     if not n.lines.s_nom_extendable.any():
         skip_iterations = True
         logger.info("No expandable lines found. Skipping iterative solving.")
 
-    # status, condition = run_glpk(**kwargs)
-
-    status, condition = n.optimize.optimize_transmission_expansion_iteratively(**kwargs)
+    # add to network for extra_functionality
+    n.config = config
 
     if skip_iterations:
         status, condition = n.optimize(**kwargs)
@@ -575,9 +571,6 @@ if __name__ == "__main__":
         )
     configure_logging(snakemake)
 
-    # tmpdir = snakemake.params.solving.get("tmpdir")
-    # if tmpdir is not None:
-    #     Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
     solve_opts = snakemake.params.solving["options"]
 
