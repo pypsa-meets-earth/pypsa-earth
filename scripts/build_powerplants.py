@@ -100,8 +100,6 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
 """
 
-import os
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -109,8 +107,13 @@ import powerplantmatching as pm
 import pypsa
 import yaml
 from _helpers import (
+    change_to_script_dir,
     configure_logging,
     create_logger,
+    get_current_directory_path,
+    get_path,
+    get_path_size,
+    mock_snakemake,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -122,7 +125,7 @@ logger = create_logger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
-    if os.stat(filepath_ppl_osm).st_size == 0:
+    if get_path_size(filepath_ppl_osm) == 0:
         return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
 
     add_ppls = read_csv_nafix(filepath_ppl_osm, index_col=0, dtype={"bus": "str"})
@@ -296,9 +299,7 @@ def replace_natural_gas_technology(df: pd.DataFrame):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_powerplants")
 
     configure_logging(snakemake)
@@ -325,8 +326,8 @@ if __name__ == "__main__":
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
-            os.getcwd(), filepath_osm2pm_ppl
+        config["EXTERNAL_DATABASE"]["fn"] = get_path(
+            get_current_directory_path(), filepath_osm2pm_ppl
         )
     else:
         # create an empty file

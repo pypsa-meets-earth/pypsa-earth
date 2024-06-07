@@ -45,14 +45,23 @@ merges them to one shapefile, and create a rasterized version of the region, tha
 The output is a raster file with the name `natura.tiff` in the folder `resources/natura/`.
 """
 import os
+import pathlib
 
 import atlite
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import rasterio as rio
-from _helpers import configure_logging, create_logger
+from _helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_path,
+    mock_snakemake,
+)
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
+from shapely.ops import unary_union
 
 logger = create_logger(__name__)
 
@@ -65,14 +74,16 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
     list_fileshapes = []
     for lf in list_paths:
-        if os.path.isdir(lf):  # if it is a folder, then list all shapes files contained
+        if pathlib.Path(
+            lf
+        ).is_dir():  # if it is a folder, then list all shapes files contained
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
                 # loop over all files
                 for subfile in files:
                     # add the subfile if it is a shape file
                     if subfile.endswith(accepted_formats):
-                        list_fileshapes.append(os.path.join(path, subfile))
+                        list_fileshapes.append(str(get_path(path, subfile)))
 
         elif lf.endswith(accepted_formats):
             list_fileshapes.append(lf)
@@ -119,9 +130,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     -------
     unified_shape : GeoDataFrame with a unified "multishape"
     """
-    import pandas as pd
-    from shapely.ops import unary_union
-    from shapely.validation import make_valid
 
     if out_logging:
         logger.info("Stage 3/5: Unify protected shape area.")
@@ -176,12 +184,11 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "build_natura_raster", cutouts=["cutouts/africa-2013-era5.nc"]
         )
+
     configure_logging(snakemake)
 
     # get crs

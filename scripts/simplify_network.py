@@ -84,7 +84,6 @@ The rule :mod:`simplify_network` does up to four things:
 
 4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), the network is clustered to this number of clusters with the routines from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. This step is usually skipped!
 """
-import os
 import sys
 from functools import reduce
 
@@ -94,9 +93,11 @@ import pandas as pd
 import pypsa
 import scipy as sp
 from _helpers import (
+    change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
+    mock_snakemake,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -961,9 +962,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("simplify_network", simpl="")
     configure_logging(snakemake)
 

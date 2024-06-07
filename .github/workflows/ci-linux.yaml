@@ -3,10 +3,10 @@ name: CI-linux
 on:
   push:
     branches:
-    - main
+    - oet_main
   pull_request:
     branches:
-    - main
+    - oet_main
   schedule:
   - cron: "0 5 * * TUE"
 
@@ -81,6 +81,11 @@ jobs:
       run: |
         cp test/tmp/config.landlock_tmp.yaml config.yaml
         snakemake --cores all solve_all_networks --forceall
+
+    - name: Unit tests
+      run: |
+        python -m pip install pytest
+        pytest test/
 
       # - name: Test plotting and summaries
       #   run: |

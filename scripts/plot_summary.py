@@ -16,11 +16,16 @@ Outputs
 Description
 -----------
 """
-import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import configure_logging, create_logger
+from _helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    get_path,
+    mock_snakemake,
+)
 
 logger = create_logger(__name__)
 
@@ -217,9 +222,8 @@ def plot_energy(infn, snmk, fn=None):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "plot_summary",
             summary="energy",
@@ -241,7 +245,7 @@ if __name__ == "__main__":
         logger.error(f"plotting function for {summary} has not been defined")
 
     func(
-        os.path.join(snakemake.input[0], f"{summary}.csv"),
+        get_path(snakemake.input[0], f"{summary}.csv"),
         snakemake,
         snakemake.output[0],
     )
