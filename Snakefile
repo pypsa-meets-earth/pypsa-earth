@@ -4,16 +4,16 @@
 
 import sys
 
-sys.path.append("./scripts")
+# sys.path.append("./scripts")
 
 from os.path import normpath, exists
 from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from _helpers import create_country_list, get_last_commit_message
-from build_demand_profiles import get_load_paths_gegis
-from retrieve_databundle_light import datafiles_retrivedatabundle
+from scripts._helpers import create_country_list, get_last_commit_message
+from scripts.build_demand_profiles import get_load_paths_gegis
+from scripts.retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
