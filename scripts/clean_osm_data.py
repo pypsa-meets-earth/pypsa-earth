@@ -9,12 +9,14 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import reverse_geocode as rg
-from _helpers import (
+
+from scripts._helpers import (
     REGION_COLS,
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_path_size,
+    mock_snakemake,
     save_to_geojson,
     to_csv_nafix,
 )
@@ -1062,10 +1064,9 @@ def clean_data(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("clean_osm_data")
+
     configure_logging(snakemake)
 
     tag_substation = snakemake.params.clean_osm_data_options["tag_substation"]

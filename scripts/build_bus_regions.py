@@ -44,9 +44,19 @@ Description
 """
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import REGION_COLS, change_to_script_dir, configure_logging, create_logger
+from scipy.spatial import Voronoi
+from shapely.geometry import Polygon
+
+from scripts._helpers import (
+    REGION_COLS,
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+)
 
 logger = create_logger(__name__)
 
@@ -66,13 +76,7 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
     polygons : N - ndarray[dtype=Polygon|MultiPolygon]
     """
 
-    import numpy as np
-    from scipy.spatial import Voronoi
-    from shapely.geometry import Polygon
-
     points = np.asarray(points)
-
-    polygons_arr = []
 
     if len(points) == 1:
         polygons_arr = [outline]
@@ -147,10 +151,9 @@ def get_gadm_shape(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_bus_regions")
+
     configure_logging(snakemake)
 
     countries = snakemake.params.countries

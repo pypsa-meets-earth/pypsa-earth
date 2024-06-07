@@ -201,16 +201,18 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    sets_path_to_root,
-)
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
 from shapely.geometry import LineString, Point, box
+
+from scripts._helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+    sets_path_to_root,
+)
 
 cc = coco.CountryConverter()
 
@@ -490,11 +492,10 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
         sets_path_to_root("pypsa-earth")
+
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()

@@ -106,19 +106,21 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import yaml
-from _helpers import (
+from scipy.spatial import cKDTree as KDTree
+from shapely.geometry import Point
+
+from scripts._helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
     get_path,
     get_path_size,
+    mock_snakemake,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
 )
-from scipy.spatial import cKDTree as KDTree
-from shapely.geometry import Point
 
 logger = create_logger(__name__)
 
@@ -298,8 +300,6 @@ def replace_natural_gas_technology(df: pd.DataFrame):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_powerplants")
 

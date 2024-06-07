@@ -11,6 +11,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import urllib
 import zipfile
 
 import country_converter as coco
@@ -18,13 +19,18 @@ import fiona
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import snakemake as sm
 import yaml
+from pypsa.clustering.spatial import _make_consense
 from pypsa.components import component_attrs, components
 from pypsa.descriptors import Dict
 from shapely.geometry import Point
 from snakemake.script import Snakemake
+from tqdm import tqdm
+
+from scripts.add_electricity import load_costs, update_transmission_costs
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +178,6 @@ def configure_logging(snakemake, skip_handlers=False):
     skip_handlers : True | False (default)
         Do (not) skip the default handlers created for redirecting output to STDERR and file.
     """
-    import logging
 
     kwargs = snakemake.config.get("logging", dict()).copy()
     kwargs.setdefault("level", "INFO")
@@ -223,8 +228,6 @@ def load_network(import_name=None, custom_components=None):
     -------
     pypsa.Network
     """
-    import pypsa
-    from pypsa.descriptors import Dict
 
     override_components = None
     override_component_attrs_dict = None
@@ -252,8 +255,6 @@ def load_network(import_name=None, custom_components=None):
 def load_network_for_plots(
     fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
-    import pypsa
-    from add_electricity import load_costs, update_transmission_costs
 
     n = pypsa.Network(fn)
 
@@ -414,9 +415,6 @@ def progress_retrieve(
         (default 0) Precision used to report the progress
         e.g. 0.1 stands for 88.1, 10 stands for 90, 80
     """
-    import urllib
-
-    from tqdm import tqdm
 
     pbar = tqdm(total=100, disable=disable_progress)
 
@@ -445,14 +443,6 @@ def get_aggregation_strategies(aggregation_strategies):
     the function's definition) they get lost when custom values are specified
     in the config.
     """
-    import numpy as np
-
-    # to handle the new version of PyPSA.
-    try:
-        from pypsa.clustering.spatial import _make_consense
-    except Exception:
-        # TODO: remove after new release and update minimum pypsa version
-        from pypsa.clustering.spatial import _make_consense
 
     bus_strategies = dict(country=_make_consense("Bus", "country"))
     bus_strategies.update(aggregation_strategies.get("buses", {}))
@@ -741,7 +731,6 @@ def create_country_list(input, iso_coding=True):
     full_codes_list : list
         Example ["NG","ZA"]
     """
-    import logging
 
     _logger = logging.getLogger(__name__)
     _logger.setLevel(logging.INFO)

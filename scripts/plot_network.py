@@ -23,16 +23,18 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from _helpers import (
+from matplotlib.legend_handler import HandlerPatch
+from matplotlib.patches import Circle, Ellipse
+
+from scripts._helpers import (
     aggregate_costs,
     aggregate_p,
     change_to_script_dir,
     configure_logging,
     create_logger,
     load_network_for_plots,
+    mock_snakemake,
 )
-from matplotlib.legend_handler import HandlerPatch
-from matplotlib.patches import Circle, Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 
@@ -357,8 +359,6 @@ def plot_total_cost_bar(n, ax=None):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "plot_network",
