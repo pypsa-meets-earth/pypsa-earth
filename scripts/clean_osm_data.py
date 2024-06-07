@@ -9,8 +9,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import reverse_geocode as rg
-
-from scripts._helpers import (
+from _helpers import (
     REGION_COLS,
     change_to_script_dir,
     configure_logging,

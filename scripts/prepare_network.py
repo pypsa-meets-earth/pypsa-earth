@@ -65,8 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
@@ -74,7 +73,7 @@ from scripts._helpers import (
     get_path,
     mock_snakemake,
 )
-from scripts.add_electricity import load_costs, update_transmission_costs
+from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 

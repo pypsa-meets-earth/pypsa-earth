@@ -5,7 +5,11 @@
 
 # -*- coding: utf-8 -*-
 
-from scripts.prepare_network import download_emission_data
+import sys
+
+sys.path.append("./scripts")
+
+from prepare_network import download_emission_data
 
 
 def test_download_emission_data():

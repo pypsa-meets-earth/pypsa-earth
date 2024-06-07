@@ -201,18 +201,17 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from add_electricity import load_powerplants
-from dask.distributed import Client, LocalCluster
-from pypsa.geo import haversine
-from shapely.geometry import LineString, Point, box
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
     mock_snakemake,
     sets_path_to_root,
 )
+from add_electricity import load_powerplants
+from dask.distributed import Client, LocalCluster
+from pypsa.geo import haversine
+from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 

@@ -64,9 +64,7 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-from shapely.ops import unary_union
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
@@ -74,6 +72,7 @@ from scripts._helpers import (
     mock_snakemake,
     read_csv_nafix,
 )
+from shapely.ops import unary_union
 
 logger = create_logger(__name__)
 

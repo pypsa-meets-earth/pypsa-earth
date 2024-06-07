@@ -73,12 +73,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 import seaborn as sns
+from _helpers import change_to_script_dir, configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
 from sklearn.preprocessing import MinMaxScaler, minmax_scale
-
-from scripts._helpers import change_to_script_dir, configure_logging, create_logger
-from scripts.solve_network import *
+from solve_network import *
 
 logger = create_logger(__name__)
 sns.set(style="whitegrid")

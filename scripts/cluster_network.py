@@ -129,16 +129,7 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as po
 import pypsa
-from pypsa.clustering.spatial import (
-    busmap_by_greedy_modularity,
-    busmap_by_hac,
-    busmap_by_kmeans,
-    get_clustering_from_busmap,
-)
-from scipy.sparse import csgraph
-from shapely.geometry import Point
-
-from scripts._helpers import (
+from _helpers import (
     REGION_COLS,
     change_to_script_dir,
     configure_logging,
@@ -148,8 +139,16 @@ from scripts._helpers import (
     sets_path_to_root,
     update_p_nom_max,
 )
-from scripts.add_electricity import load_costs
-from scripts.build_shapes import add_gdp_data, add_population_data
+from add_electricity import load_costs
+from build_shapes import add_gdp_data, add_population_data
+from pypsa.clustering.spatial import (
+    busmap_by_greedy_modularity,
+    busmap_by_hac,
+    busmap_by_kmeans,
+    get_clustering_from_busmap,
+)
+from scipy.sparse import csgraph
+from shapely.geometry import Point
 
 idx = pd.IndexSlice
 

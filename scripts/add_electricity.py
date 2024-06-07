@@ -89,8 +89,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,

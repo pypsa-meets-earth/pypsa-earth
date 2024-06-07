@@ -51,11 +51,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio as rio
-from rasterio.features import geometry_mask
-from rasterio.warp import transform_bounds
-from shapely.ops import unary_union
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
@@ -63,6 +59,9 @@ from scripts._helpers import (
     is_directory_path,
     mock_snakemake,
 )
+from rasterio.features import geometry_mask
+from rasterio.warp import transform_bounds
+from shapely.ops import unary_union
 
 logger = create_logger(__name__)
 

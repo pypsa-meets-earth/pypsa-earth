@@ -26,12 +26,15 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
+
+import sys
+
+print("sys path download_osm_data", sys.path)
+
 import pathlib
 import shutil
 
-from earth_osm import eo
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
@@ -41,6 +44,7 @@ from scripts._helpers import (
     read_osm_config,
     sets_path_to_root,
 )
+from earth_osm import eo
 
 logger = create_logger(__name__)
 

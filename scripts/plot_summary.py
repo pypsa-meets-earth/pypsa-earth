@@ -19,8 +19,7 @@ Description
 
 import matplotlib.pyplot as plt
 import pandas as pd
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,

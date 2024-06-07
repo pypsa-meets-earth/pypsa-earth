@@ -8,6 +8,7 @@
 import os
 import pathlib
 import shutil
+import sys
 from test.conftest import (
     _content_temp_file,
     _name_temp_file,
@@ -19,7 +20,9 @@ from test.conftest import (
 import numpy as np
 import pandas as pd
 
-from scripts._helpers import (
+sys.path.append("./scripts")
+
+from _helpers import (
     aggregate_fuels,
     build_directory,
     change_to_script_dir,

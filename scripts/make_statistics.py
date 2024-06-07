@@ -29,9 +29,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from shapely.validation import make_valid
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     create_country_list,
     create_logger,
@@ -42,7 +40,8 @@ from scripts._helpers import (
     three_2_two_digits_country,
     to_csv_nafix,
 )
-from scripts.build_test_configs import create_test_config
+from build_test_configs import create_test_config
+from shapely.validation import make_valid
 
 logger = create_logger(__name__)
 

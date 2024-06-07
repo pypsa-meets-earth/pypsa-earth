@@ -24,10 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pypsa
-from matplotlib.legend_handler import HandlerPatch
-from matplotlib.patches import Circle, Ellipse
-
-from scripts._helpers import (
+from _helpers import (
     aggregate_costs,
     aggregate_p,
     change_to_script_dir,
@@ -35,7 +32,9 @@ from scripts._helpers import (
     create_logger,
     mock_snakemake,
 )
-from scripts.add_electricity import load_costs, update_transmission_costs
+from add_electricity import load_costs, update_transmission_costs
+from matplotlib.legend_handler import HandlerPatch
+from matplotlib.patches import Circle, Ellipse
 
 to_rgba = mpl.colors.colorConverter.to_rgba
 

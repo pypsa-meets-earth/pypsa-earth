@@ -49,10 +49,7 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from shapely.prepared import prep
-from shapely.validation import make_valid
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     configure_logging,
     create_logger,
@@ -61,6 +58,8 @@ from scripts._helpers import (
     read_osm_config,
     sets_path_to_root,
 )
+from shapely.prepared import prep
+from shapely.validation import make_valid
 
 logger = create_logger(__name__)
 

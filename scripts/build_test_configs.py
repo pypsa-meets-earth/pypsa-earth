@@ -15,14 +15,13 @@ tutorial config.
 import collections.abc
 import copy
 
-from ruamel.yaml import YAML
-
-from scripts._helpers import (
+from _helpers import (
     change_to_script_dir,
     get_current_directory_path,
     get_path,
     mock_snakemake,
 )
+from ruamel.yaml import YAML
 
 
 def update(d, u):

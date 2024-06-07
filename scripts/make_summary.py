@@ -54,8 +54,7 @@ Replacing *summaries* with *plots* creates nice colored maps of the results.
 
 import pandas as pd
 import pypsa
-
-from scripts._helpers import (
+from _helpers import (
     build_directory,
     change_to_script_dir,
     configure_logging,
@@ -64,7 +63,7 @@ from scripts._helpers import (
     mock_snakemake,
     path_exists,
 )
-from scripts.add_electricity import load_costs, update_transmission_costs
+from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
