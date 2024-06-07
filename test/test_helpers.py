@@ -27,18 +27,12 @@ from _helpers import (
     build_directory,
     change_to_script_dir,
     country_name_2_two_digits,
-    get_abs_path,
-    get_basename_abs_path,
     get_conv_factors,
     get_current_directory_path,
-    get_dirname_path,
     get_path,
     get_path_size,
     get_relative_path,
-    is_directory_path,
-    is_file_path,
     modify_commodity,
-    path_exists,
     safe_divide,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -257,15 +251,6 @@ def test_build_directory(get_temp_folder, tmpdir):
     assert full_tree_list_os == full_tree_list_pathlib
 
 
-def test_get_abs_path():
-    """
-    Verify the path returned by get_abs_path()
-    """
-    abs_file = get_abs_path(__file__)
-    assert str(abs_file) == os.path.abspath(__file__)
-    assert str(abs_file) == __file__
-
-
 def test_change_to_script_dir():
     """
     Verify the path returned by change_to_script_dir()
@@ -274,26 +259,6 @@ def test_change_to_script_dir():
     assert str(pathlib.Path.cwd()) == path_cwd + os.sep + "test"
     change_to_script_dir(".")
     assert str(pathlib.Path.cwd()) == path_cwd
-
-
-def test_get_dirname_path():
-    """
-    Verify the path returned by get_dirname_path()
-    """
-    dir_name_file = get_dirname_path(__file__)
-    dir_name_cwd = get_dirname_path(".")
-    assert str(dir_name_file) == os.path.dirname(__file__)
-    assert str(dir_name_file) == path_cwd + os.sep + "test"
-    assert str(dir_name_cwd) == "."
-
-
-def test_get_basename_abs_path():
-    """
-    Verify the path returned by get_basename_abs_path()
-    """
-    base_name_file = get_basename_abs_path(__file__)
-    assert str(base_name_file) == os.path.basename(os.path.abspath(__file__))
-    assert str(base_name_file) == "test_helpers.py"
 
 
 def test_get_path():
@@ -344,25 +309,6 @@ def test_get_current_directory_path():
     assert str(path) == os.getcwd()
 
 
-def test_is_directory_path(tmpdir):
-    """
-    Verify if is_directory_path() returns True when path points to directory.
-    """
-    assert is_directory_path(tmpdir)
-    assert is_directory_path(tmpdir) == os.path.isdir(tmpdir)
-    assert not is_directory_path(__file__)
-
-
-def test_is_file_path(get_temp_file, tmpdir):
-    """
-    Verify if is_file_path() returns True when path points to file.
-    """
-    path = get_temp_file
-    assert is_file_path(path)
-    assert is_file_path(path) == os.path.isfile(path)
-    assert not is_file_path(tmpdir)
-
-
 def test_get_relative_path(get_temp_file):
     """
     Verify the relative path returned by get_relative_path()
@@ -372,17 +318,6 @@ def test_get_relative_path(get_temp_file):
     relative_path = get_relative_path(path, get_path(path).parent)
     assert str(relative_path) == _name_temp_file
     assert str(relative_path) == os.path.relpath(path, start=get_path(path).parent)
-
-
-def test_path_exists(get_temp_file):
-    """
-    Verify if path_exists() returns True when path exists.
-    """
-    path = get_temp_file
-    pathlib_path = get_path(path)
-    assert path_exists(path)
-    assert path_exists(pathlib_path)
-    assert path_exists(path) == os.path.exists(path)
 
 
 def test_two_2_three_digits_country():

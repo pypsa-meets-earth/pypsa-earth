@@ -24,6 +24,8 @@ Outputs
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
 
+import pathlib
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -34,7 +36,6 @@ from _helpers import (
     create_country_list,
     create_logger,
     get_path_size,
-    is_file_path,
     mock_snakemake,
     sets_path_to_root,
     three_2_two_digits_country,
@@ -130,7 +131,7 @@ def collect_basic_osm_stats(path, rulename, header):
     """
     Collect basic statistics on OSM data: number of items
     """
-    if is_file_path(path) and get_path_size(path) > 0:
+    if pathlib.Path(path).is_file() and get_path_size(path) > 0:
         df = gpd.read_file(path)
         n_elem = len(df)
 
@@ -149,7 +150,7 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
     - length of the stored shapes
     - length of objects with tag_frequency == 0 (DC elements)
     """
-    if is_file_path(path) and get_path_size(path) > 0:
+    if pathlib.Path(path).is_file() and get_path_size(path) > 0:
         df = gpd.read_file(path)
         n_elem = len(df)
         obj_length = (
@@ -251,7 +252,7 @@ def collect_bus_regions_stats(bus_region_rule="build_bus_regions"):
 
     df = pd.DataFrame()
 
-    if is_file_path(fp_onshore) and is_file_path(fp_offshore):
+    if pathlib.Path(fp_onshore).is_file() and pathlib.Path(fp_offshore).is_file():
         gdf_onshore = gpd.read_file(fp_onshore)
         gdf_offshore = gpd.read_file(fp_offshore)
 
@@ -293,7 +294,7 @@ def collect_network_stats(network_rule, scenario_config):
         else:
             return df.groupby("carrier").p_nom.sum().astype(float)
 
-    if is_file_path(network_path):
+    if pathlib.Path(network_path).is_file():
         n = pypsa.Network(network_path)
 
         lines_length = float((n.lines.length * n.lines.num_parallel).sum())
@@ -348,7 +349,7 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     """
     snakemake = _mock_snakemake(rulename)
 
-    if not is_file_path(snakemake.output.africa_shape):
+    if not pathlib.Path(snakemake.output.africa_shape).is_file():
         return pd.DataFrame()
 
     df_continent = gpd.read_file(snakemake.output.africa_shape)
@@ -359,7 +360,7 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
         .geometry.area.iloc[0]
     )
 
-    if not is_file_path(snakemake.output.gadm_shapes):
+    if not pathlib.Path(snakemake.output.gadm_shapes).is_file():
         return pd.DataFrame()
 
     df_gadm = gpd.read_file(snakemake.output.gadm_shapes)
@@ -473,7 +474,7 @@ def collect_renewable_stats(rulename, technology):
     """
     snakemake = _mock_snakemake(rulename, technology=technology)
 
-    if is_file_path(snakemake.output.profile):
+    if pathlib.Path(snakemake.output.profile).is_file():
         res = xr.open_dataset(snakemake.output.profile)
 
         if technology == "hydro":
@@ -506,7 +507,7 @@ def add_computational_stats(df, snakemake, column_name=None):
     comp_data = [np.nan] * 3  # total_time, mean_load and max_memory
 
     if snakemake.benchmark:
-        if not is_file_path(snakemake.benchmark):
+        if not pathlib.Path(snakemake.benchmark).is_file():
             return df
 
         bench_data = pd.read_csv(snakemake.benchmark, delimiter="\t")

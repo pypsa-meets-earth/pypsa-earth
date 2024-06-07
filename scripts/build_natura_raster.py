@@ -45,6 +45,7 @@ merges them to one shapefile, and create a rasterized version of the region, tha
 The output is a raster file with the name `natura.tiff` in the folder `resources/natura/`.
 """
 import os
+import pathlib
 
 import atlite
 import geopandas as gpd
@@ -56,7 +57,6 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_path,
-    is_directory_path,
     mock_snakemake,
 )
 from rasterio.features import geometry_mask
@@ -74,9 +74,9 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
     list_fileshapes = []
     for lf in list_paths:
-        if is_directory_path(
+        if pathlib.Path(
             lf
-        ):  # if it is a folder, then list all shapes files contained
+        ).is_dir():  # if it is a folder, then list all shapes files contained
             # loop over all dirs and subdirs
             for path, subdirs, files in os.walk(lf):
                 # loop over all files

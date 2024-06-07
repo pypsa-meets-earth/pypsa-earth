@@ -110,9 +110,9 @@ def read_osm_config(*args):
     {"Africa": {"DZ": "algeria", ...}, ...}
     """
     if "__file__" in globals():
-        base_folder = get_dirname_path(__file__)
-        if not path_exists(get_path(base_folder, "configs")):
-            base_folder = get_dirname_path(base_folder)
+        base_folder = pathlib.Path(__file__).parent
+        if not pathlib.Path(get_path(base_folder, "configs")).exists():
+            base_folder = pathlib.Path(base_folder).parent
     else:
         base_folder = get_current_directory_path()
     osm_config_path = get_path(base_folder, "configs", REGIONS_CONFIG)
@@ -144,7 +144,7 @@ def sets_path_to_root(root_directory_name, n=8):
     while n >= 0:
         n -= 1
         # if repo_name is current folder name, stop and set path
-        if repo_name == get_basename_abs_path("."):
+        if repo_name == pathlib.Path(".").absolute().name:
             repo_path = get_current_directory_path()  # current_path
             os.chdir(repo_path)  # change dir_path to repo_path
             print("This is the repository path: ", repo_path)
@@ -182,7 +182,7 @@ def configure_logging(snakemake, skip_handlers=False):
 
     if skip_handlers is False:
         fallback_path = get_path(
-            get_dirname_path(__file__), "..", "logs", f"{snakemake.rule}.log"
+            pathlib.Path(__file__).parent, "..", "logs", f"{snakemake.rule}.log"
         )
         logfile = snakemake.log.get(
             "python", snakemake.log[0] if snakemake.log else fallback_path
@@ -440,7 +440,7 @@ def mock_snakemake(rule_name, **wildcards):
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
     for p in sm.SNAKEFILE_CHOICES:
-        if path_exists(p):
+        if pathlib.Path(p).exists():
             snakefile = p
             break
     workflow = sm.Workflow(
@@ -464,7 +464,7 @@ def mock_snakemake(rule_name, **wildcards):
     def make_accessable(*ios):
         for io in ios:
             for i in range(len(io)):
-                io[i] = get_abs_path(io[i])
+                io[i] = pathlib.Path(io[i]).absolute()
 
     make_accessable(job.input, job.output, job.log)
     snakemake = Snakemake(
@@ -784,35 +784,6 @@ def get_last_commit_message(path):
     return last_commit_message
 
 
-def get_dirname_path(path):
-    """
-    It returns the directory name of the path.
-    """
-    return pathlib.Path(path).parent
-
-
-def get_abs_path(path):
-    """
-    It returns the absolutized version of the path.
-    """
-    return pathlib.Path(path).absolute()
-
-
-def get_basename_abs_path(path):
-    """
-    It returns the base name of a normalized and absolutized version of the
-    path.
-    """
-    return pathlib.Path(path).absolute().name
-
-
-def get_basename_path(path):
-    """
-    It returns the base name of the path.
-    """
-    return pathlib.Path(path).name
-
-
 def get_path(*args):
     """
     It returns a new path string.
@@ -868,24 +839,6 @@ def get_current_directory_path():
     return pathlib.Path.cwd()
 
 
-def is_directory_path(path):
-    """
-    It returns True if the path points to a directory.
-
-    False otherwise.
-    """
-    return pathlib.Path(path).is_dir()
-
-
-def is_file_path(path):
-    """
-    It returns True if the path points to a file.
-
-    False otherwise.
-    """
-    return pathlib.Path(path).is_file()
-
-
 def get_relative_path(path, start_path="."):
     """
     It returns a relative path to path from start_path.
@@ -893,15 +846,6 @@ def get_relative_path(path, start_path="."):
     Default for start_path is the current directory
     """
     return pathlib.Path(path).relative_to(start_path)
-
-
-def path_exists(path):
-    """
-    It returns True if the path exists.
-
-    False otherwise.
-    """
-    return pathlib.Path(path).exists()
 
 
 def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):
@@ -1004,7 +948,7 @@ def download_gadm(country_code, update=False, out_logging=False):
         gadm_filename + ".gpkg",
     )  # Input filepath gpkg
 
-    if not path_exists(gadm_input_file_gpkg) or update is True:
+    if not pathlib.Path(gadm_input_file_gpkg).exists() or update is True:
         if out_logging:
             _logger.warning(
                 f"Stage 4/4: {gadm_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {gadm_input_file_zip}"
@@ -1017,7 +961,7 @@ def download_gadm(country_code, update=False, out_logging=False):
                 shutil.copyfileobj(r.raw, f)
 
         with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
-            zip_ref.extractall(get_dirname_path(gadm_input_file_zip))
+            zip_ref.extractall(pathlib.Path(gadm_input_file_zip).parent)
 
     return gadm_input_file_gpkg, gadm_filename
 
@@ -1153,7 +1097,7 @@ def override_component_attrs(directory):
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"
-        if is_file_path(fn):
+        if pathlib.Path(fn).is_file():
             overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
             attrs[component] = overrides.combine_first(attrs[component])
 
