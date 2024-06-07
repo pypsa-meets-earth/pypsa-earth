@@ -467,13 +467,20 @@ plotting:
     "electricity": "#f9d002"
     "lines": "#70af1d"
     "transmission lines": "#70af1d"
+    "AC": "#70af1d"
     "AC-AC": "#70af1d"
     "AC line": "#70af1d"
     "links": "#8a1caf"
     "HVDC links": "#8a1caf"
+    "DC": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
     "load": "#ff0000"
+    "load shedding": "#ff0000"
+    "battery discharger": slategray
+    "battery charger": slategray
+    "h2 fuel cell": '#c251ae'
+    "h2 electrolysis": '#ff29d9'
     "csp": "#fdd404"
   nice_names:
     OCGT: "Open-Cycle Gas"
