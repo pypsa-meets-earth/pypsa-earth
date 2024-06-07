@@ -30,8 +30,6 @@ from shapely.geometry import Point
 from snakemake.script import Snakemake
 from tqdm import tqdm
 
-from scripts.add_electricity import load_costs, update_transmission_costs
-
 logger = logging.getLogger(__name__)
 
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
@@ -250,40 +248,6 @@ def load_network(import_name=None, custom_components=None):
         override_components=override_components,
         override_component_attrs=override_component_attrs_dict,
     )
-
-
-def load_network_for_plots(
-    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
-):
-
-    n = pypsa.Network(fn)
-
-    n.loads["carrier"] = n.loads.bus.map(n.buses.carrier) + " load"
-    n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
-
-    n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
-    )
-    n.lines["carrier"] = "AC line"
-    n.transformers["carrier"] = "AC transformer"
-
-    n.lines["s_nom"] = n.lines["s_nom_min"]
-    n.links["p_nom"] = n.links["p_nom_min"]
-
-    if combine_hydro_ps:
-        n.storage_units.loc[
-            n.storage_units.carrier.isin({"PHS", "hydro"}), "carrier"
-        ] = "hydro+PHS"
-
-    # if the carrier was not set on the heat storage units
-    # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
-    # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
-
-    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
-    update_transmission_costs(n, costs)
-
-    return n
 
 
 def update_p_nom_max(n):
