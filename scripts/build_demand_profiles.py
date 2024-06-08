@@ -117,7 +117,6 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         "era5_" + str(weather_year),
     )
 
-    regions_found = []
     file_names = []
     for continent in region_load:
         sel_ext = ".nc"
@@ -125,7 +124,6 @@ def get_load_paths_gegis(ssp_parentfolder, config):
             load_path = os.path.join(str(load_dir), str(continent) + str(ext))
             if os.path.exists(load_path):
                 sel_ext = ext
-                regions_found.append(continent)
                 break
         file_name = str(continent) + str(sel_ext)
         load_path = os.path.join(str(load_dir), file_name)
