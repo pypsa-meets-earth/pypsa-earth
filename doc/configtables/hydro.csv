@@ -1,5 +1,5 @@
 ,Unit,Values,Description
-cutout,--,"Must be 'europe-2013-era5'","Specifies the directory where the relevant weather data ist stored."
+cutout,--,"Must be 'europe-2013-era5'","Specifies the directory where the relevant weather data is stored."
 resource,,,
 -- method,,, "Specifies the Atlite method to calculate renewable potential."
 -- hydrobasin,,, "Specifies the file location for hydrobasins. They are used to make the runoff calibration, defining a polygon to compute the available water surface using a surface integral."

@@ -1,0 +1,15 @@
+,Unit,Values,Description
+cutout,--,Should be a file name listed in the configuration ``atlite: cutouts:`` (e.g. 'europe-2013-era5') or reference an existing folder in the directory ``cutouts``. Source module can be ERA5 or SARAH-2.,Specifies the directory where the relevant weather data is stored that is specified at ``atlite/cutouts`` configuration. Both ``sarah`` and ``era5`` work.
+resource,,,
+-- method,--,Must be 'csp',
+-- installation,--,"Should be 'SAM_solar_tower' as defined in `atlite <https://github.com/PyPSA/atlite/tree/master/atlite/resources/cspinstallation>`__",Specifies the csp technology and its characteristic attributes.
+capacity_per_sqkm,:math:`MW/km^2`,float,Allowable density of csp tower placement. Value relates to socio-technical acceptable density.
+copernicus,,,
+-- grid_codes,--,Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_,Specifies areas based on CLC which generally eligible for csp tower placement.
+-- distance,m,"int","(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology."
+-- distance_grid_codes,--,"(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_","Specifies from which a distance of 'distance' metres is unavailable as a buffer area."
+natura,bool,"{true, false}",Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``.
+potential,--,"One of {'simple', 'conservative'}",Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`
+clip_p_max_pu,p.u.,float,To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.
+extendable, bool, "{True, False}", "True: In nodes where there is no csp generation, adds a zero-capacity csp generator so that csp is considered for capacity expansion. It is done in the ``add_electricity`` rule."
+csp_model,--, One of {'advanced' or 'simple'}, Specifies the CSP model to be used. The advanced model attach stores and links to the csp buses while the simple has no stores and links.
