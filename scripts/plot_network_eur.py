@@ -115,7 +115,7 @@ def plot_map(
 
         print(comp, costs)
 
-    costs = costs.groupby(costs.columns, axis=1).sum()
+    costs = costs.T.groupby(costs.columns).sum().T
 
     costs.drop(list(costs.columns[(costs == 0.0).all()]), axis=1, inplace=True)
 
@@ -609,7 +609,7 @@ def plot_series(network, carrier="AC", name="test"):
             axis=1,
         )
 
-    supply = supply.groupby(rename_techs_tyndp, axis=1).sum()
+    supply = supply.T.groupby(rename_techs_tyndp).sum().T
 
     both = supply.columns[(supply < 0.0).any() & (supply > 0.0).any()]
 
@@ -684,7 +684,7 @@ def plot_series(network, carrier="AC", name="test"):
         supply.columns.difference(preferred_order)
     )
 
-    supply = supply.groupby(supply.columns, axis=1).sum()
+    supply = supply.T.groupby(supply.columns).sum().T
     fig, ax = plt.subplots()
     fig.set_size_inches((8, 5))
 

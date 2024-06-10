@@ -14,7 +14,6 @@ Possible improvements:
 
 import logging
 import os
-from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -163,7 +162,7 @@ def create_export_profile():
 
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
     sopts = snakemake.wildcards.sopts.split("-")
-    export_profile = export_profile.resample(sopts[0]).mean()
+    export_profile = export_profile.resample(sopts[0].casefold()).mean()
 
     # revise logger msg
     export_type = snakemake.config["export"]["export_profile"]

@@ -10,9 +10,8 @@ import logging
 import os
 from itertools import product
 
-import numpy as np
 import pandas as pd
-from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
+from helpers import read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -125,7 +124,7 @@ if __name__ == "__main__":
             snakemake.input["base_industry_totals"], index_col=[0, 1]
         )
 
-        production_base = cagr.applymap(lambda x: 1)
+        production_base = cagr.map(lambda x: 1)
         production_tom = production_base * growth_factors
 
         # non-used line; commented out

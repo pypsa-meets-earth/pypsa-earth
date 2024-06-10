@@ -2004,21 +2004,17 @@ def add_heat(n, costs):
                 )
 
             if sector in name:
-                heat_load = (
-                    heat_demand[[sector + " water", sector + " space"]]
-                    .groupby(level=1, axis=1)
-                    .sum()[h_nodes[name]]
-                    .multiply(factor)
-                )
+                heat_demand_transposed = heat_demand[
+                    [sector + " water", sector + " space"]
+                ].T
+                heat_demand_grouped = heat_demand_transposed.groupby(level=1).sum().T
+                heat_load = heat_demand_grouped[h_nodes[name]].multiply(factor)
 
         if name == "urban central":
-            heat_load = (
-                heat_demand.groupby(level=1, axis=1)
-                .sum()[h_nodes[name]]
-                .multiply(
-                    factor * (1 + options["district_heating"]["district_heating_loss"])
-                )
-            )
+            heat_demand_transposed = heat_demand.T
+            heat_demand_grouped = heat_demand_transposed.groupby(level=1).sum().T
+            heat_load = heat_demand_grouped[h_nodes[name]].multiply(
+                factor * (1 + options["district_heating"]["district_heating_loss"]))
 
         n.madd(
             "Load",
@@ -2240,7 +2236,7 @@ def average_every_nhours(n, offset):
     # logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
@@ -2249,11 +2245,11 @@ def average_every_nhours(n, offset):
         for k, df in c.pnl.items():
             if not df.empty:
                 if c.list_name == "stores" and k == "e_max_pu":
-                    pnl[k] = df.resample(offset).min()
+                    pnl[k] = df.resample(offset.casefold()).min()
                 elif c.list_name == "stores" and k == "e_min_pu":
-                    pnl[k] = df.resample(offset).max()
+                    pnl[k] = df.resample(offset.casefold()).max()
                 else:
-                    pnl[k] = df.resample(offset).mean()
+                    pnl[k] = df.resample(offset.casefold()).mean()
 
     return m
 
