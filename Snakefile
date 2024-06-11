@@ -231,7 +231,7 @@ rule add_export:
 
 rule override_respot:
     params:
-        run=config.run,
+        run=config["run"],
         custom_data=config["custom_data"],
         countries=config["countries"],
     input:
