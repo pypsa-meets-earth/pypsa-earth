@@ -655,6 +655,10 @@ rule build_industrial_distribution_key:  #default data
 
 
 rule build_base_industry_totals:  #default data
+    params:
+        base_year= config["demand_data"]["base_year"],
+        countries= config["countries"],
+        other_industries= config["demand_data"]["other_industries"],
     input:
         #industrial_production_per_country="data/industrial_production_per_country.csv",
         #unsd_path="data/demand/unsd/data/",
