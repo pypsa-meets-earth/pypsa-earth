@@ -272,6 +272,8 @@ rule prepare_transport_data:
 
 
 rule build_cop_profiles:
+    params:
+        heat_pump_sink_T= config["sector"]["heat_pump_sink_T"],
     input:
         temp_soil_total="resources/temperatures/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temperatures/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
