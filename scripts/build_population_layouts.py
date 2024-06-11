@@ -16,7 +16,10 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from helpers import mock_snakemake, sets_path_to_root
 
-        snakemake = mock_snakemake("build_population_layouts")
+        snakemake = mock_snakemake(
+            "build_population_layouts",
+            planning_horizons=2030,
+        )
         sets_path_to_root("pypsa-earth-sec")
 
     cutout_path = (
@@ -51,7 +54,7 @@ if __name__ == "__main__":
     urban_percent_df = urban_percent_df.loc[
         (
             urban_percent_df["Year"]
-            == snakemake.config["scenario"]["planning_horizons"][0]
+            == int(snakemake.wildcards.planning_horizons)
         )
     ]
 
