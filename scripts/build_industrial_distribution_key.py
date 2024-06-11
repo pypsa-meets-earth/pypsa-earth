@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 gpd_version = StrictVersion(gpd.__version__)
 
 
-def map_industry_to_buses(df):
+def map_industry_to_buses(df, countries, gadm_level, shapes_path, gadm_clustering):
     """
     Load hotmaps database of industrial sites and map onto bus regions.
     Build industrial demand... Change name and add other functions.
@@ -24,7 +24,7 @@ def map_industry_to_buses(df):
     Only cement not steel - proof of concept.
     Change hotmaps to more descriptive name, etc.
     """
-    df = df[df.country.isin(snakemake.config["countries"])]
+    df = df[df.country.isin(countries)]
     df["gadm_{}".format(gadm_level)] = df[["x", "y", "country"]].apply(
         lambda site: locate_bus(
             site[["x", "y"]].astype("float"),
@@ -36,11 +36,11 @@ def map_industry_to_buses(df):
         axis=1,
     )
 
-    return df.set_index("gadm_" + str(snakemake.config["sector"]["gadm_level"]))
+    return df.set_index("gadm_" + str(gadm_level))
 
 
 def build_nodal_distribution_key(
-    industrial_database, regions
+    industrial_database, regions, industry, countries
 ):  # returns percentage of co2 emissions
     """Build nodal distribution keys for each sector."""
 
@@ -123,12 +123,13 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-    options = snakemake.config["sector"]
-    gadm_level = options["gadm_level"]
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
+    shapes_path = snakemake.input.shapes_path
 
-    countries = snakemake.config["countries"]
+    gadm_level = snakemake.params.gadm_level
+    countries = snakemake.params.countries
+    gadm_clustering = snakemake.params.alternative_clustering
 
     # countries = ["EG", "BH"]
 
@@ -139,7 +140,7 @@ if __name__ == "__main__":
             lambda name: three_2_two_digits_country(name[:3]) + name[3:]
         )
 
-    if snakemake.config["custom_data"]["industry_database"]:
+    if snakemake.params.industry_database:
         logger.info(
             "Using custom industry database from 'data_custom/industrial_database.csv' instead of default"
         )
@@ -166,17 +167,15 @@ if __name__ == "__main__":
 
     geo_locs.capacity = pd.to_numeric(geo_locs.capacity)
 
-    gadm_clustering = snakemake.config["clustering_options"]["alternative_clustering"]
-
     geo_locs = geo_locs[geo_locs.quality != "nonexistent"]
 
     industry = geo_locs.industry.unique()
 
-    shapes_path = snakemake.input.shapes_path
     industrial_database = map_industry_to_buses(
-        geo_locs[geo_locs.quality != "unavailable"]
+        geo_locs[geo_locs.quality != "unavailable"], 
+        countries, gadm_level, shapes_path, gadm_clustering
     )
 
-    keys = build_nodal_distribution_key(industrial_database, regions)
+    keys = build_nodal_distribution_key(industrial_database, regions, industry, countries)
 
     keys.to_csv(snakemake.output.industrial_distribution_key)

@@ -633,6 +633,11 @@ rule clean:
 
 
 rule build_industrial_distribution_key:  #default data
+    params:
+        countries= config["countries"],
+        gadm_level= config["sector"]["gadm_level"],
+        alternative_clustering= config["clustering_options"]["alternative_clustering"],
+        industry_database= config["custom_data"]["industry_database"],
     input:
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
