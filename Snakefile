@@ -507,7 +507,7 @@ rule make_summary:
         scenario_config=config["scenario"],
         costs_config=config["costs"],
         h2export_qty=config["export"]["h2export"],
-        foresight=snakemake.config["foresight"],
+        foresight=config["foresight"],
     input:
         overrides="data/override_component_attrs",
         networks=expand(
