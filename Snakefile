@@ -48,6 +48,7 @@ wildcard_constraints:
     discountrate="[-+a-zA-Z0-9\.\s]*",
     demand="[-+a-zA-Z0-9\.\s]*",
     h2export="[0-9]+m?|all",
+    planning_horizons="20[2-9][0-9]|2100",
 
 
 if not config.get("disable_subworkflow", False):
@@ -229,6 +230,10 @@ rule add_export:
 
 
 rule override_respot:
+    params:
+        run= config.run,
+        custom_data= config["custom_data"],
+        countries= config["countries"],
     input:
         **{
             f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": f"resources/custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
