@@ -318,10 +318,10 @@ rule prepare_heat_data:
 
 rule build_base_energy_totals:
     params:
-        space_heat_share= config["sector"]["space_heat_share"],
-        update_data= config["demand_data"]["update_data"],
-        base_year= config["demand_data"]["base_year"],
-        countries= config["countries"],
+        space_heat_share=config["sector"]["space_heat_share"],
+        update_data=config["demand_data"]["update_data"],
+        base_year=config["demand_data"]["base_year"],
+        countries=config["countries"],
     input:
         unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
     output:
