@@ -123,7 +123,6 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-
     regions = gpd.read_file(snakemake.input.regions_onshore)
     shapes_path = snakemake.input.shapes_path
 
@@ -172,10 +171,15 @@ if __name__ == "__main__":
     industry = geo_locs.industry.unique()
 
     industrial_database = map_industry_to_buses(
-        geo_locs[geo_locs.quality != "unavailable"], 
-        countries, gadm_level, shapes_path, gadm_clustering
+        geo_locs[geo_locs.quality != "unavailable"],
+        countries,
+        gadm_level,
+        shapes_path,
+        gadm_clustering,
     )
 
-    keys = build_nodal_distribution_key(industrial_database, regions, industry, countries)
+    keys = build_nodal_distribution_key(
+        industrial_database, regions, industry, countries
+    )
 
     keys.to_csv(snakemake.output.industrial_distribution_key)
