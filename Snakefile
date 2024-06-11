@@ -499,6 +499,15 @@ rule solve_network:
 
 
 rule make_summary:
+    params:
+        planning_horizons= config["scenario"]["planning_horizons"],
+        results_dir= config["results_dir"],
+        summary_dir= config["summary_dir"],
+        run= config["run"],
+        scenario_config= config["scenario"],
+        costs_config= config["costs"],
+        h2export_qty= config["export"]["h2export"],
+        foresight= snakemake.config["foresight"],
     input:
         overrides="data/override_component_attrs",
         networks=expand(
