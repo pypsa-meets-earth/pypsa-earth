@@ -102,7 +102,6 @@ if __name__ == "__main__":
         else:
             print("No RES potential techs to override...")
 
-
         if snakemake.params.custom_data["elec_demand"]:
             for country in countries:
                 n.loads_t.p_set.filter(like=country)[buses] = (
