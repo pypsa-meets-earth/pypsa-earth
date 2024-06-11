@@ -204,6 +204,9 @@ rule prepare_sector_network:
 
 
 rule build_ship_profile:
+    params:
+        snapshots= config["snapshots"],
+        ship_opts= config["export"]["ship"],
     output:
         ship_profile="resources/ship_profile_{h2export}TWh.csv",
     script:
