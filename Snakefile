@@ -360,6 +360,8 @@ rule build_solar_thermal_profiles:
 
 
 rule build_population_layouts:
+    params:
+        planning_horizons= config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes=pypsaearth("resources/shapes/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",

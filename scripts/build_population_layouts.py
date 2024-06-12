@@ -51,7 +51,7 @@ if __name__ == "__main__":
     urban_percent_df = urban_percent_df.loc[
         (
             urban_percent_df["Year"]
-            == snakemake.config["scenario"]["planning_horizons"][0]
+            == snakemake.params.planning_horizons
         )
     ]
 
