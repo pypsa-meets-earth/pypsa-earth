@@ -22,9 +22,9 @@ if __name__ == "__main__":
     for f, name in files_to_copy.items():
         copy(
             f,
-            snakemake.config["summary_dir"]
+            snakemake.params.summary_dir
             + "/"
-            + snakemake.config["run"]
+            + snakemake.params.run
             + "/configs/"
             + name,
         )

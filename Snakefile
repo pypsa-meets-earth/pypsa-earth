@@ -471,6 +471,9 @@ rule build_temperature_profiles:
 
 
 rule copy_config:
+    params:
+        summary_dir=config["summary_dir"],
+        run=config["run"],
     output:
         SDIR + "/configs/config.yaml",
     threads: 1
