@@ -689,6 +689,12 @@ rule build_base_industry_totals:  #default data
 
 
 rule build_industry_demand:  #default data
+    params:
+        countries=config["countries"],
+        industry_demand=config["custom_data"]["industry_demand"],
+        base_year=config["demand_data"]["base_year"],
+        industry_util_factor=config["sector"]["industry_util_factor"],
+        aluminium_year=config["demand_data"]["aluminium_year"],
     input:
         industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
