@@ -94,7 +94,9 @@ if __name__ == "__main__":
 
     df.insert(2, "airport_size_nr", 1)
     df.loc[df["type"].isin(["medium_airport"]), "airport_size_nr"] = 1
-    df.loc[df["type"].isin(["large_airport"]), "airport_size_nr"] = snakemake.params.airport_sizing_factor
+    df.loc[
+        df["type"].isin(["large_airport"]), "airport_size_nr"
+    ] = snakemake.params.airport_sizing_factor
 
     # Calculate the number of total airports size
     df1 = df.copy()
