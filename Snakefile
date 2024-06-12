@@ -349,6 +349,9 @@ rule prepare_energy_totals:
 
 
 rule build_solar_thermal_profiles:
+    params:
+        solar_thermal_config=config["solar_thermal"],
+        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
