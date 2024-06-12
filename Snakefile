@@ -214,6 +214,15 @@ rule build_ship_profile:
 
 
 rule add_export:
+    params:
+        gadm_level=config["sector"]["gadm_level"],
+        alternative_clustering=config["clustering_options"]["alternative_clustering"],
+        store=config["export"]["store"],
+        store_capital_costs=config["export"]["store_capital_costs"],
+        export_profile=config["export"]["export_profile"],
+        snapshots=config["snapshots"],
+        USD_to_EUR=config["costs"]["USD2013_to_EUR2013"],
+        lifetime=config["costs"]["lifetime"],
     input:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
