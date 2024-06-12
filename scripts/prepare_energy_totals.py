@@ -46,7 +46,7 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-    countries = snakemake.config["countries"]
+    countries = snakemake.params.countries
     # countries = ["NG", "BJ"]
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     district_heating = read_csv_nafix(snakemake.input.district_heating, index_col=0)
 
     no_years = int(snakemake.wildcards.planning_horizons) - int(
-        snakemake.config["demand_data"]["base_year"]
+        snakemake.params.base_year
     )
     growth_factors = calculate_end_values(growth_factors_cagr)
     efficiency_gains = calculate_end_values(efficiency_gains_cagr)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     district_heating = district_heating[district_heating.index.isin(countries)]
     growth_factors = growth_factors[growth_factors.index.isin(countries)]
 
-    options = snakemake.config["sector"]
+    options = snakemake.params.sector_options
 
     fuel_cell_share = get(
         options["land_transport_fuel_cell_share"],
@@ -119,13 +119,13 @@ if __name__ == "__main__":
     )
 
     # Residential
-    efficiency_heat_oil_to_elec = snakemake.config["sector"][
+    efficiency_heat_oil_to_elec = snakemake.params.sector_options[
         "efficiency_heat_oil_to_elec"
     ]
-    efficiency_heat_biomass_to_elec = snakemake.config["sector"][
+    efficiency_heat_biomass_to_elec = snakemake.params.sector_options[
         "efficiency_heat_biomass_to_elec"
     ]
-    efficiency_heat_gas_to_elec = snakemake.config["sector"][
+    efficiency_heat_gas_to_elec = snakemake.params.sector_options[
         "efficiency_heat_gas_to_elec"
     ]
 
