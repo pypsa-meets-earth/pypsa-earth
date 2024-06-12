@@ -124,6 +124,8 @@ rule prepare_ports:
 
 
 rule prepare_airports:
+    params:
+        airport_sizing_factor=config["sector"]["airport_sizing_factor"],
     output:
         ports="data/airports.csv",  # TODO move from data to resources
     script:
