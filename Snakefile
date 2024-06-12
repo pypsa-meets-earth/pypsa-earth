@@ -416,6 +416,8 @@ rule build_clustered_population_layouts:
 
 
 rule build_heat_demand:
+    params:
+        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
