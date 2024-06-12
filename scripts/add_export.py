@@ -205,7 +205,7 @@ if __name__ == "__main__":
 
     costs = prepare_costs(
         snakemake.input.costs,
-        snakemake.params.USD2013_to_EUR2013,
+        snakemake.params.USD_to_EUR,
         eval(snakemake.wildcards.discountrate),
         Nyears,
         snakemake.params.lifetime,
