@@ -148,17 +148,19 @@ if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
         params:
-            gas_config= config["sector"]["gas"],
-            alternative_clustering= config["clustering_options"]["alternative_clustering"],
-            countries_list = config["countries"],
-            layer_id = config["build_shape_options"]["gadm_layer_id"],
-            update = config["build_shape_options"]["update_file"],
-            out_logging = config["build_shape_options"]["out_logging"],
-            year = config["build_shape_options"]["year"],
-            nprocesses = config["build_shape_options"]["nprocesses"],
-            contended_flag = config["build_shape_options"]["contended_flag"],
-            geo_crs = config["crs"]["geo_crs"],
-            custom_gas_network= config["custom_data"]["gas_network"],
+            gas_config=config["sector"]["gas"],
+            alternative_clustering=config["clustering_options"][
+                "alternative_clustering"
+            ],
+            countries_list=config["countries"],
+            layer_id=config["build_shape_options"]["gadm_layer_id"],
+            update=config["build_shape_options"]["update_file"],
+            out_logging=config["build_shape_options"]["out_logging"],
+            year=config["build_shape_options"]["year"],
+            nprocesses=config["build_shape_options"]["nprocesses"],
+            contended_flag=config["build_shape_options"]["contended_flag"],
+            geo_crs=config["crs"]["geo_crs"],
+            custom_gas_network=config["custom_data"]["gas_network"],
         input:
             regions_onshore=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
