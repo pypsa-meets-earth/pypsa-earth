@@ -326,6 +326,10 @@ rule build_base_energy_totals:
 
 
 rule prepare_energy_totals:
+    params:
+        countries= config["countries"],
+        base_year= config["demand_data"]["base_year"],
+        sector_options= config["sector"],
     input:
         unsd_paths="data/energy_totals_base.csv",
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
@@ -587,6 +591,8 @@ rule build_industrial_database:
 
 
 rule prepare_db:
+    params:
+        tech_colors= config["plotting"]["tech_colors"],
     input:
         network=RDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
