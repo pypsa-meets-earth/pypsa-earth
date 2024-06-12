@@ -218,7 +218,7 @@ rule add_export:
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
         snapshots=config["snapshots"],
-        USD2013_to_EUR2013=config["costs"]["USD2013_to_EUR2013"],
+        USD_to_EUR=config["costs"]["USD2013_to_EUR2013"],
         lifetime=config["costs"]["lifetime"],
     input:
         overrides="data/override_component_attrs",
