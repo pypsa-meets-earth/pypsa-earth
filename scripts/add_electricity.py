@@ -138,12 +138,17 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
+    cooking = pd.read_csv(config["cooking"], index_col=['technology','parameter']).sort_index()
+
+    costs = pd.concat([costs,cooking], ignore_index=False)
+
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
     costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
 
     costs = costs.value.unstack().fillna(config["fill_values"])
+    
 
     costs["capital_cost"] = (
         (
@@ -383,6 +388,8 @@ def attach_wind_and_solar(
                 capital_cost=capital_cost,
                 efficiency=costs.at[suptech, "efficiency"],
             )
+
+     
 
 
 def attach_conventional_generators(

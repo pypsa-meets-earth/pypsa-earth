@@ -101,6 +101,7 @@ def attach_storageunits(n, costs, config):
 def attach_stores(n, costs, config):
     elec_opts = config["electricity"]
     carriers = elec_opts["extendable_carriers"]["Store"]
+    carriers += config["cooking"]
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
@@ -182,6 +183,46 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["battery inverter", "efficiency"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
+        )
+
+    if "electric" in carriers:
+        el_buses_i = n.madd("Bus", buses_i + "electric", carrier="electric", **bus_sub_dict)
+
+        n.madd(
+            "Store",
+            el_buses_i,
+            bus=el_buses_i,
+            carrier="electric",
+            e_cyclic=True,
+            capital_cost=costs.at["electric", "capital_cost"],
+            marginal_cost=costs.at["electric", "marginal_cost"],
+            #e_initial=costs.at["electric", "e_initial"],
+        )
+
+        n.madd(
+            "Link",
+            el_buses_i + " electric",
+            bus0=el_buses_i,
+            bus1=buses_i,
+            carrier="electric",
+            efficiency=costs.at["electric", "efficiency"],
+            capital_cost=costs.at["electric", "capital_cost"],
+            #p_nom=costs.at["electric", "p_nom"],
+            #p_max_pu=costs.at["electric", "p_max_pu"],
+            marginal_cost=costs.at["electric", "marginal_cost"],
+        )
+
+        n.madd(
+            "Link",
+            el_buses_i + " cooking",
+            bus0=el_buses_i,
+            bus1=buses_i,
+            carrier="heat",
+            efficiency=costs.at["heat", "efficiency"],
+            capital_cost=costs.at["heat", "capital_cost"],
+            #p_nom=costs.at["heat", "p_nom"],
+            #p_max_pu=costs.at["heat", "p_max_pu"],
+            marginal_cost=costs.at["heat", "marginal_cost"],
         )
 
 
