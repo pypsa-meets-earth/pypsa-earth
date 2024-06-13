@@ -184,6 +184,43 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
+    if ("csp" in config["renewable"].keys()) and (
+        config["renewable"]["csp"]["csp_model"] == "advanced"
+    ):
+        # add buses for csp
+        n.madd("Bus", buses_i + " csp", carrier="csp", **bus_sub_dict)
+
+        csp_buses_i = n.buses.index[n.buses.index.str.contains("csp")]
+
+        # change bus of existing csp generators
+        old_csp_bus_vector = buses_i + " csp"
+        n.generators.loc[old_csp_bus_vector, "bus"] = csp_buses_i
+
+        # add stores for csp
+        n.madd(
+            "Store",
+            csp_buses_i,
+            bus=csp_buses_i,
+            carrier="csp",
+            e_cyclic=True,
+            e_nom_extendable=True,
+            capital_cost=costs.at["csp-tower TES", "capital_cost"],
+            marginal_cost=costs.at["csp-tower TES", "marginal_cost"],
+        )
+
+        # add links for csp
+        n.madd(
+            "Link",
+            csp_buses_i,
+            bus0=csp_buses_i,
+            bus1=buses_i,
+            carrier="csp",
+            efficiency=costs.at["csp-tower", "efficiency"],
+            capital_cost=costs.at["csp-tower", "capital_cost"],
+            p_nom_extendable=True,
+            marginal_cost=costs.at["csp-tower", "marginal_cost"],
+        )
+
 
 def attach_hydrogen_pipelines(n, costs, config):
     elec_opts = config["electricity"]
