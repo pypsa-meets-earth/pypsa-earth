@@ -269,7 +269,11 @@ rule base_network:
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
         countries=config["countries"],
         base_network=config["base_network"],
+<<<<<<< HEAD
         cooking=config["cooking"] # added link to config for cooking
+=======
+        cooking=config["cooking"]["stove"],  # added link to config for cooking
+>>>>>>> 7103fd6c665cbdc1dd1b9ca7390647032a5e83fc
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
@@ -457,7 +461,7 @@ rule build_renewable_profiles:
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
-            if w.technology in ("onwind", "solar", "hydro")
+            if w.technology in ("onwind", "solar", "hydro", "csp")
             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
         ),
         cutout=lambda w: "cutouts/"
