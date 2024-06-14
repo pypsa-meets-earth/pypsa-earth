@@ -249,20 +249,24 @@ def add_EQ_constraints(n, o, scaling=1e-1):
     )
     inflow = inflow.reindex(load.index).fillna(0.0)
     rhs = scaling * (level * load - inflow)
-    dispatch_variable = n.model["Generator-p"].T
+    dispatch_variable = n.model["Generator-p"]
     lhs_gen = (
         (dispatch_variable * (n.snapshot_weightings.generators * scaling))
-        .groupby_sum(ggrouper)
+        .groupby(ggrouper.to_xarray())
+        .sum()
         .sum("snapshot")
     )
+    # TODO: double check that this is really needed, why do have to subtract the spillage
     if not n.storage_units_t.inflow.empty:
         spillage_variable = n.model["StorageUnit-spill"]
         lhs_spill = (
             (spillage_variable * (-n.snapshot_weightings.stores * scaling))
             .groupby_sum(sgrouper)
+            .groupby(sgrouper.to_xarray())
+            .sum()
             .sum("snapshot")
         )
-        lhs = merge(lhs_gen, lhs_spill)
+        lhs = lhs_gen + lhs_spill
     else:
         lhs = lhs_gen
     n.model.add_constraints(lhs >= rhs, name="equity_min")
