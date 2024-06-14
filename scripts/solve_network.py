@@ -229,35 +229,27 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 def add_BAU_constraints(n, config):
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
-    capacity_variable = n.model["Generator-p_nom"]
+    p_nom = n.model["Generator-p_nom"]
     ext_i = n.generators.query("p_nom_extendable")
-    ext_carrier_i = ext_i.carrier.rename_axis("Generator-ext")
-    lhs = capacity_variable.groupby_sum(ext_carrier_i)
-    rhs = mincaps[lhs.coords["carrier"].values].rename_axis("carrier")
+    ext_carrier_i = xr.DataArray(ext_i.carrier.rename_axis("Generator-ext"))
+    lhs = p_nom.groupby(ext_carrier_i).sum()
+    rhs = mincaps[lhs.indexes["carrier"]].rename_axis("carrier")
     n.model.add_constraints(lhs >= rhs, name="bau_mincaps")
-
-    maxcaps = pd.Series(
-        config["electricity"].get("BAU_maxcapacities", {key: np.inf for key in ext_c})
-    )
-    lhs = (
-        linexpr((1, get_var(n, "Generator", "p_nom")))
-        .groupby(n.generators.carrier)
-        .apply(join_exprs)
-    )
-    define_constraints(n, lhs, "<=", maxcaps[lhs.index], "Carrier", "bau_maxcaps")
 
 
 def add_SAFE_constraints(n, config):
     peakdemand = n.loads_t.p_set.sum(axis=1).max()
     margin = 1.0 + config["electricity"]["SAFE_reservemargin"]
     reserve_margin = peakdemand * margin
-    conv_techs = config["plotting"]["conv_techs"]
-    ext_gens_i = n.generators.query("carrier in @conv_techs & p_nom_extendable").index
+    conventional_carriers = config["electricity"]["conventional_carriers"]
+    ext_gens_i = n.generators.query(
+        "carrier in @conventional_carriers & p_nom_extendable"
+    ).index
     capacity_variable = n.model["Generator-p_nom"]
-    ext_cap_var = capacity_variable.sel({"Generator-ext": ext_gens_i})
-    lhs = ext_cap_var.sum()
+    p_nom = n.model["Generator-p_nom"].loc[ext_gens_i]
+    lhs = p_nom.sum()
     exist_conv_caps = n.generators.query(
-        "~p_nom_extendable & carrier in @conv_techs"
+        "~p_nom_extendable & carrier in @conventional_carriers"
     ).p_nom.sum()
     rhs = reserve_margin - exist_conv_caps
     n.model.add_constraints(lhs >= rhs, name="safe_mintotalcap")
@@ -283,7 +275,7 @@ def add_operational_reserve_margin_constraint(n, sns, config):
         capacity_factor = n.generators_t.p_max_pu[vres_i.intersection(ext_i)]
         renewable_capacity_variables = (
             n.model["Generator-p_nom"]
-            .sel({"Generator-ext": vres_i.intersection(ext_i)})
+            .loc[vres_i.intersection(ext_i)]
             .rename({"Generator-ext": "Generator"})
         )
         lhs = merge(
@@ -294,12 +286,12 @@ def add_operational_reserve_margin_constraint(n, sns, config):
         )
 
     # Total demand per t
-    demand = n.loads_t.p_set.sum(1)
+    demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
 
     # VRES potential of non extendable generators
     capacity_factor = n.generators_t.p_max_pu[vres_i.difference(ext_i)]
     renewable_capacity = n.generators.p_nom[vres_i.difference(ext_i)]
-    potential = (capacity_factor * renewable_capacity).sum(1)
+    potential = (capacity_factor * renewable_capacity).sum(axis=1)
 
     # Right-hand-side
     rhs = EPSILON_LOAD * demand + EPSILON_VRES * potential + CONTINGENCY
@@ -314,8 +306,9 @@ def update_capacity_constraint(n):
 
     dispatch = n.model["Generator-p"]
     reserve = n.model["Generator-r"]
-    p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
     capacity_fixed = n.generators.p_nom[fix_i]
+
+    p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
 
     lhs = merge(
         dispatch * 1,
@@ -324,12 +317,9 @@ def update_capacity_constraint(n):
 
     if not ext_i.empty:
         capacity_variable = n.model["Generator-p_nom"]
-        lhs = merge(
-            lhs,
-            capacity_variable.rename({"Generator-ext": "Generator"}) * -p_max_pu[ext_i],
-        )
+        lhs = dispatch + reserve - capacity_variable * xr.DataArray(p_max_pu[ext_i])
 
-    rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i)
+    rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
     n.model.add_constraints(
         lhs <= rhs, name="gen_updated_capacity_constraint", mask=rhs.notnull()
     )
