@@ -52,15 +52,15 @@ Total annual system costs are minimised with PyPSA. The full formulation of the
 linear optimal power flow (plus investment planning)
 is provided in the
 `documentation of PyPSA <https://pypsa.readthedocs.io/en/latest/optimal_power_flow.html#linear-optimal-power-flow>`_.
-The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
-Additionally, some extra constraints specified in :mod:`prepare_network` are added.
+The optimization is based on the :func:`network.optimize` function.
+Additionally, some extra constraints specified in :mod:`prepare_network` and :mod:`solve_network` are added.
 
 Solving the network in multiple iterations is motivated through the dependence of transmission line capacities and impedances on values of corresponding flows.
 As lines are expanded their electrical parameters change, which renders the optimisation bilinear even if the power flow
 equations are linearized.
 To retain the computational advantage of continuous linear programming, a sequential linear programming technique
 is used, where in between iterations the line impedances are updated.
-Details (and errors made through this heuristic) are discussed in the paper
+Details (and errors introduced through this heuristic) are discussed in the paper
 
 - Fabian Neumann and Tom Brown. `Heuristics for Transmission Expansion Planning in Low-Carbon Energy System Models <https://arxiv.org/abs/1907.10548>`_), *16th International Conference on the European Energy Market*, 2019. `arXiv:1907.10548 <https://arxiv.org/abs/1907.10548>`_.
 
@@ -144,6 +144,25 @@ def prepare_network(n, solve_opts, config=None):
 
 
 def add_CCL_constraints(n, config):
+    """
+    Add CCL (country & carrier limit) constraint to the network.
+
+    Add minimum and maximum levels of generator nominal capacity per carrier
+    for individual countries. Opts and path for agg_p_nom_minmax.csv must be defined
+    in config.yaml. Default file is available at data/agg_p_nom_minmax.csv.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    config : dict
+
+    Example
+    -------
+    scenario:
+        opts: [Co2L-CCL-24H]
+    electricity:
+        agg_p_nom_limits: data/agg_p_nom_minmax.csv
+    """
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
@@ -188,6 +207,28 @@ def add_CCL_constraints(n, config):
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
+    """
+    Add equity constraints to the network.
+
+    Currently this is only implemented for the electricity sector only.
+
+    Opts must be specified in the config.yaml.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    o : str
+
+    Example
+    -------
+    scenario:
+        opts: [Co2L-EQ0.7-24h]
+
+    Require each country or node to on average produce a minimal share
+    of its total electricity consumption itself. Example: EQ0.7c demands each country
+    to produce on average at least 70% of its consumption; EQ0.7 demands
+    each node to produce on average at least 70% of its consumption.
+    """
     float_regex = "[0-9]*\.?[0-9]+"
     level = float(re.findall(float_regex, o)[0])
     if o[-1] == "c":
@@ -228,6 +269,30 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 
 def add_BAU_constraints(n, config):
+    """
+    Add a per-carrier minimal overall capacity.
+
+    BAU_mincapacities and opts must be adjusted in the config.yaml.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    config : dict
+
+    Example
+    -------
+    scenario:
+        opts: [Co2L-BAU-24h]
+    electricity:
+        BAU_mincapacities:
+            solar: 0
+            onwind: 0
+            OCGT: 100000
+            offwind-ac: 0
+            offwind-dc: 0
+    Which sets minimum expansion across all nodes e.g. in Europe to 100GW.
+    OCGT bus 1 + OCGT bus 2 + ... > 100000
+    """
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
     p_nom = n.model["Generator-p_nom"]
     ext_i = n.generators.query("p_nom_extendable")
@@ -238,6 +303,25 @@ def add_BAU_constraints(n, config):
 
 
 def add_SAFE_constraints(n, config):
+    """
+    Add a capacity reserve margin of a certain fraction above the peak demand.
+    Renewable generators and storage do not contribute. Ignores network.
+
+    Parameters
+    ----------
+        n : pypsa.Network
+        config : dict
+
+    Example
+    -------
+    config.yaml requires to specify opts:
+
+    scenario:
+        opts: [Co2L-SAFE-24h]
+    electricity:
+        SAFE_reservemargin: 0.1
+    Which sets a reserve margin of 10% above the peak demand.
+    """
     peakdemand = n.loads_t.p_set.sum(axis=1).max()
     margin = 1.0 + config["electricity"]["SAFE_reservemargin"]
     reserve_margin = peakdemand * margin
@@ -329,13 +413,31 @@ def add_operational_reserve_margin(n, sns, config):
     """
     Build reserve margin constraints based on the formulation given in
     https://genxproject.github.io/GenX/dev/core/#Reserves.
-    """
 
+    Parameters
+    ----------
+        n : pypsa.Network
+        sns: pd.DatetimeIndex
+        config : dict
+
+    Example:
+    --------
+    config.yaml requires to specify operational_reserve:
+    operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+        activate: true
+        epsilon_load: 0.02 # percentage of load at each snapshot
+        epsilon_vres: 0.02 # percentage of VRES at each snapshot
+        contingency: 400000 # MW
+    """
     add_operational_reserve_margin_constraint(n, sns, config)
     update_capacity_constraint(n)
 
 
 def add_battery_constraints(n):
+    """
+    Add constraint ensuring that charger = discharger, i.e.
+    1 * charger_size - efficiency * discharger_size = 0
+    """
     nodes = n.buses.index[n.buses.carrier == "battery"]
     # if nodes.empty or ("Link", "p_nom") not in n.variables.index:
     if nodes.empty:
@@ -472,7 +574,7 @@ def add_RES_constraints(n, res_share):
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
-    ``pypsa.linopf.network_lopf``.
+    ``pypsa.optimization.optimize``.
 
     If you want to enforce additional custom constraints, this is a good location to add them.
     The arguments ``opts`` and ``snakemake.config`` are expected to be attached to the network.
