@@ -229,12 +229,6 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 def add_BAU_constraints(n, config):
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
-    # lhs = (
-    #     linexpr((1, get_var(n, "Generator", "p_nom")))
-    #     .groupby(n.generators.carrier)
-    #     .apply(join_exprs)
-    # )
-    # define_constraints(n, lhs, ">=", mincaps[lhs.index], "Carrier", "bau_mincaps")
     capacity_variable = n.model["Generator-p_nom"]
     ext_i = n.generators.query("p_nom_extendable")
     ext_carrier_i = ext_i.carrier.rename_axis("Generator-ext")
@@ -310,7 +304,6 @@ def add_operational_reserve_margin_constraint(n, sns, config):
     # Right-hand-side
     rhs = EPSILON_LOAD * demand + EPSILON_VRES * potential + CONTINGENCY
 
-    # define_constraints(n, lhs, ">=", rhs, "Reserve margin")
     n.model.add_constraints(lhs >= rhs, name="reserve_margin")
 
 
@@ -348,8 +341,6 @@ def add_operational_reserve_margin(n, sns, config):
     https://genxproject.github.io/GenX/dev/core/#Reserves.
     """
 
-    # define_variables(n, 0, np.inf, "Generator", "r", axes=[sns, n.generators.index])
-    # add_operational_reserve_margin_constraint(n, config)
     add_operational_reserve_margin_constraint(n, sns, config)
     update_capacity_constraint(n)
 
