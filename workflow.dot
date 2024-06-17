@@ -68,4 +68,4 @@ digraph snakemake_dag {
 	11 -> 19
 	15 -> 19
 	9 -> 19
-}            
+}

@@ -188,10 +188,14 @@ def attach_stores(n, costs, config):
         )
 
     if "heat" in carriers:
-        cooking_buses_i = n.madd("Bus", buses_i + " cooking bus", carrier="heat", **bus_sub_dict)
+        cooking_buses_i = n.madd(
+            "Bus", buses_i + " cooking bus", carrier="heat", **bus_sub_dict
+        )
 
     if "AC" in carriers:
-        ac_buses_i = n.madd("Bus", buses_i + " electric bus", carrier="AC", **bus_sub_dict)
+        ac_buses_i = n.madd(
+            "Bus", buses_i + " electric bus", carrier="AC", **bus_sub_dict
+        )
 
         n.madd(
             "Store",
@@ -212,10 +216,10 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["AC", "efficiency"],
             capital_cost=costs.at["AC", "capital_cost"],
             marginal_cost=costs.at["AC", "marginal_cost"],
-            p_nom=0.25, 
+            p_nom=0.25,
             p_max_pu=1,
         )
-    
+
     if "lpg" in carriers:
         lpg_buses_i = n.madd("Bus", buses_i + " lpg bus", carrier="lpg", **bus_sub_dict)
 
@@ -238,12 +242,14 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["lpg", "efficiency"],
             capital_cost=costs.at["lpg", "capital_cost"],
             marginal_cost=costs.at["lpg", "marginal_cost"],
-            p_nom=0.25, 
+            p_nom=0.25,
             p_max_pu=1,
         )
 
     if "pellets" in carriers:
-        pellets_buses_i = n.madd("Bus", buses_i + " pellets bus", carrier="pellets", **bus_sub_dict)
+        pellets_buses_i = n.madd(
+            "Bus", buses_i + " pellets bus", carrier="pellets", **bus_sub_dict
+        )
 
         n.madd(
             "Store",
@@ -264,12 +270,14 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["pellets", "efficiency"],
             capital_cost=costs.at["pellets", "capital_cost"],
             marginal_cost=costs.at["pellets", "marginal_cost"],
-            p_nom=0.25, 
+            p_nom=0.25,
             p_max_pu=1,
         )
 
     if "firewood" in carriers:
-        firewood_buses_i = n.madd("Bus", buses_i + " firewood bus", carrier="firewood", **bus_sub_dict)
+        firewood_buses_i = n.madd(
+            "Bus", buses_i + " firewood bus", carrier="firewood", **bus_sub_dict
+        )
 
         n.madd(
             "Store",
@@ -290,12 +298,14 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["firewood", "efficiency"],
             capital_cost=costs.at["firewood", "capital_cost"],
             marginal_cost=costs.at["firewood", "marginal_cost"],
-            p_nom=0.25, 
+            p_nom=0.25,
             p_max_pu=1,
         )
 
     if "charcoal" in carriers:
-        charcoal_buses_i = n.madd("Bus", buses_i + " charcoal bus", carrier="charcoal", **bus_sub_dict)
+        charcoal_buses_i = n.madd(
+            "Bus", buses_i + " charcoal bus", carrier="charcoal", **bus_sub_dict
+        )
 
         n.madd(
             "Store",
@@ -316,11 +326,9 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["charcoal", "efficiency"],
             capital_cost=costs.at["charcoal", "capital_cost"],
             marginal_cost=costs.at["charcoal", "marginal_cost"],
-            p_nom=0.25, 
+            p_nom=0.25,
             p_max_pu=1,
         )
-
-
 
     if ("csp" in config["renewable"].keys()) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
