@@ -16,6 +16,7 @@ Outputs
 Description
 -----------
 """
+import logging
 import os
 
 import matplotlib.pyplot as plt

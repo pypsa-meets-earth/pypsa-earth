@@ -56,6 +56,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
+import logging
 import os
 import re
 from zipfile import ZipFile
@@ -127,8 +128,8 @@ def emission_extractor(filename, emission_year, country_names):
     df = df.loc[
         df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
     ]
-    df = df.loc[:, "Y_1970":"Y_2018"].astype(float).ffill(axis=1)
-    df = df.loc[:, "Y_1970":"Y_2018"].astype(float).bfill(axis=1)
+    df = df.loc[:, "Y_1970":"Y_2018"].ffill(axis=1)
+    df = df.loc[:, "Y_1970":"Y_2018"].bfill(axis=1)
     cc_iso3 = cc.convert(names=country_names, to="ISO3")
     if len(country_names) == 1:
         cc_iso3 = [cc_iso3]
@@ -225,16 +226,10 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
 
 
 def average_every_nhours(n, offset):
-
-    # Please note that a casefold is applied to the offset during the resampling.
-    # This is because the usage of offset where the time interval is in capital
-    # letters is deprecated in future versions of pandas.
-    # For example 24H is deprecated. Instead, 24h is allowed.
-
     logger.info(f"Resampling the network to {offset}")
     m = n.copy(with_time=False)
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
@@ -242,7 +237,7 @@ def average_every_nhours(n, offset):
         pnl = getattr(m, c.list_name + "_t")
         for k, df in c.pnl.items():
             if not df.empty:
-                pnl[k] = df.resample(offset.casefold()).mean()
+                pnl[k] = df.resample(offset).mean()
 
     return m
 
@@ -311,8 +306,8 @@ def enforce_autarky(n, only_crossborder=False):
 
 
 def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-    n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
-    n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
+    n.lines.s_nom_max.clip(upper=s_nom_max_set, inplace=True)
+    n.links.p_nom_max.clip(upper=p_nom_max_set, inplace=True)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,71 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "solve_all_networks", color = "0.11 0.6 0.85", style="rounded,dashed"];
+	1[label = "solve_network", color = "0.47 0.6 0.85", style="rounded,dashed"];
+	2[label = "prepare_network\nll: copt\nopts: Co2L-12H", color = "0.40 0.6 0.85", style="rounded,dashed"];
+	3[label = "add_extra_components", color = "0.44 0.6 0.85", style="rounded,dashed"];
+	4[label = "cluster_network\nclusters: 10", color = "0.16 0.6 0.85", style="rounded,dashed"];
+	5[label = "simplify_network\nsimpl: ", color = "0.24 0.6 0.85", style="rounded,dashed"];
+	6[label = "add_electricity", color = "0.31 0.6 0.85", style="rounded,dashed"];
+	7[label = "build_renewable_profiles\ntechnology: onwind", color = "0.02 0.6 0.85", style="rounded,dashed"];
+	8[label = "copy_defaultnatura_tiff", color = "0.56 0.6 0.85", style="rounded,dashed"];
+	9[label = "build_shapes", color = "0.20 0.6 0.85", style="rounded,dashed"];
+	10[label = "build_powerplants", color = "0.22 0.6 0.85", style="rounded,dashed"];
+	11[label = "base_network", color = "0.49 0.6 0.85", style="rounded,dashed"];
+	12[label = "build_osm_network", color = "0.64 0.6 0.85", style="rounded,dashed"];
+	13[label = "clean_osm_data", color = "0.60 0.6 0.85", style="rounded,dashed"];
+	14[label = "download_osm_data", color = "0.36 0.6 0.85", style="rounded,dashed"];
+	15[label = "build_bus_regions", color = "0.27 0.6 0.85", style="rounded,dashed"];
+	16[label = "build_renewable_profiles\ntechnology: solar", color = "0.02 0.6 0.85", style="rounded,dashed"];
+	17[label = "build_renewable_profiles\ntechnology: hydro", color = "0.02 0.6 0.85", style="rounded,dashed"];
+	18[label = "retrieve_cost_data", color = "0.18 0.6 0.85", style="rounded,dashed"];
+	19[label = "build_demand_profiles", color = "0.51 0.6 0.85", style="rounded,dashed"];
+	1 -> 0
+	2 -> 1
+	3 -> 2
+	18 -> 2
+	4 -> 3
+	18 -> 3
+	5 -> 4
+	9 -> 4
+	18 -> 4
+	6 -> 5
+	18 -> 5
+	15 -> 5
+	7 -> 6
+	16 -> 6
+	17 -> 6
+	11 -> 6
+	18 -> 6
+	10 -> 6
+	9 -> 6
+	19 -> 6
+	8 -> 7
+	9 -> 7
+	10 -> 7
+	15 -> 7
+	11 -> 10
+	13 -> 10
+	9 -> 10
+	12 -> 11
+	9 -> 11
+	13 -> 12
+	9 -> 12
+	14 -> 13
+	9 -> 13
+	9 -> 15
+	11 -> 15
+	8 -> 16
+	9 -> 16
+	10 -> 16
+	15 -> 16
+	8 -> 17
+	9 -> 17
+	10 -> 17
+	15 -> 17
+	11 -> 19
+	15 -> 19
+	9 -> 19
+}            

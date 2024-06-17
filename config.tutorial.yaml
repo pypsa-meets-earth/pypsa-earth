@@ -77,8 +77,7 @@ cluster_options:
     remove_stubs: true
     remove_stubs_across_borders: true
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
-    s_threshold_fetch_isolated: 0.05 # [-] a share of the national load for merging an isolated network into a backbone network
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -141,7 +140,7 @@ load_options:
 
 electricity:
   base_voltage: 380.
-  voltages: [132., 220., 300., 380., 500., 750.]
+  voltages: [220., 300., 380.]
   co2limit: 1.487e+9
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
@@ -169,7 +168,7 @@ electricity:
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
-  renewable_carriers: [solar, csp, onwind, offwind-ac, offwind-dc, hydro]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -182,15 +181,11 @@ electricity:
       Onshore: [onwind]
       PV: [solar]
 lines:
-  ac_types:
-    132.: "243-AL1/39-ST1A 20.0"
+  types:
     220.: "Al/St 240/40 2-bundle 220.0"
     300.: "Al/St 240/40 3-bundle 300.0"
     380.: "Al/St 240/40 4-bundle 380.0"
-    500.: "Al/St 240/40 4-bundle 380.0"
-    750.: "Al/St 560/50 4-bundle 750.0"
-  dc_types:
-    500.: "HVDC XLPE 1000"
+  dc_type: "HVDC XLPE 1000"
   s_max_pu: 0.7
   s_nom_max: .inf
   length_factor: 1.25
@@ -310,26 +305,6 @@ renewable:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
-  csp:
-    cutout: cutout-2013-era5-tutorial
-    resource:
-      method: csp
-      installation: SAM_solar_tower
-    capacity_per_sqkm: 2.392 # From 1.7 to 4.6 addresses issue #361
-    # Determined by comparing uncorrected area-weighted full-load hours to those
-    # published in Supplementary Data to
-    # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
-    # sector: The economic potential of photovoltaics and concentrating solar
-    # power." Applied Energy 135 (2014): 704-720.
-    copernicus:
-      grid_codes: [20, 30, 40, 60, 90]
-      distancing_codes: [50]
-      distance_to_codes: 3000
-    natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
-    csp_model: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa
 costs:
@@ -467,21 +442,13 @@ plotting:
     "electricity": "#f9d002"
     "lines": "#70af1d"
     "transmission lines": "#70af1d"
-    "AC": "#70af1d"
     "AC-AC": "#70af1d"
     "AC line": "#70af1d"
     "links": "#8a1caf"
     "HVDC links": "#8a1caf"
-    "DC": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
-    "load": "#ff0000"
-    "load shedding": "#ff0000"
-    "battery discharger": slategray
-    "battery charger": slategray
-    "h2 fuel cell": '#c251ae'
-    "h2 electrolysis": '#ff29d9'
-    "csp": "#fdd404"
+    "load": "#FF0000"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"

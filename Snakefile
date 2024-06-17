@@ -53,7 +53,7 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+(m|flex)?|all|min",
+    clusters="[0-9]+(m|flex|min)?|all",
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
@@ -269,11 +269,6 @@ rule base_network:
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
         countries=config["countries"],
         base_network=config["base_network"],
-<<<<<<< HEAD
-        cooking=config["cooking"] # added link to config for cooking
-=======
-        cooking=config["cooking"]["stove"],  # added link to config for cooking
->>>>>>> 7103fd6c665cbdc1dd1b9ca7390647032a5e83fc
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
@@ -301,7 +296,7 @@ rule base_network:
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        crs=config["crs"],
+        area_crs=config["crs"]["area_crs"],
         countries=config["countries"],
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -461,7 +456,7 @@ rule build_renewable_profiles:
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
-            if w.technology in ("onwind", "solar", "hydro", "csp")
+            if w.technology in ("onwind", "solar", "hydro")
             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
         ),
         cutout=lambda w: "cutouts/"
@@ -520,7 +515,6 @@ rule add_electricity:
         electricity=config["electricity"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
-        cooking=config["cooking"],
         length_factor=config["lines"]["length_factor"],
     input:
         **{

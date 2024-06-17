@@ -16,35 +16,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Improve Monte Carlo feature with more distributions types, independent by PyPSA component. `PR #930 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/930>`__
 
-* Introduce flexible regional selection of the demand files of GEGIS. `PR #991 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/991>`__
-
-* Generalize line types for AC and DC networks. `PR #999 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/999>`__
-
-* Add an option to merge isolated networks into respective backbone networks by countries. `PR #903 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/903>`__
-
 **Minor Changes and bug-fixing**
 
-* Minor bug-fixing to run the cluster wildcard min `PR #1019 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1019>`__
-
-* Add option to adjust load scale for each individual countries `PR #1006 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1006>`__
-
-* Minor bug-fixing to get the generalised line types work for DC lines and AC lines. `PR #1008 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1008>`__ , `PR #1011 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1011>`__ and `PR #1013 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1013>`__
-
-* Minor bug-fixing for GADM_ID format naming. `PR #980 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/980>`__, `PR #986 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/986>`__ and `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
-
-* Fix download_osm_data compatibility for earth-osm v2.1. `PR #954 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/954>`__ and `PR #988 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/988>`__
-
-* Improve geometry filtering in clean_osm_data. `PR #989 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/989>`__
-
-* Revise bus region definition by gadm. `PR #1001 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1001>`__
-
-* Documentation improvements. `PR #1007 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1007>`__
-
-* Remove unnecessary imports. `PR #1020 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1020>`__
-
-* Resolve pandas deprecation warning. `PR #1023 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1023>`__
-
-* Create files where the code outputs the value of the objective function. `PR #1033 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1033>`__
 
 PyPSA-Earth 0.3.0
 =================

@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 
 import geopandas as gpd
@@ -149,15 +150,15 @@ def set_lines_ids(lines, buses, distance_crs):
         )
         if distance_bus0 > 0.0:
             # the line does not start in the node, thus modify the linestring
-            lines.loc[i, "geometry"] = linemerge(
+            lines.geometry.loc[i] = linemerge(
                 [
                     LineString(
                         [
-                            buses.loc[bus0_id, "geometry"],
-                            lines.loc[i, "geometry"].boundary.geoms[0],
+                            buses.geometry.loc[bus0_id],
+                            lines.geometry.loc[i].boundary.geoms[0],
                         ]
                     ),
-                    lines.loc[i, "geometry"],
+                    lines.geometry.loc[i],
                 ]
             )
 
@@ -171,13 +172,13 @@ def set_lines_ids(lines, buses, distance_crs):
         )
         if distance_bus1 > 0.0:
             # the line does not end in the node, thus modify the linestring
-            lines.loc[i, "geometry"] = linemerge(
+            lines.geometry.loc[i] = linemerge(
                 [
-                    lines.loc[i, "geometry"],
+                    lines.geometry.loc[i],
                     LineString(
                         [
-                            lines.loc[i, "geometry"].boundary.geoms[1],
-                            buses.loc[bus1_id, "geometry"],
+                            lines.geometry.loc[i].boundary.geoms[1],
+                            buses.geometry.loc[bus1_id],
                         ]
                     ),
                 ]
@@ -719,9 +720,10 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     # remove original lines
     lines.drop(lines_to_split, inplace=True)
 
-    lines = df_to_add if lines.empty else pd.concat([lines, df_to_add])
-
-    lines = gpd.GeoDataFrame(lines.reset_index(drop=True), crs=lines.crs)
+    lines = gpd.GeoDataFrame(
+        pd.concat([lines, df_to_add], ignore_index=True).reset_index(drop=True),
+        crs=lines.crs,
+    )
 
     return lines, buses
 

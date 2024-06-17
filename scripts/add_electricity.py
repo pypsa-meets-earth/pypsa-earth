@@ -51,7 +51,8 @@ Inputs
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
 - ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
 
-    .. image:: /img/hydrocapacities.png
+    .. image:: /img/hydrocapacities.
+    png
 
 - ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
 - ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
@@ -84,8 +85,11 @@ It further adds extendable ``generators`` with **zero** capacity for
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
+
+import logging
 import os
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
@@ -100,10 +104,10 @@ logger = create_logger(__name__)
 
 
 def normed(s):
-    return s / s.sum()
+    return s / s.sum() 
 
 
-def calculate_annuity(n, r):
+def calculate_annuity(n, r): 
     """
     Calculate the annuity factor for an asset with lifetime n years and
     discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6.
@@ -118,38 +122,35 @@ def calculate_annuity(n, r):
         return 1 / n
 
 
-def _add_missing_carriers_from_costs(n, costs, carriers):
+def _add_missing_carriers_from_costs(n, costs, carriers): 
     missing_carriers = pd.Index(carriers).difference(n.carriers.index)
     if missing_carriers.empty:
-        return
+        return #3
 
     emissions_cols = (
         costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
     )
     suptechs = missing_carriers.str.split("-").str[0]
-    if "csp" in suptechs:
-        suptechs = suptechs.str.replace("csp", "csp-tower")
     emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)
     emissions.index = missing_carriers
     n.import_components_from_dataframe(emissions, "Carrier")
 
 
-def load_costs(tech_costs, config, elec_config, Nyears=1):
+def load_costs(tech_costs, config, elec_config, Nyears=1): # 1
     """
     Set all asset costs and other parameters.
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
-    cooking = pd.read_csv(
-        config["cooking"], index_col=["technology", "parameter"]
-    ).sort_index()
+    cooking = pd.read_csv(config["clean_cooking"]["cooking"]).set_index(["technology", "parameter"]).sort_index()
 
-    costs = pd.concat([costs, cooking], ignore_index=False)
 
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
     costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
+
+    costs = pd.concat([costs, cooking], ignore_index=False)
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
@@ -217,7 +218,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     return costs
 
 
-def load_powerplants(ppl_fn):
+def load_powerplants(ppl_fn): 
     carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
@@ -241,7 +242,7 @@ def load_powerplants(ppl_fn):
     return ppl
 
 
-def attach_load(n, demand_profiles):
+def attach_load(n, demand_profiles): 
     """
     Add load profiles to network buses.
 
@@ -263,7 +264,7 @@ def attach_load(n, demand_profiles):
     n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
-def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
+def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False): 
     if lines_or_links.empty:
         return
 
@@ -292,7 +293,7 @@ def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=
     lines_or_links.loc[dc_b, "capital_cost"] = costs
 
 
-def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
+def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False): 
     n.lines["capital_cost"] = (
         n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
     )
@@ -311,7 +312,7 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
     )
 
 
-def attach_wind_and_solar(
+def attach_wind_and_solar( 
     n,
     costs,
     ppl,
@@ -331,11 +332,9 @@ def attach_wind_and_solar(
 
         if tech == "offwind-ac":
             # add all offwind wind power plants by default as offwind-ac
-            df["carrier"] = df["carrier"].mask(
-                df.technology == "Offshore", "offwind-ac"
-            )
+            df.carrier.mask(df.technology == "Offshore", "offwind-ac", inplace=True)
 
-        df["carrier"] = df["carrier"].mask(df.technology == "Onshore", "onwind")
+        df.carrier.mask(df.technology == "Onshore", "onwind", inplace=True)
 
         with xr.open_dataset(getattr(input_files, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
@@ -365,9 +364,7 @@ def attach_wind_and_solar(
                     )
                 )
             else:
-                capital_cost = costs.at[
-                    "csp-tower" if tech == "csp" else tech, "capital_cost"
-                ]
+                capital_cost = costs.at[tech, "capital_cost"]
 
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
@@ -389,17 +386,13 @@ def attach_wind_and_solar(
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[
-                    "csp-tower" if suptech == "csp" else suptech, "marginal_cost"
-                ],
+                marginal_cost=costs.at[suptech, "marginal_cost"],
                 capital_cost=capital_cost,
-                efficiency=costs.at[
-                    "csp-tower" if suptech == "csp" else suptech, "efficiency"
-                ],
+                efficiency=costs.at[suptech, "efficiency"],
             )
 
 
-def attach_conventional_generators(
+def attach_conventional_generators( 
     n,
     costs,
     ppl,
@@ -462,7 +455,7 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
-def attach_hydro(n, costs, ppl):
+def attach_hydro(n, costs, ppl): 
     if "hydro" not in snakemake.params.renewable:
         return
     c = snakemake.params.renewable["hydro"]
@@ -637,7 +630,7 @@ def attach_hydro(n, costs, ppl):
         )
 
 
-def attach_extendable_generators(n, costs, ppl):
+def attach_extendable_generators(n, costs, ppl): 
     logger.warning("The function is deprecated with the next release")
     elec_opts = snakemake.params.electricity
     carriers = pd.Index(elec_opts["extendable_carriers"]["Generator"])
@@ -708,7 +701,7 @@ def attach_extendable_generators(n, costs, ppl):
             )
 
 
-def estimate_renewable_capacities_irena(
+def estimate_renewable_capacities_irena( 
     n, estimate_renewable_capacities_config, countries_config
 ):
     stats = estimate_renewable_capacities_config["stats"]
@@ -794,7 +787,7 @@ def estimate_renewable_capacities_irena(
             ] * float(p_nom_max)
 
 
-def add_nice_carrier_names(n, config):
+def add_nice_carrier_names(n, config): 
     carrier_i = n.carriers.index
     nice_names = (
         pd.Series(config["plotting"]["nice_names"])
@@ -811,7 +804,7 @@ def add_nice_carrier_names(n, config):
     n.carriers["color"] = colors
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # this is the core
     if "snakemake" not in globals():
         from _helpers import mock_snakemake, sets_path_to_root
 
@@ -820,11 +813,11 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.base_network)
+    n = pypsa.Network(snakemake.input.base_network) # pypsa import here, the base network, no carriers
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
 
     # Snakemake imports:
-    demand_profiles = snakemake.input["demand_profiles"]
+    demand_profiles = snakemake.input["demand_profiles"] # demand profiles loaded
 
     costs = load_costs(
         snakemake.input.tech_costs,
@@ -851,12 +844,12 @@ if __name__ == "__main__":
             "Falling back to all renewables."
         )
 
-    conventional_carriers = snakemake.params.electricity["conventional_carriers"]
-    attach_load(n, demand_profiles)
+    conventional_carriers = snakemake.params.electricity["conventional_carriers"] # can be added manually through config file
+    attach_load(n, demand_profiles) # load is attached from the demand profiles
     update_transmission_costs(n, costs, snakemake.params.length_factor)
     conventional_inputs = {
         k: v for k, v in snakemake.input.items() if k.startswith("conventional_")
-    }
+    } 
     attach_conventional_generators(
         n,
         costs,
@@ -866,7 +859,7 @@ if __name__ == "__main__":
         renewable_carriers,
         snakemake.params.conventional,
         conventional_inputs,
-    )
+    ) # loads the carriers
     attach_wind_and_solar(
         n,
         costs,

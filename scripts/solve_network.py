@@ -77,6 +77,7 @@ Details (and errors made through this heuristic) are discussed in the paper
     for all ``scenario`` s in the configuration file
     the rule :mod:`solve_network`.
 """
+import logging
 import os
 import re
 from pathlib import Path
@@ -576,5 +577,3 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
-    logger.info(f"Objective function: {n.objective}")
-    logger.info(f"Objective constant: {n.objective_constant}")

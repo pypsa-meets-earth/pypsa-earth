@@ -40,16 +40,18 @@ It creates the load paths for GEGIS outputs by combining the input parameters of
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
+import logging
 import os
 from itertools import product
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import powerplantmatching as pm
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_osm_config
+from _helpers import configure_logging, create_logger, getContinent, update_p_nom_max
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -58,35 +60,6 @@ logger = create_logger(__name__)
 
 def normed(s):
     return s / s.sum()
-
-
-def get_gegis_regions(countries):
-    """
-    Get the GEGIS region from the config file.
-
-    Parameters
-    ----------
-    region : str
-        The region of the bus
-
-    Returns
-    -------
-    str
-        The GEGIS region
-    """
-    gegis_dict, world_iso = read_osm_config("gegis_regions", "world_iso")
-
-    regions = []
-
-    for d_region in [gegis_dict, world_iso]:
-        for key, value in d_region.items():
-            # ignore if the key is already in the regions list
-            if key not in regions:
-                # if a country is in the regions values, then load it
-                cintersect = set(countries).intersection(set(value.keys()))
-                if cintersect:
-                    regions.append(key)
-    return regions
 
 
 def get_load_paths_gegis(ssp_parentfolder, config):
@@ -101,7 +74,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     ["/data/ssp2-2.6/2030/era5_2013/Africa.nc", "/data/ssp2-2.6/2030/era5_2013/Africa.nc"]
     """
     countries = config.get("countries")
-    region_load = get_gegis_regions(countries)
+    region_load = getContinent(countries)
     weather_year = config.get("load_options")["weather_year"]
     prediction_year = config.get("load_options")["prediction_year"]
     ssp = config.get("load_options")["ssp"]
@@ -179,22 +152,8 @@ def build_demand_profiles(
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
-
-    if isinstance(scale, dict):
-        logger.info(f"Using custom scaling factor for load data.")
-        DEFAULT_VAL = scale.get("DEFAULT", 1.0)
-        for country in countries:
-            scale.setdefault(country, DEFAULT_VAL)
-
-        for country, scale_country in scale.items():
-            gegis_load.loc[
-                gegis_load.region_code == country, "Electricity demand"
-            ] *= scale_country
-
-    elif isinstance(scale, (int, float)):
-        logger.info(f"Load data scaled with scaling factor {scale}.")
-        gegis_load["Electricity demand"] *= scale
-
+    logger.info(f"Load data scaled with scaling factor {scale}.")
+    gegis_load["Electricity demand"] *= scale
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
@@ -258,7 +217,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.params.load_options.get("scale", 1.0)
+    scale = snakemake.params.load_options["scale"]
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]

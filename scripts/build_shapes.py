@@ -5,10 +5,13 @@
 
 # -*- coding: utf-8 -*-
 
+import logging
 import multiprocessing as mp
 import os
 import shutil
+import zipfile
 from itertools import takewhile
+from math import ceil
 from operator import attrgetter
 
 import fiona
@@ -17,6 +20,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import requests
+import rioxarray as rx
 import xarray as xr
 from _helpers import (
     configure_logging,
@@ -31,7 +35,8 @@ from numba.core import types
 from numba.typed import Dict
 from rasterio.mask import mask
 from rasterio.windows import Window
-from shapely.geometry import MultiPolygon
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
@@ -1291,10 +1296,9 @@ def gadm(
         )
 
     # renaming 3 letter to 2 letter ISO code before saving GADM file
-    # In the case of a contested territory in the form 'Z00.00_0', save 'AA.00_0'
-    # Include bugfix for the case of 'XXX00_0' where the "." is missing, such as for Ghana
-    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].str[3:].apply(
-        lambda x: x if x.find(".") == 0 else "." + x
+    # In the case of a contested territory in the form 'Z00.00_0', save 'AA.Z00.00_0'
+    df_gadm["GADM_ID"] = df_gadm["country"] + df_gadm["GADM_ID"].apply(
+        lambda x: "." + x if x[0] == "Z" else x[3:]
     )
     df_gadm.set_index("GADM_ID", inplace=True)
     df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
