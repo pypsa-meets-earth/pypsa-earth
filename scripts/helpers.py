@@ -625,65 +625,90 @@ def get_conv_factors(sector):
             "Paraffin waxes": 0.01117,
             "Ethane": 0.01289,
             "Oil shale": 0.00247,
+            "Other kerosene": 0.01216,
+
         }
     return fuels_conv_toTWh
 
 
 def aggregate_fuels(sector):
     gas_fuels = [
-        "Blast Furnace Gas",
-        "Natural gas (including LNG)",
-        "Natural Gas (including LNG)",
-        "Natural gas liquids",
+        "Natural gas (including LNG)",#
+        "Natural Gas (including LNG)",#
     ]
 
     oil_fuels = [
-        "Motor Gasoline",
-        "Liquefied petroleum gas (LPG)",
-        "Liquified Petroleum Gas (LPG)",
-        "Fuel oil",
-        "Kerosene-type Jet Fuel",
-        "Conventional crude oil",
-        "Crude petroleum",
+        "Motor Gasoline",##
+        "Liquefied petroleum gas (LPG)",##
+        "Liquified Petroleum Gas (LPG)",##
+        "Fuel oil",##
+        "Kerosene-type Jet Fuel",##
+        "Conventional crude oil", #
+        "Crude petroleum",##
         "Lubricants",
-        "Naphtha",
-        "Gas Oil/ Diesel Oil",
-        "Petroleum coke",
-        "Petroleum Coke",
-        "Patent fuel",
-        "Ethane",
-        "Bitumen",
-        "Refinery gas",
+        "Naphtha",##
+        "Gas Oil/ Diesel Oil",##
+        "Petroleum coke",##
+        "Petroleum Coke",##
+        "Ethane",##
+        "Bitumen",##
+        "Refinery gas",##
+        'Additives and Oxygenates',# 
+        'Refinery Gas', ##
+        'Aviation gasoline',##
+        'Gasoline-type jet fuel', ##
+        'Paraffin waxes',##
+        "Natural gas liquids",#
+        "Other kerosene",
+
     ]
 
+
     biomass_fuels = [
-        "Bagasse",
-        "Fuelwood",
+        "Bagasse",#
+        "Fuelwood",#
         "Biogases",
-        "Biogasoline",
-        "Biodiesel",
-        "Charcoal",
-        "Black Liquor",
+        "Biogasoline",#
+        "Biodiesel",#
+        "Charcoal",#
+        "Black Liquor",#
+        "Bio jet kerosene",#
+        "Animal waste",#
+        "Industrial Waste",#
+        "Industrial waste",
+        "Municipal Wastes",#
+        "Vegetal waste"
     ]
 
     coal_fuels = [
         "Anthracite",
-        "Brown coal",
-        "Brown coal briquettes",
+        "Brown coal",#
+        "Brown coal briquettes",#
         "Coke oven coke",
         "Coke-oven coke",
         "Coke Oven Coke",
-        "Hard coal",
-        "Hrad coal",
+        "Coking coal",
+        "Hard coal", #
+        "Hrad coal", #
         "Other bituminous coal",
         "Sub-bituminous coal",
         "Coking coal",
-        "Coke Oven Gas",
+        "Coke Oven Gas",##
         "Gas Coke",
-        "Gasworks Gas",
-        "Lignite",
-        "Peat",
+        "Gasworks Gas",##
+        "Lignite",#
+        "Peat",#
         "Peat products",
+        'Coal Tar', ##
+        'Brown Coal Briquettes', ##
+        'Gas coke', 
+        'Peat Products', 
+        'Oil shale',#
+        'Oil Shale',#
+        'Coal coke', ## 
+        'Patent fuel', ##
+        'Blast Furnace Gas', ## 
+        'Recovered gases', ## 
     ]
 
     electricity = ["Electricity"]
