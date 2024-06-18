@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     n0 = pypsa.Network(snakemake.input.network)
 
-    tech_colors = snakemake.config["plotting"]["tech_colors"]
+    tech_colors = snakemake.params.tech_colors
 
 
 # %%

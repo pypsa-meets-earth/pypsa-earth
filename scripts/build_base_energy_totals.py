@@ -159,11 +159,11 @@ def calc_sector(sector):
                     round(
                         df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum(), 4
                     )
-                    * snakemake.config["sector"]["space_heat_share"]
+                    * snakemake.params.space_heat_share
                 )
                 energy_totals_base.at[country, "total residential water"] = round(
                     df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum(), 4
-                ) * (1 - snakemake.config["sector"]["space_heat_share"])
+                ) * (1 - snakemake.params.space_heat_share)
 
             elif sector == "services":
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
@@ -194,11 +194,11 @@ def calc_sector(sector):
                     round(
                         df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum(), 4
                     )
-                    * snakemake.config["sector"]["space_heat_share"]
+                    * snakemake.params.space_heat_share
                 )
                 energy_totals_base.at[country, "total services water"] = round(
                     df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum(), 4
-                ) * (1 - snakemake.config["sector"]["space_heat_share"])
+                ) * (1 - snakemake.params.space_heat_share)
 
             elif sector == "road":
                 energy_totals_base.at[country, "total road"] = round(
@@ -383,7 +383,7 @@ if __name__ == "__main__":
     df = df.to_dict("dict")
     d = df["Link"]
 
-    if snakemake.config["demand_data"]["update_data"]:
+    if snakemake.params.update_data:
         # Delete and existing files to avoid duplication and double counting
 
         files = glob.glob("data/demand/unsd/data/*.txt")

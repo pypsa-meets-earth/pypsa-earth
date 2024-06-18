@@ -108,9 +108,9 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
     no_years = int(snakemake.wildcards.planning_horizons) - int(
-        snakemake.config["demand_data"]["base_year"]
+        snakemake.params.base_year
     )
-    include_other = snakemake.config["demand_data"]["other_industries"]
+    include_other = snakemake.params.other_industries
 
     transaction = pd.read_csv("/nimble/home/haz43975/pes_paper/uptodate/pypsa-earth-sec/data/unsd_transactions.csv", sep=";")
 

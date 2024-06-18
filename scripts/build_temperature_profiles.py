@@ -20,7 +20,7 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-    time = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    time = pd.date_range(freq="h", **snakemake.params.snapshots)
     cutout_path = (
         snakemake.input.cutout
     )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
