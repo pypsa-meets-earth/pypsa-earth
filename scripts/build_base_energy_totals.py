@@ -291,7 +291,6 @@ def calc_sector(sector):
                     4,
                 )
             elif sector == "other energy":
-                
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
                     condition = (
                         df_sector.Commodity
@@ -322,8 +321,6 @@ def calc_sector(sector):
                     4,
                 )
             elif sector == "non energy use":
-
-                
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
                     condition = (
                         df_sector.Commodity
@@ -336,7 +333,6 @@ def calc_sector(sector):
                     df_sector[condition].Quantity_TWh.sum(), 4
                 )
 
-                
                 energy_totals_base.at[country, "non energy oil"] = round(
                     df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum(), 4
                 )
@@ -463,7 +459,6 @@ if __name__ == "__main__":
         "Consumption not elsewhere specified (other)",
         "Consumption by other consumers not elsewhere specified",
         "consumption by other consumers not elsewhere specified",
-
     ]
 
     # non_energy = ['non energy uses', 'non-energy uses', 'consumption for non-energy uses', 'Consumption for non-energy uses', 'non-energy use']

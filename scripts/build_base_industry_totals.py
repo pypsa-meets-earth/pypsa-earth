@@ -8,13 +8,13 @@ Created on Thu Jul 14 19:01:13 2022
 
 
 import os
+import re
 from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
 from helpers import aggregate_fuels, get_conv_factors
 from prepare_sector_network import get
-import re
 
 # def calc_industry_base(df):
 
@@ -61,7 +61,7 @@ def create_industry_base_totals(df):
         columns="Transaction", index=["country", "carrier"]
     ).fillna(0.0)
     industry_totals_base = industry_totals_base.droplevel(level=0, axis=1)
-    #industry_totals_base["other"] = 0
+    # industry_totals_base["other"] = 0
 
     if not include_other:
         # Loop through the columns in the list and sum them if they exist
@@ -112,9 +112,12 @@ if __name__ == "__main__":
     )
     include_other = snakemake.params.other_industries
 
-    transaction = pd.read_csv("/nimble/home/haz43975/pes_paper/uptodate/pypsa-earth-sec/data/unsd_transactions.csv", sep=";")
+    transaction = pd.read_csv(
+        "/nimble/home/haz43975/pes_paper/uptodate/pypsa-earth-sec/data/unsd_transactions.csv",
+        sep=";",
+    )
 
-    renaming_dit = transaction.set_index('Transaction')['clean_name'].to_dict()
+    renaming_dit = transaction.set_index("Transaction")["clean_name"].to_dict()
     clean_industry_list = list(transaction.clean_name.unique())
 
     unsd_path = (
@@ -134,7 +137,9 @@ if __name__ == "__main__":
         " - ", expand=True
     )
 
-    df = df[df.Commodity != 'Other bituminous coal'] #dropping problematic column leading to double counting
+    df = df[
+        df.Commodity != "Other bituminous coal"
+    ]  # dropping problematic column leading to double counting
 
     # Remove fill na in Transaction column
     df["Transaction"] = df["Transaction"].fillna("NA")
@@ -191,12 +196,11 @@ if __name__ == "__main__":
     df_yr = df[df.Year == year]
 
     df_yr = df_yr[df_yr.Transaction.isin(transaction.Transaction)]
-    
-    df_yr["Transaction"] = df_yr['Transaction'].map(renaming_dit)
+
+    df_yr["Transaction"] = df_yr["Transaction"].map(renaming_dit)
 
     # Create the industry totals file
     industry_totals_base = create_industry_base_totals(df_yr)
 
     # Export the industry totals dataframe
     industry_totals_base.to_csv(snakemake.output["base_industry_totals"])
-
