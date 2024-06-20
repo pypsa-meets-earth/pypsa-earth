@@ -470,7 +470,7 @@ def _rebase_voltage_to_config(base_network_config, voltages_config, component):
     return component
 
 
-def base_network( # function creating the base network and adding the bus from df
+def base_network(  # function creating the base network and adding the bus from df
     inputs,
     base_network_config,
     countries_config,
@@ -509,7 +509,7 @@ def base_network( # function creating the base network and adding the bus from d
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
-    n.import_components_from_dataframe(buses, "Bus") # buses added from table
+    n.import_components_from_dataframe(buses, "Bus")  # buses added from table
 
     if hvdc_as_lines_config:
         lines = pd.concat([lines_ac, lines_dc])
@@ -561,7 +561,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("base_network")
     configure_logging(snakemake)
 
-    inputs = snakemake.input # here loading all the inputs
+    inputs = snakemake.input  # here loading all the inputs
 
     # Snakemake imports:
     base_network_config = snakemake.params.base_network
@@ -583,8 +583,10 @@ if __name__ == "__main__":
         snapshots,
         transformers,
         voltages,
-    ) # buses added 160
+    )  # buses added 160
 
-    n.buses = pd.DataFrame(n.buses.drop(columns="geometry")) # drops geometry column from buses df
+    n.buses = pd.DataFrame(
+        n.buses.drop(columns="geometry")
+    )  # drops geometry column from buses df
     n.meta = snakemake.config
-    n.export_to_netcdf(snakemake.output[0]) # export the base network as .nc file
+    n.export_to_netcdf(snakemake.output[0])  # export the base network as .nc file
