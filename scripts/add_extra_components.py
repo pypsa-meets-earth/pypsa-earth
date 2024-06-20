@@ -102,6 +102,9 @@ def attach_stores(n, costs, config):
     elec_opts = config["electricity"]
     carriers = elec_opts["extendable_carriers"]["Store"]
 
+    if config["costs"]["clean_cooking"]["enable"] == True:
+        carriers += config["costs"]["clean_cooking"]["fuel"]
+
     _add_missing_carriers_from_costs(n, costs, carriers)
 
     buses_i = n.buses.index
@@ -182,6 +185,149 @@ def attach_stores(n, costs, config):
             efficiency=costs.at["battery inverter", "efficiency"],
             p_nom_extendable=True,
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
+        )
+
+    if "heat" in carriers:
+        cooking_buses_i = n.madd(
+            "Bus", buses_i + " cooking bus", carrier="heat", **bus_sub_dict
+        )
+
+    if "AC" in carriers:
+        ac_buses_i = n.madd(
+            "Bus", buses_i + " electric bus", carrier="AC", **bus_sub_dict
+        )
+
+        n.madd(
+            "Store",
+            ac_buses_i,
+            bus=ac_buses_i,
+            carrier="AC",
+            e_cyclic=True,
+            capital_cost=costs.at["AC", "capital_cost"],
+            marginal_cost=costs.at["AC", "marginal_cost"],
+        )
+
+        n.madd(
+            "Link",
+            ac_buses_i + " electricity stove",
+            bus0=ac_buses_i,
+            bus1=cooking_buses_i,
+            carrier="AC",
+            efficiency=costs.at["AC", "efficiency"],
+            capital_cost=costs.at["AC", "capital_cost"],
+            marginal_cost=costs.at["AC", "marginal_cost"],
+            p_nom=0.25,
+            p_max_pu=1,
+        )
+
+    if "lpg" in carriers:
+        lpg_buses_i = n.madd("Bus", buses_i + " lpg bus", carrier="lpg", **bus_sub_dict)
+
+        n.madd(
+            "Store",
+            lpg_buses_i,
+            bus=lpg_buses_i,
+            carrier="lpg",
+            e_cyclic=False,
+            capital_cost=costs.at["lpg", "capital_cost"],
+            marginal_cost=costs.at["lpg", "marginal_cost"],
+        )
+
+        n.madd(
+            "Link",
+            lpg_buses_i + " lpg stove",
+            bus0=lpg_buses_i,
+            bus1=cooking_buses_i,
+            carrier="lpg",
+            efficiency=costs.at["lpg", "efficiency"],
+            capital_cost=costs.at["lpg", "capital_cost"],
+            marginal_cost=costs.at["lpg", "marginal_cost"],
+            p_nom=0.25,
+            p_max_pu=1,
+        )
+
+    if "pellets" in carriers:
+        pellets_buses_i = n.madd(
+            "Bus", buses_i + " pellets bus", carrier="pellets", **bus_sub_dict
+        )
+
+        n.madd(
+            "Store",
+            pellets_buses_i,
+            bus=pellets_buses_i,
+            carrier="pellets",
+            e_cyclic=False,
+            capital_cost=costs.at["pellets", "capital_cost"],
+            marginal_cost=costs.at["pellets", "marginal_cost"],
+        )
+
+        n.madd(
+            "Link",
+            pellets_buses_i + " pellets stove",
+            bus0=pellets_buses_i,
+            bus1=cooking_buses_i,
+            carrier="pellets",
+            efficiency=costs.at["pellets", "efficiency"],
+            capital_cost=costs.at["pellets", "capital_cost"],
+            marginal_cost=costs.at["pellets", "marginal_cost"],
+            p_nom=0.25,
+            p_max_pu=1,
+        )
+
+    if "firewood" in carriers:
+        firewood_buses_i = n.madd(
+            "Bus", buses_i + " firewood bus", carrier="firewood", **bus_sub_dict
+        )
+
+        n.madd(
+            "Store",
+            firewood_buses_i,
+            bus=firewood_buses_i,
+            carrier="firewood",
+            e_cyclic=False,
+            capital_cost=costs.at["firewood", "capital_cost"],
+            marginal_cost=costs.at["firewood", "marginal_cost"],
+        )
+
+        n.madd(
+            "Link",
+            firewood_buses_i + " firewood stove",
+            bus0=firewood_buses_i,
+            bus1=cooking_buses_i,
+            carrier="firewood",
+            efficiency=costs.at["firewood", "efficiency"],
+            capital_cost=costs.at["firewood", "capital_cost"],
+            marginal_cost=costs.at["firewood", "marginal_cost"],
+            p_nom=0.25,
+            p_max_pu=1,
+        )
+
+    if "charcoal" in carriers:
+        charcoal_buses_i = n.madd(
+            "Bus", buses_i + " charcoal bus", carrier="charcoal", **bus_sub_dict
+        )
+
+        n.madd(
+            "Store",
+            charcoal_buses_i,
+            bus=charcoal_buses_i,
+            carrier="charcoal",
+            e_cyclic=False,
+            capital_cost=costs.at["charcoal", "capital_cost"],
+            marginal_cost=costs.at["charcoal", "marginal_cost"],
+        )
+
+        n.madd(
+            "Link",
+            charcoal_buses_i + " charcoal stove",
+            bus0=charcoal_buses_i,
+            bus1=cooking_buses_i,
+            carrier="charcoal",
+            efficiency=costs.at["charcoal", "efficiency"],
+            capital_cost=costs.at["charcoal", "capital_cost"],
+            marginal_cost=costs.at["charcoal", "marginal_cost"],
+            p_nom=0.25,
+            p_max_pu=1,
         )
 
     if ("csp" in config["renewable"].keys()) and (
