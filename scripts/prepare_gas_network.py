@@ -882,7 +882,7 @@ def plot_empty_dataframe():
     fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
-    
+
 if not snakemake.params.custom_gas_network:
     if snakemake.params.gas_config["network_data"] == "GGIT":
         pipelines = download_GGIT_gas_network()
