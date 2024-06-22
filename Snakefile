@@ -15,6 +15,7 @@ if not exists("config.yaml"):
     copyfile("config.default.yaml", "config.yaml")
 
 
+configfile: "config.pypsa-earth.yaml"
 configfile: "config.yaml"
 
 
@@ -47,6 +48,7 @@ wildcard_constraints:
     discountrate="[-+a-zA-Z0-9\.\s]*",
     demand="[-+a-zA-Z0-9\.\s]*",
     h2export="[0-9]+m?|all",
+    planning_horizons="20[2-9][0-9]|2100",
 
 
 if not config.get("disable_subworkflow", False):
@@ -123,6 +125,8 @@ rule prepare_ports:
 
 
 rule prepare_airports:
+    params:
+        airport_sizing_factor=config["sector"]["airport_sizing_factor"],
     output:
         ports="data/airports.csv",  # TODO move from data to resources
     script:
@@ -146,6 +150,20 @@ rule prepare_transport_data_input:
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
+        params:
+            gas_config=config["sector"]["gas"],
+            alternative_clustering=config["clustering_options"][
+                "alternative_clustering"
+            ],
+            countries_list=config["countries"],
+            layer_id=config["build_shape_options"]["gadm_layer_id"],
+            update=config["build_shape_options"]["update_file"],
+            out_logging=config["build_shape_options"]["out_logging"],
+            year=config["build_shape_options"]["year"],
+            nprocesses=config["build_shape_options"]["nprocesses"],
+            contended_flag=config["build_shape_options"]["contended_flag"],
+            geo_crs=config["crs"]["geo_crs"],
+            custom_gas_network=config["custom_data"]["gas_network"],
         input:
             regions_onshore=pypsaearth(
                 "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
@@ -203,6 +221,9 @@ rule prepare_sector_network:
 
 
 rule build_ship_profile:
+    params:
+        snapshots=config["snapshots"],
+        ship_opts=config["export"]["ship"],
     output:
         ship_profile="resources/ship_profile_{h2export}TWh.csv",
     script:
@@ -210,6 +231,15 @@ rule build_ship_profile:
 
 
 rule add_export:
+    params:
+        gadm_level=config["sector"]["gadm_level"],
+        alternative_clustering=config["clustering_options"]["alternative_clustering"],
+        store=config["export"]["store"],
+        store_capital_costs=config["export"]["store_capital_costs"],
+        export_profile=config["export"]["export_profile"],
+        snapshots=config["snapshots"],
+        USD_to_EUR=config["costs"]["USD2013_to_EUR2013"],
+        lifetime=config["costs"]["lifetime"],
     input:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
@@ -228,6 +258,10 @@ rule add_export:
 
 
 rule override_respot:
+    params:
+        run=config["run"],
+        custom_data=config["custom_data"],
+        countries=config["countries"],
     input:
         **{
             f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": f"resources/custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
@@ -271,6 +305,8 @@ rule prepare_transport_data:
 
 
 rule build_cop_profiles:
+    params:
+        heat_pump_sink_T=config["sector"]["heat_pump_sink_T"],
     input:
         temp_soil_total="resources/temperatures/temp_soil_total_elec_s{simpl}_{clusters}.nc",
         temp_soil_rural="resources/temperatures/temp_soil_rural_elec_s{simpl}_{clusters}.nc",
@@ -316,6 +352,11 @@ rule prepare_heat_data:
 
 
 rule build_base_energy_totals:
+    params:
+        space_heat_share=config["sector"]["space_heat_share"],
+        update_data=config["demand_data"]["update_data"],
+        base_year=config["demand_data"]["base_year"],
+        countries=config["countries"],
     input:
         unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
     output:
@@ -325,6 +366,10 @@ rule build_base_energy_totals:
 
 
 rule prepare_energy_totals:
+    params:
+        countries=config["countries"],
+        base_year=config["demand_data"]["base_year"],
+        sector_options=config["sector"],
     input:
         unsd_paths="data/energy_totals_base.csv",
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
@@ -338,6 +383,9 @@ rule prepare_energy_totals:
 
 
 rule build_solar_thermal_profiles:
+    params:
+        solar_thermal_config=config["solar_thermal"],
+        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
@@ -359,6 +407,8 @@ rule build_solar_thermal_profiles:
 
 
 rule build_population_layouts:
+    params:
+        planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes=pypsaearth("resources/shapes/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
@@ -408,6 +458,8 @@ rule build_clustered_population_layouts:
 
 
 rule build_heat_demand:
+    params:
+        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
@@ -429,6 +481,8 @@ rule build_heat_demand:
 
 
 rule build_temperature_profiles:
+    params:
+        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/population_shares/pop_layout_total.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
@@ -453,6 +507,9 @@ rule build_temperature_profiles:
 
 
 rule copy_config:
+    params:
+        summary_dir=config["summary_dir"],
+        run=config["run"],
     output:
         SDIR + "/configs/config.yaml",
     threads: 1
@@ -498,6 +555,15 @@ rule solve_network:
 
 
 rule make_summary:
+    params:
+        planning_horizons=config["scenario"]["planning_horizons"],
+        results_dir=config["results_dir"],
+        summary_dir=config["summary_dir"],
+        run=config["run"],
+        scenario_config=config["scenario"],
+        costs_config=config["costs"],
+        h2export_qty=config["export"]["h2export"],
+        foresight=config["foresight"],
     input:
         overrides="data/override_component_attrs",
         networks=expand(
@@ -586,6 +652,8 @@ rule build_industrial_database:
 
 
 rule prepare_db:
+    params:
+        tech_colors=config["plotting"]["tech_colors"],
     input:
         network=RDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -632,6 +700,11 @@ rule clean:
 
 
 rule build_industrial_distribution_key:  #default data
+    params:
+        countries=config["countries"],
+        gadm_level=config["sector"]["gadm_level"],
+        alternative_clustering=config["clustering_options"]["alternative_clustering"],
+        industry_database=config["custom_data"]["industry_database"],
     input:
         regions_onshore=pypsaearth(
             "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
@@ -654,6 +727,10 @@ rule build_industrial_distribution_key:  #default data
 
 
 rule build_base_industry_totals:  #default data
+    params:
+        base_year=config["demand_data"]["base_year"],
+        countries=config["countries"],
+        other_industries=config["demand_data"]["other_industries"],
     input:
         #industrial_production_per_country="data/industrial_production_per_country.csv",
         #unsd_path="data/demand/unsd/data/",
@@ -670,6 +747,12 @@ rule build_base_industry_totals:  #default data
 
 
 rule build_industry_demand:  #default data
+    params:
+        countries=config["countries"],
+        industry_demand=config["custom_data"]["industry_demand"],
+        base_year=config["demand_data"]["base_year"],
+        industry_util_factor=config["sector"]["industry_util_factor"],
+        aluminium_year=config["demand_data"]["aluminium_year"],
     input:
         industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
         #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",

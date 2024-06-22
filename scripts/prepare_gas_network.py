@@ -16,18 +16,15 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-import ruamel.yaml
 from helpers import (
     progress_retrieve,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
 from matplotlib.lines import Line2D
-from packaging.version import Version, parse
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely import wkt
-from shapely.geometry import LineString, MultiLineString, Point
+from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
@@ -168,9 +165,7 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df = df[df["WKTFormat"] != "--"]
 
     # Keep pipelines that are as below
-    df = df[
-        df["Status"].isin(snakemake.config["sector"]["gas"]["network_data_GGIT_status"])
-    ]
+    df = df[df["Status"].isin(snakemake.params.gas_config["network_data_GGIT_status"])]
 
     # Convert the WKT column to a GeoDataFrame
     df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"]))
@@ -531,22 +526,15 @@ def load_bus_region(onshore_path, pipelines):
         :, ["gadm_id", "geometry"]
     ]
 
-    if snakemake.config["clustering_options"]["alternative_clustering"]:
-        # Read the YAML file
-        yaml = ruamel.yaml.YAML()
-        file_path = "./config.pypsa-earth.yaml"
-        with open(file_path, "r") as file:
-            config_pypsa_earth = yaml.load(file)
-
-        countries_list = snakemake.config["countries"]
-        layer_id = config_pypsa_earth["build_shape_options"]["gadm_layer_id"]
-        update = config_pypsa_earth["build_shape_options"]["update_file"]
-        out_logging = config_pypsa_earth["build_shape_options"]["out_logging"]
-        year = config_pypsa_earth["build_shape_options"]["year"]
-        nprocesses = config_pypsa_earth["build_shape_options"]["nprocesses"]
-        contended_flag = config_pypsa_earth["build_shape_options"]["contended_flag"]
-        geo_crs = config_pypsa_earth["crs"]["geo_crs"]
-        distance_crs = config_pypsa_earth["crs"]["distance_crs"]
+    if snakemake.params.alternative_clustering:
+        countries_list = snakemake.params.countries_list
+        layer_id = snakemake.params.layer_id
+        update = snakemake.params.update
+        out_logging = snakemake.params.out_logging
+        year = snakemake.params.year
+        nprocesses = snakemake.params.nprocesses
+        contended_flag = snakemake.params.contended_flag
+        geo_crs = snakemake.params.geo_crs
 
         bus_regions_onshore = gadm(
             countries_list,
@@ -651,7 +639,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
 
     column_set = ["ProjectID", "nodes", "gadm_id", "capacity [MW]"]
 
-    if snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
+    if snakemake.params.gas_config["network_data"] == "IGGIELGN":
         pipelines_per_state = (
             pipelines_interstate.rename(
                 {"p_nom": "capacity [MW]", "name": "ProjectID"}, axis=1
@@ -659,7 +647,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
             .loc[:, column_set]
             .reset_index(drop=True)
         )
-    elif snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
+    elif snakemake.params.gas_config["network_data"] == "GGIT":
         pipelines_per_state = pipelines_interstate.loc[:, column_set].reset_index(
             drop=True
         )
@@ -755,7 +743,7 @@ def plot_gas_network(pipelines, country_borders, bus_regions_onshore):
     df = pipelines.copy()
     df = gpd.overlay(df, country_borders, how="intersection")
 
-    if snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
+    if snakemake.params.gas_config["network_data"] == "IGGIELGN":
         df = df.rename({"p_nom": "capacity [MW]"}, axis=1)
 
     fig, ax = plt.subplots(1, 1)
@@ -887,19 +875,20 @@ def plot_clustered_gas_network(pipelines, bus_regions_onshore):
     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
 
+# TODO: remove as soon as plotting is an extra rule
 def plot_empty_dataframe():
     fig, ax = plt.subplots(1, 1)
     fig.set_size_inches(12, 7)
     fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
-
-if not snakemake.config["custom_data"]["gas_network"]:
-    if snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
+    
+if not snakemake.params.custom_gas_network:
+    if snakemake.params.gas_config["network_data"] == "GGIT":
         pipelines = download_GGIT_gas_network()
         pipelines = prepare_GGIT_data(pipelines)
 
-    elif snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
+    elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
         download_IGGIELGN_gas_network()
 
         gas_network = "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
@@ -940,9 +929,8 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
     else:
         print(
-            "Countries:"
-            + bus_regions_onshore.country.unique().tolist()
-            + "has no existing Natral Gas network between the chosen bus regions"
+            "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
+            + ", ".join(bus_regions_onshore.country.unique().tolist())
         )
 
         # Create an empty DataFrame with the specified column names
