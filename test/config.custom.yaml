@@ -28,9 +28,7 @@ enable:
   retrieve_cost_data: false
 
 load_options:
-  scale:
-    Lagos-Porto-Novo: 0.5
-  subtitute_country_load:
+  substitute_country_load:
     Lagos-Porto-Novo: "NG"
 
 augmented_line_connection:

@@ -142,7 +142,7 @@ def build_demand_profiles(
     admin_shapes,
     countries,
     scale,
-    subtitute_country_load,
+    substitute_country_load,
     start_date,
     end_date,
     out_path,
@@ -182,9 +182,9 @@ def build_demand_profiles(
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
 
     # If Gegis data is unavailable for a specific country, it is advisable to use Gegis data from another region as an alternative. Later, it can be scaled
-    if subtitute_country_load:
-        for country_a, country_b in subtitute_country_load.items():
-            logger.info(f"subtitute load data of {country_a} using {country_b}.")
+    if substitute_country_load:
+        for country_a, country_b in substitute_country_load.items():
+            logger.info(f"substitute load data of {country_a} using {country_b}.")
 
             if country_a in gegis_load.region_code.unique():
                 logger.info(f"dropping original load data of {country_a}.")
@@ -275,8 +275,8 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.params.load_options.get("scale", 1.0)
-    subtitute_country_load = snakemake.params.load_options.get(
-        "subtitute_country_load", False
+    substitute_country_load = snakemake.params.load_options.get(
+        "substitute_country_load", False
     )
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
@@ -289,7 +289,7 @@ if __name__ == "__main__":
         admin_shapes,
         countries,
         scale,
-        subtitute_country_load,
+        substitute_country_load,
         start_date,
         end_date,
         out_path,
