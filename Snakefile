@@ -33,6 +33,12 @@ config.update({"git_commit": get_last_commit_message(".")})
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
+# extend countries based on subregions and remove the dropped subregions
+config["countries_plus"] = [x for x in config["countries"] 
+    + list(config.get("subregion", {}).get("define_subregion_gadm",{}).keys()) 
+    if (x not in config.get("subregion", {}).get("drop_subregion", {}))
+]
+
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
 config["scenario"]["unc"] = [
@@ -127,7 +133,7 @@ rule make_all_summaries:
             + RDIR
             + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}",
             **config["scenario"],
-            country=["all"] + config["countries"],
+            country=["all"] + config["countries_plus"],
         ),
 
 
@@ -139,7 +145,7 @@ rule plot_all_summaries:
             + "plots/summary_{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.{ext}",
             summary=["energy", "costs"],
             **config["scenario"],
-            country=["all"] + config["countries"],
+            country=["all"] + config["countries_plus"],
             ext=["png", "pdf"],
         ),
 
@@ -209,7 +215,7 @@ rule clean_osm_data:
 rule build_osm_network:
     params:
         build_osm_network=config.get("build_osm_network", {}),
-        countries=config["countries"],
+        countries=config["countries_plus"],
         crs=config["crs"],
     input:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
@@ -236,6 +242,7 @@ rule build_shapes:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
         countries=config["countries"],
+        subregion=config.get("subregion", {}),
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
@@ -267,7 +274,7 @@ rule base_network:
         links=config["links"],
         lines=config["lines"],
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        countries=config["countries"],
+        countries=config["countries_plus"],
         base_network=config["base_network"],
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
@@ -297,7 +304,7 @@ rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         crs=config["crs"],
-        countries=config["countries"],
+        countries=config["countries_plus"],
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
@@ -443,7 +450,7 @@ rule build_renewable_profiles:
     params:
         crs=config["crs"],
         renewable=config["renewable"],
-        countries=config["countries"],
+        countries=config["countries_plus"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
         natura="resources/" + RDIR + "natura.tiff",
@@ -480,6 +487,8 @@ rule build_powerplants:
     params:
         geo_crs=config["crs"]["geo_crs"],
         countries=config["countries"],
+        countries_plus=config["countries_plus"],
+        subregion=config.get("subregion", {}),
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
@@ -557,8 +566,9 @@ rule simplify_network:
     params:
         renewable=config["renewable"],
         geo_crs=config["crs"]["geo_crs"],
+        distance_crs=config["crs"]["distance_crs"],
         cluster_options=config["cluster_options"],
-        countries=config["countries"],
+        countries=config["countries_plus"],
         build_shape_options=config["build_shape_options"],
         electricity=config["electricity"],
         costs=config["costs"],
@@ -603,7 +613,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             length_factor=config["lines"]["length_factor"],
             renewable=config["renewable"],
             geo_crs=config["crs"]["geo_crs"],
-            countries=config["countries"],
+            countries=config["countries_plus"],
             cluster_options=config["cluster_options"],
             focus_weights=config.get("focus_weights", None),
             #custom_busmap=config["enable"].get("custom_busmap", False)
@@ -688,7 +698,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             length_factor=config["lines"]["length_factor"],
             renewable=config["renewable"],
             geo_crs=config["crs"]["geo_crs"],
-            countries=config["countries"],
+            countries=config["countries_plus"],
             gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
             cluster_options=config["cluster_options"],
         input:
@@ -1022,7 +1032,7 @@ rule build_test_configs:
 
 rule make_statistics:
     params:
-        countries=config["countries"],
+        countries=config["countries_plus"],
         renewable_carriers=config["electricity"]["renewable_carriers"],
         renewable=config["renewable"],
         crs=config["crs"],

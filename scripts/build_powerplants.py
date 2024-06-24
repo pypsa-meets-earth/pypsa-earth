@@ -310,7 +310,11 @@ if __name__ == "__main__":
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
 
     n = pypsa.Network(snakemake.input.base_network)
-    countries_codes = n.buses.country.unique()
+
+    if snakemake.params.subregion:
+        countries_codes =  snakemake.params.countries
+    else:
+        countries_codes =  n.buses.country.unique()
     countries_names = list(map(two_digits_2_name_country, countries_codes))
 
     config["target_countries"] = countries_names
@@ -361,6 +365,18 @@ if __name__ == "__main__":
 
         tree_i = kdtree.query(ppl.loc[ppl_i, ["lon", "lat"]].values)[1]
         ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
+
+    if snakemake.params.subregion:
+        subregion_include = list(snakemake.params.subregion["define_subregion_gadm"])
+        subregion_exclude = snakemake.params.subregion["drop_subregion"]
+
+        substation_i = n.buses.query("substation_lv and country.isin(@subregion_include)").index
+        kdtree = KDTree(n.buses.loc[substation_i, ["x", "y"]].values)
+        ppl_i = ppl.query("Country.isin(@subregion_exclude)").index
+
+        tree_i = kdtree.query(ppl.loc[ppl_i, ["lon", "lat"]].values)[1]
+        ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
+
 
     if cntries_without_ppl:
         logger.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
