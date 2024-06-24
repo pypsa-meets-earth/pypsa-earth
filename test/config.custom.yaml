@@ -6,8 +6,8 @@
 subregion:
   define_subregion_gadm:
     Lagos-Porto-Novo:
-      NG: [25,28]
-      BJ: [10,11]
+      NG: [25, 28]
+      BJ: [10, 11]
     Alibari-Kebbi:
       NG: [22]
       BJ: [1]

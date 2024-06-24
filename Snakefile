@@ -34,8 +34,10 @@ config.update({"git_commit": get_last_commit_message(".")})
 config["countries"] = create_country_list(config["countries"])
 
 # extend countries based on subregions and remove the dropped subregions
-config["countries_plus"] = [x for x in config["countries"] 
-    + list(config.get("subregion", {}).get("define_subregion_gadm",{}).keys()) 
+config["countries_plus"] = [
+    x
+    for x in config["countries"]
+    + list(config.get("subregion", {}).get("define_subregion_gadm", {}).keys())
     if (x not in config.get("subregion", {}).get("drop_subregion", {}))
 ]
 

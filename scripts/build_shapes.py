@@ -1305,6 +1305,7 @@ def gadm(
 
     return df_gadm
 
+
 def crop_country(country_shapes, gadm_shapes, subregion_config):
     country_shapes_new = gpd.GeoDataFrame(columns=["name", "geometry"]).set_index(
         "name"
@@ -1315,9 +1316,10 @@ def crop_country(country_shapes, gadm_shapes, subregion_config):
     for sub_region in subregion_config:
         region_GADM = [
             country + "." + str(region) + "_1"
-            for country in subregion_config[sub_region] for region in subregion_config[sub_region][country]
+            for country in subregion_config[sub_region]
+            for region in subregion_config[sub_region][country]
         ]
-        
+
         sub_country_geometry = gadm_shapes.loc[region_GADM].unary_union
         sub_country_shapes = gpd.GeoDataFrame(
             {
@@ -1328,10 +1330,12 @@ def crop_country(country_shapes, gadm_shapes, subregion_config):
 
         country_shapes_new = pd.concat([country_shapes_new, sub_country_shapes])
 
-        remain_gadm_shapes = remain_gadm_shapes.query('index != @region_GADM')
+        remain_gadm_shapes = remain_gadm_shapes.query("index != @region_GADM")
 
     for country in remain_gadm_shapes.country.unique():
-        country_geometry_new = remain_gadm_shapes.query('country == @country').unary_union
+        country_geometry_new = remain_gadm_shapes.query(
+            "country == @country"
+        ).unary_union
         country_shapes_country = gpd.GeoDataFrame(
             {
                 "name": country,
@@ -1355,31 +1359,30 @@ def crop_offshore(offshore_shapes, gadm_shapes, subregion_config):
     offshore_regions_voronoi = gpd.GeoDataFrame(columns=["name", "geometry"]).set_index(
         "name"
     )
-    
+
     for country in offshore_shapes.index:
         gadm_shapes_country = gadm_shapes.loc[gadm_shapes.country == country]
-        gadm_points = gadm_shapes_country.to_crs(
-            ccrs.PlateCarree().proj4_init
-        ).centroid
-        gadm_points_gdf = pd.DataFrame(
-            data={"x": gadm_points.x, "y": gadm_points.y}
-        )
+        gadm_points = gadm_shapes_country.to_crs(ccrs.PlateCarree().proj4_init).centroid
+        gadm_points_gdf = pd.DataFrame(data={"x": gadm_points.x, "y": gadm_points.y})
         offshore_geometry = custom_voronoi_partition_pts(
             gadm_points_gdf, offshore_shapes.geometry.loc[country]
         )
-        
+
         offshore_regions = gpd.GeoDataFrame(
             {
                 "name": gadm_shapes_country.index,
                 "geometry": offshore_geometry,
             },
         ).set_index("name")
-    
-        offshore_regions_voronoi = pd.concat([offshore_regions_voronoi, offshore_regions])
-    
+
+        offshore_regions_voronoi = pd.concat(
+            [offshore_regions_voronoi, offshore_regions]
+        )
+
     offshore_regions_voronoi["country"] = offshore_regions_voronoi.index.str[:2]
-    
+
     return crop_country(offshore_shapes, offshore_regions_voronoi, subregion_config)
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1438,20 +1441,21 @@ if __name__ == "__main__":
         subregion_config = snakemake.params.subregion["define_subregion_gadm"]
         country_shapes = crop_country(country_shapes, gadm_shapes, subregion_config)
         offshore_shapes = crop_offshore(offshore_shapes, gadm_shapes, subregion_config)
-        
+
         for sub_region in subregion_config:
             region_GADM = [
                 country + "." + str(region) + "_1"
-                for country in subregion_config[sub_region] for region in subregion_config[sub_region][country]
+                for country in subregion_config[sub_region]
+                for region in subregion_config[sub_region][country]
             ]
-    
-            gadm_shapes.loc[region_GADM,"country"] = sub_region
+
+            gadm_shapes.loc[region_GADM, "country"] = sub_region
 
     if snakemake.params.get("subregion", {}).get("drop_subregion", False):
         drop_subregion = snakemake.params.subregion["drop_subregion"]
-        country_shapes = country_shapes.query('index != @drop_subregion')
-        offshore_shapes = offshore_shapes.query('index != @drop_subregion')
-        gadm_shapes = gadm_shapes.query('country != @drop_subregion')
+        country_shapes = country_shapes.query("index != @drop_subregion")
+        offshore_shapes = offshore_shapes.query("index != @drop_subregion")
+        gadm_shapes = gadm_shapes.query("country != @drop_subregion")
 
     africa_shape = gpd.GeoDataFrame(
         geometry=[country_cover(country_shapes.geometry, offshore_shapes.geometry)]

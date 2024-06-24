@@ -17,8 +17,8 @@ subregion: []
 #   Lagos-Porto-Novo:
 #     NG: [25,28]
 #     BJ: [10,11]
-# Chose the subregion based on its GADM subdivision Map ID code. 
-# Chose the country in https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg and use https://ngageoint.github.io/geopackage-viewer-js/ and chose ADM_ADM_1 to identify the GADM ID 
+# Chose the subregion based on its GADM subdivision Map ID code.
+# Chose the country in https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg and use https://ngageoint.github.io/geopackage-viewer-js/ and chose ADM_ADM_1 to identify the GADM ID
 # This will take away the land of the GADM ID code from the original country to the new country.
 # One subregion can be composed of multiple countries.
 # drop_subregion: [] # remove the country/subregion from the model.

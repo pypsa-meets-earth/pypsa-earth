@@ -734,10 +734,17 @@ def estimate_renewable_capacities_irena(
     )
     custom_capacity = estimate_renewable_capacities_config.get("custom_capacity", {})
     if custom_capacity:
-        custom_capacities_df = pd.DataFrame.from_dict(custom_capacity).reset_index().melt(id_vars=['index'],value_vars=['Onshore','PV']).dropna()
-        custom_capacities_df = custom_capacities_df.rename(columns={'index':'Country','variable':'Technology','value':'Capacity'})
+        custom_capacities_df = (
+            pd.DataFrame.from_dict(custom_capacity)
+            .reset_index()
+            .melt(id_vars=["index"], value_vars=["Onshore", "PV"])
+            .dropna()
+        )
+        custom_capacities_df = custom_capacities_df.rename(
+            columns={"index": "Country", "variable": "Technology", "value": "Capacity"}
+        )
 
-        capacities = pd.concat([capacities,custom_capacities_df])
+        capacities = pd.concat([capacities, custom_capacities_df])
 
     if all(country in n.buses.country.unique().tolist() for country in countries):
         countries = n.buses.country.unique().tolist()

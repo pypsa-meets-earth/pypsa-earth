@@ -188,11 +188,11 @@ def build_demand_profiles(
 
             if country_a in gegis_load.region_code.unique():
                 logger.info(f"dropping original load data of {country_a}.")
-                gegis_load = gegis_load.query('region_code != @country_a')
+                gegis_load = gegis_load.query("region_code != @country_a")
 
             gegis_load_new = gegis_load.loc[gegis_load.region_code == country_b]
-            gegis_load_new.loc[:,"region_code"] = country_a
-            gegis_load_new.loc[:,"region_name"] = country_a
+            gegis_load_new.loc[:, "region_code"] = country_a
+            gegis_load_new.loc[:, "region_name"] = country_a
 
             gegis_load = pd.concat([gegis_load, gegis_load_new])
 
@@ -275,7 +275,9 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.params.load_options.get("scale", 1.0)
-    subtitute_country_load = snakemake.params.load_options.get("subtitute_country_load", False)
+    subtitute_country_load = snakemake.params.load_options.get(
+        "subtitute_country_load", False
+    )
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
