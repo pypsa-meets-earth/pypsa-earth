@@ -100,8 +100,8 @@ if __name__ == "__main__":
 
     # Loading config file and wild cards
 
-    year = snakemake.config["demand_data"]["base_year"]
-    countries = snakemake.config["countries"]
+    year = snakemake.params.base_year
+    countries = snakemake.params.countries
 
     transactions_from_list = snakemake.config["industry"]
 
