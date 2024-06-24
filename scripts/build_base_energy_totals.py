@@ -432,8 +432,8 @@ if __name__ == "__main__":
     fuels_conv_toTWh = get_conv_factors("industry")
 
     # Fetch country list and demand base year from the config file
-    year = snakemake.config["demand_data"]["base_year"]
-    countries = snakemake.config["countries"]
+    year = snakemake.params.base_year
+    countries = snakemake.params.countries
 
     # Filter for the year and country
     df_yr = df[df.Year == year]
