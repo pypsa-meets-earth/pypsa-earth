@@ -127,6 +127,8 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
         costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
     )
     suptechs = missing_carriers.str.split("-").str[0]
+    if "csp" in suptechs:
+        suptechs = suptechs.str.replace("csp", "csp-tower")
     emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)
     emissions.index = missing_carriers
     n.import_components_from_dataframe(emissions, "Carrier")
@@ -357,7 +359,9 @@ def attach_wind_and_solar(
                     )
                 )
             else:
-                capital_cost = costs.at[tech, "capital_cost"]
+                capital_cost = costs.at[
+                    "csp-tower" if tech == "csp" else tech, "capital_cost"
+                ]
 
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
@@ -379,9 +383,13 @@ def attach_wind_and_solar(
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[suptech, "marginal_cost"],
+                marginal_cost=costs.at[
+                    "csp-tower" if suptech == "csp" else suptech, "marginal_cost"
+                ],
                 capital_cost=capital_cost,
-                efficiency=costs.at[suptech, "efficiency"],
+                efficiency=costs.at[
+                    "csp-tower" if suptech == "csp" else suptech, "efficiency"
+                ],
             )
 
 

@@ -52,6 +52,7 @@ RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
 
 load_data_paths = get_load_paths_gegis("data", config)
+
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
@@ -465,7 +466,7 @@ rule build_renewable_profiles:
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
-            if w.technology in ("onwind", "solar", "hydro")
+            if w.technology in ("onwind", "solar", "hydro", "csp")
             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
         ),
         cutout=lambda w: "cutouts/"

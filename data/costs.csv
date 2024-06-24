@@ -193,3 +193,12 @@ HVDC submarine,2030,FOM,2,%/year,Hagspiel
 HVDC inverter pair,2030,investment,150000,EUR/MW,Hagspiel
 HVDC inverter pair,2030,lifetime,40,years,Hagspiel
 HVDC inverter pair,2030,FOM,2,%/year,Hagspiel
+csp-tower,2030,FOM,1.1,%/year,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
+csp-tower,2030,investment,108.37,"EUR/kW_th,dp",ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
+csp-tower,2030,lifetime,30.0,years,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
+csp-tower TES,2030,FOM,1.1,%/year,see solar-tower.
+csp-tower TES,2030,investment,14.52,EUR/kWh_th,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
+csp-tower TES,2030,lifetime,30.0,years,see solar-tower.
+csp-tower power block,2030,FOM,1.1,%/year,see solar-tower.
+csp-tower power block,2030,investment,759.17,EUR/kW_e,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
+csp-tower power block,2030,lifetime,30.0,years,see solar-tower.
