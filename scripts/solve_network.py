@@ -463,10 +463,10 @@ def add_RES_constraints(n, res_share):
     cgrouper = n.links.bus0.map(n.buses.country)
 
     logger.warning(
-        "The add_RES_constraints functionality is still work in progress. "
-        "Unexpected results might be incurred, particularly if "
+        "The add_RES_constraints() is still work in progress. "
+        "Unexpected results might be incurre, particularly if "
         "temporal clustering is applied or if an unexpected change of technologies "
-        "is subject to the obtimisation."
+        "is subject to the optimisation."
     )
 
     load = (
