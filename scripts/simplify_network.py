@@ -774,7 +774,7 @@ def transform_to_gdf(n, network_crs):
     return gdf_buses
 
 
-def merge_into_network(n, threshold, aggregation_strategies=dict()):
+def merge_into_network(n, threshold, exclude_country=[], aggregation_strategies=dict()):
     """
     Find isolated AC nodes and sub-networks in the network and merge those of
     them which have load value and a number of buses below than the specified
@@ -798,16 +798,19 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     generators_mean_origin = n.generators.p_nom.mean()
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
-    network_crs = snakemake.params.geo_crs
+    distance_crs = snakemake.params.distance_crs
 
     n.determine_network_topology()
 
-    n_buses_gdf = transform_to_gdf(n, network_crs=network_crs)
+    n_buses_gdf = transform_to_gdf(n, network_crs=distance_crs)
 
     # do not merge sub-networks spanned through a number of countries
     n_buses_gdf["is_multicnt_subntw"] = n_buses_gdf.sub_network.map(
         n_buses_gdf.groupby(["sub_network"]).country.nunique() > 1
     )
+
+    # remove excluded countries
+    n_buses_gdf = n_buses_gdf.query("country != @exclude_country")
 
     gdf_islands = (
         n_buses_gdf.query("~is_multicnt_subntw")
@@ -1109,6 +1112,7 @@ if __name__ == "__main__":
     )
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
     s_threshold_fetch_isolated = cluster_config.get("s_threshold_fetch_isolated", False)
+    exclude_isolated_country = cluster_config.get("exclude_isolated_country", [])
 
     n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
     if p_threshold_merge_isolated:
@@ -1123,6 +1127,7 @@ if __name__ == "__main__":
         n, fetched_nodes_map = merge_into_network(
             n,
             threshold=s_threshold_fetch_isolated,
+            exclude_country=exclude_isolated_country,
             aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
