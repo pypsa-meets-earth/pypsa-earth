@@ -64,9 +64,9 @@ if __name__ == "__main__":
 
         sets_path_to_root("pypsa-earth-sec")
 
-    countries = snakemake.config["countries"]
+    countries = snakemake.params.countries
 
-    if snakemake.config["custom_data"]["industry_demand"]:
+    if snakemake.params.industry_demand:
         _logger.info(
             "Fetching custom industry demand data.. expecting file at 'data_custom/industry_demand_{0}_{1}.csv'".format(
                 snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
     else:
         no_years = int(snakemake.wildcards.planning_horizons) - int(
-            snakemake.config["demand_data"]["base_year"]
+            snakemake.params.base_year
         )
 
         cagr = read_csv_nafix(snakemake.input.industry_growth_cagr, index_col=0)
@@ -131,7 +131,7 @@ if __name__ == "__main__":
         # non-used line; commented out
         # industry_totals = (production_tom * industry_base_totals).fillna(0)
 
-        industry_util_factor = snakemake.config["sector"]["industry_util_factor"]
+        industry_util_factor = snakemake.params.industry_util_factor
 
         # Load distribution keys
         keys_path = snakemake.input.industrial_distribution_key
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         countries_geo = geo_locs.index.unique().intersection(countries)
         geo_locs = match_technology(geo_locs).loc[countries_geo]
 
-        aluminium_year = snakemake.config["demand_data"]["aluminium_year"]
+        aluminium_year = snakemake.params.aluminium_year
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
         AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"

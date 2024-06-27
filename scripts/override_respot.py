@@ -36,7 +36,7 @@ def override_values(tech, year, dr):
         n.mremove("Generator", to_drop)
 
     if snakemake.wildcards["planning_horizons"] == 2050:
-        directory = "results/" + snakemake.config.run.replace("2050", "2030")
+        directory = "results/" + snakemake.params.run.replace("2050", "2030")
         n_name = snakemake.input.network.split("/")[-1].replace(
             n.config["scenario"]["clusters"], ""
         )
@@ -85,12 +85,12 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     m = n.copy()
-    if snakemake.config["custom_data"]["renewables"]:
+    if snakemake.params.custom_data["renewables"]:
         buses = list(n.buses[n.buses.carrier == "AC"].index)
         energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
-        countries = snakemake.config["countries"]
-        if snakemake.config["custom_data"]["renewables"]:
-            techs = snakemake.config["custom_data"]["renewables"]
+        countries = snakemake.params.countries
+        if snakemake.params.custom_data["renewables"]:
+            techs = snakemake.params.custom_data["renewables"]
             year = snakemake.wildcards["planning_horizons"]
             dr = snakemake.wildcards["discountrate"]
 
@@ -102,24 +102,7 @@ if __name__ == "__main__":
         else:
             print("No RES potential techs to override...")
 
-        if (
-            snakemake.config["custom_data"]["add_existing"]
-            and snakemake.wildcards["planning_horizons"] == "2030"
-        ):
-            n.generators.loc["MAR010003 onwind", "p_nom_min"] = 50
-            n.generators.loc["MAR010005 offwind", "p_nom_min"] = 120
-            n.generators.loc["MAR010005 offwind", "p_nom_max"] = 120
-            n.generators.loc["MAR010001 onwind", "p_nom_min"] = 154
-            n.generators.loc["MAR004005 onwind", "p_nom_min"] = 150
-            n.generators.loc["MAR003003 onwind", "p_nom_min"] = 180
-            n.generators.loc["MAR006003 onwind", "p_nom_min"] = 60
-            n.generators.loc["MAR011001 onwind", "p_nom_min"] = 208
-
-            n.generators.loc["MAR003001 csp", "p_nom_min"] = 500
-
-            n.generators.loc["MAR003001 solar", "p_nom_min"] = 72
-
-        if snakemake.config["custom_data"]["elec_demand"]:
+        if snakemake.params.custom_data["elec_demand"]:
             for country in countries:
                 n.loads_t.p_set.filter(like=country)[buses] = (
                     (
