@@ -82,6 +82,20 @@ Year-related parameters are also being used when specifying `load_options`:
 The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` corresponds to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
 The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
 
+Use custom demand data
+----------------------
+
+It is possible to implement custom demand profiles. It can be done by creating a dedicated custom demand sub-folder in a scenario folder `pypsa-earth/data/ssp2-2.6` and placing there a custom demand file. The name of a custom demand sub-folder should correspond to `weather_year` argument which stands in this case for general identification of a demand input. The name of a demand input file should be a continent name to which belongs a country of initerest. Both csv and nc formats can be used for demand files.
+
+For example, to  `pypsa-earth/data/ssp2-2.6/2013_custom/`
+
+.. note::
+
+    For example, to provide custom inputs for Nigeria, you can put the time-series into `Africa.csv` file and place the file into `pypsa-earth/data/ssp2-2.6/2013_custom/` folder. To make it fetched, you'll need to specify `weather_year: 2013_custom` under `load_options`.
+
+A format of the custom csv demand file should correspond to the csv files supplied with the model: there are `region_code`, `time`, `region_name` and `Electricity demand` columns, while a semicolon is used as a separator.
+
+
 Configure `atlite` section
 --------------------------
 

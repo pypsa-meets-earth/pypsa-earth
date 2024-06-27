@@ -41,6 +41,7 @@ Then with a function that takes in the PyPSA network "base.nc", region and gadm 
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
 import os
+import os.path
 from itertools import product
 
 import geopandas as gpd
@@ -49,7 +50,7 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_osm_config
+from _helpers import configure_logging, create_logger, read_csv_nafix, read_osm_config
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -106,16 +107,34 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     prediction_year = config.get("load_options")["prediction_year"]
     ssp = config.get("load_options")["ssp"]
 
+    scenario_path = os.path.join(ssp_parentfolder, ssp)
+
     load_paths = []
+    load_dir = os.path.join(
+        ssp_parentfolder,
+        str(ssp),
+        str(prediction_year),
+        "era5_" + str(weather_year),
+    )
+
+    file_names = []
     for continent in region_load:
-        load_path = os.path.join(
-            ssp_parentfolder,
-            str(ssp),
-            str(prediction_year),
-            "era5_" + str(weather_year),
-            str(continent) + ".nc",
-        )
+        sel_ext = ".nc"
+        for ext in [".nc", ".csv"]:
+            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            if os.path.exists(load_path):
+                sel_ext = ext
+                break
+        file_name = str(continent) + str(sel_ext)
+        load_path = os.path.join(str(load_dir), file_name)
         load_paths.append(load_path)
+        file_names.append(file_name)
+
+    logger.info(
+        f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
+        + f"Expected files: "
+        + "; ".join(file_names)
+    )
 
     return load_paths
 
@@ -133,6 +152,23 @@ def shapes_to_shapes(orig, dest):
             transfer[i, j] = area / dest[i].area
 
     return transfer
+
+
+def load_demand_csv(path):
+    df = read_csv_nafix(path, sep=";")
+    df.time = pd.to_datetime(df.time, format="%Y-%m-%d %H:%M:%S")
+    load_regions = {c: n for c, n in zip(df.region_code, df.region_name)}
+
+    gegis_load = df.set_index(["region_code", "time"]).to_xarray()
+    gegis_load = gegis_load.assign_coords(
+        {
+            "region_name": (
+                "region_code",
+                [name for (code, name) in load_regions.items()],
+            )
+        }
+    )
+    return gegis_load
 
 
 def build_demand_profiles(
@@ -174,9 +210,21 @@ def build_demand_profiles(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     load_paths = load_paths
-    # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-    gegis_load = xr.open_mfdataset(load_paths, combine="nested")
+
+    gegis_load_list = []
+
+    for path in load_paths:
+        if str(path).endswith(".csv"):
+            gegis_load_xr = load_demand_csv(path)
+        else:
+            # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
+        gegis_load_list.append(gegis_load_xr)
+
+    logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
+    gegis_load = xr.merge(gegis_load_list)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
 
