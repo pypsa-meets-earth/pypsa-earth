@@ -494,70 +494,53 @@ def add_RES_constraints(n, res_share, config):
         .apply(join_exprs)
     )
 
+    store_disp_expr = linexpr(
+        (
+            n.snapshot_weightings.stores,
+            get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+        )
+    )
+    store_expr = linexpr(
+        (
+            n.snapshot_weightings.stores,
+            get_var(n, "StorageUnit", "p_store")[stores_i].T,
+        )
+    )
+    charge_expr = linexpr(
+        (
+            n.snapshot_weightings.stores.apply(
+                lambda r: r * n.links.loc[charger_i].efficiency
+            ),
+            get_var(n, "Link", "p")[charger_i].T,
+        )
+    )
+    discharge_expr = linexpr(
+        (
+            n.snapshot_weightings.stores.apply(
+                lambda r: r * n.links.loc[discharger_i].efficiency
+            ),
+            get_var(n, "Link", "p")[discharger_i].T,
+        )
+    )
+
     # StorageUnits
     lhs_dispatch = (
-        (
-            linexpr(
-                (
-                    n.snapshot_weightings.stores,
-                    get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
-                )
-            )
-            .T.groupby(sgrouper, axis=1)
-            .apply(join_exprs)
-        )
+        (store_disp_expr.T.groupby(sgrouper, axis=1).apply(join_exprs))
         .reindex(lhs_gen.index)
         .fillna("")
     )
-
     lhs_store = (
-        (
-            linexpr(
-                (
-                    n.snapshot_weightings.stores,
-                    get_var(n, "StorageUnit", "p_store")[stores_i].T,
-                )
-            )
-            .T.groupby(sgrouper, axis=1)
-            .apply(join_exprs)
-        )
+        (store_expr.T.groupby(sgrouper, axis=1).apply(join_exprs))
         .reindex(lhs_gen.index)
         .fillna("")
     )
-
-    # Stores (or their resp. Link components)
-    # Note that the variables "p0" and "p1" currently do not exist.
-    # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
     lhs_charge = (
-        (
-            linexpr(
-                (
-                    n.snapshot_weightings.stores.apply(
-                        lambda r: r * n.links.loc[charger_i].efficiency
-                    ),
-                    get_var(n, "Link", "p")[charger_i].T,
-                )
-            )
-            .T.groupby(cgrouper, axis=1)
-            .apply(join_exprs)
-        )
+        (charge_expr.T.groupby(cgrouper, axis=1).apply(join_exprs))
         .reindex(lhs_gen.index)
         .fillna("")
     )
-
     lhs_discharge = (
-        (
-            linexpr(
-                (
-                    n.snapshot_weightings.stores.apply(
-                        lambda r: r * n.links.loc[discharger_i].efficiency
-                    ),
-                    get_var(n, "Link", "p")[discharger_i],
-                )
-            )
-            .groupby(cgrouper, axis=1)
-            .apply(join_exprs)
-        )
+        (discharge_expr.T.groupby(cgrouper, axis=1).apply(join_exprs))
         .reindex(lhs_gen.index)
         .fillna("")
     )
