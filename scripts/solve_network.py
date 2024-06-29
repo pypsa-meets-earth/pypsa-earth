@@ -476,12 +476,12 @@ def add_RES_constraints(n, res_share, config):
 
     rhs = res_share * load
 
-    res_techs = config.renewable_carriers
+    renew_techs = config.renewable_carriers
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
-    gens_i = n.generators.query("carrier in @res_techs").index
-    stores_i = n.storage_units.query("carrier in @res_techs").index
+    gens_i = n.generators.query("carrier in @renew_techs").index
+    stores_i = n.storage_units.query("carrier in @renew_techs").index
     charger_i = n.links.query("carrier in @charger").index
     discharger_i = n.links.query("carrier in @discharger").index
 
