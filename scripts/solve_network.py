@@ -456,7 +456,7 @@ def add_battery_constraints(n):
     n.model.add_constraints(lhs == 0, name="link_charger_ratio")
 
 
-def add_RES_constraints(n, res_share):
+def add_RES_constraints(n, res_share, config):
     lgrouper = n.loads.bus.map(n.buses.country)
     ggrouper = n.generators.bus.map(n.buses.country)
     sgrouper = n.storage_units.bus.map(n.buses.country)
@@ -476,15 +476,7 @@ def add_RES_constraints(n, res_share):
 
     rhs = res_share * load
 
-    res_techs = [
-        "solar",
-        "onwind",
-        "offwind-dc",
-        "offwind-ac",
-        "battery",
-        "hydro",
-        "ror",
-    ]
+    res_techs = config.renewable_carriers
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
@@ -597,7 +589,7 @@ def extra_functionality(n, snapshots):
     for o in opts:
         if "RES" in o:
             res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
-            add_RES_constraints(n, res_share)
+            add_RES_constraints(n, res_share, config)
     for o in opts:
         if "EQ" in o:
             add_EQ_constraints(n, o)
