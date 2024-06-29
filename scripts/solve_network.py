@@ -481,9 +481,12 @@ def add_RES_constraints(n, res_share, config):
     discharger = ["H2 fuel cell", "battery discharger"]
 
     gens_i = n.generators.query("carrier in @renew_techs").index
+
     stores_i = n.storage_units.query("carrier in @renew_techs").index
     charger_i = n.links.query("carrier in @charger").index
     discharger_i = n.links.query("carrier in @discharger").index
+
+    stores_t_weights = n.snapshot_weightings.stores
 
     # Generators
     lhs_gen = (
@@ -496,29 +499,25 @@ def add_RES_constraints(n, res_share, config):
 
     store_disp_expr = linexpr(
         (
-            n.snapshot_weightings.stores,
+            stores_t_weights,
             get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
         )
     )
     store_expr = linexpr(
         (
-            n.snapshot_weightings.stores,
+            stores_t_weights,
             get_var(n, "StorageUnit", "p_store")[stores_i].T,
         )
     )
     charge_expr = linexpr(
         (
-            n.snapshot_weightings.stores.apply(
-                lambda r: r * n.links.loc[charger_i].efficiency
-            ),
+            stores_t_weights.apply(lambda r: r * n.links.loc[charger_i].efficiency),
             get_var(n, "Link", "p")[charger_i].T,
         )
     )
     discharge_expr = linexpr(
         (
-            n.snapshot_weightings.stores.apply(
-                lambda r: r * n.links.loc[discharger_i].efficiency
-            ),
+            stores_t_weights.apply(lambda r: r * n.links.loc[discharger_i].efficiency),
             get_var(n, "Link", "p")[discharger_i].T,
         )
     )
