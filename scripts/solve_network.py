@@ -535,7 +535,7 @@ def add_RES_constraints(n, res_share, config):
 
     lhs = lhs_gen + lhs_dispatch - lhs_store - lhs_charge + lhs_discharge
 
-    define_constraints(n, lhs, "=", rhs, "res_share")
+    n.model.add_constraints(lhs == rhs, name="res_share")
 
 
 def extra_functionality(n, snapshots):
