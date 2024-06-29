@@ -490,9 +490,7 @@ def add_RES_constraints(n, res_share, config):
 
     # Generators
     lhs_gen = (
-        linexpr(
-            (n.snapshot_weightings.generators, get_var(n, "Generator", "p")[gens_i].T)
-        )
+        linexpr((n.snapshot_weightings.generators, n.model["Generator-p"][gens_i]))
         .T.groupby(ggrouper, axis=1)
         .apply(join_exprs)
     )
@@ -500,25 +498,25 @@ def add_RES_constraints(n, res_share, config):
     store_disp_expr = linexpr(
         (
             stores_t_weights,
-            get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
+            n.model["StorageUnit-p_dispatch"][stores_i],
         )
     )
     store_expr = linexpr(
         (
             stores_t_weights,
-            get_var(n, "StorageUnit", "p_store")[stores_i].T,
+            n.model["StorageUnit-p_store"][stores_i],
         )
     )
     charge_expr = linexpr(
         (
             stores_t_weights.apply(lambda r: r * n.links.loc[charger_i].efficiency),
-            get_var(n, "Link", "p")[charger_i].T,
+            n.model["Link-p"][charger_i],
         )
     )
     discharge_expr = linexpr(
         (
             stores_t_weights.apply(lambda r: r * n.links.loc[discharger_i].efficiency),
-            get_var(n, "Link", "p")[discharger_i].T,
+            n.model["Link-p"][discharger_i],
         )
     )
 
