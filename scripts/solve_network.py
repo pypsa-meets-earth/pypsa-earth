@@ -476,7 +476,7 @@ def add_RES_constraints(n, res_share, config):
 
     rhs = res_share * load
 
-    renew_techs = config.renewable_carriers
+    renew_techs = config["electricity"]["renewable_carriers"]
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
