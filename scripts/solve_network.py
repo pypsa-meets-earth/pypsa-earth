@@ -532,7 +532,9 @@ def add_RES_constraints(n, res_share, config):
         (
             linexpr(
                 (
-                    n.snapshot_weightings.stores,
+                    n.snapshot_weightings.stores.apply(
+                        lambda r: r * n.links.loc[charger_i].efficiency
+                    ),
                     get_var(n, "Link", "p")[charger_i].T,
                 )
             )
