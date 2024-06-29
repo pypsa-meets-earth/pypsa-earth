@@ -514,7 +514,7 @@ def add_RES_constraints(n, res_share, config):
         (
             linexpr(
                 (
-                    -n.snapshot_weightings.stores,
+                    n.snapshot_weightings.stores,
                     get_var(n, "StorageUnit", "p_store")[stores_i].T,
                 )
             )
@@ -532,7 +532,7 @@ def add_RES_constraints(n, res_share, config):
         (
             linexpr(
                 (
-                    -n.snapshot_weightings.stores,
+                    n.snapshot_weightings.stores,
                     get_var(n, "Link", "p")[charger_i].T,
                 )
             )
@@ -560,9 +560,8 @@ def add_RES_constraints(n, res_share, config):
         .fillna("")
     )
 
-    # signs of resp. terms are coded in the linexpr.
     # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
-    lhs = lhs_gen + lhs_dispatch + lhs_store + lhs_charge + lhs_discharge
+    lhs = lhs_gen + lhs_dispatch - lhs_store - lhs_charge + lhs_discharge
 
     define_constraints(n, lhs, "=", rhs, "res_share")
 
