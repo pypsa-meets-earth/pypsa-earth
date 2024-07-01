@@ -184,8 +184,6 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
-    
-
     if ("csp" in config["renewable"].keys()) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
     ):
@@ -229,14 +227,20 @@ def attach_cooking_technologies(n, costs, config):
         return
 
     carriers = config["clean_cooking"]["fuel"]
-    p_nom_dict = dict(zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_nom"]))
-    p_max_pu_dict = dict(zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_max_pu"]))
+    p_nom_dict = dict(
+        zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_nom"])
+    )
+    p_max_pu_dict = dict(
+        zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_max_pu"])
+    )
     buses_i = n.buses.index
-    buses_i = [bus for bus in buses_i if not (bus.endswith('battery') or bus.endswith('H2'))]
+    buses_i = [
+        bus for bus in buses_i if not (bus.endswith("battery") or bus.endswith("H2"))
+    ]
 
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
     for key in bus_sub_dict:
-        bus_sub_dict[key] = bus_sub_dict[key][:len(buses_i)]
+        bus_sub_dict[key] = bus_sub_dict[key][: len(buses_i)]
 
     cooking_buses_i = None
     if "heat" in carriers:
@@ -252,7 +256,10 @@ def attach_cooking_technologies(n, costs, config):
             fuel_buses_i = n.buses.index[n.buses.carrier == "AC"]
         else:
             fuel_buses_i = n.madd(
-                "Bus", [bus + f" {fuel}" for bus in buses_i], carrier=fuel, **bus_sub_dict
+                "Bus",
+                [bus + f" {fuel}" for bus in buses_i],
+                carrier=fuel,
+                **bus_sub_dict,
             )
 
             n.madd(
@@ -279,8 +286,8 @@ def attach_cooking_technologies(n, costs, config):
                 efficiency=costs.at[fuel, "efficiency"],
                 capital_cost=costs.at[fuel, "capital_cost"],
                 marginal_cost=costs.at[fuel, "marginal_cost"],
-                p_nom = p_nom_dict[fuel],
-                p_max_pu = p_max_pu_dict[fuel],
+                p_nom=p_nom_dict[fuel],
+                p_max_pu=p_max_pu_dict[fuel],
             )
 
 
