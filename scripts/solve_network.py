@@ -458,6 +458,7 @@ def add_battery_constraints(n):
 
 def add_RES_constraints(n, res_share, config):
     lgrouper = n.loads.bus.map(n.buses.country)
+    # TODO drop load
     ggrouper = n.generators.bus.map(n.buses.country)
     sgrouper = n.storage_units.bus.map(n.buses.country)
     cgrouper = n.links.bus0.map(n.buses.country)
