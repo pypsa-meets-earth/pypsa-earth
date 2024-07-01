@@ -625,6 +625,8 @@ if __name__ == "__main__":
     solve_opts = snakemake.params.solving["options"]
 
     n = pypsa.Network(snakemake.input[0])
+    # needed to get `n.model` property
+    n.optimize.create_model()
     # TODO Double-check handling the augmented case
     # if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
     #    n.lines.loc[
