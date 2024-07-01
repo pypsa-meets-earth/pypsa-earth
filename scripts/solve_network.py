@@ -491,34 +491,18 @@ def add_RES_constraints(n, res_share, config):
 
     # Generators
     lhs_gen = (
-        linexpr((n.snapshot_weightings.generators, n.model["Generator-p"][gens_i]))
-        .T.groupby(ggrouper, axis=1)
-        .apply(join_exprs)
-    )
+        n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators
+    )  # .groupby(ggrouper).apply(join_exprs)
 
-    store_disp_expr = linexpr(
-        (
-            stores_t_weights,
-            n.model["StorageUnit-p_dispatch"][stores_i],
-        )
+    store_disp_expr = (
+        n.model["StorageUnit-p_dispatch"].loc[:, stores_i] * stores_t_weights
     )
-    store_expr = linexpr(
-        (
-            stores_t_weights,
-            n.model["StorageUnit-p_store"][stores_i],
-        )
+    store_expr = n.model["StorageUnit-p_store"].loc[:, stores_i] * stores_t_weights
+    charge_expr = n.model["Link-p"].loc[:, charger_i] * stores_t_weights.apply(
+        lambda r: r * n.links.loc[charger_i].efficiency
     )
-    charge_expr = linexpr(
-        (
-            stores_t_weights.apply(lambda r: r * n.links.loc[charger_i].efficiency),
-            n.model["Link-p"][charger_i],
-        )
-    )
-    discharge_expr = linexpr(
-        (
-            stores_t_weights.apply(lambda r: r * n.links.loc[discharger_i].efficiency),
-            n.model["Link-p"][discharger_i],
-        )
+    discharge_expr = n.model["Link-p"].loc[:, discharger_i] * stores_t_weights.apply(
+        lambda r: r * n.links.loc[discharger_i].efficiency
     )
 
     def form_lhs_definition(lin_expression, ngrouper, target_index=lhs_gen.index):
