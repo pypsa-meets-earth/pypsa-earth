@@ -138,23 +138,8 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     Set all asset costs and other parameters.
     """
-    if os.path.basename(os.getcwd()) == "pypsa-earth":
-        cooking = os.path.join(
-            os.getcwd(), "resources", config["clean_cooking"]["cooking_costs"]
-        )
-
-    else:
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        root_directory = os.path.abspath(os.path.join(script_directory, ".."))
-        cooking = os.path.join(
-            root_directory, "resources", config["clean_cooking"]["cooking_costs"]
-        )
-
-    cooking = pd.read_csv(cooking).set_index(["technology", "parameter"]).sort_index()
 
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
-
-    costs = pd.concat([costs, cooking], ignore_index=False)
 
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3

@@ -331,6 +331,14 @@ renewable:
     extendable: true
     csp_model: advanced # simple or advanced
 
+# clean_cooking configuration
+clean_cooking: 
+    enable: true
+    fuel: ["AC","lpg","pellets","firewood","charcoal","heat"]
+    p_nom: [1,1,1,1,1,1] # same order as fuels
+    p_max_pu: [1,1,1,1,1,1] # same order as fuels
+
+
 # TODO: Needs to be adjusted for Africa
 costs:
   year: 2030
