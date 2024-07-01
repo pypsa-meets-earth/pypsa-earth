@@ -222,6 +222,75 @@ def attach_stores(n, costs, config):
         )
 
 
+def attach_cooking_technologies(n, costs, config):
+    if config["clean_cooking"]["enable"] != True:
+        return
+
+    carriers = config["clean_cooking"]["fuel"]
+    p_nom_dict = dict(
+        zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_nom"])
+    )
+    p_max_pu_dict = dict(
+        zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_max_pu"])
+    )
+    buses_i = n.buses.index
+    buses_i = [
+        bus for bus in buses_i if not (bus.endswith("battery") or bus.endswith("H2"))
+    ]
+
+    bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
+    for key in bus_sub_dict:
+        bus_sub_dict[key] = bus_sub_dict[key][: len(buses_i)]
+
+    cooking_buses_i = None
+    if "heat" in carriers:
+        cooking_buses_i = n.madd(
+            "Bus", [bus + " cooking" for bus in buses_i], carrier="heat", **bus_sub_dict
+        )
+
+    for fuel in carriers:
+        if fuel == "heat":
+            continue
+
+        if fuel == "AC" and "AC" in n.buses.carrier.values:
+            fuel_buses_i = n.buses.index[n.buses.carrier == "AC"]
+        else:
+            fuel_buses_i = n.madd(
+                "Bus",
+                [bus + f" {fuel}" for bus in buses_i],
+                carrier=fuel,
+                **bus_sub_dict,
+            )
+
+            n.madd(
+                "Store",
+                fuel_buses_i,
+                bus=fuel_buses_i,
+                carrier=fuel,
+                e_cyclic=fuel == "AC",
+                capital_cost=costs.at[fuel, "capital_cost"],
+                marginal_cost=costs.at[fuel, "marginal_cost"],
+            )
+
+        if cooking_buses_i is not None:
+            min_length = min(len(fuel_buses_i), len(cooking_buses_i))
+            fuel_buses_i = fuel_buses_i[:min_length]
+            cooking_buses_i = cooking_buses_i[:min_length]
+
+            n.madd(
+                "Link",
+                fuel_buses_i + " stove",
+                bus0=fuel_buses_i,
+                bus1=cooking_buses_i,
+                carrier=fuel,
+                efficiency=costs.at[fuel, "efficiency"],
+                capital_cost=costs.at[fuel, "capital_cost"],
+                marginal_cost=costs.at[fuel, "marginal_cost"],
+                p_nom=p_nom_dict[fuel],
+                p_max_pu=p_max_pu_dict[fuel],
+            )
+
+
 def attach_hydrogen_pipelines(n, costs, config):
     elec_opts = config["electricity"]
     ext_carriers = elec_opts["extendable_carriers"]
@@ -284,6 +353,7 @@ if __name__ == "__main__":
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
+    attach_cooking_technologies(n, costs, config)
     attach_hydrogen_pipelines(n, costs, config)
 
     add_nice_carrier_names(n, config=snakemake.config)

@@ -138,6 +138,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     Set all asset costs and other parameters.
     """
+
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW and EUR
