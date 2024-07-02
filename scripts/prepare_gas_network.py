@@ -895,7 +895,8 @@ if not snakemake.params.custom_gas_network:
     pipelines = parse_states(pipelines, bus_regions_onshore)
 
     if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
-        plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+        # TODO: plotting should be a extra rule!
+        # plot_gas_network(pipelines, country_borders, bus_regions_onshore)
 
         pipelines = cluster_gas_network(
             pipelines, bus_regions_onshore, length_factor=1.25
@@ -912,7 +913,8 @@ if not snakemake.params.custom_gas_network:
 
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
-        plot_clustered_gas_network(pipelines, bus_regions_onshore)
+        # TODO: plotting should be a extra rule!
+        # plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
         average_length = pipelines["length"].mean
         print("average_length = ", average_length)
