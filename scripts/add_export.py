@@ -38,7 +38,7 @@ def select_ports(n):
         logger.error(
             "No export ports chosen, please add ports to the file data/export_ports.csv"
         )
-    gadm_level = snakemake.config["sector"]["gadm_level"]
+    gadm_level = snakemake.params.gadm_level
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(
@@ -46,7 +46,7 @@ def select_ports(n):
             port["country"],
             gadm_level,
             snakemake.input["shapes_path"],
-            snakemake.config["clustering_options"]["alternative_clustering"],
+            snakemake.params.alternative_clustering,
         ),
         axis=1,
     )
@@ -95,16 +95,16 @@ def add_export(n, hydrogen_buses_ports, export_profile):
 
     # add store depending on config settings
 
-    if snakemake.config["export"]["store"] == True:
-        if snakemake.config["export"]["store_capital_costs"] == "no_costs":
+    if snakemake.params.store == True:
+        if snakemake.params.store_capital_costs == "no_costs":
             capital_cost = 0
-        elif snakemake.config["export"]["store_capital_costs"] == "standard_costs":
+        elif snakemake.params.store_capital_costs == "standard_costs":
             capital_cost = costs.at[
                 "hydrogen storage tank type 1 including compressor", "fixed"
             ]
         else:
             logger.error(
-                f"Value {snakemake.config['export']['store_capital_costs']} for ['export']['store_capital_costs'] is not valid"
+                f"Value {snakemake.params.store_capital_costs} for ['export']['store_capital_costs'] is not valid"
             )
 
         n.add(
@@ -119,7 +119,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             e_cyclic=True,
         )
 
-    elif snakemake.config["export"]["store"] == False:
+    elif snakemake.params.store == False:
         pass
 
     # add load
@@ -139,12 +139,12 @@ def create_export_profile():
 
     export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
 
-    if snakemake.config["export"]["export_profile"] == "constant":
+    if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760
-        snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
+        snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
         export_profile = pd.Series(export_profile, index=snapshots)
 
-    elif snakemake.config["export"]["export_profile"] == "ship":
+    elif snakemake.params.export_profile == "ship":
         # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
         export_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
         export_profile.index = pd.to_datetime(export_profile.index)
@@ -165,7 +165,7 @@ def create_export_profile():
     export_profile = export_profile.resample(sopts[0].casefold()).mean()
 
     # revise logger msg
-    export_type = snakemake.config["export"]["export_profile"]
+    export_type = snakemake.params.export_profile
     logger.info(
         f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {sopts[0]}"
     )
@@ -204,10 +204,10 @@ if __name__ == "__main__":
 
     costs = prepare_costs(
         snakemake.input.costs,
-        snakemake.config["costs"]["USD2013_to_EUR2013"],
+        snakemake.params.USD_to_EUR,
         eval(snakemake.wildcards.discountrate),
         Nyears,
-        snakemake.config["costs"]["lifetime"],
+        snakemake.params.lifetime,
     )
 
     # get hydrogen export buses/ports

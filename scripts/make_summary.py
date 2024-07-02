@@ -187,7 +187,7 @@ def calculate_costs(n, label, costs):
 
 
 def calculate_cumulative_cost():
-    planning_horizons = snakemake.config["scenario"]["planning_horizons"]
+    planning_horizons = snakemake.params.planning_horizons
 
     cumulative_cost = pd.DataFrame(
         index=df["costs"].sum().index,
@@ -689,18 +689,18 @@ if __name__ == "__main__":
             discountrate,
             demand,
             export,
-        ): snakemake.config["results_dir"]
-        + snakemake.config["run"]
+        ): snakemake.params.results_dir
+        + snakemake.params.run
         + f"/postnetworks/elec_s{simpl}_{cluster}_ec_l{ll}_{opt}_{sopt}_{planning_horizon}_{discountrate}_{demand}_{export}export.nc"  # snakemake.config['results_dir'] + snakemake.config['run'] + f'/postnetworks/elec_s{simpl}_{cluster}_lv{lv}_{opt}_{sector_opt}_{planning_horizon}.nc' \
-        for simpl in snakemake.config["scenario"]["simpl"]
-        for cluster in snakemake.config["scenario"]["clusters"]
-        for ll in snakemake.config["scenario"]["ll"]
-        for opt in snakemake.config["scenario"]["opts"]
-        for sopt in snakemake.config["scenario"]["sopts"]
-        for planning_horizon in snakemake.config["scenario"]["planning_horizons"]
-        for discountrate in snakemake.config["costs"]["discountrate"]
-        for demand in snakemake.config["scenario"]["demand"]
-        for export in snakemake.config["export"]["h2export"]
+        for simpl in snakemake.params.scenario_config["simpl"]
+        for cluster in snakemake.params.scenario_config["clusters"]
+        for ll in snakemake.params.scenario_config["ll"]
+        for opt in snakemake.params.scenario_config["opts"]
+        for sopt in snakemake.params.scenario_config["sopts"]
+        for planning_horizon in snakemake.params.scenario_config["planning_horizons"]
+        for discountrate in snakemake.params.costs_config["discountrate"]
+        for demand in snakemake.params.scenario_config["demand"]
+        for export in snakemake.params.h2export_qty
     }
 
     print(networks_dict)
@@ -709,10 +709,10 @@ if __name__ == "__main__":
 
     costs_db = prepare_costs(
         snakemake.input.costs,
-        snakemake.config["costs"]["USD2013_to_EUR2013"],
-        snakemake.config["costs"]["discountrate"][0],
+        snakemake.params.costs_config["USD2013_to_EUR2013"],
+        snakemake.params.costs_config["discountrate"][0],
         Nyears,
-        snakemake.config["costs"]["lifetime"],
+        snakemake.params.costs_config["lifetime"],
     )
 
     df = make_summaries(networks_dict)
@@ -721,11 +721,11 @@ if __name__ == "__main__":
 
     to_csv(df)
 
-    if snakemake.config["foresight"] == "myopic":
+    if snakemake.params.foresight == "myopic":
         cumulative_cost = calculate_cumulative_cost().round(3)
         cumulative_cost.to_csv(
-            snakemake.config["summary_dir"]
+            snakemake.params.summary_dir
             + "/"
-            + snakemake.config["run"]
+            + snakemake.params.run
             + "/csvs/cumulative_cost.csv"
         )

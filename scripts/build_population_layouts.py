@@ -49,10 +49,7 @@ if __name__ == "__main__":
 
     # Filter for the year used in the workflow
     urban_percent_df = urban_percent_df.loc[
-        (
-            urban_percent_df["Year"]
-            == snakemake.config["scenario"]["planning_horizons"][0]
-        )
+        (urban_percent_df["Year"] == snakemake.params.planning_horizons)
     ]
 
     # Filter for urban percent column

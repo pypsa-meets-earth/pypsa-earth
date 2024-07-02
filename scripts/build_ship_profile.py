@@ -44,7 +44,7 @@ def build_ship_profile(export_volume, ship_opts):
     )  # extend ship series to above 8760 hours
 
     # Add index, cut profile after length of snapshots
-    snapshots = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
     ship = ship[: len(snapshots)]
     ship.index = snapshots
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         sets_path_to_root("pypsa-earth-sec")
 
     # Get parameters from config and wildcard
-    ship_opts = snakemake.config["export"]["ship"]
+    ship_opts = snakemake.params.ship_opts
     export_volume = eval(snakemake.wildcards.h2export)
 
     # Create export profile
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     else:
         export_profile = pd.Series(
             0,
-            index=pd.date_range(freq="h", **snakemake.config["snapshots"]),
+            index=pd.date_range(freq="h", **snakemake.params.snapshots),
             name="profile",
         )
 

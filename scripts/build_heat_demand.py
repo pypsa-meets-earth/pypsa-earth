@@ -17,7 +17,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="10")
         sets_path_to_root("pypsa-earth-sec")
 
-    time = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    time = pd.date_range(freq="h", **snakemake.params.snapshots)
     cutout_config = snakemake.input.cutout
     cutout = atlite.Cutout(cutout_config).sel(time=time)
 
