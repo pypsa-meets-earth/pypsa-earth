@@ -490,6 +490,7 @@ def add_RES_constraints(n, res_share, config):
     stores_t_weights = n.snapshot_weightings.stores
 
     # Generators
+    # TODO restore grouping by countries un-commenting calls of groupby()
     lhs_gen = (
         (n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators)
         # .groupby(ggrouper.to_xarray())
