@@ -2004,17 +2004,21 @@ def add_heat(n, costs):
                 )
 
             if sector in name:
-                heat_demand_transposed = heat_demand[
-                    [sector + " water", sector + " space"]
-                ].T
-                heat_demand_grouped = heat_demand_transposed.groupby(level=1).sum().T
-                heat_load = heat_demand_grouped[h_nodes[name]].multiply(factor)
+                heat_load = (
+                    heat_demand[[sector + " water", sector + " space"]]
+                    .groupby(level=1, axis=1)
+                    .sum()[h_nodes[name]]
+                    .multiply(factor)
+                )
 
         if name == "urban central":
-            heat_demand_transposed = heat_demand.T
-            heat_demand_grouped = heat_demand_transposed.groupby(level=1).sum().T
-            heat_load = heat_demand_grouped[h_nodes[name]].multiply(
-                factor * (1 + options["district_heating"]["district_heating_loss"]))
+            heat_load = (
+                heat_demand.groupby(level=1, axis=1)
+                .sum()[h_nodes[name]]
+                .multiply(
+                    factor * (1 + options["district_heating"]["district_heating_loss"])
+                )
+            )
 
         n.madd(
             "Load",

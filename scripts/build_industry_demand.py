@@ -11,7 +11,7 @@ import os
 from itertools import product
 
 import pandas as pd
-from helpers import read_csv_nafix
+from helpers import mock_snakemake, read_csv_nafix, sets_path_to_root
 
 _logger = logging.getLogger(__name__)
 
@@ -49,8 +49,6 @@ def country_to_nodal(industrial_production, keys):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
