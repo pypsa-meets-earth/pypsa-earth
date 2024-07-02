@@ -491,8 +491,10 @@ def add_RES_constraints(n, res_share, config):
 
     # Generators
     lhs_gen = (
-        n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators
-    )  # .groupby(ggrouper).apply(join_exprs)
+        (n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators)
+        # .groupby(ggrouper.to_xarray())
+        .sum()
+    )
 
     store_disp_expr = (
         n.model["StorageUnit-p_dispatch"].loc[:, stores_i] * stores_t_weights
@@ -505,18 +507,26 @@ def add_RES_constraints(n, res_share, config):
         lambda r: r * n.links.loc[discharger_i].efficiency
     )
 
-    def form_lhs_definition(lin_expression, ngrouper, target_index=lhs_gen.index):
-        lhs_form = (
-            (lin_expression.T.groupby(ngrouper, axis=1).apply(join_exprs))
-            .reindex(target_index)
-            .fillna("")
-        )
-        return lhs_form
-
-    lhs_dispatch = form_lhs_definition(store_disp_expr, sgrouper)
-    lhs_store = form_lhs_definition(store_expr, sgrouper)
-    lhs_charge = form_lhs_definition(charge_expr, cgrouper)
-    lhs_discharge = form_lhs_definition(discharge_expr, cgrouper)
+    lhs_dispatch = (
+        store_disp_expr
+        # .groupby(sgrouper)
+        .sum()
+    )
+    lhs_store = (
+        store_expr
+        # .groupby(sgrouper)
+        .sum()
+    )
+    lhs_charge = (
+        charge_expr
+        # .groupby(cgrouper)
+        .sum()
+    )
+    lhs_discharge = (
+        discharge_expr
+        # .groupby(cgrouper)
+        .sum()
+    )
 
     lhs = lhs_gen + lhs_dispatch - lhs_store - lhs_charge + lhs_discharge
 
