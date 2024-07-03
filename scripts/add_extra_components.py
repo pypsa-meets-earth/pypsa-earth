@@ -104,7 +104,7 @@ def attach_stores(n, costs, config):
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    buses_i = n.buses.index
+    buses_i = n.buses.query("carrier == 'AC'").index
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
     if "H2" in carriers:
@@ -187,14 +187,17 @@ def attach_stores(n, costs, config):
     if ("csp" in config["renewable"].keys()) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
     ):
-        # add buses for csp
-        n.madd("Bus", buses_i + " csp", carrier="csp", **bus_sub_dict)
-
-        csp_buses_i = n.buses.index[n.buses.index.str.contains("csp")]
-
-        # change bus of existing csp generators
-        old_csp_bus_vector = buses_i + " csp"
-        n.generators.loc[old_csp_bus_vector, "bus"] = csp_buses_i
+        # add separate buses for csp
+        main_buses = n.generators.query("carrier == 'csp'").bus
+        csp_buses_i = n.madd(
+            "Bus",
+            main_buses + " csp",
+            carrier="csp",
+            x=n.buses.loc[main_buses, "x"].values,
+            y=n.buses.loc[main_buses, "y"].values,
+            country=n.buses.loc[main_buses, "country"].values,
+        )
+        n.generators.loc[main_buses.index, "bus"] = csp_buses_i
 
         # add stores for csp
         n.madd(
@@ -213,7 +216,7 @@ def attach_stores(n, costs, config):
             "Link",
             csp_buses_i,
             bus0=csp_buses_i,
-            bus1=buses_i,
+            bus1=main_buses,
             carrier="csp",
             efficiency=costs.at["csp-tower", "efficiency"],
             capital_cost=costs.at["csp-tower", "capital_cost"],

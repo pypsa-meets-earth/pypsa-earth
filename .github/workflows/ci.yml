@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  schedule:
+  - cron: "0 5 * * TUE"
+
+env:
+  CACHE_NUMBER: 1  # Change this value to manually reset the environment cache
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false  # don't break CI for one OS if another fails before
+      matrix:
+        include:
+        - os: ubuntu-latest
+          label: ubuntu-latest
+          prefix: /usr/share/miniconda3/envs/pypsa-earth
+        - os: macos-latest
+          label: macos-latest
+          prefix: /Users/runner/miniconda3/envs/pypsa-earth
+        - os: windows-latest
+          label: windows-latest
+          prefix: C:\Miniconda3\envs\pypsa-earth
+
+    name: Build on ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v2
+
+
+    - name: Setup micromamba
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        micromamba-version: latest
+        environment-file: envs/environment.yaml
+        log-level: debug
+        init-shell: bash
+        cache-environment: true
+        cache-downloads: true
+
+    - name: Set cache dates
+      run: |
+        echo "WEEK=$(date +'%Y%U')" >> $GITHUB_ENV
+
+    - name: Cache data and cutouts folders
+      uses: actions/cache@v3
+      with:
+        path: |
+          data
+          cutouts
+        key: data-cutouts-${{ env.WEEK }}-${{ env.CACHE_NUMBER }}
+
+
+    - name: Conda list
+      run: conda list
+
+    - name: Run Test
+      run: make test
+
+      # - name: Test plotting and summaries
+      #   run: |
+      #     snakemake --cores all plot_all_p_nom
+      #     snakemake --cores all plot_all_summaries
+      #     snakemake --cores all make_all_summaries
+      #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results

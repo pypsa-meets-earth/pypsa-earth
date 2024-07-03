@@ -18,13 +18,11 @@ from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
 
-if "config" not in globals() or not config:  # skip when used as sub-workflow
-    if not exists("config.yaml"):
-        copyfile("config.tutorial.yaml", "config.yaml")
-
-    configfile: "config.yaml"
+if not exists("config.yaml"):
+    copyfile("config.tutorial.yaml", "config.yaml")
 
 
+configfile: "config.yaml"
 configfile: "configs/bundle_config.yaml"
 
 
@@ -74,32 +72,6 @@ rule clean:
             shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
             pass
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
-
-
-rule run_tests:
-    output:
-        touch("tests.done"),
-    run:
-        import os
-
-        shell("snakemake --cores all build_test_configs")
-        directory = "test/tmp"  # assign directory
-        for filename in os.scandir(directory):  # iterate over files in that directory
-            if filename.is_file():
-                print(
-                    f"Running test: config name '{filename.name}'' and path name '{filename.path}'"
-                )
-                if "custom" in filename.name:
-                    shell("mkdir -p configs/scenarios")
-                    shell("cp {filename.path} configs/scenarios/config.custom.yaml")
-                    shell("snakemake --cores 1 run_all_scenarios --forceall")
-                if "monte" in filename.name:
-                    shell("cp {filename.path} config.yaml")
-                    shell("snakemake --cores all solve_all_networks_monte --forceall")
-                else:
-                    shell("cp {filename.path} config.yaml")
-                    shell("snakemake --cores all solve_all_networks --forceall")
-        print("Tests are successful.")
 
 
 rule solve_all_networks:
@@ -1001,26 +973,6 @@ rule plot_network:
         "scripts/plot_network.py"
 
 
-rule build_test_configs:
-    input:
-        base_config="config.tutorial.yaml",
-        update_file_list=[
-            "test/config.tutorial_noprogress.yaml",
-            "test/config.custom.yaml",
-            "test/config.monte_carlo.yaml",
-            "test/config.landlock.yaml",
-        ],
-    output:
-        tmp_test_configs=[
-            "test/tmp/config.tutorial_noprogress_tmp.yaml",
-            "test/tmp/config.custom_tmp.yaml",
-            "test/tmp/config.monte_carlo_tmp.yaml",
-            "test/tmp/config.landlock_tmp.yaml",
-        ],
-    script:
-        "scripts/build_test_configs.py"
-
-
 rule make_statistics:
     params:
         countries=config["countries"],
@@ -1047,6 +999,7 @@ rule run_scenario:
     run:
         from build_test_configs import create_test_config
         import yaml
+        from subprocess import run
 
         # get base configuration file from diff config
         with open(input.diff_config) as f:
@@ -1064,8 +1017,12 @@ rule run_scenario:
         )
         # merge the default config file with the difference
         create_test_config(base_config_path, input.diff_config, "config.yaml")
-        os.system("snakemake -j all solve_all_networks --rerun-incomplete")
-        os.system("snakemake -j1 make_statistics --force")
+        run(
+            "snakemake -j all solve_all_networks --rerun-incomplete",
+            shell=True,
+            check=True,
+        )
+        run("snakemake -j1 make_statistics --force", shell=True, check=True)
         copyfile("config.yaml", output.copyconfig)
 
 
