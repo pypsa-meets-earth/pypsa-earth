@@ -5,7 +5,10 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test3
+run:
+  name: "test3" # use this to keep track of runs with different settings
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
 
 foresight: overnight
 

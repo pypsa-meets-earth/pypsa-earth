@@ -15,6 +15,7 @@ if not exists("config.yaml"):
     copyfile("config.default.yaml", "config.yaml")
 
 
+configfile: "config.pypsa-earth.yaml"
 configfile: "config.yaml"
 
 
@@ -23,18 +24,23 @@ PYPSAEARTH_FOLDER = "pypsa-earth"
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
+run = config["run"]
 
-SDIR = config["summary_dir"] + config["run"]
-RDIR = config["results_dir"] + config["run"]
+
+SDIR = config["summary_dir"] + run["name"]
+RDIR = config["results_dir"] + run["name"]
 CDIR = config["costs_dir"]
 
 config.update({"git_commit": get_last_commit_message(".")})
 config.update({"submodule_commit": get_last_commit_message(PYPSAEARTH_FOLDER)})
 
-CUTOUTS_PATH = (
-    "cutouts/cutout-2013-era5-tutorial.nc"
+RDIR_PE = run["name"] + "/" if run.get("name") else ""
+CDIR_PE = RDIR_PE if not run.get("shared_cutouts") else ""
+
+CUTOUTS_PATH = "cutouts/" + CDIR_PE + (
+    "cutout-2013-era5-tutorial.nc"
     if config["tutorial"]
-    else "cutouts/cutout-2013-era5.nc"
+    else "cutout-2013-era5.nc"
 )
 
 
@@ -148,7 +154,7 @@ if not config["custom_data"]["gas_network"]:
     rule prepare_gas_network:
         input:
             regions_onshore=pypsaearth(
-                "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+                "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
         output:
             clustered_gas_network="resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
@@ -182,7 +188,7 @@ rule prepare_sector_network:
         district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
         shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         pipelines="data_custom/pipelines.csv"
         if config["custom_data"]["gas_network"]
@@ -218,7 +224,7 @@ rule add_export:
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
     output:
         RDIR
@@ -242,7 +248,7 @@ rule override_respot:
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
         overrides="data/override_component_attrs",
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+        network=pypsaearth("networks/" + RDIR_PE + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
     output:
         RDIR
@@ -253,7 +259,7 @@ rule override_respot:
 
 rule prepare_transport_data:
     input:
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
+        network=pypsaearth("networks/" + RDIR_PE + "elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
@@ -295,7 +301,7 @@ rule build_cop_profiles:
 
 rule prepare_heat_data:
     input:
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
+        network=pypsaearth("networks/" + RDIR_PE + "elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
         temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}.nc",
@@ -343,7 +349,7 @@ rule build_solar_thermal_profiles:
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -360,7 +366,7 @@ rule build_solar_thermal_profiles:
 
 rule build_population_layouts:
     input:
-        nuts3_shapes=pypsaearth("resources/shapes/gadm_shapes.geojson"),
+        nuts3_shapes=pypsaearth("resources/" + RDIR_PE + "shapes/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -393,7 +399,7 @@ rule build_clustered_population_layouts:
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         gdp_layout="resources/gdp_shares/gdp_layout.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -413,7 +419,7 @@ rule build_heat_demand:
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -434,7 +440,7 @@ rule build_temperature_profiles:
         pop_layout_urban="resources/population_shares/pop_layout_urban.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -631,27 +637,92 @@ rule clean:
         shell("rm -r " + PYPSAEARTH_FOLDER + "/networks")
 
 
-rule build_industrial_distribution_key:  #default data
-    input:
-        regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
-        ),
-        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
-        clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
-        industrial_database="data/industrial_database.csv",
-        shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
-        ),
-    output:
-        industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
-    threads: 1
-    resources:
-        mem_mb=1000,
-    benchmark:
-        "benchmarks/build_industrial_distribution_key_elec_s{simpl}_{clusters}"
-    script:
-        "scripts/build_industrial_distribution_key.py"
+if config["custom_data"].get("industry_demand", False) == True:
 
+    rule build_industrial_distribution_key:  #custom data
+        input:
+            regions_onshore=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
+            industrial_database="resources/custom_data/industrial_database.csv",
+            shapes_path=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            #shapes_path=PYPSAEARTH_FOLDER + "/resources/shapes/MAR2.geojson",
+        output:
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+        threads: 1
+        resources:
+            mem_mb=1000,
+        benchmark:
+            "benchmarks/build_industrial_distribution_key/s{simpl}_{clusters}"
+        script:
+            "scripts/build_industrial_distribution_key.py"
+
+    rule build_industry_demand:  #custom data
+        input:
+            industry_sector_ratios="resources/custom_data/industry_sector_ratios_{demand}_{planning_horizons}.csv",
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+            industrial_production_per_country_tomorrow="resources/custom_data/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            costs=CDIR
+            + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            industry_growth_cagr="data/demand/industry_growth_cagr.csv",
+        output:
+            industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        threads: 1
+        resources:
+            mem_mb=1000,
+        benchmark:
+            "benchmarks/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv"
+        script:
+            "scripts/build_industry_demand.py"
+
+
+if config["custom_data"].get("industry_demand", False) == False:
+
+    rule build_industrial_distribution_key:  #default data
+        input:
+            regions_onshore=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}.csv",
+            industrial_database="data/industrial_database.csv",
+            shapes_path=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            ),
+        output:
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+        threads: 1
+        resources:
+            mem_mb=1000,
+        benchmark:
+            "benchmarks/build_industrial_distribution_key_elec_s{simpl}_{clusters}"
+        script:
+            "scripts/build_industrial_distribution_key.py"
+
+
+
+    rule build_industry_demand:  #default data
+        input:
+            industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
+            #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
+            #industrial_production_per_country="data/industrial_production_per_country.csv",
+            base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
+            industrial_database="data/industrial_database.csv",
+            costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            industry_growth_cagr="data/demand/industry_growth_cagr.csv",
+        output:
+            industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        threads: 1
+        resources:
+            mem_mb=1000,
+        benchmark:
+            "benchmarks/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv"
+        script:
+            "scripts/build_industry_demand.py"
 
 rule build_base_industry_totals:  #default data
     input:
@@ -668,22 +739,3 @@ rule build_base_industry_totals:  #default data
     script:
         "scripts/build_base_industry_totals.py"
 
-
-rule build_industry_demand:  #default data
-    input:
-        industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}.csv",
-        #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
-        #industrial_production_per_country="data/industrial_production_per_country.csv",
-        base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
-        industrial_database="data/industrial_database.csv",
-        costs=CDIR + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
-        industry_growth_cagr="data/demand/industry_growth_cagr.csv",
-    output:
-        industrial_energy_demand_per_node="resources/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
-    threads: 1
-    resources:
-        mem_mb=1000,
-    benchmark:
-        "benchmarks/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv"
-    script:
-        "scripts/build_industry_demand.py"
