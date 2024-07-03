@@ -789,8 +789,6 @@ def datafiles_retrivedatabundle(config):
         )
     )
 
-    print("List of outputs to be downloaded:" + str(listoutputs))
-
     return listoutputs
 
 

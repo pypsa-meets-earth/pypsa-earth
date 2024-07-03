@@ -341,7 +341,10 @@ if config["enable"].get("build_natura_raster", False):
             area_crs=config["crs"]["area_crs"],
         input:
             shapefiles_land="data/landcover",
-            cutouts=expand("cutouts/" + CDIR + "{cutouts}.nc", **config["atlite"]),
+            cutouts=expand(
+                "cutouts/" + CDIR + "{cutout}.nc",
+                cutout=[c["cutout"] for _, c in config["renewable"].items()],
+            ),
         output:
             "resources/" + RDIR + "natura.tiff",
         log:
