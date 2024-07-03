@@ -20,10 +20,8 @@ HTTP = HTTPRemoteProvider()
 
 
 configfile: "config.default.yaml"
+configfile: "configs/bundle_config.yaml"
 configfile: "config.yaml"
-
-
-# configfile: "configs/bundle_config.yaml"
 
 
 config.update({"git_commit": get_last_commit_message(".")})
