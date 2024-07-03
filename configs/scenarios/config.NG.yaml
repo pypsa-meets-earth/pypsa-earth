@@ -17,6 +17,3 @@ countries:
 
 scenario:
   clusters: [5]
-
-enable:
-  retrieve_databundle: false

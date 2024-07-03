@@ -18,12 +18,12 @@ from pathlib import Path
 
 HTTP = HTTPRemoteProvider()
 
-if not exists("config.yaml"):
-    copyfile("config.tutorial.yaml", "config.yaml")
 
-
+configfile: "config.default.yaml"
 configfile: "config.yaml"
-configfile: "configs/bundle_config.yaml"
+
+
+# configfile: "configs/bundle_config.yaml"
 
 
 config.update({"git_commit": get_last_commit_message(".")})
