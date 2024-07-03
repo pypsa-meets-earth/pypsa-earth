@@ -110,17 +110,17 @@ if __name__ == "__main__":
 
     # Loading config file and wild cards
 
-    year = snakemake.config["demand_data"]["base_year"]
-    countries = snakemake.config["countries"]
+    year = snakemake.params.base_year
+    countries = snakemake.params.countries
     # countries = ["DE", "US", "EG", "MA", "UA", "UK"]
     # countries = ["EG", "BH"]
 
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
     no_years = int(snakemake.wildcards.planning_horizons) - int(
-        snakemake.config["demand_data"]["base_year"]
+        snakemake.params.base_year
     )
-    include_other = snakemake.config["demand_data"]["other_industries"]
+    include_other = snakemake.params.other_industries
 
     industry_list = [
         "iron and steel",

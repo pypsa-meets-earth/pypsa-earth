@@ -21,9 +21,9 @@ if __name__ == "__main__":
         )
         sets_path_to_root("pypsa-earth-sec")
 
-    config = snakemake.config["solar_thermal"]
+    config = snakemake.params.solar_thermal_config
 
-    time = pd.date_range(freq="h", **snakemake.config["snapshots"])
+    time = pd.date_range(freq="h", **snakemake.params.snapshots)
     cutout_config = snakemake.input.cutout
     cutout = atlite.Cutout(cutout_config).sel(time=time)
 
