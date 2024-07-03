@@ -11,25 +11,19 @@ on:
   - cron: "0 5 * * TUE"
 
 env:
-  CACHE_NUMBER: 1  # Change this value to manually reset the environment cache
+  CACHE_NUMBER: 2  # Change this value to manually reset the environment cache
 
 jobs:
   build:
     strategy:
-      fail-fast: false  # don't break CI for one OS if another fails before
+      fail-fast: false
+      max-parallel: 3
       matrix:
-        include:
-        - os: ubuntu-latest
-          label: ubuntu-latest
-          prefix: /usr/share/miniconda3/envs/pypsa-earth
-        - os: macos-latest
-          label: macos-latest
-          prefix: /Users/runner/miniconda3/envs/pypsa-earth
-        - os: windows-latest
-          label: windows-latest
-          prefix: C:\Miniconda3\envs\pypsa-earth
+        os:
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
 
-    name: Build on ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
 
     defaults:
