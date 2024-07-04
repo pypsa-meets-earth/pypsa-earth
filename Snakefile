@@ -732,13 +732,17 @@ rule build_industrial_distribution_key:  #default data
         industry_database=config["custom_data"]["industry_database"],
     input:
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         industrial_database="data/industrial_database.csv",
         shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
     output:
         industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
