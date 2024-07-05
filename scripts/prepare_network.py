@@ -103,9 +103,11 @@ def download_emission_data():
             )
         pathlib.Path(file_path).unlink(missing_ok=True)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
-    except:
-        logger.error(f"Failed download resource from '{url}'.")
-        return False
+    except requests.exceptions.RequestException as e:
+        logger.error(
+            f"Failed download resource from '{url}' with exception message '{e}'."
+        )
+        raise SystemExit(e)
 
 
 def emission_extractor(filename, emission_year, country_names):
@@ -120,7 +122,7 @@ def emission_extractor(filename, emission_year, country_names):
     emission_year : int
         Year of CO2 emissions
     country_names : numpy.ndarray
-        Two letter country codes of analysed countries.
+        Two-letter country codes of analysed countries.
 
     Returns
     -------
@@ -128,8 +130,8 @@ def emission_extractor(filename, emission_year, country_names):
     """
 
     # data reading process
-    datapath = get_path(get_current_directory_path(), "data", filename)
-    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
+    data_path = get_path(get_current_directory_path(), "data", filename)
+    df = pd.read_excel(data_path, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
     df = df.set_index("Country_code_A3")
     df = df.loc[
@@ -192,7 +194,7 @@ def set_line_s_max_pu(n, s_max_pu):
     logger.info(f"N-1 security margin of lines set to {s_max_pu}")
 
 
-def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
+def set_transmission_limit(n, ll_type, factor, costs):
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
 
     _lines_s_nom = (
@@ -430,7 +432,7 @@ if __name__ == "__main__":
                 break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
-    set_transmission_limit(n, ll_type, factor, costs, Nyears)
+    set_transmission_limit(n, ll_type, factor, costs)
 
     set_line_nom_max(
         n,
