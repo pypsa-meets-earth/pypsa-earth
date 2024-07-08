@@ -22,7 +22,6 @@ snapshots:
   end: "2013-03-7"
 
 
-
 clean_osm_data_options:
   threshold_voltage: 35000
 

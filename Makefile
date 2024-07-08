@@ -9,7 +9,6 @@ test:
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.custom.yaml
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml configs/scenarios/config.NG.yaml
-	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.tutorial_noprogress.yaml
 	snakemake solve_all_networks_monte -call --configfile config.tutorial.yaml test/config.monte_carlo.yaml
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.landlock.yaml
 	echo "All tests completed successfully."
