@@ -48,6 +48,9 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Create files where the code outputs the value of the objective function. `PR #1033 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1033>`__
 
+* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
+
+
 PyPSA-Earth 0.3.0
 =================
 

@@ -54,6 +54,14 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         )
 
 
+def copy_default_files():
+    fn = Path("config.yaml")
+    if not fn.exists():
+        fn.write_text(
+            "# Write down config entries differing from config.default.yaml\n\nrun: {}"
+        )
+
+
 def create_logger(logger_name, level=logging.INFO):
     """
     Create a logger for a module and adds a handler needed to capture in logs
