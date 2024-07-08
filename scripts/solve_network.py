@@ -84,6 +84,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
+import yaml
 from _helpers import configure_logging, create_logger
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
@@ -506,10 +507,13 @@ def extra_functionality(n, snapshots):
     add_battery_constraints(n)
 
 
-def solve_network(n, config, opts="", **kwargs):
-    solver_options = config["solving"]["solver"].copy()
-    solver_name = solver_options.pop("name")
-    cf_solving = config["solving"]["options"]
+def solve_network(n, config, solving={}, opts="", **kwargs):
+    set_of_options = solving["solver"]["options"]
+    cf_solving = solving["options"]
+
+    solver_options = solving["solver_options"][set_of_options] if set_of_options else {}
+    solver_name = solving["solver"]["name"]
+
     track_iterations = cf_solving.get("track_iterations", False)
     min_iterations = cf_solving.get("min_iterations", 4)
     max_iterations = cf_solving.get("max_iterations", 6)
@@ -558,18 +562,19 @@ if __name__ == "__main__":
     if tmpdir is not None:
         Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
-    solve_opts = snakemake.params.solving["options"]
+    solving = snakemake.params.solving
 
     n = pypsa.Network(snakemake.input[0])
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
             snakemake.params.augmented_line_connection.get("min_expansion")
         )
-    n = prepare_network(n, solve_opts)
+    n = prepare_network(n, solving)
 
     n = solve_network(
         n,
         config=snakemake.config,
+        solving=solving,
         opts=opts,
         solver_dir=tmpdir,
         solver_logfile=snakemake.log.solver,
