@@ -32,6 +32,17 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
     configfile: "config.yaml"
 
 
+current_config_version = config.get("version")
+
+if actual_config_version != current_config_version:
+    logger.warning(
+        f"The current version of 'config.yaml' doesn't match to the code version:\n\r"
+        f" {current_config_version} provided, {actual_config_version} expected.\n\r"
+        f"That can lead to the errors during execution of the workflow.\n\r"
+        f"Please update 'config.yaml' according to 'config.default.yaml' "
+    )
+
+
 configfile: "configs/bundle_config.yaml"
 
 
