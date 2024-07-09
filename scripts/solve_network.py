@@ -569,7 +569,7 @@ if __name__ == "__main__":
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
             snakemake.params.augmented_line_connection.get("min_expansion")
         )
-    n = prepare_network(n, solving)
+    n = prepare_network(n, solving["options"])
 
     n = solve_network(
         n,
