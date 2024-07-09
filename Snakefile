@@ -16,7 +16,13 @@ from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
+
 HTTP = HTTPRemoteProvider()
+
+# using snakemake capabilities to deal with yanl configs
+with open("config.default.yaml", "r") as f:
+    actual_config = yaml.safe_load(f)
+actual_config_version = actual_config.get("version")
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
