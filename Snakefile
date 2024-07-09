@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import sys
+import yaml
 
 sys.path.append("./scripts")
 
