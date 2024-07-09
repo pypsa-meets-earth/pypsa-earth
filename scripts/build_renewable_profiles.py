@@ -489,7 +489,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
@@ -603,10 +603,19 @@ if __name__ == "__main__":
             columns={"x": "lon", "y": "lat", "country": "countries"}
         ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
-        resource["plants"]["installed_hydro"] = [
-            True if (bus_id in hydro_ppls.bus.values) else False
-            for bus_id in resource["plants"].index
-        ]
+
+        if snakemake.params.alternative_clustering == False:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.bus.values) else False
+                for bus_id in resource["plants"].index
+            ]
+
+         ### TODO: quickfix. above case and the below case should by unified
+        if snakemake.params.alternative_clustering == True:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.region_id.values) else False
+                for bus_id in resource["plants"].shape_id.values
+            ]
 
         # get normalization before executing runoff
         normalization = None
@@ -640,6 +649,7 @@ if __name__ == "__main__":
                         )
                         * config.get("multiplier", 1.0)
                     )
+                    
                 elif method == "eia":
                     path_eia_stats = snakemake.input.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
