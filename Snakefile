@@ -694,6 +694,31 @@ rule build_industry_demand:  #default data
         "scripts/build_industry_demand.py"
 
 
+rule build_existing_heating_distribution:
+    params:
+        baseyear=config["scenario"]["planning_horizons"][0],
+        sector=config["sector"],
+        existing_capacities=config["existing_capacities"],
+    input:
+        existing_heating="data/existing_infrastructure/existing_heating_raw.csv",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+        clustered_pop_energy_layout="resources/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",  #"resources/population_shares/pop_weighted_energy_totals_s{simpl}_{clusters}.csv",
+        district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    output:
+        existing_heating_distribution="resources/heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    threads: 1
+    resources:
+        mem_mb=2000,
+    log:
+        RDIR
+        + "/logs/build_existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.log",
+    benchmark:
+        RDIR
+        +"/benchmarks/build_existing_heating_distribution/{demand}_s{simpl}_{clusters}_{planning_horizons}"
+    script:
+        "scripts/build_existing_heating_distribution.py"
+
+
 if config["foresight"] == "myopic":
 
     rule add_existing_baseyear:
@@ -715,7 +740,7 @@ if config["foresight"] == "myopic":
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
             cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
             cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}.nc",
-            existing_heating_distribution="data/existing_infrastructure/existing_heating_raw.csv",
+            existing_heating_distribution="resources/heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         output:
             RDIR
             + "/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -731,10 +756,8 @@ if config["foresight"] == "myopic":
             RDIR
             + "/logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
         benchmark:
-            (
-                RDIR
-                + "/benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
-            )
+            RDIR
+            +"/benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         script:
             "scripts/add_existing_baseyear.py"
 
