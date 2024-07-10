@@ -48,6 +48,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Create files where the code outputs the value of the objective function. `PR #1033 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1033>`__
 
+* Fix bug for hydro inflow normalization for gadm regions (alternative clustering). `PR #1057 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1057>`__
+
 PyPSA-Earth 0.3.0
 =================
 
