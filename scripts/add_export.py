@@ -77,7 +77,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
         "Bus",
         "H2 export bus",
         carrier="H2",
-        location="World",  # TODO: revise
+        location="Earth",
         x=x_export,
         y=y_export,
     )
