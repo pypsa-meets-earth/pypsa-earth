@@ -121,7 +121,7 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
-import os
+import pathlib
 from functools import reduce
 
 import geopandas as gpd
@@ -131,9 +131,11 @@ import pyomo.environ as po
 import pypsa
 from _helpers import (
     REGION_COLS,
+    change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
+    mock_snakemake,
     sets_path_to_root,
     update_p_nom_max,
 )
@@ -145,6 +147,7 @@ from pypsa.clustering.spatial import (
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
+from scipy.sparse import csgraph
 from shapely.geometry import Point
 
 idx = pd.IndexSlice
@@ -428,7 +431,6 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("random_state", 0)
 
     def fix_country_assignment_for_hac(n):
-        from scipy.sparse import csgraph
 
         # overwrite country of nodes that are disconnected from their country-topology
         for country in n.buses.country.unique():
@@ -633,8 +635,7 @@ def clustering_for_n_clusters(
 
 
 def save_to_geojson(s, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)
+    pathlib.Path(fn).unlink(missing_ok=True)
     df = s.reset_index()
     schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
     df.to_file(fn, driver="GeoJSON", schema=schema)
@@ -656,13 +657,12 @@ def cluster_regions(busmaps, inputs, output):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
         sets_path_to_root("pypsa-earth")
+
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config

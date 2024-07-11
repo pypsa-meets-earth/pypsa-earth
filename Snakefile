@@ -6,7 +6,7 @@ import sys
 
 sys.path.append("./scripts")
 
-from os.path import normpath, exists, isdir
+from os.path import normpath, exists
 from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider

@@ -84,15 +84,20 @@ It further adds extendable ``generators`` with **zero** capacity for
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
-import os
-
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
-from powerplantmatching.export import map_country_bus
+from _helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+    read_csv_nafix,
+    sets_path_to_root,
+    update_p_nom_max,
+)
 
 idx = pd.IndexSlice
 
@@ -365,7 +370,7 @@ def attach_wind_and_solar(
 
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
-                caps = map_country_bus(df.query("carrier == @tech"), buses)
+                caps = pm.export.map_country_bus(df.query("carrier == @tech"), buses)
                 caps = caps.groupby(["bus"]).p_nom.sum()
                 caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
             else:
@@ -807,11 +812,10 @@ def add_nice_carrier_names(n, config):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake("add_electricity")
         sets_path_to_root("pypsa-earth")
+
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)

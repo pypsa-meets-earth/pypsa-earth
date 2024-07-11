@@ -17,21 +17,22 @@ Description
 -----------
 """
 
-import os
-
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pypsa
 from _helpers import (
     aggregate_costs,
     aggregate_p,
+    change_to_script_dir,
     configure_logging,
     create_logger,
-    load_network_for_plots,
+    mock_snakemake,
 )
+from add_electricity import load_costs, update_transmission_costs
 from matplotlib.legend_handler import HandlerPatch
 from matplotlib.patches import Circle, Ellipse
 
@@ -356,11 +357,43 @@ def plot_total_cost_bar(n, ax=None):
     ax.grid(True, axis="y", color="k", linestyle="dotted")
 
 
+def load_network_for_plots(
+    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+):
+
+    n = pypsa.Network(fn)
+
+    n.loads["carrier"] = n.loads.bus.map(n.buses.carrier) + " load"
+    n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
+
+    n.links["carrier"] = (
+        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+    )
+    n.lines["carrier"] = "AC line"
+    n.transformers["carrier"] = "AC transformer"
+
+    n.lines["s_nom"] = n.lines["s_nom_min"]
+    n.links["p_nom"] = n.links["p_nom_min"]
+
+    if combine_hydro_ps:
+        n.storage_units.loc[
+            n.storage_units.carrier.isin({"PHS", "hydro"}), "carrier"
+        ] = "hydro+PHS"
+
+    # if the carrier was not set on the heat storage units
+    # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
+    # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
+
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
+    update_transmission_costs(n, costs)
+
+    return n
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "plot_network",
             network="elec",

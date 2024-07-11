@@ -17,7 +17,7 @@ Relevant Settings
         add_to_snakefile: false # When set to true, enables Monte Carlo sampling
         samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
         sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
-        seed: 42 # set seedling for reproducibilty
+        seed: 42 # set seedling for reproducibility
     uncertainties:
         loads_t.p_set:
           type: uniform
@@ -67,17 +67,16 @@ networks. Thereby, this script creates samples x amount of networks. The iterato
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
 0 to (total number of) SAMPLES.
 """
-import os
 
 import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
 import seaborn as sns
-from _helpers import configure_logging, create_logger
+from _helpers import change_to_script_dir, configure_logging, create_logger
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, minmax_scale
 from solve_network import *
 
 logger = create_logger(__name__)
@@ -100,8 +99,6 @@ def monte_carlo_sampling_pydoe2(
     Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
     Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     """
-    from pyDOE2 import lhs
-    from scipy.stats import qmc
 
     # Generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     lh = lhs(
@@ -135,8 +132,6 @@ def monte_carlo_sampling_chaospy(
     Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
     """
-    import chaospy
-    from scipy.stats import qmc
 
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
@@ -178,7 +173,6 @@ def monte_carlo_sampling_scipy(
     Documentation for Latin Hypercube: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.LatinHypercube.html#scipy.stats.qmc.LatinHypercube
     Orthogonal LHS is better than basic LHS: https://github.com/scipy/scipy/pull/14546/files, https://en.wikipedia.org/wiki/Latin_hypercube_sampling
     """
-    from scipy.stats import qmc
 
     sampler = qmc.LatinHypercube(
         d=N_FEATURES,
@@ -232,36 +226,37 @@ def rescale_distribution(
     - The function supports rescaling for uniform, normal, lognormal, triangle, beta, and gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
-    from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
-    from sklearn.preprocessing import MinMaxScaler, minmax_scale
 
     for idx, value in enumerate(uncertainties_values):
         dist = value.get("type")
         params = value.get("args")
 
-        match dist:
-            case "uniform":
-                l_bounds, u_bounds = params
-                latin_hypercube[:, idx] = minmax_scale(
-                    latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
-                )
-            case "normal":
-                mean, std = params
-                latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
-            case "lognormal":
-                shape = params[0]
-                latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
-            case "triangle":
-                mid_point = params[0]
-                latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], mid_point)
-            case "beta":
-                a, b = params
-                latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
-            case "gamma":
-                shape, scale = params
-                latin_hypercube[:, idx] = gamma.ppf(
-                    latin_hypercube[:, idx], shape, scale
-                )
+        if dist == "uniform":
+            l_bounds, u_bounds = params
+            latin_hypercube[:, idx] = minmax_scale(
+                latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
+            )
+        elif dist == "normal":
+            mean, std = params
+            latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
+        elif dist == "lognormal":
+            shape = params[0]
+            latin_hypercube[:, idx] = lognorm.ppf(latin_hypercube[:, idx], s=shape)
+        elif dist == "triangle":
+            mid_point = params[0]
+            latin_hypercube[:, idx] = triang.ppf(latin_hypercube[:, idx], mid_point)
+        elif dist == "beta":
+            a, b = params
+            latin_hypercube[:, idx] = beta.ppf(latin_hypercube[:, idx], a, b)
+        elif dist == "gamma":
+            shape, scale = params
+            latin_hypercube[:, idx] = gamma.ppf(latin_hypercube[:, idx], shape, scale)
+        else:
+            exception_message = (
+                f"The value {dist} is not among the allowed ones: uniform, normal, lognormal, "
+                f"triangle, beta, gamma"
+            )
+            raise NotImplementedError(exception_message)
 
     # samples space needs to be from 0 to 1
     mm = MinMaxScaler(feature_range=(0, 1), clip=True)
@@ -348,9 +343,7 @@ def validate_parameters(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "monte_carlo",
             simpl="",
