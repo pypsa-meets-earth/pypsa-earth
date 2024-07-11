@@ -12,18 +12,13 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from _helpers import create_country_list, get_last_commit_message
+from _helpers import create_country_list, get_last_commit_message, match_config
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
 
 HTTP = HTTPRemoteProvider()
-
-# using snakemake capabilities to deal with yanl configs
-with open("config.default.yaml", "r") as f:
-    actual_config = yaml.safe_load(f)
-actual_config_version = actual_config.get("version")
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
@@ -32,15 +27,7 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
     configfile: "config.yaml"
 
 
-current_config_version = config.get("version")
-
-if actual_config_version != current_config_version:
-    logger.warning(
-        f"The current version of 'config.yaml' doesn't match to the code version:\n\r"
-        f" {current_config_version} provided, {actual_config_version} expected.\n\r"
-        f"That can lead to the errors during execution of the workflow.\n\r"
-        f"Please update 'config.yaml' according to 'config.default.yaml' "
-    )
+match_config(config=config)
 
 
 configfile: "configs/bundle_config.yaml"
