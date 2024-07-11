@@ -44,8 +44,8 @@ def check_config_version(config):
         logger.error(
             f"The current version of 'config.yaml' doesn't match to the code version:\n\r"
             f" {current_config_version} provided, {actual_config_version} expected.\n\r"
-            f"That can lead to the errors during execution of the workflow.\n\r"
-            f"Please update 'config.yaml' according to 'config.default.yaml' "
+            f"That can lead to weird errors during execution of the workflow.\n\r"
+            f"Please update 'config.yaml' according to 'config.default.yaml' ."
         )
 
 
