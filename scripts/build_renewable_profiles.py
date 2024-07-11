@@ -489,7 +489,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("build_renewable_profiles", technology="hydro")
+        snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
         sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
