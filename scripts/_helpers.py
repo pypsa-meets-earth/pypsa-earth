@@ -27,7 +27,7 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
 
-def match_config(config):
+def check_config_version(config):
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
