@@ -17,6 +17,7 @@ from test.conftest import (
     get_temp_file,
 )
 
+import fiona
 import numpy as np
 import pandas as pd
 
@@ -27,8 +28,11 @@ from _helpers import (
     build_directory,
     change_to_script_dir,
     country_name_2_two_digits,
+    download_gadm,
     get_conv_factors,
     get_current_directory_path,
+    get_gadm_filename,
+    get_gadm_url,
     get_path,
     get_path_size,
     get_relative_path,
@@ -274,10 +278,30 @@ def test_get_path():
         "sub_path_5",
         "file.nc",
     )
+    file_name_path_one_list_unpacked = get_path(
+        path_cwd,
+        *[
+            "sub_path_1",
+            "sub_path_2",
+            "sub_path_3",
+            "sub_path_4",
+            "sub_path_5",
+            "file.nc",
+        ],
+    )
     path_name_path_two = get_path(
         pathlib.Path(__file__).parent, "..", "logs", "rule.log"
     )
     assert str(file_name_path_one) == os.path.join(
+        path_cwd,
+        "sub_path_1",
+        "sub_path_2",
+        "sub_path_3",
+        "sub_path_4",
+        "sub_path_5",
+        "file.nc",
+    )
+    assert str(file_name_path_one_list_unpacked) == os.path.join(
         path_cwd,
         "sub_path_1",
         "sub_path_2",
@@ -467,3 +491,90 @@ def test_aggregate_fuels():
     Verify what is returned by aggregate_fuels.
     """
     assert np.isnan(aggregate_fuels("non-industry"))
+
+
+def test_get_gadm_filename():
+    """
+    Verify what is returned by get_gadm_filename.
+    """
+    # Kosovo
+    assert get_gadm_filename("XK") == "gadm41_XKO"
+    # Clipperton island
+    assert get_gadm_filename("CP") == "gadm41_XCL"
+    # Saint-Martin
+    assert get_gadm_filename("SX") == "gadm41_MAF"
+    # French Southern Territories
+    assert get_gadm_filename("TF") == "gadm41_ATF"
+    # Aland
+    assert get_gadm_filename("AX") == "gadm41_ALA"
+    # British Indian Ocean Territory
+    assert get_gadm_filename("IO") == "gadm41_IOT"
+    # Cocos Islands
+    assert get_gadm_filename("CC") == "gadm41_CCK"
+    # Norfolk
+    assert get_gadm_filename("NF") == "gadm41_NFK"
+    # Pitcairn Islands
+    assert get_gadm_filename("PN") == "gadm41_PCN"
+    # Jersey
+    assert get_gadm_filename("JE") == "gadm41_JEY"
+    # Spratly Islands
+    assert get_gadm_filename("XS") == "gadm41_XSP"
+    # Guernsey
+    assert get_gadm_filename("GG") == "gadm41_GGY"
+    # United States Minor Outlying Islands
+    assert get_gadm_filename("UM") == "gadm41_UMI"
+    # Svalbard islands
+    assert get_gadm_filename("SJ") == "gadm41_SJM"
+    # Christmas island
+    assert get_gadm_filename("CX") == "gadm41_CXR"
+    # Afghanistan
+    assert get_gadm_filename("AF") == "gadm41_AFG"
+    # American Samoa
+    assert get_gadm_filename("AS") == "gadm41_ASM"
+    # Aruba
+    assert get_gadm_filename("AW") == "gadm41_ABW"
+    # Germany
+    assert get_gadm_filename("DE") == "gadm41_DEU"
+    # Micronesia (Federated States of)
+    assert get_gadm_filename("FM") == "gadm41_FSM"
+    # Micronesia (Federated States of) with different file_prefix
+    assert get_gadm_filename("FM", file_prefix="gadm456_") == "gadm456_FSM"
+
+
+def test_get_gadm_url():
+    """
+    Verify what is returned by get_gadm_url.
+    """
+    gadm_filename = get_gadm_filename("FM")
+    url_gadm41 = get_gadm_url(
+        "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/",
+        gadm_filename,
+    )
+    assert (
+        url_gadm41
+        == f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{gadm_filename}.gpkg"
+    )
+
+
+def test_download_gadm():
+    """
+    Verify what is returned by download_gadm.
+    """
+    file_prefix_41 = "gadm41_"
+    gadm_url_prefix_41 = "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/"
+    gadm_input_file_args_41 = ["data", "gadm"]
+    gadm_input_file_gpkg_41, gadm_filename_41 = download_gadm(
+        "XK",
+        file_prefix_41,
+        gadm_url_prefix_41,
+        gadm_input_file_args_41,
+        update=True,
+    )
+    assert gadm_input_file_gpkg_41 == get_path(
+        path_cwd, "data/gadm/gadm41_XKO/gadm41_XKO.gpkg"
+    )
+    assert gadm_filename_41 == "gadm41_XKO"
+    list_layers_41 = fiona.listlayers(gadm_input_file_gpkg_41)
+    assert list_layers_41[0] == "ADM_ADM_0"
+    assert list_layers_41[1] == "ADM_ADM_1"
+    assert list_layers_41[2] == "ADM_ADM_2"

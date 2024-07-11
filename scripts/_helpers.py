@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import sys
 import urllib
-import zipfile
 
 import country_converter as coco
 import fiona
@@ -911,62 +910,181 @@ def cycling_shift(df, steps=1):
     return df
 
 
-def download_gadm(country_code, update=False, out_logging=False):
+def get_gadm_filename(country_code, file_prefix="gadm41_"):
+    """
+    Function to get three digits country code for GADM.
+    """
+    special_codes_gadm = {
+        "XK": "XKO",  # kosovo
+        "CP": "XCL",  # clipperton island
+        "SX": "MAF",  # saint-martin
+        "TF": "ATF",  # french southern territories
+        "AX": "ALA",  # aland
+        "IO": "IOT",  # british indian ocean territory
+        "CC": "CCK",  # cocos island
+        "NF": "NFK",  # norfolk
+        "PN": "PCN",  # pitcairn islands
+        "JE": "JEY",  # jersey
+        "XS": "XSP",  # spratly islands
+        "GG": "GGY",  # guernsey
+        "UM": "UMI",  # United States minor outlying islands
+        "SJ": "SJM",  # svalbard
+        "CX": "CXR",  # Christmas island
+    }
+
+    if country_code in special_codes_gadm:
+        return file_prefix + special_codes_gadm[country_code]
+    else:
+        return file_prefix + two_2_three_digits_country(country_code)
+
+
+def get_gadm_url(gadm_url_prefix, gadm_filename):
+    """
+    Function to get the gadm url given a gadm filename.
+    """
+    return gadm_url_prefix + gadm_filename + ".gpkg"
+
+
+def download_gadm(
+    country_code,
+    file_prefix,
+    gadm_url_prefix,
+    gadm_input_file_args,
+    update=False,
+    out_logging=False,
+):
     """
     Download gpkg file from GADM for a given country code.
 
     Parameters
     ----------
     country_code : str
-        Two letter country codes of the downloaded files
+        2-digit country name of the downloaded files
+    file_prefix : str
+        file prefix string
+    gadm_url_prefix: str
+        gadm url prefix
+    gadm_input_file_args: list[str]
+        gadm input file arguments list
     update : bool
         Update = true, forces re-download of files
+    out_logging : bool
+        out_logging = true, enables output logging
 
     Returns
     -------
     gpkg file per country
     """
 
-    gadm_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
-    gadm_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{gadm_filename}_gpkg.zip"
     _logger = logging.getLogger(__name__)
-    gadm_input_file_zip = get_path(
+
+    gadm_filename = get_gadm_filename(country_code, file_prefix)
+    gadm_url = get_gadm_url(gadm_url_prefix, gadm_filename)
+    gadm_input_file = get_path(
         get_current_directory_path(),
-        "data",
-        "raw",
-        "gadm",
+        *gadm_input_file_args,
         gadm_filename,
-        gadm_filename + ".zip",
-    )  # Input filepath zip
+        gadm_filename,
+    )
 
     gadm_input_file_gpkg = get_path(
-        get_current_directory_path(),
-        "data",
-        "raw",
-        "gadm",
-        gadm_filename,
-        gadm_filename + ".gpkg",
+        str(gadm_input_file) + ".gpkg"
     )  # Input filepath gpkg
 
     if not pathlib.Path(gadm_input_file_gpkg).exists() or update is True:
         if out_logging:
             _logger.warning(
-                f"Stage 4/4: {gadm_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {gadm_input_file_zip}"
+                f"{gadm_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {gadm_input_file_gpkg}"
             )
+
         #  create data/osm directory
-        build_directory(gadm_input_file_zip)
+        build_directory(str(gadm_input_file_gpkg))
 
-        with requests.get(gadm_url, stream=True) as r:
-            with open(gadm_input_file_zip, "wb") as f:
+        try:
+            r = requests.get(gadm_url, stream=True, timeout=300)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            raise Exception(
+                f"GADM server is down at {gadm_url}. Data needed for building shapes can't be extracted.\n\r"
+            )
+        except Exception as exception:
+            raise Exception(
+                f"An error happened when trying to load GADM data by {gadm_url}.\n\r"
+                + str(exception)
+                + "\n\r"
+            )
+        else:
+            with open(gadm_input_file_gpkg, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
-
-        with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
-            zip_ref.extractall(pathlib.Path(gadm_input_file_zip).parent)
 
     return gadm_input_file_gpkg, gadm_filename
 
 
-def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
+def get_gadm_layer_name(country_code, file_prefix, layer_id, code_layer):
+
+    if file_prefix == "gadm41_":
+        return "ADM_ADM_" + str(layer_id)
+    else:
+        raise Exception(
+            f"The requested GADM data version {file_prefix} does not exist."
+        )
+
+
+def filter_gadm(
+    geo_df,
+    layer,
+    cc,
+    contended_flag,
+    output_nonstd_to_csv=False,
+):
+    # identify non-standard geo_df rows
+    geo_df_non_std = geo_df[geo_df["GID_0"] != two_2_three_digits_country(cc)].copy()
+
+    if not geo_df_non_std.empty:
+        logger.info(
+            f"Contended areas have been found for gadm layer {layer}. They will be treated according to {contended_flag} option"
+        )
+
+        # NOTE: in these options GID_0 is not changed because it is modified below
+        if contended_flag == "drop":
+            geo_df.drop(geo_df_non_std.index, inplace=True)
+        elif contended_flag != "set_by_country":
+            # "set_by_country" option is the default; if this elif applies, the desired option falls back to the default
+            logger.warning(
+                f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
+                + "Fallback to 'set_by_country'"
+            )
+
+    # force GID_0 to be the country code for the relevant countries
+    geo_df["GID_0"] = cc
+
+    # country shape should have a single geometry
+    if (layer == 0) and (geo_df.shape[0] > 1):
+        logger.warning(
+            f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
+        )
+        # take the first row only to re-define geometry keeping other columns
+        geo_df = geo_df.iloc[[0]].set_geometry([geo_df.unary_union])
+
+    # debug output to file
+    if output_nonstd_to_csv and not geo_df_non_std.empty:
+        geo_df_non_std.to_csv(
+            f"resources/non_standard_gadm{layer}_{cc}_raw.csv", index=False
+        )
+
+    return geo_df
+
+
+def get_gadm_layer(
+    country_list,
+    layer_id,
+    geo_crs,
+    file_prefix,
+    gadm_url_prefix,
+    gadm_input_file_args,
+    contended_flag,
+    update=False,
+    out_logging=False,
+):
     """
     Function to retrieve a specific layer id of a geopackage for a selection of
     countries.
@@ -979,52 +1097,95 @@ def get_gadm_layer(country_list, layer_id, update=False, outlogging=False):
         Layer to consider in the format GID_{layer_id}.
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
+    geo_crs: str
+        General geographic projection
+    file_prefix : str
+        file prefix string
+    gadm_url_prefix : str
+        gadm url prefix
+    gadm_input_file_args: list[str]
+        gadm input file arguments list
+    contended_flag : str
+        contended areas
+    update : bool
+        Update = true, forces re-download of files
+    out_logging : bool
+        out_logging = true, enables output logging
     """
-    # initialization of the list of geodataframes
-    geodf_list = []
+    # initialization of the list of geo dataframes
+    geo_df_list = []
 
     for country_code in country_list:
         # download file gpkg
-        file_gpkg, name_file = download_gadm(country_code, update, outlogging)
+        file_gpkg, name_file = download_gadm(
+            country_code,
+            file_prefix,
+            gadm_url_prefix,
+            gadm_input_file_args,
+            update,
+            out_logging,
+        )
 
         # get layers of a geopackage
         list_layers = fiona.listlayers(file_gpkg)
 
         # get layer name
-        if layer_id < 0 | layer_id >= len(list_layers):
+        if layer_id < 0 or layer_id >= len(list_layers):
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
         code_layer = np.mod(layer_id, len(list_layers))
-        layer_name = (
-            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        layer_name = get_gadm_layer_name(
+            country_code, file_prefix, layer_id, code_layer
         )
 
         # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+        geo_df_temp = gpd.read_file(
+            file_gpkg, layer=layer_name, engine="pyogrio"
+        ).to_crs(geo_crs)
 
-        # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-        ]
+        country_sub_index = ""
+        if file_prefix == "gadm41_":
+            country_sub_index = f"GID_{layer_id}"
+            geo_df_temp = filter_gadm(
+                geo_df=geo_df_temp,
+                layer=layer_id,
+                cc=country_code,
+                contended_flag=contended_flag,
+                output_nonstd_to_csv=False,
+            )
+        elif file_prefix == "gadm36_":
+            country_sub_index = f"GID_{code_layer}"
+            geo_df_temp["GID_0"] = [
+                three_2_two_digits_country(twoD_c) for twoD_c in geo_df_temp["GID_0"]
+            ]
+        else:
+            raise Exception(
+                f"The requested GADM data version {file_prefix} does not exist."
+            )
 
-        # create a subindex column that is useful
-        # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
+        geo_df_temp["GADM_ID"] = geo_df_temp[country_sub_index]
 
-        # concatenate geodataframes
-        geodf_list = pd.concat([geodf_list, geodf_temp])
+        # append geo data frames
+        geo_df_list.append(geo_df_temp)
 
-    geodf_gadm = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_gadm.set_crs(geodf_list[0].crs, inplace=True)
+    geo_df_gadm = gpd.GeoDataFrame(pd.concat(geo_df_list, ignore_index=True))
+    geo_df_gadm.set_crs(geo_crs, inplace=True)
 
-    return geodf_gadm
+    return geo_df_gadm
 
 
 def locate_bus(
     coords,
     co,
     gadm_level,
+    geo_crs,
+    file_prefix,
+    gadm_url_prefix,
+    gadm_input_file_args,
+    contended_flag,
     path_to_gadm=None,
+    update=False,
+    out_logging=False,
     gadm_clustering=False,
 ):
     """
@@ -1037,6 +1198,28 @@ def locate_bus(
         dataseries with 2 rows x & y representing the longitude and latitude
     co: string (code for country where coords are MA Morocco)
         code of the countries where the coordinates are
+    gadm_level : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+    geo_crs : str
+        General geographic projection
+    file_prefix : str
+        file prefix string
+    gadm_url_prefix: str
+        gadm url prefix
+    gadm_input_file_args: list[str]
+        gadm input file arguments list
+    contended_flag : str
+        contended areas
+    path_to_gadm : str
+        path to gadm
+    update : bool
+        Update = true, forces re-download of files
+    out_logging : bool
+        out_logging = true, enables output logging
+    gadm_clustering : bool
+        gadm_cluster = true, to enable clustering
     """
     col = "name"
     if not gadm_clustering:
@@ -1054,7 +1237,17 @@ def locate_bus(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf = get_gadm_layer(co, gadm_level)
+            gdf = get_gadm_layer(
+                co,
+                gadm_level,
+                geo_crs,
+                file_prefix,
+                gadm_url_prefix,
+                gadm_input_file_args,
+                contended_flag,
+                update,
+                out_logging,
+            )
             col = "GID_{}".format(gadm_level)
 
         # gdf.set_index("GADM_ID", inplace=True)

@@ -162,8 +162,10 @@ def download_and_unzip_zenodo(config, root_path, hot_run=True, disable_progress=
                 zipObj.extractall(path=destination)
             pathlib.Path(file_path).unlink(missing_ok=True)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+        except Exception as e:
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}' with exception message '{e}'."
+            )
             return False
 
     return True
@@ -336,9 +338,9 @@ def download_and_unzip_protectedplanet(
                         pathlib.Path(inner_zipname).unlink(missing_ok=True)
 
                         logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
-                    except:
+                    except Exception as e:
                         logger.warning(
-                            f"Exception while unzipping file '{fzip}' for {resource_iter}: skipped file"
+                            f"Exception while unzipping file '{fzip}' for {resource_iter} with exception message '{e}': skipped file"
                         )
 
                 # close and remove outer zip file
@@ -351,9 +353,9 @@ def download_and_unzip_protectedplanet(
 
                 downloaded = True
                 break
-            except:
+            except Exception as e:
                 logger.warning(
-                    f"Failed download resource '{resource_iter}' from cloud '{url_iter}'."
+                    f"Failed download resource '{resource_iter}' from cloud '{url_iter}' with exception message '{e}'."
                 )
                 current_first_day = get_first_day_of_previous_month(current_first_day)
 
@@ -411,8 +413,10 @@ def download_and_unpack(
                 pathlib.Path(file_path).unlink(missing_ok=True)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
             return True
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+        except Exception as e:
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}' with exception message '{e}'."
+            )
             return False
 
 
@@ -868,8 +872,10 @@ if __name__ == "__main__":
                     config_bundles[b_name], root_path, disable_progress=disable_progress
                 ):
                     downloaded_bundle = True
-            except Exception:
-                logger.warning(f"Error in downloading bundle {b_name} - host {host}")
+            except Exception as e:
+                logger.warning(
+                    f"Error in downloading bundle {b_name} - host {host} - with exception message '{e}'"
+                )
 
             if downloaded_bundle:
                 downloaded_bundles.append(b_name)
