@@ -22,7 +22,7 @@ HTTP = HTTPRemoteProvider()
 copy_default_files()
 
 
-configfile: "config.default.yaml"
+# configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "config.yaml"
 

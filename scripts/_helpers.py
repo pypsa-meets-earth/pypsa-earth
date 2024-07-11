@@ -7,6 +7,7 @@
 
 import logging
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -57,9 +58,11 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 def copy_default_files():
     fn = Path("config.yaml")
     if not fn.exists():
-        fn.write_text(
-            "# Write down config entries differing from config.default.yaml\n\nrun: {}"
-        )
+        # keep this for later
+        # fn.write_text(
+        #     "# Write down config entries differing from config.default.yaml\n\nrun: {}"
+        # )
+        shutil.copy(Path("config.tutorial.yaml"), fn)
 
 
 def create_logger(logger_name, level=logging.INFO):
