@@ -167,7 +167,9 @@ def add_h2_network_cap(n, cap):
         logger.warning(
             f"Impossible to set H2 cap for the following links: {diff_index}"
         )
-    lhs = linexpr((h2_network.length, h2_network_cap[subset_index])).sum()
+    lhs = linexpr(
+        (h2_network.loc[subset_index, "length"], h2_network_cap[subset_index])
+    ).sum()
     # lhs = linexpr((1, h2_network_cap[h2_network.index])).sum()
     rhs = cap * 1000
     define_constraints(n, lhs, "<=", rhs, "h2_network_cap")
