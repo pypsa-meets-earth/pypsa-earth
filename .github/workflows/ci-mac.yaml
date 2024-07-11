@@ -3,10 +3,10 @@ name: CI-mac
 on:
   push:
     branches:
-    - oet_main
+    - main
   pull_request:
     branches:
-    - oet_main
+    - main
   schedule:
   - cron: "0 5 * * TUE"
 
