@@ -818,7 +818,7 @@ if config["foresight"] == "myopic":
             busmap=pypsaearth(
                 "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
-            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}.csv",
+            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
             cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}.nc",
