@@ -16,18 +16,15 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-import ruamel.yaml
 from helpers import (
     progress_retrieve,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
 from matplotlib.lines import Line2D
-from packaging.version import Version, parse
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely import wkt
-from shapely.geometry import LineString, MultiLineString, Point
+from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
@@ -168,9 +165,7 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df = df[df["WKTFormat"] != "--"]
 
     # Keep pipelines that are as below
-    df = df[
-        df["Status"].isin(snakemake.config["sector"]["gas"]["network_data_GGIT_status"])
-    ]
+    df = df[df["Status"].isin(snakemake.params.gas_config["network_data_GGIT_status"])]
 
     # Convert the WKT column to a GeoDataFrame
     df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"]))
@@ -458,12 +453,17 @@ def get_GADM_layer(
             output_nonstd_to_csv=False,
         )
 
-        # create a subindex column that is useful
-        # in the GADM processing of sub-national zones
-        # Fix issues with missing "." in selected cases
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-            lambda x: x if x[3] == "." else x[:3] + "." + x[3:]
-        )
+        if layer_id == 0:
+            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
+                lambda x: two_2_three_digits_country(x[:2])
+            ) + pd.Series(range(1, geodf_temp.shape[0] + 1)).astype(str)
+        else:
+            # create a subindex column that is useful
+            # in the GADM processing of sub-national zones
+            # Fix issues with missing "." in selected cases
+            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
+                lambda x: x if x[3] == "." else x[:3] + "." + x[3:]
+            )
 
         # append geodataframes
         geodf_list.append(geodf_temp)
@@ -531,22 +531,15 @@ def load_bus_region(onshore_path, pipelines):
         :, ["gadm_id", "geometry"]
     ]
 
-    if snakemake.config["clustering_options"]["alternative_clustering"]:
-        # Read the YAML file
-        yaml = ruamel.yaml.YAML()
-        file_path = "./config.pypsa-earth.yaml"
-        with open(file_path, "r") as file:
-            config_pypsa_earth = yaml.load(file)
-
-        countries_list = snakemake.config["countries"]
-        layer_id = config_pypsa_earth["build_shape_options"]["gadm_layer_id"]
-        update = config_pypsa_earth["build_shape_options"]["update_file"]
-        out_logging = config_pypsa_earth["build_shape_options"]["out_logging"]
-        year = config_pypsa_earth["build_shape_options"]["year"]
-        nprocesses = config_pypsa_earth["build_shape_options"]["nprocesses"]
-        contended_flag = config_pypsa_earth["build_shape_options"]["contended_flag"]
-        geo_crs = config_pypsa_earth["crs"]["geo_crs"]
-        distance_crs = config_pypsa_earth["crs"]["distance_crs"]
+    if snakemake.params.alternative_clustering:
+        countries_list = snakemake.params.countries_list
+        layer_id = snakemake.params.layer_id
+        update = snakemake.params.update
+        out_logging = snakemake.params.out_logging
+        year = snakemake.params.year
+        nprocesses = snakemake.params.nprocesses
+        contended_flag = snakemake.params.contended_flag
+        geo_crs = snakemake.params.geo_crs
 
         bus_regions_onshore = gadm(
             countries_list,
@@ -651,7 +644,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
 
     column_set = ["ProjectID", "nodes", "gadm_id", "capacity [MW]"]
 
-    if snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
+    if snakemake.params.gas_config["network_data"] == "IGGIELGN":
         pipelines_per_state = (
             pipelines_interstate.rename(
                 {"p_nom": "capacity [MW]", "name": "ProjectID"}, axis=1
@@ -659,7 +652,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
             .loc[:, column_set]
             .reset_index(drop=True)
         )
-    elif snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
+    elif snakemake.params.gas_config["network_data"] == "GGIT":
         pipelines_per_state = pipelines_interstate.loc[:, column_set].reset_index(
             drop=True
         )
@@ -751,148 +744,149 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     return merged_df
 
 
-def plot_gas_network(pipelines, country_borders, bus_regions_onshore):
-    df = pipelines.copy()
-    df = gpd.overlay(df, country_borders, how="intersection")
+# TODO: Move it to a separate plotting rule!
+# def plot_gas_network(pipelines, country_borders, bus_regions_onshore):
+#     df = pipelines.copy()
+#     df = gpd.overlay(df, country_borders, how="intersection")
 
-    if snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
-        df = df.rename({"p_nom": "capacity [MW]"}, axis=1)
+#     if snakemake.params.gas_config["network_data"] == "IGGIELGN":
+#         df = df.rename({"p_nom": "capacity [MW]"}, axis=1)
 
-    fig, ax = plt.subplots(1, 1)
-    fig.set_size_inches(12, 7)
-    bus_regions_onshore.to_crs(epsg=3857).plot(
-        ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
-    )
-    df.loc[(df.amount_states_passed > 1)].to_crs(epsg=3857).plot(
-        ax=ax,
-        column="capacity [MW]",
-        linewidth=2.5,
-        # linewidth=df['capacity [MW]'],
-        # alpha=0.8,
-        categorical=False,
-        cmap="viridis_r",
-        # legend=True,
-        # legend_kwds={'label':'Pipeline capacity [MW]'},
-    )
+#     fig, ax = plt.subplots(1, 1)
+#     fig.set_size_inches(12, 7)
+#     bus_regions_onshore.to_crs(epsg=3857).plot(
+#         ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
+#     )
+#     df.loc[(df.amount_states_passed > 1)].to_crs(epsg=3857).plot(
+#         ax=ax,
+#         column="capacity [MW]",
+#         linewidth=2.5,
+#         # linewidth=df['capacity [MW]'],
+#         # alpha=0.8,
+#         categorical=False,
+#         cmap="viridis_r",
+#         # legend=True,
+#         # legend_kwds={'label':'Pipeline capacity [MW]'},
+#     )
 
-    df.loc[(df.amount_states_passed <= 1)].to_crs(epsg=3857).plot(
-        ax=ax,
-        column="capacity [MW]",
-        linewidth=2.5,
-        # linewidth=df['capacity [MW]'],
-        alpha=0.5,
-        categorical=False,
-        # color='darkgrey',
-        ls="dotted",
-    )
+#     df.loc[(df.amount_states_passed <= 1)].to_crs(epsg=3857).plot(
+#         ax=ax,
+#         column="capacity [MW]",
+#         linewidth=2.5,
+#         # linewidth=df['capacity [MW]'],
+#         alpha=0.5,
+#         categorical=False,
+#         # color='darkgrey',
+#         ls="dotted",
+#     )
 
-    # # Create custom legend handles for line types
-    # line_types = [ 'solid', 'dashed', 'dotted'] # solid
-    # legend_handles = [Line2D([0], [0], color='black', linestyle=line_type) for line_type in line_types]
+#     # # Create custom legend handles for line types
+#     # line_types = [ 'solid', 'dashed', 'dotted'] # solid
+#     # legend_handles = [Line2D([0], [0], color='black', linestyle=line_type) for line_type in line_types]
 
-    # Define line types and labels
-    line_types = ["solid", "dotted"]
-    line_labels = ["Operating", "Not considered \n(within-state)"]
+#     # Define line types and labels
+#     line_types = ["solid", "dotted"]
+#     line_labels = ["Operating", "Not considered \n(within-state)"]
 
-    # Create custom legend handles for line types
-    legend_handles = [
-        Line2D([0], [0], color="black", linestyle=line_type, label=line_label)
-        for line_type, line_label in zip(line_types, line_labels)
-    ]
+#     # Create custom legend handles for line types
+#     legend_handles = [
+#         Line2D([0], [0], color="black", linestyle=line_type, label=line_label)
+#         for line_type, line_label in zip(line_types, line_labels)
+#     ]
 
-    # Add the line type legend
-    ax.legend(
-        handles=legend_handles,
-        title="Status",
-        borderpad=1,
-        title_fontproperties={"weight": "bold"},
-        fontsize=11,
-        loc=1,
-    )
+#     # Add the line type legend
+#     ax.legend(
+#         handles=legend_handles,
+#         title="Status",
+#         borderpad=1,
+#         title_fontproperties={"weight": "bold"},
+#         fontsize=11,
+#         loc=1,
+#     )
 
-    # # create the colorbar
-    norm = colors.Normalize(
-        vmin=df["capacity [MW]"].min(), vmax=df["capacity [MW]"].max()
-    )
-    cbar = plt.cm.ScalarMappable(norm=norm, cmap="viridis_r")
-    # fig.colorbar(cbar, ax=ax).set_label('Capacity [MW]')
+#     # # create the colorbar
+#     norm = colors.Normalize(
+#         vmin=df["capacity [MW]"].min(), vmax=df["capacity [MW]"].max()
+#     )
+#     cbar = plt.cm.ScalarMappable(norm=norm, cmap="viridis_r")
+#     # fig.colorbar(cbar, ax=ax).set_label('Capacity [MW]')
 
-    # add colorbar
-    ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
-    # add label for the colorbar
-    ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
+#     # add colorbar
+#     ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
+#     # add label for the colorbar
+#     ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
 
-    ax.set_axis_off()
-    fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
+#     ax.set_axis_off()
+#     fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
+
+# TODO: Move it to a separate plotting rule!
+# def plot_clustered_gas_network(pipelines, bus_regions_onshore):
+#     # Create a new GeoDataFrame with centroids
+#     centroids = bus_regions_onshore.copy()
+#     centroids["geometry"] = centroids["geometry"].centroid
+#     centroids["gadm_id"] = centroids["gadm_id"].apply(
+#         lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+#     )
+#     gdf1 = pd.merge(
+#         pipelines, centroids, left_on=["bus0"], right_on=["gadm_id"], how="left"
+#     )
+#     gdf1.rename(columns={"geometry": "geometry_bus0"}, inplace=True)
+#     pipe_links = pd.merge(
+#         gdf1, centroids, left_on=["bus1"], right_on=["gadm_id"], how="left"
+#     )
+#     pipe_links.rename(columns={"geometry": "geometry_bus1"}, inplace=True)
+
+#     # Create LineString geometries from the points
+#     pipe_links["geometry"] = pipe_links.apply(
+#         lambda row: LineString([row["geometry_bus0"], row["geometry_bus1"]]), axis=1
+#     )
+
+#     clustered = gpd.GeoDataFrame(pipe_links, geometry=pipe_links["geometry"])
+
+#     # Optional: Set the coordinate reference system (CRS) if needed
+#     clustered.crs = "EPSG:3857"  # For example, WGS84
+
+#     # plot pipelines
+#     fig, ax = plt.subplots(1, 1)
+#     fig.set_size_inches(12, 7)
+#     bus_regions_onshore.to_crs(epsg=3857).plot(
+#         ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
+#     )
+#     clustered.to_crs(epsg=3857).plot(
+#         ax=ax,
+#         column="capacity",
+#         linewidth=1.5,
+#         categorical=False,
+#         cmap="plasma",
+#     )
+
+#     centroids.to_crs(epsg=3857).plot(
+#         ax=ax,
+#         color="red",
+#         markersize=35,
+#         alpha=0.5,
+#     )
+
+#     norm = colors.Normalize(
+#         vmin=pipelines["capacity"].min(), vmax=pipelines["capacity"].max()
+#     )
+#     cbar = plt.cm.ScalarMappable(norm=norm, cmap="plasma")
+
+#     # add colorbar
+#     ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
+#     # add label for the colorbar
+#     ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
+
+#     ax.set_axis_off()
+#     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
 
-def plot_clustered_gas_network(pipelines, bus_regions_onshore):
-    # Create a new GeoDataFrame with centroids
-    centroids = bus_regions_onshore.copy()
-    centroids["geometry"] = centroids["geometry"].centroid
-    centroids["gadm_id"] = centroids["gadm_id"].apply(
-        lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-    )
-    gdf1 = pd.merge(
-        pipelines, centroids, left_on=["bus0"], right_on=["gadm_id"], how="left"
-    )
-    gdf1.rename(columns={"geometry": "geometry_bus0"}, inplace=True)
-    pipe_links = pd.merge(
-        gdf1, centroids, left_on=["bus1"], right_on=["gadm_id"], how="left"
-    )
-    pipe_links.rename(columns={"geometry": "geometry_bus1"}, inplace=True)
-
-    # Create LineString geometries from the points
-    pipe_links["geometry"] = pipe_links.apply(
-        lambda row: LineString([row["geometry_bus0"], row["geometry_bus1"]]), axis=1
-    )
-
-    clustered = gpd.GeoDataFrame(pipe_links, geometry=pipe_links["geometry"])
-
-    # Optional: Set the coordinate reference system (CRS) if needed
-    clustered.crs = "EPSG:3857"  # For example, WGS84
-
-    # plot pipelines
-    fig, ax = plt.subplots(1, 1)
-    fig.set_size_inches(12, 7)
-    bus_regions_onshore.to_crs(epsg=3857).plot(
-        ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
-    )
-    clustered.to_crs(epsg=3857).plot(
-        ax=ax,
-        column="capacity",
-        linewidth=1.5,
-        categorical=False,
-        cmap="plasma",
-    )
-
-    centroids.to_crs(epsg=3857).plot(
-        ax=ax,
-        color="red",
-        markersize=35,
-        alpha=0.5,
-    )
-
-    norm = colors.Normalize(
-        vmin=pipelines["capacity"].min(), vmax=pipelines["capacity"].max()
-    )
-    cbar = plt.cm.ScalarMappable(norm=norm, cmap="plasma")
-
-    # add colorbar
-    ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
-    # add label for the colorbar
-    ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
-
-    ax.set_axis_off()
-    fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
-
-
-if not snakemake.config["custom_data"]["gas_network"]:
-    if snakemake.config["sector"]["gas"]["network_data"] == "GGIT":
+if not snakemake.params.custom_gas_network:
+    if snakemake.params.gas_config["network_data"] == "GGIT":
         pipelines = download_GGIT_gas_network()
         pipelines = prepare_GGIT_data(pipelines)
 
-    elif snakemake.config["sector"]["gas"]["network_data"] == "IGGIELGN":
+    elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
         download_IGGIELGN_gas_network()
 
         gas_network = "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
@@ -906,7 +900,8 @@ if not snakemake.config["custom_data"]["gas_network"]:
     pipelines = parse_states(pipelines, bus_regions_onshore)
 
     if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
-        plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+        # TODO: plotting should be a extra rule!
+        # plot_gas_network(pipelines, country_borders, bus_regions_onshore)
 
         pipelines = cluster_gas_network(
             pipelines, bus_regions_onshore, length_factor=1.25
@@ -923,7 +918,8 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
-        plot_clustered_gas_network(pipelines, bus_regions_onshore)
+        # TODO: plotting should be a extra rule!
+        # plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
         average_length = pipelines["length"].mean
         print("average_length = ", average_length)
@@ -933,9 +929,8 @@ if not snakemake.config["custom_data"]["gas_network"]:
 
     else:
         print(
-            "Countries:"
-            + bus_regions_onshore.country.unique().tolist()
-            + "has no existing Natral Gas network between the chosen bus regions"
+            "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
+            + ", ".join(bus_regions_onshore.country.unique().tolist())
         )
 
         # Create an empty DataFrame with the specified column names
