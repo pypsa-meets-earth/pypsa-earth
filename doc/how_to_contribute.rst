@@ -42,8 +42,8 @@ Add a new test if you want to contribute new functionality to the config.
 We perform currently *multiple* integration tests which means various workflows need to work.
 All test configs are build by updating the ``config.tutorial.yaml`` with the configs in ``pypysa-earth/test/*.yaml``.
 
-  * You can test your contribution locally with ``snakemake --cores 4 run_tests``. This will build test configs and executes them.
-  * Run ``snakemake -j1 build_test_configs`` to build and analyse locally the test configs.
+  * You can test your contribution locally with ``make test``.
+  * See the Makefile for further information which configurations are tested.
 
 To contribute a test:
 
