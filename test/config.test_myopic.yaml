@@ -5,7 +5,7 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test2
+run: test_myopic
 
 foresight: myopic
 
@@ -19,7 +19,6 @@ scenario:
   - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
-  - 2050
   ll:
   - "c1"
   opts:
@@ -31,13 +30,15 @@ scenario:
 
 
 policy_config:
-  policy: "H2_export_yearly_constraint" #either "H2_export_yearly_constraint", "H2_export_monthly_constraint", "no_res_matching"
-  monthly: # Specify attributes for the monthly constraint
+  hydrogen:
+    temporal_matching: "no_res_matching" #either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
+    spatial_matching: false
+    additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
     allowed_excess: 1.0
-    reference_case: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
-  yearly: # Specify attributes for the yearly constraint
+    is_reference: false # Whether or not this network is a reference case network, relevant only if additionality is _true_
+    remove_h2_load: false #Whether or not to remove the h2 load from the network, relevant only if is_reference is _true_
+    path_to_ref: "" # Path to the reference case network for additionality calculation, relevant only if additionality is _true_ and is_reference is _false_
     re_country_load: false # Set to "True" to force the RE electricity to be equal to the electricity required for hydrogen export and the country electricity load. "False" excludes the country electricity load from the constraint.
-
 
 clustering_options:
   alternative_clustering: true
@@ -54,6 +55,7 @@ demand_data:
 
 enable:
   retrieve_cost_data: true # if true, the workflow overwrites the cost data saved in data/costs again
+  retrieve_irena: true  #If true, downloads the IRENA data
 
 fossil_reserves:
   oil: 100 #TWh Maybe reduntant
@@ -70,7 +72,6 @@ export:
     fill_time: 24 # hours, for 48h see Hampp2021
     unload_time: 24 # hours for 48h see Hampp2021
 
-
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
   elec_demand: false
@@ -84,6 +85,7 @@ custom_data:
   custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
 
+
 costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_horizon in the scenario section
   version: v0.6.2
   lifetime: 25 #default lifetime
@@ -91,6 +93,7 @@ costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_ho
   discountrate: [0.071] #, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532
+
   # Marginal and capital costs can be overwritten
   # capital_cost:
   #   onwind: 500
@@ -102,7 +105,6 @@ costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_ho
     H2: 0.
     battery: 0.
 
-
   emission_prices: # only used with the option Ep (emission prices)
     co2: 0.
 
@@ -111,51 +113,6 @@ costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_ho
 
 
 industry:
-  St_primary_fraction: 0.9 # fraction of steel produced via primary route versus secondary route (scrap+EAF); today fraction is 0.6
-    # 2020: 0.6
-    # 2025: 0.55
-    # 2030: 0.5
-    # 2035: 0.45
-    # 2040: 0.4
-    # 2045: 0.35
-    # 2050: 0.3
-  DRI_fraction: 0.5 # fraction of the primary route converted to DRI + EAF
-    # 2020: 0
-    # 2025: 0
-    # 2030: 0.05
-    # 2035: 0.2
-    # 2040: 0.4
-    # 2045: 0.7
-    # 2050: 1
-  H2_DRI: 1.7   #H2 consumption in Direct Reduced Iron (DRI),  MWh_H2,LHV/ton_Steel from 51kgH2/tSt in Vogl et al (2018) doi:10.1016/j.jclepro.2018.08.279
-  elec_DRI: 0.322   #electricity consumption in Direct Reduced Iron (DRI) shaft, MWh/tSt HYBRIT brochure https://ssabwebsitecdn.azureedge.net/-/media/hybrit/files/hybrit_brochure.pdf
-  Al_primary_fraction: 0.2 # fraction of aluminium produced via the primary route versus scrap; today fraction is 0.4
-    # 2020: 0.4
-    # 2025: 0.375
-    # 2030: 0.35
-    # 2035: 0.325
-    # 2040: 0.3
-    # 2045: 0.25
-    # 2050: 0.2
-  MWh_CH4_per_tNH3_SMR: 10.8 # 2012's demand from https://ec.europa.eu/docsroom/documents/4165/attachments/1/translations/en/renditions/pdf
-  MWh_elec_per_tNH3_SMR: 0.7 # same source, assuming 94-6% split methane-elec of total energy demand 11.5 MWh/tNH3
-  MWh_H2_per_tNH3_electrolysis: 6.5 # from https://doi.org/10.1016/j.joule.2018.04.017, around 0.197 tH2/tHN3 (>3/17 since some H2 lost and used for energy)
-  MWh_elec_per_tNH3_electrolysis: 1.17 # from https://doi.org/10.1016/j.joule.2018.04.017 Table 13 (air separation and HB)
-  NH3_process_emissions: 24.5 # in MtCO2/a from SMR for H2 production for NH3 from UNFCCC for 2015 for EU28
-  petrochemical_process_emissions: 25.5 # in MtCO2/a for petrochemical and other from UNFCCC for 2015 for EU28
-  HVC_primary_fraction: 1. # fraction of today's HVC produced via primary route
-  HVC_mechanical_recycling_fraction: 0. # fraction of today's HVC produced via mechanical recycling
-  HVC_chemical_recycling_fraction: 0. # fraction of today's HVC produced via chemical recycling
-  HVC_production_today: 52. # MtHVC/a from DECHEMA (2017), Figure 16, page 107; includes ethylene, propylene and BTX
-  MWh_elec_per_tHVC_mechanical_recycling: 0.547 # from SI of https://doi.org/10.1016/j.resconrec.2020.105010, Table S5, for HDPE, PP, PS, PET. LDPE would be 0.756.
-  MWh_elec_per_tHVC_chemical_recycling: 6.9 # Material Economics (2019), page 125; based on pyrolysis and electric steam cracking
-  chlorine_production_today: 9.58 # MtCl/a from DECHEMA (2017), Table 7, page 43
-  MWh_elec_per_tCl: 3.6 # DECHEMA (2017), Table 6, page 43
-  MWh_H2_per_tCl: -0.9372  # DECHEMA (2017), page 43; negative since hydrogen produced in chloralkali process
-  methanol_production_today: 1.5 # MtMeOH/a from DECHEMA (2017), page 62
-  MWh_elec_per_tMeOH: 0.167 # DECHEMA (2017), Table 14, page 65
-  MWh_CH4_per_tMeOH: 10.25 # DECHEMA (2017), Table 14, page 65
-  hotmaps_locate_missing: false
   reference_year: 2015
 
 solar_thermal:
@@ -188,6 +145,10 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+    hydrogen_colors: false
+    set_color_shares: false
+    blue_share: 0.40
+    pink_share: 0.05
 
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
@@ -216,13 +177,7 @@ sector:
     # 2040: 0.16
     # 2045: 0.21
     # 2050: 0.29
-  retrofitting:   # co-optimises building renovation to reduce space heat demand
-    retro_endogen: false  # co-optimise space heat savings
-    cost_factor: 1.0   # weight costs for building renovation
-    interest_rate: 0.04  # for investment in building components
-    annualise_cost: true  # annualise the investment costs
-    tax_weighting: false   # weight costs depending on taxes in countries
-    construction_index: true   # weight costs depending on labour/material costs per country
+
   tes: true
   tes_tau: # 180 day time constant for centralised, 3 day for decentralised
     decentral: 3
@@ -257,8 +212,9 @@ sector:
 
   biomass_transport: true  # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
-  solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+  solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
   biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
+
   efficiency_heat_oil_to_elec: 0.9
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
@@ -332,7 +288,7 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 2
+  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
@@ -570,3 +526,5 @@ plotting:
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
     biomass EOP: "green"
+    biomass: "green"
+    high-temp electrolysis: "magenta"
