@@ -52,6 +52,7 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Local tests are now run with `make test`. This uses a `Makefile` which runs snakemake calls with different configurations. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
 
+* Minor bug-fixing for s_nom_min. `PR #961 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/961>`__
 
 PyPSA-Earth 0.3.0
 =================
