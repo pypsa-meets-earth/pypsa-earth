@@ -203,7 +203,7 @@ atlite:
       dy: 0.3  # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
-      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
 
@@ -352,8 +352,8 @@ monte_carlo:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
-    seed: 42 # set seedling for reproducibilty
-  # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
+    seed: 42 # set seedling for reproducibility
+  # Uncertainties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
   # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
   # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
   # The arguments of the distribution are passed using the key 'args'  as follows, tailored by distribution type

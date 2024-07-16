@@ -2250,7 +2250,7 @@ def average_every_nhours(n, offset):
     # logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
@@ -2259,11 +2259,11 @@ def average_every_nhours(n, offset):
         for k, df in c.pnl.items():
             if not df.empty:
                 if c.list_name == "stores" and k == "e_max_pu":
-                    pnl[k] = df.resample(offset).min()
+                    pnl[k] = df.resample(offset.casefold()).min()
                 elif c.list_name == "stores" and k == "e_min_pu":
-                    pnl[k] = df.resample(offset).max()
+                    pnl[k] = df.resample(offset.casefold()).max()
                 else:
-                    pnl[k] = df.resample(offset).mean()
+                    pnl[k] = df.resample(offset.casefold()).mean()
 
     return m
 
