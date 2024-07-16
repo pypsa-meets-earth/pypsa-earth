@@ -5,9 +5,9 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test1
+run: test_myopic
 
-foresight: overnight
+foresight: myopic
 
 # option to disable the subworkflow to ease the analyses
 disable_subworkflow: false
@@ -26,7 +26,8 @@ scenario:
   sopts:
   - "144H"
   demand:
-  - "AB"
+  - "DF"
+
 
 policy_config:
   hydrogen:
@@ -48,20 +49,21 @@ demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
   base_year: 2019
 
-  other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
+  other_industries: false # Whether or not to include industries that are not specified. some countries have has exageratted numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
 
 enable:
   retrieve_cost_data: true # if true, the workflow overwrites the cost data saved in data/costs again
+  retrieve_irena: true  #If true, downloads the IRENA data
 
 fossil_reserves:
-  oil: 100 #TWh Maybe redundant
+  oil: 100 #TWh Maybe reduntant
 
 
 export:
   h2export: [120] # Yearly export demand in TWh
-  store: true # [True, False] # specifies whether an export store to balance demand is implemented
+  store: true # [True, False] # specifies wether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   export_profile: "ship" # use "ship" or "constant"
   ship:
@@ -69,7 +71,6 @@ export:
     travel_time: 288 # hours # From Agadir to Rotterdam and back (12*24)
     fill_time: 24 # hours, for 48h see Hampp2021
     unload_time: 24 # hours for 48h see Hampp2021
-
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
@@ -84,6 +85,7 @@ custom_data:
   custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
 
+
 costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_horizon in the scenario section
   version: v0.6.2
   lifetime: 25 #default lifetime
@@ -91,6 +93,7 @@ costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_ho
   discountrate: [0.071] #, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532
+
   # Marginal and capital costs can be overwritten
   # capital_cost:
   #   onwind: 500
@@ -101,7 +104,6 @@ costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_ho
     hydro: 0.
     H2: 0.
     battery: 0.
-
 
   emission_prices: # only used with the option Ep (emission prices)
     co2: 0.
@@ -156,7 +158,7 @@ sector:
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share
-      #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
+      #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
     progress: 1
       #2020: 0.0
       #2030: 0.3
@@ -210,14 +212,15 @@ sector:
 
   biomass_transport: true  # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
-  solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+  solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
   biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
+
   efficiency_heat_oil_to_elec: 0.9
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
 
   dynamic_transport:
-    enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
+    enable: false # If "True", then the BEV and FCEV shares are obtained depening on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
     land_transport_electric_share:
       Co2L2.0: 0.00
       Co2L1.0: 0.01
@@ -285,7 +288,7 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 2
+  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
@@ -523,4 +526,5 @@ plotting:
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
     biomass EOP: "green"
+    biomass: "green"
     high-temp electrolysis: "magenta"
