@@ -61,8 +61,8 @@ from _helpers import configure_logging, create_logger, read_csv_nafix
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
-    load_costs,
     calculate_annuity,
+    load_costs,
 )
 
 idx = pd.IndexSlice
@@ -288,29 +288,34 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 carrier=fuel,
                 efficiency=cooking_cost.at[fuel, "efficiency"],
                 capital_cost=cooking_cost.at[fuel, "capital_cost"],
-                marginal_cost=cooking_cost.at[fuel, "marginal_cost"], #differentiate between store and link
+                marginal_cost=cooking_cost.at[
+                    fuel, "marginal_cost"
+                ],  # differentiate between store and link
                 p_nom=cooking_cost.at[fuel, "p_nom"],
                 p_max_pu=cooking_cost.at[fuel, "p_nom_pu"],
             )
 
+
 def attach_cooking_load(n, demand_cooking):
     demand_df = read_csv_nafix(demand_cooking, index_col=0, parse_dates=True)
-    cooking_bus = n.buses.loc[n.buses.index.str.endswith('cooking')].index
-    n.madd("Load", 
-           demand_df.columns, 
-           bus=cooking_bus, 
-           p_set=demand_df)
+    cooking_bus = n.buses.loc[n.buses.index.str.endswith("cooking")].index
+    n.madd("Load", demand_df.columns, bus=cooking_bus, p_set=demand_df)
+
 
 def load_cooking_costs(cooking_fuel_costs, config, elec_config, Nyears=1):
     """
     Set all cooking costs and other parameters.
     """
 
-    cooking_costs = pd.read_csv(cooking_fuel_costs, index_col=["technology", "parameter"]).sort_index()
+    cooking_costs = pd.read_csv(
+        cooking_fuel_costs, index_col=["technology", "parameter"]
+    ).sort_index()
 
     cooking_costs.loc[cooking_costs.unit.str.contains("/kW"), "value"] *= 1e3
     cooking_costs.unit = cooking_costs.unit.str.replace("/kW", "/MW")
-    cooking_costs.loc[cooking_costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
+    cooking_costs.loc[cooking_costs.unit.str.contains("USD"), "value"] *= config[
+        "USD2013_to_EUR2013"
+    ]
 
     cooking_costs = cooking_costs.value.unstack().fillna(config["fill_values"])
 
@@ -321,9 +326,12 @@ def load_cooking_costs(cooking_fuel_costs, config, elec_config, Nyears=1):
         )
         * cooking_costs["investment"]
         * Nyears
-    ) # look into costs in links vs stores
+    )  # look into costs in links vs stores
 
-    cooking_costs["marginal_cost"] = cooking_costs["VOM"] + cooking_costs["fuel"] / cooking_costs["efficiency"]
+    cooking_costs["marginal_cost"] = (
+        cooking_costs["VOM"] + cooking_costs["fuel"] / cooking_costs["efficiency"]
+    )
+
 
 def attach_hydrogen_pipelines(n, costs, config):
     elec_opts = config["electricity"]
