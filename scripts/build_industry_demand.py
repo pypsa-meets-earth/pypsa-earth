@@ -10,9 +10,8 @@ import logging
 import os
 from itertools import product
 
-import numpy as np
 import pandas as pd
-from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
+from helpers import mock_snakemake, read_csv_nafix, sets_path_to_root
 
 _logger = logging.getLogger(__name__)
 
@@ -50,8 +49,6 @@ def country_to_nodal(industrial_production, keys):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake(
@@ -125,7 +122,7 @@ if __name__ == "__main__":
             snakemake.input["base_industry_totals"], index_col=[0, 1]
         )
 
-        production_base = cagr.applymap(lambda x: 1)
+        production_base = cagr.map(lambda x: 1)
         production_tom = production_base * growth_factors
 
         # non-used line; commented out

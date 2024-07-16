@@ -40,6 +40,7 @@ def get_cocode_from_coords(df):
 
         # Perform reverse geocoding to get location information
         tries = 0
+        location = None
         while tries < 10:
             try:
                 location = geolocator.reverse((latitude, longitude), exactly_one=True)

@@ -568,9 +568,7 @@ def locate_bus(
     except ValueError:
         return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
             col
-        ].iloc[
-            0
-        ]  # looks for closest one shape=node
+        ].item()  # looks for closest one shape=node
 
 
 def get_conv_factors(sector):
