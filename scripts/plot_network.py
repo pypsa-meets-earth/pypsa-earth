@@ -594,7 +594,7 @@ def plot_map(
         costs = pd.concat([costs, costs_c], axis=1)
 
         print(comp, costs)
-    costs = costs.T.groupby(costs.columns).sum().T
+    costs = costs.groupby(costs.columns, axis=1).sum()
 
     costs.drop(list(costs.columns[(costs == 0.0).all()]), axis=1, inplace=True)
 

@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 import pypsa
+import yaml
 from helpers import override_component_attrs
 from prepare_sector_network import prepare_costs
 
@@ -507,7 +508,9 @@ def calculate_weighted_prices(n, label, weighted_prices):
             if names.empty:
                 continue
 
-            load += n.links_t.p0[names].T.groupby(n.links.loc[names, "bus0"]).sum().T
+            load += (
+                n.links_t.p0[names].groupby(n.links.loc[names, "bus0"], axis=1).sum()
+            )
 
         # Add H2 Store when charging
         # if carrier == "H2":
@@ -545,9 +548,9 @@ def calculate_market_values(n, label, market_values):
 
         dispatch = (
             n.generators_t.p[gens]
-            .T.groupby(n.generators.loc[gens, "bus"])
+            .groupby(n.generators.loc[gens, "bus"], axis=1)
             .sum()
-            .T.reindex(columns=buses, fill_value=0.0)
+            .reindex(columns=buses, fill_value=0.0)
         )
 
         revenue = dispatch * n.buses_t.marginal_price[buses]
@@ -568,9 +571,9 @@ def calculate_market_values(n, label, market_values):
 
             dispatch = (
                 n.links_t["p" + i][links]
-                .T.groupby(n.links.loc[links, "bus" + i])
+                .groupby(n.links.loc[links, "bus" + i], axis=1)
                 .sum()
-                .T.reindex(columns=buses, fill_value=0.0)
+                .reindex(columns=buses, fill_value=0.0)
             )
 
             revenue = dispatch * n.buses_t.marginal_price[buses]
