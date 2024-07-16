@@ -739,6 +739,8 @@ rule add_extra_components:
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
+        demand_cooking="resources/demand_cooking.csv",
+        cooking_costs="data/cooking_costs.csv",
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
