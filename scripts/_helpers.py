@@ -27,14 +27,14 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
 
-def check_config_version(config):
+def check_config_version(config, fp_config="config.default.yaml"):
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
     """
 
     # using snakemake capabilities to deal with yanl configs
-    with open("config.default.yaml", "r") as f:
+    with open(fp_config, "r") as f:
         actual_config = yaml.safe_load(f)
     actual_config_version = actual_config.get("version")
 
