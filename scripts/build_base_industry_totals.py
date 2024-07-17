@@ -103,8 +103,6 @@ if __name__ == "__main__":
     year = snakemake.params.base_year
     countries = snakemake.params.countries
 
-    transactions_from_list = snakemake.config["industry"]
-
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
     no_years = int(snakemake.wildcards.planning_horizons) - int(

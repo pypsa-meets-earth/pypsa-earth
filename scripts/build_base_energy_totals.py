@@ -132,7 +132,7 @@ def calc_sector(sector):
             sectors_dfs[sector] = df_sector.copy()
 
             if sector == "consumption by households":
-                if snakemake.config["sector"]["coal"]["shift_to_elec"]:
+                if snakemake.params.shift_coal_to_elec:
                     condition = (df_sector.Commodity == "Electricity") | (
                         df_sector.Commodity.isin(coal_fuels)
                     )
@@ -165,7 +165,7 @@ def calc_sector(sector):
                 ) * (1 - snakemake.params.space_heat_share)
 
             elif sector == "services":
-                if snakemake.config["sector"]["coal"]["shift_to_elec"]:
+                if snakemake.params.shift_coal_to_elec:
                     condition = (df_sector.Commodity == "Electricity") | (
                         df_sector.Commodity.isin(coal_fuels)
                     )
@@ -289,7 +289,7 @@ def calc_sector(sector):
                     4,
                 )
             elif sector == "other energy":
-                if snakemake.config["sector"]["coal"]["shift_to_elec"]:
+                if snakemake.params.shift_coal_to_elec:
                     condition = (df_sector.Commodity == "Electricity") | (
                         df_sector.Commodity.isin(coal_fuels)
                     )
@@ -318,7 +318,7 @@ def calc_sector(sector):
                     4,
                 )
             elif sector == "non energy use":
-                if snakemake.config["sector"]["coal"]["shift_to_elec"]:
+                if snakemake.params.shift_coal_to_elec:
                     condition = (df_sector.Commodity == "Electricity") | (
                         df_sector.Commodity.isin(coal_fuels)
                     )
