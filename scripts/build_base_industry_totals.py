@@ -113,7 +113,7 @@ if __name__ == "__main__":
     include_other = snakemake.params.other_industries
 
     transaction = pd.read_csv(
-        "/nimble/home/haz43975/pes_paper/uptodate/pypsa-earth-sec/data/unsd_transactions.csv",
+        "data/unsd_transactions.csv",
         sep=";",
     )
 
