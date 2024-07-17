@@ -192,137 +192,29 @@ lines:
 links:
   p_max_pu: 1.0
   p_nom_max: .inf
-  under_construction: zero
-load_options:
-  prediction_year: 2030
-  scale: 1
-  ssp: ssp2-2.6
-  weather_year: 2013
-logging:
-  format: '%(levelname)s:%(name)s:%(message)s'
-  level: INFO
-monte_carlo:
-  options:
-    add_to_snakefile: false
-    samples: 9
-    sampling_strategy: chaospy
-    seed: 42
-  uncertainties:
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
-      args:
-      - 1.5
-      type: lognormal
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
-      args:
-      - 0.5
-      - 2
-      type: beta
-    loads_t.p_set:
-      args:
-      - 0
-      - 1
-      type: uniform
-plotting:
-  AC_carriers:
-  - AC line
-  - AC transformer
-  conv_techs:
-  - OCGT
-  - CCGT
-  - nuclear
-  - coal
-  - oil
-  costs_max: 800
-  costs_threshold: 1
-  energy_max: 15000.0
-  energy_min: -10000.0
-  energy_threshold: 50.0
-  link_carriers:
-  - DC line
-  - Converter AC-DC
-  load_carriers:
-  - AC load
-  map:
-    boundaries:
-    - -10.2
-    - 29
-    - 35
-    - 72
-    figsize:
-    - 7
-    - 7
-    p_nom:
-      bus_size_factor: 50000.0
-      linewidth_factor: 3000.0
-  nice_names:
-    CCGT: Combined-Cycle Gas
-    H2: Hydrogen Storage
-    OCGT: Open-Cycle Gas
-    PHS: Pumped Hydro Storage
-    battery: Battery Storage
-    hydro: Reservoir & Dam
-    lines: Transmission Lines
-    offwind-ac: Offshore Wind (AC)
-    offwind-dc: Offshore Wind (DC)
-    onwind: Onshore Wind
-    ror: Run of River
-    solar: Solar
-  storage_techs:
-  - hydro+PHS
-  - battery
-  - H2
-  tech_colors:
-    AC line: '#70af1d'
-    AC-AC: '#70af1d'
-    CCGT: '#b20101'
-    DC link: '#8a1caf'
-    DC-DC: '#8a1caf'
-    Electric load: '#f9d002'
-    H2: '#ea048a'
-    HVDC links: '#8a1caf'
-    OCGT: '#d35050'
-    PHS: '#08ad97'
-    battery: '#b8ea04'
-    biogas: '#23932d'
-    biomass: '#0c6013'
-    coal: '#707070'
-    electricity: '#f9d002'
-    gas: '#d35050'
-    geothermal: '#ba91b1'
-    hydro: '#08ad97'
-    hydro reservoir: '#08ad97'
-    hydro+PHS: '#08ad97'
-    hydroelectricity: '#08ad97'
-    hydrogen storage: '#ea048a'
-    lignite: '#9e5a01'
-    lines: '#70af1d'
-    links: '#8a1caf'
-    load: '#FF0000'
-    natural gas: '#d35050'
-    nuclear: '#ff9000'
-    offshore wind: '#6895dd'
-    offshore wind ac: '#6895dd'
-    offshore wind dc: '#74c6f2'
-    offwind: '#6895dd'
-    offwind-ac: '#6895dd'
-    offwind-dc: '#74c6f2'
-    oil: '#262626'
-    onshore wind: '#235ebc'
-    onwind: '#235ebc'
-    ror: '#4adbc8'
-    run of river: '#4adbc8'
-    solar: '#f9d002'
-    solar PV: '#f9d002'
-    solar thermal: '#ffef60'
-    solid biomass: '#06540d'
-    transmission lines: '#70af1d'
-    waste: '#68896b'
-  vre_techs:
-  - onwind
-  - offwind-ac
-  - offwind-dc
-  - solar
-  - ror
+
+  under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+
+transformers:
+  x: 0.1
+  s_nom: 2000.
+  type: ""
+
+atlite:
+  nprocesses: 4
+  cutouts:
+    # geographical bounds automatically determined from countries input
+    cutout-2013-era5:
+      module: era5
+      dx: 0.3  # cutout resolution
+      dy: 0.3  # cutout resolution
+      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
+      # y: [33., 72]    # manual set cutout range
+
+
 renewable:
   hydro:
     PHS_max_hours: 6
@@ -425,26 +317,86 @@ renewable:
     natura: true
     potential: simple
     resource:
-      method: pv
-      orientation: latitude_optimal
-      panel: CSi
-retrieve_databundle:
-  show_progress: false
-run:
-  name: ''
-scenario:
-  clusters:
-  - 6
-  ll:
-  - copt
-  opts:
-  - Co2L-4H
-  simpl:
-  - ''
-snapshots:
-  end: 2013-03-7
-  inclusive: left
-  start: 2013-03-1
+      method: hydro
+      hydrobasins: data/hydrobasins/hybas_world.shp
+      flowspeed: 1.0  # m/s
+      # weight_with_height: false
+      # show_progress: true
+    carriers: [ror, PHS, hydro]
+    PHS_max_hours: 6
+    hydro_max_hours: "energy_capacity_totals_by_country"  # not active
+    hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
+    clip_min_inflow: 1.0
+    extendable: true
+    normalization:
+      method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
+      year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the weather year of the snapshots is used
+    multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
+
+# TODO: Needs to be adjusted for Africa.
+# Costs Configuration (Do not remove, needed for Sphynx documentation).
+costs:
+  year: 2030
+  version: v0.5.0
+  rooftop_share: 0.14  # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
+  USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    CO2 intensity: 0
+    discount rate: 0.071
+  marginal_cost: # EUR/MWh
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    battery: 0.
+    battery inverter: 0.
+  emission_prices: # in currency per tonne emission, only used with the option Ep
+    co2: 0.
+
+
+monte_carlo:
+  # Description: Specify Monte Carlo sampling options for uncertainty analysis.
+  # Define the option list for Monte Carlo sampling.
+  # Make sure add_to_snakefile is set to true to enable Monte-Carlo
+  options:
+    add_to_snakefile: false # When set to true, enables Monte Carlo sampling
+    samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
+    sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
+    seed: 42 # set seedling for reproducibility
+  # Uncertainties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
+  # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
+  # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
+  # The arguments of the distribution are passed using the key 'args'  as follows, tailored by distribution type
+  # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
+  # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
+  # More info on the distributions are documented in the Chaospy reference guide...
+  # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
+  # An abstract example is as follows:
+  # {pypsa network object, e.g. "loads_t.p_set"}:
+  # type: {any supported distribution among the previous: "uniform", "normal", ...}
+  # args: {arguments passed as a list depending on the distribution, see the above and more at https://pypsa.readthedocs.io/}
+  uncertainties:
+    loads_t.p_set:
+      type: uniform
+      args: [0, 1]
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
+      type: lognormal
+      args: [1.5]
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
+      type: beta
+      args: [0.5, 2]
+
+
+
 solving:
   options:
     clip_p_max_pu: 0.01

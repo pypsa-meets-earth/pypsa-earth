@@ -14,7 +14,6 @@ Possible improvements:
 
 import logging
 import os
-from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -77,6 +76,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
         "Bus",
         "H2 export bus",
         carrier="H2",
+        location="Earth",
         x=x_export,
         y=y_export,
     )
@@ -163,7 +163,7 @@ def create_export_profile():
 
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
     sopts = snakemake.wildcards.sopts.split("-")
-    export_profile = export_profile.resample(sopts[0]).mean()
+    export_profile = export_profile.resample(sopts[0].casefold()).mean()
 
     # revise logger msg
     export_type = snakemake.params.export_profile

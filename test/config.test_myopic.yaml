@@ -1,13 +1,13 @@
 logging_level: INFO
-tutorial: false
+tutorial: true
 
 results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_run
+run: test_myopic
 
-foresight: overnight
+foresight: myopic
 
 # option to disable the subworkflow to ease the analyses
 disable_subworkflow: false
@@ -16,17 +16,18 @@ scenario:
   simpl: # only relevant for PyPSA-Eur
   - ""
   clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 10
+  - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
-  - "c1.0"
+  - "c1"
   opts:
   - "Co2L"
   sopts:
   - "144H"
   demand:
-  - "AB"
+  - "DF"
+
 
 policy_config:
   hydrogen:
@@ -42,13 +43,13 @@ policy_config:
 clustering_options:
   alternative_clustering: true
 
-countries: ['MA']
+countries: ['NG', 'BJ']
 
 demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
   base_year: 2019
 
-  other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
+  other_industries: false # Whether or not to include industries that are not specified. some countries have has exageratted numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
 
@@ -57,13 +58,13 @@ enable:
   retrieve_irena: true  #If true, downloads the IRENA data
 
 fossil_reserves:
-  oil: 100 #TWh Maybe redundant
+  oil: 100 #TWh Maybe reduntant
 
 
 export:
-  h2export: [10] # Yearly export demand in TWh
-  store: true # [True, False] # specifies whether an export store to balance demand is implemented
-  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
+  h2export: [120] # Yearly export demand in TWh
+  store: true # [True, False] # specifies wether an export store to balance demand is implemented
+  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   export_profile: "ship" # use "ship" or "constant"
   ship:
     ship_capacity: 0.4 # TWh # 0.05 TWh for new ones, 0.003 TWh for Susio Frontier, 0.4 TWh according to Hampp2021: "Corresponds to 11360 t H2 (l) with LHV of 33.3333 Mwh/t_H2. Cihlar et al 2020 based on IEA 2019, Table 3-B"
@@ -148,8 +149,6 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
-  coal:
-    shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
 
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
@@ -159,7 +158,7 @@ sector:
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
       #increase of today's district heating demand to potential maximum district heating share
-      #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
+      #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
     progress: 1
       #2020: 0.0
       #2030: 0.3
@@ -221,7 +220,7 @@ sector:
   efficiency_heat_gas_to_elec: 0.9
 
   dynamic_transport:
-    enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
+    enable: false # If "True", then the BEV and FCEV shares are obtained depening on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
     land_transport_electric_share:
       Co2L2.0: 0.00
       Co2L1.0: 0.01
@@ -311,8 +310,8 @@ sector:
 # snapshots are originally set in PyPSA-Earth/config.yaml but used again by PyPSA-Earth-Sec
 snapshots:
   # arguments to pd.date_range
-  start: "2013-01-01"
-  end: "2014-01-01"
+  start: "2013-03-1"
+  end: "2013-03-7"
   inclusive: "left" # end is not inclusive
 
 # atlite:
@@ -334,16 +333,7 @@ solving:
     max_iterations: 6
 
   solver:
-    name: gurobi
-    threads: 25
-    method: 2 # barrier
-    crossover: 0
-    BarConvTol: 1.e-6
-    Seed: 123
-    AggFill: 0
-    PreDual: 0
-    GURO_PAR_BARDENSETHRESH: 200
-    #FeasibilityTol: 1.e-6
+    name: cbc
 
   mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
 
