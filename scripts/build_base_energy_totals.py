@@ -134,8 +134,8 @@ def calc_sector(sector):
             if sector == "consumption by households":
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
                     condition = (
-                        df_sector.Commodity
-                        == "Electricity" | df_sector.Commodity.isin(coal_fuels)
+                        (df_sector.Commodity
+                        == "Electricity") | (df_sector.Commodity.isin(coal_fuels))
                     )
                 else:
                     condition = df_sector.Commodity == "Electricity"
@@ -168,8 +168,8 @@ def calc_sector(sector):
             elif sector == "services":
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
                     condition = (
-                        df_sector.Commodity
-                        == "Electricity" | df_sector.Commodity.isin(coal_fuels)
+                        (df_sector.Commodity
+                        == "Electricity") | (df_sector.Commodity.isin(coal_fuels))
                     )
                 else:
                     condition = df_sector.Commodity == "Electricity"
@@ -293,8 +293,8 @@ def calc_sector(sector):
             elif sector == "other energy":
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
                     condition = (
-                        df_sector.Commodity
-                        == "Electricity" | df_sector.Commodity.isin(coal_fuels)
+                        (df_sector.Commodity
+                        == "Electricity") | (df_sector.Commodity.isin(coal_fuels))
                     )
                 else:
                     condition = df_sector.Commodity == "Electricity"
@@ -323,8 +323,8 @@ def calc_sector(sector):
             elif sector == "non energy use":
                 if snakemake.config["sector"]["coal"]["shift_to_elec"]:
                     condition = (
-                        df_sector.Commodity
-                        == "Electricity" | df_sector.Commodity.isin(coal_fuels)
+                        (df_sector.Commodity
+                        == "Electricity") | (df_sector.Commodity.isin(coal_fuels))
                     )
                 else:
                     condition = df_sector.Commodity == "Electricity"
