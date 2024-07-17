@@ -167,7 +167,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         <a href="https://github.com/hazemful">
             <img src="https://avatars.githubusercontent.com/u/26235356?v=4" width="100;" alt="hazemful"/>
             <br />
-            <sub><b>Hazemful</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
