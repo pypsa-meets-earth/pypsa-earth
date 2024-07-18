@@ -228,12 +228,7 @@ def attach_cooking_technologies(n, cooking_costs, config):
         return
 
     carriers = config["clean_cooking"]["fuel"]
-    p_nom_dict = dict(
-        zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_nom"])
-    )
-    p_max_pu_dict = dict(
-        zip(config["clean_cooking"]["fuel"], config["clean_cooking"]["p_max_pu"])
-    )
+    cooking_costs = cooking_costs
     buses_i = n.buses.index
     buses_i = [
         bus for bus in buses_i if not (bus.endswith("battery") or bus.endswith("H2"))
@@ -269,10 +264,9 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 bus=fuel_buses_i,
                 carrier=fuel,
                 e_cyclic=fuel == "AC",
-                e_nom=cooking_costs.at[fuel, "e_nom"],
                 e_initial=cooking_costs.at[fuel, "e_initial"],
-                capital_cost=cooking_cost.at[fuel, "capital_cost"],
-                marginal_cost=cooking_cost.at[fuel, "marginal_cost"],
+                capital_cost=cooking_costs.at[fuel, "capital_cost"],
+                marginal_cost=cooking_costs.at[fuel, "marginal_cost"],
             )
 
         if cooking_buses_i is not None:
@@ -302,7 +296,7 @@ def attach_cooking_load(n, demand_cooking):
     n.madd("Load", demand_df.columns, bus=cooking_bus, p_set=demand_df)
 
 
-def load_cooking_costs(cooking_fuel_costs, config, elec_config, Nyears=1):
+def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
     """
     Set all cooking costs and other parameters.
     """
@@ -317,7 +311,7 @@ def load_cooking_costs(cooking_fuel_costs, config, elec_config, Nyears=1):
         "USD2013_to_EUR2013"
     ]
 
-    cooking_costs = cooking_costs.value.unstack().fillna(config["fill_values"])
+    cooking_costs = cooking_costs.value.unstack().fillna(config["costs"]["fill_values"])
 
     cooking_costs["capital_cost"] = (
         (
@@ -395,8 +389,12 @@ if __name__ == "__main__":
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
-    load_cooking_costs(snakemake.input.cooking_costs, config, Nyears=1)
-    attach_cooking_technologies(n, costs, config)
+    cooking_costs = load_cooking_costs(
+        snakemake.input.cooking_costs, 
+        config, 
+        Nyears=1
+    )
+    attach_cooking_technologies(n, cooking_costs, config)
     attach_cooking_load(n, snakemake.input.demand_cooking)
     attach_hydrogen_pipelines(n, costs, config)
 
