@@ -18,7 +18,7 @@ if __name__ == "__main__":
             simpl="",
             clusters=900,
         )
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     time = pd.date_range(freq="h", **snakemake.params.snapshots)
     cutout_path = (

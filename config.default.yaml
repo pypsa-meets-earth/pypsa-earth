@@ -5,7 +5,9 @@ results_dir: results/
 summary_dir: results/
 costs_dir: data/ #TODO change to the equivalent of technology data
 
-run: test_run
+run: 
+  name: test_run
+  shared_cutouts: true
 
 foresight: overnight
 
@@ -27,6 +29,10 @@ scenario:
   - "144H"
   demand:
   - "AB"
+
+electricity: 
+  extendable_carriers:
+    Link: []
 
 policy_config:
   hydrogen:

@@ -561,7 +561,7 @@ if __name__ == "__main__":
             h2export="0",
         )
 
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     logging.basicConfig(
         filename=snakemake.log.python, level=snakemake.config["logging_level"]

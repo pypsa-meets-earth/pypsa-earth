@@ -68,7 +68,7 @@ jobs:
     - name: Test snakemake workflow
       run: |
         conda list
-        snakemake --cores all run_test
+        make test
 
       # - name: Test plotting and summaries
       #   run: |

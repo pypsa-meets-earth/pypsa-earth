@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("prepare_urban_percent")
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
     # configure_logging(snakemake)
 
     # run = snakemake.config.get("run", {})

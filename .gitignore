@@ -44,6 +44,10 @@ data/costs*
 /data/ports.csv
 /data/energy_totals_DF_2030
 /data/energy_totals_XX_2038
+data/
+data/osm/
+data/raw/
+data/base_network/
 
 /data/airports.csv
 /data/energy_totals_base.csv

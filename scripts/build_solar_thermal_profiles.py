@@ -19,7 +19,7 @@ if __name__ == "__main__":
             simpl="",
             clusters=15,
         )
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     config = snakemake.params.solar_thermal_config
 

@@ -210,7 +210,7 @@ if __name__ == "__main__":
             planning_horizons=2030,
         )
 
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     n = pypsa.Network(snakemake.input.network)
 

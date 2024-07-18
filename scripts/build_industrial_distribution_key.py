@@ -121,7 +121,7 @@ if __name__ == "__main__":
             demand="AB",
             planning_horizons=2050,
         )
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
     shapes_path = snakemake.input.shapes_path

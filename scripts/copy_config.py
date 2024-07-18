@@ -17,7 +17,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         snakemake = mock_snakemake("copy_config")
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     for f, name in files_to_copy.items():
         copy(

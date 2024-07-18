@@ -62,7 +62,7 @@ if __name__ == "__main__":
             demand="AB",
         )
 
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     countries = snakemake.params.countries
 

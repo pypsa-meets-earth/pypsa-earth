@@ -69,7 +69,7 @@ if __name__ == "__main__":
             "build_ship_profile",
             h2export="120",
         )
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     # Get parameters from config and wildcard
     ship_opts = snakemake.params.ship_opts

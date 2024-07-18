@@ -177,7 +177,7 @@ def create_export_profile():
 if __name__ == "__main__":
     if "snakemake" not in globals():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        from helpers import mock_snakemake, sets_path_to_root
+        from helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "add_export",
@@ -191,7 +191,7 @@ if __name__ == "__main__":
             demand="AB",
             h2export="120",
         )
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)

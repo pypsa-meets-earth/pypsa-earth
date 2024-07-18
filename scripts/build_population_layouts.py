@@ -20,7 +20,7 @@ if __name__ == "__main__":
             "build_population_layouts",
             planning_horizons=2030,
         )
-        sets_path_to_root("pypsa-earth-sec")
+        os.chdir(snakemake.config["ROOT_PATH"])
 
     cutout_path = (
         snakemake.input.cutout
