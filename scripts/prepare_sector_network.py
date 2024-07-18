@@ -1068,7 +1068,7 @@ def add_aviation(n, cost):
             airports["p_set"].sum()
             * domestic_to_total
             * costs.at["oil", "CO2 intensity"]
-        ).item()
+        ).sum()
 
     n.add(
         "Load",
@@ -1398,7 +1398,7 @@ def add_shipping(n, costs):
                 ports["p_set"].sum()
                 * domestic_to_total
                 * costs.at["oil", "CO2 intensity"]
-            ).item()
+            ).sum()
 
         n.add(
             "Load",
