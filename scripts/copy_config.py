@@ -24,7 +24,7 @@ if __name__ == "__main__":
             f,
             snakemake.params.summary_dir
             + "/"
-            + snakemake.params.run
+            + snakemake.params.run["name"]
             + "/configs/"
             + name,
         )

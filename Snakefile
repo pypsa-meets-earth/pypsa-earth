@@ -24,18 +24,23 @@ PYPSAEARTH_FOLDER = "pypsa-earth"
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
+run = config["run"]
 
-SDIR = config["summary_dir"] + config["run"]
-RDIR = config["results_dir"] + config["run"]
+
+SDIR = config["summary_dir"] + run["name"]
+RDIR = config["results_dir"] + run["name"]
 CDIR = config["costs_dir"]
 
 config.update({"git_commit": get_last_commit_message(".")})
 config.update({"submodule_commit": get_last_commit_message(PYPSAEARTH_FOLDER)})
 
+RDIR_PE = run["name_subworkflow"] + "/" if run.get("name_subworkflow") else ""
+CDIR_PE = RDIR_PE if not run.get("shared_cutouts") else ""
+
 CUTOUTS_PATH = (
-    "cutouts/cutout-2013-era5-tutorial.nc"
-    if config["tutorial"]
-    else "cutouts/cutout-2013-era5.nc"
+    "cutouts/"
+    + CDIR_PE
+    + ("cutout-2013-era5-tutorial.nc" if config["tutorial"] else "cutout-2013-era5.nc")
 )
 
 
@@ -166,7 +171,9 @@ if not config["custom_data"]["gas_network"]:
             custom_gas_network=config["custom_data"]["gas_network"],
         input:
             regions_onshore=pypsaearth(
-                "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
         output:
             clustered_gas_network="resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
@@ -201,7 +208,9 @@ rule prepare_sector_network:
         district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
         shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         pipelines="data_custom/pipelines.csv"
         if config["custom_data"]["gas_network"]
@@ -249,7 +258,9 @@ rule add_export:
         network=RDIR
         + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
     output:
         RDIR
@@ -277,7 +288,9 @@ rule override_respot:
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
         overrides="data/override_component_attrs",
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
+        network=pypsaearth(
+            "networks/" + RDIR_PE + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        ),
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
     output:
         RDIR
@@ -288,7 +301,7 @@ rule override_respot:
 
 rule prepare_transport_data:
     input:
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
+        network=pypsaearth("networks/" + RDIR_PE + "elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
@@ -332,7 +345,7 @@ rule build_cop_profiles:
 
 rule prepare_heat_data:
     input:
-        network=pypsaearth("networks/elec_s{simpl}_{clusters}.nc"),
+        network=pypsaearth("networks/" + RDIR_PE + "elec_s{simpl}_{clusters}.nc"),
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -392,7 +405,9 @@ rule build_solar_thermal_profiles:
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -411,7 +426,7 @@ rule build_population_layouts:
     params:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
-        nuts3_shapes=pypsaearth("resources/shapes/gadm_shapes.geojson"),
+        nuts3_shapes=pypsaearth("resources/" + RDIR_PE + "shapes/gadm_shapes.geojson"),
         urban_percent="data/urban_percent.csv",
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -444,7 +459,9 @@ rule build_clustered_population_layouts:
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
         gdp_layout="resources/gdp_shares/gdp_layout_{planning_horizons}.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -466,7 +483,9 @@ rule build_heat_demand:
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -489,7 +508,9 @@ rule build_temperature_profiles:
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         cutout=pypsaearth(CUTOUTS_PATH),
     output:
@@ -687,6 +708,10 @@ rule run_test:
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
             config_pypsaearth["electricity"]["co2limit"] = 7.75e7
+            config_pypsaearth["run"] = {
+                "name": "tutorial",
+                "shared_cutouts": True,
+            }
 
             with open("./config.pypsa-earth.yaml", "w") as wfile:
                 yaml.dump(config_pypsaearth, wfile)
@@ -712,13 +737,17 @@ rule build_industrial_distribution_key:  #default data
         industry_database=config["custom_data"]["industry_database"],
     input:
         regions_onshore=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         industrial_database="data/industrial_database.csv",
         shapes_path=pypsaearth(
-            "resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+            "resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
     output:
         industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -813,10 +842,14 @@ if config["foresight"] == "myopic":
         input:
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            powerplants=pypsaearth("resources/powerplants.csv"),
-            busmap_s=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}.csv"),
+            powerplants=pypsaearth("resources/" + RDIR_PE + "powerplants.csv"),
+            busmap_s=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"
+            ),
             busmap=pypsaearth(
-                "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs=CDIR
@@ -847,7 +880,7 @@ if config["foresight"] == "myopic":
     def input_profile_tech_brownfield(w):
         return {
             f"profile_{tech}": pypsaearth(
-                f"resources/renewable_profiles/profile_{tech}.nc"
+                f"resources/" + RDIR_PE + "renewable_profiles/profile_{tech}.nc"
             )
             for tech in config["electricity"]["renewable_carriers"]
             if tech != "hydro"
@@ -876,10 +909,14 @@ if config["foresight"] == "myopic":
             # drop_leap_day=config["enable"]["drop_leap_day"],
             carriers=config["electricity"]["renewable_carriers"],
         input:
-            unpack(input_profile_tech_brownfield),
-            simplify_busmap=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}.csv"),
+            # unpack(input_profile_tech_brownfield),
+            simplify_busmap=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"
+            ),
             cluster_busmap=pypsaearth(
-                "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
