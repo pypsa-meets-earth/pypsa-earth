@@ -34,7 +34,7 @@ CDIR = config["costs_dir"]
 config.update({"git_commit": get_last_commit_message(".")})
 config.update({"submodule_commit": get_last_commit_message(PYPSAEARTH_FOLDER)})
 
-RDIR_PE = run["name"] + "/" if run.get("name") else ""
+RDIR_PE = run["name_subworkflow"] + "/" if run.get("name_subworkflow") else ""
 CDIR_PE = RDIR_PE if not run.get("shared_cutouts") else ""
 
 CUTOUTS_PATH = (
