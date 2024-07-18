@@ -190,7 +190,7 @@ databundles:
     category: natura
     destination: "data/natura/"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/13539/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
     - data/natura/natura.tiff
