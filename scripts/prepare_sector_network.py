@@ -1068,7 +1068,7 @@ def add_aviation(n, cost):
             airports["p_set"].sum()
             * domestic_to_total
             * costs.at["oil", "CO2 intensity"]
-        )
+        ).item()
 
     n.add(
         "Load",
@@ -1398,7 +1398,7 @@ def add_shipping(n, costs):
                 ports["p_set"].sum()
                 * domestic_to_total
                 * costs.at["oil", "CO2 intensity"]
-            )
+            ).item()
 
         n.add(
             "Load",
@@ -1630,9 +1630,11 @@ def add_industry(n, costs):
         spatial.nodes,
         suffix=" low-temperature heat for industry",
         bus=[
-            node + " urban central heat"
-            if node + " urban central heat" in n.buses.index
-            else node + " services urban decentral heat"
+            (
+                node + " urban central heat"
+                if node + " urban central heat" in n.buses.index
+                else node + " services urban decentral heat"
+            )
             for node in spatial.nodes
         ],
         carrier="low-temperature heat for industry",
