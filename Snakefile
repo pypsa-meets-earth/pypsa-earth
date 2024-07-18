@@ -843,9 +843,13 @@ if config["foresight"] == "myopic":
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             powerplants=pypsaearth("resources/" + RDIR_PE + "powerplants.csv"),
-            busmap_s=pypsaearth("resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"),
+            busmap_s=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"
+            ),
             busmap=pypsaearth(
-                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs=CDIR
@@ -906,9 +910,13 @@ if config["foresight"] == "myopic":
             carriers=config["electricity"]["renewable_carriers"],
         input:
             # unpack(input_profile_tech_brownfield),
-            simplify_busmap=pypsaearth("resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"),
+            simplify_busmap=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"
+            ),
             cluster_busmap=pypsaearth(
-                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
