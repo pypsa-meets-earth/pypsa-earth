@@ -842,10 +842,10 @@ if config["foresight"] == "myopic":
         input:
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            powerplants=pypsaearth("resources/powerplants.csv"),
-            busmap_s=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}.csv"),
+            powerplants=pypsaearth("resources/" + RDIR_PE + "powerplants.csv"),
+            busmap_s=pypsaearth("resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"),
             busmap=pypsaearth(
-                "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
             clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs=CDIR
@@ -876,7 +876,7 @@ if config["foresight"] == "myopic":
     def input_profile_tech_brownfield(w):
         return {
             f"profile_{tech}": pypsaearth(
-                f"resources/renewable_profiles/profile_{tech}.nc"
+                f"resources/" + RDIR_PE + "renewable_profiles/profile_{tech}.nc"
             )
             for tech in config["electricity"]["renewable_carriers"]
             if tech != "hydro"
@@ -905,10 +905,10 @@ if config["foresight"] == "myopic":
             # drop_leap_day=config["enable"]["drop_leap_day"],
             carriers=config["electricity"]["renewable_carriers"],
         input:
-            unpack(input_profile_tech_brownfield),
-            simplify_busmap=pypsaearth("resources/bus_regions/busmap_elec_s{simpl}.csv"),
+            # unpack(input_profile_tech_brownfield),
+            simplify_busmap=pypsaearth("resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"),
             cluster_busmap=pypsaearth(
-                "resources/bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
             ),
             network=RDIR
             + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",

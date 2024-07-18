@@ -13,7 +13,7 @@ run:
 foresight: myopic
 
 # option to disable the subworkflow to ease the analyses
-disable_subworkflow: false
+disable_subworkflow: true
 
 scenario:
   simpl: # only relevant for PyPSA-Eur
