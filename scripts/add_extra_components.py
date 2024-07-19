@@ -280,13 +280,12 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 bus0=fuel_buses_i,
                 bus1=cooking_buses_i,
                 carrier=fuel,
-                efficiency=cooking_costs.at[fuel, "efficiency"],
-                capital_cost=cooking_cost.at[fuel, "capital_cost"],
-                marginal_cost=cooking_cost.at[
-                    fuel, "marginal_cost"
+                efficiency=cooking_costs.at[f"{fuel} stove", "efficiency"],
+                capital_cost=cooking_costs.at[f"{fuel} stove", "capital_cost"],
+                marginal_cost=cooking_costs.at[
+                    f"{fuel} stove", "marginal_cost"
                 ],  # differentiate between store and link
-                p_nom=cooking_cost.at[fuel, "p_nom"],
-                p_max_pu=cooking_cost.at[fuel, "p_nom_pu"],
+                p_nom=cooking_costs.at[f"{fuel} stove", "p_nom"],
             )
 
 
@@ -317,11 +316,30 @@ def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
         )
         * cooking_costs["investment"]
         * Nyears
-    )  # look into costs in links vs stores
+    )
 
     cooking_costs["marginal_cost"] = (
         cooking_costs["VOM"] + cooking_costs["fuel"] / cooking_costs["efficiency"]
     )
+
+    cooking_costs = cooking_costs.rename(
+        columns={"CO2 intensity": "co2_emissions", "capacity": "p_nom"}
+    )
+
+    def costs_for_storage(store, link, max_hours=1.0):
+        capital_cost = link["capital_cost"] + max_hours * store["capital_cost"]
+        return pd.Series(
+            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
+        )
+
+    for i in config["clean_cooking"]["fuel"]:
+        if i != "heat":
+            cooking_costs.loc[i] = costs_for_storage(
+                cooking_costs.loc[i],
+                cooking_costs.loc[f"{i} stove"],
+            )
+
+    return cooking_costs
 
 
 def attach_hydrogen_pipelines(n, costs, config):
