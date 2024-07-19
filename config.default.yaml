@@ -152,6 +152,8 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
+  coal:
+    shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
 
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 

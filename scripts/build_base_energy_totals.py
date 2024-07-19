@@ -14,7 +14,12 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from helpers import sets_path_to_root, three_2_two_digits_country
+from helpers import (
+    aggregate_fuels,
+    get_conv_factors,
+    sets_path_to_root,
+    three_2_two_digits_country,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -26,20 +31,34 @@ def calc_sector(sector):
         # print(country, sector)
         df_co = df_yr[df_yr.country == country]
 
-        if sector != "navigation":
+        if sector == "navigation":
             df_sector = df_co.loc[
-                df["Commodity - Transaction"].str.lower().str.contains(sector)
-            ]
-            # assert df_yr[df_yr["Commodity - Transaction"].str.contains(sector)]["Unit"].unique() == 'Metric tons,  thousand', "Not all quantities have the expected unit: {}".format(expected_unit)
-        else:
-            df_sector = df_co.loc[
-                (df["Commodity - Transaction"].str.lower().str.contains(sector))
+                (df_co["Commodity - Transaction"].str.lower().str.contains(sector))
                 | (
-                    df["Commodity - Transaction"]
+                    df_co["Commodity - Transaction"]
                     .str.lower()
                     .str.contains("marine bunkers")
                 )
             ]
+
+        elif sector == "non energy use":
+            df_sector = df_co.loc[
+                (df_co["Transaction"].str.lower().str.contains(sector))
+                | (
+                    df_co["Transaction"]
+                    .str.replace("-", " ")
+                    .str.replace("uses", "use")
+                    .str.lower()
+                    .str.contains(sector)
+                )
+            ]
+        elif sector == "other energy":
+            df_sector = df_co.loc[df_co["Transaction"].isin(other_energy)]
+        else:
+            df_sector = df_co.loc[
+                df_co["Commodity - Transaction"].str.lower().str.contains(sector)
+            ]
+            # assert df_yr[df_yr["Commodity - Transaction"].str.contains(sector)]["Unit"].unique() == 'Metric tons,  thousand', "Not all quantities have the expected unit: {}".format(expected_unit)
 
         if df_sector.empty:
             if sector == "consumption by households":
@@ -113,12 +132,15 @@ def calc_sector(sector):
             sectors_dfs[sector] = df_sector.copy()
 
             if sector == "consumption by households":
+                if snakemake.params.shift_coal_to_elec:
+                    condition = (df_sector.Commodity == "Electricity") | (
+                        df_sector.Commodity.isin(coal_fuels)
+                    )
+                else:
+                    condition = df_sector.Commodity == "Electricity"
+
                 energy_totals_base.at[country, "electricity residential"] = round(
-                    df_sector[
-                        (df_sector.Commodity == "Electricity")
-                        | df_sector.Commodity.isin(other_fuels)
-                    ].Quantity_TWh.sum(),
-                    4,
+                    df_sector[condition].Quantity_TWh.sum(), 4
                 )
                 energy_totals_base.at[country, "residential oil"] = round(
                     df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum(), 4
@@ -143,11 +165,15 @@ def calc_sector(sector):
                 ) * (1 - snakemake.params.space_heat_share)
 
             elif sector == "services":
+                if snakemake.params.shift_coal_to_elec:
+                    condition = (df_sector.Commodity == "Electricity") | (
+                        df_sector.Commodity.isin(coal_fuels)
+                    )
+                else:
+                    condition = df_sector.Commodity == "Electricity"
+
                 energy_totals_base.at[country, "services electricity"] = round(
-                    df_sector[
-                        (df_sector.Commodity == "Electricity")
-                        | df_sector.Commodity.isin(other_fuels)
-                    ].Quantity_TWh.sum(),
+                    df_sector[condition].Quantity_TWh.sum(),
                     4,
                 )
                 energy_totals_base.at[country, "services oil"] = round(
@@ -176,12 +202,27 @@ def calc_sector(sector):
                 energy_totals_base.at[country, "total road"] = round(
                     df_sector.Quantity_TWh.sum(), 4
                 )
+                energy_totals_base.at[country, "road electricity"] = round(
+                    df_sector[df_sector.Commodity == "Electricity"].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "road gas"] = round(
+                    df_sector[df_sector.Commodity.isin(gas_fuels)].Quantity_TWh.sum(), 4
+                )
+                energy_totals_base.at[country, "road biomass"] = round(
+                    df_sector[
+                        df_sector.Commodity.isin(biomass_fuels)
+                    ].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "road oil"] = round(
+                    df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum(), 4
+                )
 
             elif sector == "agriculture":
                 energy_totals_base.at[country, "agriculture electricity"] = round(
                     df_sector[
                         (df_sector.Commodity == "Electricity")
-                        | df_sector.Commodity.isin(other_fuels)
                     ].Quantity_TWh.sum(),
                     4,
                 )
@@ -192,6 +233,10 @@ def calc_sector(sector):
                     df_sector[
                         df_sector.Commodity.isin(biomass_fuels)
                     ].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "agriculture coal"] = round(
+                    df_sector[df_sector.Commodity.isin(coal_fuels)].Quantity_TWh.sum(),
                     4,
                 )
                 # energy_totals_base.at[country, "electricity rail"] = round(df_house[(df_house.Commodity=="Electricity")].Quantity_TWh.sum(), 4)
@@ -243,7 +288,64 @@ def calc_sector(sector):
                     ].Quantity_TWh.sum(),
                     4,
                 )
+            elif sector == "other energy":
+                if snakemake.params.shift_coal_to_elec:
+                    condition = (df_sector.Commodity == "Electricity") | (
+                        df_sector.Commodity.isin(coal_fuels)
+                    )
+                else:
+                    condition = df_sector.Commodity == "Electricity"
 
+                energy_totals_base.at[country, "other electricity"] = round(
+                    df_sector[condition].Quantity_TWh.sum(), 4
+                )
+
+                energy_totals_base.at[country, "other oil"] = round(
+                    df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum(), 4
+                )
+                energy_totals_base.at[country, "other biomass"] = round(
+                    df_sector[
+                        df_sector.Commodity.isin(biomass_fuels)
+                    ].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "other gas"] = round(
+                    df_sector[df_sector.Commodity.isin(gas_fuels)].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "other heat"] = round(
+                    df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum(),
+                    4,
+                )
+            elif sector == "non energy use":
+                if snakemake.params.shift_coal_to_elec:
+                    condition = (df_sector.Commodity == "Electricity") | (
+                        df_sector.Commodity.isin(coal_fuels)
+                    )
+                else:
+                    condition = df_sector.Commodity == "Electricity"
+
+                energy_totals_base.at[country, "non energy electricity"] = round(
+                    df_sector[condition].Quantity_TWh.sum(), 4
+                )
+
+                energy_totals_base.at[country, "non energy oil"] = round(
+                    df_sector[df_sector.Commodity.isin(oil_fuels)].Quantity_TWh.sum(), 4
+                )
+                energy_totals_base.at[country, "non energy biomass"] = round(
+                    df_sector[
+                        df_sector.Commodity.isin(biomass_fuels)
+                    ].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "non energy gas"] = round(
+                    df_sector[df_sector.Commodity.isin(gas_fuels)].Quantity_TWh.sum(),
+                    4,
+                )
+                energy_totals_base.at[country, "non energy heat"] = round(
+                    df_sector[df_sector.Commodity.isin(heat)].Quantity_TWh.sum(),
+                    4,
+                )
             else:
                 print("wrong sector")
 
@@ -257,8 +359,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_energy_totals",
             simpl="",
-            clusters=10,
-            demand="DF",
+            clusters=19,
+            demand="AB",
             planning_horizons=2030,
         )
         sets_path_to_root("pypsa-earth-sec")
@@ -323,49 +425,11 @@ if __name__ == "__main__":
     df = df[~df.country.str.contains(",", na=False)].reset_index(drop=True)
 
     # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
-    fuels_conv_toTWh = {
-        "Gas Oil/ Diesel Oil": 0.01194,
-        "Motor Gasoline": 0.01230,
-        "Kerosene-type Jet Fuel": 0.01225,
-        "Aviation gasoline": 0.01230,
-        "Biodiesel": 0.01022,
-        "Natural gas liquids": 0.01228,
-        "Biogasoline": 0.007444,
-        "Bitumen": 0.01117,
-        "Fuel oil": 0.01122,
-        "Liquefied petroleum gas (LPG)": 0.01313,
-        "Liquified Petroleum Gas (LPG)": 0.01313,
-        "Lubricants": 0.01117,
-        "Naphtha": 0.01236,
-        "Fuelwood": 0.00254,
-        "Charcoal": 0.00819,
-        "Patent fuel": 0.00575,
-        "Brown coal briquettes": 0.00575,
-        "Hard coal": 0.007167,
-        "Other bituminous coal": 0.005556,
-        "Anthracite": 0.005,
-        "Peat": 0.00271,
-        "Peat products": 0.00271,
-        "Lignite": 0.003889,
-        "Brown coal": 0.003889,
-        "Sub-bituminous coal": 0.005555,
-        "Coke-oven coke": 0.0002778,
-        "Coke oven coke": 0.0002778,
-        "Coke Oven Coke": 0.0002778,
-        "Gasoline-type jet fuel": 0.01230,
-        "Conventional crude oil": 0.01175,
-        "Brown Coal Briquettes": 0.00575,
-        "Refinery Gas": 0.01375,
-        "Petroleum coke": 0.009028,
-        "Coking coal": 0.007833,
-        "Peat Products": 0.00271,
-        "Petroleum Coke": 0.009028,
-    }
+    fuels_conv_toTWh = get_conv_factors("industry")
 
     # Fetch country list and demand base year from the config file
     year = snakemake.params.base_year
     countries = snakemake.params.countries
-    # countries = ["NG", "BJ"]
 
     # Filter for the year and country
     df_yr = df[df.Year == year]
@@ -376,21 +440,24 @@ if __name__ == "__main__":
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
     # Lists that combine the different fuels in the dataset to the model's carriers
-    oil_fuels = [
-        "Patent fuel",
-        "Gas Oil/ Diesel Oil",
-        "Motor Gasoline",
-        "Liquefied petroleum gas (LPG)",
-    ]
-    gas_fuels = [
-        "Natural gas (including LNG)",
-        "Gasworks Gas",
-        "Natural Gas (including LNG)",
-    ]
-    biomass_fuels = ["Biodiesel", "Biogases", "Fuelwood", "Biogasoline"]
-    other_fuels = ["Charcoal", "Brown coal briquettes", "Other bituminous coal"]
-    heat = ["Heat", "Direct use of geothermal heat", "Direct use of solar thermal heat"]
+    (
+        gas_fuels,
+        oil_fuels,
+        biomass_fuels,
+        coal_fuels,
+        heat,
+        electricity,
+    ) = aggregate_fuels("industry")
 
+    other_energy = [
+        "consumption not elsewhere specified (other)",
+        "consumption not elsewhere specified (other)"
+        "Consumption not elsewhere specified (other)",
+        "Consumption by other consumers not elsewhere specified",
+        "consumption by other consumers not elsewhere specified",
+    ]
+
+    # non_energy = ['non energy uses', 'non-energy uses', 'consumption for non-energy uses', 'Consumption for non-energy uses', 'non-energy use']
     # Create a dictionary to save the data if need to be checked
     sectors_dfs = {}
 
@@ -403,6 +470,8 @@ if __name__ == "__main__":
         "navigation",
         "agriculture",
         "services",
+        "other energy",
+        "non energy use",
     ]
     for sector in sectors:
         calc_sector(sector)

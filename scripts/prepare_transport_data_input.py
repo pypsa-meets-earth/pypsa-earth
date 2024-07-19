@@ -67,6 +67,7 @@ def download_CO2_emissions():
         print("File read successfully.")
     except Exception as e:
         print("Failed to read the file:", e)
+        return pd.DataFrame()
 
     CO2_emissions = CO2_emissions[
         ["Country Name", "Country Code", "Indicator Name", "2014"]
