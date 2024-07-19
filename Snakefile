@@ -742,7 +742,6 @@ rule build_base_industry_totals:  #default data
         #unsd_path="data/demand/unsd/data/",
         energy_totals_base="data/energy_totals_base.csv",
         transactions_path="data/unsd_transactions.csv",
-
     output:
         base_industry_totals="resources/demand/base_industry_totals_{planning_horizons}_{demand}.csv",
     threads: 1
