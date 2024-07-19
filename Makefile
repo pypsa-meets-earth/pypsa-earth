@@ -6,7 +6,7 @@
 
 test:
 	set -e
-	snakemake -call solve_all_networks --configfile pypsa-earth/config.tutorial.yaml test/config.test1.yaml
+	snakemake -call solve_sector_networks --configfile pypsa-earth/config.tutorial.yaml test/config.test1.yaml
 	echo "All tests completed successfully."
 
 setup:
@@ -15,5 +15,5 @@ setup:
 
 clean:
 	# Add clean-up commands here
-	snakemake -j1 solve_all_networks --delete-all-output --configfile test/config.test1.yaml
+	snakemake -j1 solve_sector_networks --delete-all-output --configfile test/config.test1.yaml
 	echo "Clean-up complete."

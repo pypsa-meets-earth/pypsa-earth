@@ -8,7 +8,7 @@ costs_dir: data/ #TODO change to the equivalent of technology data
 run: 
   name: test_run
   shared_cutouts: true
-
+  
 foresight: overnight
 
 # option to disable the subworkflow to ease the analyses

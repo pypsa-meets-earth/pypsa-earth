@@ -32,7 +32,7 @@ config["ROOT_PATH"] = os.getcwd()
 
 run = config.get("run", {})
 SDIR = config["summary_dir"] + run["name"] + "/" if run.get("name") else ""
-RDIR = config["results_dir"] + run["name"] + "/" if run.get("name") else ""
+RESDIR = config["results_dir"] + run["name"] + "/" if run.get("name") else ""
 COSTDIR = config["costs_dir"]
 
 
@@ -102,8 +102,8 @@ if config["enable"].get("retrieve_cost_data", True):
 rule prepare_sector_networks:
     input:
         expand(
-            RDIR
-            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+            RESDIR
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
             **config["scenario"],
             **config["costs"]
         ),
@@ -112,8 +112,8 @@ rule prepare_sector_networks:
 rule override_res_all_nets:
     input:
         expand(
-            RDIR
-            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
+            RESDIR
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
             **config["scenario"],
             **config["costs"],
             **config["export"]
@@ -123,7 +123,7 @@ rule override_res_all_nets:
 rule solve_sector_networks:
     input:
         expand(
-            RDIR
+            RESDIR
             + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             **config["scenario"],
             **config["costs"],
@@ -191,8 +191,8 @@ if not config["custom_data"]["gas_network"]:
 
 rule prepare_sector_network:
     input:
-        network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
+        network=RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -217,14 +217,14 @@ rule prepare_sector_network:
         if config["custom_data"]["gas_network"]
         else "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
     output:
-        RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
     threads: 1
     resources:
         mem_mb=2000,
     benchmark:
         (
-            RDIR
+            RESDIR
             + "/benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}"
         )
     script:
@@ -256,12 +256,12 @@ rule add_export:
         export_ports="data/export_ports.csv",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         ship_profile="resources/ship_profile_{h2export}TWh.csv",
-        network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        network=RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     script:
         "scripts/add_export.py"
 
@@ -288,8 +288,8 @@ rule override_respot:
         network="networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
     output:
-        RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
+        RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
     script:
         "scripts/override_respot.py"
 
@@ -525,30 +525,30 @@ rule copy_config:
 rule solve_sector_network:
     input:
         overrides="data/override_component_attrs",
-        # network=RDIR
-        # + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
-        network=RDIR
-        + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        # network=RESDIR
+        # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
+        network=RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
     output:
-        RDIR
+        RESDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     shadow:
         "shallow"
     log:
-        solver=RDIR
+        solver=RESDIR
         + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
-        python=RDIR
+        python=RESDIR
         + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_python.log",
-        memory=RDIR
+        memory=RESDIR
         + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
     threads: 25
     resources:
         mem_mb=config["solving"]["mem"],
     benchmark:
         (
-            RDIR
+            RESDIR
             + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
     script:
@@ -568,7 +568,7 @@ rule make_sector_summary:
     input:
         overrides="data/override_component_attrs",
         networks=expand(
-            RDIR
+            RESDIR
             + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             **config["scenario"],
             **config["costs"],
@@ -576,7 +576,7 @@ rule make_sector_summary:
         ),
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         plots=expand(
-            RDIR
+            RESDIR
             + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
             **config["scenario"],
             **config["costs"],
@@ -610,17 +610,17 @@ rule make_sector_summary:
 rule plot_sector_network:
     input:
         overrides="data/override_component_attrs",
-        network=RDIR
+        network=RESDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
-        map=RDIR
+        map=RESDIR
         + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
         (
-            RDIR
+            RESDIR
             + "/benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
     script:
@@ -656,17 +656,17 @@ rule prepare_db:
     params:
         tech_colors=config["plotting"]["tech_colors"],
     input:
-        network=RDIR
+        network=RESDIR
         + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
-        db=RDIR
+        db=RESDIR
         + "/summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
         (
-            RDIR
+            RESDIR
             + "/benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
     script:
