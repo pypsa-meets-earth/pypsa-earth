@@ -389,11 +389,7 @@ if __name__ == "__main__":
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
-    cooking_costs = load_cooking_costs(
-        snakemake.input.cooking_costs, 
-        config, 
-        Nyears=1
-    )
+    cooking_costs = load_cooking_costs(snakemake.input.cooking_costs, config, Nyears=1)
     attach_cooking_technologies(n, cooking_costs, config)
     attach_cooking_load(n, snakemake.input.demand_cooking)
     attach_hydrogen_pipelines(n, costs, config)
