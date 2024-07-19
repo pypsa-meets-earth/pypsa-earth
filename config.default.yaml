@@ -334,7 +334,6 @@ renewable:
     extendable: true
     csp_model: advanced # simple or advanced
 
-
 # clean_cooking configuration
 clean_cooking:
   enable: true
