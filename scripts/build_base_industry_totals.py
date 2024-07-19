@@ -13,7 +13,7 @@ from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
-from helpers import aggregate_fuels, get_conv_factors
+from helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
 from prepare_sector_network import get
 
 # def calc_industry_base(df):
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     )
     include_other = snakemake.params.other_industries
 
-    transaction = pd.read_csv_nafix(
+    transaction = read_csv_nafix(
         snakemake.input.transactions_path,
         sep=";",
     )
