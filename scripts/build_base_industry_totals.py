@@ -110,8 +110,8 @@ if __name__ == "__main__":
     )
     include_other = snakemake.params.other_industries
 
-    transaction = pd.read_csv(
-        "data/unsd_transactions.csv",
+    transaction = pd.read_csv_nafix(
+        snakemake.input.transactions_path,
         sep=";",
     )
 
