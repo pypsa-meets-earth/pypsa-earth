@@ -280,7 +280,7 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 bus0=fuel_buses_i,
                 bus1=cooking_buses_i,
                 carrier=fuel,
-                efficiency=cooking_cost.at[fuel, "efficiency"],
+                efficiency=cooking_costs.at[fuel, "efficiency"],
                 capital_cost=cooking_cost.at[fuel, "capital_cost"],
                 marginal_cost=cooking_cost.at[
                     fuel, "marginal_cost"
@@ -307,9 +307,6 @@ def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
 
     cooking_costs.loc[cooking_costs.unit.str.contains("/kW"), "value"] *= 1e3
     cooking_costs.unit = cooking_costs.unit.str.replace("/kW", "/MW")
-    cooking_costs.loc[cooking_costs.unit.str.contains("USD"), "value"] *= config[
-        "USD2013_to_EUR2013"
-    ]
 
     cooking_costs = cooking_costs.value.unstack().fillna(config["costs"]["fill_values"])
 
