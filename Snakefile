@@ -34,12 +34,14 @@ run = config.get("run", {})
 SDIR = config["summary_dir"] + run["name"] + "/" if run.get("name") else ""
 RESDIR = config["results_dir"] + run["name"] + "/" if run.get("name") else ""
 COSTDIR = config["costs_dir"]
+RDIR_PE = run["name_subworkflow"] + "/" if run.get("name_subworkflow") else ""
+CDIR_PE = RDIR_PE if not run.get("shared_cutouts") else ""
 
 
 CUTOUTS_PATH = (
-    "cutouts/cutout-2013-era5-tutorial.nc"
-    if config["tutorial"]
-    else "cutouts/cutout-2013-era5.nc"
+    "cutouts/"
+    + CDIR_PE
+    + ("cutout-2013-era5-tutorial.nc" if config["tutorial"] else "cutout-2013-era5.nc")
 )
 
 
@@ -179,7 +181,9 @@ if not config["custom_data"]["gas_network"]:
             geo_crs=config["crs"]["geo_crs"],
             custom_gas_network=config["custom_data"]["gas_network"],
         input:
-            regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_onshore="resources/"
+                + RDIR_PE
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         output:
             clustered_gas_network="resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             # TODO: Should be a own snakemake rule
@@ -212,7 +216,9 @@ rule prepare_sector_network:
         solar_thermal="resources/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
-        shapes_path="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        shapes_path="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         pipelines="data_custom/pipelines.csv"
         if config["custom_data"]["gas_network"]
         else "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
@@ -258,7 +264,9 @@ rule add_export:
         ship_profile="resources/ship_profile_{h2export}TWh.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
-        shapes_path="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        shapes_path="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -285,7 +293,9 @@ rule override_respot:
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
         overrides="data/override_component_attrs",
-        network="networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        network=
+            "networks/" + RDIR_PE + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"
+        ,
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
     output:
         RESDIR
@@ -296,7 +306,7 @@ rule override_respot:
 
 rule prepare_transport_data:
     input:
-        network="networks/elec_s{simpl}_{clusters}.nc",
+        network="networks/" + RDIR_PE + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
@@ -340,7 +350,7 @@ rule build_cop_profiles:
 
 rule prepare_heat_data:
     input:
-        network="networks/elec_s{simpl}_{clusters}.nc",
+        network="networks/" + RDIR_PE + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         temp_air_total="resources/temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -399,7 +409,9 @@ rule build_solar_thermal_profiles:
         pop_layout_total="resources/population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
-        regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         cutout=CUTOUTS_PATH,
     output:
         solar_thermal_total="resources/demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -417,7 +429,7 @@ rule build_population_layouts:
     params:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
-        nuts3_shapes="resources/shapes/gadm_shapes.geojson",
+        nuts3_shapes="resources/" + RDIR_PE + "shapes/gadm_shapes.geojson",
         urban_percent="data/urban_percent.csv",
         cutout=CUTOUTS_PATH,
     output:
@@ -449,7 +461,9 @@ rule build_clustered_population_layouts:
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
         gdp_layout="resources/gdp_shares/gdp_layout_{planning_horizons}.nc",
-        regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         cutout=CUTOUTS_PATH,
     output:
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -469,7 +483,9 @@ rule build_heat_demand:
         pop_layout_total="resources/population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
-        regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         cutout=CUTOUTS_PATH,
     output:
         heat_demand_urban="resources/demand/heat/heat_demand_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -490,7 +506,9 @@ rule build_temperature_profiles:
         pop_layout_total="resources/population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/population_shares/pop_layout_rural_{planning_horizons}.nc",
-        regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         cutout=CUTOUTS_PATH,
     output:
         temp_soil_total="resources/temperatures/temp_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -521,6 +539,8 @@ rule copy_config:
     script:
         "scripts/copy_config.py"
 
+
+if config["foresight"] == "overnight":
 
 rule solve_sector_network:
     input:
@@ -685,6 +705,10 @@ rule run_test:
             config_pypsaearth["electricity"]["extendable_carriers"]["Store"] = []
             config_pypsaearth["electricity"]["extendable_carriers"]["Link"] = []
             config_pypsaearth["electricity"]["co2limit"] = 7.75e7
+            config_pypsaearth["run"] = {
+                "name": "tutorial",
+                "shared_cutouts": True,
+            }
 
             with open("./config.pypsa-earth.yaml", "w") as wfile:
                 yaml.dump(config_pypsaearth, wfile)
@@ -701,11 +725,15 @@ rule build_industrial_distribution_key:  #default data
         alternative_clustering=config["clustering_options"]["alternative_clustering"],
         industry_database=config["custom_data"]["industry_database"],
     input:
-        regions_onshore="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_onshore="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         clustered_gdp_layout="resources/gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         industrial_database="data/industrial_database.csv",
-        shapes_path="resources/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        shapes_path="resources/"
+            + RDIR_PE
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
         industrial_distribution_key="resources/demand/industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 1
@@ -761,3 +789,190 @@ rule build_industry_demand:  #default data
         "benchmarks/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv"
     script:
         "scripts/build_industry_demand.py"
+
+
+rule build_existing_heating_distribution:
+    params:
+        baseyear=config["scenario"]["planning_horizons"][0],
+        sector=config["sector"],
+        existing_capacities=config["existing_capacities"],
+    input:
+        existing_heating="data/existing_infrastructure/existing_heating_raw.csv",
+        clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+        clustered_pop_energy_layout="resources/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",  #"resources/population_shares/pop_weighted_energy_totals_s{simpl}_{clusters}.csv",
+        district_heat_share="resources/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    output:
+        existing_heating_distribution="resources/heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    threads: 1
+    resources:
+        mem_mb=2000,
+    log:
+        RDIR
+        + "/logs/build_existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.log",
+    benchmark:
+        RDIR
+        +"/benchmarks/build_existing_heating_distribution/{demand}_s{simpl}_{clusters}_{planning_horizons}"
+    script:
+        "scripts/build_existing_heating_distribution.py"
+
+
+if config["foresight"] == "myopic":
+
+    rule add_existing_baseyear:
+        params:
+            baseyear=config["scenario"]["planning_horizons"][0],
+            sector=config["sector"],
+            existing_capacities=config["existing_capacities"],
+            costs=config["costs"],
+        input:
+            network=RDIR
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            powerplants=pypsaearth("resources/" + RDIR_PE + "powerplants.csv"),
+            busmap_s=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"
+            ),
+            busmap=pypsaearth(
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+            ),
+            clustered_pop_layout="resources/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+            costs=CDIR
+            + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            existing_heating_distribution="resources/heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        output:
+            RDIR
+            + "/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        wildcard_constraints:
+            # TODO: The first planning_horizon needs to be aligned across scenarios
+            # snakemake does not support passing functions to wildcard_constraints
+            # reference: https://github.com/snakemake/snakemake/issues/2703
+            planning_horizons=config["scenario"]["planning_horizons"][0],  #only applies to baseyear
+        threads: 1
+        resources:
+            mem_mb=2000,
+        log:
+            RDIR
+            + "/logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
+        benchmark:
+            RDIR
+            +"/benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+        script:
+            "scripts/add_existing_baseyear.py"
+
+    def input_profile_tech_brownfield(w):
+        return {
+            f"profile_{tech}": pypsaearth(
+                f"resources/" + RDIR_PE + "renewable_profiles/profile_{tech}.nc"
+            )
+            for tech in config["electricity"]["renewable_carriers"]
+            if tech != "hydro"
+        }
+
+    def solved_previous_horizon(w):
+        planning_horizons = config["scenario"]["planning_horizons"]
+        i = planning_horizons.index(int(w.planning_horizons))
+        planning_horizon_p = str(planning_horizons[i - 1])
+
+        return (
+            RDIR
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
+            + planning_horizon_p
+            + "_{discountrate}_{demand}_{h2export}export.nc"
+        )
+
+    rule add_brownfield:
+        params:
+            H2_retrofit=config["sector"]["hydrogen"],
+            H2_retrofit_capacity_per_CH4=config["sector"]["hydrogen"][
+                "H2_retrofit_capacity_per_CH4"
+            ],
+            threshold_capacity=config["existing_capacities"]["threshold_capacity"],
+            snapshots=config["snapshots"],
+            # drop_leap_day=config["enable"]["drop_leap_day"],
+            carriers=config["electricity"]["renewable_carriers"],
+        input:
+            # unpack(input_profile_tech_brownfield),
+            simplify_busmap=pypsaearth(
+                "resources/" + RDIR_PE + "bus_regions/busmap_elec_s{simpl}.csv"
+            ),
+            cluster_busmap=pypsaearth(
+                "resources/"
+                + RDIR_PE
+                + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
+            ),
+            network=RDIR
+            + "/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            network_p=solved_previous_horizon,  #solved network at previous time step
+            costs=CDIR + "costs_{planning_horizons}.csv",
+            cop_soil_total="resources/cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            cop_air_total="resources/cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        output:
+            RDIR
+            + "/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        threads: 4
+        resources:
+            mem_mb=10000,
+        log:
+            RDIR
+            + "/logs/add_brownfield_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
+        benchmark:
+            (
+                RDIR
+                + "/benchmarks/add_brownfield/elec_s{simpl}_ec_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+            )
+        script:
+            "./scripts/add_brownfield.py"
+
+    ruleorder: add_existing_baseyear > add_brownfield
+
+    rule solve_network_myopic:
+        params:
+            solving=config["solving"],
+            foresight=config["foresight"],
+            planning_horizons=config["scenario"]["planning_horizons"],
+            co2_sequestration_potential=config["scenario"].get(
+                "co2_sequestration_potential", 200
+            ),
+        input:
+            overrides="data/override_component_attrs",
+            network=RDIR
+            + "/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            costs=CDIR + "costs_{planning_horizons}.csv",
+            configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
+        output:
+            network=RDIR
+            + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            # config=RDIR
+            # + "/configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.yaml",
+        shadow:
+            "shallow"
+        log:
+            solver=RDIR
+            + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
+            python=RDIR
+            + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_python.log",
+            memory=RDIR
+            + "/logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
+        threads: 25
+        resources:
+            mem_mb=config["solving"]["mem"],
+        benchmark:
+            (
+                RDIR
+                + "/benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+            )
+        script:
+            "./scripts/solve_network.py"
+
+    rule solve_all_networks_myopic:
+        input:
+            networks=expand(
+                RDIR
+                + "/postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+                **config["scenario"],
+                **config["costs"],
+                **config["export"],
+            ),

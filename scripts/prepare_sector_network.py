@@ -29,6 +29,15 @@ logger = logging.getLogger(__name__)
 spatial = SimpleNamespace()
 
 
+def add_lifetime_wind_solar(n, costs):
+    """
+    Add lifetime for solar and wind generators.
+    """
+    for carrier in ["solar", "onwind", "offwind"]:
+        gen_i = n.generators.index.str.contains(carrier)
+        n.generators.loc[gen_i, "lifetime"] = costs.at[carrier, "lifetime"]
+
+
 def add_carrier_buses(n, carrier, nodes=None):
     """
     Add buses to connect e.g. coal, nuclear and oil plants
@@ -638,7 +647,7 @@ def add_hydrogen(n, costs):
             )
 
 
-def define_spatial(nodes):
+def define_spatial(nodes, options):
     """
     Namespace for spatial
 
@@ -648,7 +657,6 @@ def define_spatial(nodes):
     """
 
     global spatial
-    global options
 
     spatial.nodes = nodes
 
@@ -677,16 +685,18 @@ def define_spatial(nodes):
         spatial.co2.nodes = nodes + " co2 stored"
         spatial.co2.locations = nodes
         spatial.co2.vents = nodes + " co2 vent"
-        spatial.co2.x = (n.buses.loc[list(nodes)].x.values,)
-        spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
+        # spatial.co2.x = (n.buses.loc[list(nodes)].x.values,)
+        # spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
     else:
         spatial.co2.nodes = ["co2 stored"]
         spatial.co2.locations = ["Africa"]
         spatial.co2.vents = ["co2 vent"]
-        spatial.co2.x = (0,)
-        spatial.co2.y = 0
+        # spatial.co2.x = (0,)
+        # spatial.co2.y = 0
 
     spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
+
+    return spatial
 
 
 def add_biomass(n, costs):
@@ -1058,7 +1068,7 @@ def add_aviation(n, cost):
             airports["p_set"].sum()
             * domestic_to_total
             * costs.at["oil", "CO2 intensity"]
-        )
+        ).sum()
 
     n.add(
         "Load",
@@ -1388,7 +1398,7 @@ def add_shipping(n, costs):
                 ports["p_set"].sum()
                 * domestic_to_total
                 * costs.at["oil", "CO2 intensity"]
-            )
+            ).sum()
 
         n.add(
             "Load",
@@ -1620,9 +1630,11 @@ def add_industry(n, costs):
         spatial.nodes,
         suffix=" low-temperature heat for industry",
         bus=[
-            node + " urban central heat"
-            if node + " urban central heat" in n.buses.index
-            else node + " services urban decentral heat"
+            (
+                node + " urban central heat"
+                if node + " urban central heat" in n.buses.index
+                else node + " services urban decentral heat"
+            )
             for node in spatial.nodes
         ],
         carrier="low-temperature heat for industry",
@@ -2240,7 +2252,7 @@ def average_every_nhours(n, offset):
     # logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
@@ -2249,11 +2261,11 @@ def average_every_nhours(n, offset):
         for k, df in c.pnl.items():
             if not df.empty:
                 if c.list_name == "stores" and k == "e_max_pu":
-                    pnl[k] = df.resample(offset).min()
+                    pnl[k] = df.resample(offset.casefold()).min()
                 elif c.list_name == "stores" and k == "e_min_pu":
-                    pnl[k] = df.resample(offset).max()
+                    pnl[k] = df.resample(offset.casefold()).max()
                 else:
-                    pnl[k] = df.resample(offset).mean()
+                    pnl[k] = df.resample(offset.casefold()).mean()
 
     return m
 
@@ -2366,7 +2378,7 @@ def add_services(n, costs):
     )
 
     # TODO check with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"] * 8760
+    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -2565,7 +2577,7 @@ def add_residential(n, costs):
     )
 
     # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"] * 8760
+    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -2707,6 +2719,9 @@ if __name__ == "__main__":
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
 
+    # Add location. TODO: move it into pypsa-earth
+    n.buses.location = n.buses.index
+
     # Set carrier of AC loads
     n.loads.loc[nodes, "carrier"] = "AC"
 
@@ -2727,7 +2742,10 @@ if __name__ == "__main__":
     )
 
     # Define spatial for biomass and co2. They require the same spatial definition
-    define_spatial(pop_layout.index)
+    spatial = define_spatial(pop_layout.index, options)
+
+    if snakemake.config["foresight"] in ["myopic", "perfect"]:
+        add_lifetime_wind_solar(n, costs)
 
     # TODO logging
 
