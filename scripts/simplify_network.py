@@ -120,8 +120,9 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     are moved from their starting bus to their ending bus. The
     corresponding starting buses are removed as well.
     """
-    logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
 
+    logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
+    n.buses["v_nom"] = base_voltage
     n.lines["type"] = linetype
     n.lines["v_nom"] = base_voltage
     n.lines["i_nom"] = n.line_types.i_nom[linetype]
@@ -1129,6 +1130,7 @@ if __name__ == "__main__":
         "substation_lv",
         "substation_off",
     }.intersection(n.buses.columns)
+
     n.buses = n.buses.drop(buses_c, axis=1)
 
     update_p_nom_max(n)
