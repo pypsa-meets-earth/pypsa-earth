@@ -287,7 +287,10 @@ def attach_cooking_technologies(n, cooking_costs, config):
             )
 
 
-def attach_cooking_load(n, demand_cooking):
+def attach_cooking_load(n, config, demand_cooking):
+    if config["clean_cooking"]["enable"] != True:
+        return
+
     demand_df = read_csv_nafix(demand_cooking, index_col=0, parse_dates=True)
     cooking_bus = n.buses.loc[n.buses.index.str.endswith("cooking")].index
     n.madd("Load", cooking_bus, bus=cooking_bus, p_set=demand_df)
@@ -297,6 +300,8 @@ def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
     """
     Set all cooking costs and other parameters.
     """
+    if config["clean_cooking"]["enable"] != True:
+        return
 
     cooking_costs = pd.read_csv(
         cooking_fuel_costs, index_col=["technology", "parameter"]
@@ -404,7 +409,7 @@ if __name__ == "__main__":
     attach_stores(n, costs, config)
     cooking_costs = load_cooking_costs(snakemake.input.cooking_costs, config, Nyears=1)
     attach_cooking_technologies(n, cooking_costs, config)
-    attach_cooking_load(n, snakemake.input.demand_cooking)
+    attach_cooking_load(n, config, snakemake.input.demand_cooking)
     attach_hydrogen_pipelines(n, costs, config)
 
     add_nice_carrier_names(n, config=snakemake.config)
