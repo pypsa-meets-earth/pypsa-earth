@@ -282,9 +282,7 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 carrier=fuel,
                 efficiency=cooking_costs.at[f"{fuel} stove", "efficiency"],
                 capital_cost=cooking_costs.at[f"{fuel} stove", "capital_cost"],
-                marginal_cost=cooking_costs.at[
-                    f"{fuel} stove", "marginal_cost"
-                ],  # differentiate between store and link
+                marginal_cost=cooking_costs.at[f"{fuel} stove", "marginal_cost"],
                 p_nom=cooking_costs.at[f"{fuel} stove", "p_nom"],
             )
 
@@ -292,7 +290,7 @@ def attach_cooking_technologies(n, cooking_costs, config):
 def attach_cooking_load(n, demand_cooking):
     demand_df = read_csv_nafix(demand_cooking, index_col=0, parse_dates=True)
     cooking_bus = n.buses.loc[n.buses.index.str.endswith("cooking")].index
-    n.madd("Load", demand_df.columns, bus=cooking_bus, p_set=demand_df)
+    n.madd("Load", cooking_bus, bus=cooking_bus, p_set=demand_df)
 
 
 def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
@@ -316,7 +314,7 @@ def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
         )
         * cooking_costs["investment"]
         * Nyears
-    )
+    )  # look into costs in links vs stores
 
     cooking_costs["marginal_cost"] = (
         cooking_costs["VOM"] + cooking_costs["fuel"] / cooking_costs["efficiency"]
