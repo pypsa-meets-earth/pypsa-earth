@@ -1085,7 +1085,7 @@ if __name__ == "__main__":
                 f"clustering preparation (hac): aggregating {len(buses_i)} buses of type {carrier}."
             )
             n, busmap_hac = aggregate_to_substations(
-                n, params.aggregation_strategies, buses_i
+                n, snakemake.params.aggregation_strategies, buses_i
             )
             busmaps.append(busmap_hac)
 
