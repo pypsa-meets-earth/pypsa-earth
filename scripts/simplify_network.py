@@ -586,7 +586,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         busmap.loc[buses_i] = dist.idxmin(1)
 
     line_strategies = aggregation_strategies.get("lines", dict())
-    line_strategies.update({"geometry": "first", "bounds": "first"})
+    bus_strategies = aggregation_strategies.get("buses", dict())
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
@@ -598,13 +598,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         line_strategies=line_strategies,
-        bus_strategies={
-            "lat": "mean",
-            "lon": "mean",
-            "tag_substation": "first",
-            "tag_area": "first",
-            "country": "first",
-        },
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
@@ -855,7 +849,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     line_strategies = aggregation_strategies.get("lines", dict())
-    line_strategies.update({"geometry": "first", "bounds": "first"})
+    bus_strategies = aggregation_strategies.get("buses", dict())
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
@@ -867,13 +861,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         line_strategies=line_strategies,
-        bus_strategies={
-            "lat": "mean",
-            "lon": "mean",
-            "tag_substation": "first",
-            "tag_area": "first",
-            "country": "first",
-        },
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
@@ -950,7 +938,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     line_strategies = aggregation_strategies.get("lines", dict())
-    line_strategies.update({"geometry": "first", "bounds": "first"})
+    bus_strategies = aggregation_strategies.get("buses", dict())
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
@@ -962,13 +950,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         line_strategies=line_strategies,
-        bus_strategies={
-            "lat": "mean",
-            "lon": "mean",
-            "tag_substation": "first",
-            "tag_area": "first",
-            "country": "first",
-        },
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
@@ -1001,6 +983,20 @@ if __name__ == "__main__":
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
     aggregation_strategies = snakemake.params.aggregation_strategies
+
+    aggregation_strategies.setdefault("lines", {})
+    aggregation_strategies["lines"].update({"geometry": "first", "bounds": "first"})
+
+    aggregation_strategies.setdefault("buses", {})
+    aggregation_strategies["buses"].update(
+        {
+            "lat": "mean",
+            "lon": "mean",
+            "tag_substation": "first",
+            "tag_area": "first",
+            "country": "first",
+        }
+    )
 
     n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 

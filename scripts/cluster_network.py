@@ -577,7 +577,7 @@ def clustering_for_n_clusters(
     focus_weights=None,
 ):
     line_strategies = aggregation_strategies.get("lines", dict())
-    line_strategies.update({"geometry": "first", "bounds": "first"})
+    bus_strategies = aggregation_strategies.get("buses", dict())
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
@@ -610,13 +610,7 @@ def clustering_for_n_clusters(
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
         line_strategies=line_strategies,
-        bus_strategies={
-            "lat": "mean",
-            "lon": "mean",
-            "tag_substation": "first",
-            "tag_area": "first",
-            "country": "first",
-        },
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
@@ -748,6 +742,21 @@ if __name__ == "__main__":
         #     for p in aggregation_strategies.keys()
         # }
         aggregation_strategies = snakemake.params.aggregation_strategies
+
+        aggregation_strategies.setdefault("lines", {})
+        aggregation_strategies["lines"].update({"geometry": "first", "bounds": "first"})
+
+        aggregation_strategies.setdefault("buses", {})
+        aggregation_strategies["buses"].update(
+            {
+                "lat": "mean",
+                "lon": "mean",
+                "tag_substation": "first",
+                "tag_area": "first",
+                "country": "first",
+            }
+        )
+
         custom_busmap = False  # snakemake.params.custom_busmap custom busmap is depreciated https://github.com/pypsa-meets-earth/pypsa-earth/pull/694
         if custom_busmap:
             busmap = pd.read_csv(
