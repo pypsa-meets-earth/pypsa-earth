@@ -734,14 +734,6 @@ if __name__ == "__main__":
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
 
-        # aggregation_strategies = snakemake.params.cluster_options.get(
-        #     "aggregation_strategies", {}
-        # )
-        # # translate str entries of aggregation_strategies to pd.Series functions:
-        # aggregation_strategies = {
-        #     p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
-        #     for p in aggregation_strategies.keys()
-        # }
         aggregation_strategies = snakemake.params.aggregation_strategies
 
         # Aggregation strategies must be set for all columns
