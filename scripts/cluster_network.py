@@ -577,6 +577,7 @@ def clustering_for_n_clusters(
     focus_weights=None,
 ):
     line_strategies = aggregation_strategies.get("lines", dict())
+    line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 

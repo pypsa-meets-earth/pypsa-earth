@@ -93,11 +93,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import (
-    configure_logging,
-    create_logger,
-    update_p_nom_max,
-)
+from _helpers import configure_logging, create_logger, update_p_nom_max
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
@@ -590,6 +586,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         busmap.loc[buses_i] = dist.idxmin(1)
 
     line_strategies = aggregation_strategies.get("lines", dict())
+    line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
@@ -855,7 +852,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
-    
+
     clustering = get_clustering_from_busmap(
         n,
         busmap,
@@ -947,6 +944,7 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
         return n, n.buses.index.to_series()
 
     line_strategies = aggregation_strategies.get("lines", dict())
+    line_strategies.update({"geometry": "first", "bounds": "first"})
     generator_strategies = aggregation_strategies.get("generators", dict())
     one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
