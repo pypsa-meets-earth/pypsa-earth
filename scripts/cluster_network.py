@@ -610,6 +610,13 @@ def clustering_for_n_clusters(
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=line_length_factor,
         line_strategies=line_strategies,
+        bus_strategies={
+            "lat": "mean",
+            "lon": "mean",
+            "tag_substation": "first",
+            "tag_area": "first",
+            "country": "first",
+        },
         generator_strategies=generator_strategies,
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
