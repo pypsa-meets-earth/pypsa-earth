@@ -24,6 +24,8 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Add an option to use csv format for custom demand imports. `PR #995 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/995>`__
 
+* Re-implement network optimisation using linopy methods. `PR #796 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/796>`__
+
 **Minor Changes and bug-fixing**
 
 * Minor bug-fixing to run the cluster wildcard min `PR #1019 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1019>`__
