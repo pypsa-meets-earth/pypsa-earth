@@ -78,6 +78,7 @@ dependencies:
 
 # Default solver for tests (required for CI)
 - glpk
+- ipopt #<3.13.3
 - gurobi
 
 - pip:
