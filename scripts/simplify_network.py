@@ -993,12 +993,13 @@ if __name__ == "__main__":
     update_config_dictionary(
         config_dict=aggregation_strategies,
         parameter_key_to_fill="lines",
-        dict_to_use={"geometry": "first", "bounds": "first"},
+        dict_to_use={"v_nom": "first", "geometry": "first", "bounds": "first"},
     )
     update_config_dictionary(
         config_dict=aggregation_strategies,
         parameter_key_to_fill="buses",
         dict_to_use={
+            "v_nom": "first",
             "lat": "mean",
             "lon": "mean",
             "tag_substation": "first",
