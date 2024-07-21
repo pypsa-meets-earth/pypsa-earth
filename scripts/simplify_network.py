@@ -1000,14 +1000,8 @@ if __name__ == "__main__":
         "exclude_carriers", []
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
-    # aggregation_strategies = snakemake.params.cluster_options.get(
-    #    "aggregation_strategies", {}
-    # )
-    ## translate str entries of aggregation_strategies to pd.Series functions:
-    # aggregation_strategies = {
-    #    p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
-    #    for p in aggregation_strategies.keys()
-    # }
+    aggregation_strategies = snakemake.params.aggregation_strategies
+
     n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
@@ -1028,7 +1022,7 @@ if __name__ == "__main__":
         snakemake.params.config_links,
         snakemake.output,
         exclude_carriers,
-        snakemake.params.aggregation_strategies,
+        aggregation_strategies,
     )
 
     busmaps = [trafo_map, simplify_links_map]
@@ -1045,14 +1039,12 @@ if __name__ == "__main__":
             hvdc_as_lines,
             lines_length_factor,
             snakemake.output,
-            aggregation_strategies=snakemake.params.aggregation_strategies,
+            aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(stub_map)
 
     if cluster_config.get("to_substations", False):
-        n, substation_map = aggregate_to_substations(
-            n, snakemake.params.aggregation_strategies
-        )
+        n, substation_map = aggregate_to_substations(n, aggregation_strategies)
         busmaps.append(substation_map)
 
     # treatment of outliers (nodes without a profile for considered carrier):
@@ -1084,9 +1076,7 @@ if __name__ == "__main__":
             logger.info(
                 f"clustering preparation (hac): aggregating {len(buses_i)} buses of type {carrier}."
             )
-            n, busmap_hac = aggregate_to_substations(
-                n, snakemake.params.aggregation_strategies, buses_i
-            )
+            n, busmap_hac = aggregate_to_substations(n, aggregation_strategies, buses_i)
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
@@ -1116,7 +1106,7 @@ if __name__ == "__main__":
             solver_name,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
-            aggregation_strategies=snakemake.params.aggregation_strategies,
+            aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(cluster_map)
 
@@ -1144,7 +1134,7 @@ if __name__ == "__main__":
         n, merged_nodes_map = merge_isolated_nodes(
             n,
             threshold=p_threshold_merge_isolated,
-            aggregation_strategies=snakemake.params.aggregation_strategies,
+            aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(merged_nodes_map)
 
@@ -1152,7 +1142,7 @@ if __name__ == "__main__":
         n, fetched_nodes_map = merge_into_network(
             n,
             threshold=s_threshold_fetch_isolated,
-            aggregation_strategies=snakemake.params.aggregation_strategies,
+            aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
 
