@@ -796,3 +796,13 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
+
+def update_config_dictionary(
+    config_dict,
+    parameter_key_to_fill="lines",
+    dict_to_use={"geometry": "first", "bounds": "first"},
+):
+    config_dict.setdefault(parameter_key_to_fill, {})
+    config_dict[parameter_key_to_fill].update(dict_to_use)
+    return config_dict

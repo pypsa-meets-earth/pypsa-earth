@@ -134,6 +134,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     sets_path_to_root,
+    update_config_dictionary,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -743,18 +744,22 @@ if __name__ == "__main__":
         # }
         aggregation_strategies = snakemake.params.aggregation_strategies
 
-        aggregation_strategies.setdefault("lines", {})
-        aggregation_strategies["lines"].update({"geometry": "first", "bounds": "first"})
-
-        aggregation_strategies.setdefault("buses", {})
-        aggregation_strategies["buses"].update(
-            {
+        # Aggregation strategies must be set for all columns
+        update_config_dictionary(
+            config_dict=aggregation_strategies,
+            parameter_key_to_fill="lines",
+            dict_to_use={"geometry": "first", "bounds": "first"},
+        )
+        update_config_dictionary(
+            config_dict=aggregation_strategies,
+            parameter_key_to_fill="buses",
+            dict_to_use={
                 "lat": "mean",
                 "lon": "mean",
                 "tag_substation": "first",
                 "tag_area": "first",
                 "country": "first",
-            }
+            },
         )
 
         custom_busmap = False  # snakemake.params.custom_busmap custom busmap is depreciated https://github.com/pypsa-meets-earth/pypsa-earth/pull/694

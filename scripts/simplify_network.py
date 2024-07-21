@@ -93,7 +93,12 @@ import numpy as np
 import pandas as pd
 import pypsa
 import scipy as sp
-from _helpers import configure_logging, create_logger, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    create_logger,
+    update_config_dictionary,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
@@ -984,18 +989,22 @@ if __name__ == "__main__":
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
     aggregation_strategies = snakemake.params.aggregation_strategies
 
-    aggregation_strategies.setdefault("lines", {})
-    aggregation_strategies["lines"].update({"geometry": "first", "bounds": "first"})
-
-    aggregation_strategies.setdefault("buses", {})
-    aggregation_strategies["buses"].update(
-        {
+    # Aggregation strategies must be set for all columns
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="lines",
+        dict_to_use={"geometry": "first", "bounds": "first"},
+    )
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="buses",
+        dict_to_use={
             "lat": "mean",
             "lon": "mean",
             "tag_substation": "first",
             "tag_area": "first",
             "country": "first",
-        }
+        },
     )
 
     n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
