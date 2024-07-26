@@ -40,6 +40,7 @@ Description
 -----------
 
 The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendmends. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
+
 1. Adding all powerplants from custom:
 
     .. code:: yaml
@@ -69,20 +70,26 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         custom_powerplants: YearCommissioned <= 2015
 
 Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
+
 Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
 
 Tagging considerations for columns in the file:
+
 - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
 - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
-- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
+- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
+
 1. The benchmark PPM keys values were taken as follows:
         'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
             'Wind', 'Geothermal', 'Solar', 'Waste', 'Other']
+
         'Technology': ['Reservoir', 'Pumped Storage', 'Run-Of-River', 'Steam Turbine', 'CCGT', 'OCGT'
             'Pv', 'CCGT, Thermal', 'Offshore', 'Storage Technologies']
+
         'Set': ['Store', 'PP', 'CHP']
+
 2. OSM-extracted features were mapped into PPM ones using a (quite arbitrary) set of rules:
         'coal': 'Hard Coal'
         'wind_turbine': 'Onshore',
@@ -92,7 +99,7 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
 """
-import logging
+
 import os
 
 import geopandas as gpd
@@ -108,9 +115,7 @@ from _helpers import (
     to_csv_nafix,
     two_digits_2_name_country,
 )
-from build_shapes import get_GADM_layer
 from scipy.spatial import cKDTree as KDTree
-from shapely import wkt
 from shapely.geometry import Point
 
 logger = create_logger(__name__)
@@ -358,11 +363,11 @@ if __name__ == "__main__":
         ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
     if cntries_without_ppl:
-        logging.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+        logger.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
-        logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
+        logger.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
     if snakemake.params.alternative_clustering:
         gadm_layer_id = snakemake.params.gadm_layer_id

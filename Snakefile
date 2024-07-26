@@ -11,10 +11,11 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from _helpers import create_country_list, get_last_commit_message
+from _helpers import create_country_list, get_last_commit_message, check_config_version
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
+
 
 HTTP = HTTPRemoteProvider()
 
@@ -23,6 +24,9 @@ if "config" not in globals() or not config:  # skip when used as sub-workflow
         copyfile("config.tutorial.yaml", "config.yaml")
 
     configfile: "config.yaml"
+
+
+check_config_version(config=config)
 
 
 configfile: "configs/bundle_config.yaml"
@@ -44,6 +48,7 @@ RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
 
 load_data_paths = get_load_paths_gegis("data", config)
+
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + "costs.csv"
 else:
@@ -53,7 +58,7 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+(m|flex|min)?|all",
+    clusters="[0-9]+(m|flex)?|all|min",
     ll="(v|c)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
@@ -67,10 +72,10 @@ if config["custom_rules"] is not []:
 
 rule clean:
     run:
-        shell("snakemake -j 1 solve_all_networks --delete-all-output")
         try:
-            shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
+            shell("snakemake -j 1 solve_all_networks --delete-all-output")
         except:
+            shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
             pass
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
 
@@ -105,7 +110,7 @@ rule solve_all_networks:
     input:
         expand(
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-            **config["scenario"]
+            **config["scenario"],
         ),
 
 
@@ -116,7 +121,7 @@ rule plot_all_p_nom:
             + RDIR
             + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.{ext}",
             **config["scenario"],
-            ext=["png", "pdf"]
+            ext=["png", "pdf"],
         ),
 
 
@@ -127,7 +132,7 @@ rule make_all_summaries:
             + RDIR
             + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}",
             **config["scenario"],
-            country=["all"] + config["countries"]
+            country=["all"] + config["countries"],
         ),
 
 
@@ -140,7 +145,7 @@ rule plot_all_summaries:
             summary=["energy", "costs"],
             **config["scenario"],
             country=["all"] + config["countries"],
-            ext=["png", "pdf"]
+            ext=["png", "pdf"],
         ),
 
 
@@ -254,7 +259,7 @@ rule build_shapes:
         "benchmarks/" + RDIR + "build_shapes"
     threads: 1
     resources:
-        mem_mb=500,
+        mem_mb=3096,
     script:
         "scripts/build_shapes.py"
 
@@ -296,7 +301,7 @@ rule base_network:
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        area_crs=config["crs"]["area_crs"],
+        crs=config["crs"],
         countries=config["countries"],
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -456,7 +461,7 @@ rule build_renewable_profiles:
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
-            if w.technology in ("onwind", "solar", "hydro")
+            if w.technology in ("onwind", "solar", "hydro", "csp")
             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
         ),
         cutout=lambda w: "cutouts/"
@@ -867,7 +872,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 "networks/"
                 + RDIR
                 + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
+                **config["scenario"],
             ),
 
     rule solve_network:
@@ -912,7 +917,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 "results/"
                 + RDIR
                 + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
-                **config["scenario"]
+                **config["scenario"],
             ),
 
 
@@ -930,7 +935,7 @@ def input_make_summary(w):
         **{
             k: config["scenario"][k] if getattr(w, k) == "all" else getattr(w, k)
             for k in ["simpl", "clusters", "opts"]
-        }
+        },
     )
 
 

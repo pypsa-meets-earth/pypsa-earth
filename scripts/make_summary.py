@@ -9,7 +9,8 @@ Creates summaries of aggregated energy and costs as ``.csv`` files.
 
 Relevant Settings
 -----------------
-..code:: yaml
+.. code:: yaml
+
     costs:
         USD2013_to_EUR2013:
         discountrate:
@@ -17,31 +18,39 @@ Relevant Settings
         capital_cost:
     electricity:
         max_hours:
-..seealso::
+
+.. seealso::
     Documentation of the configuration file ``config.yaml`` at
     :ref:`costs_cf`, :ref:`electricity_cf`
+
 Inputs
 ------
+
 Outputs
 -------
+
 Description
 -----------
 The following rule can be used to summarize the results in separate .csv files:
-..code::
+
+.. code:: bash
+
     snakemake results/summaries/elec_s_all_lall_Co2L-3H_all
                                          clusters
                                              line volume or cost cap
                                                 - options
                                                         - all countries
-the line volume/cost cap field can be set to one of the following:
-* ``lv1.25`` for a particular line volume extension by 25%
-* ``lc1.25`` for a line cost extension by 25 %
-* ``lall`` for all evaluated caps
-* ``lvall`` for all line volume caps
-* ``lcall`` for all line cost caps
-Replacing '/summaries/' with '/plots/' creates nice colored maps of the results.
+
+The line volume/cost cap field can be set to one of the following:
+
+- ``lv1.25`` for a particular line volume extension by 25%
+- ``lc1.25`` for a line cost extension by 25 %
+- ``lall`` for all evaluated caps
+- ``lvall`` for all line volume caps
+- ``lcall`` for all line cost caps
+
+Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
-import logging
 import os
 
 import pandas as pd

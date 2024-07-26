@@ -65,7 +65,7 @@ author = "Max Parzen"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.3"
+release = "0.3.0"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -183,4 +183,4 @@ man_pages = [(master_doc, "pypsa_earth", "pypsa_earth Documentation", [author], 
 # man_show_urls = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}

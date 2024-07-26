@@ -49,7 +49,7 @@ Description
 -----------
 
 Total annual system costs are minimised with PyPSA. The full formulation of the
-linear optimal power flow (plus investment planning
+linear optimal power flow (plus investment planning)
 is provided in the
 `documentation of PyPSA <https://pypsa.readthedocs.io/en/latest/optimal_power_flow.html#linear-optimal-power-flow>`_.
 The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
@@ -77,7 +77,6 @@ Details (and errors made through this heuristic) are discussed in the paper
     for all ``scenario`` s in the configuration file
     the rule :mod:`solve_network`.
 """
-import logging
 import os
 import re
 from pathlib import Path
@@ -563,9 +562,9 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
-        n.lines.loc[
-            n.lines.index.str.contains("new"), "s_nom_min"
-        ] = snakemake.params.augmented_line_connection.get("min_expansion")
+        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
+            snakemake.params.augmented_line_connection.get("min_expansion")
+        )
     n = prepare_network(n, solve_opts)
 
     n = solve_network(
@@ -577,3 +576,5 @@ if __name__ == "__main__":
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
+    logger.info(f"Objective function: {n.objective}")
+    logger.info(f"Objective constant: {n.objective_constant}")

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.2.3
+version: 0.3.0
 tutorial: true
 
 logging:
@@ -77,7 +77,8 @@ cluster_options:
     remove_stubs: true
     remove_stubs_across_borders: true
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if bus mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
+    s_threshold_fetch_isolated: 0.05 # [-] a share of the national load for merging an isolated network into a backbone network
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -104,7 +105,6 @@ build_shape_options:
   out_logging: true  # When true, logging is printed to console
   year: 2020  # reference year used to derive shapes, info on population and info on GDP
   nprocesses: 2  # number of processes to be used in build_shapes
-  nchunks: 2  # number of data chuncks for build_shapes. If not specified or smaller than nprocesses, specified as nprocesses
   worldpop_method: "standard"  # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster, false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard"  # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
@@ -141,7 +141,7 @@ load_options:
 
 electricity:
   base_voltage: 380.
-  voltages: [220., 300., 380.]
+  voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 1.487e+9
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv
@@ -169,7 +169,7 @@ electricity:
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
-  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+  renewable_carriers: [solar, csp, onwind, offwind-ac, offwind-dc, hydro]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -182,11 +182,15 @@ electricity:
       Onshore: [onwind]
       PV: [solar]
 lines:
-  types:
+  ac_types:
+    132.: "243-AL1/39-ST1A 20.0"
     220.: "Al/St 240/40 2-bundle 220.0"
     300.: "Al/St 240/40 3-bundle 300.0"
     380.: "Al/St 240/40 4-bundle 380.0"
-  dc_type: "HVDC XLPE 1000"
+    500.: "Al/St 240/40 4-bundle 380.0"
+    750.: "Al/St 560/50 4-bundle 750.0"
+  dc_types:
+    500.: "HVDC XLPE 1000"
   s_max_pu: 0.7
   s_nom_max: .inf
   length_factor: 1.25
@@ -306,6 +310,26 @@ renewable:
       method: hydro_capacities  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0
+  csp:
+    cutout: cutout-2013-era5-tutorial
+    resource:
+      method: csp
+      installation: SAM_solar_tower
+    capacity_per_sqkm: 2.392 # From 1.7 to 4.6 addresses issue #361
+    # Determined by comparing uncorrected area-weighted full-load hours to those
+    # published in Supplementary Data to
+    # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
+    # sector: The economic potential of photovoltaics and concentrating solar
+    # power." Applied Energy 135 (2014): 704-720.
+    copernicus:
+      grid_codes: [20, 30, 40, 60, 90]
+      distancing_codes: [50]
+      distance_to_codes: 3000
+    natura: true
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+    extendable: true
+    csp_model: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa
 costs:
@@ -337,19 +361,36 @@ costs:
 
 
 monte_carlo:
+  # Description: Specify Monte Carlo sampling options for uncertainty analysis.
+  # Define the option list for Monte Carlo sampling.
+  # Make sure add_to_snakefile is set to true to enable Monte-Carlo
   options:
-    add_to_snakefile: false
-    samples: 7    # number of optimizations
-    sampling_strategy: "chaospy"    # "pydoe2", "chaospy", "scipy", packages that are supported
-  pypsa_standard:
-      # User can add here flexibly more features for the Monte-Carlo sampling.
-      # Given as "key: value" format
-      # Key: add below the pypsa object for the monte_carlo sampling, "network" is only allowed for filtering!
-      # Value: currently supported format [l_bound, u_bound] or empty [], represent multiplication factors for the object
-    loads_t.p_set: [0.9, 1.1]
-    # generators_t.p_max_pu.loc[:, n.generators.carrier == "wind"]: [0.9, 1.1]
-    # generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]: [0.9, 1.1]
-
+    add_to_snakefile: false # When set to true, enables Monte Carlo sampling
+    samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
+    sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
+    seed: 42 # set seedling for reproducibilty
+  # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
+  # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
+  # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
+  # The arguments of the distribution are passed using the key 'args'  as follows, tailored by distribution type
+  # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
+  # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
+  # More info on the distributions are documented in the Chaospy reference guide...
+  # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
+  # An abstract example is as follows:
+  # {pypsa network object, e.g. "loads_t.p_set"}:
+  # type: {any supported distribution among the previous: "uniform", "normal", ...}
+  # args: {arguments passed as a list depending on the distribution, see the above and more at https://pypsa.readthedocs.io/}
+  uncertainties:
+    loads_t.p_set:
+      type: uniform
+      args: [0, 1]
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
+      type: lognormal
+      args: [1.5]
+    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
+      type: beta
+      args: [0.5, 2]
 
 solving:
   options:
@@ -426,13 +467,21 @@ plotting:
     "electricity": "#f9d002"
     "lines": "#70af1d"
     "transmission lines": "#70af1d"
+    "AC": "#70af1d"
     "AC-AC": "#70af1d"
     "AC line": "#70af1d"
     "links": "#8a1caf"
     "HVDC links": "#8a1caf"
+    "DC": "#8a1caf"
     "DC-DC": "#8a1caf"
     "DC link": "#8a1caf"
-    "load": "#FF0000"
+    "load": "#ff0000"
+    "load shedding": "#ff0000"
+    "battery discharger": slategray
+    "battery charger": slategray
+    "h2 fuel cell": '#c251ae'
+    "h2 electrolysis": '#ff29d9'
+    "csp": "#fdd404"
   nice_names:
     OCGT: "Open-Cycle Gas"
     CCGT: "Combined-Cycle Gas"

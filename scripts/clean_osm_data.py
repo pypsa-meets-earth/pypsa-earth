@@ -5,7 +5,6 @@
 
 # -*- coding: utf-8 -*-
 
-import logging
 import os
 
 import geopandas as gpd
@@ -47,6 +46,9 @@ def prepare_substation_df(df_all_substations):
             "lonlat": "geometry",
         }
     )
+
+    # Convert polygons to points
+    df_all_substations["geometry"] = df_all_substations["geometry"].centroid
 
     # Add longitude (lon) and latitude (lat) coordinates in the dataset
     df_all_substations["lon"] = df_all_substations["geometry"].x
@@ -454,6 +456,7 @@ def split_and_match_voltage_frequency_size(df):
     last value in the column.
 
     The function does as follows:
+
     1. First, it splits voltage and frequency columns by semicolon
        For example, the following lines
        row 1: '50', '220000
@@ -514,6 +517,7 @@ def fill_circuits(df):
     element matches the size of the list in the frequency column.
 
     Multiple procedure are adopted:
+
     1. In the rows of circuits where the number of elements matches
        the number of the frequency column, nothing is done
     2. Where the number of elements in the cables column match the ones
@@ -522,7 +526,7 @@ def fill_circuits(df):
        the cables elements are downscaled and the last values of cables
        are summed.
        Let's assume that cables is [3,3,3] but frequency is [50,50].
-       With this procedures, cables is treated as [3,6] and used for
+       With this procedure, cables is treated as [3,6] and used for
        calculating the circuits
     4. Where the number in cables has an unique number, e.g. ['6'],
        but frequency does not, e.g. ['50', '50'],
@@ -634,6 +638,7 @@ def fill_circuits(df):
         lambda x: ";".join([str(x["multiplier"] * v) for v in x["basic_cables"]]),
         axis=1,
     )
+    df["circuits"] = df["circuits"].astype(str)
     df.loc[filled_values.index, "circuits"] = filled_values
 
     # otherwise assume a circuit per element
@@ -662,7 +667,7 @@ def explode_rows(df, cols):
     row 2: 50, 110000
     """
     # check if all row elements are list
-    is_all_list = df[cols].applymap(lambda x: isinstance(x, list)).all(axis=1)
+    is_all_list = df[cols].map(lambda x: isinstance(x, list)).all(axis=1)
     if not is_all_list.all():
         df_nonlist = df[~is_all_list]
         logger.warning(
@@ -671,7 +676,7 @@ def explode_rows(df, cols):
         df.drop(df_nonlist.index, inplace=True)
 
     # check if errors in the columns
-    nunique_values = df[cols].applymap(len).nunique(axis=1)
+    nunique_values = df[cols].map(len).nunique(axis=1)
     df_nunique = df[nunique_values != 1]
     if not df_nunique.empty:
         logger.warning(
@@ -726,10 +731,8 @@ def filter_lines_by_geometry(df_all_lines):
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
-    # remove lines without endings (Temporary fix for a Tanzanian line TODO: reformulation?)
-    df_all_lines = df_all_lines[
-        df_all_lines["geometry"].map(lambda g: len(g.boundary.geoms) >= 2)
-    ]
+    # remove lines represented as Polygons
+    df_all_lines = df_all_lines[df_all_lines.geometry.geom_type == "LineString"]
 
     return df_all_lines
 
@@ -807,9 +810,11 @@ def create_extended_country_shapes(country_shapes, offshore_shapes, tolerance=0.
             {
                 "name": list(country_shapes.index),
                 "geometry": [
-                    c_geom.unary_union(offshore_shapes[c_code])
-                    if c_code in offshore_shapes
-                    else c_geom
+                    (
+                        c_geom.unary_union(offshore_shapes[c_code])
+                        if c_code in offshore_shapes
+                        else c_geom
+                    )
                     for c_code, c_geom in country_shapes.items()
                 ],
             },
@@ -851,7 +856,7 @@ def load_network_data(network_asset, data_options):
 
     # checks the options for loading data to be used based on the network_asset defined (lines/cables/substations)
     try:
-        cleanning_data_options = data_options[f"use_custom_{network_asset}"]
+        cleaning_data_options = data_options[f"use_custom_{network_asset}"]
         custom_path = data_options[f"path_custom_{network_asset}"]
 
     except:
@@ -860,16 +865,16 @@ def load_network_data(network_asset, data_options):
         )
 
     # creates a dataframe for the network_asset defined
-    if cleanning_data_options == "custom_only":
+    if cleaning_data_options == "custom_only":
         loaded_df = gpd.read_file(custom_path)
 
-    elif cleanning_data_options == "add_custom":
+    elif cleaning_data_options == "add_custom":
         loaded_df1 = gpd.read_file(input_files[network_asset])
         loaded_df2 = gpd.read_file(custom_path)
         loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
 
     else:
-        if cleanning_data_options != "OSM_only":
+        if cleaning_data_options != "OSM_only":
             logger.warning(
                 f"Unrecognized option {data_options} for handling custom data of {network_asset}."
                 + "Default OSM_only option used. Options available in clean_OSM_data_options configtable"

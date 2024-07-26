@@ -38,5 +38,5 @@ Rule ``solve_operations_network``
 
 |
 
-.. automodule:: solve_operations_network
-    :noindex:
+.. .. automodule:: solve_operations_network
+..     :noindex:

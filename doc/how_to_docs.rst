@@ -10,12 +10,12 @@ How to docs?
 We add the code documentation along the way.
 You might think that cost a lot of time and is not efficient - but that's not really true anymore!
 Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speed up the overall process.
-Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add
-on `sphinx.ext.autodoc  <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ we document in our
+Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add-on
+`sphinx.ext.autodoc  <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ we document in our
 code scripts which then will automatically generate the documentation you might see here.
 
 Thank you Eric Holscher & team for your wonderful *Readthedocs* open source project.
-You can find an emotional speak by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
+You can find an emotional speech by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
 
 Structure and Syntax example
 -----------------------------
@@ -35,39 +35,3 @@ We found three important files/file groups for the documentation:
 The images for documentation should be placed into `documentation <https://github.com/pypsa-meets-earth/documentation>`_ repository to the folder "doc/img". The content of the folder "documentation/doc/img/" is copied into "pypsa-earth/doc/img/" during building PyPSA-Earth documentation.
 
 Please, if you have problems with the documentation create an issue and let us know
-
-Compile the documentation locally
-----------------------------------
-
-To create the documentation locally, you need `Sphinx <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ . It can be installed using specifications
-form `doc/requirements.txt`. First, we recommend creating a fresh python environment and activate it:
-
-.. code:: bash
-
-    .../pypsa-earth % conda create --name pypsa-earth-docs python
-
-    .../pypsa-earth % conda activate pypsa-earth-docs
-
-Next, install the packages specified in `doc/requirements.txt` using `pip`:
-
-.. code:: bash
-
-    .../pypsa-earth % pip install -r doc/requirements.txt
-
-
-Once installation is completed, the following commands allow you to create the documentation locally:
-
-.. code:: bash
-
-    .../pypsa-earth (pypsa-earth-docs) % cd doc
-
-    .../pypsa-earth/doc (pypsa-earth-docs) % make html
-
-This will create html files in `pypsa-earth/doc/_build/html`.
-VScode provides a so called Liveserver extension such that the html file can be opened locally on your computer.
-
-.. note::
-
-    Windows users might face some challenges when building the documentation locally using `make`. A workaround can be found, but might be time consuming. For instance:
-
-    1. If using Windows PowerShell, one might need to replace the command `make html` above by `./make html`. For more details on what is going on, see `this post <https://stackoverflow.com/questions/65471557/make-html-not-working-for-sphinx-documentation-in-windows-10>`_ on Stack Overflow.

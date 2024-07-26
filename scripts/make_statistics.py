@@ -10,6 +10,7 @@ Create statistics for a given scenario run.
 This script contains functions to create statistics of the workflow for the current execution
 
 Relevant statistics that are created are:
+
 - For clean_osm_data and download_osm_data,
   the number of elements, length of the lines and length of dc lines are stored
 - For build_shapes, the surface, total GDP, total population and number of shapes are collected
@@ -23,8 +24,6 @@ Outputs
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
 import os
-import shutil
-from datetime import datetime
 from pathlib import Path
 
 import geopandas as gpd
@@ -34,7 +33,6 @@ import pypsa
 import xarray as xr
 from _helpers import create_logger, mock_snakemake, sets_path_to_root, to_csv_nafix
 from build_test_configs import create_test_config
-from ruamel.yaml import YAML
 from shapely.validation import make_valid
 
 logger = create_logger(__name__)
