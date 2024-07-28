@@ -14,6 +14,17 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 **New Features and Major Changes**
 
+
+
+**Minor Changes and bug-fixing**
+
+
+
+PyPSA-Earth 0.4.0
+=================
+
+**New Features and Major Changes (27th July 2024)**
+
 * Improve Monte Carlo feature with more distributions types, independent by PyPSA component. `PR #930 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/930>`__
 
 * Introduce flexible regional selection of the demand files of GEGIS. `PR #991 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/991>`__
@@ -49,6 +60,13 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 * Resolve pandas deprecation warning. `PR #1023 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1023>`__
 
 * Create files where the code outputs the value of the objective function. `PR #1033 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1033>`__
+
+* Introduce versioning of the configuration files. `PR #1058 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1058>`__
+
+* Fix bug for hydro inflow normalization for gadm regions (alternative clustering). `PR #1057 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1057>`__
+
+* Minor bug-fixing for s_nom_min. `PR #961 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/961>`__
+
 
 PyPSA-Earth 0.3.0
 =================
