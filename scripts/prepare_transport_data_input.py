@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import country_converter as coco
 import helpers
@@ -26,7 +26,8 @@ def download_number_of_vehicles():
     # Read the 'Data' sheet directly from the csv file at the provided URL
     try:
         Nbr_vehicles_csv = pd.read_csv(
-            fn, storage_options=storage_options, encoding="utf8")
+            fn, storage_options=storage_options, encoding="utf8"
+        )
         print("File read successfully.")
     except Exception as e:
         print("Failed to read the file:", e)
@@ -48,16 +49,14 @@ def download_number_of_vehicles():
 
     # # Remove spaces, Replace empty values with NaN
     Nbr_vehicles_csv["number cars"] = (
-        Nbr_vehicles_csv["number cars"].str.replace(
-            " ", "").replace("", np.nan)
+        Nbr_vehicles_csv["number cars"].str.replace(" ", "").replace("", np.nan)
     )
 
     # Drop rows with NaN values in 'number cars'
     Nbr_vehicles_csv = Nbr_vehicles_csv.dropna(subset=["number cars"])
 
     # convert the 'number cars' to integer
-    Nbr_vehicles_csv["number cars"] = Nbr_vehicles_csv["number cars"].astype(
-        int)
+    Nbr_vehicles_csv["number cars"] = Nbr_vehicles_csv["number cars"].astype(int)
 
     return Nbr_vehicles_csv
 
@@ -74,8 +73,7 @@ def download_CO2_emissions():
 
     # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
-        CO2_emissions = pd.read_excel(
-            url, sheet_name="Data", skiprows=[0, 1, 2])
+        CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
         print("File read successfully.")
     except Exception as e:
         print("Failed to read the file:", e)
@@ -86,8 +84,7 @@ def download_CO2_emissions():
     ]
 
     # Calculate efficiency based on CO2 emissions from transport (% of total fuel combustion)
-    CO2_emissions["average fuel efficiency"] = (
-        100 - CO2_emissions["2014"]) / 100
+    CO2_emissions["average fuel efficiency"] = (100 - CO2_emissions["2014"]) / 100
 
     # Add ISO2 country code for each country
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
@@ -131,19 +128,20 @@ if __name__ == "__main__":
     else:
         # Join the DataFrames by the 'country' column
         merged_df = pd.merge(vehicles_csv, CO2_emissions_csv, on="country")
-        merged_df = merged_df[["country",
-                               "number cars", "average fuel efficiency"]]
+        merged_df = merged_df[["country", "number cars", "average fuel efficiency"]]
 
         # Drop rows with NaN values in 'average fuel efficiency'
         merged_df = merged_df.dropna(subset=["average fuel efficiency"])
 
         # Convert the 'average fuel efficiency' to float
-        merged_df["average fuel efficiency"] = merged_df["average fuel efficiency"].astype(
-            float)
+        merged_df["average fuel efficiency"] = merged_df[
+            "average fuel efficiency"
+        ].astype(float)
 
         # Round the 'average fuel efficiency' to three decimal places
-        merged_df.loc[:, "average fuel efficiency"] = merged_df["average fuel efficiency"].round(
-            3)
+        merged_df.loc[:, "average fuel efficiency"] = merged_df[
+            "average fuel efficiency"
+        ].round(3)
 
         # Save the merged DataFrame to a CSV file
         merged_df.to_csv(
