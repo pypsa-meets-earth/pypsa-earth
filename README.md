@@ -106,7 +106,7 @@ All data and metadata provided by UNSD may be copied freely, duplicated and furt
 Global Steel Plant from GlobalEnergyMonitor ([License](https://globalenergymonitor.org/projects/global-steel-plant-tracker/download-data/)):
 All Global Energy Monitor data are freely available under the Creative Commons Attribution Public License below, unless otherwise noted. 
 
-Global database of cement production (Terms of use):
+Global database of cement production ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/)):
 The dataset is distributed under the licence Creative Commons Attribution 4.0 International (CC BY 4.0).
 
 Petrochemicals Database For Europe And North America ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/petrochemicals/)):
@@ -124,6 +124,6 @@ The Spatial Finance Initiative Pulp and Paper Mill Database for Latin America ca
 OurAirport Global Airport Statistics ([Terms of use](https://ourairports.com/data/)):
 All data is released to the Public Domain, and comes with no guarantee of accuracy or fitness for use.
 
-World Port index Statistics from National Geospatial-Intelligence Agency (NGA) (Terms of use):
+World Port index Statistics from National Geospatial-Intelligence Agency (NGA) ([Terms of use](https://www.nga.mil/resources/Privacy_Policy.html)):
 This website is provided as a public service by NGA’s Office of Corporate Communications. Information presented on this website is considered public information and may be distributed or copied unless otherwise specified.
 
