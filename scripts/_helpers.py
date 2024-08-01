@@ -1586,3 +1586,5 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         """
         # set the required compression demand
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
+def normed(x):
+    return (x / x.sum()).fillna(0.0)

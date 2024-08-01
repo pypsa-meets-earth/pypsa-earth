@@ -27,6 +27,11 @@ from scripts._helpers import (
     get_path,
     get_path_size,
     get_relative_path,
+    normed,
+    safe_divide,
+    three_2_two_digits_country,
+    two_2_three_digits_country,
+    two_digits_2_name_country,
     is_directory_path,
     is_file_path,
     path_exists,
@@ -156,6 +161,39 @@ def test_path_exists(get_temp_file):
     """
     Verify if path_exists() returns True when path exists.
     """
+    file_prefix_41 = "gadm41_"
+    gadm_url_prefix_41 = "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/"
+    gadm_input_file_args_41 = ["data", "gadm"]
+    gadm_input_file_gpkg_41, gadm_filename_41 = download_gadm(
+        "XK",
+        file_prefix_41,
+        gadm_url_prefix_41,
+        gadm_input_file_args_41,
+        update=True,
+    )
+    assert gadm_input_file_gpkg_41 == get_path(
+        path_cwd, "data/gadm/gadm41_XKO/gadm41_XKO.gpkg"
+    )
+    assert gadm_filename_41 == "gadm41_XKO"
+    list_layers_41 = fiona.listlayers(gadm_input_file_gpkg_41)
+    assert list_layers_41[0] == "ADM_ADM_0"
+    assert list_layers_41[1] == "ADM_ADM_1"
+    assert list_layers_41[2] == "ADM_ADM_2"
+
+
+def test_normed():
+    df_input = pd.DataFrame(
+        {"A": [1.0, 2.0, 3.0, 4.0, 5.0], "B": [6.0, 7.0, 8.0, 9.0, 10.0]}
+    )
+    df_output = normed(df_input)
+    df_reference = pd.DataFrame(
+        {
+            "A": [x / 15.0 for x in [1.0, 2.0, 3.0, 4.0, 5.0]],
+            "B": [x / 40.0 for x in [6.0, 7.0, 8.0, 9.0, 10.0]],
+        }
+    )
+    df_comparison = df_output.compare(df_reference)
+    assert df_comparison.empty
     path = get_temp_file
     pathlib_path = get_path(path)
     assert path_exists(path)

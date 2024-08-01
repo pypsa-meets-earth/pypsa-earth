@@ -91,16 +91,22 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
+from _helpers import (
+    change_to_script_dir,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+    normed,
+    read_csv_nafix,
+    sets_path_to_root,
+    update_p_nom_max,
+)
 from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-
-
-def normed(s):
-    return s / s.sum()
 
 
 def calculate_annuity(n, r):
