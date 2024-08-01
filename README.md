@@ -36,7 +36,7 @@ Sector-coupled PyPSA-Earth model introduces several novel features that set it a
 
 The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included.
 
-![alt text](https://github.com/pypsa-meets-earth/pypsa-earth-sec/blob/documentation/docs/SCPE.png?raw=true)
+![alt text](docs/SCPE_v0.2.png)
 
 
 ## Installation
