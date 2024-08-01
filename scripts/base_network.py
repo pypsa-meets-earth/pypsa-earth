@@ -61,7 +61,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import pypsa
-import scipy as sp
 import shapely.prepared
 import shapely.wkt
 from _helpers import (
@@ -77,40 +76,11 @@ from shapely.ops import unary_union
 logger = create_logger(__name__)
 
 
-def _get_oid(df):
-    if "tags" in df.columns:
-        return df.tags.str.extract('"oid"=>"(\\d+)"', expand=False)
-    else:
-        return pd.Series(np.nan, df.index)
-
-
 def get_country(df):
     if "tags" in df.columns:
         return df.tags.str.extract('"country"=>"([A-Z]{2})"', expand=False)
     else:
         return pd.Series(np.nan, df.index)
-
-
-def _find_closest_links(links, new_links, distance_upper_bound=1.5):
-    treecoords = np.asarray(
-        [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten() for s in links.geometry]
-    )
-    querycoords = np.vstack(
-        [new_links[["x1", "y1", "x2", "y2"]], new_links[["x2", "y2", "x1", "y1"]]]
-    )
-    tree = sp.spatial.KDTree(treecoords)
-    dist, ind = tree.query(querycoords, distance_upper_bound=distance_upper_bound)
-    found_b = ind < len(links)
-    found_i = np.arange(len(new_links) * 2)[found_b] % len(new_links)
-
-    return (
-        pd.DataFrame(
-            dict(D=dist[found_b], i=links.index[ind[found_b] % len(links)]),
-            index=new_links.index[found_i],
-        )
-        .sort_values(by="D")[lambda ds: ~ds.index.duplicated(keep="first")]
-        .sort_index()["i"]
-    )
 
 
 def _load_buses_from_osm(fp_buses):
@@ -131,20 +101,6 @@ def _load_buses_from_osm(fp_buses):
     buses = buses.dropna(axis="index", subset=["x", "y", "country"])
 
     return buses
-
-
-def add_underwater_links(n, fp_offshore_shapes):
-    if not hasattr(n.links, "geometry"):
-        n.links["underwater_fraction"] = 0.0
-    else:
-        offshore_shape = gpd.read_file(fp_offshore_shapes).unary_union
-        if offshore_shape is None or offshore_shape.is_empty:
-            n.links["underwater_fraction"] = 0.0
-        else:
-            links = gpd.GeoSeries(n.links.geometry.dropna().map(shapely.wkt.loads))
-            n.links["underwater_fraction"] = (
-                links.intersection(offshore_shape).length / links.length
-            )
 
 
 def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
@@ -205,37 +161,7 @@ def _load_lines_from_osm(fp_osm_lines):
     return lines
 
 
-# TODO Seems to be not needed anymore
-def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config):
-    # the links file can be empty
-    if get_path_size(fp_osm_converters) == 0:
-        links = pd.DataFrame()
-        return links
-
-    links = (
-        read_csv_nafix(
-            fp_osm_converters,
-            dtype=dict(
-                line_id="str",
-                bus0="str",
-                bus1="str",
-                underground="bool",
-                under_construction="bool",
-            ),
-        )
-        .set_index("line_id")
-        .rename(columns=dict(voltage="v_nom", circuits="num_parallel"))
-    )
-
-    links["length"] /= 1e3  # m to km conversion
-    links["v_nom"] /= 1e3  # V to kV conversion
-    links = links.loc[:, ~links.columns.str.contains("^Unnamed")]  # remove unnamed col
-    # links = _remove_dangling_branches(links, buses)  # TODO: add dangling branch removal?
-
-    return links
-
-
-def _load_converters_from_osm(fp_osm_converters, buses):
+def _load_converters_from_osm(fp_osm_converters):
     # the links file can be empty
     if get_path_size(fp_osm_converters) == 0:
         converters = pd.DataFrame()
@@ -254,7 +180,7 @@ def _load_converters_from_osm(fp_osm_converters, buses):
     return converters
 
 
-def _load_transformers_from_osm(fp_osm_transformers, buses):
+def _load_transformers_from_osm(fp_osm_transformers):
     transformers = (
         read_csv_nafix(
             fp_osm_transformers,
@@ -405,12 +331,6 @@ def _set_lines_s_nom_from_linetypes(n):
     ) * n.lines.eval("v_nom * num_parallel")
 
 
-def _remove_dangling_branches(branches, buses):
-    return pd.DataFrame(
-        branches.loc[branches.bus0.isin(buses.index) & branches.bus1.isin(buses.index)]
-    )
-
-
 def _set_countries_and_substations(inputs, base_network_config, countries_config, n):
     countries = countries_config
     country_shapes = gpd.read_file(inputs.country_shapes).set_index("name")["geometry"]
@@ -492,8 +412,8 @@ def base_network(
 ):
     buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
     lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
-    transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
-    converters = _load_converters_from_osm(inputs.osm_converters, buses)
+    transformers = _load_transformers_from_osm(inputs.osm_transformers)
+    converters = _load_converters_from_osm(inputs.osm_converters)
 
     lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
