@@ -1472,3 +1472,7 @@ def safe_divide(numerator, denominator):
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
         return np.nan
+
+
+def normed(x):
+    return (x / x.sum()).fillna(0.0)

@@ -136,6 +136,7 @@ from _helpers import (
     create_logger,
     get_aggregation_strategies,
     mock_snakemake,
+    normed,
     sets_path_to_root,
     update_p_nom_max,
 )
@@ -153,10 +154,6 @@ from shapely.geometry import Point
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-
-
-def normed(x):
-    return (x / x.sum()).fillna(0.0)
 
 
 def weighting_for_country(n, x):
