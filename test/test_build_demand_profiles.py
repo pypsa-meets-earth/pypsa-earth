@@ -17,11 +17,17 @@ path_cwd = pathlib.Path.cwd()
 
 
 def test_get_gegis_regions():
+    """
+    Verify what returned by get_gegis_regions.
+    """
     output_regions = get_gegis_regions(["NG", "IT"])
     assert output_regions == ["Africa", "Europe"]
 
 
 def test_get_load_paths_gegis():
+    """
+    Verify what returned by get_load_paths_gegis.
+    """
     config = {
         "countries": ["NG", "IT"],
         "load_options": {
