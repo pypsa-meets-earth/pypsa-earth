@@ -8,9 +8,6 @@
 import pathlib
 import sys
 
-import numpy as np
-import pandas as pd
-
 sys.path.append("./scripts")
 
 from _helpers import create_country_list, get_path
