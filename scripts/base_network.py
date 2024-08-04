@@ -513,6 +513,18 @@ def base_network(
 
     if hvdc_as_lines_config:
         lines = pd.concat([lines_ac, lines_dc])
+        lines.drop(
+            labels=[
+                "bus0_lon",
+                "bus0_lat",
+                "bus1_lon",
+                "bus1_lat",
+                "bus_0_coors",
+                "bus_1_coors",
+            ],
+            axis=1,
+            inplace=True,
+        )
         n.import_components_from_dataframe(lines, "Line")
     else:
         lines_dc = _set_electrical_parameters_links(links_config, lines_dc)
@@ -521,6 +533,18 @@ def base_network(
             lambda x: x["v_nom"] * n.line_types.i_nom[x["type"]],
             axis=1,
             result_type="reduce",
+        )
+        lines_ac.drop(
+            labels=[
+                "bus0_lon",
+                "bus0_lat",
+                "bus1_lon",
+                "bus1_lat",
+                "bus_0_coors",
+                "bus_1_coors",
+            ],
+            axis=1,
+            inplace=True,
         )
         n.import_components_from_dataframe(lines_ac, "Line")
         # The columns which names starts with "bus" are mixed up with the third-bus specification
