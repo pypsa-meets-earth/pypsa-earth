@@ -27,6 +27,7 @@ enable:
   retrieve_databundle: true
   retrieve_cost_data: true
   download_osm_data: true
+  retrieve_cooking_data: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
