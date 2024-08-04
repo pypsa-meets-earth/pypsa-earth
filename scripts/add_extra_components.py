@@ -224,7 +224,7 @@ def attach_stores(n, costs, config):
 
 
 def attach_cooking_technologies(n, cooking_costs, config):
-    if config["clean_cooking"]["enable"] != True:
+    if not clean_cooking:
         return
 
     carriers = config["clean_cooking"]["fuel"]
@@ -264,7 +264,6 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 bus=fuel_buses_i,
                 carrier=fuel,
                 e_cyclic=fuel == "AC",
-                e_initial=cooking_costs.at[fuel, "e_initial"],
                 capital_cost=cooking_costs.at[fuel, "capital_cost"],
                 marginal_cost=cooking_costs.at[fuel, "marginal_cost"],
             )
@@ -283,66 +282,7 @@ def attach_cooking_technologies(n, cooking_costs, config):
                 efficiency=cooking_costs.at[f"{fuel} stove", "efficiency"],
                 capital_cost=cooking_costs.at[f"{fuel} stove", "capital_cost"],
                 marginal_cost=cooking_costs.at[f"{fuel} stove", "marginal_cost"],
-                p_nom=cooking_costs.at[f"{fuel} stove", "p_nom"],
             )
-
-
-def attach_cooking_load(n, config, demand_cooking):
-    if config["clean_cooking"]["enable"] != True:
-        return
-
-    demand_df = read_csv_nafix(demand_cooking, index_col=0, parse_dates=True)
-    cooking_bus = n.buses.loc[n.buses.index.str.endswith("cooking")].index
-    n.madd("Load", cooking_bus, bus=cooking_bus, p_set=demand_df)
-
-
-def load_cooking_costs(cooking_fuel_costs, config, Nyears=1):
-    """
-    Set all cooking costs and other parameters.
-    """
-    if config["clean_cooking"]["enable"] != True:
-        return
-
-    cooking_costs = pd.read_csv(
-        cooking_fuel_costs, index_col=["technology", "parameter"]
-    ).sort_index()
-
-    cooking_costs.loc[cooking_costs.unit.str.contains("/kW"), "value"] *= 1e3
-    cooking_costs.unit = cooking_costs.unit.str.replace("/kW", "/MW")
-
-    cooking_costs = cooking_costs.value.unstack().fillna(config["costs"]["fill_values"])
-
-    cooking_costs["capital_cost"] = (
-        (
-            calculate_annuity(cooking_costs["lifetime"], cooking_costs["discount rate"])
-            + cooking_costs["FOM"] / 100.0
-        )
-        * cooking_costs["investment"]
-        * Nyears
-    )  # look into costs in links vs stores
-
-    cooking_costs["marginal_cost"] = (
-        cooking_costs["VOM"] + cooking_costs["fuel"] / cooking_costs["efficiency"]
-    )
-
-    cooking_costs = cooking_costs.rename(
-        columns={"CO2 intensity": "co2_emissions", "capacity": "p_nom"}
-    )
-
-    def costs_for_storage(store, link, max_hours=1.0):
-        capital_cost = link["capital_cost"] + max_hours * store["capital_cost"]
-        return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
-        )
-
-    for i in config["clean_cooking"]["fuel"]:
-        if i != "heat":
-            cooking_costs.loc[i] = costs_for_storage(
-                cooking_costs.loc[i],
-                cooking_costs.loc[f"{i} stove"],
-            )
-
-    return cooking_costs
 
 
 def attach_hydrogen_pipelines(n, costs, config):
@@ -398,18 +338,20 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     config = snakemake.config
 
+    clean_cooking = snakemake.params.clean_cooking
+
     costs = load_costs(
         snakemake.input.tech_costs,
+        snakemake.input.cooking_costs,
         config["costs"],
         config["electricity"],
         Nyears,
+        clean_cooking,
     )
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
-    cooking_costs = load_cooking_costs(snakemake.input.cooking_costs, config, Nyears=1)
-    attach_cooking_technologies(n, cooking_costs, config)
-    attach_cooking_load(n, config, snakemake.input.demand_cooking)
+    attach_cooking_technologies(n, costs, config)
     attach_hydrogen_pipelines(n, costs, config)
 
     add_nice_carrier_names(n, config=snakemake.config)
