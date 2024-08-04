@@ -4,11 +4,6 @@ charcoal stove,2030,efficiency,0.21,per unit,Analysis and modeling of the therma
 pellets stove,2030,efficiency,0.39,per unit,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
 lpg stove,2030,efficiency,0.66,per unit,Emission characterization and performance of conventional liquefied petroleum gas cookstove burners: https://www.tandfonline.com/doi/full/10.1080/23311916.2019.1652228
 AC stove,2030,efficiency,0.72,per unit,https://mecs.org.uk/blog/energy-transfer-in-kitchen-appliances/
-firewood,2030,VOM,1.3,EUR/MWhel,DIW DataDoc http://hdl.handle.net/10419/80348
-charcoal,2030,VOM,1.4,EUR/MWhel,DIW DataDoc http://hdl.handle.net/10419/80348
-pellets,2030,VOM,1.5,EUR/MWhel,DIW DataDoc http://hdl.handle.net/10419/80348
-lpg,2030,VOM,1.6,EUR/MWhel,DIW DataDoc http://hdl.handle.net/10419/80348
-AC,2030,VOM,1.7,EUR/MWhel,DIW DataDoc http://hdl.handle.net/10419/80348
 firewood,2030,lifetime,15,years,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
 charcoal,2030,lifetime,6,years,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
 pellets,2030,lifetime,6,years,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
@@ -18,18 +13,6 @@ firewood,2030,fuel,1.45E-05,EUR/MWhth,A2C Cost of Cooking Study
 charcoal,2030,fuel,2.09E-05,EUR/MWhth,A2C Cost of Cooking Study
 pellets,2030,fuel,2.06E-05,EUR/MWhth,A2C Cost of Cooking Study
 lpg,2030,fuel,9.07E-05,EUR/MWhth,A2C Cost of Cooking Study
-firewood,2030,FOM,0,%/year,Pypsa Earth default
-firewood,2030,investment,0,EUR/kW_e,Pypsa Earth default
-firewood,2030,discount rate,0,per unit,Pypsa Earth default
-firewood stove,2030,capacity,10,per unit,Cooking cost
-charcoal stove,2030,capacity,20,per unit,Cooking cost
-pellets stove,2030,capacity,30,per unit,Cooking cost
-lpg stove,2030,capacity,40,per unit,Cooking cost
-AC stove,2030,capacity,50,per unit,Cooking cost
-firewood,2030,e_initial,2.3,per unit,Cooking cost
-charcoal,2030,e_initial,3.4,per unit,Cooking cost
-pellets,2030,e_initial,5.6,per unit,Cooking cost
-lpg,2030,e_initial,6.7,per unit,Cooking cost
 firewood,2030,CO2 intensity,1.605599987,tCO2/MWth,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
 charcoal,2030,CO2 intensity,0.435599997,tCO2/MWth,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
 pellets,2030,CO2 intensity,0.403199997,tCO2/MWth,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
