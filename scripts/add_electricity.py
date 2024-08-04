@@ -135,12 +135,12 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
 
 
 def load_costs(
-    tech_costs, cooking_costs, config, elec_config, Nyears=1, clean_cooking=False
+    tech_costs, config, elec_config, Nyears=1, clean_cooking=False, cooking_costs=None
 ):
     """
     Set all asset costs and other parameters.
     """
-    if clean_cooking:
+    if clean_cooking and cooking_costs is not None:
         cooking_costs = pd.read_csv(cooking_costs)
         tech_costs = pd.read_csv(tech_costs)
         costs = (
@@ -834,14 +834,15 @@ if __name__ == "__main__":
     demand_profiles = snakemake.input["demand_profiles"]
 
     clean_cooking = snakemake.params.clean_cooking
+    cooking_costs = snakemake.input.cooking_costs
 
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.input.cooking_costs,
         snakemake.params.costs,
         snakemake.params.electricity,
         Nyears,
         clean_cooking,
+        cooking_costs,
     )
     ppl = load_powerplants(snakemake.input.powerplants)
     if "renewable_carriers" in snakemake.params.electricity:

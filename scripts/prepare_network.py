@@ -348,10 +348,12 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    clean_cooking = snakemake.params.clean_cooking
+
     attach_cooking_demand(
         n,
         snakemake.input.cook_load,
-        snakemake.params.clean_cooking,
+        clean_cooking,
         snakemake.params.tutorial,
     )
     costs = load_costs(
@@ -359,6 +361,7 @@ if __name__ == "__main__":
         snakemake.params.costs,
         snakemake.params.electricity,
         Nyears,
+        clean_cooking,
     )
     s_max_pu = snakemake.params.lines["s_max_pu"]
 
