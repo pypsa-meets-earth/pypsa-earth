@@ -134,12 +134,24 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     n.import_components_from_dataframe(emissions, "Carrier")
 
 
-def load_costs(tech_costs, config, elec_config, Nyears=1):
+def load_costs(
+    tech_costs, cooking_costs, config, elec_config, Nyears=1, clean_cooking=False
+):
     """
     Set all asset costs and other parameters.
     """
-
-    costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
+    if clean_cooking:
+        cooking_costs = pd.read_csv(cooking_costs)
+        tech_costs = pd.read_csv(tech_costs)
+        costs = (
+            pd.concat([tech_costs, cooking_costs], ignore_index=True)
+            .set_index(["technology", "parameter"])
+            .sort_index()
+        )
+    else:
+        costs = pd.read_csv(
+            tech_costs, index_col=["technology", "parameter"]
+        ).sort_index()
 
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
@@ -821,11 +833,15 @@ if __name__ == "__main__":
     # Snakemake imports:
     demand_profiles = snakemake.input["demand_profiles"]
 
+    clean_cooking = snakemake.params.clean_cooking
+
     costs = load_costs(
         snakemake.input.tech_costs,
+        snakemake.input.cooking_costs,
         snakemake.params.costs,
         snakemake.params.electricity,
         Nyears,
+        clean_cooking,
     )
     ppl = load_powerplants(snakemake.input.powerplants)
     if "renewable_carriers" in snakemake.params.electricity:
