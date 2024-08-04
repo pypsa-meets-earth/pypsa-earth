@@ -140,7 +140,7 @@ def load_costs(
     """
     Set all asset costs and other parameters.
     """
-    if clean_cooking and cooking_costs is not None:
+    if clean_cooking:
         cooking_costs = pd.read_csv(cooking_costs)
         tech_costs = pd.read_csv(tech_costs)
         costs = (
