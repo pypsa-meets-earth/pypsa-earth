@@ -814,6 +814,7 @@ def built_network(
     countries_config,
     geo_crs,
     distance_crs,
+    lines_cols_standard,
     force_ac=False,
 ):
     logger.info("Stage 1/5: Read input data")
@@ -878,6 +879,8 @@ def built_network(
     if not os.path.exists(outputs["lines"]):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
+    lines = lines[lines_cols_standard]
+
     to_csv_nafix(lines, outputs["lines"])  # Generate CSV
     to_csv_nafix(converters, outputs["converters"])  # Generate CSV
     to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
@@ -908,6 +911,26 @@ if __name__ == "__main__":
 
     sets_path_to_root("pypsa-earth")
 
+    # Keep only a predefined set of columns, as otherwise conflicts are possible
+    # e.g. the columns which names starts with "bus" are mixed up with
+    # the third-bus specification when executing additional_linkports()
+    lines_cols_standard = [
+        "line_id",
+        "circuits",
+        "tag_type",
+        "voltage",
+        "bus0",
+        "bus1",
+        "length",
+        "underground",
+        "under_construction",
+        "tag_frequency",
+        "dc",
+        "country",
+        "geometry",
+        "bounds",
+    ]
+
     built_network(
         snakemake.input,
         snakemake.output,
@@ -915,5 +938,6 @@ if __name__ == "__main__":
         countries,
         geo_crs,
         distance_crs,
+        lines_cols_standard=lines_cols_standard,
         force_ac=force_ac,
     )
