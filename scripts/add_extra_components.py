@@ -342,11 +342,11 @@ if __name__ == "__main__":
 
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.input.cooking_costs,
         config["costs"],
         config["electricity"],
         Nyears,
         clean_cooking,
+        snakemake.input.cooking_costs,
     )
 
     attach_storageunits(n, costs, config)
