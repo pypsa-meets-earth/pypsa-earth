@@ -362,6 +362,7 @@ if __name__ == "__main__":
         snakemake.params.electricity,
         Nyears,
         clean_cooking,
+        snakemake.input.cooking_costs,
     )
     s_max_pu = snakemake.params.lines["s_max_pu"]
 

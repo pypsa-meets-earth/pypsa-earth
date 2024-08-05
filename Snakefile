@@ -814,6 +814,7 @@ rule prepare_network:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs=COSTS,
         cook_load=COOK_DEMAND,
+        cooking_costs=COOK_COSTS,
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
