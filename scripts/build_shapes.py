@@ -604,7 +604,6 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
 
 
 def load_GDP(
-    countries_codes,
     year=2015,
     update=False,
     out_logging=False,
