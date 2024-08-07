@@ -127,7 +127,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/record/1239739/files/tutorial_cutouts_KZ.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/69756/files/bundle_tutorial_cutouts_KZ.zip?download=1
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
@@ -190,7 +190,7 @@ databundles:
     category: natura
     destination: "data/natura/"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/13539/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
     - data/natura/natura.tiff
@@ -262,7 +262,6 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
