@@ -187,14 +187,20 @@ def attach_stores(n, costs, config):
     if ("csp" in config["renewable"].keys()) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
     ):
-        # add buses for csp
-        n.madd("Bus", buses_i + " csp", carrier="csp", **bus_sub_dict)
+        # get CSP generators and their buses
+        csp_gens = n.generators.query("carrier == 'csp'")
+        buses_csp_gens = n.buses.loc[csp_gens.bus]
 
-        csp_buses_i = n.buses.index[n.buses.index.str.contains("csp")]
+        csp_buses_i = csp_gens.index
+        c_buses_i = csp_gens.bus.values
+
+        csp_bus_sub_dict = {k: buses_csp_gens[k].values for k in ["x", "y", "country"]}
+
+        # add buses for csp
+        n.madd("Bus", csp_buses_i, carrier="csp", **csp_bus_sub_dict)
 
         # change bus of existing csp generators
-        old_csp_bus_vector = buses_i + " csp"
-        n.generators.loc[old_csp_bus_vector, "bus"] = csp_buses_i
+        n.generators.loc[csp_gens.index, "bus"] = csp_buses_i
 
         # add stores for csp
         n.madd(
@@ -213,7 +219,7 @@ def attach_stores(n, costs, config):
             "Link",
             csp_buses_i,
             bus0=csp_buses_i,
-            bus1=buses_i,
+            bus1=c_buses_i,
             carrier="csp",
             efficiency=costs.at["csp-tower", "efficiency"],
             capital_cost=costs.at["csp-tower", "capital_cost"],
@@ -268,7 +274,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)
+        snakemake = mock_snakemake("add_extra_components", simpl="", clusters="20flex")
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
