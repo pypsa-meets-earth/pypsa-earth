@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import shutil
 from pathlib import Path
 
 import country_converter as coco
@@ -21,7 +22,16 @@ def download_number_of_vehicles():
     """
     fn = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
-    Nbr_vehicles_csv = pd.read_csv(fn, storage_options=storage_options, encoding="utf8")
+
+    # Read the 'Data' sheet directly from the csv file at the provided URL
+    try:
+        Nbr_vehicles_csv = pd.read_csv(
+            fn, storage_options=storage_options, encoding="utf8"
+        )
+        print("File read successfully.")
+    except Exception as e:
+        print("Failed to read the file:", e)
+        return pd.DataFrame()
 
     Nbr_vehicles_csv = Nbr_vehicles_csv.rename(
         columns={
@@ -67,6 +77,7 @@ def download_CO2_emissions():
         print("File read successfully.")
     except Exception as e:
         print("Failed to read the file:", e)
+        return pd.DataFrame()
 
     CO2_emissions = CO2_emissions[
         ["Country Name", "Country Code", "Indicator Name", "2014"]
@@ -109,28 +120,34 @@ if __name__ == "__main__":
     # Downloaded and prepare CO2_emissions_csv:
     CO2_emissions_csv = download_CO2_emissions().copy()
 
-    # Join the DataFrames by the 'country' column
-    merged_df = pd.merge(vehicles_csv, CO2_emissions_csv, on="country")
-    merged_df = merged_df[["country", "number cars", "average fuel efficiency"]]
+    if vehicles_csv.empty or CO2_emissions_csv.empty:
+        # In case one of the urls is not working, we can use the hard-coded data
+        src = os.getcwd() + "/data/temp_hard_coded/transport_data.csv"
+        dest = snakemake.output.transport_data_input
+        shutil.copy(src, dest)
+    else:
+        # Join the DataFrames by the 'country' column
+        merged_df = pd.merge(vehicles_csv, CO2_emissions_csv, on="country")
+        merged_df = merged_df[["country", "number cars", "average fuel efficiency"]]
 
-    # drop rows with NaN values in 'average fuel efficiency'
-    merged_df = merged_df.dropna(subset=["average fuel efficiency"])
+        # Drop rows with NaN values in 'average fuel efficiency'
+        merged_df = merged_df.dropna(subset=["average fuel efficiency"])
 
-    # Convert the 'average fuel efficiency' to float
-    merged_df["average fuel efficiency"] = merged_df["average fuel efficiency"].astype(
-        float
-    )
+        # Convert the 'average fuel efficiency' to float
+        merged_df["average fuel efficiency"] = merged_df[
+            "average fuel efficiency"
+        ].astype(float)
 
-    # Round the 'average fuel efficiency' to three decimal places
-    merged_df.loc[:, "average fuel efficiency"] = merged_df[
-        "average fuel efficiency"
-    ].round(3)
+        # Round the 'average fuel efficiency' to three decimal places
+        merged_df.loc[:, "average fuel efficiency"] = merged_df[
+            "average fuel efficiency"
+        ].round(3)
 
-    # Save
-    merged_df.to_csv(
-        snakemake.output.transport_data_input,
-        sep=",",
-        encoding="utf-8",
-        header="true",
-        index=False,
-    )
+        # Save the merged DataFrame to a CSV file
+        merged_df.to_csv(
+            snakemake.output.transport_data_input,
+            sep=",",
+            encoding="utf-8",
+            header="true",
+            index=False,
+        )

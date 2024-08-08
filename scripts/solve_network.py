@@ -620,6 +620,10 @@ if __name__ == "__main__":
         n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
         n.export_to_netcdf(snakemake.output[0])
 
+    # logging output to the terminal
+    print("Objective function: {}".format(n.objective))
+
+    # logging output to file
     logger.info("Objective function: {}".format(n.objective))
     logger.info("Objective constant: {}".format(n.objective_constant))
     logger.info("Maximum memory usage: {}".format(mem.mem_usage))

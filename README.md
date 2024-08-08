@@ -36,7 +36,7 @@ Sector-coupled PyPSA-Earth model introduces several novel features that set it a
 
 The diagram below depicts one representative clustered node showing the combination of carriers and sectors covered in the model as well as the generation and conversion technologies included.
 
-![alt text](https://github.com/pypsa-meets-earth/pypsa-earth-sec/blob/documentation/docs/SCPE.png?raw=true)
+![alt text](docs/SCPE_v0.2.png)
 
 
 ## Installation
@@ -97,3 +97,33 @@ The diagram below depicts one representative clustered node showing the combinat
   snakemake -j 1 solve_all_networks -n
   ```
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
+
+## Licenses
+
+Energy Statistics from UNSD ([Terms of use](https://unstats.un.org/unsd/energystats/data/)):
+All data and metadata provided by UNSD may be copied freely, duplicated and further distributed provided that UNSD is cited as the reference and the use is not for profit. Otherwise please contact UNSD. 
+
+Global Steel Plant from GlobalEnergyMonitor ([License](https://globalenergymonitor.org/projects/global-steel-plant-tracker/download-data/)):
+All Global Energy Monitor data are freely available under the Creative Commons Attribution Public License below, unless otherwise noted. 
+
+Global database of cement production ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/)):
+The dataset is distributed under the licence Creative Commons Attribution 4.0 International (CC BY 4.0).
+
+Petrochemicals Database For Europe And North America ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/petrochemicals/)):
+The Spatial Finance Initiative Petrochemicals Database for Europe and North America can be used by others and is available under a CC BY 4.0 license.
+
+Global Oil Refinery Complex, Daily Capacity, CO2 Emissions and Various Ancillary Products Statistics from Esri-ArcGIS ([License and Terms of use](https://www.esri.com/en-us/legal/copyright-proprietary-rights)):
+Esri grants the recipient of the Esri information contained within the esri.com Web site the right to freely reproduce, redistribute, rebroadcast, and/or retransmit this information for personal, noncommercial purposes, including teaching, classroom use, scholarship, and/or research, subject to the fair use rights enumerated in sections 107 and 108 of the Copyright Act (Title 17 of the United States Code). All copies, whether in whole or in part, shall include the appropriate Esri copyright notice.
+
+Global  Coal and Metal Mine Production Statistics ([License](https://www.nature.com/articles/s41597-023-01965-y)):
+The dataset is distributed under the licence Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Pulp And Paper Mill Database For Latin America ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/)):
+The Spatial Finance Initiative Pulp and Paper Mill Database for Latin America can be used by others and is available under a CC BY 4.0 license.
+
+OurAirport Global Airport Statistics ([Terms of use](https://ourairports.com/data/)):
+All data is released to the Public Domain, and comes with no guarantee of accuracy or fitness for use.
+
+World Port index Statistics from National Geospatial-Intelligence Agency (NGA) ([Terms of use](https://www.nga.mil/resources/Privacy_Policy.html)):
+This website is provided as a public service by NGA’s Office of Corporate Communications. Information presented on this website is considered public information and may be distributed or copied unless otherwise specified.
+

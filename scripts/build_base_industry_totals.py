@@ -8,11 +8,12 @@ Created on Thu Jul 14 19:01:13 2022
 
 
 import os
+import re
 from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
-from helpers import aggregate_fuels, get_conv_factors
+from helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
 from prepare_sector_network import get
 
 # def calc_industry_base(df):
@@ -60,25 +61,14 @@ def create_industry_base_totals(df):
         columns="Transaction", index=["country", "carrier"]
     ).fillna(0.0)
     industry_totals_base = industry_totals_base.droplevel(level=0, axis=1)
-    industry_totals_base["other"] = 0
+    # industry_totals_base["other"] = 0
 
-    if include_other:
+    if not include_other:
         # Loop through the columns in the list and sum them if they exist
         print(
-            "other industries are included, check thoroughly as data sometimes is not accurate"
+            "unspecified industries are not included, check thoroughly as values sometimes significant for some countries"
         )
-        for col_name in other_list:
-            if col_name in industry_totals_base.columns:
-                industry_totals_base["other"] += industry_totals_base[col_name]
-                industry_totals_base.drop(col_name, axis=1, inplace=True)
-    else:
-        print(
-            "other industries are included, check thoroughly as data sometimes is not accurate"
-        )
-        industry_totals_base.drop(
-            columns=[col for col in other_list if col in industry_totals_base.columns],
-            inplace=True,
-        )
+        industry_totals_base.drop("other", axis=1)
 
     industry_totals_base = industry_totals_base.rename(
         columns={"paper, pulp and print": "paper pulp and print"}
@@ -112,8 +102,6 @@ if __name__ == "__main__":
 
     year = snakemake.params.base_year
     countries = snakemake.params.countries
-    # countries = ["DE", "US", "EG", "MA", "UA", "UK"]
-    # countries = ["EG", "BH"]
 
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand
@@ -122,44 +110,13 @@ if __name__ == "__main__":
     )
     include_other = snakemake.params.other_industries
 
-    industry_list = [
-        "iron and steel",
-        "chemical and petrochemical",
-        "non-ferrous metals",
-        "non-metallic minerals",
-        "transport equipment",
-        "machinery",
-        "mining and quarrying",
-        "food and tobacco",
-        "paper, pulp and printing",
-        "paper, pulp and print",
-        "wood and wood products",
-        "textile and leather",
-        "construction",
-        "not elsewhere specified (industry)",
-        "other manuf., const. and non-fuel ind.",
-        "other manuf., const. and non-fuel min. ind.",
-    ]
-    other_list = [
-        "other manuf., const. and non-fuel ind.",
-        "other manuf., const. and non-fuel min. ind.",
-    ]
+    transaction = read_csv_nafix(
+        snakemake.input.transactions_path,
+        sep=";",
+    )
 
-    clean_industry_list = [
-        "iron and steel",
-        "chemical and petrochemical",
-        "non-ferrous metals",
-        "non-metallic minerals",
-        "transport equipment",
-        "machinery",
-        "mining and quarrying",
-        "food and tobacco",
-        "paper pulp and print",
-        "wood and wood products",
-        "textile and leather",
-        "construction",
-        "other",
-    ]
+    renaming_dit = transaction.set_index("Transaction")["clean_name"].to_dict()
+    clean_industry_list = list(transaction.clean_name.unique())
 
     unsd_path = (
         os.path.dirname(snakemake.input["energy_totals_base"]) + "/demand/unsd/data/"
@@ -177,6 +134,10 @@ if __name__ == "__main__":
     df[["Commodity", "Transaction", "extra"]] = df["Commodity - Transaction"].str.split(
         " - ", expand=True
     )
+
+    df = df[
+        df.Commodity != "Other bituminous coal"
+    ]  # dropping problematic column leading to double counting
 
     # Remove fill na in Transaction column
     df["Transaction"] = df["Transaction"].fillna("NA")
@@ -231,28 +192,13 @@ if __name__ == "__main__":
 
     # Filter for the year and country
     df_yr = df[df.Year == year]
-    df_yr = df_yr[df_yr.country.isin(countries)]
-    # df_yr = df_yr[df_yr["Commodity - Transaction"].str.contains("industry")]
-    df_yr = df_yr[
-        df_yr["Transaction"].str.lower().str.contains("|".join(industry_list))
-    ]
 
-    df_yr = df_yr[
-        ~df_yr.Transaction.str.lower().str.contains(
-            "consumption by manufacturing, construction and non-fuel"
-        )
-    ]
-    df_yr["Transaction"] = df_yr["Transaction"].str.replace(" industry", "")
+    df_yr = df_yr[df_yr.Transaction.isin(transaction.Transaction)]
 
-    df_yr["Transaction"] = df_yr["Transaction"].str.rstrip()
-    df_yr["Transaction"] = df_yr["Transaction"].str.replace("consumption by ", "")
+    df_yr["Transaction"] = df_yr["Transaction"].map(renaming_dit)
 
-    # df_yr[df_yr['Commodity - Transaction'].str.lower().str.contains('|'.join(industry_list))]
-    # df_yr "consumption by manufacturing, construction and non-fuel"
     # Create the industry totals file
     industry_totals_base = create_industry_base_totals(df_yr)
 
     # Export the industry totals dataframe
     industry_totals_base.to_csv(snakemake.output["base_industry_totals"])
-
-    # print("end")
