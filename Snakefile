@@ -15,6 +15,7 @@ from _helpers import create_country_list, get_last_commit_message, check_config_
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
+import requests
 
 
 HTTP = HTTPRemoteProvider()
@@ -56,11 +57,11 @@ else:
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 if config["enable"].get("retrieve_cooking_data", True):
-    COOK_COSTS = "resources/" + RDIR + "cooking_costs.csv"
-    COOK_DEMAND = "resources/" + RDIR + "demand_cooking.csv"
+    COOK_COSTS = os.path.join("resources", RDIR, "cooking_costs.csv")
+    COOK_DEMAND = os.path.join("resources", RDIR, "demand_cooking.csv")
 else:
-    COOK_COSTS = "data/cooking_costs.csv"
-    COOK_DEMAND = "data/demand_cooking.csv"
+    COOK_COSTS = os.path.join("data", "cooking_costs.csv")
+    COOK_DEMAND = os.path.join("data", "demand_cooking.csv")
 
 
 wildcard_constraints:
@@ -424,37 +425,37 @@ if config["enable"].get("retrieve_cost_data", True):
             move(input[0], output[0])
 
 
+# Define the rules
 if config["enable"].get("retrieve_cooking_data", True):
 
     rule retrieve_cooking_costs:
-        input:
-            HTTP.remote(
-                f"https://zenodo.org/records/13118035/files/cooking_costs.csv?download=1",
-                keep_local=True,
-            ),
         output:
             COOK_COSTS,
         log:
-            "logs/" + RDIR + "retrieve_cooking_costs.log",
+            os.path.join("logs", RDIR, "retrieve_cooking_costs.log"),
         resources:
             mem_mb=5000,
         run:
-            move(input[0], output[0])
+            url = "https://zenodo.org/records/13118035/files/cooking_costs.csv?download=1"
+            response = requests.get(url)
+            response.raise_for_status()  # Ensure the request was successful
+            with open(output[0], "wb") as f:
+                f.write(response.content)
 
     rule retrieve_cooking_load:
-        input:
-            HTTP.remote(
-                f"https://zenodo.org/records/13208358/files/demand_cooking.csv?download=1",
-                keep_local=True,
-            ),
         output:
             COOK_DEMAND,
         log:
-            "logs/" + RDIR + "retrieve_cooking_load.log",
+            os.path.join("logs", RDIR, "retrieve_cooking_costs.log"),
         resources:
             mem_mb=5000,
         run:
-            move(input[0], output[0])
+            url = "https://zenodo.org/records/13208358/files/demand_cooking.csv?download=1"
+            response = requests.get(url)
+            response.raise_for_status()  # Ensure the request was successful
+            with open(output[0], "wb") as f:
+                f.write(response.content)
+
 
 
 rule build_demand_profiles:
