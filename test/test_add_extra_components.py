@@ -221,20 +221,17 @@ def test_attach_hydrogen_pipelines():
     )
 
     reference_component_dict = {
-        "Bus": 1755,
-        "Carrier": 2,
+        "Bus": 585,
         "Line": 852,
         "LineType": 34,
         "Transformer": 96,
         "TransformerType": 14,
-        "Link": 2340,
+        "Link": 705,
         "Load": 489,
         "Generator": 1423,
         "StorageUnit": 38,
-        "Store": 1170,
     }
-    test_network_de.buses["country"] = "DE"
-    attach_stores(test_network_de, test_costs, config_dict)
+    attach_hydrogen_pipelines(test_network_de, test_costs, config_dict)
 
     output_component_dict = {}
     for c in test_network_de.iterate_components(
