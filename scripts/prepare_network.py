@@ -80,9 +80,16 @@ idx = pd.IndexSlice
 logger = create_logger(__name__)
 
 
-def download_emission_data():
+def download_emission_data(url_emissions, file_name_emissions):
     """
     Download emission file from EDGAR.
+
+    Parameters
+    ----------
+    url_emissions : str
+        global emission file url.
+    file_name_emissions : str
+        global emission file name.
 
     Returns
     -------
@@ -90,22 +97,21 @@ def download_emission_data():
     """
 
     try:
-        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
-        with requests.get(url) as rq:
+        with requests.get(url_emissions) as rq:
             with open("data/co2.zip", "wb") as file:
                 file.write(rq.content)
         root_path = get_current_directory_path()
         file_path = get_path(root_path, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
             zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                file_name_emissions,
                 get_path(root_path, "data"),
             )
         pathlib.Path(file_path).unlink(missing_ok=True)
-        return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
+        return file_name_emissions
     except requests.exceptions.RequestException as e:
         logger.error(
-            f"Failed download resource from '{url}' with exception message '{e}'."
+            f"Failed download resource from '{url_emissions}' with exception message '{e}'."
         )
         raise SystemExit(e)
 
@@ -339,6 +345,11 @@ if __name__ == "__main__":
 
     opts = snakemake.wildcards.opts.split("-")
 
+    emissions_file_url = snakemake.params.prepare_network_options["emissions_file_url"]
+    emissions_file_name = snakemake.params.prepare_network_options[
+        "emissions_file_name"
+    ]
+
     n = pypsa.Network(snakemake.input[0])
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = load_costs(
@@ -372,7 +383,9 @@ if __name__ == "__main__":
                 emission_year = snakemake.params.electricity[
                     "automatic_emission_base_year"
                 ]
-                filename = download_emission_data()
+                filename = download_emission_data(
+                    emissions_file_url, emissions_file_name
+                )
                 co2limit = emission_extractor(
                     filename, emission_year, country_names
                 ).sum()
