@@ -32,18 +32,18 @@ jobs:
     # Load all steps #
     ##################
     steps:
-      ##########################
-      # Checkout the code base #
-      ##########################
+    ##########################
+    # Checkout the code base #
+    ##########################
     - name: Checkout Code
       uses: actions/checkout@v2
       with:
-          # Full git history is needed to get a proper list of changed files within `super-linter`
+        # Full git history is needed to get a proper list of changed files within `super-linter`
         fetch-depth: 0
 
-      ################################
-      # Run Linter against code base #
-      ################################
+    ################################
+    # Run Linter against code base #
+    ################################
     - name: Lint Code Base
       uses: docker://ghcr.io/github/super-linter:slim-v4
       env:

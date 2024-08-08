@@ -8,8 +8,7 @@ costs_dir: data/ #TODO change to the equivalent of technology data
 run:
   name: "test_myopic" # use this to keep track of runs with different settings
   name_subworkflow: "tutorial"  # scenario name of the pypsa-earth subworkflow
-  shared_cutouts: true  # set to true to share the default cutout(s) across runs
-                        # Note: value false requires build_cutout to be enabled
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs; Note: value false requires build_cutout to be enabled
 foresight: myopic
 
 # option to disable the subworkflow to ease the analyses
@@ -163,26 +162,26 @@ sector:
 
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
-      #increase of today's district heating demand to potential maximum district heating share
-      #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
+    #increase of today's district heating demand to potential maximum district heating share
+    #progress = 0 means today's district heating share, progress=-1 means maxumzm fraction of urban demand is supplied by district heating
     progress: 1
-      #2020: 0.0
-      #2030: 0.3
-      #2040: 0.6
-      #2050: 1.0
+    # 2020: 0.0
+    # 2030: 0.3
+    # 2040: 0.6
+    # 2050: 1.0
     district_heating_loss: 0.15
   reduce_space_heat_exogenously: true  # reduces space heat demand by a given factor (applied before losses in DH)
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
   # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
-    # 2020: 0.10  # this results in a space heat demand reduction of 10%
-    # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
-    # 2030: 0.09
-    # 2035: 0.11
-    # 2040: 0.16
-    # 2045: 0.21
-    # 2050: 0.29
+  # 2020: 0.10  # this results in a space heat demand reduction of 10%
+  # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
+  # 2030: 0.09
+  # 2035: 0.11
+  # 2040: 0.16
+  # 2045: 0.21
+  # 2050: 0.29
 
   tes: true
   tes_tau: # 180 day time constant for centralised, 3 day for decentralised

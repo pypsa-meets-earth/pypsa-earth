@@ -55,7 +55,7 @@ repos:
   rev: v1.33.0
   hooks:
   - id: yamllint
-    args: [--format, parsable, -c=.yamllint]
+    args: [-c=.yamllint]
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt

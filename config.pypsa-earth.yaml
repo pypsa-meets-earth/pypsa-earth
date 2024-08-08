@@ -26,8 +26,7 @@ custom_rules: []  # Default empty [] or link to custom rule file e.g. ["my_folde
 
 run:
   name: "" # use this to keep track of runs with different settings
-  shared_cutouts: true  # set to true to share the default cutout(s) across runs
-                        # Note: value false requires build_cutout to be enabled
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs; Note: value false requires build_cutout to be enabled
 
 scenario:
   simpl: ['']
@@ -279,8 +278,8 @@ renewable:
       method: pv
       panel: CSi
       orientation: latitude_optimal # will lead into optimal design
-        # slope: 0.  # slope: 0 represent a flat panel
-        # azimuth: 180.  # azimuth: 180 south orientation
+      # slope: 0.  # slope: 0 represent a flat panel
+      # azimuth: 180.  # azimuth: 180 south orientation
     capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
