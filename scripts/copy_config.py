@@ -12,19 +12,10 @@ files_to_copy = {
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from helpers import mock_snakemake
 
         snakemake = mock_snakemake("copy_config")
-        os.chdir(snakemake.config["ROOT_PATH"])
 
+    directory = snakemake.output["folder"]
     for f, name in files_to_copy.items():
-        copy(
-            f,
-            snakemake.params.summary_dir
-            + "/"
-            + snakemake.params.run["name"]
-            + "/configs/"
-            + name,
-        )
+        copy(f, directory + "/" + name)

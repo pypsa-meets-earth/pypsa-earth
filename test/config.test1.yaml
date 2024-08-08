@@ -1,6 +1,6 @@
 tutorial: true
 
-run: 
+run:
   name: test1
   name_subworkflow: "tutorial"
   shared_cutouts: true
@@ -12,6 +12,14 @@ scenario:
   - "c1"
 
 countries: ['NG', 'BJ']
+
+
+electricity:
+  extendable_carriers:
+    Store: []
+    Link: []
+
+  co2limit: 7.75e7
 
 export:
   h2export: [120] # Yearly export demand in TWh
