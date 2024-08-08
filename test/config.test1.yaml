@@ -2,7 +2,6 @@ tutorial: true
 
 run:
   name: test1
-  name_subworkflow: "tutorial"
   shared_cutouts: true
 
 scenario:
