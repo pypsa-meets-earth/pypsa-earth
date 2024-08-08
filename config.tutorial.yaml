@@ -27,6 +27,7 @@ enable:
   retrieve_databundle: true
   retrieve_cost_data: true
   download_osm_data: true
+  retrieve_cooking_data: true
   # If "build_cutout" : true # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   build_cutout: false
@@ -330,6 +331,11 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
     csp_model: advanced # simple or advanced
+
+# clean_cooking configuration
+clean_cooking:
+  enable: true
+  fuel: ["AC", "lpg", "pellets", "firewood", "charcoal", "heat"]
 
 # TODO: Needs to be adjusted for Africa
 costs:

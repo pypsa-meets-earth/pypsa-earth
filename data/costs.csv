@@ -46,7 +46,7 @@ solar-utility,2030,FOM,3,%/year,ETIP PV
 biomass,2030,FOM,4.526935,%/year,DIW DataDoc http://hdl.handle.net/10419/80348
 geothermal,2030,FOM,2.358491,%/year,DIW DataDoc http://hdl.handle.net/10419/80348
 coal,2030,FOM,1.923076,%/year,DIW DataDoc http://hdl.handle.net/10419/80348 PC (Advanced/SuperC)
-lignite,2030,FOM,2.0,%/year,DIW DataDoc http://hdl.handle.net/10419/80348 PC (Advanced/SuperC)
+lignite,2030,FOM,2,%/year,DIW DataDoc http://hdl.handle.net/10419/80348 PC (Advanced/SuperC)
 oil,2030,FOM,1.5,%/year,DIW DataDoc http://hdl.handle.net/10419/80348
 PHS,2030,FOM,1,%/year,DIW DataDoc http://hdl.handle.net/10419/80348
 hydro,2030,FOM,1,%/year,DIW DataDoc http://hdl.handle.net/10419/80348
@@ -195,10 +195,15 @@ HVDC inverter pair,2030,lifetime,40,years,Hagspiel
 HVDC inverter pair,2030,FOM,2,%/year,Hagspiel
 csp-tower,2030,FOM,1.1,%/year,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
 csp-tower,2030,investment,108.37,"EUR/kW_th,dp",ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
-csp-tower,2030,lifetime,30.0,years,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
+csp-tower,2030,lifetime,30,years,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power)
 csp-tower TES,2030,FOM,1.1,%/year,see solar-tower.
 csp-tower TES,2030,investment,14.52,EUR/kWh_th,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
-csp-tower TES,2030,lifetime,30.0,years,see solar-tower.
+csp-tower TES,2030,lifetime,30,years,see solar-tower.
 csp-tower power block,2030,FOM,1.1,%/year,see solar-tower.
 csp-tower power block,2030,investment,759.17,EUR/kW_e,ATB CSP data (https://atb.nrel.gov/electricity/2021/concentrating_solar_power) and NREL SAM v2021.12.2 (https://sam.nrel.gov/).
-csp-tower power block,2030,lifetime,30.0,years,see solar-tower.
+csp-tower power block,2030,lifetime,30,years,see solar-tower.
+Firewood,2030,efficiency,0.17,per unit,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+Charcoal,2030,efficiency,0.21,per unit,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+Pellets,2030,efficiency,0.39,per unit,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
+LPG,2030,efficiency,0.66,per unit,Emission characterization and performance of conventional liquefied petroleum gas cookstove burners: https://www.tandfonline.com/doi/full/10.1080/23311916.2019.1652228
+AC,2030,efficiency,0.72,per unit,https://mecs.org.uk/blog/energy-transfer-in-kitchen-appliances/

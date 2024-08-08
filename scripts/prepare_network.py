@@ -315,6 +315,21 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
     n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
 
 
+def attach_cooking_demand(n, cook_load, clean_cooking, tutorial):
+    if clean_cooking:
+        if tutorial:
+            demand_t = n.loads_t.p_set * 0.1
+        else:
+            try:
+                demand_t = pd.read_csv(cook_load, index_col=0, parse_dates=True)
+            except Exception as e:
+                print(f"Error reading the cooking load CSV file: {e}")
+                return
+        n.madd("Load", demand_t.columns, bus=demand_t.columns, p_set=demand_t)
+    else:
+        pass
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -333,11 +348,21 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    clean_cooking = snakemake.params.clean_cooking
+
+    attach_cooking_demand(
+        n,
+        snakemake.input.cook_load,
+        clean_cooking,
+        snakemake.params.tutorial,
+    )
     costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
         snakemake.params.electricity,
         Nyears,
+        clean_cooking,
+        snakemake.input.cooking_costs,
     )
     s_max_pu = snakemake.params.lines["s_max_pu"]
 

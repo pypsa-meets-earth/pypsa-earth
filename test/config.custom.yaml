@@ -36,3 +36,8 @@ electricity:
 
   extendable_carriers:
     Link: [H2 pipeline]
+
+# clean_cooking configuration
+clean_cooking:
+  enable: true
+  fuel: ["AC", "lpg", "pellets", "firewood", "charcoal", "heat"]
