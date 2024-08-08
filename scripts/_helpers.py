@@ -123,41 +123,6 @@ def read_osm_config(*args):
         return tuple([osm_config[a] for a in args])
 
 
-def sets_path_to_root(root_directory_name):
-    """
-    Search and sets path to the given root directory (root/path/file).
-
-    Parameters
-    ----------
-    root_directory_name : str
-        Name of the root directory.
-    n : int
-        Number of folders the function will check upwards/root directed.
-    """
-    import os
-
-    repo_name = root_directory_name
-    n = 8  # check max 8 levels above. Random default.
-    n0 = n
-
-    while n >= 0:
-        n -= 1
-        # if repo_name is current folder name, stop and set path
-        if repo_name == os.path.basename(os.path.abspath(".")):
-            repo_path = os.getcwd()  # os.getcwd() = current_path
-            os.chdir(repo_path)  # change dir_path to repo_path
-            print("This is the repository path: ", repo_path)
-            print("Had to go %d folder(s) up." % (n0 - 1 - n))
-            break
-        # if repo_name NOT current folder name for 5 levels then stop
-        if n == 0:
-            print("Can't find the repo path.")
-        # if repo_name NOT current folder name, go one directory higher
-        else:
-            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
-            os.chdir(upper_path)
-
-
 def configure_logging(snakemake, skip_handlers=False):
     """
     Configure the basic behaviour for the logging module.
@@ -435,11 +400,13 @@ def progress_retrieve(
         data = urllib.parse.urlencode(data).encode()
 
     if headers:
-        opener = urllib.request.build_opener()
-        opener.addheaders = headers
-        urllib.request.install_opener(opener)
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as response:
+            with open(file, "wb") as f:
+                f.write(response.read())
 
-    urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
+    else:
+        urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
 def get_aggregation_strategies(aggregation_strategies):
@@ -467,7 +434,7 @@ def get_aggregation_strategies(aggregation_strategies):
     return bus_strategies, generator_strategies
 
 
-def mock_snakemake(rulename, **wildcards):
+def mock_snakemake(rulename, root_dir=None, submodule_dir=None, **wildcards):
     """
     This function is expected to be executed from the "scripts"-directory of "
     the snakemake project. It returns a snakemake.script.Snakemake object,
@@ -490,57 +457,72 @@ def mock_snakemake(rulename, **wildcards):
     from snakemake.script import Snakemake
 
     script_dir = Path(__file__).parent.resolve()
-    assert (
-        Path.cwd().resolve() == script_dir
-    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
-    os.chdir(script_dir.parent)
-    for p in sm.SNAKEFILE_CHOICES:
-        if os.path.exists(p):
-            snakefile = p
-            break
-    workflow = sm.Workflow(
-        snakefile, overwrite_configfiles=[], rerun_triggers=[]
-    )  # overwrite_config=config
-    workflow.include(snakefile)
-    workflow.global_resources = {}
-    try:
-        rule = workflow.get_rule(rulename)
-    except Exception as exception:
-        print(
-            exception,
-            f"The {rulename} might be a conditional rule in the Snakefile.\n"
-            f"Did you enable {rulename} in the config?",
+    if root_dir is None:
+        root_dir = script_dir.parent
+    else:
+        root_dir = Path(root_dir).resolve()
+
+    user_in_script_dir = Path.cwd().resolve() == script_dir
+    if str(submodule_dir) in __file__:
+        # the submodule_dir path is only need to locate the project dir
+        os.chdir(Path(__file__[: __file__.find(str(submodule_dir))]))
+    elif user_in_script_dir:
+        os.chdir(root_dir)
+    elif Path.cwd().resolve() != root_dir:
+        raise RuntimeError(
+            "mock_snakemake has to be run from the repository root"
+            f" {root_dir} or scripts directory {script_dir}"
         )
-        raise
-    dag = sm.dag.DAG(workflow, rules=[rule])
-    wc = Dict(wildcards)
-    job = sm.jobs.Job(rule, dag, wc)
+    try:
+        for p in sm.SNAKEFILE_CHOICES:
+            if os.path.exists(p):
+                snakefile = p
+                break
+        workflow = sm.Workflow(
+            snakefile, overwrite_configfiles=[], rerun_triggers=[]
+        )  # overwrite_config=config
+        workflow.include(snakefile)
+        workflow.global_resources = {}
+        try:
+            rule = workflow.get_rule(rulename)
+        except Exception as exception:
+            print(
+                exception,
+                f"The {rulename} might be a conditional rule in the Snakefile.\n"
+                f"Did you enable {rulename} in the config?",
+            )
+            raise
+        dag = sm.dag.DAG(workflow, rules=[rule])
+        wc = Dict(wildcards)
+        job = sm.jobs.Job(rule, dag, wc)
 
-    def make_accessable(*ios):
-        for io in ios:
-            for i in range(len(io)):
-                io[i] = os.path.abspath(io[i])
+        def make_accessable(*ios):
+            for io in ios:
+                for i in range(len(io)):
+                    io[i] = os.path.abspath(io[i])
 
-    make_accessable(job.input, job.output, job.log)
-    snakemake = Snakemake(
-        job.input,
-        job.output,
-        job.params,
-        job.wildcards,
-        job.threads,
-        job.resources,
-        job.log,
-        job.dag.workflow.config,
-        job.rule.name,
-        None,
-    )
-    snakemake.benchmark = job.benchmark
+        make_accessable(job.input, job.output, job.log)
+        snakemake = Snakemake(
+            job.input,
+            job.output,
+            job.params,
+            job.wildcards,
+            job.threads,
+            job.resources,
+            job.log,
+            job.dag.workflow.config,
+            job.rule.name,
+            None,
+        )
+        snakemake.benchmark = job.benchmark
 
-    # create log and output dir if not existent
-    for path in list(snakemake.log) + list(snakemake.output):
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        # create log and output dir if not existent
+        for path in list(snakemake.log) + list(snakemake.output):
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
 
-    os.chdir(script_dir)
+    finally:
+        if user_in_script_dir:
+            os.chdir(script_dir)
     return snakemake
 
 

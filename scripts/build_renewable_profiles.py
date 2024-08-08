@@ -202,7 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, create_logger, sets_path_to_root
+from _helpers import configure_logging, create_logger
 from add_electricity import load_powerplants
 from dask.distributed import Client, LocalCluster
 from pypsa.geo import haversine
@@ -490,7 +490,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
-        sets_path_to_root("pypsa-earth")
+        os.chdir(snakemake.config["ROOT_PATH"])
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()

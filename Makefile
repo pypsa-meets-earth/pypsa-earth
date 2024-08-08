@@ -20,7 +20,7 @@ setup:
 clean:
 	# Add clean-up commands here
 	snakemake -j1 solve_all_networks --delete-all-output --configfile test/config.custom.yaml
-	snakemake -j1 solve_all_networks --delete-all-output --configfile test/config.tutorial_noprogress.yaml
+	snakemake -j1 solve_all_networks --delete-all-output --configfile configs/scenarios/config.NG.yaml
 	snakemake -j1 solve_all_networks_monte --delete-all-output --configfile test/config.monte_carlo.yaml
 	snakemake -j1 run_all_scenarios --delete-all-output --configfile test/config.landlock.yaml
 	echo "Clean-up complete."

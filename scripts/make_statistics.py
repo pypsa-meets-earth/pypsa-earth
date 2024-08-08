@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import create_logger, mock_snakemake, sets_path_to_root, to_csv_nafix
+from _helpers import create_logger, mock_snakemake, to_csv_nafix
 from build_test_configs import create_test_config
 from shapely.validation import make_valid
 
@@ -45,7 +45,7 @@ def _multi_index_scen(rulename, keys):
 def _mock_snakemake(rule, **kwargs):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     snakemake = mock_snakemake(rule, **kwargs)
-    sets_path_to_root("pypsa-earth")
+    os.chdir(snakemake.config["ROOT_PATH"])
     return snakemake
 
 
@@ -584,7 +584,7 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("make_statistics")
 
-    sets_path_to_root("pypsa-earth")
+    os.chdir(snakemake.config["ROOT_PATH"])
 
     fp_stats = snakemake.output["stats"]
     scenario = snakemake.params.scenario

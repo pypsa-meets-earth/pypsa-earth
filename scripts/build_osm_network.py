@@ -15,7 +15,6 @@ from _helpers import (
     create_logger,
     read_geojson,
     read_osm_config,
-    sets_path_to_root,
     to_csv_nafix,
 )
 from shapely.geometry import LineString, Point
@@ -906,7 +905,7 @@ if __name__ == "__main__":
     build_osm_network = snakemake.params.build_osm_network
     countries = snakemake.params.countries
 
-    sets_path_to_root("pypsa-earth")
+    os.chdir(snakemake.config["ROOT_PATH"])
 
     built_network(
         snakemake.input,

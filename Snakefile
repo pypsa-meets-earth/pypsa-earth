@@ -37,6 +37,8 @@ config["countries"] = create_country_list(config["countries"])
 config["scenario"]["unc"] = [
     f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
 ]
+config["ROOT_PATH"] = os.getcwd()
+
 
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
