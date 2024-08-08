@@ -603,10 +603,17 @@ if __name__ == "__main__":
             columns={"x": "lon", "y": "lat", "country": "countries"}
         ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
-        resource["plants"]["installed_hydro"] = [
-            True if (bus_id in hydro_ppls.bus.values) else False
-            for bus_id in resource["plants"].index
-        ]
+        # TODO: these cases shall be fixed by restructuring the alternative clustering procedure
+        if snakemake.params.alternative_clustering == False:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.bus.values) else False
+                for bus_id in resource["plants"].index
+            ]
+        else:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.region_id.values) else False
+                for bus_id in resource["plants"].shape_id.values
+            ]
 
         # get normalization before executing runoff
         normalization = None
@@ -640,6 +647,7 @@ if __name__ == "__main__":
                         )
                         * config.get("multiplier", 1.0)
                     )
+
                 elif method == "eia":
                     path_eia_stats = snakemake.input.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(

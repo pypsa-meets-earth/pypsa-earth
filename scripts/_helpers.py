@@ -28,6 +28,28 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
 
+def check_config_version(config, fp_config="config.default.yaml"):
+    """
+    Check that a version of the local config.yaml matches to the actual config
+    version as defined in config.default.yaml.
+    """
+
+    # using snakemake capabilities to deal with yanl configs
+    with open(fp_config, "r") as f:
+        actual_config = yaml.safe_load(f)
+    actual_config_version = actual_config.get("version")
+
+    current_config_version = config.get("version")
+
+    if actual_config_version != current_config_version:
+        logger.error(
+            f"The current version of 'config.yaml' doesn't match to the code version:\n\r"
+            f" {current_config_version} provided, {actual_config_version} expected.\n\r"
+            f"That can lead to weird errors during execution of the workflow.\n\r"
+            f"Please update 'config.yaml' according to 'config.default.yaml' ."
+        )
+
+
 def handle_exception(exc_type, exc_value, exc_traceback):
     """
     Customise errors traceback.

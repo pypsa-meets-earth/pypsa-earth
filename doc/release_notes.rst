@@ -14,6 +14,20 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **New Features and Major Changes**
 
+* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
+
+* Local tests are now run with `make test`. This uses a `Makefile` which runs snakemake calls with different configurations. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
+
+**Minor Changes and bug-fixing**
+
+* Remove unused `countries_codes` argument from `load_GDP` function in `build_shapes.py` script, which was not being called as intended with positional arguments `PR #1069 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1069>`__
+
+
+PyPSA-Earth 0.4.0
+=================
+
+**New Features and Major Changes (27th July 2024)**
+
 * Improve Monte Carlo feature with more distributions types, independent by PyPSA component. `PR #930 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/930>`__
 
 * Introduce flexible regional selection of the demand files of GEGIS. `PR #991 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/991>`__
@@ -48,11 +62,12 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Create files where the code outputs the value of the objective function. `PR #1033 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1033>`__
 
-* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
+* Introduce versioning of the configuration files. `PR #1058 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1058>`__
 
-* Local tests are now run with `make test`. This uses a `Makefile` which runs snakemake calls with different configurations. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
+* Fix bug for hydro inflow normalization for gadm regions (alternative clustering). `PR #1057 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1057>`__
 
 * Minor bug-fixing for s_nom_min. `PR #961 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/961>`__
+
 
 PyPSA-Earth 0.3.0
 =================

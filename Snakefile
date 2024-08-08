@@ -11,21 +11,21 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from _helpers import create_country_list, get_last_commit_message, copy_default_files
+from _helpers import create_country_list, get_last_commit_message, check_config_version, copy_default_files
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
+
 
 HTTP = HTTPRemoteProvider()
 
 
 copy_default_files()
 
-
-# configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "config.yaml"
 
+check_config_version(config=config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 
