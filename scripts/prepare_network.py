@@ -131,7 +131,7 @@ def emission_extractor(
         Global emission sheet name
     year_emissions : int
         Year of CO2 emissions
-    country_names_emissions : numpy.ndarray
+    country_names_emissions : list
         Two-letter country codes of analysed countries.
 
     Returns
@@ -149,7 +149,7 @@ def emission_extractor(
     ]
     df = df.loc[:, "Y_1970":"Y_2018"].astype(float).ffill(axis=1)
     df = df.loc[:, "Y_1970":"Y_2018"].astype(float).bfill(axis=1)
-    cc_iso3 = cc.convert(names=country_names, to="ISO3")
+    cc_iso3 = cc.convert(names=country_names_emissions, to="ISO3")
     if len(country_names_emissions) == 1:
         cc_iso3 = [cc_iso3]
     emission_by_country = df.loc[
