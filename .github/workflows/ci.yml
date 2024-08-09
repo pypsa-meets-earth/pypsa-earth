@@ -33,6 +33,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Fill submodule
+      run: |
+        git submodule update --init
 
     - name: Setup micromamba
       uses: mamba-org/setup-micromamba@v1
