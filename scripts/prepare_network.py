@@ -131,7 +131,7 @@ def emission_extractor(
         Global emission sheet name
     year_emissions : int
         Year of CO2 emissions
-    country_names_emissions : list
+    country_names_emissions : numpy.ndarray
         Two-letter country codes of analysed countries.
 
     Returns

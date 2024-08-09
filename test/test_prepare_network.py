@@ -33,23 +33,9 @@ def test_emission_extractor():
         automatic_emission_base_year,
         country_names,
     )
-    reference_df = pd.DataFrame(
-        {
-            "Country_code_A3": ["NGA", "DEU", "ITA"],
-            "emissions": [5698.761870, 381475.887378, 123981.645873],
-        }
-    )
-    output_df = pd.DataFrame(
-        {"Country_code_A3": output_series.index, "emissions": output_series.values}
-    )
-    print(reference_df)
-    print(output_df)
-    comparison_df = output_df.compare(reference_df)
-    print(comparison_df)
-    print(type(output_series.values))
-    print(type(output_series.values[0]))
-    print(type(output_series.values[1]))
-    print(type(output_series.values[2]))
-    print(type(5698.761870))
-    assert comparison_df.empty
-    # assert False
+    assert output_series.index.tolist() == ["NGA", "DEU", "ITA"]
+    assert output_series.values.tolist() == [
+        5698.76187,
+        381475.887377666,
+        123981.6458729,
+    ]
