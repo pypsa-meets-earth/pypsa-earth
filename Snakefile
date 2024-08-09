@@ -34,8 +34,10 @@ config["ROOT_PATH"] = os.getcwd()
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
-SDIR = str(Path(config["summary_dir"]) / RDIR)  # use Path to flexibly allow closing "/"
-RESDIR = str(Path(config["results_dir"]) / RDIR)
+SDIR = (
+    str(Path(config["summary_dir"]) / RDIR) + "/"
+)  # use Path to flexibly allow closing "/"
+RESDIR = str(Path(config["results_dir"]) / RDIR) + "/"
 COSTDIR = config["costs_dir"]
 
 
