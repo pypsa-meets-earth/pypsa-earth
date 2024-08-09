@@ -94,6 +94,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     mock_snakemake,
+    normed,
     read_csv_nafix,
     sets_path_to_root,
     update_p_nom_max,
@@ -102,10 +103,6 @@ from _helpers import (
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-
-
-def normed(s):
-    return s / s.sum()
 
 
 def calculate_annuity(n, r):

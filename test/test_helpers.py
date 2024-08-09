@@ -37,6 +37,7 @@ from _helpers import (
     get_path_size,
     get_relative_path,
     modify_commodity,
+    normed,
     safe_divide,
     three_2_two_digits_country,
     two_2_three_digits_country,
@@ -578,3 +579,18 @@ def test_download_gadm():
     assert list_layers_41[0] == "ADM_ADM_0"
     assert list_layers_41[1] == "ADM_ADM_1"
     assert list_layers_41[2] == "ADM_ADM_2"
+
+
+def test_normed():
+    df_input = pd.DataFrame(
+        {"A": [1.0, 2.0, 3.0, 4.0, 5.0], "B": [6.0, 7.0, 8.0, 9.0, 10.0]}
+    )
+    df_output = normed(df_input)
+    df_reference = pd.DataFrame(
+        {
+            "A": [x / 15.0 for x in [1.0, 2.0, 3.0, 4.0, 5.0]],
+            "B": [x / 40.0 for x in [6.0, 7.0, 8.0, 9.0, 10.0]],
+        }
+    )
+    df_comparison = df_output.compare(df_reference)
+    assert df_comparison.empty

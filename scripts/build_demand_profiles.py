@@ -56,6 +56,7 @@ from _helpers import (
     create_logger,
     get_path,
     mock_snakemake,
+    normed,
     read_csv_nafix,
     read_osm_config,
     sets_path_to_root,
@@ -64,10 +65,6 @@ from shapely.prepared import prep
 from shapely.validation import make_valid
 
 logger = create_logger(__name__)
-
-
-def normed(s):
-    return s / s.sum()
 
 
 def get_gegis_regions(countries):
