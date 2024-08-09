@@ -556,7 +556,7 @@ if config["foresight"] == "overnight":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs=COSTDIR + "costs_{planning_horizons}.csv",
-            configs=SDIR + "/configs/config.yaml",  # included to trigger copy_config rule
+            configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
         output:
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -603,7 +603,7 @@ rule make_sector_summary:
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         plots=expand(
             RESDIR
-            + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
+            + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
             **config["scenario"],
             **config["costs"],
             **config["export"],
@@ -640,7 +640,7 @@ rule plot_sector_network:
         + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
         map=RESDIR
-        + "/maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
+        + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
     threads: 2
     resources:
         mem_mb=10000,
