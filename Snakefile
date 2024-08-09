@@ -18,7 +18,7 @@ if not exists("config.yaml"):
     copyfile("config.default.yaml", "config.yaml")
 
 
-configfile: "config.pypsa-earth.yaml"
+configfile: PYPSAEARTH_FOLDER + "/config.default.yaml"
 configfile: PYPSAEARTH_FOLDER + "/configs/bundle_config.yaml"
 configfile: PYPSAEARTH_FOLDER + "/configs/powerplantmatching_config.yaml"
 configfile: "config.yaml"

@@ -346,7 +346,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_filename = get_GADM_filename(country_code)
 
     GADM_inputfile_gpkg = os.path.join(
-        os.getcwd() + "/pypsa-earth",
         "data",
         "gadm",
         GADM_filename,
