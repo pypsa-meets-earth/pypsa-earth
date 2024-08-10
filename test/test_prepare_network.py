@@ -11,7 +11,12 @@ import pypsa
 
 sys.path.append("./scripts")
 
-from prepare_network import add_co2limit, download_emission_data, emission_extractor
+from prepare_network import (
+    add_co2limit,
+    add_gaslimit,
+    download_emission_data,
+    emission_extractor,
+)
 
 emissions_file_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
 emissions_file_name = "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
@@ -50,4 +55,19 @@ def test_add_co2limit():
         == "co2_emissions"
     )
     assert test_network_de.global_constraints.sense.values[0] == "<="
-    assert test_network_de.global_constraints.constant.values[0] == 212328.76712328766
+    assert (
+        test_network_de.global_constraints.constant.values[0] == co2limit * number_years
+    )
+
+
+def test_add_gaslimit():
+    test_network_de = pypsa.examples.scigrid_de(from_master=True)
+    test_network_de.add("Carrier", "OCGT")
+    number_years = test_network_de.snapshot_weightings.objective.sum() / 8760.0
+    add_gaslimit(test_network_de, number_years, number_years)
+    assert test_network_de.global_constraints.carrier_attribute.values[0] == "gas_usage"
+    assert test_network_de.global_constraints.sense.values[0] == "<="
+    assert (
+        test_network_de.global_constraints.constant.values[0]
+        == number_years * number_years
+    )
