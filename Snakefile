@@ -346,7 +346,9 @@ def terminate_if_cutout_exists(config=config):
 
 
 if config["enable"].get("build_cutout", False):
-    terminate_if_cutout_exists(config)
+    cmd = " ".join(sys.argv)
+    if "--mode 1" not in cmd or "build_cutout" in cmd:
+        terminate_if_cutout_exists(config)
 
     rule build_cutout:
         params:
