@@ -18,6 +18,7 @@ from prepare_network import (
     download_emission_data,
     emission_extractor,
     enforce_autarky,
+    set_line_nom_max,
     set_line_s_max_pu,
 )
 
@@ -83,9 +84,21 @@ def test_set_line_s_max_pu():
     assert test_network_de.lines["s_max_pu"].unique()[0] == s_max_pu_new_value
 
 
+def test_set_line_nom_max():
+    test_network = pypsa.examples.ac_dc_meshed(from_master=True)
+    s_nom_max_value = 5.0
+    p_nom_max_value = 10.0
+    set_line_nom_max(
+        test_network, s_nom_max_set=s_nom_max_value, p_nom_max_set=p_nom_max_value
+    )
+    assert test_network.lines.s_nom_max.unique()[0] == s_nom_max_value
+    assert test_network.links.p_nom_max.unique()[0] == p_nom_max_value
+
+
 def test_enforce_autarky():
 
     # test with only_crossborder=False
+    # --> it removes all lines and all DC links
     test_network_no_cross_border = pypsa.examples.ac_dc_meshed(from_master=True)
 
     bus_country_list = ["UK", "UK", "UK", "UK", "DE", "DE", "DE", "NO", "NO"]
@@ -115,6 +128,7 @@ def test_enforce_autarky():
     )
 
     # test with only_crossborder=True
+    # --> it removes links and lines that cross borders
     test_network_with_cross_border = pypsa.examples.ac_dc_meshed(from_master=True)
     bus_country_list = ["UK", "UK", "UK", "UK", "DE", "DE", "DE", "NO", "NO"]
     test_network_with_cross_border.buses["country"] = bus_country_list
