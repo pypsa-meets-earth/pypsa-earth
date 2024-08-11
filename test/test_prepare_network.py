@@ -77,6 +77,17 @@ def test_add_gaslimit():
     )
 
 
+def test_add_emission_prices():
+    test_network_ac_dc_meshed = pypsa.examples.ac_dc_meshed(from_master=True)
+    print("before", test_network_ac_dc_meshed.generators["marginal_cost"])
+    print("=====")
+    add_emission_prices(
+        test_network_ac_dc_meshed, emission_prices={"co2": 1.0}, exclude_co2=False
+    )
+    print("after", test_network_ac_dc_meshed.generators["marginal_cost"])
+    assert False
+
+
 def test_set_line_s_max_pu():
     test_network_de = pypsa.examples.scigrid_de(from_master=True)
     s_max_pu_new_value = 3.0
@@ -157,23 +168,3 @@ def test_enforce_autarky():
         output_component_dict_with_cross_border
         == reference_component_dict_with_cross_border
     )
-
-
-# I do not understand this method!
-# def test_add_emission_prices():
-#     test_network_de = pypsa.examples.scigrid_de(from_master=True)
-#     test_network_de.add("Carrier", "OCGT_emissions", co2_emissions=2.0)
-#     test_network_de.add("Carrier", "coal_emissions", co2_emissions=2.0)
-#     test_network_de.add("Generator", "OCGT_emissions")
-#     test_network_de.add("Generator", "coal_emissions")
-#     ep = (
-#         pd.Series({"co2": 1.0}).rename(lambda x: x + "_emissions")
-#         * test_network_de.carriers.filter(like="_emissions")
-#     ).sum(axis=1)
-#     print("first term", test_network_de.generators.carrier.map(ep))
-#     print("second term", test_network_de.generators.efficiency)
-#     #print("before", test_network_de.generators["marginal_cost"])
-#     #print("=====")
-#     add_emission_prices(test_network_de, emission_prices={"co2": 1.0}, exclude_co2=False)
-#     #print("after", test_network_de.generators["marginal_cost"])
-#     assert False
