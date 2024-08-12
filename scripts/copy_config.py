@@ -7,7 +7,6 @@ files_to_copy = {
     "./Snakefile": "Snakefile",
     "./scripts/solve_network.py": "solve_network.py",
     "./scripts/prepare_sector_network.py": "prepare_sector_network.py",
-    "./config.pypsa-earth.yaml": "config.pypsa-earth.yaml",
 }
 
 if __name__ == "__main__":
