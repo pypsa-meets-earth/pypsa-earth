@@ -465,7 +465,7 @@ def add_RES_constraints(n, res_share, config):
 
     logger.warning(
         "The add_RES_constraints() is still work in progress. "
-        "Unexpected results might be incurre, particularly if "
+        "Unexpected results might be incurred, particularly if "
         "temporal clustering is applied or if an unexpected change of technologies "
         "is subject to the optimisation."
     )
