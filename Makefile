@@ -6,7 +6,7 @@
 
 test:
 	set -e
-	snakemake -call solve_sector_networks --configfile pypsa-earth/config.tutorial.yaml test/config.test1.yaml
+	snakemake -c1 solve_sector_networks --configfile pypsa-earth/config.tutorial.yaml test/config.test1.yaml
 	echo "All tests completed successfully."
 
 setup:
