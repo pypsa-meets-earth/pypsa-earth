@@ -94,7 +94,7 @@ from vresutils.benchmark import memory_logger
 logger = create_logger(__name__)
 
 
-def prepare_network(n, solve_opts, config=None):
+def prepare_network(n, solve_opts, config):
     if "clip_p_max_pu" in solve_opts:
         for df in (n.generators_t.p_max_pu, n.storage_units_t.inflow):
             df.where(df > solve_opts["clip_p_max_pu"], other=0.0, inplace=True)
