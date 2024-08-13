@@ -344,6 +344,14 @@ def add_SAFE_constraints(n, config):
 
 
 def add_operational_reserve_margin_constraint(n, sns, config):
+    """
+    Build reserve margin constraints based on the formulation
+    as suggested in GenX
+    https://energy.mit.edu/wp-content/uploads/2017/10/Enhanced-Decision-Support-for-a-Changing-Electricity-Landscape.pdf
+    It implies that the reserve margin also accounts for optimal
+    dispatch of distributed energy resources (DERs) and demand response
+    which is a novel feature of GenX.
+    """
     reserve_config = config["electricity"]["operational_reserve"]
     EPSILON_LOAD = reserve_config["epsilon_load"]
     EPSILON_VRES = reserve_config["epsilon_vres"]
