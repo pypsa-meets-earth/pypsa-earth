@@ -8,6 +8,8 @@
 extends: default
 
 rules:
+  braces:
+    forbid: false
   brackets:
     max-spaces-inside: 0
     max-spaces-inside-empty: 0
