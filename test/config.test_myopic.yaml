@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+
 logging_level: INFO
 tutorial: true
 
@@ -45,7 +46,7 @@ policy_config:
     path_to_ref: "" # Path to the reference case network for additionality calculation, relevant only if additionality is _true_ and is_reference is _false_
     re_country_load: false # Set to "True" to force the RE electricity to be equal to the electricity required for hydrogen export and the country electricity load. "False" excludes the country electricity load from the constraint.
 
-clustering_options:
+cluster_options:
   alternative_clustering: true
 
 countries: ['NG', 'BJ']

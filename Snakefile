@@ -410,6 +410,10 @@ if config["enable"].get("retrieve_cost_data", True):
             COSTS,
         log:
             "logs/" + RDIR + "retrieve_cost_data.log",
+        resources:
+            mem_mb=5000,
+        run:
+            move(input[0], output[0])
 
     rule retrieve_cost_data_flexible:
         input:
@@ -1038,9 +1042,7 @@ if not config["custom_data"]["gas_network"]:
     rule prepare_gas_network:
         params:
             gas_config=config["sector"]["gas"],
-            alternative_clustering=config["clustering_options"][
-                "alternative_clustering"
-            ],
+            alternative_clustering=config["cluster_options"]["alternative_clustering"],
             countries_list=config["countries"],
             layer_id=config["build_shape_options"]["gadm_layer_id"],
             update=config["build_shape_options"]["update_file"],
@@ -1122,7 +1124,7 @@ rule build_ship_profile:
 rule add_export:
     params:
         gadm_level=config["sector"]["gadm_level"],
-        alternative_clustering=config["clustering_options"]["alternative_clustering"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
         store=config["export"]["store"],
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
@@ -1626,7 +1628,7 @@ rule build_industrial_distribution_key:  #default data
     params:
         countries=config["countries"],
         gadm_level=config["sector"]["gadm_level"],
-        alternative_clustering=config["clustering_options"]["alternative_clustering"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
         industry_database=config["custom_data"]["industry_database"],
     input:
         regions_onshore="resources/"
