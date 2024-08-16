@@ -14,7 +14,7 @@ google_api_key:
 
 #matching config
 matching_sources:
-  # - CARMA  # deprecated as no more public
+# - CARMA  # deprecated as no more public
 - GEO
 - GPD
 - GBPT
@@ -30,7 +30,7 @@ matching_sources:
 # - EXTERNAL_DATABASE
 
 fully_included_sources:
-  # - CARMA  # deprecated as no more public
+# - CARMA  # deprecated as no more public
 - GEO
 - GPD
 - GBPT

@@ -14,8 +14,8 @@ rules:
     max-spaces-inside: 0
     max-spaces-inside-empty: 0
   comments:
-    require-starting-space: true
-    min-spaces-from-content: 1
+    require-starting-space: false
+    min-spaces-from-content: 0
   # Force correct indentation of comments
   # yamllint disable-line rule:braces
   comments-indentation: {}
@@ -34,7 +34,7 @@ rules:
   key-duplicates: {}
   line-length:
     level: warning
-    max: 200
+    max: 350
   new-line-at-end-of-file: enable
   truthy:
     check-keys: false       # Disable truthy check hits on keys like "on": ...

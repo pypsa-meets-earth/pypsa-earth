@@ -21,15 +21,23 @@ by
 [![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+<!-- [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) -->
 [![REUSE status](https://api.reuse.software/badge/github.com/pypsa-meets-earth/pypsa-earth)](https://api.reuse.software/info/github.com/pypsa-meets-earth/pypsa-earth)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-earth/pypsa-earth/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-earth/pypsa-earth/main)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
-**PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution.** It enables large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions. It is suitable for operational as well as combined generation, storage and transmission expansion studies. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. The data includes electricity demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
+**PyPSA-Earth: A Global Open-Source Multi-Energy System Model**
 
-The model is described in the Applied Energy article "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.121096 [(BibTeX)](https://pypsa-earth.readthedocs.io/en/latest/talks_and_papers.html#publications). The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information.
+PyPSA-Earth is the first open-source global energy system model with high spatial and temporal resolution. It provides a powerful tool for modeling the world energy system or any subset of it, enabling large-scale collaboration and transparent analysis for a sustainable energy future. PyPSA-Earth combines the capabilities of the original PyPSA-Eur model with new data and functions, making it suitable for operational studies as well as combined generation, storage, and transmission expansion analysis.
+
+With the recent integration of PyPSA-Earth and the sector-coupled PyPSA-Earth model, all functionality is now combined into a single, comprehensive tool. This unified model allows for detailed optimization of multi-energy systems, covering electricity, heating, transport, and more. It is designed to adapt to the specific needs of any country or region, offering customizable data extraction, preparation scripts with global coverage, and a broad range of clustering and grid meshing strategies to meet computational and practical requirements.
+
+PyPSA-Earth supports stakeholders in planning and analyzing the transition to a decarbonized, integrated energy system. By making this tool openly available, we aim to foster collaboration, innovation, and informed decision-making that leads to sustainable and efficient energy solutions worldwide.
+
+For more details, the model is described in the Applied Energy article "PyPSA-Earth: A new global open energy system optimization model demonstrated in Africa," 2023. The preprint describing the sector-coupled functionalities is also available [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4743242). Additional information can be found in the [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
+
 
 **PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth.** We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
@@ -40,6 +48,11 @@ The model is described in the Applied Energy article "PyPSA-Earth. A new global 
 </p>
 
 <p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a>https://zenodo.org/records/10080766</a></p>
+
+
+The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
+
+![alt text](doc/SCPE_v0.2.png)
 
 ## Livetracker. Most popular global models:
 
@@ -142,6 +155,10 @@ There are multiple ways to get involved and learn more about our work. That's ho
   ```
 
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
+
+
+
+
 
 ## Training
 
@@ -480,3 +497,32 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
     </td></tr>
 </table>
 <!-- readme: collaborators,contributors,restyled-commits/- -end -->
+
+## Licenses
+
+Energy Statistics from UNSD ([Terms of use](https://unstats.un.org/unsd/energystats/data/)):
+All data and metadata provided by UNSD may be copied freely, duplicated and further distributed provided that UNSD is cited as the reference and the use is not for profit. Otherwise please contact UNSD.
+
+Global Steel Plant from GlobalEnergyMonitor ([License](https://globalenergymonitor.org/projects/global-steel-plant-tracker/download-data/)):
+All Global Energy Monitor data are freely available under the Creative Commons Attribution Public License below, unless otherwise noted.
+
+Global database of cement production ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/)):
+The dataset is distributed under the licence Creative Commons Attribution 4.0 International (CC BY 4.0).
+
+Petrochemicals Database For Europe And North America ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/petrochemicals/)):
+The Spatial Finance Initiative Petrochemicals Database for Europe and North America can be used by others and is available under a CC BY 4.0 license.
+
+Global Oil Refinery Complex, Daily Capacity, CO2 Emissions and Various Ancillary Products Statistics from Esri-ArcGIS ([License and Terms of use](https://www.esri.com/en-us/legal/copyright-proprietary-rights)):
+Esri grants the recipient of the Esri information contained within the esri.com Web site the right to freely reproduce, redistribute, rebroadcast, and/or retransmit this information for personal, noncommercial purposes, including teaching, classroom use, scholarship, and/or research, subject to the fair use rights enumerated in sections 107 and 108 of the Copyright Act (Title 17 of the United States Code). All copies, whether in whole or in part, shall include the appropriate Esri copyright notice.
+
+Global  Coal and Metal Mine Production Statistics ([License](https://www.nature.com/articles/s41597-023-01965-y)):
+The dataset is distributed under the licence Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Pulp And Paper Mill Database For Latin America ([Terms of use](https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/)):
+The Spatial Finance Initiative Pulp and Paper Mill Database for Latin America can be used by others and is available under a CC BY 4.0 license.
+
+OurAirport Global Airport Statistics ([Terms of use](https://ourairports.com/data/)):
+All data is released to the Public Domain, and comes with no guarantee of accuracy or fitness for use.
+
+World Port index Statistics from National Geospatial-Intelligence Agency (NGA) ([Terms of use](https://www.nga.mil/resources/Privacy_Policy.html)):
+This website is provided as a public service by NGA’s Office of Corporate Communications. Information presented on this website is considered public information and may be distributed or copied unless otherwise specified.
