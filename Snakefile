@@ -827,7 +827,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
@@ -893,7 +893,9 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         output:
             "results/"
             + RDIR
@@ -1417,6 +1419,9 @@ rule copy_config:
 if config["foresight"] == "overnight":
 
     rule solve_sector_network:
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
         input:
             overrides="data/override_component_attrs",
             # network=RESDIR

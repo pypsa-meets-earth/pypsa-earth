@@ -2311,6 +2311,7 @@ def add_dac(n, costs):
 
 
 def add_services(n, costs):
+    nhours = n.snapshot_weightings.generators.sum()
     buses = spatial.nodes.intersection(n.loads_t.p_set.columns)
 
     profile_residential = normalize_by_country(
@@ -2318,7 +2319,7 @@ def add_services(n, costs):
     ).fillna(0)
 
     p_set_elec = p_set_from_scaling(
-        "services electricity", profile_residential, energy_totals
+        "services electricity", profile_residential, energy_totals, nhours
     )
 
     n.madd(
@@ -2330,7 +2331,7 @@ def add_services(n, costs):
         p_set=p_set_elec,
     )
     p_set_biomass = p_set_from_scaling(
-        "services biomass", profile_residential, energy_totals
+        "services biomass", profile_residential, energy_totals, nhours
     )
 
     n.madd(
@@ -2353,7 +2354,9 @@ def add_services(n, costs):
     #     carrier="biomass emissions",
     #     p_set=-co2,
     # )
-    p_set_oil = p_set_from_scaling("services oil", profile_residential, energy_totals)
+    p_set_oil = p_set_from_scaling(
+        "services oil", profile_residential, energy_totals, nhours
+    )
 
     n.madd(
         "Load",
@@ -2375,7 +2378,9 @@ def add_services(n, costs):
         p_set=-co2,
     )
 
-    p_set_gas = p_set_from_scaling("services gas", profile_residential, energy_totals)
+    p_set_gas = p_set_from_scaling(
+        "services gas", profile_residential, energy_totals, nhours
+    )
 
     n.madd(
         "Load",
@@ -2468,12 +2473,16 @@ def normalize_and_group(df, multiindex=False):
     )
 
 
-def p_set_from_scaling(col, scaling, energy_totals):
+def p_set_from_scaling(col, scaling, energy_totals, nhours):
     """
     Function to create p_set from energy_totals, using the per-unit scaling
     dataframe.
     """
-    return 1e6 * scaling.mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
+    return (
+        1e6
+        / nhours
+        * scaling.mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
+    )
 
 
 def add_residential(n, costs):
@@ -2483,33 +2492,19 @@ def add_residential(n, costs):
     # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
     # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
 
+    nhours = n.snapshot_weightings.generators.sum()
+
     heat_ind = (
         n.loads_t.p_set.filter(like="residential")
         .filter(like="heat")
         .dropna(axis=1)
         .columns
     )
-    oil_ind = (
-        n.loads_t.p_set.filter(like="residential")
-        .filter(like="oil")
-        .dropna(axis=1)
-        .columns
-    )
-    bio_ind = (
-        n.loads_t.p_set.filter(like="residential")
-        .filter(like="biomass")
-        .dropna(axis=1)
-        .columns
-    )
-
-    gas_ind = (
-        n.loads_t.p_set.filter(like="residential")
-        .filter(like="gas")
-        .dropna(axis=1)
-        .columns
-    )
-
     heat_shape_raw = normalize_by_country(n.loads_t.p_set[heat_ind])
+    heat_shape = heat_shape_raw.rename(
+        columns=n.loads.bus.map(n.buses.location), level=1
+    )
+    heat_shape = heat_shape.T.groupby(level=[0, 1]).sum().T
 
     n.loads_t.p_set[heat_ind] = 1e6 * heat_shape_raw.mul(
         energy_totals["total residential space"]
@@ -2518,39 +2513,44 @@ def add_residential(n, costs):
         - energy_totals["residential heat oil"]
         - energy_totals["residential heat gas"],
         level=0,
-    ).droplevel(level=0, axis=1)
-
-    heat_shape = group_by_node(heat_shape_raw.droplevel(0, axis=True), multiindex=True)
+    ).droplevel(level=0, axis=1).div(nhours)
 
     heat_oil_demand = p_set_from_scaling(
-        "residential heat oil", heat_shape, energy_totals
+        "residential heat oil", heat_shape, energy_totals, nhours
     )
-
     heat_biomass_demand = p_set_from_scaling(
-        "residential heat biomass", heat_shape, energy_totals
+        "residential heat biomass", heat_shape, energy_totals, nhours
     )
 
     heat_gas_demand = p_set_from_scaling(
-        "residential heat gas", heat_shape, energy_totals
+        "residential heat gas", heat_shape, energy_totals, nhours
     )
 
     res_index = spatial.nodes.intersection(n.loads_t.p_set.columns)
-    profile_residential = normalize_and_group(
-        n.loads_t.p_set[res_index], multiindex=True
-    ).fillna(0)
+    profile_residential_raw = normalize_by_country(n.loads_t.p_set[res_index])
+    profile_residential = profile_residential_raw.rename(
+        columns=n.loads.bus.map(n.buses.location), level=1
+    )
+    profile_residential = profile_residential.T.groupby(level=[0, 1]).sum().T
 
     p_set_oil = (
-        p_set_from_scaling("residential oil", profile_residential, energy_totals)
+        p_set_from_scaling(
+            "residential oil", profile_residential, energy_totals, nhours
+        )
         + heat_oil_demand
     )
 
     p_set_biomass = (
-        p_set_from_scaling("residential biomass", profile_residential, energy_totals)
+        p_set_from_scaling(
+            "residential biomass", profile_residential, energy_totals, nhours
+        )
         + heat_biomass_demand
     )
 
     p_set_gas = (
-        p_set_from_scaling("residential gas", profile_residential, energy_totals)
+        p_set_from_scaling(
+            "residential gas", profile_residential, energy_totals, nhours
+        )
         + heat_gas_demand
     )
 
@@ -2618,7 +2618,9 @@ def add_residential(n, costs):
             n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
         )
         n.loads_t.p_set.loc[:, heat_buses] = np.where(
-            ~np.isnan(safe_division), safe_division * rem_heat_demand * 1e6, 0.0
+            ~np.isnan(safe_division),
+            safe_division * rem_heat_demand * 1e6 / nhours,
+            0.0,
         )
 
     # Revise residential electricity demand
@@ -2626,7 +2628,7 @@ def add_residential(n, costs):
 
     profile_pu = normalize_by_country(n.loads_t.p_set[buses]).fillna(0)
     n.loads_t.p_set.loc[:, buses] = p_set_from_scaling(
-        "electricity residential", profile_pu, energy_totals
+        "electricity residential", profile_pu, energy_totals, nhours
     )
 
 

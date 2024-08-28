@@ -5,7 +5,7 @@
 tutorial: true
 
 
-countries: ["NG", "BJ"]
+countries: ["BJ", "NG"]
 
 enable:
   build_natura_raster: true

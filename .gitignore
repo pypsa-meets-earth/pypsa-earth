@@ -55,7 +55,7 @@ scripts/old
 doc/_build
 sample_pypsa_eur
 test/tmp/
-
+playground/
 
 # Specific configuration files
 configs/scenarios/config.*.yaml

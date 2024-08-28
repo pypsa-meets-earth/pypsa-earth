@@ -575,11 +575,6 @@ def add_h2_network_cap(n, cap):
         return
     h2_network_cap = get_var(n, "Link", "p_nom")
     subset_index = h2_network.index.intersection(h2_network_cap.index)
-    diff_index = h2_network_cap.index.difference(subset_index)
-    if len(diff_index) > 0:
-        logger.warning(
-            f"Impossible to set H2 cap for the following links: {diff_index}"
-        )
     lhs = linexpr(
         (h2_network.loc[subset_index, "length"], h2_network_cap[subset_index])
     ).sum()
@@ -1012,13 +1007,13 @@ if __name__ == "__main__":
     opts = snakemake.wildcards.opts.split("-")
     solving = snakemake.params.solving
 
-    is_sector_coupled = "sopts" in snakemake.wildcards
+    is_sector_coupled = "sopts" in snakemake.wildcards.keys()
 
     if is_sector_coupled:
         overrides = override_component_attrs(snakemake.input.overrides)
-        n = pypsa.Network(snakemake.input[0], override_component_attrs=overrides)
+        n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     else:
-        n = pypsa.Network(snakemake.input[0])
+        n = pypsa.Network(snakemake.input.network)
 
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (

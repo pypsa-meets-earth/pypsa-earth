@@ -902,6 +902,7 @@ if not snakemake.params.custom_gas_network:
         pipelines = prepare_IGGIELGN_data(pipelines)
 
     bus_regions_onshore = load_bus_region(snakemake.input.regions_onshore, pipelines)[0]
+    bus_regions_onshore.geometry = bus_regions_onshore.geometry.buffer(0)
     country_borders = load_bus_region(snakemake.input.regions_onshore, pipelines)[1]
 
     pipelines = parse_states(pipelines, bus_regions_onshore)
@@ -915,20 +916,20 @@ if not snakemake.params.custom_gas_network:
         )
 
         # Conversion of GADM id to from 3 to 2-digit
-        pipelines["bus0"] = pipelines["bus0"].apply(
-            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        )
+        # pipelines["bus0"] = pipelines["bus0"].apply(
+        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        # )
 
-        pipelines["bus1"] = pipelines["bus1"].apply(
-            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        )
+        # pipelines["bus1"] = pipelines["bus1"].apply(
+        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        # )
 
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
         # TODO: plotting should be a extra rule!
         # plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
-        average_length = pipelines["length"].mean
+        average_length = pipelines["length"].mean()
         print("average_length = ", average_length)
 
         total_system_capacity = pipelines["GWKm"].sum()

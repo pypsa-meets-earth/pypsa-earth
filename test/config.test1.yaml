@@ -14,7 +14,7 @@ scenario:
   ll:
   - "c1"
 
-countries: ['NG', 'BJ']
+countries: ["NG", "BJ"]
 
 
 electricity:
@@ -50,4 +50,4 @@ snapshots:
 
 solving:
   solver:
-    name: cbc
+    name: gurobi
