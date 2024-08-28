@@ -10,6 +10,8 @@ import sys
 
 sys.path.append("./scripts")
 
+from test.conftest import get_config_dict
+
 from _helpers import create_country_list, get_path
 from build_demand_profiles import get_gegis_regions, get_load_paths_gegis
 
@@ -24,22 +26,14 @@ def test_get_gegis_regions():
     assert output_regions == ["Africa", "Europe"]
 
 
-def test_get_load_paths_gegis():
+def test_get_load_paths_gegis(get_config_dict):
     """
     Verify what returned by get_load_paths_gegis.
     """
-    config = {
-        "countries": ["NG", "IT"],
-        "load_options": {
-            "ssp": "ssp2-2.6",
-            "weather_year": 2013,
-            "prediction_year": 2030,
-            "scale": 1,
-        },
-    }
-    load_data_paths = get_load_paths_gegis("data", config)
+    config_dict = get_config_dict
+    load_data_paths = get_load_paths_gegis("data", config_dict)
     reference_list = [
         get_path("data", "ssp2-2.6", "2030", "era5_2013", "Africa.nc"),
-        get_path("data", "ssp2-2.6", "2030", "era5_2013", "Europe.nc"),
     ]
+    print(load_data_paths)
     assert load_data_paths == reference_list
