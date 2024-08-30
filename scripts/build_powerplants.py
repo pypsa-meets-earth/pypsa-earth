@@ -243,23 +243,55 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     return add_ppls
 
 
-def add_custom_powerplants(ppl, inputs, config):
-    if "custom_powerplants" not in config["electricity"]:
-        return ppl
+def add_power_plants(
+    custom_power_plants_file_path, power_plants_config_dict, custom_power_plant_query
+):
 
-    custom_ppl_query = config["electricity"]["custom_powerplants"]
-    if not custom_ppl_query:
-        return ppl
-    add_ppls = read_csv_nafix(
-        inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
-    )
-
-    if custom_ppl_query == "merge":
-        return pd.concat(
-            [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
+    if custom_power_plant_query == "replace":
+        # use only the data from custom_powerplants.csv
+        custom_power_plants = read_csv_nafix(
+            custom_power_plants_file_path, index_col=0, dtype={"bus": "str"}
         )
-    elif custom_ppl_query == "replace":
-        return add_ppls
+        return custom_power_plants
+    elif custom_power_plant_query == "merge":
+        # merge the data from powerplantmatching and custom_powerplants.csv
+        ppl_ppm = (
+            pm.powerplants(
+                from_url=False, update=True, config_update=power_plants_config_dict
+            )
+            .powerplant.fill_missing_decommissioning_years()
+            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .powerplant.convert_country_to_alpha2()
+            .pipe(replace_natural_gas_technology)
+        )
+        ppl_cpp = read_csv_nafix(
+            custom_power_plants_file_path, index_col=0, dtype={"bus": "str"}
+        )
+        power_plants = pd.concat(
+            [ppl_ppm, ppl_cpp], sort=False, ignore_index=True, verify_integrity=True
+        )
+        return power_plants
+    elif (
+        custom_power_plant_query not in ["merge", "replace"]
+        or custom_power_plant_query is None
+    ):
+        # use only the data from powerplantsmatching
+        power_plants = (
+            pm.powerplants(
+                from_url=False, update=True, config_update=power_plants_config_dict
+            )
+            .powerplant.fill_missing_decommissioning_years()
+            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .powerplant.convert_country_to_alpha2()
+            .pipe(replace_natural_gas_technology)
+        )
+        return power_plants
+    else:
+        raise Exception(
+            "No power plants were built for custom_powerplants {}".format(
+                custom_power_plant_query
+            )
+        )
 
 
 def replace_natural_gas_technology(df: pd.DataFrame):
@@ -305,28 +337,30 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     with open(snakemake.input.pm_config, "r") as f:
-        config = yaml.safe_load(f)
+        power_plants_config = yaml.safe_load(f)
 
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
+    custom_powerplants_query = snakemake.params.custom_powerplants_query
 
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
     countries_names = list(map(two_digits_2_name_country, countries_codes))
 
-    config["target_countries"] = countries_names
+    power_plants_config["target_countries"] = countries_names
 
     if (
         "EXTERNAL_DATABASE"
-        in config["matching_sources"] + config["fully_included_sources"]
+        in power_plants_config["matching_sources"]
+        + power_plants_config["fully_included_sources"]
     ):
-        if "EXTERNAL_DATABASE" not in config:
+        if "EXTERNAL_DATABASE" not in power_plants_config:
             logger.error(
                 "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
                 "Please check file configs/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
-        config["EXTERNAL_DATABASE"]["fn"] = get_path(
+        power_plants_config["EXTERNAL_DATABASE"]["fn"] = get_path(
             get_current_directory_path(), filepath_osm2pm_ppl
         )
     else:
@@ -337,21 +371,15 @@ if __name__ == "__main__":
     # specify the main query for filtering powerplants
     ppl_query = snakemake.params.powerplants_filter
     if isinstance(ppl_query, str):
-        config["main_query"] = ppl_query
+        power_plants_config["main_query"] = ppl_query
     else:
-        config["main_query"] = ""
+        power_plants_config["main_query"] = ""
 
-    ppl = (
-        pm.powerplants(from_url=False, update=True, config_update=config)
-        .powerplant.fill_missing_decommissioning_years()
-        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .powerplant.convert_country_to_alpha2()
-        .pipe(replace_natural_gas_technology)
+    ppl = add_power_plants(
+        snakemake.input.custom_power_plants_file,
+        power_plants_config,
+        custom_powerplants_query,
     )
-
-    ppl = add_custom_powerplants(
-        ppl, snakemake.input, snakemake.config
-    )  # add carriers from own powerplant files
 
     countries_without_ppl = [
         c for c in countries_codes if c not in ppl.Country.unique()
