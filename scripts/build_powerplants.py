@@ -353,7 +353,9 @@ if __name__ == "__main__":
         ppl, snakemake.input, snakemake.config
     )  # add carriers from own powerplant files
 
-    cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]
+    countries_without_ppl = [
+        c for c in countries_codes if c not in ppl.Country.unique()
+    ]
 
     for c in countries_codes:
         substation_i = n.buses.query("substation_lv and country == @c").index
@@ -363,8 +365,8 @@ if __name__ == "__main__":
         tree_i = kdtree.query(ppl.loc[ppl_i, ["lon", "lat"]].values)[1]
         ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
-    if cntries_without_ppl:
-        logger.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+    if countries_without_ppl:
+        logger.warning(f"No powerplants known in: {', '.join(countries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
