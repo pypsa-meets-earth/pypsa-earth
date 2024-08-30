@@ -432,8 +432,9 @@ def attach_conventional_generators(
         efficiency=ppl.efficiency,
         marginal_cost=ppl.marginal_cost,
         capital_cost=ppl.capital_cost,
-        build_year=ppl.datein.fillna(0).astype(int),
-        lifetime=(ppl.dateout - ppl.datein).fillna(np.inf),
+        build_year=ppl.datein.fillna(0).astype(int),        
+        lifetime=(ppl.dateout.replace(' ', '0')
+                  .apply(lambda x: int(x) if pd.notna(x) else 0) - ppl.datein),
     )
 
     for carrier in conventional_config:
