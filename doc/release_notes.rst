@@ -14,7 +14,7 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **New Features and Major Changes**
 
-* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
+* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. One can think of the new `config.yaml` as of a list of arguments in a python function that already have a default. So in principle the `config.yaml` could now be empty, and the workflow would still run. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
 
 * Local tests are now run with `make test`. This uses a `Makefile` which runs snakemake calls with different configurations. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`_
 

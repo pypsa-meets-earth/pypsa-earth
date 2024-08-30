@@ -5,13 +5,10 @@
 tutorial: true
 
 
-countries: ["BJ", "NG"]
+countries: ["NG", "BJ"]
 
 enable:
   build_natura_raster: true
-
-retrieve_databundle:
-  show_progress: false
 
 scenario:
   clusters: [6]

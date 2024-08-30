@@ -497,7 +497,7 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
     paths = snakemake.input
     nprocesses = int(snakemake.threads)
-    noprogress = not snakemake.config["atlite"].get("show_progress", False)
+    noprogress = not snakemake.config["enable"]["progress_bar"]
     config = snakemake.params.renewable[snakemake.wildcards.technology]
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)

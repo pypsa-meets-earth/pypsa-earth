@@ -823,14 +823,11 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
 
-    disable_progress = not snakemake.config.get("retrieve_databundle", {}).get(
-        "show_progress", True
-    )
-
     # load enable configuration
     config_enable = snakemake.config["enable"]
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
+    disable_progress = not config_enable["progress_bar"]
 
     bundles_to_download = get_best_bundles(
         countries, config_bundles, tutorial, config_enable

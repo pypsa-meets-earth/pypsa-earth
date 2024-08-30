@@ -98,7 +98,6 @@ from pypsa.linopf import (
     network_lopf,
 )
 from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
-from vresutils.benchmark import memory_logger
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
@@ -546,27 +545,6 @@ def _add_land_use_constraint_m(n):
             ].rename(lambda x: x[:-4] + current_horizon)
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
-
-
-def add_battery_constraints(n):
-    chargers_b = n.links.carrier.str.contains("battery charger")
-    chargers = n.links.index[chargers_b & n.links.p_nom_extendable]
-    dischargers = chargers.str.replace("charger", "discharger")
-
-    if chargers.empty or ("Link", "p_nom") not in n.variables.index:
-        return
-
-    link_p_nom = get_var(n, "Link", "p_nom")
-
-    lhs = linexpr(
-        (1, link_p_nom[chargers]),
-        (
-            -n.links.loc[dischargers, "efficiency"].values,
-            link_p_nom[dischargers].values,
-        ),
-    )
-
-    define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
 
 
 def add_h2_network_cap(n, cap):
