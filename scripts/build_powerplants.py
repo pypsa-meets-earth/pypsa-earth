@@ -112,10 +112,8 @@ from _helpers import (
     create_logger,
     get_current_directory_path,
     get_path,
-    get_path_size,
     mock_snakemake,
     read_csv_nafix,
-    to_csv_nafix,
     two_digits_2_name_country,
 )
 from scipy.spatial import cKDTree as KDTree
@@ -125,7 +123,10 @@ logger = create_logger(__name__)
 
 
 def add_power_plants(
-    custom_power_plants_file_path, power_plants_config_dict, custom_power_plant_query
+    custom_power_plants_file_path,
+    power_plants_config_dict,
+    custom_power_plant_query,
+    countries_names_list,
 ):
 
     if custom_power_plant_query == "replace":
@@ -141,7 +142,9 @@ def add_power_plants(
                 from_url=False, update=True, config_update=power_plants_config_dict
             )
             .powerplant.fill_missing_decommissioning_years()
-            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .query(
+                'Fueltype not in ["Solar", "Wind"] and Country in @countries_names_list'
+            )
             .powerplant.convert_country_to_alpha2()
             .pipe(replace_natural_gas_technology)
         )
@@ -162,7 +165,9 @@ def add_power_plants(
                 from_url=False, update=True, config_update=power_plants_config_dict
             )
             .powerplant.fill_missing_decommissioning_years()
-            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .query(
+                'Fueltype not in ["Solar", "Wind"] and Country in @countries_names_list'
+            )
             .powerplant.convert_country_to_alpha2()
             .pipe(replace_natural_gas_technology)
         )
@@ -260,6 +265,7 @@ if __name__ == "__main__":
         snakemake.input.custom_power_plants_file,
         power_plants_config,
         custom_powerplants_query,
+        countries_names,
     )
 
     countries_without_ppl = [

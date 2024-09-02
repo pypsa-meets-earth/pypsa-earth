@@ -9,13 +9,13 @@ import pathlib
 import sys
 
 import pandas as pd
+import yaml
 
 sys.path.append("./scripts")
 
 from test.conftest import get_config_dict
 
-from _helpers import create_country_list, get_path
-from build_powerplants import replace_natural_gas_technology
+from build_powerplants import add_power_plants, replace_natural_gas_technology
 
 path_cwd = pathlib.Path.cwd()
 
@@ -96,3 +96,61 @@ def test_replace_natural_gas_technology():
     modified_df = replace_natural_gas_technology(input_df)
     comparison_df = modified_df.compare(reference_df)
     assert comparison_df.empty
+
+
+def test_add_power_plants(get_config_dict):
+    config_dict = get_config_dict
+    custom_power_plants_file_path = pathlib.Path(
+        path_cwd, "test", "test_data", "custom_NG_powerplants.csv"
+    )
+    pm_config_path = pathlib.Path(path_cwd, "configs", "powerplantmatching_config.yaml")
+    with open(pm_config_path, "r") as f:
+        power_plants_config = yaml.safe_load(f)
+    ppl_query = config_dict["electricity"]["powerplants_filter"]
+
+    config_dict["countries"] = ["NG"]
+
+    # merge
+    config_dict["electricity"]["custom_powerplants"] = "merge"
+    custom_power_plant_query = config_dict["electricity"]["custom_powerplants"]
+    if isinstance(ppl_query, str):
+        power_plants_config["main_query"] = ppl_query
+    countries_names = ["Nigeria"]
+    power_plants_config["target_countries"] = countries_names
+    ppl_merge = add_power_plants(
+        custom_power_plants_file_path,
+        power_plants_config,
+        custom_power_plant_query,
+        countries_names,
+    )
+    assert ppl_merge.shape == (64, 20)
+
+    # replace
+    config_dict["electricity"]["custom_powerplants"] = "replace"
+    custom_power_plant_query = config_dict["electricity"]["custom_powerplants"]
+    if isinstance(ppl_query, str):
+        power_plants_config["main_query"] = ppl_query
+    countries_names = ["Nigeria"]
+    power_plants_config["target_countries"] = countries_names
+    ppl_merge = add_power_plants(
+        custom_power_plants_file_path,
+        power_plants_config,
+        custom_power_plant_query,
+        countries_names,
+    )
+    assert ppl_merge.shape == (33, 19)
+
+    # false
+    config_dict["electricity"]["custom_powerplants"] = "false"
+    custom_power_plant_query = config_dict["electricity"]["custom_powerplants"]
+    if isinstance(ppl_query, str):
+        power_plants_config["main_query"] = ppl_query
+    countries_names = ["Nigeria"]
+    power_plants_config["target_countries"] = countries_names
+    ppl_merge = add_power_plants(
+        custom_power_plants_file_path,
+        power_plants_config,
+        custom_power_plant_query,
+        countries_names,
+    )
+    assert ppl_merge.shape == (31, 18)
