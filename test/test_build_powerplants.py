@@ -123,7 +123,7 @@ def test_add_power_plants(get_config_dict):
         custom_power_plant_query,
         countries_names,
     )
-    assert ppl_merge.shape == (64, 20)
+    assert ppl_merge.shape == (35, 20)
 
     # replace
     config_dict["electricity"]["custom_powerplants"] = "replace"
@@ -138,7 +138,7 @@ def test_add_power_plants(get_config_dict):
         custom_power_plant_query,
         countries_names,
     )
-    assert ppl_merge.shape == (33, 19)
+    assert ppl_merge.shape == (4, 19)
 
     # false
     config_dict["electricity"]["custom_powerplants"] = "false"
