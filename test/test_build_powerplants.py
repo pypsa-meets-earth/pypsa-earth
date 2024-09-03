@@ -99,6 +99,9 @@ def test_replace_natural_gas_technology():
 
 
 def test_add_power_plants(get_config_dict):
+    """
+    Verify what returned by add_power_plants.
+    """
     config_dict = get_config_dict
     custom_power_plants_file_path = pathlib.Path(
         path_cwd, "test", "test_data", "custom_NG_powerplants.csv"
