@@ -93,7 +93,6 @@ df_converters_input = pd.DataFrame(
 df_converters_reference = pd.DataFrame(
     {
         "converter_id": "convert_20_41",
-        "Unnamed: 0": 0,
         "index": 0,
         "bus0": "41",
         "bus1": "42",
@@ -251,7 +250,6 @@ df_transformers_input = pd.DataFrame(
 df_transformers_reference = pd.DataFrame(
     {
         "transformer_id": "transf_1_0",
-        "Unnamed: 0": 0,
         "bus0": "1",
         "bus1": "2",
         "voltage_bus0": 161000,
@@ -316,7 +314,7 @@ def test_load_transformers_from_osm(tmpdir):
     Verify what returned by _load_transformers_from_osm.
     """
     file_path = get_path(tmpdir, "transformers_exercise.csv")
-    df_transformers_input.to_csv(file_path)
+    df_transformers_input.to_csv(file_path, index=False)
     df_transformers_output = _load_transformers_from_osm(file_path)
     df_transformers_comparison = df_transformers_output.compare(
         df_transformers_reference
@@ -330,7 +328,7 @@ def test_load_converters_from_osm(tmpdir):
     Verify what returned by _load_converters_from_osm.
     """
     file_path = get_path(tmpdir, "converters_exercise.csv")
-    df_converters_input.to_csv(file_path)
+    df_converters_input.to_csv(file_path, index=False)
     df_converters_output = _load_converters_from_osm(file_path)
     df_converters_comparison = df_converters_output.compare(df_converters_reference)
     pathlib.Path.unlink(file_path)
@@ -455,7 +453,7 @@ def test_set_electrical_parameters_transformers(get_config_dict, tmpdir):
     """
     config_dict = get_config_dict
     file_path = get_path(tmpdir, "transformers_exercise.csv")
-    df_transformers_input.to_csv(file_path)
+    df_transformers_input.to_csv(file_path, index=False)
     df_transformers_output = _load_transformers_from_osm(file_path)
     df_transformers_parameters = _set_electrical_parameters_transformers(
         config_dict["transformers"], df_transformers_output
@@ -477,7 +475,7 @@ def test_set_electrical_parameters_converters(get_config_dict, tmpdir):
     """
     config_dict = get_config_dict
     file_path = get_path(tmpdir, "converters_exercise.csv")
-    df_converters_input.to_csv(file_path)
+    df_converters_input.to_csv(file_path, index=False)
     df_converters_output = _load_converters_from_osm(file_path)
     df_converters_parameters = _set_electrical_parameters_converters(
         config_dict["links"], df_converters_output
