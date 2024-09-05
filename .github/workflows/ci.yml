@@ -47,7 +47,7 @@ jobs:
     - name: Install ipopt for windows
       if: matrix.os == 'windows-latest'
       run: |
-        micromamba install -y -c conda-forge ipopt==3.13.2
+        micromamba install -y -c conda-forge ipopt<3.13.3
 
 
     - name: Set cache dates
