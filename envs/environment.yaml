@@ -15,7 +15,7 @@ dependencies:
 - pypsa>=0.24, <0.25
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-- powerplantmatching<=0.15.5
+- powerplantmatching<=0.5.16
 - earth-osm>=2.1
 - atlite
 
