@@ -45,7 +45,7 @@ def _multi_index_scen(rulename, keys):
 def _mock_snakemake(rule, **kwargs):
 
     snakemake = mock_snakemake(rule, **kwargs)
-    os.chdir(snakemake.config["ROOT_PATH"])
+
     return snakemake
 
 

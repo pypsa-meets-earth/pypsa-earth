@@ -438,13 +438,13 @@ def progress_retrieve(
         urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
-def content_retrieve(url, data=None, headers=None):
+def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor=0.3):
     """
-    Retrieve the content of a url.
+    Retrieve the content of a url with improved robustness.
 
-    This function is used to retrieve the content of a url. It follows a
-    quite robust approach to handle permission issues and to avoid being
-    blocked by the server.
+    This function uses a more robust approach to handle permission issues
+    and avoid being blocked by the server. It implements exponential backoff
+    for retries and rotates user agents.
 
     Parameters
     ----------
@@ -455,23 +455,43 @@ def content_retrieve(url, data=None, headers=None):
     headers : dict, optional
         Headers for the request, defaults to a fake user agent
         If no headers are wanted at all, pass an empty dict.
+    max_retries : int, optional
+        Maximum number of retries, by default 3
+    backoff_factor : float, optional
+        Factor to apply between attempts, by default 0.3
     """
     if headers is None:
         ua = UserAgent()
         headers = {
             "User-Agent": ua.random,
             "Upgrade-Insecure-Requests": "1",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
             "Referer": "https://www.google.com/",
         }
 
     session = requests.Session()
-    response = session.get(url, headers=headers)
-    if response.status_code == 403:
-        # try a second time
-        time.sleep(1)
-        response = session.get(url, headers=headers)
-    response.raise_for_status()
-    return io.BytesIO(response.content)
+
+    for i in range(max_retries):
+        try:
+            response = session.get(url, headers=headers, data=data)
+            response.raise_for_status()
+            return io.BytesIO(response.content)
+        except requests.exceptions.RequestException as e:
+            if i == max_retries - 1:  # last attempt
+                raise
+            else:
+                # Exponential backoff
+                wait_time = backoff_factor * (2**i) + random.uniform(0, 0.1)
+                time.sleep(wait_time)
+
+                # Rotate user agent for next attempt
+                headers["User-Agent"] = UserAgent().random
+
+    raise Exception("Max retries exceeded")
 
 
 def get_aggregation_strategies(aggregation_strategies):
