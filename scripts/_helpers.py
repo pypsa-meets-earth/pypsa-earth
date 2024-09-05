@@ -8,9 +8,11 @@
 import io
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import time
+import zipfile
 from pathlib import Path
 
 import country_converter as coco
@@ -20,6 +22,9 @@ import pandas as pd
 import requests
 import yaml
 from fake_useragent import UserAgent
+from pypsa.components import component_attrs, components
+from shapely.geometry import Point
+from vresutils.costdata import annuity
 
 logger = logging.getLogger(__name__)
 
@@ -879,72 +884,6 @@ def get_last_commit_message(path):
 # PYPSA-EARTH-SEC
 
 
-def mock_snakemake(rulename, **wildcards):
-    """
-    This function is expected to be executed from the 'scripts'-directory of '
-    the snakemake project. It returns a snakemake.script.Snakemake object,
-    based on the Snakefile.
-
-    If a rule has wildcards, you have to specify them in **wildcards.
-
-    Parameters
-    ----------
-    rulename: str
-        name of the rule for which the snakemake object should be generated
-    **wildcards:
-        keyword arguments fixing the wildcards. Only necessary if wildcards are
-        needed.
-    """
-    import os
-
-    import snakemake as sm
-    from pypsa.descriptors import Dict
-    from snakemake.script import Snakemake
-
-    script_dir = Path(__file__).parent.resolve()
-    assert (
-        Path.cwd().resolve() == script_dir
-    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
-    os.chdir(script_dir.parent)
-    for p in sm.SNAKEFILE_CHOICES:
-        if os.path.exists(p):
-            snakefile = p
-            break
-    workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
-    # workflow = sm.Workflow(snakefile, overwrite_configfiles=[])
-    workflow.include(snakefile)
-    workflow.global_resources = {}
-    rule = workflow.get_rule(rulename)
-    dag = sm.dag.DAG(workflow, rules=[rule])
-    wc = Dict(wildcards)
-    job = sm.jobs.Job(rule, dag, wc)
-
-    def make_accessable(*ios):
-        for io in ios:
-            for i in range(len(io)):
-                io[i] = os.path.abspath(io[i])
-
-    make_accessable(job.input, job.output, job.log)
-    snakemake = Snakemake(
-        job.input,
-        job.output,
-        job.params,
-        job.wildcards,
-        job.threads,
-        job.resources,
-        job.log,
-        job.dag.workflow.config,
-        job.rule.name,
-        None,
-    )
-    # create log and output dir if not existent
-    for path in list(snakemake.log) + list(snakemake.output):
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-
-    os.chdir(script_dir)
-    return snakemake
-
-
 def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
@@ -1127,7 +1066,7 @@ def override_component_attrs(directory):
     Dictionary of overridden component attributes.
     """
 
-    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
+    attrs = {k: v.copy() for k, v in component_attrs.items()}
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"
@@ -1174,23 +1113,113 @@ def get_country(target, **keys):
         return np.nan
 
 
-def two_2_three_digits_country(two_code_country):
+def download_GADM(country_code, update=False, out_logging=False):
     """
-    Convert 2-digit to 3-digit country code:
+    Download gpkg file from GADM for a given country code.
+
     Parameters
     ----------
-    two_code_country: str
-        2-digit country name
-    Returns
-    ----------
-    three_code_country: str
-        3-digit country name
-    """
-    if two_code_country == "SN-GM":
-        return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
+    country_code : str
+        Two letter country codes of the downloaded files
+    update : bool
+        Update = true, forces re-download of files
 
-    three_code_country = get_country("alpha_3", alpha_2=two_code_country)
-    return three_code_country
+    Returns
+    -------
+    gpkg file per country
+    """
+
+    GADM_filename = f"gadm36_{two_2_three_digits_country(country_code)}"
+    GADM_url = f"https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
+    _logger = logging.getLogger(__name__)
+    GADM_inputfile_zip = os.path.join(
+        os.getcwd(),
+        "data",
+        "raw",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".zip",
+    )  # Input filepath zip
+
+    GADM_inputfile_gpkg = os.path.join(
+        os.getcwd(),
+        "data",
+        "raw",
+        "gadm",
+        GADM_filename,
+        GADM_filename + ".gpkg",
+    )  # Input filepath gpkg
+
+    if not os.path.exists(GADM_inputfile_gpkg) or update is True:
+        if out_logging:
+            _logger.warning(
+                f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
+            )
+        #  create data/osm directory
+        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
+
+        with requests.get(GADM_url, stream=True) as r:
+            with open(GADM_inputfile_zip, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
+            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
+
+    return GADM_inputfile_gpkg, GADM_filename
+
+
+def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
+    """
+    Function to retrieve a specific layer id of a geopackage for a selection of
+    countries.
+
+    Parameters
+    ----------
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
+    """
+    # initialization of the list of geodataframes
+    geodf_list = []
+
+    for country_code in country_list:
+        # download file gpkg
+        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
+
+        # get layers of a geopackage
+        list_layers = fiona.listlayers(file_gpkg)
+
+        # get layer name
+        if layer_id < 0 | layer_id >= len(list_layers):
+            # when layer id is negative or larger than the number of layers, select the last layer
+            layer_id = len(list_layers) - 1
+        code_layer = np.mod(layer_id, len(list_layers))
+        layer_name = (
+            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
+        )
+
+        # read gpkg file
+        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
+
+        # convert country name representation of the main country (GID_0 column)
+        geodf_temp["GID_0"] = [
+            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
+        ]
+
+        # create a subindex column that is useful
+        # in the GADM processing of sub-national zones
+        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
+
+        # concatenate geodataframes
+        geodf_list = pd.concat([geodf_list, geodf_temp])
+
+    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
+
+    return geodf_GADM
 
 
 def locate_bus(
@@ -1228,8 +1257,6 @@ def locate_bus(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            from build_shapes import get_GADM_layer
-
             gdf = get_GADM_layer(co, gadm_level)
             col = "GID_{}".format(gadm_level)
 
