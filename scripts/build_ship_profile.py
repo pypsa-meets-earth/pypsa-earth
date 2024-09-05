@@ -64,14 +64,13 @@ def build_ship_profile(export_volume, ship_opts):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        from helpers import mock_snakemake, sets_path_to_root
+
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_ship_profile",
             h2export="120",
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     # Get parameters from config and wildcard
     ship_opts = snakemake.params.ship_opts

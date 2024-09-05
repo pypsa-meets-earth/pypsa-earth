@@ -9,6 +9,7 @@ countries: ["NG", "BJ"]
 
 enable:
   build_natura_raster: true
+  progress_bar: false
 
 scenario:
   clusters: [6]

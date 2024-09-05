@@ -14,7 +14,7 @@ from itertools import product
 
 import geopandas as gpd
 import pandas as pd
-from helpers import locate_bus, three_2_two_digits_country
+from _helpers import locate_bus, three_2_two_digits_country
 from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
@@ -118,9 +118,7 @@ def match_technology(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
@@ -129,7 +127,6 @@ if __name__ == "__main__":
             demand="AB",
             planning_horizons=2050,
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
     shapes_path = snakemake.input.shapes_path

@@ -165,9 +165,7 @@ def build_existing_heating():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_existing_heating_distribution",

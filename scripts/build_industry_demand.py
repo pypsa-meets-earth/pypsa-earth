@@ -13,7 +13,7 @@ import os
 from itertools import product
 
 import pandas as pd
-from helpers import mock_snakemake, read_csv_nafix, sets_path_to_root
+from _helpers import mock_snakemake, read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -51,8 +51,6 @@ def country_to_nodal(industrial_production, keys):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
@@ -60,8 +58,6 @@ if __name__ == "__main__":
             planning_horizons=2030,
             demand="AB",
         )
-
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     countries = snakemake.params.countries
 

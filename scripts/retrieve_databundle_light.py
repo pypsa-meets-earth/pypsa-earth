@@ -811,14 +811,15 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_databundle_light")
+
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
-    rootpath = snakemake.config["ROOT_PATH"]
+    rootpath = "."
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")

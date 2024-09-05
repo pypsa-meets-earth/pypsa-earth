@@ -204,9 +204,7 @@ def prepare_transport_data(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "prepare_transport_data",
@@ -215,8 +213,6 @@ if __name__ == "__main__":
             demand="AB",
             planning_horizons=2030,
         )
-
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     n = pypsa.Network(snakemake.input.network)
 

@@ -13,19 +13,18 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from helpers import read_csv_nafix
+from _helpers import read_csv_nafix
 from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        from helpers import mock_snakemake, sets_path_to_root
+
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_population_layouts",
             planning_horizons=2030,
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     cutout_path = (
         snakemake.input.cutout

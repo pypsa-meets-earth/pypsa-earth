@@ -11,7 +11,7 @@ import helpers
 import numpy as np
 import pandas as pd
 
-# from helpers import configure_logging
+# from _helpers import configure_logging
 
 
 # logger = logging.getLogger(__name__)
@@ -34,11 +34,10 @@ def download_ports():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("prepare_ports")
-        os.chdir(snakemake.config["ROOT_PATH"])
+
     # configure_logging(snakemake)
 
     # run = snakemake.config.get("run", {})

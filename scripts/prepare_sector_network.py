@@ -15,7 +15,7 @@ import pypsa
 import pytz
 import ruamel.yaml
 import xarray as xr
-from helpers import (
+from _helpers import (
     create_dummy_data,
     create_network_topology,
     cycling_shift,
@@ -2702,8 +2702,6 @@ def add_rail_transport(n, costs):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
             "prepare_sector_network",

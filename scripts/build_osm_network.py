@@ -894,8 +894,8 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_osm_network")
+
     configure_logging(snakemake)
 
     # load default crs
@@ -904,8 +904,6 @@ if __name__ == "__main__":
     force_ac = snakemake.params.build_osm_network.get("force_ac", False)
     build_osm_network = snakemake.params.build_osm_network
     countries = snakemake.params.countries
-
-    os.chdir(snakemake.config["ROOT_PATH"])
 
     built_network(
         snakemake.input,

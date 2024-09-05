@@ -501,11 +501,8 @@ def create_paper_df():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-        # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
             "build_industrial_database",
             simpl="",
@@ -517,6 +514,7 @@ if __name__ == "__main__":
             discountrate="0.071",
             demand="DF",
         )
+
     industrial_database_steel = create_steel_db()
     industrial_database_cement = create_cement_db()
     industrial_database_refineries = create_refineries_df()

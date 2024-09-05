@@ -24,7 +24,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from helpers import locate_bus, override_component_attrs, prepare_costs
+from _helpers import locate_bus, override_component_attrs, prepare_costs
 
 logger = logging.getLogger(__name__)
 
@@ -186,8 +186,8 @@ def create_export_profile():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        from helpers import mock_snakemake
+
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "add_export",
@@ -201,7 +201,6 @@ if __name__ == "__main__":
             demand="AB",
             h2export="120",
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)

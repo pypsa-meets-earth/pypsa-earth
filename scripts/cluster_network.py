@@ -379,7 +379,6 @@ def distribute_clusters(
 
 
 def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
-    # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
@@ -657,11 +656,9 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config

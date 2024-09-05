@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from helpers import read_csv_nafix, sets_path_to_root, three_2_two_digits_country
+from _helpers import read_csv_nafix, three_2_two_digits_country
 
 _logger = logging.getLogger(__name__)
 
@@ -38,9 +38,7 @@ def calculate_end_values(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "prepare_energy_totals",
@@ -49,7 +47,6 @@ if __name__ == "__main__":
             demand="EG",
             planning_horizons=2030,
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     countries = snakemake.params.countries
     # countries = ["NG", "BJ"]

@@ -11,19 +11,17 @@ import atlite
 import geopandas as gpd
 import pandas as pd
 import xarray as xr
-from helpers import read_csv_nafix, to_csv_nafix
+from _helpers import read_csv_nafix, to_csv_nafix
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
             simpl="",
             clusters=38,
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     cutout_path = (
         snakemake.input.cutout

@@ -1071,9 +1071,8 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         import os
 
-        from helpers import mock_snakemake
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "plot_network",
             network="elec",

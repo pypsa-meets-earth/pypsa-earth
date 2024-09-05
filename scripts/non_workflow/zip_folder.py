@@ -39,9 +39,8 @@ def zipFilesInDir(dirName, zipFileName, filter, include_parent=True):
 
 if __name__ == "__main__":
     # Set path to this file
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# Execute zip function
-# zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
-zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
-# zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)
+    # Execute zip function
+    # zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
+    zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
+    # zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)

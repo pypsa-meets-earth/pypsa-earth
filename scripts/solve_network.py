@@ -85,8 +85,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
-from helpers import override_component_attrs
+from _helpers import configure_logging, create_logger, override_component_attrs
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -969,7 +968,6 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
@@ -977,6 +975,7 @@ if __name__ == "__main__":
             ll="copt",
             opts="Co2L-1H",
         )
+
     configure_logging(snakemake)
 
     tmpdir = snakemake.params.solving.get("tmpdir")

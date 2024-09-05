@@ -15,7 +15,7 @@ from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
-from helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
+from _helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
 from prepare_sector_network import get
 
 # def calc_industry_base(df):
@@ -89,16 +89,13 @@ def create_industry_base_totals(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_base_industry_totals",
             planning_horizons=2030,
             demand="EG",
         )
-        os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
     # Loading config file and wild cards
 

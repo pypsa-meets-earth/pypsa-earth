@@ -13,9 +13,6 @@ import pandas as pd
 import pypsa
 import xarray as xr
 from add_existing_baseyear import add_build_year_to_new_assets
-from helpers import (  # # configure_logging,; # set_scenario_config,; # update_config_from_wildcards,
-    sets_path_to_root,
-)
 
 # from pypsa.clustering.spatial import normed_or_uniform
 
@@ -229,11 +226,8 @@ def disable_grid_expansion_if_limit_hit(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        import os
 
-        from helpers import mock_snakemake
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "add_brownfield",
@@ -247,7 +241,6 @@ if __name__ == "__main__":
             demand="AB",
             h2export="120",
         )
-        sets_path_to_root("pypsa-earth-sec")
 
     logger.info(f"Preparing brownfield from the file {snakemake.input.network_p}")
 

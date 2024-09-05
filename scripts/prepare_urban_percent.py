@@ -9,7 +9,7 @@ import pandas as pd
 import py7zr
 import requests
 
-# from helpers import configure_logging
+# from _helpers import configure_logging
 
 
 # logger = logging.getLogger(__name__)
@@ -70,17 +70,9 @@ def download_urban_percent():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("prepare_urban_percent")
-        os.chdir(snakemake.config["ROOT_PATH"])
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
     df = download_urban_percent().copy()
 

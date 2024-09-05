@@ -12,7 +12,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from helpers import mock_snakemake, override_component_attrs, sets_path_to_root
+from _helpers import mock_snakemake, override_component_attrs
 
 
 def override_values(tech, year, dr):
@@ -70,8 +70,6 @@ def override_values(tech, year, dr):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
@@ -83,7 +81,6 @@ if __name__ == "__main__":
             demand="AP",
             discountrate=0.071,
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)

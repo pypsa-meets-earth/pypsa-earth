@@ -43,7 +43,7 @@ def _multi_index_scen(rulename, keys):
 
 
 def _mock_snakemake(rule, **kwargs):
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     snakemake = mock_snakemake(rule, **kwargs)
     os.chdir(snakemake.config["ROOT_PATH"])
     return snakemake
@@ -581,7 +581,6 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("make_statistics")
 
     os.chdir(snakemake.config["ROOT_PATH"])

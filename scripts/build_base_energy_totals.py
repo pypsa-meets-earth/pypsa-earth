@@ -19,12 +19,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from helpers import (
-    aggregate_fuels,
-    get_conv_factors,
-    sets_path_to_root,
-    three_2_two_digits_country,
-)
+from _helpers import aggregate_fuels, get_conv_factors
 
 _logger = logging.getLogger(__name__)
 
@@ -357,9 +352,7 @@ def calc_sector(sector):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_base_energy_totals",
@@ -368,7 +361,6 @@ if __name__ == "__main__":
             demand="AB",
             planning_horizons=2030,
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     energy_stat_database = pd.read_excel(
         snakemake.input.unsd_paths, index_col=0, header=0

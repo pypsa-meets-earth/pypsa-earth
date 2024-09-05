@@ -10,7 +10,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from helpers import mock_snakemake
+from _helpers import mock_snakemake
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -132,9 +132,7 @@ def prepare_heat_data(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "prepare_heat_data",
@@ -143,7 +141,6 @@ if __name__ == "__main__":
             planning_horizons=2030,
             demand="DF",
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
 
     n = pypsa.Network(snakemake.input.network)
 

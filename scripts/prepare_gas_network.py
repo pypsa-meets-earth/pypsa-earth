@@ -19,11 +19,12 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-from helpers import (
+from _helpers import (
     progress_retrieve,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
+from build_shapes import gadm
 from matplotlib.lines import Line2D
 from pyproj import CRS
 from pypsa.geo import haversine_pts
@@ -33,18 +34,14 @@ from shapely.validation import make_valid
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
             clusters="10",
         )
-        os.chdir(snakemake.config["ROOT_PATH"])
-        rootpath = ".."
-    else:
-        rootpath = "."
+
     # configure_logging(snakemake)
 
     # run = snakemake.config.get("run", {})
@@ -65,8 +62,8 @@ def download_IGGIELGN_gas_network():
     url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
 
     # Save locations
-    zip_fn = Path(f"{rootpath}/IGGIELGN.zip")
-    to_fn = Path(f"{rootpath}/data/gas_network/scigrid-gas")
+    zip_fn = Path("IGGIELGN.zip")
+    to_fn = Path("data/gas_network/scigrid-gas")
 
     logger.info(f"Downloading databundle from '{url}'.")
     progress_retrieve(url, zip_fn)
