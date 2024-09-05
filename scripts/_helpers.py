@@ -5,17 +5,21 @@
 
 # -*- coding: utf-8 -*-
 
+import io
 import logging
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import requests
 import yaml
+from fake_useragent import UserAgent
 
 logger = logging.getLogger(__name__)
 
@@ -427,6 +431,42 @@ def progress_retrieve(
 
     else:
         urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
+
+
+def content_retrieve(url, data=None, headers=None):
+    """
+    Retrieve the content of a url.
+
+    This function is used to retrieve the content of a url. It follows a
+    quite robust approach to handle permission issues and to avoid being
+    blocked by the server.
+
+    Parameters
+    ----------
+    url : str
+        URL to retrieve the content from
+    data : dict, optional
+        Data for the request, by default None
+    headers : dict, optional
+        Headers for the request, defaults to a fake user agent
+        If no headers are wanted at all, pass an empty dict.
+    """
+    if headers is None:
+        ua = UserAgent()
+        headers = {
+            "User-Agent": ua.random,
+            "Upgrade-Insecure-Requests": "1",
+            "Referer": "https://www.google.com/",
+        }
+
+    session = requests.Session()
+    response = session.get(url, headers=headers)
+    if response.status_code == 403:
+        # try a second time
+        time.sleep(1)
+        response = session.get(url, headers=headers)
+    response.raise_for_status()
+    return io.BytesIO(response.content)
 
 
 def get_aggregation_strategies(aggregation_strategies):

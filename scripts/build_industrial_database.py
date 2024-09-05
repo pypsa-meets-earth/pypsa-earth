@@ -3,19 +3,14 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import io
 import math
-import time
 
 import country_converter as coco
-import matplotlib.pyplot as plt
 import numpy as np
-import openpyxl
 import pandas as pd
 import pycountry
 import requests
-import seaborn as sns
-from fake_useragent import UserAgent
+from _helpers import content_retrieve
 from geopy.geocoders import Nominatim
 
 
@@ -76,22 +71,9 @@ def create_steel_db():
     # https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx . The dataset contains 1433 Steel plants globally.
 
     url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
-    ua = UserAgent()
-    headers = {
-        "User-Agent": ua.random,
-        "Upgrade-Insecure-Requests": "1",
-        "Referer": "https://www.google.com/",
-    }
-    session = requests.Session()
-    response = session.get(url, headers=headers)
-    if response.status_code == 403:
-        # try a second time
-        time.sleep(1)
-        response = session.get(url, headers=headers)
-    response.raise_for_status()
 
     df_steel = pd.read_excel(
-        io.BytesIO(response.content),
+        content_retrieve(url),
         index_col=0,
         sheet_name="Steel Plants",
         header=0,

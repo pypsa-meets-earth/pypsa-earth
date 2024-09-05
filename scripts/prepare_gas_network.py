@@ -19,11 +19,7 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import (
-    progress_retrieve,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
-)
+from _helpers import content_retrieve, progress_retrieve, two_2_three_digits_country
 from build_shapes import gadm
 from matplotlib.lines import Line2D
 from pyproj import CRS
@@ -84,12 +80,10 @@ def download_GGIT_gas_network():
     https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
     The dataset contains 3144 pipelines.
     """
-    fn = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
-    storage_options = {"User-Agent": "Mozilla/5.0"}
+    url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
     GGIT_gas_pipeline = pd.read_excel(
-        fn,
+        content_retrieve(url),
         index_col=0,
-        storage_options=storage_options,
         sheet_name="Gas Pipelines 2022-12-16",
         header=0,
     )
