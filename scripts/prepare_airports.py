@@ -2,12 +2,7 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import logging
-import os
-from pathlib import Path
 
-import country_converter as coco
-import helpers
 import numpy as np
 import pandas as pd
 
