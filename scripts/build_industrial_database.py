@@ -3,11 +3,9 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import json
+import io
 import math
-import os
-import pprint
-from pathlib import Path
+import time
 
 import country_converter as coco
 import matplotlib.pyplot as plt
@@ -17,6 +15,7 @@ import pandas as pd
 import pycountry
 import requests
 import seaborn as sns
+from fake_useragent import UserAgent
 from geopy.geocoders import Nominatim
 
 
@@ -76,17 +75,28 @@ def create_steel_db():
     # The following excel file was downloaded from the following webpage
     # https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx . The dataset contains 1433 Steel plants globally.
 
-    fn = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
-    storage_options = {"User-Agent": "Mozilla/5.0"}
-    steel_orig = pd.read_excel(
-        fn,
+    url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
+    ua = UserAgent()
+    headers = {
+        "User-Agent": ua.random,
+        "Upgrade-Insecure-Requests": "1",
+        "Referer": "https://www.google.com/",
+    }
+    session = requests.Session()
+    response = session.get(url, headers=headers)
+    if response.status_code == 403:
+        # try a second time
+        time.sleep(1)
+        response = session.get(url, headers=headers)
+    response.raise_for_status()
+
+    df_steel = pd.read_excel(
+        io.BytesIO(response.content),
         index_col=0,
-        storage_options=storage_options,
         sheet_name="Steel Plants",
         header=0,
     )
 
-    df_steel = steel_orig.copy()
     df_steel = df_steel[
         [
             "Plant name (English)",
