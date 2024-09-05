@@ -27,7 +27,7 @@ by
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
-**PyPSA-Earth: A Global Open-Source Multi-Energy System Model**
+**PyPSA-Earth: A Global Sector-Coupled Open-Source Multi-Energy System Model**
 
 PyPSA-Earth is the first open-source global energy system model with high spatial and temporal resolution. It provides a powerful tool for modeling the world energy system or any subset of it, enabling large-scale collaboration and transparent analysis for a sustainable energy future. PyPSA-Earth combines the capabilities of the original PyPSA-Eur model with new data and functions, making it suitable for operational studies as well as combined generation, storage, and transmission expansion analysis.
 
