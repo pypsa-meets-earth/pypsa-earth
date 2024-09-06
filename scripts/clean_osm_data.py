@@ -551,12 +551,10 @@ def fill_circuits(df):
         return len_f, len_c, isna_c, len_cab, isna_cab
 
     def _parse_float(x, ret_def=0.0):
-        if isinstance(x, (int, float)):
+        try:
             return float(x)
-        str_x = str(x)
-        if str_x.isnumeric():
-            return float(str_x)
-        return ret_def
+        except:
+            return ret_def
 
     # cables requirement for circuits calculation
     cables_req = {
