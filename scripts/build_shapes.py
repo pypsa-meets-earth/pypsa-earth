@@ -65,9 +65,8 @@ def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(
+def get_countries_shapes(
     countries,
-    layer_id,
     geo_crs,
     file_prefix,
     gadm_url_prefix,
@@ -137,19 +136,19 @@ def save_to_geojson(df, fn):
             pass
 
 
-def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
+def load_eez(countries_codes, geo_crs, eez_gpkg_file="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
 
     The dataset shall be downloaded independently by the user (see
     guide) or together with pypsa-earth package.
     """
-    if not pathlib.Path(EEZ_gpkg).exists():
+    if not pathlib.Path(eez_gpkg_file).exists():
         raise Exception(
-            f"File EEZ {EEZ_gpkg} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {pathlib.Path(EEZ_gpkg).parent}"
+            f"File EEZ {eez_gpkg_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {pathlib.Path(EEZ_gpkg).parent}"
         )
 
-    geodf_EEZ = gpd.read_file(EEZ_gpkg, engine="pyogrio").to_crs(geo_crs)
+    geodf_EEZ = gpd.read_file(eez_gpkg_file, engine="pyogrio").to_crs(geo_crs)
     geodf_EEZ.dropna(axis=0, how="any", subset=["ISO_TER1"], inplace=True)
     # [["ISO_TER1", "TERRITORY1", "ISO_SOV1", "ISO_SOV2", "ISO_SOV3", "geometry"]]
     geodf_EEZ = geodf_EEZ[["ISO_TER1", "geometry"]]
@@ -169,11 +168,11 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     return geodf_EEZ
 
 
-def eez(
+def get_eez(
     countries,
     geo_crs,
     country_shapes,
-    EEZ_gpkg,
+    eez_gpkg_file,
     out_logging=False,
     distance=0.01,
     minarea=0.01,
@@ -189,7 +188,7 @@ def eez(
         logger.info("Stage 2 of 5: Create offshore shapes")
 
     # load data
-    df_eez = load_EEZ(countries, geo_crs, EEZ_gpkg)
+    df_eez = load_eez(countries, geo_crs, eez_gpkg_file)
 
     eez_countries = [cc for cc in countries if df_eez.name.str.contains(cc).any()]
     ret_df = gpd.GeoDataFrame(
@@ -242,7 +241,7 @@ def download_WorldPop(
     worldpop_method: str
          worldpop_method = "api" will use the API method to access the WorldPop 100mx100m dataset.  worldpop_method = "standard" will use the standard method to access the WorldPop 1KMx1KM dataset.
     country_code : str
-        Two letter country codes of the downloaded files.
+        Two-letter country codes of the downloaded files.
         Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
     year : int
         Year of the data to download
@@ -252,7 +251,7 @@ def download_WorldPop(
         Minimum size of each file to download
     """
     if worldpop_method == "api":
-        return download_WorldPop_API(country_code, year, update, out_logging, size_min)
+        return download_WorldPop_API(country_code, year, update)
 
     elif worldpop_method == "standard":
         return download_WorldPop_standard(
@@ -274,7 +273,7 @@ def download_WorldPop_standard(
     Parameters
     ----------
     country_code : str
-        Two letter country codes of the downloaded files.
+        Two-letter country codes of the downloaded files.
         Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
     year : int
         Year of the data to download
@@ -330,9 +329,7 @@ def download_WorldPop_standard(
     return WorldPop_inputfile, WorldPop_filename
 
 
-def download_WorldPop_API(
-    country_code, year=2020, update=False, out_logging=False, size_min=300
-):
+def download_WorldPop_API(country_code, year=2020, size_min=300):
     """
     Download tiff file for each country code using the api method from worldpop
     API with 100mx100m resolution.
@@ -340,14 +337,10 @@ def download_WorldPop_API(
     Parameters
     ----------
     country_code : str
-        Two letter country codes of the downloaded files.
+        Two-letter country codes of the downloaded files.
         Files downloaded from https://data.worldpop.org/ datasets WorldPop UN adjusted
     year : int
         Year of the data to download
-    update : bool
-        Update = true, forces re-download of files
-    size_min : int
-        Minimum size of each file to download
     Returns
     -------
     WorldPop_inputfile : str
@@ -383,7 +376,7 @@ def download_WorldPop_API(
     return WorldPop_inputfile, WorldPop_filename
 
 
-def convert_GDP(name_file_nc, year=2015, out_logging=False):
+def convert_gdp(name_file_nc, year=2015, out_logging=False):
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
@@ -430,7 +423,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     return GDP_tif, name_file_tif
 
 
-def load_GDP(
+def load_gdp(
     year=2015,
     update=False,
     out_logging=False,
@@ -455,7 +448,7 @@ def load_GDP(
             logger.warning(
                 f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"
             )
-        convert_GDP(name_file_nc, year, out_logging)
+        convert_gdp(name_file_nc, year, out_logging)
 
     return GDP_tif, name_file_tif
 
@@ -496,8 +489,6 @@ def add_gdp_data(
     update=False,
     out_logging=False,
     name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    nprocesses=2,
-    disable_progressbar=False,
 ):
     """
     Function to add gdp data to arbitrary number of shapes in a country.
@@ -520,7 +511,7 @@ def add_gdp_data(
     # initialize new gdp column
     df_gadm["gdp"] = 0.0
 
-    GDP_tif, name_tif = load_GDP(year, update, out_logging, name_file_nc)
+    GDP_tif, name_tif = load_gdp(year, update, out_logging, name_file_nc)
 
     with rasterio.open(GDP_tif) as src:
         # resample data to target shape
@@ -946,7 +937,6 @@ def add_population_data(
     out_logging=False,
     mem_read_limit_per_process=1024,
     nprocesses=2,
-    disable_progressbar=False,
 ):
     """
     Function to add population data to arbitrary number of shapes in a country.
@@ -1062,7 +1052,7 @@ def add_population_data(
                     pbar.update(1)
 
 
-def gadm(
+def get_gadm_shapes(
     worldpop_method,
     gdp_method,
     countries,
@@ -1173,9 +1163,8 @@ if __name__ == "__main__":
     gadm_url_prefix = snakemake.params.build_shape_options["gadm_url_prefix"]
     gadm_input_file_args = ["data", "gadm"]
 
-    country_shapes = countries(
+    country_shapes_df = get_countries_shapes(
         countries_list,
-        layer_id,
         geo_crs,
         file_prefix,
         gadm_url_prefix,
@@ -1184,20 +1173,20 @@ if __name__ == "__main__":
         update,
         out_logging,
     )
-    country_shapes.to_file(snakemake.output.country_shapes)
+    country_shapes_df.to_file(snakemake.output.country_shapes)
 
-    offshore_shapes = eez(
-        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
+    offshore_shapes = get_eez(
+        countries_list, geo_crs, country_shapes_df, EEZ_gpkg, out_logging
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
 
     africa_shape = gpd.GeoDataFrame(
-        geometry=[country_cover(country_shapes, offshore_shapes.geometry)]
+        geometry=[country_cover(country_shapes_df, offshore_shapes.geometry)]
     )
     africa_shape.reset_index().to_file(snakemake.output.africa_shape)
 
-    gadm_shapes = gadm(
+    gadm_shapes = get_gadm_shapes(
         worldpop_method,
         gdp_method,
         countries_list,
