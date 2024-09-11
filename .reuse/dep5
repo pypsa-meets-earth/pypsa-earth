@@ -11,6 +11,10 @@ Files: doc/configtables/*
 Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
 License: CC-BY-4.0
 
+Files: test/test_data/*
+Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
+License: CC-BY-4.0
+
 Files: data/*
 Copyright:  The PyPSA-Earth and PyPSA-Eur Authors
 License: CC-BY-4.0
