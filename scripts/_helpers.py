@@ -485,7 +485,7 @@ def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor
                 raise
             else:
                 # Exponential backoff
-                wait_time = backoff_factor * (2**i) + random.uniform(0, 0.1)
+                wait_time = backoff_factor * (2**i) + np.random.uniform(0, 0.1)
                 time.sleep(wait_time)
 
                 # Rotate user agent for next attempt
