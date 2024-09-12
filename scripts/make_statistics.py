@@ -583,8 +583,6 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("make_statistics")
 
-    os.chdir(snakemake.config["ROOT_PATH"])
-
     fp_stats = snakemake.output["stats"]
     scenario = snakemake.params.scenario
     scenario_name = snakemake.config["run"]["name"]
