@@ -1913,9 +1913,13 @@ rule run_scenario:
         run(
             "snakemake -j all solve_all_networks --rerun-incomplete",
             shell=True,
-            check=True,
+            check=not config["run"]["allow_scenario_failure"],
         )
-        run("snakemake -j1 make_statistics --force", shell=True, check=True)
+        run(
+            "snakemake -j1 make_statistics --force",
+            shell=True,
+            check=not config["run"]["allow_scenario_failure"],
+        )
         copyfile("config.yaml", output.copyconfig)
 
 

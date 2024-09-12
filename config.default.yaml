@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.4.0
+version: 0.5.0
 tutorial: false
 
 logging:
@@ -39,6 +39,7 @@ run:
   name: "" # use this to keep track of runs with different settings
   shared_cutouts: true # set to true to share the default cutout(s) across runs
   # Note: value false requires build_cutout to be enabled
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
 
 scenario:
   simpl: [""]
@@ -215,9 +216,6 @@ transformers:
 atlite:
   nprocesses: 4
   cutouts:
-    # use 'base' to determine geographical bounds and time span from config
-    # base:
-    # module: era5
     cutout-2013-era5:
       module: era5
       dx: 0.3 # cutout resolution
