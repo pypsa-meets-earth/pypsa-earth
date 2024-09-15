@@ -358,6 +358,18 @@ costs:
     battery inverter: 0.
   emission_prices: # in currency per tonne emission, only used with the option Ep
     co2: 0.
+  # investment:
+  #   CCGT: 830000 # 830'000 EUR/MW (830.0 EUR/kW)
+  # FOM:
+  #   CCGT: 3.35 # 3.35 %/year
+  # VOM:
+  #   CCGT: 4.2 # 4.2 EUR/MWh
+  # fuel:
+  #   gas: 10.1 # EUR/MWh_th
+  # lifetime:
+  #   CCGT: 25.0 # 25.0 years
+  # efficiency:
+  #   CCGT: 0.58 # 0.58 per unit
 
 
 monte_carlo:
