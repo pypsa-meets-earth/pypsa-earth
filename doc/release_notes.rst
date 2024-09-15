@@ -20,6 +20,7 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 
 * Remove unused `countries_codes` argument from `load_GDP` function in `build_shapes.py` script, which was not being called as intended with positional arguments `PR #1069 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1069>`__
 * Fixed problematic float parsing (`_parse_float`) in `clean_osm_data.py` to make sure all OSM lines are correctly accounted for `PR #1089 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1089>`__
+* Add functionality to modify the cost assumptions using config files `PR #1097 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1097>`__
 
 
 PyPSA-Earth 0.4.0
