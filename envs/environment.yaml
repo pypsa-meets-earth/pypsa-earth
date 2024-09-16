@@ -15,7 +15,7 @@ dependencies:
 - pypsa>=0.24, <0.25
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-- powerplantmatching>=0.5.19
+- powerplantmatching
 - earth-osm>=2.1
 - atlite
 
@@ -82,6 +82,7 @@ dependencies:
 
 - pip:
   - earth-osm>=2.2 # until conda release it out
+  - powerplantmatching>=0.5.19 # until conda release it out
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
   - tsam>=1.1.0
