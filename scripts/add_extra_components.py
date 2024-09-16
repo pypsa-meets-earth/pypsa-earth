@@ -184,7 +184,7 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
-    if ("csp" in config["renewable"].keys()) and (
+    if ("csp" in elec_opts["renewable_carriers"]) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
     ):
         # add separate buses for csp
