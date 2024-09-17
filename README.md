@@ -140,6 +140,17 @@ There are multiple ways to get involved and learn more about our work. That's ho
       Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
    ```
 
+## Running the model in previous versions
+
+The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.4.0, which is the last version before the repo `pypsa-earth-sec` was merged, the following command can be used:
+
+```bash
+git checkout v0.4.0
+```
+After checking out the tag, the model can be run as usual. Please make sure to install the required packages for the respective version.
+
+
+
 ## Test run on tutorial
 
 - In the folder open a terminal/command window to be located at this path `~/pypsa-earth/`
