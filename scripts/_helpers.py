@@ -480,7 +480,10 @@ def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor
             response = session.get(url, headers=headers, data=data)
             response.raise_for_status()
             return io.BytesIO(response.content)
-        except requests.exceptions.RequestException as e:
+        except (
+            requests.exceptions.RequestException,
+            requests.exceptions.HTTPError,
+        ) as e:
             if i == max_retries - 1:  # last attempt
                 raise
             else:
