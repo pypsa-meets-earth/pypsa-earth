@@ -21,7 +21,7 @@ E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_t
 PyPSA-Earth 0.4.1
 =================
 
-**New Features and Major Changes**
+**New Features and Major Changes (19th September 2024)**
 
 * Add functionality to modify the cost assumptions using config files `PR #1097 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1097>`__
 
