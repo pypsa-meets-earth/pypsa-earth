@@ -20,10 +20,18 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **Minor Changes and bug-fixing**
 
-* Remove unused `countries_codes` argument from `load_GDP` function in `build_shapes.py` script, which was not being called as intended with positional arguments `PR #1069 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1069>`__
-* Fixed problematic float parsing (`_parse_float`) in `clean_osm_data.py` to make sure all OSM lines are correctly accounted for `PR #1089 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1089>`__
+
+PyPSA-Earth 0.4.1
+=================
+
+**New Features and Major Changes**
+
 * Add functionality to modify the cost assumptions using config files `PR #1097 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1097>`__
 
+**Minor Changes and bug-fixing**
+
+* Remove unused `countries_codes` argument from `load_GDP` function in `build_shapes.py` script, which was not being called as intended with positional arguments `PR #1069 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1069>`__
+* Fixed problematic float parsing (`_parse_float`) in `clean_osm_data.py` to make sure all OSM lines are correctly accounted for `PR #1089 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1089>`__
 * Fix minor bug for advanced csp implementation `PR #1076 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1076>`__
 * Fix minor bug in `build_powerplants.py` where the gas technology assignment incorrectly introduced NaN values for all powerplant technologies. `PR #1102 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1102>`__
 
