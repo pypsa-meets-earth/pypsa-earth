@@ -2750,10 +2750,9 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     costs = prepare_costs(
         snakemake.input.costs,
-        snakemake.config["costs"]["USD2013_to_EUR2013"],
-        eval(snakemake.wildcards.discountrate),
+        snakemake.params.costs["USD2013_to_EUR2013"],
+        snakemake.params.costs["fill_values"],
         Nyears,
-        snakemake.config["costs"]["lifetime"],
     )
 
     # Define spatial for biomass and co2. They require the same spatial definition

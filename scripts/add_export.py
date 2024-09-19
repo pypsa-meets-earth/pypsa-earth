@@ -18,7 +18,6 @@ Possible improvements:
 
 
 import logging
-import os
 
 import geopandas as gpd
 import numpy as np
@@ -214,10 +213,9 @@ if __name__ == "__main__":
 
     costs = prepare_costs(
         snakemake.input.costs,
-        snakemake.params.USD_to_EUR,
-        eval(snakemake.wildcards.discountrate),
+        snakemake.params.costs["USD2013_to_EUR2013"],
+        snakemake.params.costs["fill_values"],
         Nyears,
-        snakemake.params.lifetime,
     )
 
     # get hydrogen export buses/ports

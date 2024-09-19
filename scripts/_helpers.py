@@ -907,7 +907,9 @@ def get_last_commit_message(path):
 # PYPSA-EARTH-SEC
 
 
-def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
+def prepare_costs(
+    cost_file: str, USD_to_EUR: float, fill_values: dict, Nyears: float | int = 1
+):
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
@@ -919,18 +921,7 @@ def prepare_costs(cost_file, USD_to_EUR, discount_rate, Nyears, lifetime):
     costs = (
         costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
     )
-    costs = costs.fillna(
-        {
-            "CO2 intensity": 0,
-            "FOM": 0,
-            "VOM": 0,
-            "discount rate": discount_rate,
-            "efficiency": 1,
-            "fuel": 0,
-            "investment": 0,
-            "lifetime": lifetime,
-        }
-    )
+    costs = costs.fillna(fill_values)
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100

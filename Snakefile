@@ -1058,6 +1058,8 @@ if not config["custom_data"]["gas_network"]:
 
 
 rule prepare_sector_network:
+    params:
+        costs=config["costs"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
@@ -1121,8 +1123,7 @@ rule add_export:
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
         snapshots=config["snapshots"],
-        USD_to_EUR=config["costs"]["USD2013_to_EUR2013"],
-        lifetime=config["costs"]["lifetime"],
+        costs=config["costs"],
     input:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
