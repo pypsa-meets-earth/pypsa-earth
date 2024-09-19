@@ -15,6 +15,7 @@ countries: ["NG", "BJ"]
 enable:
   retrieve_databundle: true  #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_cost_data: true  # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cooking_data: true
   download_osm_data: true  # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false  # If True, then an exclusion raster will be build
   build_cutout: false
@@ -333,6 +334,11 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
     csp_model: advanced # simple or advanced
+
+# clean_cooking configuration
+clean_cooking:
+  enable: true
+  fuel: ["AC", "lpg", "pellets", "firewood", "charcoal", "heat"]
 
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration (Do not remove, needed for Sphynx documentation).

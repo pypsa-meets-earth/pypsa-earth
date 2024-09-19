@@ -1,0 +1,19 @@
+technology,year,parameter,value,unit,source
+firewood stove,2030,efficiency,0.17,per unit,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+charcoal stove,2030,efficiency,0.21,per unit,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+pellets stove,2030,efficiency,0.39,per unit,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
+lpg stove,2030,efficiency,0.66,per unit,Emission characterization and performance of conventional liquefied petroleum gas cookstove burners: https://www.tandfonline.com/doi/full/10.1080/23311916.2019.1652228
+AC stove,2030,efficiency,0.72,per unit,https://mecs.org.uk/blog/energy-transfer-in-kitchen-appliances/
+firewood,2030,lifetime,15,years,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+charcoal,2030,lifetime,6,years,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+pellets,2030,lifetime,6,years,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
+lpg,2030,lifetime,7,years,Source: Emission characterization and performance of conventional liquefied petroleum gas cookstove burners: https://www.tandfonline.com/doi/full/10.1080/23311916.2019.1652228
+AC,2030,lifetime,10,years,Source: https://mecs.org.uk/blog/energy-transfer-in-kitchen-appliances/
+firewood,2030,fuel,1.45E-05,EUR/MWhth,A2C Cost of Cooking Study
+charcoal,2030,fuel,2.09E-05,EUR/MWhth,A2C Cost of Cooking Study
+pellets,2030,fuel,2.06E-05,EUR/MWhth,A2C Cost of Cooking Study
+lpg,2030,fuel,9.07E-05,EUR/MWhth,A2C Cost of Cooking Study
+firewood,2030,CO2 intensity,1.605599987,tCO2/MWth,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+charcoal,2030,CO2 intensity,0.435599997,tCO2/MWth,Analysis and modeling of the thermal behavior of an improved pellet cookstove: https://link.springer.com/article/10.1007/s42452-021-04630-4
+pellets,2030,CO2 intensity,0.403199997,tCO2/MWth,https://www.nature.com/articles/s41893-022-01039-8#MOESM1
+lpg,2030,CO2 intensity,0.986399992,tCO2/MWth,Source: Emission characterization and performance of conventional liquefied petroleum gas cookstove burners: https://www.tandfonline.com/doi/full/10.1080/23311916.2019.1652228

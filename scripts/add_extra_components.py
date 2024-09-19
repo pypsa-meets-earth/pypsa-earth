@@ -57,10 +57,11 @@ import os
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, read_csv_nafix
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
+    calculate_annuity,
     load_costs,
 )
 
@@ -228,6 +229,68 @@ def attach_stores(n, costs, config):
         )
 
 
+def attach_cooking_technologies(n, cooking_costs, config):
+    if not clean_cooking:
+        return
+
+    carriers = config["clean_cooking"]["fuel"]
+    cooking_costs = cooking_costs
+    buses_i = n.buses.index
+    buses_i = [
+        bus for bus in buses_i if not (bus.endswith("battery") or bus.endswith("H2"))
+    ]
+
+    bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
+    for key in bus_sub_dict:
+        bus_sub_dict[key] = bus_sub_dict[key][: len(buses_i)]
+
+    cooking_buses_i = None
+    if "heat" in carriers:
+        cooking_buses_i = n.madd(
+            "Bus", [bus + " cooking" for bus in buses_i], carrier="heat", **bus_sub_dict
+        )
+
+    for fuel in carriers:
+        if fuel == "heat":
+            continue
+
+        if fuel == "AC" and "AC" in n.buses.carrier.values:
+            fuel_buses_i = n.buses.index[n.buses.carrier == "AC"]
+        else:
+            fuel_buses_i = n.madd(
+                "Bus",
+                [bus + f" {fuel}" for bus in buses_i],
+                carrier=fuel,
+                **bus_sub_dict,
+            )
+
+            n.madd(
+                "Store",
+                fuel_buses_i,
+                bus=fuel_buses_i,
+                carrier=fuel,
+                e_cyclic=fuel == "AC",
+                capital_cost=cooking_costs.at[fuel, "capital_cost"],
+                marginal_cost=cooking_costs.at[fuel, "marginal_cost"],
+            )
+
+        if cooking_buses_i is not None:
+            min_length = min(len(fuel_buses_i), len(cooking_buses_i))
+            fuel_buses_i = fuel_buses_i[:min_length]
+            cooking_buses_i = cooking_buses_i[:min_length]
+
+            n.madd(
+                "Link",
+                fuel_buses_i + " stove",
+                bus0=fuel_buses_i,
+                bus1=cooking_buses_i,
+                carrier=fuel,
+                efficiency=cooking_costs.at[f"{fuel} stove", "efficiency"],
+                capital_cost=cooking_costs.at[f"{fuel} stove", "capital_cost"],
+                marginal_cost=cooking_costs.at[f"{fuel} stove", "marginal_cost"],
+            )
+
+
 def attach_hydrogen_pipelines(n, costs, config):
     elec_opts = config["electricity"]
     ext_carriers = elec_opts["extendable_carriers"]
@@ -281,15 +344,20 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     config = snakemake.config
 
+    clean_cooking = snakemake.params.clean_cooking
+
     costs = load_costs(
         snakemake.input.tech_costs,
         config["costs"],
         config["electricity"],
         Nyears,
+        clean_cooking,
+        snakemake.input.cooking_costs,
     )
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
+    attach_cooking_technologies(n, costs, config)
     attach_hydrogen_pipelines(n, costs, config)
 
     add_nice_carrier_names(n, config=snakemake.config)

@@ -15,6 +15,7 @@ from _helpers import create_country_list, get_last_commit_message, check_config_
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
+import requests
 
 
 HTTP = HTTPRemoteProvider()
@@ -54,6 +55,13 @@ if config["enable"].get("retrieve_cost_data", True):
 else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
+
+if config["enable"].get("retrieve_cooking_data", True):
+    COOK_COSTS = os.path.join("resources", RDIR, "cooking_costs.csv")
+    COOK_DEMAND = os.path.join("resources", RDIR, "demand_cooking.csv")
+else:
+    COOK_COSTS = os.path.join("data", "cooking_costs.csv")
+    COOK_DEMAND = os.path.join("data", "demand_cooking.csv")
 
 
 wildcard_constraints:
@@ -417,6 +425,39 @@ if config["enable"].get("retrieve_cost_data", True):
             move(input[0], output[0])
 
 
+# Define the rules
+if config["enable"].get("retrieve_cooking_data", True):
+
+    rule retrieve_cooking_costs:
+        output:
+            COOK_COSTS,
+        log:
+            os.path.join("logs", RDIR, "retrieve_cooking_costs.log"),
+        resources:
+            mem_mb=5000,
+        run:
+            url = "https://zenodo.org/records/13118035/files/cooking_costs.csv?download=1"
+            response = requests.get(url)
+            response.raise_for_status()  # Ensure the request was successful
+            with open(output[0], "wb") as f:
+                f.write(response.content)
+
+    rule retrieve_cooking_load:
+        output:
+            COOK_DEMAND,
+        log:
+            os.path.join("logs", RDIR, "retrieve_cooking_costs.log"),
+        resources:
+            mem_mb=5000,
+        run:
+            url = "https://zenodo.org/records/13208358/files/demand_cooking.csv?download=1"
+            response = requests.get(url)
+            response.raise_for_status()  # Ensure the request was successful
+            with open(output[0], "wb") as f:
+                f.write(response.content)
+
+
+
 rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
@@ -521,6 +562,7 @@ rule add_electricity:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
+        clean_cooking=config["clean_cooking"]["enable"],
     input:
         **{
             f"profile_{tech}": "resources/"
@@ -537,6 +579,7 @@ rule add_electricity:
         },
         base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
+        cooking_costs=COOK_COSTS,
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
@@ -740,9 +783,12 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 
 
 rule add_extra_components:
+    params:
+        clean_cooking=config["clean_cooking"]["enable"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
+        cooking_costs=COOK_COSTS,
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
@@ -763,9 +809,13 @@ rule prepare_network:
         s_max_pu=config["lines"]["s_max_pu"],
         electricity=config["electricity"],
         costs=config["costs"],
+        clean_cooking=config["clean_cooking"]["enable"],
+        tutorial=config["tutorial"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs=COSTS,
+        cook_load=COOK_DEMAND,
+        cooking_costs=COOK_COSTS,
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
