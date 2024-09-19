@@ -155,7 +155,7 @@ electricity:
   custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
-  renewable_carriers: [solar, csp, onwind, offwind-ac, offwind-dc, hydro]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
 
   estimate_renewable_capacities:
     stats: "irena"  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -362,6 +362,18 @@ costs:
     battery inverter: 0.
   emission_prices: # in currency per tonne emission, only used with the option Ep
     co2: 0.
+  # investment: # EUR/MW
+  #   CCGT: 830000
+  # FOM: # %/year
+  #   CCGT: 3.35
+  # VOM: # EUR/MWh
+  #   CCGT: 4.2
+  # fuel: # EUR/MWh
+  #   gas: 10.1
+  # lifetime: # years
+  #   CCGT: 25.0
+  # efficiency: # per unit
+  #   CCGT: 0.58
 
 
 monte_carlo:
