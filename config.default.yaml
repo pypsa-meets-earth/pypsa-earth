@@ -384,6 +384,18 @@ costs:
     co2: 0.
   lines:
     length_factor: 1.25 #to estimate offwind connection costs
+  # investment: # EUR/MW
+  #   CCGT: 830000
+  # FOM: # %/year
+  #   CCGT: 3.35
+  # VOM: # EUR/MWh
+  #   CCGT: 4.2
+  # fuel: # EUR/MWh
+  #   gas: 10.1
+  # lifetime: # years
+  #   CCGT: 25.0
+  # efficiency: # per unit
+  #   CCGT: 0.58
 
 
 monte_carlo:

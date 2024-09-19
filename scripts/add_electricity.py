@@ -145,6 +145,15 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
+    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+        overwrites = config.get(attr)
+        if overwrites is not None:
+            overwrites = pd.Series(overwrites)
+            costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
+
     costs["capital_cost"] = (
         (
             calculate_annuity(costs["lifetime"], costs["discount rate"])
@@ -206,6 +215,9 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         if overwrites is not None:
             overwrites = pd.Series(overwrites)
             costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
 
     return costs
 

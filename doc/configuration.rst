@@ -425,7 +425,7 @@ Specifies the cost assumptions of the technologies considered. Cost information 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-after: Costs Configuration
-   :end-at: co2:
+   :end-at: CCGT: 0.58
 
 .. csv-table::
    :header-rows: 1
