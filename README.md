@@ -142,10 +142,10 @@ There are multiple ways to get involved and learn more about our work. That's ho
 
 ## Running the model in previous versions
 
-The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.4.0, which is the last version before the repo `pypsa-earth-sec` was merged, the following command can be used:
+The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.4.1, which is the last version before the repo `pypsa-earth-sec` was merged, the following command can be used:
 
 ```bash
-git checkout v0.4.0
+git checkout v0.4.1
 ```
 After checking out the tag, the model can be run as usual. Please make sure to install the required packages for the respective version.
 
