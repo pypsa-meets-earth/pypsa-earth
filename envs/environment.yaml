@@ -15,7 +15,7 @@ dependencies:
 - pypsa>=0.24, <0.25
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-- powerplantmatching>=0.5.7
+- powerplantmatching
 - earth-osm>=2.1
 - atlite
 
@@ -31,7 +31,7 @@ dependencies:
 - numpy
 - pandas
 - geopandas>=0.11.0, <=0.14.3
-- fiona!=1.8.22
+- fiona<1.10.0
 - xarray>=2023.11.0, <2023.12.0
 - netcdf4
 - networkx
@@ -77,11 +77,14 @@ dependencies:
 
 # Default solver for tests (required for CI)
 - glpk
-- ipopt<3.13.3
+- ipopt
 - gurobi
 
 - pip:
+  - earth-osm>=2.2 # until conda release it out
+  - powerplantmatching>=0.5.19 # until conda release it out
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
+  - fake_useragent

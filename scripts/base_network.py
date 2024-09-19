@@ -556,9 +556,8 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         snakemake = mock_snakemake("base_network")
+
     configure_logging(snakemake)
 
     inputs = snakemake.input

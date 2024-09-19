@@ -27,9 +27,16 @@ by
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
 
-**PyPSA-Earth is the first open-source global energy system model with data in high spatial and temporal resolution.** It enables large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions. It is suitable for operational as well as combined generation, storage and transmission expansion studies. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. The data includes electricity demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
+**PyPSA-Earth: A Global Sector-Coupled Open-Source Multi-Energy System Model**
 
-The model is described in the Applied Energy article "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.121096 [(BibTeX)](https://pypsa-earth.readthedocs.io/en/latest/talks_and_papers.html#publications). The [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html) provides additional information.
+PyPSA-Earth is the first open-source global cross-sectoral energy system model with high spatial and temporal resolution. Originally it was derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions which provide capabilities for modelling the world energy system or any subset of it, enabling large-scale collaboration and transparent analysis for a sustainable energy future. It is suitable for operational studies, as well as expansion studies on combined generation, storage and transmission accounting for cross-sectoral interactions. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage for power and cross-sectoral modelling and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. In particular, the data includes energy demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
+
+With the recent integration of PyPSA-Earth and the sector-coupled PyPSA-Earth model, all functionality is now combined into a single, comprehensive tool. This unified model allows for detailed optimization of multi-energy systems, covering electricity, heating, transport, and more. It is designed to adapt to the specific needs of any country or region, offering customizable data extraction, preparation scripts with global coverage, and a broad range of clustering and grid meshing strategies to meet computational and practical requirements.
+
+PyPSA-Earth is capable to provide the modelling evidence needed to translate implications behind energy scenarios into the regional actions. By making this tool openly available, we aim to foster collaboration, innovation, and informed decision-making that leads to sustainable and efficient energy solutions worldwide.
+
+For more details, the model is described in the Applied Energy article "PyPSA-Earth: A new global open energy system optimization model demonstrated in Africa," 2023. The preprint describing the sector-coupled functionalities is also available [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4743242). Additional information can be found in the [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
+
 
 **PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth.** We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
@@ -40,6 +47,11 @@ The model is described in the Applied Energy article "PyPSA-Earth. A new global 
 </p>
 
 <p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a>https://zenodo.org/records/10080766</a></p>
+
+
+The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
+
+![alt text](doc/SCPE_v0.2.png)
 
 ## Livetracker. Most popular global models:
 
@@ -128,6 +140,17 @@ There are multiple ways to get involved and learn more about our work. That's ho
       Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
    ```
 
+## Running the model in previous versions
+
+The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.4.1, which is the last version before the repo `pypsa-earth-sec` was merged, the following command can be used:
+
+```bash
+git checkout v0.4.1
+```
+After checking out the tag, the model can be run as usual. Please make sure to install the required packages for the respective version.
+
+
+
 ## Test run on tutorial
 
 - In the folder open a terminal/command window to be located at this path `~/pypsa-earth/`
@@ -142,6 +165,10 @@ There are multiple ways to get involved and learn more about our work. That's ho
   ```
 
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
+
+
+
+
 
 ## Training
 
