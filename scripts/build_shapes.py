@@ -19,14 +19,12 @@ import requests
 import xarray as xr
 from _helpers import (
     build_directory,
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
     get_gadm_layer,
     get_path,
     mock_snakemake,
-    sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
@@ -39,9 +37,6 @@ from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
-
-sets_path_to_root("pypsa-earth")
-
 
 logger = create_logger(__name__)
 
@@ -145,7 +140,7 @@ def load_eez(countries_codes, geo_crs, eez_gpkg_file="./data/eez/eez_v11.gpkg"):
     """
     if not pathlib.Path(eez_gpkg_file).exists():
         raise Exception(
-            f"File EEZ {eez_gpkg_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {pathlib.Path(EEZ_gpkg).parent}"
+            f"File EEZ {eez_gpkg_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {pathlib.Path(eez_gpkg).parent}"
         )
 
     geodf_EEZ = gpd.read_file(eez_gpkg_file, engine="pyogrio").to_crs(geo_crs)
@@ -1137,14 +1132,12 @@ def get_gadm_shapes(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_shapes")
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     out = snakemake.output
 
-    EEZ_gpkg = snakemake.input["eez"]
+    eez_gpkg = snakemake.input["eez"]
     mem_mb = snakemake.resources["mem_mb"]
 
     countries_list = snakemake.params.countries
@@ -1176,7 +1169,7 @@ if __name__ == "__main__":
     country_shapes_df.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = get_eez(
-        countries_list, geo_crs, country_shapes_df, EEZ_gpkg, out_logging
+        countries_list, geo_crs, country_shapes_df, eez_gpkg, out_logging
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)

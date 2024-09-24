@@ -26,23 +26,16 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-
-import sys
-
-print("sys path download_osm_data", sys.path)
-
 import pathlib
 import shutil
 
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
     get_path,
     mock_snakemake,
     read_osm_config,
-    sets_path_to_root,
 )
 from earth_osm import eo
 
@@ -105,10 +98,7 @@ def convert_iso_to_geofk(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("download_osm_data")
-        sets_path_to_root("pypsa-earth")
-
     configure_logging(snakemake)
 
     run = snakemake.config.get("run", {})
@@ -129,6 +119,7 @@ if __name__ == "__main__":
         out_dir=store_path_resources,
         out_format=["csv", "geojson"],
         out_aggregate=True,
+        progress_bar=snakemake.config["enable"]["progress_bar"],
     )
 
     out_path = get_path(store_path_resources, "out")

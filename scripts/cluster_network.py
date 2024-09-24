@@ -131,13 +131,11 @@ import pyomo.environ as po
 import pypsa
 from _helpers import (
     REGION_COLS,
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
     mock_snakemake,
     normed,
-    sets_path_to_root,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -379,8 +377,7 @@ def distribute_clusters(
     )
 
 
-def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
-    # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
+def busmap_for_gadm_clusters(inputs, n, gadm_level):
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
@@ -562,7 +559,6 @@ def clustering_for_n_clusters(
     n_clusters,
     alternative_clustering,
     gadm_layer_id,
-    geo_crs,
     country_list,
     distribution_cluster,
     build_shape_options,
@@ -582,9 +578,7 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
-            busmap = busmap_for_gadm_clusters(
-                inputs, n, gadm_layer_id, geo_crs, country_list
-            )
+            busmap = busmap_for_gadm_clusters(inputs, n, gadm_layer_id)
         else:
             busmap = busmap_for_n_clusters(
                 inputs,
@@ -654,12 +648,9 @@ def cluster_regions(busmaps, inputs, output):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
-        sets_path_to_root("pypsa-earth")
-
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
@@ -671,7 +662,6 @@ if __name__ == "__main__":
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     focus_weights = snakemake.params.get("focus_weights", None)
     country_list = snakemake.params.countries
-    geo_crs = snakemake.params.geo_crs
 
     renewable_carriers = pd.Index(
         [
@@ -753,7 +743,6 @@ if __name__ == "__main__":
             n_clusters,
             alternative_clustering,
             gadm_layer_id,
-            geo_crs,
             country_list,
             distribution_cluster,
             snakemake.params.build_shape_options,

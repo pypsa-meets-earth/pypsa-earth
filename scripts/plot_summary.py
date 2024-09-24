@@ -19,13 +19,7 @@ Description
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    get_path,
-    mock_snakemake,
-)
+from _helpers import configure_logging, create_logger, get_path, mock_snakemake
 
 logger = create_logger(__name__)
 
@@ -223,7 +217,6 @@ def plot_energy(infn, snmk, fn=None):
 if __name__ == "__main__":
     if "snakemake" not in globals():
 
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "plot_summary",
             summary="energy",

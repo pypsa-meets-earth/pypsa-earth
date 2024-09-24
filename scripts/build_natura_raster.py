@@ -52,13 +52,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio as rio
-from _helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    get_path,
-    mock_snakemake,
-)
+from _helpers import configure_logging, create_logger, get_path, mock_snakemake
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
 from shapely.ops import unary_union
@@ -184,11 +178,9 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "build_natura_raster", cutouts=["cutouts/africa-2013-era5.nc"]
         )
-
     configure_logging(snakemake)
 
     # get crs

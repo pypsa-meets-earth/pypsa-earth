@@ -5,12 +5,14 @@
 
 # -*- coding: utf-8 -*-
 
+import io
 import logging
 import os
 import pathlib
 import shutil
 import subprocess
 import sys
+import time
 import urllib
 
 import country_converter as coco
@@ -22,12 +24,14 @@ import pypsa
 import requests
 import snakemake as sm
 import yaml
+from fake_useragent import UserAgent
 from pypsa.clustering.spatial import _make_consense
 from pypsa.components import component_attrs, components
 from pypsa.descriptors import Dict
 from shapely.geometry import Point
 from snakemake.script import Snakemake
 from tqdm import tqdm
+from vresutils.costdata import annuity
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +93,14 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         )
 
 
+def copy_default_files():
+    fn = pathlib.Path("config.yaml")
+    if not fn.exists():
+        fn.write_text(
+            "# Write down config entries differing from config.default.yaml\n\nrun: {}"
+        )
+
+
 def create_logger(logger_name, level=logging.INFO):
     """
     Create a logger for a module and adds a handler needed to capture in logs
@@ -145,38 +157,6 @@ def read_osm_config(*args):
         return osm_config[args[0]]
     else:
         return tuple([osm_config[a] for a in args])
-
-
-def sets_path_to_root(root_directory_name, n=8):
-    """
-    Search and sets path to the given root directory (root/path/file).
-
-    Parameters
-    ----------
-    root_directory_name : str
-        Name of the root directory.
-    n : int
-        Number of folders the function will check upwards/root directed.
-    """
-
-    repo_name = root_directory_name
-    n0 = n
-
-    while n >= 0:
-        n -= 1
-        # if repo_name is current folder name, stop and set path
-        if repo_name == pathlib.Path(".").absolute().name:
-            repo_path = get_current_directory_path()  # current_path
-            os.chdir(repo_path)  # change dir_path to repo_path
-            print("This is the repository path: ", repo_path)
-            print("Had to go %d folder(s) up." % (n0 - 1 - n))
-            break
-        # if repo_name NOT current folder name for 5 levels then stop
-        if n == 0:
-            print("Can't find the repo path.")
-        # if repo_name NOT current folder name, go one directory higher
-        else:
-            change_to_script_dir(".")  # change to the upper folder
 
 
 def configure_logging(snakemake, skip_handlers=False):
@@ -269,6 +249,42 @@ def load_network(import_name=None, custom_components=None):
         override_components=override_components,
         override_component_attrs=override_component_attrs_dict,
     )
+
+
+def load_network_for_plots(
+    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
+):
+    import pypsa
+    from add_electricity import load_costs, update_transmission_costs
+
+    n = pypsa.Network(fn)
+
+    n.loads["carrier"] = n.loads.bus.map(n.buses.carrier) + " load"
+    n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
+
+    n.links["carrier"] = (
+        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
+    )
+    n.lines["carrier"] = "AC line"
+    n.transformers["carrier"] = "AC transformer"
+
+    n.lines["s_nom"] = n.lines["s_nom_min"]
+    n.links["p_nom"] = n.links["p_nom_min"]
+
+    if combine_hydro_ps:
+        n.storage_units.loc[
+            n.storage_units.carrier.isin({"PHS", "hydro"}), "carrier"
+        ] = "hydro+PHS"
+
+    # if the carrier was not set on the heat storage units
+    # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
+    # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
+
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
+    update_transmission_costs(n, costs)
+
+    return n
 
 
 def update_p_nom_max(n):
@@ -414,11 +430,72 @@ def progress_retrieve(
         data = urllib.parse.urlencode(data).encode()
 
     if headers:
-        opener = urllib.request.build_opener()
-        opener.addheaders = headers
-        urllib.request.install_opener(opener)
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as response:
+            with open(file, "wb") as f:
+                f.write(response.read())
 
-    urllib.request.urlretrieve(url, file, reporthook=dl_progress, data=data)
+    else:
+        urllib.request.urlretrieve(url, file, reporthook=dl_progress, data=data)
+
+
+def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor=0.3):
+    """
+    Retrieve the content of a url with improved robustness.
+
+    This function uses a more robust approach to handle permission issues
+    and avoid being blocked by the server. It implements exponential backoff
+    for retries and rotates user agents.
+
+    Parameters
+    ----------
+    url : str
+        URL to retrieve the content from
+    data : dict, optional
+        Data for the request, by default None
+    headers : dict, optional
+        Headers for the request, defaults to a fake user agent
+        If no headers are wanted at all, pass an empty dict.
+    max_retries : int, optional
+        Maximum number of retries, by default 3
+    backoff_factor : float, optional
+        Factor to apply between attempts, by default 0.3
+    """
+    if headers is None:
+        ua = UserAgent()
+        headers = {
+            "User-Agent": ua.random,
+            "Upgrade-Insecure-Requests": "1",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Referer": "https://www.google.com/",
+        }
+
+    session = requests.Session()
+
+    for i in range(max_retries):
+        try:
+            response = session.get(url, headers=headers, data=data)
+            response.raise_for_status()
+            return io.BytesIO(response.content)
+        except (
+            requests.exceptions.RequestException,
+            requests.exceptions.HTTPError,
+        ) as e:
+            if i == max_retries - 1:  # last attempt
+                raise
+            else:
+                # Exponential backoff
+                wait_time = backoff_factor * (2**i) + np.random.uniform(0, 0.1)
+                time.sleep(wait_time)
+
+                # Rotate user agent for next attempt
+                headers["User-Agent"] = UserAgent().random
+
+    raise Exception("Max retries exceeded")
 
 
 def get_aggregation_strategies(aggregation_strategies):
@@ -438,7 +515,7 @@ def get_aggregation_strategies(aggregation_strategies):
     return bus_strategies, generator_strategies
 
 
-def mock_snakemake(rule_name, **wildcards):
+def mock_snakemake(rule_name, root_dir=None, submodule_dir=None, **wildcards):
     """
     This function is expected to be executed from the "scripts"-directory of "
     the snakemake project. It returns a snakemake.script.Snakemake object,
@@ -456,57 +533,72 @@ def mock_snakemake(rule_name, **wildcards):
     """
 
     script_dir = pathlib.Path(__file__).parent.resolve()
-    assert (
-        pathlib.Path.cwd().resolve() == script_dir
-    ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
-    os.chdir(script_dir.parent)
-    for p in sm.SNAKEFILE_CHOICES:
-        if pathlib.Path(p).exists():
-            snakefile = p
-            break
-    workflow = sm.Workflow(
-        snakefile, overwrite_configfiles=[], rerun_triggers=[]
-    )  # overwrite_config=config
-    workflow.include(snakefile)
-    workflow.global_resources = {}
-    try:
-        rule = workflow.get_rule(rule_name)
-    except Exception as exception:
-        print(
-            exception,
-            f"The {rule_name} might be a conditional rule in the Snakefile.\n"
-            f"Did you enable {rule_name} in the config?",
+    if root_dir is None:
+        root_dir = script_dir.parent
+    else:
+        root_dir = pathlib.Path(root_dir).resolve()
+
+    user_in_script_dir = pathlib.Path.cwd().resolve() == script_dir
+    if str(submodule_dir) in __file__:
+        # the submodule_dir path is only need to locate the project dir
+        os.chdir(pathlib.Path(__file__[: __file__.find(str(submodule_dir))]))
+    elif user_in_script_dir:
+        os.chdir(root_dir)
+    elif pathlib.Path.cwd().resolve() != root_dir:
+        raise RuntimeError(
+            "mock_snakemake has to be run from the repository root"
+            f" {root_dir} or scripts directory {script_dir}"
         )
-        raise
-    dag = sm.dag.DAG(workflow, rules=[rule])
-    wc = Dict(wildcards)
-    job = sm.jobs.Job(rule, dag, wc)
+    try:
+        for p in sm.SNAKEFILE_CHOICES:
+            if pathlib.Path(p).exists():
+                snakefile = p
+                break
+        workflow = sm.Workflow(
+            snakefile, overwrite_configfiles=[], rerun_triggers=[]
+        )  # overwrite_config=config
+        workflow.include(snakefile)
+        workflow.global_resources = {}
+        try:
+            rule = workflow.get_rule(rule_name)
+        except Exception as exception:
+            print(
+                exception,
+                f"The {rule_name} might be a conditional rule in the Snakefile.\n"
+                f"Did you enable {rule_name} in the config?",
+            )
+            raise
+        dag = sm.dag.DAG(workflow, rules=[rule])
+        wc = Dict(wildcards)
+        job = sm.jobs.Job(rule, dag, wc)
 
-    def make_accessable(*ios):
-        for io in ios:
-            for i in range(len(io)):
-                io[i] = pathlib.Path(io[i]).absolute()
+        def make_accessable(*ios):
+            for io in ios:
+                for i in range(len(io)):
+                    io[i] = pathlib.Path(io[i]).absolute()
 
-    make_accessable(job.input, job.output, job.log)
-    snakemake = Snakemake(
-        job.input,
-        job.output,
-        job.params,
-        job.wildcards,
-        job.threads,
-        job.resources,
-        job.log,
-        job.dag.workflow.config,
-        job.rule.name,
-        None,
-    )
-    snakemake.benchmark = job.benchmark
+        make_accessable(job.input, job.output, job.log)
+        snakemake = Snakemake(
+            job.input,
+            job.output,
+            job.params,
+            job.wildcards,
+            job.threads,
+            job.resources,
+            job.log,
+            job.dag.workflow.config,
+            job.rule.name,
+            None,
+        )
+        snakemake.benchmark = job.benchmark
 
-    # create log and output dir if not existent
-    for path in list(snakemake.log) + list(snakemake.output):
-        build_directory(path)
+        # create log and output dir if not existent
+        for path in list(snakemake.log) + list(snakemake.output):
+            build_directory(path)
 
-    os.chdir(script_dir)
+    finally:
+        if user_in_script_dir:
+            os.chdir(script_dir)
     return snakemake
 
 
@@ -869,6 +961,35 @@ def get_relative_path(path, start_path="."):
     return pathlib.Path(path).relative_to(start_path)
 
 
+# PYPSA-EARTH-SEC
+
+
+def prepare_costs(
+    cost_file: str, USD_to_EUR: float, fill_values: dict, Nyears: float | int = 1
+):
+    # set all asset costs and other parameters
+    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
+
+    # correct units to MW and EUR
+    costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
+    costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
+
+    # min_count=1 is important to generate NaNs which are then filled by fillna
+    costs = (
+        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    )
+    costs = costs.fillna(fill_values)
+
+    def annuity_factor(v):
+        return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
+
+    costs["fixed"] = [
+        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
+    ]
+
+    return costs
+
+
 def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):
     """
     Create a network topology like the power transmission network.
@@ -922,6 +1043,33 @@ def create_network_topology(n, prefix, connector=" <-> ", bidirectional=True):
     return topo
 
 
+def create_dummy_data(n, sector):
+    ind = n.buses_t.p.index
+    ind = n.buses.index[n.buses.carrier == "AC"]
+
+    if sector == "industry":
+        col = [
+            "electricity",
+            "coal",
+            "coke",
+            "solid biomass",
+            "methane",
+            "hydrogen",
+            "low-temperature heat",
+            "naphtha",
+            "process emission",
+            "process emission from feedstock",
+            "current electricity",
+        ]
+    else:
+        raise Exception("sector not found")
+    data = (
+        np.random.randint(10, 500, size=(len(ind), len(col))) * 1000 * 1
+    )  # TODO change 1 with temp. resolution
+
+    return pd.DataFrame(data, index=ind, columns=col)
+
+
 def cycling_shift(df, steps=1):
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
@@ -930,6 +1078,34 @@ def cycling_shift(df, steps=1):
     new_index = np.roll(df.index, steps)
     df.values[:] = df.reindex(index=new_index).values
     return df
+
+
+def override_component_attrs(directory):
+    """Tell PyPSA that links can have multiple outputs by
+    overriding the component_attrs. This can be done for
+    as many buses as you need with format busi for i = 2,3,4,5,....
+    See https://pypsa.org/doc/components.html#link-with-multiple-outputs-or-inputs
+
+    Parameters
+    ----------
+    directory : string
+        Folder where component attributes to override are stored
+        analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
+
+    Returns
+    -------
+    Dictionary of overridden component attributes.
+    """
+
+    attrs = {k: v.copy() for k, v in component_attrs.items()}
+
+    for component, list_name in components.list_name.items():
+        fn = f"{directory}/{list_name}.csv"
+        if pathlib.Path(fn).is_file():
+            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
+            attrs[component] = overrides.combine_first(attrs[component])
+
+    return attrs
 
 
 def get_gadm_filename(country_code, file_prefix="gadm41_"):
@@ -1041,7 +1217,7 @@ def download_gadm(
     return gadm_input_file_gpkg, gadm_filename
 
 
-def get_gadm_layer_name(country_code, file_prefix, layer_id, code_layer):
+def get_gadm_layer_name(file_prefix, layer_id):
 
     if file_prefix == "gadm41_":
         return "ADM_ADM_" + str(layer_id)
@@ -1156,9 +1332,7 @@ def get_gadm_layer(
             # when layer id is negative or larger than the number of layers, select the last layer
             layer_id = len(list_layers) - 1
         code_layer = np.mod(layer_id, len(list_layers))
-        layer_name = get_gadm_layer_name(
-            country_code, file_prefix, layer_id, code_layer
-        )
+        layer_name = get_gadm_layer_name(file_prefix, layer_id)
 
         # read gpkg file
         geo_df_temp = gpd.read_file(
@@ -1291,34 +1465,6 @@ def locate_bus(
         ].item()  # looks for closest one shape=node
 
 
-def override_component_attrs(directory):
-    """Tell PyPSA that links can have multiple outputs by
-    overriding the component_attrs. This can be done for
-    as many buses as you need with format busi for i = 2,3,4,5,....
-    See https://pypsa.org/doc/components.html#link-with-multiple-outputs-or-inputs
-
-    Parameters
-    ----------
-    directory : string
-        Folder where component attributes to override are stored
-        analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
-
-    Returns
-    -------
-    Dictionary of overridden component attributes.
-    """
-
-    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
-
-    for component, list_name in components.list_name.items():
-        fn = f"{directory}/{list_name}.csv"
-        if pathlib.Path(fn).is_file():
-            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
-            attrs[component] = overrides.combine_first(attrs[component])
-
-    return attrs
-
-
 def get_conv_factors(sector):
     """
     Create a dictionary with all the conversion factors for the standard net calorific value
@@ -1367,6 +1513,7 @@ def get_conv_factors(sector):
         "natural gas liquids": 0.01228,
         "oil shale": 0.00247,
         "other bituminous coal": 0.005556,
+        "other kerosene": 0.01216,
         "paraffin waxes": 0.01117,
         "patent fuel": 0.00575,
         "peat": 0.00271,
@@ -1387,30 +1534,35 @@ def aggregate_fuels(sector):
     gas_fuels = [
         "blast furnace gas",
         "natural gas (including lng)",
-        "natural gas liquids",
     ]
 
     oil_fuels = [
-        "bitumen",
+        "additives and oxygenates" "aviation gasoline" "bitumen",
         "conventional crude oil",
         "crude petroleum",
         "ethane",
         "fuel oil",
         "gas oil/ diesel oil",
+        "gasoline-type jet fuel",
         "kerosene-type jet fuel",
         "liquefied petroleum gas (lpg)",
         "lubricants",
         "motor gasoline",
         "naphtha",
-        "patent fuel",
+        "natural gas liquids",
+        "other kerosene",
+        "paraffin waxes" "patent fuel",
         "petroleum coke",
         "refinery gas",
     ]
 
     coal_fuels = [
         "anthracite",
+        "blast furnace gas",
         "brown coal",
         "brown coal briquettes",
+        "coal coke",
+        "coal tar",
         "coke-oven coke",
         "coke-oven gas",
         "coking coal",
@@ -1418,9 +1570,12 @@ def aggregate_fuels(sector):
         "gasworks gas",
         "hard coal",
         "lignite",
+        "oil shale",
         "other bituminous coal",
+        "patent fuel",
         "peat",
         "peat products",
+        "recovered gases",
         "sub-bituminous coal",
     ]
 
@@ -1432,6 +1587,11 @@ def aggregate_fuels(sector):
         "biodiesel",
         "charcoal",
         "black liquor",
+        "bio jet kerosene",
+        "animal waste",
+        "industrial waste",
+        "municipal wastes",
+        "vegetal waste",
     ]
 
     electricity = ["electricity"]
@@ -1461,7 +1621,7 @@ def modify_commodity(commodity):
     return commodity.strip().casefold()
 
 
-def safe_divide(numerator, denominator):
+def safe_divide(numerator, denominator, default_value=np.nan):
     """
     Safe division function that returns NaN when the denominator is zero.
     """
@@ -1471,7 +1631,7 @@ def safe_divide(numerator, denominator):
         logging.warning(
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
-        return np.nan
+        return default_value
 
 
 def normed(x):

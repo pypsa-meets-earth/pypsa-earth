@@ -32,12 +32,10 @@ import pandas as pd
 import pypsa
 import xarray as xr
 from _helpers import (
-    change_to_script_dir,
     create_country_list,
     create_logger,
     get_path_size,
     mock_snakemake,
-    sets_path_to_root,
     three_2_two_digits_country,
     to_csv_nafix,
 )
@@ -52,9 +50,7 @@ def _multi_index_scen(rulename, keys):
 
 
 def _mock_snakemake(rule, **kwargs):
-    change_to_script_dir(__file__)
     snakemake = mock_snakemake(rule, **kwargs)
-    sets_path_to_root("pypsa-earth")
     return snakemake
 
 
@@ -587,10 +583,7 @@ def calculate_stats(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("make_statistics")
-
-    sets_path_to_root("pypsa-earth")
 
     fp_stats = snakemake.output["stats"]
     scenario = snakemake.params.scenario

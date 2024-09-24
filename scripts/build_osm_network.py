@@ -10,13 +10,11 @@ import numpy as np
 import pandas as pd
 from _helpers import (
     build_directory,
-    change_to_script_dir,
     configure_logging,
     create_logger,
     mock_snakemake,
     read_geojson,
     read_osm_config,
-    sets_path_to_root,
     to_csv_nafix,
 )
 from shapely.geometry import LineString, Point
@@ -44,7 +42,7 @@ def line_endings_to_bus_conversion(lines):
 
 
 # tol in m
-def set_substations_ids(buses, distance_crs, tol=2000):
+def set_substations_ids(buses, distance_crs_val, tol=2000):
     """
     Function to set substations ids to buses, accounting for location
     tolerance.
@@ -63,7 +61,7 @@ def set_substations_ids(buses, distance_crs, tol=2000):
     buses["station_id"] = -1
 
     # create temporary series to execute distance calculations using m as reference distances
-    temp_bus_geom = buses.geometry.to_crs(distance_crs)
+    temp_bus_geom = buses.geometry.to_crs(distance_crs_val)
 
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -115,7 +113,7 @@ def set_substations_ids(buses, distance_crs, tol=2000):
                 buses.loc[buses.index[close_nodes], "station_id"] = sub_id
 
 
-def set_lines_ids(lines, buses, distance_crs):
+def set_lines_ids(lines, buses, distance_crs_val):
     """
     Function to set line buses ids to the closest bus in the list.
     """
@@ -131,8 +129,8 @@ def set_lines_ids(lines, buses, distance_crs):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    busesepsg = buses.to_crs(distance_crs)
-    linesepsg = lines.to_crs(distance_crs)
+    busesepsg = buses.to_crs(distance_crs_val)
+    linesepsg = lines.to_crs(distance_crs_val)
 
     for i, row in tqdm(linesepsg.iterrows(), **tqdm_kwargs_line_ids):
         # select buses having the voltage level of the current line
@@ -343,7 +341,7 @@ def get_transformers(buses, lines):
     return df_transformers
 
 
-def get_converters(buses, lines):
+def get_converters(buses):
     """
     Function to create fake converter lines that connect buses of the same
     station_id of different polarities.
@@ -513,7 +511,7 @@ def set_lv_substations(buses):
 
 
 def merge_stations_lines_by_station_id_and_voltage(
-    lines, buses, geo_crs, distance_crs, tol=2000
+    lines, buses, distance_crs_val, tol=2000
 ):
     """
     Function to merge close stations and adapt the line datasets to adhere to
@@ -525,7 +523,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     )
 
     # set substation ids
-    set_substations_ids(buses, distance_crs, tol=tol)
+    set_substations_ids(buses, distance_crs_val, tol=tol)
 
     logger.info("Stage 3b/4: Merge substations with the same id")
 
@@ -536,7 +534,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     logger.info("Stage 3c/4: Specify the bus ids of the line endings")
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses, distance_crs)
+    lines, buses = set_lines_ids(lines, buses, distance_crs_val)
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
@@ -559,9 +557,7 @@ def merge_stations_lines_by_station_id_and_voltage(
     return lines, buses
 
 
-def create_station_at_equal_bus_locations(
-    lines, buses, geo_crs, distance_crs, tol=2000
-):
+def create_station_at_equal_bus_locations(lines, buses, distance_crs_val, tol=2000):
     # V1. Create station_id at same bus location
     # - We saw that buses are not connected exactly at one point, they are
     #   usually connected to a substation "area" (analysed on maps)
@@ -580,10 +576,10 @@ def create_station_at_equal_bus_locations(
     bus_all = buses
 
     # set substation ids
-    set_substations_ids(buses, distance_crs, tol=tol)
+    set_substations_ids(buses, distance_crs_val, tol=tol)
 
     # set the bus ids to the line dataset
-    lines, buses = set_lines_ids(lines, buses, distance_crs)
+    lines, buses = set_lines_ids(lines, buses, distance_crs_val)
 
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
@@ -628,7 +624,7 @@ def _split_linestring_by_point(linestring, points):
     return list_linestrings
 
 
-def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
+def fix_overpassing_lines(lines, buses, distance_crs_val, tol=1):
     """
     Function to avoid buses overpassing lines with no connection when the bus
     is within a given tolerance from the line.
@@ -639,6 +635,8 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         Geodataframe of lines
     buses : GeoDataFrame
         Geodataframe of substations
+    distance_crs_val: str
+        Coordinate reference system
     tol : float
         Tolerance in meters of the distance between the substation and the line
         below which the line will be split
@@ -647,8 +645,8 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     lines_to_add = []  # list of lines to be added
     lines_to_split = []  # list of lines that have been split
 
-    lines_epsgmod = lines.to_crs(distance_crs)
-    buses_epsgmod = buses.to_crs(distance_crs)
+    lines_epsgmod = lines.to_crs(distance_crs_val)
+    buses_epsgmod = buses.to_crs(distance_crs_val)
 
     # set tqdm options for substation ids
     tqdm_kwargs_substation_ids = dict(
@@ -711,7 +709,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     df_to_add.set_index(lines.index[-1] + df_to_add.index, inplace=True)
 
     # update length
-    df_to_add["length"] = df_to_add.to_crs(distance_crs).geometry.length
+    df_to_add["length"] = df_to_add.to_crs(distance_crs_val).geometry.length
 
     # update line endings
     df_to_add = line_endings_to_bus_conversion(df_to_add)
@@ -739,13 +737,13 @@ def force_ac_lines(df, col="tag_frequency"):
     # TODO: default frequency may be by country
     default_ac_frequency = 50
 
-    df["tag_frequency"] = default_ac_frequency
+    df[col] = default_ac_frequency
     df["dc"] = False
 
     return df
 
 
-def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
+def add_buses_to_empty_countries(geo_crs_val, country_list, fp_country_shapes, buses):
     """
     Function to add a bus for countries missing substation data.
     """
@@ -763,7 +761,7 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
         no_data_countries_shape = (
             country_shapes[country_shapes.index.isin(no_data_countries) == True]
             .reset_index()
-            .to_crs(geo_crs)
+            .to_crs(geo_crs_val)
         )
         length = len(no_data_countries)
         df = gpd.GeoDataFrame(
@@ -783,7 +781,7 @@ def add_buses_to_empty_countries(country_list, fp_country_shapes, buses):
                 "geometry": no_data_countries_shape["geometry"].centroid,
                 "substation_lv": [True] * length,
             },
-            crs=geo_crs,
+            crs=geo_crs_val,
         ).astype(
             buses.dtypes.to_dict()
         )  # keep the same dtypes as buses
@@ -812,8 +810,8 @@ def built_network(
     outputs,
     build_osm_network_config,
     countries_config,
-    geo_crs,
-    distance_crs,
+    geo_crs_val,
+    distance_crs_val,
     force_ac=False,
 ):
     logger.info("Stage 1/5: Read input data")
@@ -845,12 +843,14 @@ def built_network(
         tol = build_osm_network_config.get("overpassing_lines_tolerance", 1)
         logger.info("Stage 3/5: Avoid nodes overpassing lines: enabled with tolerance")
 
-        lines, buses = fix_overpassing_lines(lines, buses, distance_crs, tol=tol)
+        lines, buses = fix_overpassing_lines(lines, buses, distance_crs_val, tol=tol)
     else:
         logger.info("Stage 3/5: Avoid nodes overpassing lines: disabled")
 
     # Add bus to countries with no buses
-    buses = add_buses_to_empty_countries(countries_config, inputs.country_shapes, buses)
+    buses = add_buses_to_empty_countries(
+        geo_crs_val, countries_config, inputs.country_shapes, buses
+    )
 
     # METHOD to merge buses with same voltage and within tolerance Step 4/5
     if build_osm_network_config.get("group_close_buses", False):
@@ -859,7 +859,7 @@ def built_network(
             f"Stage 4/5: Aggregate close substations: enabled with tolerance {tol} m"
         )
         lines, buses = merge_stations_lines_by_station_id_and_voltage(
-            lines, buses, geo_crs, distance_crs, tol=tol
+            lines, buses, distance_crs_val, tol=tol
         )
     else:
         logger.info("Stage 4/5: Aggregate close substations: disabled")
@@ -870,7 +870,7 @@ def built_network(
     transformers = get_transformers(buses, lines)
 
     # get converters: currently modelled as links connecting buses with different polarity
-    converters = get_converters(buses, lines)
+    converters = get_converters(buses)
 
     logger.info("Save outputs")
 
@@ -891,7 +891,6 @@ def built_network(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_osm_network")
 
     configure_logging(snakemake)
@@ -902,8 +901,6 @@ if __name__ == "__main__":
     force_ac = snakemake.params.build_osm_network.get("force_ac", False)
     build_osm_network = snakemake.params.build_osm_network
     countries = snakemake.params.countries
-
-    sets_path_to_root("pypsa-earth")
 
     built_network(
         snakemake.input,

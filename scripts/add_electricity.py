@@ -90,15 +90,14 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_logger,
     mock_snakemake,
     normed,
     read_csv_nafix,
-    sets_path_to_root,
     update_p_nom_max,
 )
+from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
@@ -129,8 +128,6 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
         costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
     )
     suptechs = missing_carriers.str.split("-").str[0]
-    if "csp" in suptechs:
-        suptechs = suptechs.str.replace("csp", "csp-tower")
     emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)
     emissions.index = missing_carriers
     n.import_components_from_dataframe(emissions, "Carrier")
@@ -191,6 +188,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         config["rooftop_share"] * costs.at["solar-rooftop", "capital_cost"]
         + (1 - config["rooftop_share"]) * costs.at["solar-utility", "capital_cost"]
     )
+    costs.loc["csp"] = costs.loc["csp-tower"]
 
     def costs_for_storage(store, link1, link2=None, max_hours=1.0):
         capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
@@ -373,13 +371,11 @@ def attach_wind_and_solar(
                     )
                 )
             else:
-                capital_cost = costs.at[
-                    "csp-tower" if tech == "csp" else tech, "capital_cost"
-                ]
+                capital_cost = costs.at[tech, "capital_cost"]
 
             if not df.query("carrier == @tech").empty:
                 buses = n.buses.loc[ds.indexes["bus"]]
-                caps = pm.export.map_country_bus(df.query("carrier == @tech"), buses)
+                caps = map_country_bus(df.query("carrier == @tech"), buses)
                 caps = caps.groupby(["bus"]).p_nom.sum()
                 caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
             else:
@@ -397,13 +393,9 @@ def attach_wind_and_solar(
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[
-                    "csp-tower" if suptech == "csp" else suptech, "marginal_cost"
-                ],
+                marginal_cost=costs.at[suptech, "marginal_cost"],
                 capital_cost=capital_cost,
-                efficiency=costs.at[
-                    "csp-tower" if suptech == "csp" else suptech, "efficiency"
-                ],
+                efficiency=costs.at[suptech, "efficiency"],
             )
 
 
@@ -776,7 +768,8 @@ def estimate_renewable_capacities_irena(
             (
                 n.generators_t.p_max_pu[tech_i].mean()
                 * n.generators.loc[tech_i, "p_nom_max"]
-            )  # maximal yearly generation
+            )
+            # maximal yearly generation
             .groupby(n.generators.bus.map(n.buses.country))
             .transform(lambda s: normed(s) * tech_capacities.at[s.name])
             .where(lambda s: s > 0.1, 0.0)
@@ -821,9 +814,7 @@ def add_nice_carrier_names(n, config):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("add_electricity")
-        sets_path_to_root("pypsa-earth")
 
     configure_logging(snakemake)
 

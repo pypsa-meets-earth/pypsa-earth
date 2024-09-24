@@ -107,7 +107,6 @@ import powerplantmatching as pm
 import pypsa
 import yaml
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_current_directory_path,
@@ -215,7 +214,6 @@ def replace_natural_gas_technology(df: pd.DataFrame):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_powerplants")
 
     configure_logging(snakemake)

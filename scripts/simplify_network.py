@@ -93,7 +93,6 @@ import pandas as pd
 import pypsa
 import scipy as sp
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
@@ -963,8 +962,8 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("simplify_network", simpl="")
+
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)

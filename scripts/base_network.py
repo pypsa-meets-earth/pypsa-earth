@@ -64,7 +64,6 @@ import pypsa
 import shapely.prepared
 import shapely.wkt
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_path_size,
@@ -156,7 +155,6 @@ def _load_lines_from_osm(fp_osm_lines):
     lines["length"] /= 1e3  # m to km conversion
     lines["v_nom"] /= 1e3  # V to kV conversion
     lines = lines.loc[:, ~lines.columns.str.contains("^Unnamed")]  # remove unnamed col
-    # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
     return lines
 
@@ -171,8 +169,6 @@ def _load_converters_from_osm(fp_osm_converters):
         fp_osm_converters,
         dtype=dict(converter_id="str", bus0="str", bus1="str"),
     ).set_index("converter_id")
-
-    # converters = _remove_dangling_branches(converters, buses)
 
     converters["carrier"] = "B2B"
     converters["dc"] = True
@@ -189,7 +185,6 @@ def _load_transformers_from_osm(fp_osm_transformers):
         .rename(columns=dict(line_id="transformer_id"))
         .set_index("transformer_id")
     )
-    # transformers = _remove_dangling_branches(transformers, buses)  # TODO: add dangling branch removal?
 
     return transformers
 
@@ -480,7 +475,6 @@ def base_network(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("base_network")
 
     configure_logging(snakemake)

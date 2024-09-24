@@ -47,13 +47,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import (
-    REGION_COLS,
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    mock_snakemake,
-)
+from _helpers import REGION_COLS, configure_logging, create_logger, mock_snakemake
 from scipy.spatial import Voronoi
 from shapely.geometry import Polygon
 
@@ -150,7 +144,6 @@ def get_gadm_shape(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_bus_regions")
 
     configure_logging(snakemake)

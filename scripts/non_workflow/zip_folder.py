@@ -11,8 +11,6 @@ import os
 import pathlib
 import zipfile
 
-from _helpers import sets_path_to_root
-
 # Zip the files from given directory that matches the filter
 
 
@@ -40,11 +38,8 @@ def zipFilesInDir(dirName, zipFileName, filter, include_parent=True):
 
 if __name__ == "__main__":
     # Set path to this file
-    os.chdir(pathlib.Path(__file__).parent.absolute())
-    # Required to set path to pypsa-earth
-    sets_path_to_root("pypsa-earth")
 
-# Execute zip function
-# zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
-zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
-# zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)
+    # Execute zip function
+    # zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
+    zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
+    # zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)

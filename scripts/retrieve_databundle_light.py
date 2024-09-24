@@ -89,16 +89,13 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_country_list,
     create_logger,
-    get_current_directory_path,
     get_path,
     get_relative_path,
     mock_snakemake,
     progress_retrieve,
-    sets_path_to_root,
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from tqdm import tqdm
@@ -338,9 +335,9 @@ def download_and_unzip_protectedplanet(
                         pathlib.Path(inner_zipname).unlink(missing_ok=True)
 
                         logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
-                    except Exception as e:
+                    except:
                         logger.warning(
-                            f"Exception while unzipping file '{fzip}' for {resource_iter} with exception message '{e}': skipped file"
+                            f"Exception while unzipping file '{fzip}' for {resource_iter}: skipped file"
                         )
 
                 # close and remove outer zip file
@@ -517,7 +514,7 @@ def download_and_unzip_hydrobasins(
             file_path=file_path,
             resource=resource,
             destination=destination,
-            headers=[("User-agent", "Mozilla/5.0")],
+            headers={"User-agent": "Mozilla/5.0"},
             hot_run=hot_run,
             unzip=True,
             disable_progress=disable_progress,
@@ -805,7 +802,6 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
         "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)
         for suffix in config_hydrobasin["urls"]["hydrobasins"]["suffixes"]
     ]
-
     gpdf_list = [None] * len(files_to_merge)
     logger.info("Merging hydrobasins files into: " + output_fl)
     for i, f_name in tqdm(enumerate(files_to_merge)):
@@ -818,26 +814,21 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("retrieve_databundle_light")
+
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
-    sets_path_to_root("pypsa-earth")
-
-    root_path = get_current_directory_path()
+    root_path = "."
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
-
-    disable_progress = not snakemake.config.get("retrieve_databundle", {}).get(
-        "show_progress", True
-    )
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
+    disable_progress = not config_enable["progress_bar"]
 
     bundles_to_download = get_best_bundles(
         countries, config_bundles, tutorial, config_enable

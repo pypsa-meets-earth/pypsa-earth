@@ -51,7 +51,6 @@ import pypsa
 import scipy.sparse as sparse
 import xarray as xr
 from _helpers import (
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_path,
@@ -59,7 +58,6 @@ from _helpers import (
     normed,
     read_csv_nafix,
     read_osm_config,
-    sets_path_to_root,
 )
 from shapely.prepared import prep
 from shapely.validation import make_valid
@@ -296,10 +294,7 @@ def build_demand_profiles(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_demand_profiles")
-        sets_path_to_root("pypsa-earth")
-
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)

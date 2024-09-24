@@ -58,7 +58,6 @@ import pandas as pd
 import pypsa
 from _helpers import (
     build_directory,
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_path,
@@ -542,7 +541,6 @@ def to_csv(dfs, dir):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",

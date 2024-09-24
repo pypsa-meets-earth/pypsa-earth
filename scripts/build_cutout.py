@@ -97,19 +97,13 @@ Description
 import atlite
 import geopandas as gpd
 import pandas as pd
-from _helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    mock_snakemake,
-)
+from _helpers import configure_logging, create_logger, mock_snakemake
 
 logger = create_logger(__name__)
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("build_cutout", cutout="africa-2013-era5")
 
     configure_logging(snakemake)

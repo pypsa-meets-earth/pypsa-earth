@@ -11,7 +11,6 @@ import pandas as pd
 import reverse_geocode as rg
 from _helpers import (
     REGION_COLS,
-    change_to_script_dir,
     configure_logging,
     create_logger,
     get_path_size,
@@ -1061,7 +1060,6 @@ def clean_data(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
         snakemake = mock_snakemake("clean_osm_data")
 
     configure_logging(snakemake)

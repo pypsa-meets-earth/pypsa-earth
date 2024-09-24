@@ -57,12 +57,7 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import (
-    change_to_script_dir,
-    configure_logging,
-    create_logger,
-    mock_snakemake,
-)
+from _helpers import configure_logging, create_logger, mock_snakemake
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -109,7 +104,7 @@ def attach_stores(n, costs, config):
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    buses_i = n.buses.index
+    buses_i = n.buses.query("carrier == 'AC'").index
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
     if "H2" in carriers:
@@ -192,20 +187,17 @@ def attach_stores(n, costs, config):
     if ("csp" in elec_opts["renewable_carriers"]) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
     ):
-        # get CSP generators and their buses
-        csp_gens = n.generators.query("carrier == 'csp'")
-        buses_csp_gens = n.buses.loc[csp_gens.bus]
-
-        csp_buses_i = csp_gens.index
-        c_buses_i = csp_gens.bus.values
-
-        csp_bus_sub_dict = {k: buses_csp_gens[k].values for k in ["x", "y", "country"]}
-
-        # add buses for csp
-        n.madd("Bus", csp_buses_i, carrier="csp", **csp_bus_sub_dict)
-
-        # change bus of existing csp generators
-        n.generators.loc[csp_gens.index, "bus"] = csp_buses_i
+        # add separate buses for csp
+        main_buses = n.generators.query("carrier == 'csp'").bus
+        csp_buses_i = n.madd(
+            "Bus",
+            main_buses + " csp",
+            carrier="csp",
+            x=n.buses.loc[main_buses, "x"].values,
+            y=n.buses.loc[main_buses, "y"].values,
+            country=n.buses.loc[main_buses, "country"].values,
+        )
+        n.generators.loc[main_buses.index, "bus"] = csp_buses_i
 
         # add stores for csp
         n.madd(
@@ -224,7 +216,7 @@ def attach_stores(n, costs, config):
             "Link",
             csp_buses_i,
             bus0=csp_buses_i,
-            bus1=c_buses_i,
+            bus1=main_buses,
             carrier="csp",
             efficiency=costs.at["csp-tower", "efficiency"],
             capital_cost=costs.at["csp-tower", "capital_cost"],
@@ -276,8 +268,7 @@ def attach_hydrogen_pipelines(n, costs, config):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        change_to_script_dir(__file__)
-        snakemake = mock_snakemake("add_extra_components", simpl="", clusters="20flex")
+        snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)
 
     configure_logging(snakemake)
 
