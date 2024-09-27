@@ -57,7 +57,9 @@ COSTDIR = config["costs_dir"]
 load_data_paths = get_load_paths_gegis("data", config)
 
 if config["enable"].get("retrieve_cost_data", True):
-    COSTS = "resources/" + RDIR + "costs_{year}.csv".format(year=config["costs"]["year"])
+    COSTS = (
+        "resources/" + RDIR + "costs_{year}.csv".format(year=config["costs"]["year"])
+    )
 else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
