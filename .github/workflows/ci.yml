@@ -37,7 +37,7 @@ jobs:
     - name: Setup micromamba
       uses: mamba-org/setup-micromamba@v1
       with:
-        micromamba-version: latest
+        micromamba-version: '2.0.0-0'
         environment-file: envs/environment.yaml
         log-level: debug
         init-shell: bash
