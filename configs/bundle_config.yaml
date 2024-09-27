@@ -276,9 +276,9 @@ databundles:
     destination: "cutouts"
     urls:
       gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
-    output: [ cutouts/cutout-2013-era5.nc ]
+    output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
-      build_cutout: [ all ]
+      build_cutout: [all]
 
   # cutouts bundle of the cutouts folder for the Asian continent, except Russia
   # Size about 30GB (zipped)
