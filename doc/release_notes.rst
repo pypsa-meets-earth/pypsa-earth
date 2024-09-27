@@ -20,6 +20,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **Minor Changes and bug-fixing**
 
+* Include a dedicated cutout for North America in bundle_config.yaml `PR #1121 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1121>`_
+
 
 PyPSA-Earth 0.4.1
 =================
