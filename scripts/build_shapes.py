@@ -21,7 +21,6 @@ import xarray as xr
 from _helpers import (
     configure_logging,
     create_logger,
-    sets_path_to_root,
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
@@ -35,9 +34,6 @@ from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
-
-sets_path_to_root("pypsa-earth")
-
 
 logger = create_logger(__name__)
 
@@ -223,6 +219,19 @@ def get_GADM_layer(
         # create a subindex column that is useful
         # in the GADM processing of sub-national zones
         geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"]
+
+        # from pypsa-earth-sec
+        # if layer_id == 0:
+        #     geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
+        #         lambda x: two_2_three_digits_country(x[:2])
+        #     ) + pd.Series(range(1, geodf_temp.shape[0] + 1)).astype(str)
+        # else:
+        #     # create a subindex column that is useful
+        #     # in the GADM processing of sub-national zones
+        #     # Fix issues with missing "." in selected cases
+        #     geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
+        #         lambda x: x if x[3] == "." else x[:3] + "." + x[3:]
+        #     )
 
         # append geodataframes
         geodf_list.append(geodf_temp)
@@ -1309,9 +1318,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_shapes")
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     out = snakemake.output
