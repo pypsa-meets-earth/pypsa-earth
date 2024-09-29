@@ -1,6 +1,8 @@
 import os
 import sys
 
+CUTOUT = "cutout.nc"
+
 
 def terminate_if_cutout_exists(subprocess_check=False):
     """
@@ -19,11 +21,10 @@ def terminate_if_cutout_exists(subprocess_check=False):
         ):
             return
 
-    cutout_fl = "cutout.txt"
-    if os.path.exists(cutout_fl):
-        os.remove(cutout_fl)
+    if os.path.exists(CUTOUT):
+        os.remove(CUTOUT)
         raise Exception(
-            f"A cutout file {cutout_fl} exists and risks to be overwritten. "
+            f"A cutout file {CUTOUT} exists and risks to be overwritten. "
             "If this is an intended behavior, please move or delete this file and re-run the rule."
         )
 
@@ -33,13 +34,13 @@ terminate_if_cutout_exists(subprocess_check=config.get("subprocess_check", False
 
 rule remove_cutout:
     input:
-        "cutout.txt",
+        cutout=CUTOUT,
     run:
-        os.remove(input[0])
+        os.remove(input.cutout)
 
 
 rule build_cutout:
     output:
-        "cutout.txt",
+        cutout=CUTOUT,
     shell:
-        "echo build cutout > {output}"
+        "echo build_cutout > {output.cutout}"
