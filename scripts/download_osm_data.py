@@ -92,11 +92,9 @@ def convert_iso_to_geofk(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("download_osm_data")
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     run = snakemake.config.get("run", {})
@@ -115,6 +113,7 @@ if __name__ == "__main__":
         out_dir=store_path_resources,
         out_format=["csv", "geojson"],
         out_aggregate=True,
+        progress_bar=snakemake.config["enable"]["progress_bar"],
     )
 
     out_path = Path.joinpath(store_path_resources, "out")

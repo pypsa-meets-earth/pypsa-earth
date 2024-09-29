@@ -49,12 +49,21 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 24.4.2
+  rev: 24.8.0
   hooks:
   # Format Python files
   - id: black
   # Format Jupyter Python notebooks
   - id: black-jupyter
+
+# Find common spelling mistakes in comments and docstrings
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.3.0
+  hooks:
+  - id: codespell
+    args: ['--ignore-regex="\b[A-Z]+\b"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,vor'] # Ignore capital case words, e.g. country codes
+    types_or: [python, rst, markdown]
+    files: ^(actions|doc)/
 
 # Do YAML formatting (before the linter checks it for misses)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks

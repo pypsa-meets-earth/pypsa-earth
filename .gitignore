@@ -6,6 +6,8 @@
 **/__pycache__
 *.py[cod]
 *$py.class
+
+# Jupyter-related files
 .ipynb_checkpoints
 
 # General untracked file formats
@@ -15,55 +17,58 @@
 *.zip
 *.png
 *.done
+*.tif
+*.csv
+*.geojson
+*.nc
+*.xls
+*.xlsx
+*.org
+*~
 
-# Untracked files
+# Specific untracked files
 config.yaml
 dag.svg
-
-# Files appear for tests
-configs/scenarios/config.custom.yaml
-data/*.csv
-data/*.geojson
+gurobi.log
+gadm_shapes.geojson
+doc/*.vscode/settings.json
 
 # Untracked folders (and files within)
-img/
-.snakemake/
+bak
 benchmarks/
+backup*
 cutouts/
 data/
-data/osm/
-data/raw/
-data/base_network/
-results/
+dask-worker-space/
+img/
+logs/
 networks/
+notebooks
+notebooks/
+pypsa/
 resources/
-scripts/temp
-scripts/test.py
+results/
+.snakemake/
+slurm
+scripts/old
+.tmp
+doc/_build
+sample_pypsa_eur
 test/tmp/
+playground/
+
+# Specific configuration files
 configs/scenarios/config.*.yaml
 !configs/scenarios/config.NG.yaml
-dask-worker-space/
 
-# Untrack some Jupyter changes
-.ipynb_checkpoints
-notebooks/*.nc
-notebooks/*.csv
-notebooks/*.zip
-notebooks/*.tif
-notebooks/old_notebooks/*.nc
-notebooks/old_notebooks/*.csv
-notebooks/old_notebooks/*.zip
-notebooks/old_notebooks/*.tif
-
-# Untrack test doc builds
-doc/_build
-
-# VS code related
-*.vscode
-doc/*.vscode/settings.json
-*.vscode/settings.json
+# VS Code-related files
+.vscode
 *.code-workspace
+*.vscode/settings.json
 
 # Additional debugging folders
 backup*
 screenlog*
+
+# Exclude specific file paths
+!data/demand/unsd/paths/Energy_Statistics_Database.xlsx

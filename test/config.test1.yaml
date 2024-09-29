@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+version: 0.5.0
+tutorial: true
+
+run:
+  name: test1
+  shared_cutouts: true
+
+scenario:
+  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
+  - 4
+  ll:
+  - "c1"
+
+countries: ["NG", "BJ"]
+
+
+electricity:
+  extendable_carriers:
+    Store: []
+    Link: []
+
+  co2limit: 7.75e7
+
+export:
+  h2export: [120] # Yearly export demand in TWh
+  store: true # [True, False] # specifies whether an export store to balance demand is implemented
+  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
+
+existing_capacities:
+  grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]
+  grouping_years_heat: [1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2019] # these should not extend 2020
+  threshold_capacity: 10
+  default_heating_lifetime: 20
+  conventional_carriers:
+  - lignite
+  - coal
+  - oil
+  - uranium
+
+sector:
+  solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+  gadm_level: 2
+snapshots:
+  # arguments to pd.date_range
+  start: "2013-03-1"
+  end: "2013-03-7"
+
+solving:
+  solver:
+    name: gurobi
