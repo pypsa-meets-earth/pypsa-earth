@@ -87,12 +87,9 @@ def download_emission_data():
         with requests.get(url) as rq:
             with open("data/co2.zip", "wb") as file:
                 file.write(rq.content)
-        rootpath = os.getcwd()
-        file_path = os.path.join(rootpath, "data/co2.zip")
+        file_path = "data/co2.zip"
         with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
-            )
+            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", "data")
         os.remove(file_path)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
     except:
@@ -319,7 +316,6 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
@@ -327,6 +323,7 @@ if __name__ == "__main__":
             ll="v0.3",
             opts="Co2L-24H",
         )
+
     configure_logging(snakemake)
 
     opts = snakemake.wildcards.opts.split("-")

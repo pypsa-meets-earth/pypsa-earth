@@ -202,9 +202,9 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, create_logger, sets_path_to_root
+from _helpers import configure_logging, create_logger
 from add_electricity import load_powerplants
-from dask.distributed import Client, LocalCluster
+from dask.distributed import Client
 from pypsa.geo import haversine
 from shapely.geometry import LineString, Point, box
 
@@ -488,16 +488,14 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()
     countries = snakemake.params.countries
     paths = snakemake.input
     nprocesses = int(snakemake.threads)
-    noprogress = not snakemake.config["atlite"].get("show_progress", False)
+    noprogress = not snakemake.config["enable"]["progress_bar"]
     config = snakemake.params.renewable[snakemake.wildcards.technology]
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
@@ -522,8 +520,10 @@ if __name__ == "__main__":
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
 
-    cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
-    client = Client(cluster, asynchronous=True)
+    if nprocesses > 1:
+        client = Client(n_workers=nprocesses, threads_per_worker=1)
+    else:
+        client = None
 
     cutout = atlite.Cutout(paths["cutout"])
 
@@ -833,4 +833,6 @@ if __name__ == "__main__":
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
         ds.to_netcdf(snakemake.output.profile)
-    client.shutdown()
+
+    if client is not None:
+        client.shutdown()

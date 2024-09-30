@@ -15,7 +15,6 @@ from _helpers import (
     create_logger,
     read_geojson,
     read_osm_config,
-    sets_path_to_root,
     to_csv_nafix,
 )
 from shapely.geometry import LineString, Point
@@ -898,8 +897,8 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_osm_network")
+
     configure_logging(snakemake)
 
     # load default crs
@@ -908,8 +907,6 @@ if __name__ == "__main__":
     force_ac = snakemake.params.build_osm_network.get("force_ac", False)
     build_osm_network = snakemake.params.build_osm_network
     countries = snakemake.params.countries
-
-    sets_path_to_root("pypsa-earth")
 
     # Keep only a predefined set of columns, as otherwise conflicts are possible
     # e.g. the columns which names starts with "bus" are mixed up with

@@ -133,8 +133,8 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
-    sets_path_to_root,
     update_config_dictionary,
+    get_aggregation_strategies,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -380,7 +380,6 @@ def distribute_clusters(
 
 
 def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
-    # gdf = get_GADM_layer(country_list, gadm_level, geo_crs)
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
@@ -661,11 +660,9 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
