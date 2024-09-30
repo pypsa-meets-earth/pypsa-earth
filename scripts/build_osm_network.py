@@ -901,13 +901,6 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    # load default crs
-    geo_crs = snakemake.params.crs["geo_crs"]
-    distance_crs = snakemake.params.crs["distance_crs"]
-    force_ac = snakemake.params.build_osm_network.get("force_ac", False)
-    build_osm_network = snakemake.params.build_osm_network
-    countries = snakemake.params.countries
-
     # Keep only a predefined set of columns, as otherwise conflicts are possible
     # e.g. the columns which names starts with "bus" are mixed up with
     # the third-bus specification when executing additional_linkports()
@@ -927,6 +920,13 @@ if __name__ == "__main__":
         "geometry",
         "bounds",
     ]
+
+    # load default crs
+    geo_crs = snakemake.params.crs["geo_crs"]
+    distance_crs = snakemake.params.crs["distance_crs"]
+    force_ac = snakemake.params.build_osm_network.get("force_ac", False)
+    build_osm_network = snakemake.params.build_osm_network
+    countries = snakemake.params.countries
 
     built_network(
         snakemake.input,
