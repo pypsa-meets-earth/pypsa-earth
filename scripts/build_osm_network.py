@@ -911,7 +911,7 @@ if __name__ == "__main__":
     # Keep only a predefined set of columns, as otherwise conflicts are possible
     # e.g. the columns which names starts with "bus" are mixed up with
     # the third-bus specification when executing additional_linkports()
-    lines_cols_standard = [
+    LINES_COLUMNS = [
         "line_id",
         "circuits",
         "tag_type",
@@ -935,6 +935,6 @@ if __name__ == "__main__":
         countries,
         geo_crs,
         distance_crs,
-        lines_cols_standard=lines_cols_standard,
+        lines_cols_standard=LINES_COLUMNS,
         force_ac=force_ac,
     )
