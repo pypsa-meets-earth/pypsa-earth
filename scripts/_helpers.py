@@ -496,6 +496,7 @@ def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor
 
     raise Exception("Max retries exceeded")
 
+
 def get_aggregation_strategies(aggregation_strategies):
     """
     Default aggregation strategies that cannot be defined in .yaml format must
@@ -902,7 +903,7 @@ def get_last_commit_message(path):
     os.chdir(backup_cwd)
     return last_commit_message
 
-  
+
 def update_config_dictionary(
     config_dict,
     parameter_key_to_fill="lines",
@@ -911,6 +912,7 @@ def update_config_dictionary(
     config_dict.setdefault(parameter_key_to_fill, {})
     config_dict[parameter_key_to_fill].update(dict_to_use)
     return config_dict
+
 
 # PYPSA-EARTH-SEC
 
