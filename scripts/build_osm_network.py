@@ -24,6 +24,27 @@ from tqdm import tqdm
 logger = create_logger(__name__)
 
 
+# Keep only a predefined set of columns, as otherwise conflicts are possible
+# e.g. the columns which names starts with "bus" are mixed up with
+# the third-bus specification when executing additional_linkports()
+LINES_COLUMNS = [
+    "line_id",
+    "circuits",
+    "tag_type",
+    "voltage",
+    "bus0",
+    "bus1",
+    "length",
+    "underground",
+    "under_construction",
+    "tag_frequency",
+    "dc",
+    "country",
+    "geometry",
+    "bounds",
+]
+
+
 def line_endings_to_bus_conversion(lines):
     # Assign to every line a start and end point
 
@@ -900,26 +921,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_osm_network")
 
     configure_logging(snakemake)
-
-    # Keep only a predefined set of columns, as otherwise conflicts are possible
-    # e.g. the columns which names starts with "bus" are mixed up with
-    # the third-bus specification when executing additional_linkports()
-    LINES_COLUMNS = [
-        "line_id",
-        "circuits",
-        "tag_type",
-        "voltage",
-        "bus0",
-        "bus1",
-        "length",
-        "underground",
-        "under_construction",
-        "tag_frequency",
-        "dc",
-        "country",
-        "geometry",
-        "bounds",
-    ]
 
     # load default crs
     geo_crs = snakemake.params.crs["geo_crs"]
