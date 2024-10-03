@@ -407,7 +407,6 @@ if config["enable"].get("retrieve_cost_data", True):
         run:
             move(input[0], output[0])
 
-
 rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
