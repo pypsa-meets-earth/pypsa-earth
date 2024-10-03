@@ -407,21 +407,6 @@ if config["enable"].get("retrieve_cost_data", True):
         run:
             move(input[0], output[0])
 
-    rule retrieve_cost_data_flexible:
-        input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs"
-                + "_{planning_horizons}.csv",
-                keep_local=True,
-            ),
-        output:
-            costs=COSTDIR + "costs_{planning_horizons}.csv",
-        resources:
-            mem_mb=5000,
-        run:
-            move(input[0], output[0])
-
-
 rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
