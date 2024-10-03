@@ -24,7 +24,7 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Include a dedicated cutout for North America in bundle_config.yaml `PR #1121 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1121>`_
 
-* Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125`_
+* Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`_
 
 PyPSA-Earth 0.4.1
 =================
