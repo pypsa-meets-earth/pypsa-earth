@@ -18,6 +18,8 @@ dependencies:
 # need to move back to conda once the issues will be resolved
 # - powerplantmatching
 # - earth-osm>=2.1
+# until the release will incorporate all the fixes needed
+# to work with CDS beta
 # - atlite
 
   # Dependencies of the workflow itself
