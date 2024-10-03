@@ -13,7 +13,6 @@ dependencies:
 - mamba   # esp for windows build
 
 - pypsa>=0.24, <0.25
-# - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
 - powerplantmatching
 - earth-osm>=2.1
