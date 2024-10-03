@@ -14,9 +14,11 @@ dependencies:
 
 - pypsa>=0.24, <0.25
 - dask
-- powerplantmatching
-- earth-osm>=2.1
-- atlite
+# currently the packages are being installed with pip
+# need to move back to conda once the issues will be resolved
+# - powerplantmatching
+# - earth-osm>=2.1
+# - atlite
 
   # Dependencies of the workflow itself
 - xlrd
