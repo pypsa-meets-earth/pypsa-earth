@@ -488,10 +488,7 @@ def attach_hydro(n, costs, ppl):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
-    if snakemake.params.alternative_clustering:
-        bus_id = ppl["region_id"]
-    else:
-        bus_id = ppl["bus"]
+    bus_id = ppl["bus"]
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
@@ -530,12 +527,18 @@ def attach_hydro(n, costs, ppl):
                 network_buses_to_keep = plants_with_data.index
                 plants_to_keep = plants_with_data.to_numpy()
 
+                # hydro_inflow_factor is used to divide the inflow between the various units of each power plant
+                hydro_inflow_factor = hydro["p_nom"] / hydro.groupby("bus")[
+                    "p_nom"
+                ].transform("sum")
+
                 inflow_t = (
                     inflow.sel(plant=plants_to_keep)
                     .rename({"plant": "name"})
                     .assign_coords(name=network_buses_to_keep)
                     .transpose("time", "name")
                     .to_pandas()
+                    * hydro_inflow_factor
                 )
 
     if "ror" in carriers and not ror.empty:
