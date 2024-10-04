@@ -20,6 +20,7 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **Minor Changes and bug-fixing**
 
+* The computation of `hydro_profile.nc` in `build_renewable_profiles.py` is not differentiated whether alternative clustering is applied or not; the indexing of the different power plants in `add_electricity.py` is performed according to the bus either in case alternative clustering is applied or not and a `hydro_inflow_factor` is computed prior to the computation of `inflow_t` to split the inflow according to the capacity of each different unit of each power plant (if more units are present). `PR #1119 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1119>`_
 
 PyPSA-Earth 0.4.1
 =================
