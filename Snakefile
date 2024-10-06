@@ -515,6 +515,28 @@ rule build_powerplants:
         "scripts/build_powerplants.py"
 
 
+rule build_egs_potentials:
+    params:
+        enhanced_geothermal=config["sector"]["enhanced_geothermal"],
+    input:
+        egs_potential="temp/egs_dummy_data.csv",
+        regions_onshore="temp/regions.geojson",
+    output:
+        # egs_potentials="resources/egs_potential_s{simpl}_{clusters}.csv",
+        egs_potentials="temp/potentials.csv",
+    threads: 2
+    resources:
+        mem_mb=10000,
+    benchmark:
+        (
+            RDIR
+            # + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}"
+            + "/benchmarks/build_egs_potentials/egs_potential"
+        )
+    script:
+        "scripts/build_egs_potentials.py"
+
+
 rule add_electricity:
     params:
         countries=config["countries"],
