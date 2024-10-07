@@ -50,8 +50,8 @@ config["scenario"]["unc"] = [
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
-SDIR = config["summary_dir"].strip("/") + f"/{RDIR}/"
-RESDIR = config["results_dir"].strip("/") + f"/{RDIR}/"
+SDIR = config["summary_dir"].strip("/") + f"/{RDIR}"
+RESDIR = config["results_dir"].strip("/") + f"/{RDIR}"
 COSTDIR = config["costs_dir"]
 
 load_data_paths = get_load_paths_gegis("data", config)
