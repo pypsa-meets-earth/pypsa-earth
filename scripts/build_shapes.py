@@ -99,6 +99,7 @@ def get_countries_shapes(
 
     # set index and simplify polygons
     ret_df = df_countries.set_index("name")["geometry"].map(_simplify_polys)
+    
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
     ret_df = ret_df.make_valid()
@@ -200,6 +201,7 @@ def get_eez(
             ],
         }
     ).set_index("name")
+
 
     ret_df = ret_df.geometry.map(
         lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
@@ -1067,6 +1069,7 @@ def get_gadm_shapes(
     out_logging=False,
     year=2020,
     nprocesses=None,
+    simplify_gadm=True
 ):
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
@@ -1126,7 +1129,9 @@ def get_gadm_shapes(
         lambda x: x if x.find(".") == 0 else "." + x
     )
     df_gadm.set_index("GADM_ID", inplace=True)
-    df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+    if simplify_gadm:
+        df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+
     df_gadm.geometry = df_gadm.geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
     )
@@ -1161,6 +1166,7 @@ if __name__ == "__main__":
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
     file_prefix = snakemake.params.build_shape_options["gadm_file_prefix"]
     gadm_url_prefix = snakemake.params.build_shape_options["gadm_url_prefix"]
+    simplify_gadm = snakemake.params.build_shape_options['simplify_gadm']
     gadm_input_file_args = ["data", "gadm"]
 
     country_shapes_df = get_countries_shapes(
@@ -1176,7 +1182,7 @@ if __name__ == "__main__":
     country_shapes_df.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = get_eez(
-        countries_list, geo_crs, country_shapes_df, EEZ_gpkg, out_logging
+        countries_list, geo_crs, country_shapes_df, EEZ_gpkg, out_logging,
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
@@ -1201,5 +1207,6 @@ if __name__ == "__main__":
         out_logging,
         year,
         nprocesses=nprocesses,
+        simplify_gadm=simplify_gadm,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)
