@@ -321,6 +321,77 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
     n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
 
 
+
+def add_enhanched_geothermal(n):
+
+    egs_potential = pd.read_csv(snakemake.input["egs_potential"], index_col=[0,1])
+
+    idx = pd.IndexSlice
+
+    n.add(
+        "Bus",
+        "EGS",
+        carrier="geothermal heat",
+        unit="MWh_th",
+    )
+
+    n.add(
+        "Generator",
+        "EGS",
+        bus="EGS",
+        carrier="geothermal heat",
+        p_nom_extendable=True,
+    )
+
+    for bus in egs_potential.index.get_level_values(1).unique():
+
+        ss = egs_potential.loc[idx[bus,:]]
+        nodes = f"{bus} " + pd.Index(range(len(ss)))
+
+        p_nom_max = ss["potentials"].values
+        capex = ss.index.values
+        opex = ss["opex"].values
+        eta = ss["efficiency"].values
+
+        n.madd(
+            "Bus",
+            nodes,
+            suffix=" EGS surface",
+            carrier="geothermal heat",
+        )
+
+        n.madd(
+            "Link",
+            nodes,
+            suffix=" EGS well",
+            bus0="EGS",
+            bus1=nodes + " EGS surface",
+            p_nom_max=p_nom_max / eta,
+            capital_cost=capex * eta,
+            p_nom_extendable=True,
+        )
+
+        n.madd(
+            "StorageUnit",
+            nodes,
+            suffix=" EGS reservoir",
+            bus=nodes + " EGS surface",
+            max_hours=100, # should be agreed on, constraint to be implemented
+        )
+
+        n.madd(
+            "Link",
+            nodes,
+            suffix=" EGS surface",
+            bus0=nodes + " EGS surface",
+            bus1=bus,
+            carrier="orc",
+            efficiency=eta,
+            marginal_cost=opex,
+            p_nom_extendable=True,
+        )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         snakemake = mock_snakemake(
@@ -345,6 +416,8 @@ if __name__ == "__main__":
     s_max_pu = snakemake.params.lines["s_max_pu"]
 
     set_line_s_max_pu(n, s_max_pu)
+
+    add_enhanched_geothermal(n)
 
     for o in opts:
         m = re.match(r"^\d+h$", o, re.IGNORECASE)
