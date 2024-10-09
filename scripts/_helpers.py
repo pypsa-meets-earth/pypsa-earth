@@ -36,8 +36,13 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 # filename of the regions definition config file
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
+# absolute path to base directory (pypsa-earth)
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
-def check_config_version(config, fp_config="config.default.yaml"):
+# absolute path to config.default.yaml
+CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, 'config.default.yaml')
+
+def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
