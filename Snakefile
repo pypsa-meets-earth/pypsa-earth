@@ -765,17 +765,12 @@ rule build_egs_potentials:
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        egs_potentials="resources/"
-        + RDIR
-        + "egs_potential_s{simpl}_{clusters}.csv",
+        egs_potentials="resources/" + RDIR + "egs_potential_s{simpl}_{clusters}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        (
-            RDIR
-            + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}"
-        )
+        (RDIR + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}")
     script:
         "scripts/build_egs_potentials.py"
 
@@ -791,9 +786,7 @@ rule prepare_network:
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs=COSTS,
-        egs_potentials="resources/"
-        + RDIR
-        + "egs_potential_s{simpl}_{clusters}.csv",
+        egs_potentials="resources/" + RDIR + "egs_potential_s{simpl}_{clusters}.csv",
     threads: 2
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",

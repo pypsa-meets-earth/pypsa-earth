@@ -321,13 +321,9 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
     n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
 
 
-
 def add_enhanced_geothermal(n):
 
-    egs_potential = pd.read_csv(
-        snakemake.input["egs_potentials"],
-        index_col=[0,1]
-        )
+    egs_potential = pd.read_csv(snakemake.input["egs_potentials"], index_col=[0, 1])
 
     idx = pd.IndexSlice
 
@@ -346,11 +342,11 @@ def add_enhanced_geothermal(n):
         p_nom_extendable=True,
     )
 
-    eta = 0.15 # preliminary
+    eta = 0.15  # preliminary
 
     for bus in egs_potential.index.get_level_values(0).unique():
 
-        ss = egs_potential.loc[idx[bus,:]]
+        ss = egs_potential.loc[idx[bus, :]]
 
         nodes = f"{bus} " + pd.Index(range(len(ss)), dtype=str)
 
@@ -382,7 +378,7 @@ def add_enhanced_geothermal(n):
             nodes,
             suffix=" EGS reservoir",
             bus=nodes + " EGS surface",
-            max_hours=100, # should be agreed on, constraint to be implemented
+            max_hours=100,  # should be agreed on, constraint to be implemented
         )
 
         n.madd(
@@ -423,7 +419,7 @@ if __name__ == "__main__":
 
     set_line_s_max_pu(n, s_max_pu)
 
-    if snakemake.params.renewable['enhanced_geothermal']['enable']:
+    if snakemake.params.renewable["enhanced_geothermal"]["enable"]:
         add_enhanced_geothermal(n)
 
     for o in opts:
