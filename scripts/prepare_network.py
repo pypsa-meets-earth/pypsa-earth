@@ -325,7 +325,7 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
 def add_enhanced_geothermal(n):
 
     egs_potential = pd.read_csv(
-        snakemake.input["egs_potential"],
+        snakemake.input["egs_potentials"],
         index_col=[0,1]
         )
 
@@ -346,15 +346,18 @@ def add_enhanced_geothermal(n):
         p_nom_extendable=True,
     )
 
-    for bus in egs_potential.index.get_level_values(1).unique():
+    eta = 0.15 # preliminary
+
+    for bus in egs_potential.index.get_level_values(0).unique():
 
         ss = egs_potential.loc[idx[bus,:]]
-        nodes = f"{bus} " + pd.Index(range(len(ss)))
 
-        p_nom_max = ss["potentials"].values
+        nodes = f"{bus} " + pd.Index(range(len(ss)), dtype=str)
+
+        p_nom_max = ss["available_capacity[MW]"].values
         capex = ss.index.values
-        opex = ss["opex"].values
-        eta = ss["efficiency"].values
+        opex = ss["opex[$/kWh]"].values
+        # eta = ss["efficiency"].values
 
         n.madd(
             "Bus",
