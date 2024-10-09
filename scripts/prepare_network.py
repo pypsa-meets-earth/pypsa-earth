@@ -322,9 +322,12 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
 
 
 
-def add_enhanched_geothermal(n):
+def add_enhanced_geothermal(n):
 
-    egs_potential = pd.read_csv(snakemake.input["egs_potential"], index_col=[0,1])
+    egs_potential = pd.read_csv(
+        snakemake.input["egs_potential"],
+        index_col=[0,1]
+        )
 
     idx = pd.IndexSlice
 
@@ -417,7 +420,8 @@ if __name__ == "__main__":
 
     set_line_s_max_pu(n, s_max_pu)
 
-    add_enhanched_geothermal(n)
+    if snakemake.params.renewable['enhanced_geothermal']['enable']:
+        add_enhanced_geothermal(n)
 
     for o in opts:
         m = re.match(r"^\d+h$", o, re.IGNORECASE)

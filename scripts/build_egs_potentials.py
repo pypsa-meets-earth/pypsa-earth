@@ -29,18 +29,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_egs_potentials",
             simpl="",
-            clusters=38,
+            clusters=50,
         )
-        sets_path_to_root("pypsa-earth-sec")
-
 
     regions = gpd.read_file(snakemake.input.regions_onshore).set_index("name")
-
-    demands = ["AC", "industrial_hot", "industrial_medium"]
-    # demand_array = xr.open_dataarray(snakemake.input.demand_array)
-
-    # egs_potentials = pd.read_csv('egs_dummy_data.csv', index_col=[0,1,2])
     egs_potentials = pd.read_csv(snakemake.input["egs_potential"], index_col=[0,1,2])
+
     gdf = gpd.GeoDataFrame(
         egs_potentials,
         geometry=gpd.points_from_xy(
@@ -48,12 +42,15 @@ if __name__ == "__main__":
             egs_potentials.index.get_level_values('lat')
             )).set_crs(epsg=4326)
 
-    node_egs_capex = pd.DataFrame(index=regions.index, columns=demands)
+    nodal_egs_potentials = pd.DataFrame(
+        np.nan,
+        index=regions.index,
+        columns=['capex[$/kW]', 'opex[$/kWh]', 'p_nom_max[MW]']
+        )
 
     config = snakemake.params["enhanced_geothermal"]
 
     regional_potentials = []
-
 
     for name, geom in regions.geometry.items():
 
@@ -62,43 +59,38 @@ if __name__ == "__main__":
             continue
 
         ss = (
-            ss[['capex', 'opex']]
+            ss[['capex[$/kW]', 'opex[$/kWh]', 'available_capacity[MW]']]
             .reset_index(drop=True)
-            .sort_values(by='capex')
+            .sort_values(by='capex[$/kW]')
         )
 
-        ss['potential'] = ss.index
-        ss['agg_potential'] = ss['potential'].cumsum()
+        ss['agg_available_capacity[MW]'] = ss['available_capacity[MW]'].cumsum()
 
-        bins = pd.Series(np.linspace(ss['capex'].min(), ss['capex'].max(), config['max_levels']+1))
+        bins = pd.Series(
+                np.linspace(
+                    ss['capex[$/kW]'].min(),
+                    ss['capex[$/kW]'].max(),
+                    config['max_levels']+1
+                    )
+                )
+
         labels = bins.rolling(2).mean().dropna().tolist()
 
-        ss['level'] = pd.cut(ss['capex'], bins=bins, labels=labels)
+        ss['level'] = pd.cut(ss['capex[$/kW]'], bins=bins, labels=labels)
+        ss = ss.dropna()
 
         ss = (
             ss
-            .groupby('level')[['potential', 'opex']]
-            .agg({'potential': 'sum', 'opex': 'mean'})
+            .groupby('level')[['available_capacity[MW]', 'opex[$/kWh]']]
+            .agg({'available_capacity[MW]': 'sum', 'opex[$/kWh]': 'mean'})
         )
-        ss.index = pd.MultiIndex.from_product([[name], ss.index], names=['network_region', 'capex'])
+        ss.index = (
+            pd.MultiIndex.from_product(
+                [[name], ss.index],
+                names=['network_region', 'capex[$/kW]']
+                )
+            )
 
         regional_potentials.append(ss) 
-
-        # to be included once heat usage data is available
-        """
-        geom = regions.loc[region, 'geometry']
-        demand_geoms = get_demand_geometries(demand_array, geom)
-
-        rings = get_circles(
-            geom,
-            config['demand_steps'],
-            config['demand_max_distance'],
-        )
-
-        for ring in rings:
-
-            for demand in demands:
-                demand = get_demands(demand_array, geom, demand_geoms)
-        """
 
     pd.concat(regional_potentials).dropna().to_csv(snakemake.output.egs_potentials)
