@@ -26,6 +26,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`_
 
+* Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`_
+
 PyPSA-Earth 0.4.1
 =================
 
