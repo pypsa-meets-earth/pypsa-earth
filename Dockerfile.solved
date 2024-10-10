@@ -1,0 +1,26 @@
+FROM condaforge/mambaforge
+
+RUN conda update -n base conda
+RUN conda install -n base conda-libmamba-solver
+RUN conda config --set solver libmamba
+
+RUN apt-get update && apt-get install -y git
+
+WORKDIR /pypsa-earth
+
+COPY . .
+
+RUN conda env create --file envs/environment.yaml 
+
+RUN echo "source activate pypsa-earth" > ~/.bashrc
+ENV PATH /opt/conda/envs/pypsa-earth/bin:$PATH
+
+RUN /bin/bash -c "source activate pypsa-earth && snakemake -j 1 solve_all_networks"
+
+RUN git ls-files -z | xargs -0 rm
+
+RUN find . -type d -empty -delete
+
+RUN rm -rf scripts config data .snakemake .git
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]
