@@ -8,11 +8,11 @@ WORKDIR /pypsa-earth
 
 COPY ./envs ./envs
 
-RUN conda env create --file envs/environment.yaml
+RUN conda env create -n pypsa-earth --file envs/environment.yaml
 
 RUN rm -r envs
 
-RUN echo "source activate pypsa-earth" > ~/.bashrc
+RUN echo "conda activate pypsa-earth" > ~/.bashrc
 ENV PATH /opt/conda/envs/pypsa-earth/bin:$PATH
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]
