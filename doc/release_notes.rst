@@ -26,6 +26,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`_
 
+* Use absolute path for `config.default.yaml` in `_helpers.py` for facilitate smooth module import `PR #1137 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1137>`_
+
 PyPSA-Earth 0.4.1
 =================
 
