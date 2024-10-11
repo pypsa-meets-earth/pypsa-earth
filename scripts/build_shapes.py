@@ -19,12 +19,12 @@ import rasterio
 import requests
 import xarray as xr
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_logger,
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
-    BASE_DIR
 )
 from numba import njit
 from numba.core import types
@@ -584,9 +584,7 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     GDP_nc = os.path.join(BASE_DIR, "data", "GDP", name_file_nc)  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(
-        BASE_DIR, "data", "GDP", name_file_tif
-    )  # Input filepath nc
+    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
@@ -629,9 +627,7 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(
-        BASE_DIR, "data", "GDP", name_file_tif
-    )  # Input filepath tif
+    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
