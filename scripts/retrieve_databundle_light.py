@@ -143,7 +143,7 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
-    destination = os.path.relpath(config["destination"])
+    destination = os.path.join(PREFIX, config["destination"])
     url = config["urls"]["zenodo"]
 
     if hot_run:
@@ -188,7 +188,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
-    destination = os.path.relpath(config["destination"])
+    destination = os.path.join(PREFIX, config["destination"])
     url = config["urls"]["gdrive"]
 
     # retrieve file_id from path
@@ -266,7 +266,7 @@ def download_and_unzip_protectedplanet(
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile_wpda.zip")
-    destination = os.path.relpath(config["destination"])
+    destination = os.path.join(PREFIX, config["destination"])
     url = config["urls"]["protectedplanet"]
 
     def get_first_day_of_month(date):
@@ -438,7 +438,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = os.path.relpath(config["destination"])
+    destination = os.path.join(PREFIX, config["destination"])
     url = config["urls"]["direct"]
 
     file_path = os.path.join(destination, os.path.basename(url))
@@ -492,7 +492,7 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = os.path.relpath(config["destination"])
+    destination = os.path.join(PREFIX, config["destination"])
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
@@ -543,7 +543,7 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = os.path.relpath(config["destination"])
+    destination = os.path.join(PREFIX, config["destination"])
 
     # load data for post method
     postdata = config["urls"]["post"]
@@ -792,8 +792,8 @@ def datafiles_retrivedatabundle(config):
 
 
 def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
-    basins_path = config_hydrobasin["destination"]
-    output_fl = config_hydrobasin["output"][0]
+    basins_path = os.path.join(PREFIX, config_hydrobasin["destination"])
+    output_fl = os.path.join(PREFIX, config_hydrobasin["output"][0])
 
     files_to_merge = [
         "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)
@@ -823,6 +823,9 @@ if __name__ == "__main__":
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
+
+    # get prefix (exists only if importing rule as import, else empty string)
+    PREFIX = snakemake.log[0].split("log")[0]
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
