@@ -574,8 +574,6 @@ def mock_snakemake(
         if isinstance(configfile, str):
             with open(configfile, "r") as file:
                 configfile = yaml.safe_load(file)
-        else:
-            configfile = None
 
         workflow = sm.Workflow(
             snakefile,
