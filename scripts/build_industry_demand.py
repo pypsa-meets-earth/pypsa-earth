@@ -205,6 +205,9 @@ if __name__ == "__main__":
 
         aluminium_year = snakemake.params.aluminium_year
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
+        # drop duplicate entries for the same country and year by keeping highest production data
+        AL = AL.sort_values(by=['country', 'Year', 'production[ktons/a]'], ascending=[True, True, False]).reset_index()
+        AL = AL.drop_duplicates(subset=["country", "Year"], keep='first').set_index("country")
         AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"
         ].reindex(countries_geo, fill_value=0.0)
