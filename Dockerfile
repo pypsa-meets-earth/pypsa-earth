@@ -20,6 +20,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 
 ENV PATH /opt/conda/envs/pypsa-earth/bin:$PATH
 
+RUN conda install conda-forge::openjdk -y
+
 RUN rm -r temp
 
 RUN conda clean -afy && \
