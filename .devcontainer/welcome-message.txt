@@ -1,13 +1,21 @@
 
 
-👋 Welcome to pypsa-eur contribution in a dev container! 
-     Works in VS Code, or in docker using the devcontainer cli
-
-See https://github.com/drifter089/pypsa-eur/blob/master/README.md for guidance on debugging and contributing to pypsa-eur
 
 
-For details about dev containers see https://containers.dev
+👋 Welcome to the PyPSA-Earth Development Environment!
 
-The configuration for the dev container is in the .github/.devcontainer folder.
+We’re excited to have you here! This setup allows you to contribute to PyPSA-Earth effortlessly using a development container in VS Code.
 
-🔍 To explore VS Code to its fullest, search using the Command Palette (Cmd/Ctrl + Shift + P or F1).+
+📖 Getting Started for New Users
+
+	•	For a step-by-step guide on setting up your environment, debugging, and making your first contribution, refer to the PyPSA-Earth README. It covers everything you need to know as a newcomer.
+	•	The configuration files for the development container are located in the .github/.devcontainer folder.
+
+💡 Tips for New Users
+
+	•	Make the most of VS Code by using the Command Palette (Cmd/Ctrl + Shift + P or F1) for quick access to features and commands.
+	•	If you’re new to development containers, learn the basics at containers.dev.
+
+🚀 Start Exploring and Happy Coding!
+
+Don’t hesitate to reach out if you need help—our community is here to support you.
