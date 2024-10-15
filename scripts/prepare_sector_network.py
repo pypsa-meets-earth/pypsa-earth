@@ -1089,7 +1089,9 @@ def add_aviation(n, cost):
 
 def add_storage(n, costs):
     "function to add the different types of storage systems"
-    n.add("Carrier", "battery")
+
+    if not "battery" in n.carriers.index:
+        n.add("Carrier", "battery")
 
     n.madd(
         "Bus",
