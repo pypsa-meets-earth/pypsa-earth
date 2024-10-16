@@ -19,6 +19,7 @@ import rasterio
 import requests
 import xarray as xr
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_logger,
     three_2_two_digits_country,
@@ -85,7 +86,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
-        os.getcwd(),
+        BASE_DIR,
         "data",
         "gadm",
         GADM_filename,
@@ -489,7 +490,7 @@ def download_WorldPop_standard(
         ]
 
     WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "WorldPop", WorldPop_filename
+        BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
@@ -543,7 +544,7 @@ def download_WorldPop_API(
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
     WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "WorldPop", WorldPop_filename
+        BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
     os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
     year_api = int(str(year)[2:])
@@ -580,12 +581,10 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "GDP", name_file_nc)  # Input filepath nc
+    GDP_nc = os.path.join(BASE_DIR, "data", "GDP", name_file_nc)  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath nc
+    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
@@ -628,9 +627,7 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath tif
+    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:

@@ -30,6 +30,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`_
 
+* Use sumodule prefix in rules and `_helpers.py` script for facilitate smooth module import `PR #1137 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1137>`_
+
 PyPSA-Earth 0.4.1
 =================
 
