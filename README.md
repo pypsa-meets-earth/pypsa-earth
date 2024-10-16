@@ -327,6 +327,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/finozzifa">
+            <img src="https://avatars.githubusercontent.com/u/167071962?v=4" width="100;" alt="finozzifa"/>
+            <br />
+            <sub><b>Finozzifa</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Emre-Yorat89">
             <img src="https://avatars.githubusercontent.com/u/62134151?v=4" width="100;" alt="Emre-Yorat89"/>
             <br />
@@ -352,13 +359,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <img src="https://avatars.githubusercontent.com/u/99509555?v=4" width="100;" alt="Ekaterina-Vo"/>
             <br />
             <sub><b>Ekaterina-Vo</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/finozzifa">
-            <img src="https://avatars.githubusercontent.com/u/167071962?v=4" width="100;" alt="finozzifa"/>
-            <br />
-            <sub><b>Finozzifa</b></sub>
         </a>
     </td></tr>
 <tr>
