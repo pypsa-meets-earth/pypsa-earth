@@ -522,7 +522,9 @@ def get_aggregation_strategies(aggregation_strategies):
     return bus_strategies, generator_strategies
 
 
-def mock_snakemake(rulename, root_dir=None, submodule_dir=None, **wildcards):
+def mock_snakemake(
+    rulename, root_dir=None, submodule_dir=None, configfile=None, **wildcards
+):
     """
     This function is expected to be executed from the "scripts"-directory of "
     the snakemake project. It returns a snakemake.script.Snakemake object,
@@ -534,6 +536,8 @@ def mock_snakemake(rulename, root_dir=None, submodule_dir=None, **wildcards):
     ----------
     rulename: str
         name of the rule for which the snakemake object should be generated
+    configfile: str
+        path to config file to be used in mock_snakemake
     wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
@@ -566,9 +570,17 @@ def mock_snakemake(rulename, root_dir=None, submodule_dir=None, **wildcards):
             if os.path.exists(p):
                 snakefile = p
                 break
+
+        if isinstance(configfile, str):
+            with open(configfile, "r") as file:
+                configfile = yaml.safe_load(file)
+
         workflow = sm.Workflow(
-            snakefile, overwrite_configfiles=[], rerun_triggers=[]
-        )  # overwrite_config=config
+            snakefile,
+            overwrite_configfiles=[],
+            rerun_triggers=[],
+            overwrite_config=configfile,
+        )
         workflow.include(snakefile)
         workflow.global_resources = {}
         try:
