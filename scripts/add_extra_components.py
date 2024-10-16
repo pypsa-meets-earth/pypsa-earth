@@ -104,7 +104,7 @@ def attach_stores(n, costs, config):
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    buses_i = n.buses.query("carrier == 'AC'").index
+    buses_i = n.buses.index
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
     if "H2" in carriers:
