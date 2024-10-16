@@ -245,7 +245,8 @@ def H2_liquid_fossil_conversions(n, costs):
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
 
-    n.add("Carrier", "H2")
+    if not "H2" in n.carriers.index:
+        n.add("Carrier", "H2")
 
     n.madd(
         "Bus",
@@ -1088,7 +1089,9 @@ def add_aviation(n, cost):
 
 def add_storage(n, costs):
     "function to add the different types of storage systems"
-    n.add("Carrier", "battery")
+
+    if not "battery" in n.carriers.index:
+        n.add("Carrier", "battery")
 
     n.madd(
         "Bus",
