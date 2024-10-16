@@ -11,10 +11,8 @@ import logging
 import numpy as np
 import pandas as pd
 import pypsa
-import xarray as xr
+from _helpers import mock_snakemake
 from add_existing_baseyear import add_build_year_to_new_assets
-
-# from pypsa.clustering.spatial import normed_or_uniform
 
 logger = logging.getLogger(__name__)
 idx = pd.IndexSlice
@@ -226,8 +224,6 @@ def disable_grid_expansion_if_limit_hit(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-
-        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "add_brownfield",

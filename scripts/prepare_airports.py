@@ -3,11 +3,8 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import numpy as np
 import pandas as pd
-
-# from _helpers import configure_logging
-
+from _helpers import mock_snakemake
 
 # logger = logging.getLogger(__name__)
 
@@ -38,10 +35,7 @@ def download_airports():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("prepare_airports")
-    # configure_logging(snakemake)
 
     # run = snakemake.config.get("run", {})
     # RDIR = run["name"] + "/" if run.get("name") else ""

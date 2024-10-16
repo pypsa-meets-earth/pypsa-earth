@@ -2,19 +2,12 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import logging
-import os
 import shutil
-from pathlib import Path
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
-
-# from _helpers import configure_logging
-
-
-# logger = logging.getLogger(__name__)
+from _helpers import get_current_directory_path, get_path, mock_snakemake
 
 
 def download_number_of_vehicles():
@@ -108,7 +101,6 @@ def download_CO2_emissions():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("prepare_transport_data_input")
 
@@ -127,7 +119,9 @@ if __name__ == "__main__":
 
     if vehicles_csv.empty or CO2_emissions_csv.empty:
         # In case one of the urls is not working, we can use the hard-coded data
-        src = os.getcwd() + "/data/temp_hard_coded/transport_data.csv"
+        src = get_path(
+            get_current_directory_path(), "data/temp_hard_coded/transport_data.csv"
+        )
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:

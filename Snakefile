@@ -3,10 +3,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import sys
+import pathlib
 
 sys.path.append("./scripts")
 
-from os.path import normpath, exists, isdir
+from os.path import normpath
 from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
@@ -19,7 +20,6 @@ from _helpers import (
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
-from pathlib import Path
 
 
 HTTP = HTTPRemoteProvider()
@@ -295,7 +295,7 @@ rule build_bus_regions:
         base_network="networks/" + RDIR + "base.nc",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
+        #To use: download file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
@@ -323,7 +323,7 @@ def terminate_if_cutout_exists(config=config):
 
     for ct in set(config_cutouts):
         cutout_fl = "cutouts/" + CDIR + ct + ".nc"
-        if os.path.exists(cutout_fl):
+        if pathlib.Path(cutout_fl).exists():
             raise Exception(
                 "An option `build_cutout` is enabled, while a cutout file '"
                 + cutout_fl
@@ -491,15 +491,12 @@ rule build_powerplants:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
+        custom_powerplants=config["electricity"]["custom_powerplants"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/custom_powerplants.csv",
+        custom_powerplants_file="data/custom_powerplants.csv",
         osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
         powerplants="resources/" + RDIR + "powerplants.csv",
@@ -1042,6 +1039,8 @@ if not config["custom_data"]["gas_network"]:
             year=config["build_shape_options"]["year"],
             nprocesses=config["build_shape_options"]["nprocesses"],
             contended_flag=config["build_shape_options"]["contended_flag"],
+            gadm_file_prefix=config["build_shape_options"]["gadm_file_prefix"],
+            gadm_url_prefix=config["build_shape_options"]["gadm_url_prefix"],
             geo_crs=config["crs"]["geo_crs"],
             custom_gas_network=config["custom_data"]["gas_network"],
         input:
@@ -1060,6 +1059,10 @@ if not config["custom_data"]["gas_network"]:
 rule prepare_sector_network:
     params:
         costs=config["costs"],
+        contended_flag=config["build_shape_options"]["contended_flag"],
+        gadm_file_prefix=config["build_shape_options"]["gadm_file_prefix"],
+        gadm_url_prefix=config["build_shape_options"]["gadm_url_prefix"],
+        geo_crs=config["crs"]["geo_crs"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
@@ -1124,6 +1127,10 @@ rule add_export:
         export_profile=config["export"]["export_profile"],
         snapshots=config["snapshots"],
         costs=config["costs"],
+        contended_flag=config["build_shape_options"]["contended_flag"],
+        gadm_file_prefix=config["build_shape_options"]["gadm_file_prefix"],
+        gadm_url_prefix=config["build_shape_options"]["gadm_url_prefix"],
+        geo_crs=config["crs"]["geo_crs"],
     input:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
@@ -1646,6 +1653,10 @@ rule build_industrial_distribution_key:  #default data
         gadm_level=config["sector"]["gadm_level"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         industry_database=config["custom_data"]["industry_database"],
+        contended_flag=config["build_shape_options"]["contended_flag"],
+        gadm_file_prefix=config["build_shape_options"]["gadm_file_prefix"],
+        gadm_url_prefix=config["build_shape_options"]["gadm_url_prefix"],
+        geo_crs=config["crs"]["geo_crs"],
     input:
         regions_onshore="resources/"
         + RDIR
@@ -1943,6 +1954,6 @@ rule run_all_scenarios:
             "results/{scenario_name}/scenario.done",
             scenario_name=[
                 c.stem.replace("config.", "")
-                for c in Path("configs/scenarios").glob("config.*.yaml")
+                for c in pathlib.Path("configs/scenarios").glob("config.*.yaml")
             ],
         ),

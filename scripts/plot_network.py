@@ -17,8 +17,6 @@ Description
 -----------
 """
 
-import os
-
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib as mpl
@@ -32,6 +30,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     load_network_for_plots,
+    mock_snakemake,
 )
 from matplotlib.legend_handler import HandlerPatch
 from matplotlib.patches import Circle, Ellipse
@@ -43,14 +42,14 @@ logger = create_logger(__name__)
 
 def assign_location(n):
     for c in n.iterate_components(n.one_port_components | n.branch_components):
-        ifind = pd.Series(c.df.index.str.find(" ", start=4), c.df.index)
+        i_find = pd.Series(c.df.index.str.find(" ", start=4), c.df.index)
 
-        for i in ifind.value_counts().index:
+        for i in i_find.value_counts().index:
             # these have already been assigned defaults
             if i == -1:
                 continue
 
-            names = ifind.index[ifind == i]
+            names = i_find.index[i_find == i]
 
             c.df.loc[names, "location"] = names.str[:i]
 
@@ -1069,10 +1068,6 @@ nice_names_n = {
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        import os
-
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "plot_network",
             network="elec",

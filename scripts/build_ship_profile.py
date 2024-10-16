@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import logging
-import os
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from _helpers import mock_snakemake
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +63,6 @@ def build_ship_profile(export_volume, ship_opts):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "build_ship_profile",
             h2export="120",

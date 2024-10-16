@@ -12,16 +12,16 @@
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
+# documentation root, use pathlib.Path.absolute to make it absolute, like shown here.
 #
 import datetime
-import os
+import pathlib
 import shutil
 import sys
 
 from git import Repo
 
-sys.path.insert(0, os.path.abspath("../scripts"))
+sys.path.insert(0, str(pathlib.Path("../scripts").absolute()))
 for p in sys.path:
     print(p)
 

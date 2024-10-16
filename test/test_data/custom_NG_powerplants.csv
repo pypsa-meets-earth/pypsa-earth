@@ -1,0 +1,5 @@
+Name,Fueltype,Technology,Set,Country,Capacity,Efficiency,Duration,Volume_Mm3,DamHeight_m,StorageCapacity_MWh,DateIn,DateRetrofit,DateMothball,DateOut,lat,lon,EIC,projectID,bus
+Jebba,hydro,Reservoir,PP,NG,578,,,0,0,0,0,1985,1985,2085,9.1409,4.7896,{nan},"{'GHPT': {'G602885'}, 'GEO': {'GEO-42544'}, 'GPD': {'WRI1000037'}}",
+Olorunsogo,CCGT,CCGT,PP,NG,754,,,0,0,0,0,2008,2008,2048,6.885316,3.316268,"{nan, nan}","{'GGPT': {'L406801'}, 'GEO': {'GEO-42564'}, 'GPD': {'WRI1000031'}}",
+Gbarain Gas,CCGT,CCGT,PP,NG,252,,,0,0,0,0,2016,2016,2056,5.031067,6.301568,"{nan, nan}","{'GGPT': {'L406786'}, 'GEO': {'GEO-42563'}, 'GPD': {'WRI1000027'}}",
+Sapele,CCGT,CCGT,PP,NG,1472,,,0,0,0,0,1978,1978,2018,5.926139,5.644983,"{nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan}","{'GGPT': {'L406809', 'L406808'}, 'GEO': {'GEO-42560'}, 'GPD': {'WRI1000028'}}",

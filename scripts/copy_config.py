@@ -2,8 +2,10 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import os
+
 from shutil import copy
+
+from _helpers import mock_snakemake
 
 files_to_copy = {
     "./config.yaml": "config.yaml",
@@ -14,8 +16,6 @@ files_to_copy = {
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("copy_config")
 
     directory = snakemake.output["folder"]

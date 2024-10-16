@@ -6,20 +6,15 @@
 # -*- coding: utf-8 -*-
 import glob
 import logging
-import os
-import sys
+import pathlib
 from io import BytesIO
-from pathlib import Path
 from urllib.request import urlopen
 from zipfile import ZipFile
 
 import country_converter as coco
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import py7zr
-import requests
-from _helpers import aggregate_fuels, get_conv_factors
+from _helpers import aggregate_fuels, get_conv_factors, mock_snakemake, modify_commodity
 
 _logger = logging.getLogger(__name__)
 
@@ -352,8 +347,6 @@ def calc_sector(sector):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "build_base_energy_totals",
             simpl="",
@@ -377,7 +370,7 @@ if __name__ == "__main__":
 
         files = glob.glob("data/demand/unsd/data/*.txt")
         for f in files:
-            os.remove(f)
+            pathlib.Path(f).unlink(missing_ok=True)
 
         # Feed the dictionary of links to the for loop, download and unzip all files
         for key, value in d.items():
@@ -390,7 +383,7 @@ if __name__ == "__main__":
                     path = "data/demand/unsd/data"
 
     # Get the files from the path provided in the OP
-    all_files = list(Path("data/demand/unsd/data").glob("*.txt"))
+    all_files = list(pathlib.Path("data/demand/unsd/data").glob("*.txt"))
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
@@ -401,6 +394,9 @@ if __name__ == "__main__":
     df[["Commodity", "Transaction", "extra"]] = df["Commodity - Transaction"].str.split(
         " - ", expand=True
     )
+
+    # Modify the commodity column, replacing typos and case-folding the strings
+    df["Commodity"] = df["Commodity"].map(modify_commodity)
 
     # Remove Foootnote and Estimate from 'Commodity - Transaction' column
     df = df.loc[df["Commodity - Transaction"] != "Footnote"]

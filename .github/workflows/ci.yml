@@ -31,7 +31,7 @@ jobs:
         shell: bash -l {0}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
 
     - name: Setup micromamba
@@ -62,7 +62,7 @@ jobs:
       run: micromamba list
 
     - name: Run Test
-      run: make test
+      run: make checks
 
       # - name: Test plotting and summaries
       #   run: |

@@ -8,9 +8,8 @@
 Module to zip the desired folders to be stored in google drive, or equivalent.
 """
 import os
+import pathlib
 import zipfile
-from os.path import basename
-from xml.etree.ElementInclude import include
 
 # Zip the files from given directory that matches the filter
 
@@ -23,7 +22,7 @@ def zipFilesInDir(dirName, zipFileName, filter, include_parent=True):
             for filename in filenames:
                 if filter(filename):
                     # create complete filepath of file in directory
-                    filePath = os.path.join(folderName, filename)
+                    filePath = str(pathlib.Path(folderName, filename))
 
                     # path of the zip file
                     if include_parent:

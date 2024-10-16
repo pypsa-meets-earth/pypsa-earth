@@ -6,18 +6,15 @@
 Build heat demand time series.
 """
 
-import os
-
 import atlite
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+from _helpers import mock_snakemake
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="10")
 
     time = pd.date_range(freq="h", **snakemake.params.snapshots)

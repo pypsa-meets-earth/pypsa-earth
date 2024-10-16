@@ -23,18 +23,29 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, override_component_attrs, prepare_costs
+from _helpers import locate_bus, mock_snakemake, override_component_attrs, prepare_costs
 
 logger = logging.getLogger(__name__)
 
 
-def select_ports(n):
+def select_ports(
+    n,
+    export_ports_path,
+    gadm_level_val,
+    geo_crs_val,
+    file_prefix_val,
+    gadm_url_prefix_val,
+    contended_flag_val,
+    gadm_input_file_args_list,
+    shapes_path_val,
+    gadm_clustering_val,
+):
     """
     This function selects the buses where ports are located.
     """
 
     ports = pd.read_csv(
-        snakemake.input.export_ports,
+        export_ports_path,
         index_col=None,
         keep_default_na=False,
     ).squeeze()
@@ -44,20 +55,24 @@ def select_ports(n):
         logger.error(
             "No export ports chosen, please add ports to the file data/export_ports.csv"
         )
-    gadm_level = snakemake.params.gadm_level
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
+    ports["gadm_{}".format(gadm_level_val)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(
             port[["x", "y"]],
             port["country"],
-            gadm_level,
-            snakemake.input["shapes_path"],
-            snakemake.params.alternative_clustering,
+            gadm_level_val,
+            geo_crs_val,
+            file_prefix_val,
+            gadm_url_prefix_val,
+            gadm_input_file_args_list,
+            contended_flag_val,
+            path_to_gadm=shapes_path_val,
+            gadm_clustering=gadm_clustering_val,
         ),
         axis=1,
     )
 
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    ports = ports.set_index("gadm_{}".format(gadm_level_val))
 
     # Select the hydrogen buses based on nodes with ports
     hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
@@ -185,9 +200,6 @@ def create_export_profile():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
@@ -203,7 +215,16 @@ if __name__ == "__main__":
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    export_ports = snakemake.input.export_ports
     countries = list(n.buses.country.unique())
+    gadm_level = snakemake.params.gadm_level
+    geo_crs = snakemake.params.geo_crs
+    file_prefix = snakemake.params.gadm_file_prefix
+    gadm_url_prefix = snakemake.params.gadm_url_prefix
+    contended_flag = snakemake.params.contended_flag
+    gadm_input_file_args = ["data", "raw", "gadm"]
+    shapes_path = snakemake.input["shapes_path"]
+    gadm_clustering = snakemake.params.alternative_clustering
 
     # Create export profile
     export_profile = create_export_profile()
@@ -219,7 +240,18 @@ if __name__ == "__main__":
     )
 
     # get hydrogen export buses/ports
-    hydrogen_buses_ports = select_ports(n)
+    hydrogen_buses_ports = select_ports(
+        n,
+        export_ports,
+        gadm_level,
+        geo_crs,
+        file_prefix,
+        gadm_url_prefix,
+        contended_flag,
+        gadm_input_file_args,
+        shapes_path,
+        gadm_clustering,
+    )
 
     # add export value and components to network
     add_export(n, hydrogen_buses_ports, export_profile)

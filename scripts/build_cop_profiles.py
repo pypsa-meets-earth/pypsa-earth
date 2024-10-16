@@ -7,6 +7,7 @@ Build COP time series for air- or ground-sourced heat pumps.
 """
 
 import xarray as xr
+from _helpers import mock_snakemake
 
 
 def coefficient_of_performance(delta_T, source="air"):
@@ -26,8 +27,6 @@ def coefficient_of_performance(delta_T, source="air"):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "build_cop_profiles",
             simpl="",
