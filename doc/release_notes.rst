@@ -28,6 +28,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
 
+* Included a configuration option to quantitavely set the tolerance levels for simplifying GADM shapes `PR #1147 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1147/commits>`
+
 PyPSA-Earth 0.4.1
 =================
 
