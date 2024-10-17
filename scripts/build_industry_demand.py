@@ -205,12 +205,21 @@ if __name__ == "__main__":
 
         aluminium_year = snakemake.params.aluminium_year
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
-        # drop duplicate entries for the same country and year by keeping highest production data
-        AL = AL.sort_values(by=['country', 'Year', 'production[ktons/a]'], ascending=[True, True, False]).reset_index()
-        AL = AL.drop_duplicates(subset=["country", "Year"], keep='first').set_index("country")
+        # Filter data for the given year and countries
         AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"
-        ].reindex(countries_geo, fill_value=0.0)
+        ]
+
+        # Check for duplicate entries per country
+        duplicates = AL_prod_tom.index[AL_prod_tom.index.duplicated(keep=False)].unique()
+        if len(duplicates) > 0:
+            raise ValueError(
+            f"There are more than one entry for aluminium production data for the following countries: {', '.join(duplicates)} in 'data/AL_production.csv'"
+        )
+
+        # Reindex and fill missing values with 0.0
+        AL_prod_tom = AL_prod_tom.reindex(countries_geo, fill_value=0.0)
+
         AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
         Steel_emissions = (
