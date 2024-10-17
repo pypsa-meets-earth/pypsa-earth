@@ -401,7 +401,9 @@ def eez(
         # repeat to simplify after the buffer correction
         ret_df_new = ret_df_new.map(
             lambda x: (
-                x if x is None else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+                x
+                if x is None
+                else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
             )
         )
         ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
@@ -1344,7 +1346,7 @@ if __name__ == "__main__":
     contended_flag = snakemake.params.build_shape_options["contended_flag"]
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
-    simplify_gadm = snakemake.params.build_shape_options['simplify_gadm']
+    simplify_gadm = snakemake.params.build_shape_options["simplify_gadm"]
 
     country_shapes = countries(
         countries_list,
