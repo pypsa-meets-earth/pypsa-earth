@@ -30,6 +30,9 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`_
 
+* Drop duplicate entries in `AL_production.csv` data used in `build_industry_demand` rule `PR #1143 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1143>`_
+
+
 PyPSA-Earth 0.4.1
 =================
 
