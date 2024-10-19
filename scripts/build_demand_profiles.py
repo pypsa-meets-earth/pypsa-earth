@@ -50,7 +50,7 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, read_osm_config
+from _helpers import configure_logging, create_logger, read_csv_nafix, read_osm_config, PREFIX
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -121,7 +121,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         sel_ext = ".nc"
         for ext in [".nc", ".csv"]:
-            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            load_path = os.path.join(PREFIX, str(load_dir), str(continent) + str(ext))
             if os.path.exists(load_path):
                 sel_ext = ext
                 break
