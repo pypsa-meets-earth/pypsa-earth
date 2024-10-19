@@ -93,6 +93,7 @@ from _helpers import (
     create_country_list,
     create_logger,
     progress_retrieve,
+    PREFIX
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from tqdm import tqdm
@@ -823,9 +824,6 @@ if __name__ == "__main__":
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
     logger.info(f"Retrieving data for {len(countries)} countries.")
-
-    # get prefix (exists only if importing rule as import, else empty string)
-    PREFIX = snakemake.log[0].split("log")[0]
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
