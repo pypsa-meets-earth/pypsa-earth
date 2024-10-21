@@ -37,7 +37,7 @@ jobs:
 
     - name: Test Container Image
       run: |
-        docker run --rm ghcr.io/${{ github.repository }} /bin/bash -c "git clone https://github.com/drifter089/pypsa-earth/tree/devContainers && cd pypsa-earth && bash .github/.devcontainer/test.sh"
+        docker run --rm ghcr.io/${{ github.repository }} /bin/bash -c  "git clone -b devContainers https://github.com/drifter089/pypsa-earth.git && cd pypsa-earth && bash .github/.devcontainer/test.sh"
 
     - name: Push Container Image
       if: ${{ success() }}
