@@ -9,7 +9,7 @@ exclude: ^(LICENSES)
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v5.0.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
@@ -49,7 +49,7 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 24.8.0
+  rev: 24.10.0
   hooks:
   # Format Python files
   - id: black
@@ -58,7 +58,7 @@ repos:
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.1
+  rev: v2.3.0
   hooks:
   - id: codespell
     args: ['--ignore-regex="\b[A-Z]+\b"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,vor'] # Ignore capital case words, e.g. country codes

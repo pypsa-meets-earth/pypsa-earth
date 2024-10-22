@@ -20,11 +20,20 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **Minor Changes and bug-fixing**
 
+* The default configuration for `electricity:estimate_renewable_capacities:year` was updated from 2020 to 2023. `PR #1106 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1106>`_
+
+* Include a dedicated cutout for North America in bundle_config.yaml `PR #1121 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1121>`_
+
+* Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`_
+
+* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
+
+* Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`_
 
 PyPSA-Earth 0.4.1
 =================
 
-**New Features and Major Changes**
+**New Features and Major Changes (19th September 2024)**
 
 * Add functionality to modify the cost assumptions using config files `PR #1097 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1097>`__
 
