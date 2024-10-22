@@ -27,4 +27,7 @@ RUN rm -r temp
 RUN conda clean -afy && \
     rm -rf /tmp/*
 
+ENV LD_PRELOAD=/opt/conda/envs/pypsa-earth/lib/python3.10/site-packages/sklearn/utils/../../../../libgomp.so.1
+
 CMD ["bash"]
+
