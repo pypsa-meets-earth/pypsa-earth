@@ -1344,7 +1344,7 @@ def add_shipping(n, costs):
     if options["shipping_hydrogen_liquefaction"]:
         n.madd(
             "Bus",
-            nodes,
+            spatial.nodes,
             suffix=" H2 liquid",
             carrier="H2 liquid",
             location=spatial.nodes,
@@ -1373,7 +1373,7 @@ def add_shipping(n, costs):
     ):
         n.madd(
             "Load",
-            nodes,
+            spatial.nodes,
             suffix=" H2 for shipping",
             bus=shipping_bus,
             carrier="H2 for shipping",
