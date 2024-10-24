@@ -36,13 +36,11 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 # filename of the regions definition config file
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
-# prefix when running pypsa-earth rules in different directories (if running in pypsa-earth directory PREFIX='.')
+# prefix when running pypsa-earth rules in different directories (if running in pypsa-earth as subworkflow)
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-RUN_DIR = os.path.abspath(os.getcwd())
-PREFIX = os.path.relpath(BASE_DIR, RUN_DIR)
 
 # absolute path to config.default.yaml
-CONFIG_DEFAULT_PATH = os.path.join(PREFIX, "config.default.yaml")
+CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
