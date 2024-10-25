@@ -41,6 +41,9 @@ repos:
   hooks:
   - id: docformatter
     args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
+    entry: docformatter
+    language: python
+    types: [python]
 
 - repo: https://github.com/keewis/blackdoc
   rev: v0.3.9
