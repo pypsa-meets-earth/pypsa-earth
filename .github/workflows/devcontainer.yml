@@ -13,9 +13,17 @@ on:
       
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - [ubuntu-latest]
+        - [macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
     steps:
-    - 
+    -
       name: Checkout
       id: checkout
       uses: actions/checkout@v1
