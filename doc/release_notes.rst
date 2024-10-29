@@ -34,6 +34,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Use BASE_DIR in rules and `_helpers.py` script for facilitate module import in subworkflow `PR #1137 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1137>`_
 
+* Include a dedicated cutout for Oceania in bundle_config.yaml `PR #1157 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1157>`_
+
 PyPSA-Earth 0.4.1
 =================
 
