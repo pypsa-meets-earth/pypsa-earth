@@ -36,6 +36,9 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Include a dedicated cutout for Oceania in bundle_config.yaml `PR #1157 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1157>`_
 
+* Drop duplicate entries in `AL_production.csv` data used in `build_industry_demand` rule `PR #1143 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1143>`_
+
+
 PyPSA-Earth 0.4.1
 =================
 
