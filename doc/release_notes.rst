@@ -20,7 +20,26 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 **Minor Changes and bug-fixing**
 
+* The default configuration for `electricity:estimate_renewable_capacities:year` was updated from 2020 to 2023. `PR #1106 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1106>`_
+
+* Include a dedicated cutout for North America in bundle_config.yaml `PR #1121 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1121>`_
+
+* Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`_
+
+* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
+
+* Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`_
+
+* Fix pre-commit docformatter python issue. `PR #1153 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1153>`__
+
+* Use BASE_DIR in rules and `_helpers.py` script for facilitate module import in subworkflow `PR #1137 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1137>`_
+
+* Include a dedicated cutout for Oceania in bundle_config.yaml `PR #1157 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1157>`_
+
+* Drop duplicate entries in `AL_production.csv` data used in `build_industry_demand` rule `PR #1143 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1143>`_
+
 * The computation of `hydro_profile.nc` in `build_renewable_profiles.py` is not differentiated whether alternative clustering is applied or not; the indexing of the different power plants in `add_electricity.py` is performed according to the bus either in case alternative clustering is applied or not and a `hydro_inflow_factor` is computed prior to the computation of `inflow_t` to split the inflow according to the capacity of each different unit of each power plant (if more units are present). `PR #1119 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1119>`_
+
 
 PyPSA-Earth 0.4.1
 =================

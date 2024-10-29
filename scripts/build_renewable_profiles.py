@@ -202,7 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, create_logger
+from _helpers import BASE_DIR, configure_logging, create_logger
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
@@ -538,7 +538,7 @@ if __name__ == "__main__":
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
-        hydrobasins = gpd.read_file(resource["hydrobasins"])
+        hydrobasins = gpd.read_file(os.path.join(BASE_DIR, resource["hydrobasins"]))
         ppls = load_powerplants(snakemake.input.powerplants)
 
         hydro_ppls = ppls[ppls.carrier == "hydro"]
