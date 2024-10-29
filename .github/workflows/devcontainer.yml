@@ -18,7 +18,7 @@ jobs:
       matrix:
         os:
         - [ubuntu-latest]
-        - [macos-latest]
+        - [ macos-13 ]
 
     runs-on: ${{ matrix.os }}
 
@@ -28,15 +28,13 @@ jobs:
       id: checkout
       uses: actions/checkout@v1
     
-    - name: Setup Colima (Docker alternative for macOS)
-      if: runner.os == 'macOS'
+    - name: Setup docker (missing on MacOS)
+      if: runner.os == 'macos'
       run: |
-        brew install colima docker
-        colima start --cpu 2 --memory 4
-        # Wait for Docker to be ready
-        while ! docker info >/dev/null 2>&1; do sleep 1; done
-    -
-      name: Login to GitHub Container Registry
+        brew install docker
+        colima start
+    
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
