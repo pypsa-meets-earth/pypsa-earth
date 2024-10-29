@@ -43,6 +43,8 @@ jobs:
         password: ${{ secrets.REGISTRY_TOKEN }}
     - 
       name: Build Dev Container Image
+      env: 
+        DOCKER_BUILDKIT: ${{ runner.os == 'macOS' && '0' || '' }}
       uses: devcontainers/ci@v0.2
       with:
         subFolder: .github
@@ -51,6 +53,8 @@ jobs:
         push: never  
 
     - name: Test Container Image
+      env: 
+        DOCKER_BUILDKIT: ${{ runner.os == 'macOS' && '0' || '' }}  
       run: |
         docker run --rm ghcr.io/${{ github.repository }} /bin/bash -c  "git clone -b devContainers https://github.com/drifter089/pypsa-earth.git && cd pypsa-earth && bash .github/.devcontainer/test.sh"
 
