@@ -186,6 +186,17 @@ Documentation
 
    monte_carlo
 
+**Applications**
+
+* :doc:`users_list`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Applications
+
+   users_list
+
 **Help and References**
 
 * :doc:`release_notes`
