@@ -50,7 +50,13 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, read_osm_config, BASE_DIR
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+    read_osm_config,
+)
 from shapely.prepared import prep
 from shapely.validation import make_valid
 

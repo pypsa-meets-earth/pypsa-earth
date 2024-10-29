@@ -65,7 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging, create_logger, BASE_DIR
+from _helpers import BASE_DIR, configure_logging, create_logger
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -89,7 +89,10 @@ def download_emission_data():
                 file.write(rq.content)
         file_path = os.path.join(BASE_DIR, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", os.path.join(BASE_DIR, "data"))
+            zipObj.extract(
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                os.path.join(BASE_DIR, "data"),
+            )
         os.remove(file_path)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
     except:

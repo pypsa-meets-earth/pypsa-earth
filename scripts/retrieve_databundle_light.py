@@ -89,11 +89,11 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_country_list,
     create_logger,
     progress_retrieve,
-    BASE_DIR
 )
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from tqdm import tqdm
