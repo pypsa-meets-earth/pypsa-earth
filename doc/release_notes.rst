@@ -32,6 +32,9 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Fix pre-commit docformatter python issue. `PR #1153 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1153>`__
 
+* Include a dedicated cutout for Oceania in bundle_config.yaml `PR #1157 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1157>`_
+
+
 PyPSA-Earth 0.4.1
 =================
 
