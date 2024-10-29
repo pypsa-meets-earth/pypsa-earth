@@ -15,6 +15,6 @@ Implications of the national decarbonisaiton goals for power system of Kazakhsta
 
 Possible implementation of energy transition in Saudi Arabia (MSc Thesis in Edinburgh University)
 
-Power system modeling for Korea considering ESS Capacity expansion, LMP & Cost analysis according to ESS combination, and coal phase-out scenario ("Energy Innovation Lab", Korea University https://energyinnovation.korea.ac.kr/)
+Power system modeling for Korea to support development of the national energy strategy, considering ESS Capacity expansion, LMP & Cost analysis according to ESS combination, and coal phase-out scenario (`Energy Innovation Lab <https://energyinnovation.korea.ac.kr/>`_ at `Korea University <https://www.korea.ac.kr/sites/ko/index.do>`_)
 
 Pakistan
