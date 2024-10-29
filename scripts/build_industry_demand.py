@@ -213,7 +213,9 @@ if __name__ == "__main__":
         # Check if aluminum data is missing for any countries
         for country in countries_geo:
             if country not in AL_prod_tom.index:
-                _logger.warning(f"No aluminum production data found for {country}. Filled with 0.0.")
+                _logger.warning(
+                    f"No aluminum production data found for {country}. Filled with 0.0."
+                )
 
         # Reindex and fill missing values with 0.0
         AL_prod_tom = AL_prod_tom.reindex(countries_geo, fill_value=0.0)
