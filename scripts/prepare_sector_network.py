@@ -622,8 +622,8 @@ def define_spatial(nodes, options):
     spatial.oil = SimpleNamespace()
 
     if options["oil"]["spatial_oil"]:
-        spatial.oil.nodes = spatial.nodes + " oil"
-        spatial.oil.locations = spatial.nodes
+        spatial.oil.nodes = nodes + " oil"
+        spatial.oil.locations = nodes
     else:
         spatial.oil.nodes = ["Africa oil"]
         spatial.oil.locations = ["Africa"]
@@ -633,13 +633,13 @@ def define_spatial(nodes, options):
     spatial.gas = SimpleNamespace()
 
     if options["gas"]["spatial_gas"]:
-        spatial.gas.nodes = spatial.nodes + " gas"
-        spatial.gas.locations = spatial.nodes
-        spatial.gas.biogas = spatial.nodes + " biogas"
-        spatial.gas.industry = spatial.nodes + " gas for industry"
+        spatial.gas.nodes = nodes + " gas"
+        spatial.gas.locations = nodes
+        spatial.gas.biogas = nodes + " biogas"
+        spatial.gas.industry = nodes + " gas for industry"
         if snakemake.config["sector"]["cc"]:
-            spatial.gas.industry_cc = spatial.nodes + " gas for industry CC"
-        spatial.gas.biogas_to_gas = spatial.nodes + " biogas to gas"
+            spatial.gas.industry_cc = nodes + " gas for industry CC"
+        spatial.gas.biogas_to_gas = nodes + " biogas to gas"
     else:
         spatial.gas.nodes = ["Africa gas"]
         spatial.gas.locations = ["Africa"]
@@ -650,6 +650,34 @@ def define_spatial(nodes, options):
         spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
 
     spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=spatial.nodes)
+
+    # coal
+
+    spatial.coal = SimpleNamespace()
+
+    if options["coal"]["spatial_coal"]:
+        spatial.coal.nodes = nodes + " coal"
+        spatial.coal.locations = nodes
+        spatial.coal.industry = nodes + " coal for industry"
+        if snakemake.config["sector"]["cc"]:
+            spatial.coal.industry_cc = nodes + " coal for industry CC"
+    else:
+        spatial.coal.nodes = ["Africa coal"]
+        spatial.coal.locations = ["Africa"]
+        spatial.coal.industry = ["Africa coal for industry"]
+        if snakemake.config["sector"]["cc"]:
+            spatial.coal.industry_cc = ["Africa coal for industry CC"]
+
+    # lignite
+
+    spatial.lignite = SimpleNamespace()
+
+    if options["lignite"]["spatial_lignite"]:
+        spatial.lignite.nodes = nodes + " lignite"
+        spatial.lignite.locations = nodes
+    else:
+        spatial.lignite.nodes = ["Africa lignite"]
+        spatial.lignite.locations = ["Africa"]
 
     return spatial
 
