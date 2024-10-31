@@ -389,13 +389,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/koen-vg">
-            <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
-            <br />
-            <sub><b>Koen Van Greevenbroek</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/danielelerede-oet">
             <img src="https://avatars.githubusercontent.com/u/175011591?v=4" width="100;" alt="danielelerede-oet"/>
             <br />
@@ -403,6 +396,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td></tr>
 <tr>
+    <td align="center">
+        <a href="https://github.com/carlosfv92">
+            <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
+            <br />
+            <sub><b>Carlos Fernandez</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/carlosfv92">
             <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
@@ -430,7 +430,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/juli-a-ko">
             <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>
@@ -473,7 +474,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
             <br />
             <sub><b>Katherine M. Antonio</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/jessLryan">
             <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
