@@ -659,14 +659,10 @@ def define_spatial(nodes, options):
         spatial.coal.nodes = nodes + " coal"
         spatial.coal.locations = nodes
         spatial.coal.industry = nodes + " coal for industry"
-        if snakemake.config["sector"]["cc"]:
-            spatial.coal.industry_cc = nodes + " coal for industry CC"
     else:
         spatial.coal.nodes = ["Africa coal"]
         spatial.coal.locations = ["Africa"]
         spatial.coal.industry = ["Africa coal for industry"]
-        if snakemake.config["sector"]["cc"]:
-            spatial.coal.industry_cc = ["Africa coal for industry CC"]
 
     # lignite
 
