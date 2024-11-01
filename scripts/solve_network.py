@@ -282,26 +282,37 @@ def add_EQ_constraints(n, o, scaling=1e-1):
 
 
 def add_BAU_constraints(n, config):
-    ext_c = n.generators.query("p_nom_extendable").carrier.unique()
-    mincaps = pd.Series(
-        config["electricity"].get("BAU_mincapacities", {key: 0 for key in ext_c})
-    )
-    lhs = (
-        linexpr((1, get_var(n, "Generator", "p_nom")))
-        .groupby(n.generators.carrier)
-        .apply(join_exprs)
-    )
-    define_constraints(n, lhs, ">=", mincaps[lhs.index], "Carrier", "bau_mincaps")
+    """
+    Add a per-carrier minimal overall capacity.
 
-    maxcaps = pd.Series(
-        config["electricity"].get("BAU_maxcapacities", {key: np.inf for key in ext_c})
-    )
-    lhs = (
-        linexpr((1, get_var(n, "Generator", "p_nom")))
-        .groupby(n.generators.carrier)
-        .apply(join_exprs)
-    )
-    define_constraints(n, lhs, "<=", maxcaps[lhs.index], "Carrier", "bau_maxcaps")
+    BAU_mincapacities and opts must be adjusted in the config.yaml.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    config : dict
+
+    Example
+    -------
+    scenario:
+        opts: [Co2L-BAU-24h]
+    electricity:
+        BAU_mincapacities:
+            solar: 0
+            onwind: 0
+            OCGT: 100000
+            offwind-ac: 0
+            offwind-dc: 0
+    Which sets minimum expansion across all nodes e.g. in Europe to 100GW.
+    OCGT bus 1 + OCGT bus 2 + ... > 100000
+    """
+    mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
+    p_nom = n.model["Generator-p_nom"]
+    ext_i = n.generators.query("p_nom_extendable")
+    ext_carrier_i = xr.DataArray(ext_i.carrier.rename_axis("Generator-ext"))
+    lhs = p_nom.groupby(ext_carrier_i).sum()
+    rhs = mincaps[lhs.indexes["carrier"]].rename_axis("carrier")
+    n.model.add_constraints(lhs >= rhs, name="bau_mincaps")
 
 
 def add_SAFE_constraints(n, config):
