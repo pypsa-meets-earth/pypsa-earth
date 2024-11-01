@@ -96,7 +96,6 @@ from pypsa.linopf import (
     linexpr,
     network_lopf,
 )
-from pypsa.linopt import define_constraints, get_var, join_exprs, linexpr
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
