@@ -86,16 +86,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import configure_logging, create_logger, override_component_attrs
+from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.linopf import (
-    define_constraints,
-    define_variables,
-    get_var,
-    ilopf,
-    join_exprs,
-    linexpr,
-    network_lopf,
-)
+from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
+from pypsa.optimization.optimize import optimize
+from vresutils.benchmark import memory_logger
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
