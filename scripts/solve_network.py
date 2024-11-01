@@ -52,15 +52,15 @@ Total annual system costs are minimised with PyPSA. The full formulation of the
 linear optimal power flow (plus investment planning)
 is provided in the
 `documentation of PyPSA <https://pypsa.readthedocs.io/en/latest/optimal_power_flow.html#linear-optimal-power-flow>`_.
-The optimization is based on the ``pyomo=False`` setting in the :func:`network.lopf` and  :func:`pypsa.linopf.ilopf` function.
-Additionally, some extra constraints specified in :mod:`prepare_network` are added.
+The optimization is based on the :func:`network.optimize` function.
+Additionally, some extra constraints specified in :mod:`prepare_network` and :mod:`solve_network` are added.
 
 Solving the network in multiple iterations is motivated through the dependence of transmission line capacities and impedances on values of corresponding flows.
 As lines are expanded their electrical parameters change, which renders the optimisation bilinear even if the power flow
 equations are linearized.
 To retain the computational advantage of continuous linear programming, a sequential linear programming technique
 is used, where in between iterations the line impedances are updated.
-Details (and errors made through this heuristic) are discussed in the paper
+Details (and errors introduced through this heuristic) are discussed in the paper
 
 - Fabian Neumann and Tom Brown. `Heuristics for Transmission Expansion Planning in Low-Carbon Energy System Models <https://arxiv.org/abs/1907.10548>`_), *16th International Conference on the European Energy Market*, 2019. `arXiv:1907.10548 <https://arxiv.org/abs/1907.10548>`_.
 
