@@ -205,9 +205,21 @@ if __name__ == "__main__":
 
         aluminium_year = snakemake.params.aluminium_year
         AL = read_csv_nafix("data/AL_production.csv", index_col=0)
+        # Filter data for the given year and countries
         AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"
-        ].reindex(countries_geo, fill_value=0.0)
+        ]
+
+        # Check if aluminum data is missing for any countries
+        for country in countries_geo:
+            if country not in AL_prod_tom.index:
+                _logger.warning(
+                    f"No aluminum production data found for {country}. Filled with 0.0."
+                )
+
+        # Reindex and fill missing values with 0.0
+        AL_prod_tom = AL_prod_tom.reindex(countries_geo, fill_value=0.0)
+
         AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
 
         Steel_emissions = (
