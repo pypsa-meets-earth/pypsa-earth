@@ -664,6 +664,8 @@ def define_spatial(nodes, options):
         spatial.coal.locations = ["Africa"]
         spatial.coal.industry = ["Africa coal for industry"]
 
+    spatial.coal.df = pd.DataFrame(vars(spatial.coal), index=spatial.nodes)
+
     # lignite
 
     spatial.lignite = SimpleNamespace()
@@ -674,6 +676,8 @@ def define_spatial(nodes, options):
     else:
         spatial.lignite.nodes = ["Africa lignite"]
         spatial.lignite.locations = ["Africa"]
+
+    spatial.lignite.df = pd.DataFrame(vars(spatial.lignite), index=spatial.nodes)
 
     return spatial
 
@@ -2707,9 +2711,11 @@ def remove_elec_base_techs(n):
     since they're re-added here using links.
     """
     conventional_generators = options.get("conventional_generation", {})
-    to_remove = list(conventional_generators.keys())
+    to_remove = pd.Index(conventional_generators.keys())
     # remove only conventional_generation carriers present in the network
-    to_remove = pd.Index(n.generators.carrier.unique()).intersection(to_remove)
+    to_remove = pd.Index(
+        snakemake.params.electricity.get("conventional_carriers", [])
+    ).intersection(to_remove)
 
     if to_remove.empty:
         return
