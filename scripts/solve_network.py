@@ -153,6 +153,25 @@ def prepare_network(n, solve_opts):
 
 
 def add_CCL_constraints(n, config):
+    """
+    Add CCL (country & carrier limit) constraint to the network.
+
+    Add minimum and maximum levels of generator nominal capacity per carrier
+    for individual countries. Opts and path for agg_p_nom_minmax.csv must be defined
+    in config.yaml. Default file is available at data/agg_p_nom_minmax.csv.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    config : dict
+
+    Example
+    -------
+    scenario:
+        opts: [Co2L-CCL-24H]
+    electricity:
+        agg_p_nom_limits: data/agg_p_nom_minmax.csv
+    """
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
