@@ -216,6 +216,28 @@ def add_CCL_constraints(n, config):
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
+    """
+    Add equity constraints to the network.
+
+    Currently this is only implemented for the electricity sector only.
+
+    Opts must be specified in the config.yaml.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    o : str
+
+    Example
+    -------
+    scenario:
+        opts: [Co2L-EQ0.7-24h]
+
+    Require each country or node to on average produce a minimal share
+    of its total electricity consumption itself. Example: EQ0.7c demands each country
+    to produce on average at least 70% of its consumption; EQ0.7 demands
+    each node to produce on average at least 70% of its consumption.
+    """
     float_regex = "[0-9]*\.?[0-9]+"
     level = float(re.findall(float_regex, o)[0])
     if o[-1] == "c":
