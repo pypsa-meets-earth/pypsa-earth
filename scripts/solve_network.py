@@ -168,29 +168,32 @@ def add_CCL_constraints(n, config):
     )
 
     gen_country = n.generators.bus.map(n.buses.country)
-    # cc means country and carrier
-    p_nom_per_cc = (
-        pd.DataFrame(
-            {
-                "p_nom": linexpr((1, get_var(n, "Generator", "p_nom"))),
-                "country": gen_country,
-                "carrier": n.generators.carrier,
-            }
+    capacity_variable = n.model["Generator-p_nom"]
+
+    lhs = []
+    ext_carriers = n.generators.query("p_nom_extendable").carrier.unique()
+    for c in ext_carriers:
+        ext_carrier = n.generators.query("p_nom_extendable and carrier == @c")
+        country_grouper = (
+            ext_carrier.bus.map(n.buses.country)
+            .rename_axis("Generator-ext")
+            .rename("country")
         )
-        .dropna(subset=["p_nom"])
-        .groupby(["country", "carrier"])
-        .p_nom.apply(join_exprs)
+        ext_carrier_per_country = capacity_variable.loc[
+            country_grouper.index
+        ].groupby_sum(country_grouper)
+        lhs.append(ext_carrier_per_country)
+    lhs = merge(lhs, dim=pd.Index(ext_carriers, name="carrier"))
+
+    min_matrix = agg_p_nom_minmax["min"].to_xarray().unstack().reindex_like(lhs)
+    max_matrix = agg_p_nom_minmax["max"].to_xarray().unstack().reindex_like(lhs)
+
+    n.model.add_constraints(
+        lhs >= min_matrix, name="agg_p_nom_min", mask=min_matrix.notnull()
     )
-    minimum = agg_p_nom_minmax["min"].dropna()
-    if not minimum.empty:
-        minconstraint = define_constraints(
-            n, p_nom_per_cc[minimum.index], ">=", minimum, "agg_p_nom", "min"
-        )
-    maximum = agg_p_nom_minmax["max"].dropna()
-    if not maximum.empty:
-        maxconstraint = define_constraints(
-            n, p_nom_per_cc[maximum.index], "<=", maximum, "agg_p_nom", "max"
-        )
+    n.model.add_constraints(
+        lhs <= max_matrix, name="agg_p_nom_max", mask=max_matrix.notnull()
+    )
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
