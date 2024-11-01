@@ -236,26 +236,27 @@ def add_EQ_constraints(n, o, scaling=1e-1):
     )
     inflow = inflow.reindex(load.index).fillna(0.0)
     rhs = scaling * (level * load - inflow)
+    dispatch_variable = n.model["Generator-p"]
     lhs_gen = (
-        linexpr(
-            (n.snapshot_weightings.generators * scaling, get_var(n, "Generator", "p").T)
-        )
-        .T.groupby(ggrouper, axis=1)
-        .apply(join_exprs)
+        (dispatch_variable * (n.snapshot_weightings.generators * scaling))
+        .groupby(ggrouper.to_xarray())
+        .sum()
+        .sum("snapshot")
     )
-    lhs_spill = (
-        linexpr(
-            (
-                -n.snapshot_weightings.stores * scaling,
-                get_var(n, "StorageUnit", "spill").T,
-            )
+    # TODO: double check that this is really needed, why do have to subtract the spillage
+    if not n.storage_units_t.inflow.empty:
+        spillage_variable = n.model["StorageUnit-spill"]
+        lhs_spill = (
+            (spillage_variable * (-n.snapshot_weightings.stores * scaling))
+            .groupby_sum(sgrouper)
+            .groupby(sgrouper.to_xarray())
+            .sum()
+            .sum("snapshot")
         )
-        .T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    )
-    lhs_spill = lhs_spill.reindex(lhs_gen.index).fillna("")
-    lhs = lhs_gen + lhs_spill
-    define_constraints(n, lhs, ">=", rhs, "equity", "min")
+        lhs = lhs_gen + lhs_spill
+    else:
+        lhs = lhs_gen
+    n.model.add_constraints(lhs >= rhs, name="equity_min")
 
 
 def add_BAU_constraints(n, config):
