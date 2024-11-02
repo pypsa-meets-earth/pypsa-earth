@@ -89,6 +89,7 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_country_list,
     create_logger,
@@ -146,7 +147,7 @@ def download_and_unzip_zenodo(config, root_path, hot_run=True, disable_progress=
     """
     resource = config["category"]
     file_path = get_path(root_path, "tempfile.zip")
-    destination = get_relative_path(config["destination"])
+    destination = get_path(BASE_DIR, config["destination"])
     url = config["urls"]["zenodo"]
 
     if hot_run:
@@ -193,7 +194,7 @@ def download_and_unzip_gdrive(config, root_path, hot_run=True, disable_progress=
     """
     resource = config["category"]
     file_path = get_path(root_path, "tempfile.zip")
-    destination = get_relative_path(config["destination"])
+    destination = get_path(BASE_DIR, config["destination"])
     url = config["urls"]["gdrive"]
 
     # retrieve file_id from path
@@ -270,7 +271,7 @@ def download_and_unzip_protectedplanet(
     """
     resource = config["category"]
     file_path = get_path(root_path, "tempfile_wpda.zip")
-    destination = get_relative_path(config["destination"])
+    destination = get_path(BASE_DIR, config["destination"])
     url = config["urls"]["protectedplanet"]
 
     def get_first_day_of_month(date):
@@ -442,7 +443,7 @@ def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = get_relative_path(config["destination"])
+    destination = get_path(BASE_DIR, config["destination"])
     url = config["urls"]["direct"]
 
     file_path = get_path(destination, pathlib.Path(url).name)
@@ -496,7 +497,7 @@ def download_and_unzip_hydrobasins(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = get_relative_path(config["destination"])
+    destination = get_path(BASE_DIR, config["destination"])
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
@@ -547,7 +548,7 @@ def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=Fa
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    destination = get_relative_path(config["destination"])
+    destination = get_path(BASE_DIR, config["destination"])
 
     # load data for post method
     postdata = config["urls"]["post"]
@@ -795,8 +796,8 @@ def datafiles_retrivedatabundle(config):
 
 
 def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
-    basins_path = config_hydrobasin["destination"]
-    output_fl = config_hydrobasin["output"][0]
+    basins_path = get_path(BASE_DIR, config_hydrobasin["destination"])
+    output_fl = get_path(BASE_DIR, config_hydrobasin["output"][0])
 
     files_to_merge = [
         "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)

@@ -51,6 +51,7 @@ import pypsa
 import scipy.sparse as sparse
 import xarray as xr
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_logger,
     get_path,
@@ -123,7 +124,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         sel_ext = ".nc"
         for ext in [".nc", ".csv"]:
-            load_path = get_path(load_dir, str(continent) + str(ext))
+            load_path = get_path(BASE_DIR, load_dir, str(continent) + str(ext))
             if pathlib.Path(load_path).exists():
                 sel_ext = ext
                 break

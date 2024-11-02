@@ -60,11 +60,13 @@ import pathlib
 import re
 from zipfile import ZipFile
 
+import country_converter as cc
 import numpy as np
 import pandas as pd
 import pypsa
 import requests
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_logger,
     get_current_directory_path,
@@ -91,11 +93,11 @@ def download_emission_data():
     try:
         url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
         with requests.get(url) as rq:
-            with open("data/co2.zip", "wb") as file:
+            with open(get_path(BASE_DIR, "data", "co2.zip"), "wb") as file:
                 file.write(rq.content)
-        file_path = "data/co2.zip"
+        file_path = get_path(BASE_DIR, "data", "co2.zip")
         with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", "data")
+            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", get_path(BASE_DIR, "data"))
         pathlib.Path(file_path).unlink(missing_ok=True)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
     except requests.exceptions.RequestException as e:
@@ -125,7 +127,7 @@ def emission_extractor(filename, emission_year, country_names):
     """
 
     # data reading process
-    data_path = get_path(get_current_directory_path(), "data", filename)
+    data_path = get_path(BASE_DIR, "data", filename)
     df = pd.read_excel(data_path, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
     df = df.set_index("Country_code_A3")

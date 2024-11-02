@@ -29,6 +29,8 @@ from _helpers import (
     change_to_script_dir,
     country_name_2_two_digits,
     download_gadm,
+    get_base_dir,
+    get_config_default_path,
     get_conv_factors,
     get_current_directory_path,
     get_gadm_filename,
@@ -324,6 +326,24 @@ def test_get_path_size(get_temp_file):
     file_size = get_path_size(path)
     assert file_size == os.stat(path).st_size
     assert file_size == len(_content_temp_file)
+
+
+def test_get_base_dir(get_temp_file):
+    """
+    Verify the base directory path returned by get_base_dir()
+    """
+    assert get_base_dir(get_temp_file) == os.path.abspath(os.path.join(os.path.dirname(get_temp_file), os.pardir))
+    assert get_base_dir(__file__) == os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
+
+def test_get_config_default_path(get_temp_file):
+    """
+    Verify the base directory path returned by get_config_default_path()
+    """
+    base_dir = get_config_default_path(get_temp_file)
+    assert get_config_default_path(base_dir) == str(get_path(base_dir, "config.default.yaml"))
+    base_dir = get_config_default_path(__file__)
+    assert get_config_default_path(base_dir) == str(get_path(base_dir, "config.default.yaml"))
 
 
 def test_get_current_directory_path():

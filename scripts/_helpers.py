@@ -44,7 +44,22 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
 
-def check_config_version(config, fp_config="config.default.yaml"):
+def get_base_dir(file_path):
+    return str(pathlib.Path(file_path).parent.parent.absolute())
+
+
+def get_config_default_path(base_dir_path):
+    return str(pathlib.Path(base_dir_path, "config.default.yaml"))
+
+
+# prefix when running pypsa-earth rules in different directories (if running in pypsa-earth as subworkflow)
+BASE_DIR = get_base_dir(__file__)
+
+# absolute path to config.default.yaml
+CONFIG_DEFAULT_PATH = get_config_default_path(BASE_DIR)
+
+
+def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
@@ -94,7 +109,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 def copy_default_files():
-    fn = pathlib.Path("config.yaml")
+    fn = pathlib.Path(BASE_DIR, "config.yaml")
     if not fn.exists():
         fn.write_text(
             "# Write down config entries differing from config.default.yaml\n\nrun: {}"

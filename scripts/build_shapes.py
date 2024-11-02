@@ -19,6 +19,7 @@ import requests
 import xarray as xr
 from _helpers import (
     build_directory,
+    BASE_DIR,
     configure_logging,
     create_logger,
     get_current_directory_path,
@@ -299,7 +300,7 @@ def download_WorldPop_standard(
         ]
 
     WorldPop_inputfile = get_path(
-        get_current_directory_path(), "data", "WorldPop", WorldPop_filename
+        BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
 
     if not pathlib.Path(WorldPop_inputfile).exists() or update is True:
@@ -347,7 +348,7 @@ def download_WorldPop_API(country_code, year=2020, size_min=300):
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
     WorldPop_inputfile = get_path(
-        get_current_directory_path(), "data", "WorldPop", WorldPop_filename
+        BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
     build_directory(WorldPop_inputfile)
     year_api = int(str(year)[2:])
@@ -385,12 +386,12 @@ def convert_gdp(name_file_nc, year=2015, out_logging=False):
 
     # path of the nc file
     GDP_nc = get_path(
-        get_current_directory_path(), "data", "GDP", name_file_nc
+        BASE_DIR, "data", "GDP", name_file_nc
     )  # Input filepath nc
 
     # path of the tif file
     GDP_tif = get_path(
-        get_current_directory_path(), "data", "GDP", name_file_tif
+        BASE_DIR, "data", "GDP", name_file_tif
     )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
@@ -435,7 +436,7 @@ def load_gdp(
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
     GDP_tif = get_path(
-        get_current_directory_path(), "data", "GDP", name_file_tif
+        BASE_DIR, "data", "GDP", name_file_tif
     )  # Input filepath tif
 
     if update | (not pathlib.Path(GDP_tif).exists()):

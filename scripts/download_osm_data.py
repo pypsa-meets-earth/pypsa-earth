@@ -30,6 +30,7 @@ import pathlib
 import shutil
 
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_logger,
     get_current_directory_path,
@@ -104,9 +105,9 @@ if __name__ == "__main__":
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
     store_path_resources = get_path(
-        get_current_directory_path(), "resources", RDIR, "osm", "raw"
+        BASE_DIR, "resources", RDIR, "osm", "raw"
     )
-    store_path_data = get_path(get_current_directory_path(), "data", "osm")
+    store_path_data = get_path(BASE_DIR, "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.save_osm_data(

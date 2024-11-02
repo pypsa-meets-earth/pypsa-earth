@@ -20,8 +20,8 @@ _sub_temp_content_dir = "sub_temp_content_dir"
 
 @pytest.fixture(scope="function")
 def get_temp_file(tmpdir):
-    p = tmpdir.join(_name_temp_file)
-    p.write(_content_temp_file)
+    p = pathlib.Path(tmpdir, _name_temp_file)
+    p.write_text(_content_temp_file)
     yield p
     pathlib.Path(p).unlink(missing_ok=True)
 
