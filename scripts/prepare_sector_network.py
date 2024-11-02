@@ -160,7 +160,8 @@ def H2_liquid_fossil_conversions(n, costs):
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
 
-    n.add("Carrier", "H2")
+    if not "H2" in n.carriers.index:
+        n.add("Carrier", "H2")
 
     n.madd(
         "Bus",
@@ -1065,7 +1066,9 @@ def add_aviation(n, cost):
 
 def add_storage(n, costs):
     "function to add the different types of storage systems"
-    n.add("Carrier", "battery")
+
+    if not "battery" in n.carriers.index:
+        n.add("Carrier", "battery")
 
     n.madd(
         "Bus",
@@ -1154,11 +1157,11 @@ def h2_hc_conversions(n, costs):
         if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
             n.madd(
                 "Bus",
-                nodes + " blue H2",
-                location=nodes,
+                spatial.nodes + " blue H2",
+                location=spatial.nodes,
                 carrier="blue H2",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
+                x=n.buses.loc[list(spatial.nodes)].x.values,
+                y=n.buses.loc[list(spatial.nodes)].y.values,
             )
 
             n.madd(
@@ -1166,7 +1169,7 @@ def h2_hc_conversions(n, costs):
                 spatial.nodes,
                 suffix=" SMR CC",
                 bus0=spatial.gas.nodes,
-                bus1=nodes + " blue H2",
+                bus1=spatial.nodes + " blue H2",
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
                 p_nom_extendable=True,
@@ -1181,9 +1184,9 @@ def h2_hc_conversions(n, costs):
 
             n.madd(
                 "Link",
-                nodes + " blue H2",
-                bus0=nodes + " blue H2",
-                bus1=nodes + " H2",
+                spatial.nodes + " blue H2",
+                bus0=spatial.nodes + " blue H2",
+                bus1=spatial.nodes + " H2",
                 carrier="blue H2",
                 capital_cost=0,
                 p_nom_extendable=True,
@@ -1196,7 +1199,7 @@ def h2_hc_conversions(n, costs):
                 spatial.nodes,
                 suffix=" SMR CC",
                 bus0=spatial.gas.nodes,
-                bus1=nodes + " H2",
+                bus1=spatial.nodes + " H2",
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
                 p_nom_extendable=True,
@@ -1213,18 +1216,18 @@ def h2_hc_conversions(n, costs):
         if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
             n.madd(
                 "Bus",
-                nodes + " grey H2",
-                location=nodes,
+                spatial.nodes + " grey H2",
+                location=spatial.nodes,
                 carrier="grey H2",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
+                x=n.buses.loc[list(spatial.nodes)].x.values,
+                y=n.buses.loc[list(spatial.nodes)].y.values,
             )
 
             n.madd(
                 "Link",
-                nodes + " SMR",
+                spatial.nodes + " SMR",
                 bus0=spatial.gas.nodes,
-                bus1=nodes + " grey H2",
+                bus1=spatial.nodes + " grey H2",
                 bus2="co2 atmosphere",
                 p_nom_extendable=True,
                 carrier="SMR",
@@ -1236,9 +1239,9 @@ def h2_hc_conversions(n, costs):
 
             n.madd(
                 "Link",
-                nodes + " grey H2",
-                bus0=nodes + " grey H2",
-                bus1=nodes + " H2",
+                spatial.nodes + " grey H2",
+                bus0=spatial.nodes + " grey H2",
+                bus1=spatial.nodes + " H2",
                 carrier="grey H2",
                 capital_cost=0,
                 p_nom_extendable=True,
@@ -1248,9 +1251,9 @@ def h2_hc_conversions(n, costs):
         else:
             n.madd(
                 "Link",
-                nodes + " SMR",
+                spatial.nodes + " SMR",
                 bus0=spatial.gas.nodes,
-                bus1=nodes + " H2",
+                bus1=spatial.nodes + " H2",
                 bus2="co2 atmosphere",
                 p_nom_extendable=True,
                 carrier="SMR",
@@ -1318,7 +1321,7 @@ def add_shipping(n, costs):
     if options["shipping_hydrogen_liquefaction"]:
         n.madd(
             "Bus",
-            nodes,
+            spatial.nodes,
             suffix=" H2 liquid",
             carrier="H2 liquid",
             location=spatial.nodes,
@@ -1347,7 +1350,7 @@ def add_shipping(n, costs):
     ):
         n.madd(
             "Load",
-            nodes,
+            spatial.nodes,
             suffix=" H2 for shipping",
             bus=shipping_bus,
             carrier="H2 for shipping",
