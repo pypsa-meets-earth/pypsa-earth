@@ -86,13 +86,18 @@ def add_carrier_buses(n, carrier, nodes=None):
     )
 
 
-def add_generation(n, costs):
+def add_generation(
+    n, costs, existing_capacities=0, existing_efficiencies=None, existing_nodes=None
+):
     """
     Adds conventional generation as specified in config.
 
     Args:
         n (network): PyPSA prenetwork
         costs (dataframe): _description_
+        existing_capacities: dictionary containing installed capacities for conventional_generation technologies
+        existing_efficiencies: dictionary containing efficiencies for conventional_generation technologies
+        existing_nodes: dictionary containing nodes for conventional_generation technologies
 
     Returns:
         _type_: _description_
@@ -109,9 +114,10 @@ def add_generation(n, costs):
     for generator, carrier in conventionals.items():
         add_carrier_buses(n, carrier)
         carrier_nodes = vars(spatial)[carrier].nodes
+        link_names = spatial.nodes + " " + generator
         n.madd(
             "Link",
-            spatial.nodes + " " + generator,
+            link_names,
             bus0=carrier_nodes,
             bus1=spatial.nodes,
             bus2="co2 atmosphere",
@@ -120,9 +126,29 @@ def add_generation(n, costs):
             # NB: fixed cost is per MWel
             capital_cost=costs.at[generator, "efficiency"]
             * costs.at[generator, "fixed"],
-            p_nom_extendable=True,
+            p_nom_extendable=(
+                True
+                if generator
+                in snakemake.params.electricity.get("extendable_carriers", dict()).get(
+                    "Generator", list()
+                )
+                else False
+            ),
+            p_nom=(
+                (
+                    existing_capacities[generator] / existing_efficiencies[generator]
+                ).reindex(link_names, fill_value=0)
+                if not existing_capacities == 0
+                else 0
+            ),  # NB: existing capacities are MWel
             carrier=generator,
-            efficiency=costs.at[generator, "efficiency"],
+            efficiency=(
+                existing_efficiencies[generator].reindex(
+                    link_names, fill_value=costs.at[generator, "efficiency"]
+                )
+                if existing_efficiencies is not None
+                else costs.at[generator, "efficiency"]
+            ),
             efficiency2=costs.at[carrier, "CO2 intensity"],
             lifetime=costs.at[generator, "lifetime"],
         )
@@ -2872,7 +2898,7 @@ if __name__ == "__main__":
     # remove conventional generators built in elec-only model
     remove_elec_base_techs(n)
 
-    add_generation(n, costs)
+    add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     add_hydrogen(n, costs)  # TODO add costs
 
