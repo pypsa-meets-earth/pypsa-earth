@@ -1000,40 +1000,44 @@ def extra_functionality(n, snapshots):
     add_co2_sequestration_limit(n, snapshots)
 
 
-def solve_network(n, config, solving={}, opts="", **kwargs):
+def solve_network(n, config, solving, **kwargs):
     set_of_options = solving["solver"]["options"]
     cf_solving = solving["options"]
 
-    solver_options = solving["solver_options"][set_of_options] if set_of_options else {}
-    solver_name = solving["solver"]["name"]
+    kwargs["solver_options"] = (
+        solving["solver_options"][set_of_options] if set_of_options else {}
+    )
+    kwargs["solver_name"] = solving["solver"]["name"]
 
-    track_iterations = cf_solving.get("track_iterations", False)
-    min_iterations = cf_solving.get("min_iterations", 4)
-    max_iterations = cf_solving.get("max_iterations", 6)
+    skip_iterations = cf_solving.get("skip_iterations", False)
+    if not n.lines.s_nom_extendable.any():
+        skip_iterations = True
+        logger.info("No expandable lines found. Skipping iterative solving.")
 
     # add to network for extra_functionality
     n.config = config
     n.opts = opts
 
-    if cf_solving.get("skip_iterations", False):
-        network_lopf(
-            n,
-            solver_name=solver_name,
-            solver_options=solver_options,
-            extra_functionality=extra_functionality,
-            **kwargs,
-        )
+    if skip_iterations:
+        status, condition = n.optimize(**kwargs)
     else:
-        ilopf(
-            n,
-            solver_name=solver_name,
-            solver_options=solver_options,
-            track_iterations=track_iterations,
-            min_iterations=min_iterations,
-            max_iterations=max_iterations,
-            extra_functionality=extra_functionality,
-            **kwargs,
+        kwargs["track_iterations"] = (cf_solving.get("track_iterations", False),)
+        kwargs["min_iterations"] = (cf_solving.get("min_iterations", 4),)
+        kwargs["max_iterations"] = (cf_solving.get("max_iterations", 6),)
+        status, condition = n.optimize.optimize_transmission_expansion_iteratively(
+            **kwargs
         )
+
+    if status != "ok":  # and not rolling_horizon:
+        logger.warning(
+            f"Solving status '{status}' with termination condition '{condition}'"
+        )
+    if "infeasible" in condition:
+        labels = n.model.compute_infeasibilities()
+        logger.info(f"Labels:\n{labels}")
+        n.model.print_infeasibilities()
+        raise RuntimeError("Solving status 'infeasible'")
+
     return n
 
 
