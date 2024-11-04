@@ -316,6 +316,25 @@ def add_BAU_constraints(n, config):
 
 
 def add_SAFE_constraints(n, config):
+    """
+    Add a capacity reserve margin of a certain fraction above the peak demand.
+    Renewable generators and storage do not contribute. Ignores network.
+
+    Parameters
+    ----------
+        n : pypsa.Network
+        config : dict
+
+    Example
+    -------
+    config.yaml requires to specify opts:
+
+    scenario:
+        opts: [Co2L-SAFE-24h]
+    electricity:
+        SAFE_reservemargin: 0.1
+    Which sets a reserve margin of 10% above the peak demand.
+    """
     peakdemand = n.loads_t.p_set.sum(axis=1).max()
     margin = 1.0 + config["electricity"]["SAFE_reservemargin"]
     reserve_margin = peakdemand * margin
