@@ -409,24 +409,27 @@ def update_capacity_constraint(n):
     ext_i = n.generators.query("p_nom_extendable").index
     fix_i = n.generators.query("not p_nom_extendable").index
 
-    dispatch = get_var(n, "Generator", "p")
-    reserve = get_var(n, "Generator", "r")
+    dispatch = n.model["Generator-p"]
+    reserve = n.model["Generator-r"]
 
     capacity_fixed = n.generators.p_nom[fix_i]
 
     p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
 
-    lhs = linexpr((1, dispatch), (1, reserve))
+    lhs = merge(
+        dispatch * 1,
+        reserve * 1,
+    )
 
     if not ext_i.empty:
-        capacity_variable = get_var(n, "Generator", "p_nom")
-        lhs += linexpr((-p_max_pu[ext_i], capacity_variable)).reindex(
-            columns=gen_i, fill_value=""
-        )
+        capacity_variable = n.model["Generator-p_nom"]
+        lhs = dispatch + reserve - capacity_variable * xr.DataArray(p_max_pu[ext_i])
 
     rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
 
-    define_constraints(n, lhs, "<=", rhs, "Generators", "updated_capacity_constraint")
+    n.model.add_constraints(
+        lhs <= rhs, name="gen_updated_capacity_constraint", mask=rhs.notnull()
+    )
 
 
 def add_operational_reserve_margin(n, sns, config):
