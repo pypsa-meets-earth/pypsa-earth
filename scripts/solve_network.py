@@ -457,17 +457,18 @@ def add_operational_reserve_margin(n, sns, config):
 
 def add_battery_constraints(n):
     nodes = n.buses.index[n.buses.carrier == "battery"]
-    if nodes.empty or ("Link", "p_nom") not in n.variables.index:
+    # TODO Check if the second part of the condition can make sense
+    # if nodes.empty or ("Link", "p_nom") not in n.variables.index:
+    if nodes.empty:
         return
-    link_p_nom = get_var(n, "Link", "p_nom")
-    lhs = linexpr(
-        (1, link_p_nom[nodes + " charger"]),
-        (
-            -n.links.loc[nodes + " discharger", "efficiency"].values,
-            link_p_nom[nodes + " discharger"].values,
-        ),
+    vars_link = n.model["Link-p_nom"]
+    eff = n.links.loc[nodes + " discharger", "efficiency"]
+    lhs = merge(
+        vars_link.sel({"Link-ext": nodes + " charger"}) * 1,
+        # for some reasons, eff is one element longer as compared with vars_link
+        vars_link.sel({"Link-ext": nodes + " discharger"}) * -eff[0],
     )
-    define_constraints(n, lhs, "=", 0, "Link", "charger_ratio")
+    n.model.add_constraints(lhs == 0, name="link_charger_ratio")
 
 
 def add_RES_constraints(n, res_share):
