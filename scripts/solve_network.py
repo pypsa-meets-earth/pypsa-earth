@@ -456,6 +456,10 @@ def add_operational_reserve_margin(n, sns, config):
 
 
 def add_battery_constraints(n):
+    """
+    Add constraint ensuring that charger = discharger, i.e.
+    1 * charger_size - efficiency * discharger_size = 0
+    """
     nodes = n.buses.index[n.buses.carrier == "battery"]
     # TODO Check if the second part of the condition can make sense
     # if nodes.empty or ("Link", "p_nom") not in n.variables.index:
