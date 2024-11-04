@@ -1055,11 +1055,8 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    tmpdir = snakemake.params.solving.get("tmpdir")
-    if tmpdir is not None:
-        Path(tmpdir).mkdir(parents=True, exist_ok=True)
     opts = snakemake.wildcards.opts.split("-")
-    solving = snakemake.params.solving
+    solve_opts = snakemake.config["solving"]["options"]
 
     is_sector_coupled = "sopts" in snakemake.wildcards.keys()
 
@@ -1069,10 +1066,11 @@ if __name__ == "__main__":
     else:
         n = pypsa.Network(snakemake.input.network)
 
-    if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
-        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
-            snakemake.params.augmented_line_connection.get("min_expansion")
-        )
+    # TODO Double-check handling the augmented case
+    # if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
+    #     n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
+    #         snakemake.params.augmented_line_connection.get("min_expansion")
+    #     )
 
     if (
         snakemake.config["custom_data"]["add_existing"]
@@ -1093,15 +1091,17 @@ if __name__ == "__main__":
     else:
         n_ref = None
 
+    # needed to get `n.model` property
+    n.optimize.create_model()
+    n = prepare_network(n, solve_opts, config=solve_opts)
+
     n = prepare_network(n, solving["options"])
 
     n = solve_network(
         n,
         config=snakemake.config,
-        solving=solving,
-        opts=opts,
-        solver_dir=tmpdir,
-        solver_logfile=snakemake.log.solver,
+        solving=snakemake.params.solving,
+        log_fn=snakemake.log.solver,
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
