@@ -475,17 +475,18 @@ def add_battery_constraints(n):
     n.model.add_constraints(lhs == 0, name="link_charger_ratio")
 
 
-def add_RES_constraints(n, res_share):
+def add_RES_constraints(n, res_share, config):
     lgrouper = n.loads.bus.map(n.buses.country)
+    # TODO drop load
     ggrouper = n.generators.bus.map(n.buses.country)
     sgrouper = n.storage_units.bus.map(n.buses.country)
     cgrouper = n.links.bus0.map(n.buses.country)
 
     logger.warning(
-        "The add_RES_constraints functionality is still work in progress. "
+        "The add_RES_constraints() is still work in progress. "
         "Unexpected results might be incurred, particularly if "
         "temporal clustering is applied or if an unexpected change of technologies "
-        "is subject to the obtimisation."
+        "is subject to future improvements."
     )
 
     load = (
@@ -495,103 +496,68 @@ def add_RES_constraints(n, res_share):
 
     rhs = res_share * load
 
-    res_techs = [
-        "solar",
-        "onwind",
-        "offwind-dc",
-        "offwind-ac",
-        "battery",
-        "hydro",
-        "ror",
-    ]
+    renew_techs = config["electricity"]["renewable_carriers"]
+
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
-    gens_i = n.generators.query("carrier in @res_techs").index
-    stores_i = n.storage_units.query("carrier in @res_techs").index
+    gens_i = n.generators.query("carrier in @renew_techs").index
+    stores_i = n.storage_units.query("carrier in @renew_techs").index
+
     charger_i = n.links.query("carrier in @charger").index
     discharger_i = n.links.query("carrier in @discharger").index
 
+    stores_t_weights = n.snapshot_weightings.stores
+
     # Generators
+    # TODO restore grouping by countries un-commenting calls of groupby()
     lhs_gen = (
-        linexpr(
-            (n.snapshot_weightings.generators, get_var(n, "Generator", "p")[gens_i].T)
-        )
-        .T.groupby(ggrouper, axis=1)
-        .apply(join_exprs)
+        (n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators)
+        # .groupby(ggrouper.to_xarray())
+        .sum()
     )
 
     # StorageUnits
-    lhs_dispatch = (
-        (
-            linexpr(
-                (
-                    n.snapshot_weightings.stores,
-                    get_var(n, "StorageUnit", "p_dispatch")[stores_i].T,
-                )
-            )
-            .T.groupby(sgrouper, axis=1)
-            .apply(join_exprs)
-        )
-        .reindex(lhs_gen.index)
-        .fillna("")
+    store_disp_expr = (
+        n.model["StorageUnit-p_dispatch"].loc[:, stores_i] * stores_t_weights
+    )
+    store_expr = n.model["StorageUnit-p_store"].loc[:, stores_i] * stores_t_weights
+    charge_expr = n.model["Link-p"].loc[:, charger_i] * stores_t_weights.apply(
+        lambda r: r * n.links.loc[charger_i].efficiency
+    )
+    discharge_expr = n.model["Link-p"].loc[:, discharger_i] * stores_t_weights.apply(
+        lambda r: r * n.links.loc[discharger_i].efficiency
     )
 
+    lhs_dispatch = (
+        store_disp_expr
+        # .groupby(sgrouper)
+        .sum()
+    )
     lhs_store = (
-        (
-            linexpr(
-                (
-                    -n.snapshot_weightings.stores,
-                    get_var(n, "StorageUnit", "p_store")[stores_i].T,
-                )
-            )
-            .T.groupby(sgrouper, axis=1)
-            .apply(join_exprs)
-        )
-        .reindex(lhs_gen.index)
-        .fillna("")
+        store_expr
+        # .groupby(sgrouper)
+        .sum()
     )
 
     # Stores (or their resp. Link components)
     # Note that the variables "p0" and "p1" currently do not exist.
     # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
     lhs_charge = (
-        (
-            linexpr(
-                (
-                    -n.snapshot_weightings.stores,
-                    get_var(n, "Link", "p")[charger_i].T,
-                )
-            )
-            .T.groupby(cgrouper, axis=1)
-            .apply(join_exprs)
-        )
-        .reindex(lhs_gen.index)
-        .fillna("")
+        charge_expr
+        # .groupby(cgrouper)
+        .sum()
     )
 
     lhs_discharge = (
-        (
-            linexpr(
-                (
-                    n.snapshot_weightings.stores.apply(
-                        lambda r: r * n.links.loc[discharger_i].efficiency
-                    ),
-                    get_var(n, "Link", "p")[discharger_i],
-                )
-            )
-            .groupby(cgrouper, axis=1)
-            .apply(join_exprs)
-        )
-        .reindex(lhs_gen.index)
-        .fillna("")
+        discharge_expr
+        # .groupby(cgrouper)
+        .sum()
     )
 
-    # signs of resp. terms are coded in the linexpr.
-    # todo: for links (lhs_charge and lhs_discharge), account for snapshot weightings
-    lhs = lhs_gen + lhs_dispatch + lhs_store + lhs_charge + lhs_discharge
+    lhs = lhs_gen + lhs_dispatch - lhs_store - lhs_charge + lhs_discharge
 
-    define_constraints(n, lhs, "=", rhs, "RES share")
+    n.model.add_constraints(lhs == rhs, name="res_share")
 
 
 def add_land_use_constraint(n):
