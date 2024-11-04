@@ -438,9 +438,7 @@ def add_operational_reserve_margin(n, sns, config):
     https://genxproject.github.io/GenX/dev/core/#Reserves.
     """
 
-    define_variables(n, 0, np.inf, "Generator", "r", axes=[sns, n.generators.index])
-
-    add_operational_reserve_margin_constraint(n, config)
+    add_operational_reserve_margin_constraint(n, sns, config)
 
     update_capacity_constraint(n)
 
