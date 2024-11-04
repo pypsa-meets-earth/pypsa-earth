@@ -949,7 +949,7 @@ def extra_functionality(n, snapshots):
     for o in opts:
         if "RES" in o:
             res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
-            add_RES_constraints(n, res_share)
+            add_RES_constraints(n, res_share, config)
     for o in opts:
         if "EQ" in o:
             add_EQ_constraints(n, o)
