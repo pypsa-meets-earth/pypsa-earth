@@ -103,6 +103,13 @@ def download_CO2_emissions():
     # Drop region names that have no ISO2:
     CO2_emissions = CO2_emissions[CO2_emissions.country != "not found"]
 
+    # Drop region names where country column contains list of countries
+    CO2_emissions = CO2_emissions[
+        CO2_emissions.apply(
+            lambda x: False if not isinstance(x.country, str) else True, axis=1
+        )
+    ]
+
     return CO2_emissions
 
 
