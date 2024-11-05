@@ -96,7 +96,7 @@ logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
 
 
-def prepare_network(n, solve_opts):
+def prepare_network(n, solve_opts, config):
     if "clip_p_max_pu" in solve_opts:
         for df in (
             n.generators_t.p_max_pu,
@@ -1094,8 +1094,6 @@ if __name__ == "__main__":
     # needed to get `n.model` property
     n.optimize.create_model()
     n = prepare_network(n, solve_opts, config=solve_opts)
-
-    n = prepare_network(n, solving["options"])
 
     n = solve_network(
         n,
