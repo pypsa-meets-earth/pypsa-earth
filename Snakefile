@@ -50,8 +50,9 @@ config["scenario"]["unc"] = [
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
-SDIR = config["summary_dir"].strip("/") + f"/{RDIR}"
-RESDIR = config["results_dir"].strip("/") + f"/{RDIR}"
+SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
+SDIR = config["summary_dir"].strip("/") + f"/{RDIR}{SECDIR}"
+RESDIR = config["results_dir"].strip("/") + f"/{RDIR}{SECDIR}"
 COSTDIR = config["costs_dir"]
 
 load_data_paths = get_load_paths_gegis("data", config)
@@ -1024,7 +1025,11 @@ rule prepare_urban_percent:
 
 rule prepare_transport_data_input:
     output:
-        transport_data_input="resources/" + RDIR + "transport_data.csv",
+        transport_data_input="resources/"
+        + RDIR
+        + "sector/"
+        + SECDIR
+        + "transport_data.csv",
     script:
         "scripts/prepare_transport_data_input.py"
 
@@ -1051,6 +1056,8 @@ if not config["custom_data"]["gas_network"]:
         output:
             clustered_gas_network="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             # TODO: Should be a own snakemake rule
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
@@ -1069,43 +1076,67 @@ rule prepare_sector_network:
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         transport="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         avail_profile="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         dsm_profile="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         nodal_transport_data="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         overrides="data/override_component_attrs",
         clustered_pop_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         industrial_demand="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
         airports="data/airports.csv",
         ports="data/ports.csv",
         heat_demand="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ashp_cop="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         gshp_cop="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         solar_thermal="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         district_heat_share="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
         shapes_path="resources/"
@@ -1116,6 +1147,8 @@ rule prepare_sector_network:
             if config["custom_data"]["gas_network"]
             else "resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv"
         ),
     output:
@@ -1138,7 +1171,11 @@ rule build_ship_profile:
         snapshots=config["snapshots"],
         ship_opts=config["export"]["ship"],
     output:
-        ship_profile="resources/" + RDIR + "ship_profile_{h2export}TWh.csv",
+        ship_profile="resources/"
+        + RDIR
+        + "sector/"
+        + SECDIR
+        + "ship_profile_{h2export}TWh.csv",
     script:
         "scripts/build_ship_profile.py"
 
@@ -1156,7 +1193,11 @@ rule add_export:
         overrides="data/override_component_attrs",
         export_ports="data/export_ports.csv",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
-        ship_profile="resources/" + RDIR + "ship_profile_{h2export}TWh.csv",
+        ship_profile="resources/"
+        + RDIR
+        + "sector/"
+        + SECDIR
+        + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
         shapes_path="resources/"
@@ -1178,6 +1219,8 @@ rule override_respot:
         **{
             f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": "resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + f"custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
             for tech in config["custom_data"]["renewables"]
             for discountrate in config["costs"]["discountrate"]
@@ -1186,6 +1229,8 @@ rule override_respot:
         **{
             f"custom_res_ins_{tech}_{planning_horizons}_{discountrate}": "resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + f"custom_renewables/{tech}_{planning_horizons}_{discountrate}_installable.csv"
             for tech in config["custom_data"]["renewables"]
             for discountrate in config["costs"]["discountrate"]
@@ -1207,26 +1252,38 @@ rule prepare_transport_data:
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
-        transport_name="resources/" + RDIR + "transport_data.csv",
+        transport_name="resources/" + RDIR + "sector/" + SECDIR + "transport_data.csv",
         clustered_pop_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         temp_air_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     output:
         # nodal_energy_totals="resources/nodal_energy_totals_s{simpl}_{clusters}.csv",
         transport="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         avail_profile="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         dsm_profile="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         nodal_transport_data="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     script:
         "scripts/prepare_transport_data.py"
@@ -1238,40 +1295,64 @@ rule build_cop_profiles:
     input:
         temp_soil_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_soil_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_soil_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_soil_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_soil_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_air_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_air_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_air_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     output:
         cop_soil_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_soil_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_soil_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_soil_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_soil_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_air_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_air_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_air_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_air_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
@@ -1279,6 +1360,8 @@ rule build_cop_profiles:
         (
             "benchmarks/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "build_cop_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
@@ -1291,41 +1374,65 @@ rule prepare_heat_data:
         energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
         clustered_pop_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         temp_air_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_soil_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         cop_air_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         solar_thermal_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_demand_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_profile="data/heat_load_profile_BDEW.csv",
     output:
         nodal_energy_totals="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         heat_demand="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ashp_cop="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         gshp_cop="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         solar_thermal="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         district_heat_share="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     script:
         "scripts/prepare_heat_data.py"
@@ -1370,12 +1477,18 @@ rule build_solar_thermal_profiles:
     input:
         pop_layout_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_rural_{planning_horizons}.nc",
         regions_onshore="resources/"
         + RDIR
@@ -1388,12 +1501,18 @@ rule build_solar_thermal_profiles:
     output:
         solar_thermal_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         solar_thermal_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/solar_thermal_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         solar_thermal_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/solar_thermal_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
@@ -1401,6 +1520,8 @@ rule build_solar_thermal_profiles:
         (
             "benchmarks/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "build_solar_thermal_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
@@ -1421,18 +1542,34 @@ rule build_population_layouts:
     output:
         pop_layout_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_rural_{planning_horizons}.nc",
-        gdp_layout="resources/" + RDIR + "gdp_shares/gdp_layout_{planning_horizons}.nc",
+        gdp_layout="resources/"
+        + RDIR
+        + "sector/"
+        + SECDIR
+        + "gdp_shares/gdp_layout_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
-        "benchmarks/" + RDIR + "build_population_layouts_{planning_horizons}"
+        (
+            "benchmarks/"
+            + RDIR
+            + "sector/"
+            + SECDIR
+            + "build_population_layouts_{planning_horizons}"
+        )
     threads: 8
     script:
         "scripts/build_population_layouts.py"
@@ -1442,7 +1579,7 @@ rule move_hardcoded_files_temp:
     input:
         "data/temp_hard_coded/energy_totals.csv",
     output:
-        "resources/" + RDIR + "energy_totals.csv",
+        "resources/" + RDIR + "sector/" + SECDIR + "energy_totals.csv",
     shell:
         "cp -a data/temp_hard_coded/. resources"
 
@@ -1451,12 +1588,18 @@ rule build_clustered_population_layouts:
     input:
         pop_layout_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_rural_{planning_horizons}.nc",
         gdp_layout="resources/" + RDIR + "gdp_shares/gdp_layout_{planning_horizons}.nc",
         regions_onshore="resources/"
@@ -1470,9 +1613,13 @@ rule build_clustered_population_layouts:
     output:
         clustered_pop_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         clustered_gdp_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
     resources:
         mem_mb=10000,
@@ -1480,6 +1627,8 @@ rule build_clustered_population_layouts:
         (
             "benchmarks/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "build_clustered_population_layouts/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
@@ -1492,12 +1641,18 @@ rule build_heat_demand:
     input:
         pop_layout_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_rural_{planning_horizons}.nc",
         regions_onshore="resources/"
         + RDIR
@@ -1510,12 +1665,18 @@ rule build_heat_demand:
     output:
         heat_demand_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/heat_demand_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_demand_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/heat_demand_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_demand_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
@@ -1523,6 +1684,8 @@ rule build_heat_demand:
         (
             "benchmarks/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "build_heat_demand/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
@@ -1535,12 +1698,18 @@ rule build_temperature_profiles:
     input:
         pop_layout_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
         pop_layout_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_urban_{planning_horizons}.nc",
         pop_layout_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_rural_{planning_horizons}.nc",
         regions_onshore="resources/"
         + RDIR
@@ -1553,21 +1722,33 @@ rule build_temperature_profiles:
     output:
         temp_soil_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_soil_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_soil_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_soil_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_soil_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_air_total="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_air_rural="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         temp_air_urban="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "temperatures/temp_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
@@ -1575,6 +1756,8 @@ rule build_temperature_profiles:
         (
             "benchmarks/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "build_temperature_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
@@ -1822,9 +2005,13 @@ rule build_industrial_distribution_key:  #default data
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         clustered_pop_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         clustered_gdp_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         industrial_database="data/industrial_database.csv",
         shapes_path="resources/"
@@ -1833,6 +2020,8 @@ rule build_industrial_distribution_key:  #default data
     output:
         industrial_distribution_key="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 1
     resources:
@@ -1860,12 +2049,20 @@ rule build_base_industry_totals:  #default data
     output:
         base_industry_totals="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
     threads: 1
     resources:
         mem_mb=1000,
     benchmark:
-        "benchmarks/" + RDIR + "build_base_industry_totals_{planning_horizons}_{demand}"
+        (
+            "benchmarks/"
+            + RDIR
+            + "sector/"
+            + SECDIR
+            + "build_base_industry_totals_{planning_horizons}_{demand}"
+        )
     script:
         "scripts/build_base_industry_totals.py"
 
@@ -1880,11 +2077,15 @@ rule build_industry_demand:  #default data
     input:
         industrial_distribution_key="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         #industrial_production_per_country_tomorrow="resources/demand/industrial_production_per_country_tomorrow_{planning_horizons}_{demand}.csv",
         #industrial_production_per_country="data/industrial_production_per_country.csv",
         base_industry_totals="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         industrial_database="data/industrial_database.csv",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
@@ -1892,6 +2093,8 @@ rule build_industry_demand:  #default data
     output:
         industrial_energy_demand_per_node="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
     threads: 1
     resources:
@@ -1900,6 +2103,8 @@ rule build_industry_demand:  #default data
         (
             "benchmarks/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv"
         )
     script:
@@ -1915,16 +2120,25 @@ rule build_existing_heating_distribution:
         existing_heating="data/existing_infrastructure/existing_heating_raw.csv",
         clustered_pop_layout="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         clustered_pop_energy_layout="resources/"
         + RDIR
-        + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",  #"resources/population_shares/pop_weighted_energy_totals_s{simpl}_{clusters}.csv",
+        + "sector/"
+        + SECDIR
+        + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        #"resources/population_shares/pop_weighted_energy_totals_s{simpl}_{clusters}.csv",
         district_heat_share="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     output:
         existing_heating_distribution="resources/"
         + RDIR
+        + "sector/"
+        + SECDIR
         + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 1
     resources:
@@ -1957,17 +2171,25 @@ if config["foresight"] == "myopic":
             ),
             clustered_pop_layout="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs=CDIR
             + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
             cop_soil_total="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
             cop_air_total="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
             existing_heating_distribution="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         output:
             RESDIR
@@ -2004,7 +2226,7 @@ if config["foresight"] == "myopic":
         planning_horizon_p = str(planning_horizons[i - 1])
 
         return (
-            RDIR
+            RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
             + planning_horizon_p
             + "_{discountrate}_{demand}_{h2export}export.nc"
@@ -2032,9 +2254,13 @@ if config["foresight"] == "myopic":
             costs=CDIR + "costs_{planning_horizons}.csv",
             cop_soil_total="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
             cop_air_total="resources/"
             + RDIR
+            + "sector/"
+            + SECDIR
             + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         output:
             RESDIR
