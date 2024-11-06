@@ -242,15 +242,6 @@ sector:
     network_data_GGIT_status: ["Construction", "Operating", "Idle", "Shelved", "Mothballed", "Proposed"]
   hydrogen:
     network: true
-    H2_retrofit_capacity_per_CH4: 0.6
-    network_limit: 2000 #GWkm
-    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
-    gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
-    underground_storage: false
-    hydrogen_colors: false
-    set_color_shares: false
-    blue_share: 0.40
-    pink_share: 0.05
   coal:
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
 
@@ -265,17 +256,6 @@ sector:
   hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
-
-  shipping_hydrogen_share: #1.0
-    BU_2030: 0.00
-    AP_2030: 0.00
-    NZ_2030: 0.10
-    DF_2030: 0.05
-    AB_2030: 0.05
-    BU_2050: 0.00
-    AP_2050: 0.25
-    NZ_2050: 0.36
-    DF_2050: 0.12
 
   gadm_level: 1
   h2_cavern: true
