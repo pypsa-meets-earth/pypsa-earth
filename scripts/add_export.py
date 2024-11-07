@@ -33,11 +33,14 @@ def select_ports(n):
     This function selects the buses where ports are located.
     """
 
-    ports = pd.read_csv(
+    raw_ports = pd.read_csv(
         snakemake.input.export_ports,
         index_col=None,
         keep_default_na=False,
     ).squeeze()
+
+    ports = raw_ports[['name', 'country', 'fraction', 'x', 'y']]
+    ports.loc[:,'fraction'] = ports.fraction.round(1)
 
     ports = ports[ports.country.isin(countries)]
     if len(ports) < 1:
