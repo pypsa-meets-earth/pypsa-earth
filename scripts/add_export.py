@@ -39,8 +39,8 @@ def select_ports(n):
         keep_default_na=False,
     ).squeeze()
 
-    ports = raw_ports[['name', 'country', 'fraction', 'x', 'y']]
-    ports.loc[:,'fraction'] = ports.fraction.round(1)
+    ports = raw_ports[["name", "country", "fraction", "x", "y"]]
+    ports.loc[:, "fraction"] = ports.fraction.round(1)
 
     ports = ports[ports.country.isin(countries)]
     if len(ports) < 1:
