@@ -42,6 +42,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Fix bugs in `prepare_sector_network.py` related to links with H2 buses and bug of re-addition of H2 and battery carriers in present `PR #1145 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1145>`_
 
+* Revise ports data for export in `add_export.py` related to sector model `PR #1175 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1175>`_
+
 PyPSA-Earth 0.4.1
 =================
 
