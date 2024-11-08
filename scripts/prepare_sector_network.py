@@ -2748,7 +2748,6 @@ if __name__ == "__main__":
     # Fetch wildcards
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Prepare the costs dataframe
     costs = prepare_costs(
