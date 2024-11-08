@@ -95,9 +95,8 @@ def download_CO2_emissions():
     # Add ISO2 country code for each country
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
     cc = coco.CountryConverter()
-    Country = pd.Series(CO2_emissions["Country"])
-    CO2_emissions["country"] = cc.pandas_convert(
-        series=Country, to="ISO2", not_found="not found"
+    CO2_emissions.loc[:, "country"] = cc.pandas_convert(
+        series=CO2_emissions["Country"], to="ISO2", not_found="not found"
     )
 
     # Drop region names that have no ISO2:
