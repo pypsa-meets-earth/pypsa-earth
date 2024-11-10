@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from _helpers import aggregate_fuels, get_conv_factors
+from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors
 
 _logger = logging.getLogger(__name__)
 
@@ -375,7 +375,7 @@ if __name__ == "__main__":
     if snakemake.params.update_data:
         # Delete and existing files to avoid duplication and double counting
 
-        files = glob.glob("data/demand/unsd/data/*.txt")
+        files = glob.glob(os.path.join(BASE_DIR, "data/demand/unsd/data/*.txt"))
         for f in files:
             os.remove(f)
 
@@ -387,7 +387,7 @@ if __name__ == "__main__":
                 with ZipFile(BytesIO(zipresp.read())) as zfile:
                     zfile.extractall("data/demand/unsd/data")
 
-                    path = "data/demand/unsd/data"
+                    path = os.path.join(BASE_DIR, "data/demand/unsd/data")
 
     # Get the files from the path provided in the OP
     all_files = list(Path("data/demand/unsd/data").glob("*.txt"))
@@ -433,7 +433,9 @@ if __name__ == "__main__":
     df_yr = df_yr[df_yr.country.isin(countries)]
 
     # Create an empty dataframe for energy_totals_base
-    energy_totals_cols = pd.read_csv("data/energy_totals_DF_2030.csv").columns
+    energy_totals_cols = pd.read_csv(
+        os.path.join(BASE_DIR, "data/energy_totals_DF_2030.csv")
+    ).columns
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
     # Lists that combine the different fuels in the dataset to the model's carriers
