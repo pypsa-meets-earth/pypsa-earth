@@ -385,12 +385,14 @@ if __name__ == "__main__":
 
             with urlopen(zipurl) as zipresp:
                 with ZipFile(BytesIO(zipresp.read())) as zfile:
-                    zfile.extractall("data/demand/unsd/data")
+                    zfile.extractall(os.path.join(BASE_DIR, "data/demand/unsd/data"))
 
                     path = os.path.join(BASE_DIR, "data/demand/unsd/data")
 
     # Get the files from the path provided in the OP
-    all_files = list(Path("data/demand/unsd/data").glob("*.txt"))
+    all_files = list(
+        Path(os.path.join(BASE_DIR, "data/demand/unsd/data")).glob("*.txt")
+    )
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
