@@ -30,6 +30,13 @@ copy_default_files()
 configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
+configfile: "config.spatial.yaml"
+configfile: "config.weather.yaml"
+configfile: "config.elec.yaml"
+configfile: "config.costs.yaml"
+configfile: "config.solve.yaml"
+configfile: "config.plot.yaml"
+configfile: "config.default.yaml"
 configfile: "config.yaml"
 
 
