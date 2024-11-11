@@ -13,7 +13,7 @@ import os
 from itertools import product
 
 import pandas as pd
-from _helpers import mock_snakemake, read_csv_nafix
+from _helpers import BASE_DIR, mock_snakemake, read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -69,8 +69,12 @@ if __name__ == "__main__":
         )
 
         industry_demand = pd.read_csv(
-            "data/custom/industry_demand_{0}_{1}.csv".format(
-                snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
+            os.path.join(
+                BASE_DIR,
+                "data/custom/industry_demand_{0}_{1}.csv".format(
+                    snakemake.wildcards["demand"],
+                    snakemake.wildcards["planning_horizons"],
+                ),
             ),
             index_col=[0, 1],
         )
@@ -204,7 +208,9 @@ if __name__ == "__main__":
         geo_locs = match_technology(geo_locs).loc[countries_geo]
 
         aluminium_year = snakemake.params.aluminium_year
-        AL = read_csv_nafix("data/AL_production.csv", index_col=0)
+        AL = read_csv_nafix(
+            os.path.join(BASE_DIR, "data/AL_production.csv"), index_col=0
+        )
         # Filter data for the given year and countries
         AL_prod_tom = AL.query("Year == @aluminium_year and index in @countries_geo")[
             "production[ktons/a]"
