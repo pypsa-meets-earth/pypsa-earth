@@ -28,8 +28,6 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Removed duplications of devendencies in environment.yaml `PR #1128 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1128>`_
 
-* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
-
 * Use BASE_DIR in rules and `_helpers.py` script for facilitate module import in subworkflow `PR #1137 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1137>`__
 
 
