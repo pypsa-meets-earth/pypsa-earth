@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+version: 0.4.1
+
+sector:
+  hydrogen:
+    network: true
+    H2_retrofit_capacity_per_CH4: 0.6
+    network_limit: 2000 #GWkm
+    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
+    gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
+    underground_storage: false
+    hydrogen_colors: false
+    set_color_shares: false
+    blue_share: 0.40
+    pink_share: 0.05
+
+  hydrogen_underground_storage: true
+  shipping_hydrogen_liquefaction: false
+  shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
+
+  gadm_level: 1
+  h2_cavern: true
+  marginal_cost_storage: 0
+  methanation: true
+  helmeth: true
+  dac: true
+  SMR: true
+  SMR CC: true
+  cc_fraction: 0.9
+  cc: true
+  airport_sizing_factor: 3
+
+  min_part_load_fischer_tropsch: 0.9
