@@ -5,6 +5,46 @@
 version: 0.4.1
 
 sector:
+
+  # parameters of the heating sector
+  district_heating:
+    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+    #increase of today's district heating demand to potential maximum district heating share
+    #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
+    progress: 1
+    # 2020: 0.0
+    # 2030: 0.3
+    # 2040: 0.6
+    # 2050: 1.0
+    district_heating_loss: 0.15
+  reduce_space_heat_exogenously: true # reduces space heat demand by a given factor (applied before losses in DH)
+  # this can represent e.g. building renovation, building demolition, or if
+  # the factor is negative: increasing floor area, increased thermal comfort, population growth
+  reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
+  # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
+  # 2020: 0.10  # this results in a space heat demand reduction of 10%
+  # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
+  # 2030: 0.09
+  # 2035: 0.11
+  # 2040: 0.16
+  # 2045: 0.21
+  # 2050: 0.29
+
+  tes: true
+  tes_tau: # 180 day time constant for centralised, 3 day for decentralised
+    decentral: 3
+    central: 180
+  boilers: true
+  oil_boilers: false
+  chp: true
+  micro_chp: false
+  solar_thermal: true
+  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  time_dep_hp_cop: true #time dependent heat pump coefficient of performance
+  solar_cf_correction: 0.788457 # = >>>1/1.2683
+
+
+  # parameters of the mobility sector
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
   bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
   transport_heating_deadband_upper: 20.
@@ -84,3 +124,34 @@ sector:
     AP_2050: 0.42
     NZ_2050: 0.68
     DF_2050: 0.011
+
+  # parameters of H2 production, transport and storage
+  hydrogen:
+    network: true
+    H2_retrofit_capacity_per_CH4: 0.6
+    network_limit: 2000 #GWkm
+    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
+    gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
+    underground_storage: false
+    hydrogen_colors: false
+    set_color_shares: false
+    blue_share: 0.40
+    pink_share: 0.05
+
+  hydrogen_underground_storage: true
+  shipping_hydrogen_liquefaction: false
+  shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
+
+  gadm_level: 1
+  h2_cavern: true
+  marginal_cost_storage: 0
+  methanation: true
+  helmeth: true
+  dac: true
+  SMR: true
+  SMR CC: true
+  cc_fraction: 0.9
+  cc: true
+  airport_sizing_factor: 3
+
+  min_part_load_fischer_tropsch: 0.9
