@@ -36,7 +36,6 @@ configfile: "config.elec.yaml"
 configfile: "config.costs.yaml"
 configfile: "config.solve.yaml"
 configfile: "config.plot.yaml"
-configfile: "config.default.yaml"
 configfile: "config.yaml"
 
 
