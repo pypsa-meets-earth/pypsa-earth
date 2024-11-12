@@ -104,7 +104,7 @@ def download_CO2_emissions():
 
     # Drop region names where country column contains list of countries
     CO2_emissions = CO2_emissions[
-        CO2_emissions.country.apply(lambda x: isinstance(x, str), axis=1)
+        CO2_emissions.country.apply(lambda x: isinstance(x, str))
     ]
     return CO2_emissions
 
