@@ -10,9 +10,7 @@ from pathlib import Path
 import country_converter as coco
 import numpy as np
 import pandas as pd
-
-# from _helpers import configure_logging
-
+from _helpers import BASE_DIR
 
 # logger = logging.getLogger(__name__)
 
@@ -127,7 +125,7 @@ if __name__ == "__main__":
 
     if vehicles_csv.empty or CO2_emissions_csv.empty:
         # In case one of the urls is not working, we can use the hard-coded data
-        src = os.getcwd() + "/data/temp_hard_coded/transport_data.csv"
+        src = BASE_DIR + "/data/temp_hard_coded/transport_data.csv"
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:
