@@ -1461,7 +1461,9 @@ rule build_clustered_population_layouts:
         pop_layout_rural="resources/"
         + SECDIR
         + "population_shares/pop_layout_rural_{planning_horizons}.nc",
-        gdp_layout="resources/" + RDIR + "gdp_shares/gdp_layout_{planning_horizons}.nc",
+        gdp_layout="resources/"
+        + SECDIR
+        + "gdp_shares/gdp_layout_{planning_horizons}.nc",
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
