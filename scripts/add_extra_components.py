@@ -265,6 +265,41 @@ def attach_hydrogen_pipelines(n, costs, config):
         carrier="H2 pipeline",
     )
 
+    # setup pipelines as bidirectional and lossy
+    lossy_bidirectional_links(n,"H2 pipeline")
+
+
+def lossy_bidirectional_links(
+        n: pypsa.components.Network,
+        carrier: str
+    ):
+
+    "Split bidirectional links into two unidirectional links to include transmission losses."
+
+    carrier_i = n.links.query("carrier == @carrier").index
+
+    if carrier_i.empty:
+        return
+    
+    logger.info(
+        f"Splitting bidirectional links with the carrier {carrier}"
+    )
+
+    n.links.loc[carrier_i, "p_min_pu"] = 0
+
+    rev_links = (
+        n.links.loc[carrier_i].copy().rename({"bus0": "bus1", "bus1": "bus0"}, axis=1)
+    )
+    rev_links["length_original"] = rev_links["length"]
+    rev_links["capital_cost"] = 0
+    rev_links["length"] = 0
+    rev_links["reversed"] = True
+    rev_links.index = rev_links.index.map(lambda x: x + "-reversed")
+
+    n.links = pd.concat([n.links, rev_links], sort=False)
+    n.links["reversed"] = n.links["reversed"].fillna(False).infer_objects(copy=False)
+    n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

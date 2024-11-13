@@ -854,6 +854,46 @@ def add_existing(n):
             n.generators.loc[tech_index, tech] = existing_res
 
 
+def add_lossy_bidirectional_link_constraints(
+        n: pypsa.components.Network
+    ) -> None:
+
+    '''
+    Ensures that the two links simulating a bidirectional_link are extended the same amount.
+    '''
+
+    if not n.links.p_nom_extendable.any() or "reversed" not in n.links.columns:
+        return
+
+    n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
+    carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
+
+    forward_i = n.links.query(
+        "carrier in @carriers and ~reversed and p_nom_extendable"
+    ).index
+
+    def get_backward_i(forward_i):
+        return pd.Index(
+            [
+                (
+                    re.sub(r"-(\d{4})$", r"-reversed-\1", s)
+                    if re.search(r"-\d{4}$", s)
+                    else s + "-reversed"
+                )
+                for s in forward_i
+            ]
+        )
+
+    backward_i = get_backward_i(forward_i)
+
+    lhs = linexpr(
+        (1, get_var(n,"Link", "p_nom")[backward_i].to_numpy()),
+        (-1, get_var(n,"Link", "p_nom")[forward_i].to_numpy())
+    )
+    
+    define_constraints(n, lhs, "=", 0, "Link-bidirectional_sync")
+
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -881,6 +921,7 @@ def extra_functionality(n, snapshots):
         if "EQ" in o:
             add_EQ_constraints(n, o)
     add_battery_constraints(n)
+    add_lossy_bidirectional_link_constraints(n)
 
     if (
         snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
