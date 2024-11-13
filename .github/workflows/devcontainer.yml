@@ -32,7 +32,6 @@ jobs:
       with:
         subFolder: .github
         imageName: ghcr.io/${{ github.repository }}:test
-        cacheFrom: ghcr.io/${{ github.repository }}:test
         push: always  
 
   test:
