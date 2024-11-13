@@ -411,6 +411,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/carlosfv92">
+            <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
+            <br />
+            <sub><b>Carlos Fernandez</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/stephenjlee">
             <img src="https://avatars.githubusercontent.com/u/11340470?v=4" width="100;" alt="stephenjlee"/>
             <br />
