@@ -622,8 +622,8 @@ def define_spatial(nodes, options):
         spatial.biomass.industry = nodes + " solid biomass for industry"
         spatial.biomass.industry_cc = nodes + " solid biomass for industry CC"
     else:
-        spatial.biomass.nodes = ["Africa solid biomass"]
-        spatial.biomass.locations = ["Africa"]
+        spatial.biomass.nodes = ["Earth solid biomass"]
+        spatial.biomass.locations = ["Earth"]
         spatial.biomass.industry = ["solid biomass for industry"]
         spatial.biomass.industry_cc = ["solid biomass for industry CC"]
 
@@ -641,7 +641,7 @@ def define_spatial(nodes, options):
         # spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
     else:
         spatial.co2.nodes = ["co2 stored"]
-        spatial.co2.locations = ["Africa"]
+        spatial.co2.locations = ["Earth"]
         spatial.co2.vents = ["co2 vent"]
         # spatial.co2.x = (0,)
         # spatial.co2.y = 0
@@ -656,8 +656,8 @@ def define_spatial(nodes, options):
         spatial.oil.nodes = nodes + " oil"
         spatial.oil.locations = nodes
     else:
-        spatial.oil.nodes = ["Africa oil"]
-        spatial.oil.locations = ["Africa"]
+        spatial.oil.nodes = ["Earth oil"]
+        spatial.oil.locations = ["Earth"]
 
     # gas
 
@@ -672,13 +672,13 @@ def define_spatial(nodes, options):
             spatial.gas.industry_cc = nodes + " gas for industry CC"
         spatial.gas.biogas_to_gas = nodes + " biogas to gas"
     else:
-        spatial.gas.nodes = ["Africa gas"]
-        spatial.gas.locations = ["Africa"]
-        spatial.gas.biogas = ["Africa biogas"]
+        spatial.gas.nodes = ["Earth gas"]
+        spatial.gas.locations = ["Earth"]
+        spatial.gas.biogas = ["Earth biogas"]
         spatial.gas.industry = ["gas for industry"]
         if snakemake.config["sector"]["cc"]:
             spatial.gas.industry_cc = ["gas for industry CC"]
-        spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
+        spatial.gas.biogas_to_gas = ["Earth biogas to gas"]
 
     spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=spatial.nodes)
 
@@ -691,9 +691,9 @@ def define_spatial(nodes, options):
         spatial.coal.locations = nodes
         spatial.coal.industry = nodes + " coal for industry"
     else:
-        spatial.coal.nodes = ["Africa coal"]
-        spatial.coal.locations = ["Africa"]
-        spatial.coal.industry = ["Africa coal for industry"]
+        spatial.coal.nodes = ["Earth coal"]
+        spatial.coal.locations = ["Earth"]
+        spatial.coal.industry = ["Earth coal for industry"]
 
     spatial.coal.df = pd.DataFrame(vars(spatial.coal), index=spatial.nodes)
 
@@ -705,8 +705,8 @@ def define_spatial(nodes, options):
         spatial.lignite.nodes = nodes + " lignite"
         spatial.lignite.locations = nodes
     else:
-        spatial.lignite.nodes = ["Africa lignite"]
-        spatial.lignite.locations = ["Africa"]
+        spatial.lignite.nodes = ["Earth lignite"]
+        spatial.lignite.locations = ["Earth"]
 
     spatial.lignite.df = pd.DataFrame(vars(spatial.lignite), index=spatial.nodes)
 
@@ -926,7 +926,7 @@ def add_co2(n, costs):
     n.add(
         "Bus",
         "co2 atmosphere",
-        location="Africa",  # TODO Ignoed by pypsa check
+        location="Earth",  # TODO Ignoed by pypsa check
         carrier="co2",
     )
 
@@ -1520,7 +1520,7 @@ def add_industry(n, costs):
 
     # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
-    # n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
+    # n.add("Bus", "gas for industry", location="Earth", carrier="gas for industry")
     n.madd(
         "Bus",
         spatial.gas.industry,
@@ -1546,7 +1546,7 @@ def add_industry(n, costs):
     n.madd(
         "Link",
         spatial.gas.industry,
-        # bus0="Africa gas",
+        # bus0="Earth gas",
         bus0=spatial.gas.nodes,
         # bus1="gas for industry",
         bus1=spatial.gas.industry,
@@ -1561,7 +1561,7 @@ def add_industry(n, costs):
             "Link",
             spatial.gas.industry_cc,
             # suffix=" gas for industry CC",
-            # bus0="Africa gas",
+            # bus0="Earth gas",
             bus0=spatial.gas.nodes,
             bus1=spatial.gas.industry,
             bus2="co2 atmosphere",
@@ -1696,7 +1696,7 @@ def add_industry(n, costs):
         p_set=industrial_elec,
     )
 
-    n.add("Bus", "process emissions", location="Africa", carrier="process emissions")
+    n.add("Bus", "process emissions", location="Earth", carrier="process emissions")
 
     # this should be process emissions fossil+feedstock
     # then need load on atmosphere for feedstock emissions that are currently going to atmosphere via Link Fischer-Tropsch demand
@@ -2212,7 +2212,7 @@ def add_heat(n, costs):
                 n.madd(
                     "Link",
                     h_nodes[name] + " urban central gas CHP CC",
-                    # bus0="Africa gas",
+                    # bus0="Earth gas",
                     bus0=spatial.gas.nodes,
                     bus1=h_nodes[name],
                     bus2=h_nodes[name] + " urban central heat",
@@ -2253,7 +2253,7 @@ def add_heat(n, costs):
                 "Link",
                 h_nodes[name] + f" {name} micro gas CHP",
                 p_nom_extendable=True,
-                # bus0="Africa gas",
+                # bus0="Earth gas",
                 bus0=spatial.gas.nodes,
                 bus1=h_nodes[name],
                 bus2=h_nodes[name] + f" {name} heat",
