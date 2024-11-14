@@ -38,26 +38,15 @@ def select_ports(n):
         index_col=None,
         keep_default_na=False,
     ).squeeze()
-
-    ports = ports[ports.country.isin(countries)]
-    if len(ports) < 1:
-        logger.error(
-            "No export ports chosen, please add ports to the file data/export_ports.csv"
-        )
     gadm_level = snakemake.params.gadm_level
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(
-            port[["x", "y"]],
-            port["country"],
-            gadm_level,
-            snakemake.input["shapes_path"],
-            snakemake.params.alternative_clustering,
-        ),
-        axis=1,
-    )
-
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    ports = locate_bus(
+        ports,
+        countries,
+        gadm_level,
+        snakemake.input.shapes_path,
+        snakemake.params.alternative_clustering,
+    ).set_index("gadm_{}".format(gadm_level))
 
     # Select the hydrogen buses based on nodes with ports
     hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
@@ -191,14 +180,15 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="10",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate="0.071",
             demand="AB",
             h2export="120",
+            # configfile="test/config.test1.yaml",
         )
 
     overrides = override_component_attrs(snakemake.input.overrides)
