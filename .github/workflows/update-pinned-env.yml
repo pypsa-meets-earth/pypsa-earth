@@ -3,7 +3,7 @@ name: Update pinned envs
 on:
   push:
     branches:
-    - master
+    - main
     paths:
     - 'envs/environment.yaml'
   schedule:
