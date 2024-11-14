@@ -21,7 +21,6 @@ from _helpers import (
     create_network_topology,
     cycling_shift,
     locate_bus,
-    locate_bus_gdf,
     mock_snakemake,
     override_component_attrs,
     prepare_costs,
@@ -1032,7 +1031,7 @@ def add_aviation(n, cost):
 
     gadm_level = options["gadm_level"]
 
-    airports = locate_bus_gdf(
+    airports = locate_bus(
         airports,
         countries,
         gadm_level,
@@ -1307,7 +1306,7 @@ def add_shipping(n, costs):
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
-    ports = locate_bus_gdf(
+    ports = locate_bus(
         ports,
         countries,
         gadm_level,
