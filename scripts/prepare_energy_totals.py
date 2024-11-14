@@ -3,8 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
-
-from _helpers import mock_snakemake, read_csv_nafix
+from _helpers import BASE_DIR, get_path, mock_snakemake, read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
-    base_energy_totals = read_csv_nafix("data/energy_totals_base.csv", index_col=0)
+    base_energy_totals = read_csv_nafix(get_path(BASE_DIR, "data", "energy_totals_base.csv"), index_col=0)
     growth_factors_cagr = read_csv_nafix(
         snakemake.input.growth_factors_cagr, index_col=0
     )

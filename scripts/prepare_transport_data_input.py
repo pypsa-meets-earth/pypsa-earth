@@ -7,7 +7,9 @@ import shutil
 import country_converter as coco
 import numpy as np
 import pandas as pd
-from _helpers import get_current_directory_path, get_path, mock_snakemake
+from _helpers import BASE_DIR, configure_logging, create_logger, get_path, mock_snakemake
+
+logger = create_logger(__name__)
 
 
 def download_number_of_vehicles():
@@ -26,9 +28,9 @@ def download_number_of_vehicles():
         Nbr_vehicles_csv = pd.read_csv(
             fn, storage_options=storage_options, encoding="utf8"
         )
-        print("File read successfully.")
+        logger.info("File at {} read successfully.".format(fn))
     except Exception as e:
-        print("Failed to read the file:", e)
+        logger.error("Failed to read the file from {} with exception:".format(fn), e)
         return pd.DataFrame()
 
     Nbr_vehicles_csv = Nbr_vehicles_csv.rename(
@@ -88,14 +90,17 @@ def download_CO2_emissions():
     # Add ISO2 country code for each country
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
     cc = coco.CountryConverter()
-    Country = pd.Series(CO2_emissions["Country"])
-    CO2_emissions["country"] = cc.pandas_convert(
-        series=Country, to="ISO2", not_found="not found"
+    CO2_emissions.loc[:, "country"] = cc.pandas_convert(
+        series=CO2_emissions["Country"], to="ISO2", not_found="not found"
     )
 
     # Drop region names that have no ISO2:
     CO2_emissions = CO2_emissions[CO2_emissions.country != "not found"]
 
+    # Drop region names where country column contains list of countries
+    CO2_emissions = CO2_emissions[
+        CO2_emissions.country.apply(lambda x: isinstance(x, str))
+    ]
     return CO2_emissions
 
 
@@ -104,12 +109,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("prepare_transport_data_input")
 
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
+    configure_logging(snakemake)
 
     # Downloaded and prepare vehicles_csv:
     vehicles_csv = download_number_of_vehicles().copy()
@@ -119,9 +119,7 @@ if __name__ == "__main__":
 
     if vehicles_csv.empty or CO2_emissions_csv.empty:
         # In case one of the urls is not working, we can use the hard-coded data
-        src = get_path(
-            get_current_directory_path(), "data/temp_hard_coded/transport_data.csv"
-        )
+        src = BASE_DIR + "/data/temp_hard_coded/transport_data.csv"
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:
