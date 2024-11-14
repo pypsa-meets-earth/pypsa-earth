@@ -10,9 +10,7 @@ from pathlib import Path
 import country_converter as coco
 import numpy as np
 import pandas as pd
-
-# from _helpers import configure_logging
-
+from _helpers import BASE_DIR
 
 # logger = logging.getLogger(__name__)
 
@@ -95,14 +93,17 @@ def download_CO2_emissions():
     # Add ISO2 country code for each country
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
     cc = coco.CountryConverter()
-    Country = pd.Series(CO2_emissions["Country"])
-    CO2_emissions["country"] = cc.pandas_convert(
-        series=Country, to="ISO2", not_found="not found"
+    CO2_emissions.loc[:, "country"] = cc.pandas_convert(
+        series=CO2_emissions["Country"], to="ISO2", not_found="not found"
     )
 
     # Drop region names that have no ISO2:
     CO2_emissions = CO2_emissions[CO2_emissions.country != "not found"]
 
+    # Drop region names where country column contains list of countries
+    CO2_emissions = CO2_emissions[
+        CO2_emissions.country.apply(lambda x: isinstance(x, str))
+    ]
     return CO2_emissions
 
 
@@ -127,7 +128,7 @@ if __name__ == "__main__":
 
     if vehicles_csv.empty or CO2_emissions_csv.empty:
         # In case one of the urls is not working, we can use the hard-coded data
-        src = os.getcwd() + "/data/temp_hard_coded/transport_data.csv"
+        src = BASE_DIR + "/data/temp_hard_coded/transport_data.csv"
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:
