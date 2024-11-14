@@ -1232,6 +1232,7 @@ def locate_bus(
     path_to_gadm=None,
     gadm_clustering=False,
     dropnull=True,
+    col_out=None,
 ):
     """
     Function to locate the points of the dataframe df into the GADM shapefile.
@@ -1244,15 +1245,18 @@ def locate_bus(
         List of target countries
     gadm_level: int
         GADM level to be used
-    path_to_gadm: str
+    path_to_gadm: str (default None)
         Path to the GADM shapefile
-    gadm_clustering: bool
+    gadm_clustering: bool (default False)
         True if gadm clustering is adopted
-    dropnull: bool
+    dropnull: bool (default True)
         True if the rows with null values should be dropped
+    col_out: str (default gadm_{gadm_level})
+        Name of the output column
     """
+    if col_out is None:
+        col_out = "gadm_{}".format(gadm_level)
     df = df[df.country.isin(countries)]
-    col_out = "gadm_{}".format(gadm_level)
     df[col_out] = None
     for co in countries:
         gdf_shape, col = _get_shape_col_gdf(
