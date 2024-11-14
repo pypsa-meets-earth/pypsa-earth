@@ -16,6 +16,7 @@ import pytz
 import ruamel.yaml
 import xarray as xr
 from _helpers import (
+    BASE_DIR,
     create_dummy_data,
     create_network_topology,
     cycling_shift,
@@ -263,8 +264,11 @@ def add_hydrogen(n, costs):
     if snakemake.config["sector"]["hydrogen"]["underground_storage"]:
         if snakemake.config["custom_data"]["h2_underground"]:
             custom_cavern = pd.read_csv(
-                "data/custom/h2_underground_{0}_{1}.csv".format(
-                    demand_sc, investment_year
+                os.path.join(
+                    BASE_DIR,
+                    "data/custom/h2_underground_{0}_{1}.csv".format(
+                        demand_sc, investment_year
+                    ),
                 )
             )
             # countries = n.buses.country.unique().to_list()
@@ -2664,9 +2668,12 @@ def add_residential(n, costs):
 def add_custom_water_cost(n):
     for country in countries:
         water_costs = pd.read_csv(
-            "resources/custom_data/{}_water_costs.csv".format(country),
-            sep=",",
-            index_col=0,
+            os.path.join(
+                BASE_DIR,
+                "resources/custom_data/{}_water_costs.csv".format(country),
+                sep=",",
+                index_col=0,
+            )
         )
         water_costs = water_costs.filter(like=country, axis=0).loc[spatial.nodes]
         electrolysis_links = n.links.filter(like=country, axis=0).filter(
@@ -2801,7 +2808,6 @@ if __name__ == "__main__":
     # Fetch wildcards
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Prepare the costs dataframe
     costs = prepare_costs(
