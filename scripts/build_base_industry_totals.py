@@ -8,8 +8,6 @@ Created on Thu Jul 14 19:01:13 2022.
 @author: user
 """
 
-import pathlib
-
 import country_converter as coco
 import pandas as pd
 from _helpers import (
@@ -117,11 +115,11 @@ if __name__ == "__main__":
     clean_industry_list = list(transaction.clean_name.unique())
 
     unsd_path = get_path(
-        pathlib.Path(snakemake.input["energy_totals_base"]).parent, "demand/unsd/data/"
+        get_path(snakemake.input["energy_totals_base"]).parent, "demand/unsd/data/"
     )
 
     # Get the files from the path provided in the OP
-    all_files = list(pathlib.Path(unsd_path).glob("*.txt"))
+    all_files = list(get_path(unsd_path).glob("*.txt"))
 
     # Create a dataframe from all downloaded files
     df = pd.concat(

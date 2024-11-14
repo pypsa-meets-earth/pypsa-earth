@@ -124,12 +124,12 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         sel_ext = ".nc"
         for ext in [".nc", ".csv"]:
-            load_path = get_path(BASE_DIR, load_dir, str(continent) + str(ext))
-            if pathlib.Path(load_path).exists():
+            load_path = get_path(BASE_DIR, str(load_dir), str(continent) + str(ext))
+            if get_path(load_path).exists():
                 sel_ext = ext
                 break
         file_name = str(continent) + str(sel_ext)
-        load_path = get_path(load_dir, file_name)
+        load_path = get_path(str(load_dir), file_name)
         load_paths.append(load_path)
         file_names.append(file_name)
 

@@ -52,8 +52,6 @@ The line volume/cost cap field can be set to one of the following:
 Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
 
-import pathlib
-
 import pandas as pd
 import pypsa
 from _helpers import (
@@ -503,7 +501,7 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
     for label, filename in networks_dict.items():
         print(label, filename)
-        if not pathlib.Path(filename).exists():
+        if not get_path(filename).exists():
             print("does not exist!!")
             continue
 

@@ -6,7 +6,6 @@
 # -*- coding: utf-8 -*-
 
 import multiprocessing as mp
-import pathlib
 import shutil
 from itertools import takewhile
 from operator import attrgetter
@@ -22,7 +21,6 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
-    get_current_directory_path,
     get_gadm_layer,
     get_path,
     mock_snakemake,
@@ -117,7 +115,7 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
 
 
 def save_to_geojson(df, fn):
-    pathlib.Path(fn).unlink(missing_ok=True)  # remove file if it exists
+    get_path(fn).unlink(missing_ok=True)  # remove file if it exists
     if not isinstance(df, gpd.GeoDataFrame):
         df = gpd.GeoDataFrame(dict(geometry=df))
 
@@ -139,9 +137,9 @@ def load_eez(countries_codes, geo_crs, eez_gpkg_file="./data/eez/eez_v11.gpkg"):
     The dataset shall be downloaded independently by the user (see
     guide) or together with pypsa-earth package.
     """
-    if not pathlib.Path(eez_gpkg_file).exists():
+    if not get_path(eez_gpkg_file).exists():
         raise Exception(
-            f"File EEZ {eez_gpkg_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {pathlib.Path(eez_gpkg).parent}"
+            f"File EEZ {eez_gpkg_file} not found, please download it from https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip and copy it in {get_path(eez_gpkg).parent}"
         )
 
     geodf_EEZ = gpd.read_file(eez_gpkg_file, engine="pyogrio").to_crs(geo_crs)
@@ -303,7 +301,7 @@ def download_WorldPop_standard(
         BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
 
-    if not pathlib.Path(WorldPop_inputfile).exists() or update is True:
+    if not get_path(WorldPop_inputfile).exists() or update is True:
         if out_logging:
             logger.warning(
                 f"Stage 3 of 5: {WorldPop_filename} does not exist, downloading to {WorldPop_inputfile}"
@@ -395,9 +393,9 @@ def convert_gdp(name_file_nc, year=2015, out_logging=False):
     )  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
-    if not pathlib.Path(GDP_nc).exists():
+    if not get_path(GDP_nc).exists():
         raise Exception(
-            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {pathlib.Path(GDP_nc).parent}"
+            f"File {name_file_nc} not found, please download it from https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0 and copy it in {get_path(GDP_nc).parent}"
         )
 
     # open nc dataset
@@ -439,7 +437,7 @@ def load_gdp(
         BASE_DIR, "data", "GDP", name_file_tif
     )  # Input filepath tif
 
-    if update | (not pathlib.Path(GDP_tif).exists()):
+    if update | (not get_path(GDP_tif).exists()):
         if out_logging:
             logger.warning(
                 f"Stage 5 of 5: File {name_file_tif} not found, the file will be produced by processing {name_file_nc}"

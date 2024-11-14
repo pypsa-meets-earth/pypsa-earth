@@ -121,7 +121,6 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
-import pathlib
 from functools import reduce
 
 import geopandas as gpd
@@ -134,6 +133,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_aggregation_strategies,
+    get_path,
     mock_snakemake,
     normed,
     update_p_nom_max,
@@ -626,7 +626,7 @@ def clustering_for_n_clusters(
 
 
 def save_to_geojson(s, fn):
-    pathlib.Path(fn).unlink(missing_ok=True)
+    get_path(fn).unlink(missing_ok=True)
     df = s.reset_index()
     schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
     df.to_file(fn, driver="GeoJSON", schema=schema)

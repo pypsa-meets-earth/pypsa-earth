@@ -26,14 +26,12 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-import pathlib
 import shutil
 
 from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
-    get_current_directory_path,
     get_path,
     mock_snakemake,
     read_osm_config,
@@ -135,7 +133,7 @@ if __name__ == "__main__":
     for name in names:
         for f in out_formats:
             new_file_name = get_path(store_path_resources, f"all_raw_{name}s.{f}")
-            old_files = list(pathlib.Path(out_path).glob(f"*{name}.{f}"))
+            old_files = list(get_path(out_path).glob(f"*{name}.{f}"))
             # if file is missing, create empty file, otherwise rename it and move it
             if not old_files:
                 with open(new_file_name, "w") as f:

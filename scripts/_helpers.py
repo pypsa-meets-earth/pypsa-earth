@@ -1408,6 +1408,7 @@ def locate_bus(
     gadm_url_prefix,
     gadm_input_file_args,
     contended_flag,
+    col_name="name",
     path_to_gadm=None,
     update=False,
     out_logging=False,
@@ -1445,8 +1446,9 @@ def locate_bus(
         out_logging = true, enables output logging
     gadm_clustering : bool
         gadm_cluster = true, to enable clustering
+    col_name: str
+        column to use to filter the GeoDataFrame
     """
-    col = "name"
     if not gadm_clustering:
         gdf = gpd.read_file(path_to_gadm)
     else:
@@ -1473,11 +1475,11 @@ def locate_bus(
                 update,
                 out_logging,
             )
-            col = "GID_{}".format(gadm_level)
+            col_name = "GID_{}".format(gadm_level)
 
         # gdf.set_index("GADM_ID", inplace=True)
     gdf_co = gdf[
-        gdf[col].str.contains(co)
+        gdf[col_name].str.contains(co)
     ]  # geodataframe of entire continent - output of prev function {} are placeholders
     # in strings - conditional formatting
     # insert any variable into that place using .format - extract string and filter for those containing co (MA)
@@ -1485,12 +1487,12 @@ def locate_bus(
 
     try:
         return gdf_co[gdf_co.contains(point)][
-            col
+            col_name
         ].item()  # filter gdf_co which contains point and returns the bus
 
     except ValueError:
         return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
-            col
+            col_name
         ].item()  # looks for closest one shape=node
 
 
@@ -1566,7 +1568,9 @@ def aggregate_fuels(sector):
     ]
 
     oil_fuels = [
-        "additives and oxygenates" "aviation gasoline" "bitumen",
+        "additives and oxygenates",
+        "aviation gasoline",
+        "bitumen",
         "conventional crude oil",
         "crude petroleum",
         "ethane",
@@ -1580,7 +1584,7 @@ def aggregate_fuels(sector):
         "naphtha",
         "natural gas liquids",
         "other kerosene",
-        "paraffin waxes" "patent fuel",
+        "paraffin waxes",
         "petroleum coke",
         "refinery gas",
     ]

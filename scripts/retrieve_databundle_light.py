@@ -81,7 +81,6 @@ according to the following rules:
 
 """
 import datetime as dt
-import pathlib
 import re
 from zipfile import ZipFile
 
@@ -94,7 +93,6 @@ from _helpers import (
     create_country_list,
     create_logger,
     get_path,
-    get_relative_path,
     mock_snakemake,
     progress_retrieve,
 )
@@ -158,7 +156,7 @@ def download_and_unzip_zenodo(config, root_path, hot_run=True, disable_progress=
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=destination)
-            pathlib.Path(file_path).unlink(missing_ok=True)
+            get_path(file_path).unlink(missing_ok=True)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         except Exception as e:
             logger.warning(
@@ -221,7 +219,7 @@ def download_and_unzip_gdrive(config, root_path, hot_run=True, disable_progress=
     # if hot run enabled
     if hot_run:
         # remove file
-        pathlib.Path(file_path).unlink(missing_ok=True)
+        get_path(file_path).unlink(missing_ok=True)
         # download file from google drive
         gdd.download_file_from_google_drive(
             file_id=file_id,
@@ -286,7 +284,7 @@ def download_and_unzip_protectedplanet(
     )
 
     if hot_run:
-        pathlib.Path(file_path).unlink(missing_ok=True)
+        get_path(file_path).unlink(missing_ok=True)
 
         downloaded = False
 
@@ -333,7 +331,7 @@ def download_and_unzip_protectedplanet(
                             nested_zip.extractall(path=dest_nested)
 
                         # remove inner zip file
-                        pathlib.Path(inner_zipname).unlink(missing_ok=True)
+                        get_path(inner_zipname).unlink(missing_ok=True)
 
                         logger.info(f"{resource} - Successfully unzipped file '{fzip}'")
                     except:
@@ -343,7 +341,7 @@ def download_and_unzip_protectedplanet(
 
                 # close and remove outer zip file
                 zip_obj.close()
-                pathlib.Path(file_path).unlink(missing_ok=True)
+                get_path(file_path).unlink(missing_ok=True)
 
                 logger.info(
                     f"Downloaded resource '{resource_iter}' from cloud '{url_iter}'."
@@ -394,7 +392,7 @@ def download_and_unpack(
     True when download is successful, False otherwise
     """
     if hot_run:
-        pathlib.Path(file_path).unlink(missing_ok=True)
+        get_path(file_path).unlink(missing_ok=True)
 
         try:
             logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
@@ -408,7 +406,7 @@ def download_and_unpack(
                 with ZipFile(file_path, "r") as zipfile:
                     zipfile.extractall(path=destination)
 
-                pathlib.Path(file_path).unlink(missing_ok=True)
+                get_path(file_path).unlink(missing_ok=True)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
             return True
         except Exception as e:
@@ -418,9 +416,9 @@ def download_and_unpack(
             return False
 
 
-def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=False):
+def download_and_unzip_direct(config, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_direct(config, root_path, dest_path, hot_run=True,
+    download_and_unzip_direct(config, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download the data by category from a direct url with no processing.
@@ -430,8 +428,6 @@ def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=
     ------
     config : Dict
         Configuration data for the category to download
-    root_path : str
-        Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
@@ -446,7 +442,7 @@ def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=
     destination = get_path(BASE_DIR, config["destination"])
     url = config["urls"]["direct"]
 
-    file_path = get_path(destination, pathlib.Path(url).name)
+    file_path = get_path(destination, get_path(url).name)
 
     unzip = config.get("unzip", False)
 
@@ -461,10 +457,10 @@ def download_and_unzip_direct(config, root_path, hot_run=True, disable_progress=
 
 
 def download_and_unzip_hydrobasins(
-    config, root_path, hot_run=True, disable_progress=False
+    config, hot_run=True, disable_progress=False
 ):
     """
-    download_and_unzip_basins(config, root_path, dest_path, hot_run=True,
+    download_and_unzip_basins(config, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download and unzip the data for hydrobasins from HydroBASINS database
@@ -484,8 +480,6 @@ def download_and_unzip_hydrobasins(
     ------
     config : Dict
         Configuration data for the category to download
-    root_path : str
-        Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
@@ -508,7 +502,7 @@ def download_and_unzip_hydrobasins(
 
     for rg in suffix_list:
         url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
-        file_path = get_path(destination, pathlib.Path(url).name)
+        file_path = get_path(destination, get_path(url).name)
 
         all_downloaded &= download_and_unpack(
             url=url,
@@ -524,9 +518,9 @@ def download_and_unzip_hydrobasins(
     return all_downloaded
 
 
-def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=False):
+def download_and_unzip_post(config, hot_run=True, disable_progress=False):
     """
-    download_and_unzip_post(config, root_path, dest_path, hot_run=True,
+    download_and_unzip_post(config, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download the data by category from a post request.
@@ -535,8 +529,6 @@ def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=Fa
     ------
     config : Dict
         Configuration data for the category to download
-    root_path : str
-        Absolute path of the repository
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
@@ -555,10 +547,10 @@ def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=Fa
     # remove url feature
     url = postdata.pop("url")
 
-    file_path = get_path(destination, pathlib.Path(url).name)
+    file_path = get_path(destination, get_path(url).name)
 
     if hot_run:
-        pathlib.Path(file_path).unlink(missing_ok=True)
+        get_path(file_path).unlink(missing_ok=True)
 
         # try:
         logger.info(f"Downloading resource '{resource}' from cloud '{url}'.")
@@ -576,7 +568,7 @@ def download_and_unzip_post(config, root_path, hot_run=True, disable_progress=Fa
             with ZipFile(file_path, "r") as zipfile:
                 zipfile.extractall(path=destination)
 
-            pathlib.Path(file_path).unlink(missing_ok=True)
+            get_path(file_path).unlink(missing_ok=True)
         logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
         # except:
         #     logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
@@ -804,7 +796,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
         for suffix in config_hydrobasin["urls"]["hydrobasins"]["suffixes"]
     ]
     gpdf_list = [None] * len(files_to_merge)
-    logger.info("Merging hydrobasins files into: " + output_fl)
+    logger.info(f"Merging hydrobasins files into: {output_fl}")
     for i, f_name in tqdm(enumerate(files_to_merge)):
         gpdf_list[i] = gpd.read_file(get_path(basins_path, f_name))
     fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
