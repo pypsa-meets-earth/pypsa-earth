@@ -854,13 +854,10 @@ def add_existing(n):
             n.generators.loc[tech_index, tech] = existing_res
 
 
-def add_lossy_bidirectional_link_constraints(
-        n: pypsa.components.Network
-    ) -> None:
-
-    '''
+def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> None:
+    """
     Ensures that the two links simulating a bidirectional_link are extended the same amount.
-    '''
+    """
 
     if not n.links.p_nom_extendable.any() or "reversed" not in n.links.columns:
         return
@@ -887,10 +884,10 @@ def add_lossy_bidirectional_link_constraints(
     backward_i = get_backward_i(forward_i)
 
     lhs = linexpr(
-        (1, get_var(n,"Link", "p_nom")[backward_i].to_numpy()),
-        (-1, get_var(n,"Link", "p_nom")[forward_i].to_numpy())
+        (1, get_var(n, "Link", "p_nom")[backward_i].to_numpy()),
+        (-1, get_var(n, "Link", "p_nom")[forward_i].to_numpy()),
     )
-    
+
     define_constraints(n, lhs, "=", 0, "Link-bidirectional_sync")
 
 
