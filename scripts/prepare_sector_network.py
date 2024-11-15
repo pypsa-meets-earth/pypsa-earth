@@ -517,7 +517,7 @@ def add_hydrogen(n, costs):
 
         if len(h2_links) > 0:
             if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
-                add_links_elec_routing_new_H2_pipelines()
+                add_links_repurposed_H2_pipelines()
             if snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
                 add_links_elec_routing_new_H2_pipelines()
             else:
