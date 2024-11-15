@@ -51,8 +51,8 @@ run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
 SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
-SDIR = config["summary_dir"].strip("/") + f"/{RDIR}{SECDIR}"
-RESDIR = config["results_dir"].strip("/") + f"/{RDIR}{SECDIR}"
+SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
+RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 COSTDIR = config["costs_dir"]
 
 load_data_paths = get_load_paths_gegis("data", config)
@@ -1063,6 +1063,7 @@ if not config["custom_data"]["gas_network"]:
 rule prepare_sector_network:
     params:
         costs=config["costs"],
+        electricity=config["electricity"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",

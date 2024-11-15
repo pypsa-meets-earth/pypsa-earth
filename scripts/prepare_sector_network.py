@@ -64,14 +64,17 @@ def add_carrier_buses(n, carrier, nodes=None):
 
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
+    # initial fossil reserves
+    e_initial = (snakemake.config["fossil_reserves"]).get(carrier, 0) * 1e6
     # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
     n.madd(
         "Store",
         nodes + " Store",
         bus=nodes,
         e_nom_extendable=True,
-        e_cyclic=True,
+        e_cyclic=True if e_initial == 0 else False,
         carrier=carrier,
+        e_initial=e_initial,
     )
 
     n.madd(
@@ -84,13 +87,18 @@ def add_carrier_buses(n, carrier, nodes=None):
     )
 
 
-def add_generation(n, costs):
+def add_generation(
+    n, costs, existing_capacities=0, existing_efficiencies=None, existing_nodes=None
+):
     """
     Adds conventional generation as specified in config.
 
     Args:
         n (network): PyPSA prenetwork
         costs (dataframe): _description_
+        existing_capacities: dictionary containing installed capacities for conventional_generation technologies
+        existing_efficiencies: dictionary containing efficiencies for conventional_generation technologies
+        existing_nodes: dictionary containing nodes for conventional_generation technologies
 
     Returns:
         _type_: _description_
@@ -107,9 +115,10 @@ def add_generation(n, costs):
     for generator, carrier in conventionals.items():
         add_carrier_buses(n, carrier)
         carrier_nodes = vars(spatial)[carrier].nodes
+        link_names = spatial.nodes + " " + generator
         n.madd(
             "Link",
-            spatial.nodes + " " + generator,
+            link_names,
             bus0=carrier_nodes,
             bus1=spatial.nodes,
             bus2="co2 atmosphere",
@@ -118,103 +127,35 @@ def add_generation(n, costs):
             # NB: fixed cost is per MWel
             capital_cost=costs.at[generator, "efficiency"]
             * costs.at[generator, "fixed"],
-            p_nom_extendable=True,
+            p_nom_extendable=(
+                True
+                if generator
+                in snakemake.params.electricity.get("extendable_carriers", dict()).get(
+                    "Generator", list()
+                )
+                else False
+            ),
+            p_nom=(
+                (
+                    existing_capacities[generator] / existing_efficiencies[generator]
+                ).reindex(link_names, fill_value=0)
+                if not existing_capacities == 0
+                else 0
+            ),  # NB: existing capacities are MWel
             carrier=generator,
-            efficiency=costs.at[generator, "efficiency"],
+            efficiency=(
+                existing_efficiencies[generator].reindex(
+                    link_names, fill_value=costs.at[generator, "efficiency"]
+                )
+                if existing_efficiencies is not None
+                else costs.at[generator, "efficiency"]
+            ),
             efficiency2=costs.at[carrier, "CO2 intensity"],
             lifetime=costs.at[generator, "lifetime"],
         )
 
-
-def add_oil(n, costs):
-    """
-    Function to add oil carrier and bus to network.
-
-    If-Statements are required in case oil was already added from config
-    ['sector']['conventional_generation'] Oil is copper plated
-    """
-    # TODO function will not be necessary if conventionals are added using "add_carrier_buses()"
-    # TODO before using add_carrier_buses: remove_elec_base_techs(n), otherwise carriers are added double
-    # spatial.gas = SimpleNamespace()
-
-    spatial.oil = SimpleNamespace()
-
-    if options["oil"]["spatial_oil"]:
-        spatial.oil.nodes = spatial.nodes + " oil"
-        spatial.oil.locations = spatial.nodes
-    else:
-        spatial.oil.nodes = ["Africa oil"]
-        spatial.oil.locations = ["Africa"]
-
-    if "oil" not in n.carriers.index:
-        n.add("Carrier", "oil")
-
-    # Set the "co2_emissions" of the carrier "oil" to 0, because the emissions of oil usage taken from the spatial.oil.nodes are accounted separately (directly linked to the co2 atmosphere bus). Setting the carrier to 0 here avoids double counting. Be aware to link oil emissions to the co2 atmosphere bus.
-    n.carriers.loc["oil", "co2_emissions"] = 0
-    # print("co2_emissions of oil set to 0 for testing")  # TODO add logger.info
-
-    n.madd(
-        "Bus",
-        spatial.oil.nodes,
-        location=spatial.oil.locations,
-        carrier="oil",
-    )
-
-    # if "Africa oil" not in n.buses.index:
-
-    #     n.add("Bus", "Africa oil", location="Africa", carrier="oil")
-
-    # if "Africa oil Store" not in n.stores.index:
-
-    e_initial = (snakemake.config["fossil_reserves"]).get("oil", 0) * 1e6
-    # could correct to e.g. 0.001 EUR/kWh * annuity and O&M
-    n.madd(
-        "Store",
-        [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
-        bus=spatial.oil.nodes,
-        e_nom_extendable=True,
-        e_cyclic=False,
-        carrier="oil",
-        e_initial=e_initial,
-        marginal_cost=costs.at["oil", "fuel"],
-    )
-
-    # TODO check non-unique generators
-    n.madd(
-        "Generator",
-        spatial.oil.nodes,
-        bus=spatial.oil.nodes,
-        p_nom_extendable=True,
-        carrier="oil",
-        marginal_cost=costs.at["oil", "fuel"],
-    )
-
-
-def add_gas(n, costs):
-    spatial.gas = SimpleNamespace()
-
-    if options["gas"]["spatial_gas"]:
-        spatial.gas.nodes = spatial.nodes + " gas"
-        spatial.gas.locations = spatial.nodes
-        spatial.gas.biogas = spatial.nodes + " biogas"
-        spatial.gas.industry = spatial.nodes + " gas for industry"
-        if snakemake.config["sector"]["cc"]:
-            spatial.gas.industry_cc = spatial.nodes + " gas for industry CC"
-        spatial.gas.biogas_to_gas = spatial.nodes + " biogas to gas"
-    else:
-        spatial.gas.nodes = ["Africa gas"]
-        spatial.gas.locations = ["Africa"]
-        spatial.gas.biogas = ["Africa biogas"]
-        spatial.gas.industry = ["gas for industry"]
-        if snakemake.config["sector"]["cc"]:
-            spatial.gas.industry_cc = ["gas for industry CC"]
-        spatial.gas.biogas_to_gas = ["Africa biogas to gas"]
-
-    spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=spatial.nodes)
-
-    gas_nodes = vars(spatial)["gas"].nodes
-
-    add_carrier_buses(n, "gas", gas_nodes)
+        # set the "co2_emissions" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)
+        n.carriers.loc[carrier, "co2_emissions"] = 0
 
 
 def H2_liquid_fossil_conversions(n, costs):
@@ -681,8 +622,8 @@ def define_spatial(nodes, options):
         spatial.biomass.industry = nodes + " solid biomass for industry"
         spatial.biomass.industry_cc = nodes + " solid biomass for industry CC"
     else:
-        spatial.biomass.nodes = ["Africa solid biomass"]
-        spatial.biomass.locations = ["Africa"]
+        spatial.biomass.nodes = ["Earth solid biomass"]
+        spatial.biomass.locations = ["Earth"]
         spatial.biomass.industry = ["solid biomass for industry"]
         spatial.biomass.industry_cc = ["solid biomass for industry CC"]
 
@@ -700,12 +641,74 @@ def define_spatial(nodes, options):
         # spatial.co2.y = (n.buses.loc[list(nodes)].y.values,)
     else:
         spatial.co2.nodes = ["co2 stored"]
-        spatial.co2.locations = ["Africa"]
+        spatial.co2.locations = ["Earth"]
         spatial.co2.vents = ["co2 vent"]
         # spatial.co2.x = (0,)
         # spatial.co2.y = 0
 
     spatial.co2.df = pd.DataFrame(vars(spatial.co2), index=nodes)
+
+    # oil
+
+    spatial.oil = SimpleNamespace()
+
+    if options["oil"]["spatial_oil"]:
+        spatial.oil.nodes = nodes + " oil"
+        spatial.oil.locations = nodes
+    else:
+        spatial.oil.nodes = ["Earth oil"]
+        spatial.oil.locations = ["Earth"]
+
+    # gas
+
+    spatial.gas = SimpleNamespace()
+
+    if options["gas"]["spatial_gas"]:
+        spatial.gas.nodes = nodes + " gas"
+        spatial.gas.locations = nodes
+        spatial.gas.biogas = nodes + " biogas"
+        spatial.gas.industry = nodes + " gas for industry"
+        if snakemake.config["sector"]["cc"]:
+            spatial.gas.industry_cc = nodes + " gas for industry CC"
+        spatial.gas.biogas_to_gas = nodes + " biogas to gas"
+    else:
+        spatial.gas.nodes = ["Earth gas"]
+        spatial.gas.locations = ["Earth"]
+        spatial.gas.biogas = ["Earth biogas"]
+        spatial.gas.industry = ["gas for industry"]
+        if snakemake.config["sector"]["cc"]:
+            spatial.gas.industry_cc = ["gas for industry CC"]
+        spatial.gas.biogas_to_gas = ["Earth biogas to gas"]
+
+    spatial.gas.df = pd.DataFrame(vars(spatial.gas), index=spatial.nodes)
+
+    # coal
+
+    spatial.coal = SimpleNamespace()
+
+    if options["coal"]["spatial_coal"]:
+        spatial.coal.nodes = nodes + " coal"
+        spatial.coal.locations = nodes
+        spatial.coal.industry = nodes + " coal for industry"
+    else:
+        spatial.coal.nodes = ["Earth coal"]
+        spatial.coal.locations = ["Earth"]
+        spatial.coal.industry = ["Earth coal for industry"]
+
+    spatial.coal.df = pd.DataFrame(vars(spatial.coal), index=spatial.nodes)
+
+    # lignite
+
+    spatial.lignite = SimpleNamespace()
+
+    if options["lignite"]["spatial_lignite"]:
+        spatial.lignite.nodes = nodes + " lignite"
+        spatial.lignite.locations = nodes
+    else:
+        spatial.lignite.nodes = ["Earth lignite"]
+        spatial.lignite.locations = ["Earth"]
+
+    spatial.lignite.df = pd.DataFrame(vars(spatial.lignite), index=spatial.nodes)
 
     return spatial
 
@@ -923,7 +926,7 @@ def add_co2(n, costs):
     n.add(
         "Bus",
         "co2 atmosphere",
-        location="Africa",  # TODO Ignoed by pypsa check
+        location="Earth",  # TODO Ignoed by pypsa check
         carrier="co2",
     )
 
@@ -1517,7 +1520,7 @@ def add_industry(n, costs):
 
     # industrial_demand.set_index("TWh/a (MtCO2/a)", inplace=True)
 
-    # n.add("Bus", "gas for industry", location="Africa", carrier="gas for industry")
+    # n.add("Bus", "gas for industry", location="Earth", carrier="gas for industry")
     n.madd(
         "Bus",
         spatial.gas.industry,
@@ -1543,7 +1546,7 @@ def add_industry(n, costs):
     n.madd(
         "Link",
         spatial.gas.industry,
-        # bus0="Africa gas",
+        # bus0="Earth gas",
         bus0=spatial.gas.nodes,
         # bus1="gas for industry",
         bus1=spatial.gas.industry,
@@ -1558,7 +1561,7 @@ def add_industry(n, costs):
             "Link",
             spatial.gas.industry_cc,
             # suffix=" gas for industry CC",
-            # bus0="Africa gas",
+            # bus0="Earth gas",
             bus0=spatial.gas.nodes,
             bus1=spatial.gas.industry,
             bus2="co2 atmosphere",
@@ -1693,7 +1696,7 @@ def add_industry(n, costs):
         p_set=industrial_elec,
     )
 
-    n.add("Bus", "process emissions", location="Africa", carrier="process emissions")
+    n.add("Bus", "process emissions", location="Earth", carrier="process emissions")
 
     # this should be process emissions fossil+feedstock
     # then need load on atmosphere for feedstock emissions that are currently going to atmosphere via Link Fischer-Tropsch demand
@@ -2209,7 +2212,7 @@ def add_heat(n, costs):
                 n.madd(
                     "Link",
                     h_nodes[name] + " urban central gas CHP CC",
-                    # bus0="Africa gas",
+                    # bus0="Earth gas",
                     bus0=spatial.gas.nodes,
                     bus1=h_nodes[name],
                     bus2=h_nodes[name] + " urban central heat",
@@ -2250,7 +2253,7 @@ def add_heat(n, costs):
                 "Link",
                 h_nodes[name] + f" {name} micro gas CHP",
                 p_nom_extendable=True,
-                # bus0="Africa gas",
+                # bus0="Earth gas",
                 bus0=spatial.gas.nodes,
                 bus1=h_nodes[name],
                 bus2=h_nodes[name] + f" {name} heat",
@@ -2710,6 +2713,56 @@ def add_rail_transport(n, costs):
     )
 
 
+def get_capacities_from_elec(n, carriers, component):
+    """
+    Gets capacities and efficiencies for {carrier} in n.{component} that were
+    previously assigned in add_electricity.
+    """
+    component_list = ["generators", "storage_units", "links", "stores"]
+    component_dict = {name: getattr(n, name) for name in component_list}
+    e_nom_carriers = ["stores"]
+    nom_col = {x: "e_nom" if x in e_nom_carriers else "p_nom" for x in component_list}
+    eff_col = "efficiency"
+
+    capacity_dict = {}
+    efficiency_dict = {}
+    node_dict = {}
+    for carrier in carriers:
+        capacity_dict[carrier] = component_dict[component].query("carrier in @carrier")[
+            nom_col[component]
+        ]
+        efficiency_dict[carrier] = component_dict[component].query(
+            "carrier in @carrier"
+        )[eff_col]
+        node_dict[carrier] = component_dict[component].query("carrier in @carrier")[
+            "bus"
+        ]
+
+    return capacity_dict, efficiency_dict, node_dict
+
+
+def remove_elec_base_techs(n):
+    """
+    Remove conventional generators (e.g. OCGT, oil) build in electricity-only network,
+    since they're re-added here using links.
+    """
+    conventional_generators = options.get("conventional_generation", {})
+    to_remove = pd.Index(conventional_generators.keys())
+    # remove only conventional_generation carriers present in the network
+    to_remove = pd.Index(
+        snakemake.params.electricity.get("conventional_carriers", [])
+    ).intersection(to_remove)
+
+    if to_remove.empty:
+        return
+
+    logger.info(f"Removing Generators with carrier {list(to_remove)}")
+    names = n.generators.index[n.generators.carrier.isin(to_remove)]
+    for name in names:
+        n.remove("Generator", name)
+    n.carriers.drop(to_remove, inplace=True, errors="ignore")
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         # from helper import mock_snakemake #TODO remove func from here to helper script
@@ -2834,13 +2887,24 @@ if __name__ == "__main__":
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
 
+    # read existing installed capacities of generators
+    if options.get("keep_existing_capacities", False):
+        existing_capacities, existing_efficiencies, existing_nodes = (
+            get_capacities_from_elec(
+                n,
+                carriers=options.get("conventional_generation").keys(),
+                component="generators",
+            )
+        )
+    else:
+        existing_capacities, existing_efficiencies, existing_nodes = 0, None, None
+
     add_co2(n, costs)  # TODO add costs
 
-    # TODO This might be transferred to add_generation, but before apply remove_elec_base_techs(n) from PyPSA-Eur-Sec
-    add_oil(n, costs)
+    # remove conventional generators built in elec-only model
+    remove_elec_base_techs(n)
 
-    add_gas(n, costs)
-    add_generation(n, costs)
+    add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     add_hydrogen(n, costs)  # TODO add costs
 
