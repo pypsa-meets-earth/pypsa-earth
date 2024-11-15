@@ -1485,6 +1485,9 @@ def locate_bus(
     # insert any variable into that place using .format - extract string and filter for those containing co (MA)
     point = Point(coords["x"], coords["y"])  # point object
 
+    if gdf_co.empty:
+        return None
+
     try:
         return gdf_co[gdf_co.contains(point)][
             col_name
