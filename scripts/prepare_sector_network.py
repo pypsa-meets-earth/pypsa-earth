@@ -186,9 +186,9 @@ def H2_liquid_fossil_conversions(n, costs):
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
+    logger.info("Adding hydrogen")
 
-    if not "H2" in n.carriers.index:
-        n.add("Carrier", "H2")
+    n.add("Carrier", "H2")
 
     n.madd(
         "Bus",
@@ -1096,9 +1096,9 @@ def add_aviation(n, cost):
 
 def add_storage(n, costs):
     "function to add the different types of storage systems"
+    logger.info("Add battery storage")
 
-    if not "battery" in n.carriers.index:
-        n.add("Carrier", "battery")
+    n.add("Carrier", "battery")
 
     n.madd(
         "Bus",
@@ -2763,6 +2763,31 @@ def remove_elec_base_techs(n):
     n.carriers.drop(to_remove, inplace=True, errors="ignore")
 
 
+def remove_carrier_related_components(n, carriers_to_drop):
+    """
+    Removes carrier related components, such as "Carrier", "Generator", "Link", "Store", and "Storage Unit"
+    """
+    # remove carriers
+    n.carriers.drop(carriers_to_drop, inplace=True, errors="ignore")
+
+    # remove buses, generators, stores, and storage units with carrier to remote
+    for c in n.iterate_components(["Bus", "Generator", "Store", "StorageUnit"]):
+        logger.info(f"Removing {c.list_name} with carrier {list(carriers_to_drop)}")
+        names = c.df.index[c.df.carrier.isin(carriers_to_drop)]
+        if c.name == "Bus":
+            buses_to_remove = names
+        n.mremove(c.name, names)
+
+    # remove links connected to buses that were removed
+    links_to_remove = n.links.query(
+        "bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove"
+    ).index
+    logger.info(
+        f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
+    )
+    n.mremove("Link", links_to_remove)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         # from helper import mock_snakemake #TODO remove func from here to helper script
@@ -2905,6 +2930,9 @@ if __name__ == "__main__":
     remove_elec_base_techs(n)
 
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
+
+    # remove H2 and battery technologies added in elec-only model
+    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
     add_hydrogen(n, costs)  # TODO add costs
 
