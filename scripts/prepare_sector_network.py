@@ -488,22 +488,9 @@ def add_hydrogen(n, costs):
         # Order buses to detect equal pairs for bidirectional pipelines
         buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-        if snakemake.config["build_osm_network"]["force_ac"]:
-            # Appending string for carrier specification '_AC'
-            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-            # # Conversion of GADM id to from 3 to 2-digit
-            # h2_links["bus0"] = (
-            #     h2_links["bus0"]
-            #     .str.split(".")
-            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            # )
-            # h2_links["bus1"] = (
-            #     h2_links["bus1"]
-            #     .str.split(".")
-            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            # )
+        # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
+        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
         # Create index column
         h2_links["buses_idx"] = (
