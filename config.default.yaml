@@ -519,6 +519,8 @@ sector:
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
+    CC: false
+    coal_CC_techs: ["coal CC-95", "coal CC-99", "coal IGCC", "coal IGCC-90"] # coal CC with 95% capture rate, coal CC with 99% capture rate, coal integrated gas CC, coal integrated gas CC with 90% capture rate
   lignite:
     spatial_lignite: false
 

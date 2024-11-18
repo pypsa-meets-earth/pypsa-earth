@@ -157,6 +157,42 @@ def add_generation(
         # set the "co2_emissions" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)
         n.carriers.loc[carrier, "co2_emissions"] = 0
 
+    # add coal CC technologies
+    if options["coal"].get("CC", False):
+        coal_CC_techs = options["coal"].get("coal_CC_techs", list())
+
+        nice_tech_names = {
+            "coal CC-95": "Coal-95%-CCS",
+            "coal CC-99": "Coal-99%-CCS",
+            "coal IGCC": "Coal-IGCC",
+            "coal IGCC-90": "Coal-IGCC-90%-CCS",
+        }
+
+        for cc_tech in coal_CC_techs:
+            n.madd(
+                "Link",
+                spatial.nodes + " " + cc_tech,
+                bus0=spatial.coal.nodes,
+                bus1=spatial.nodes,
+                bus2="co2 atmosphere",
+                bus3=spatial.co2.nodes,
+                marginal_cost=costs.at[nice_tech_names[cc_tech], "efficiency"]
+                * costs.at["coal", "VOM"],  # NB: VOM is per MWel
+                # NB: fixed cost is per MWel
+                capital_cost=costs.at[nice_tech_names[cc_tech], "efficiency"]
+                * costs.at["coal", "fixed"]
+                + costs.at["biomass CHP capture", "fixed"]
+                * costs.at["coal", "CO2 intensity"],  # NB: fixed cost is per MWel
+                p_nom_extendable=True,
+                carrier="coal",
+                efficiency=costs.at[nice_tech_names[cc_tech], "efficiency"],
+                efficiency2=costs.at["coal", "CO2 intensity"]
+                * (1 - costs.at[nice_tech_names[cc_tech], "capture_rate"]),
+                efficiency3=costs.at["coal", "CO2 intensity"]
+                * costs.at[nice_tech_names[cc_tech], "capture_rate"],
+                lifetime=costs.at[nice_tech_names[cc_tech], "lifetime"],
+            )
+
 
 def H2_liquid_fossil_conversions(n, costs):
     """
