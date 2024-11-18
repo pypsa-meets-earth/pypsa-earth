@@ -266,13 +266,10 @@ def attach_hydrogen_pipelines(n, costs, config):
     )
 
     # setup pipelines as bidirectional and lossy
-    lossy_bidirectional_links(n,"H2 pipeline")
+    lossy_bidirectional_links(n, "H2 pipeline")
 
 
-def lossy_bidirectional_links(
-        n: pypsa.components.Network,
-        carrier: str
-    ):
+def lossy_bidirectional_links(n: pypsa.components.Network, carrier: str):
 
     "Split bidirectional links into two unidirectional links to include transmission losses."
 
@@ -280,10 +277,8 @@ def lossy_bidirectional_links(
 
     if carrier_i.empty:
         return
-    
-    logger.info(
-        f"Splitting bidirectional links with the carrier {carrier}"
-    )
+
+    logger.info(f"Splitting bidirectional links with the carrier {carrier}")
 
     n.links.loc[carrier_i, "p_min_pu"] = 0
 
