@@ -462,8 +462,7 @@ def add_battery_constraints(n):
     1 * charger_size - efficiency * discharger_size = 0
     """
     nodes = n.buses.index[n.buses.carrier == "battery"]
-    # TODO Check if the second part of the condition can make sense
-    # if nodes.empty or ("Link", "p_nom") not in n.variables.index:
+
     if nodes.empty:
         return
     vars_link = n.model["Link-p_nom"]
@@ -608,7 +607,7 @@ def _add_land_use_constraint_m(n):
 
 def add_h2_network_cap(n, cap):
     h2_network = n.links.loc[n.links.carrier == "H2 pipeline"]
-    if h2_network.index.empty or ("Link", "p_nom") not in n.variables.index:
+    if h2_network.index.empty:
         return
     h2_network_cap = get_var(n, "Link", "p_nom")
     subset_index = h2_network.index.intersection(h2_network_cap.index)
@@ -817,7 +816,7 @@ def add_chp_constraints(n):
 def add_co2_sequestration_limit(n, sns):
     co2_stores = n.stores.loc[n.stores.carrier == "co2 stored"].index
 
-    if co2_stores.empty or ("Store", "e") not in n.variables.index:
+    if co2_stores.empty:
         return
 
     vars_final_co2_stored = get_var(n, "Store", "e").loc[sns[-1], co2_stores]
