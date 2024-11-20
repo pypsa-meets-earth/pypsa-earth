@@ -476,12 +476,6 @@ def add_battery_constraints(n):
 
 
 def add_RES_constraints(n, res_share, config):
-    lgrouper = n.loads.bus.map(n.buses.country)
-    # TODO drop load
-    ggrouper = n.generators.bus.map(n.buses.country)
-    sgrouper = n.storage_units.bus.map(n.buses.country)
-    cgrouper = n.links.bus0.map(n.buses.country)
-
     logger.warning(
         "The add_RES_constraints() is still work in progress. "
         "Unexpected results might be incurred, particularly if "
@@ -489,31 +483,39 @@ def add_RES_constraints(n, res_share, config):
         "is subject to future improvements."
     )
 
-    load = (
-        n.snapshot_weightings.generators
-        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
-    )
-
-    rhs = res_share * load
-
     renew_techs = config["electricity"]["renewable_carriers"]
 
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
-    gens_i = n.generators.query("carrier in @renew_techs").index
-    stores_i = n.storage_units.query("carrier in @renew_techs").index
+    ren_gen = n.generators.query("carrier in @renew_techs")
+    ren_stores = n.storage_units.query("carrier in @renew_techs")
+    ren_charger = n.links.query("carrier in @charger")
+    ren_discharger = n.links.query("carrier in @discharger")
 
-    charger_i = n.links.query("carrier in @charger").index
-    discharger_i = n.links.query("carrier in @discharger").index
+    gens_i = ren_gen.index
+    stores_i = ren_stores.index
+    charger_i = ren_charger.index
+    discharger_i = ren_discharger.index
 
     stores_t_weights = n.snapshot_weightings.stores
 
+    lgrouper = n.loads.bus.map(n.buses.country)
+    ggrouper = ren_gen.bus.map(n.buses.country)
+    sgrouper = ren_stores.bus.map(n.buses.country)
+    cgrouper = ren_charger.bus0.map(n.buses.country)
+    dgrouper = ren_discharger.bus0.map(n.buses.country)
+
+    load = (
+        n.snapshot_weightings.generators
+        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+    )
+    rhs = res_share * load
+
     # Generators
-    # TODO restore grouping by countries un-commenting calls of groupby()
     lhs_gen = (
         (n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators)
-        # .groupby(ggrouper.to_xarray())
+        .groupby(ggrouper.to_xarray())
         .sum()
     )
 
@@ -529,31 +531,15 @@ def add_RES_constraints(n, res_share, config):
         lambda r: r * n.links.loc[discharger_i].efficiency
     )
 
-    lhs_dispatch = (
-        store_disp_expr
-        # .groupby(sgrouper)
-        .sum()
-    )
-    lhs_store = (
-        store_expr
-        # .groupby(sgrouper)
-        .sum()
-    )
+    lhs_dispatch = store_disp_expr.groupby(sgrouper).sum()
+    lhs_store = store_expr.groupby(sgrouper).sum()
 
     # Stores (or their resp. Link components)
     # Note that the variables "p0" and "p1" currently do not exist.
     # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
-    lhs_charge = (
-        charge_expr
-        # .groupby(cgrouper)
-        .sum()
-    )
+    lhs_charge = charge_expr.groupby(cgrouper).sum()
 
-    lhs_discharge = (
-        discharge_expr
-        # .groupby(cgrouper)
-        .sum()
-    )
+    lhs_discharge = discharge_expr.groupby(cgrouper).sum()
 
     lhs = lhs_gen + lhs_dispatch - lhs_store - lhs_charge + lhs_discharge
 
