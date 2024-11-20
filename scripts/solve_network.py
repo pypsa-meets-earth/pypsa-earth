@@ -428,9 +428,7 @@ def update_capacity_constraint(n):
 
     rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
 
-    n.model.add_constraints(
-        lhs <= rhs, name="gen_updated_capacity_constraint", mask=rhs.notnull()
-    )
+    n.model.add_constraints(lhs <= rhs, name="gen_updated_capacity_constraint")
 
 
 def add_operational_reserve_margin(n, sns, config):
