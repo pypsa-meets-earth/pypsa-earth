@@ -85,7 +85,8 @@ dependencies:
   - powerplantmatching>=0.5.19 # until conda release it out
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
+  - git+https://github.com/vincentarelbundock/pycountrycode@main # until the fix will be available via https://github.com/vincentarelbundock/pycountrycode/pull/13
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent
-  - countrycode==0.4.0 # a sub-dependency; the restriction is needed to deal with an encoding error for windows
+  #- countrycode==0.4.0 # a sub-dependency; the restriction is needed to deal with an encoding error for windows
