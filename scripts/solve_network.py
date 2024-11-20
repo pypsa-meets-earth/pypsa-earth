@@ -1091,8 +1091,6 @@ if __name__ == "__main__":
     else:
         n_ref = None
 
-    # needed to get `n.model` property
-    n.optimize.create_model()
     n = prepare_network(n, solve_opts, config=solve_opts)
 
     n = solve_network(
