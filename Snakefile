@@ -198,29 +198,29 @@ rule clean_osm_data:
         "scripts/clean_osm_data.py"
 
 
-# rule build_osm_network:
-#     params:
-#         build_osm_network=config.get("build_osm_network", {}),
-#         countries=config["countries"],
-#         crs=config["crs"],
-#     input:
-#         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
-#         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
-#         substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
-#         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
-#     output:
-#         lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
-#         converters="resources/" + RDIR + "base_network/all_converters_build_network.csv",
-#         transformers="resources/"
-#         + RDIR
-#         + "base_network/all_transformers_build_network.csv",
-#         substations="resources/" + RDIR + "base_network/all_buses_build_network.csv",
-#     log:
-#         "logs/" + RDIR + "build_osm_network.log",
-#     benchmark:
-#         "benchmarks/" + RDIR + "build_osm_network"
-#     script:
-#         "scripts/build_osm_network.py"
+rule build_osm_network:
+    params:
+        build_osm_network=config.get("build_osm_network", {}),
+        countries=config["countries"],
+        crs=config["crs"],
+    input:
+        generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
+        lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
+        substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+    output:
+        lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
+        converters="resources/" + RDIR + "base_network/all_converters_build_network.csv",
+        transformers="resources/"
+        + RDIR
+        + "base_network/all_transformers_build_network.csv",
+        substations="resources/" + RDIR + "base_network/all_buses_build_network.csv",
+    log:
+        "logs/" + RDIR + "build_osm_network.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_osm_network"
+    script:
+        "scripts/build_osm_network.py"
 
 
 rule build_shapes:
@@ -448,41 +448,41 @@ rule build_demand_profiles:
         "scripts/build_demand_profiles.py"
 
 
-# rule build_renewable_profiles:
-#     params:
-#         crs=config["crs"],
-#         renewable=config["renewable"],
-#         countries=config["countries"],
-#         alternative_clustering=config["cluster_options"]["alternative_clustering"],
-#     input:
-#         natura="resources/" + RDIR + "natura.tiff",
-#         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-#         gebco="data/gebco/GEBCO_2021_TID.nc",
-#         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
-#         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-#         hydro_capacities="data/hydro_capacities.csv",
-#         eia_hydro_generation="data/eia_hydro_annual_generation.csv",
-#         powerplants="resources/" + RDIR + "powerplants.csv",
-#         regions=lambda w: (
-#             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
-#             if w.technology in ("onwind", "solar", "hydro", "csp")
-#             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
-#         ),
-#         cutout=lambda w: "cutouts/"
-#         + CDIR
-#         + config["renewable"][w.technology]["cutout"]
-#         + ".nc",
-#     output:
-#         profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc",
-#     log:
-#         "logs/" + RDIR + "build_renewable_profile_{technology}.log",
-#     benchmark:
-#         "benchmarks/" + RDIR + "build_renewable_profiles_{technology}"
-#     threads: ATLITE_NPROCESSES
-#     resources:
-#         mem_mb=ATLITE_NPROCESSES * 5000,
-#     script:
-#         "scripts/build_renewable_profiles.py"
+rule build_renewable_profiles:
+    params:
+        crs=config["crs"],
+        renewable=config["renewable"],
+        countries=config["countries"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+    input:
+        natura="resources/" + RDIR + "natura.tiff",
+        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+        gebco="data/gebco/GEBCO_2021_TID.nc",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        hydro_capacities="data/hydro_capacities.csv",
+        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        powerplants="resources/" + RDIR + "powerplants.csv",
+        regions=lambda w: (
+            "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
+            if w.technology in ("onwind", "solar", "hydro", "csp")
+            else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
+        ),
+        cutout=lambda w: "cutouts/"
+        + CDIR
+        + config["renewable"][w.technology]["cutout"]
+        + ".nc",
+    output:
+        profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc",
+    log:
+        "logs/" + RDIR + "build_renewable_profile_{technology}.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_renewable_profiles_{technology}"
+    threads: ATLITE_NPROCESSES
+    resources:
+        mem_mb=ATLITE_NPROCESSES * 5000,
+    script:
+        "scripts/build_renewable_profiles.py"
 
 
 rule build_powerplants:
