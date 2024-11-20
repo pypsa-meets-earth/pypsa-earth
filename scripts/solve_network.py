@@ -85,6 +85,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pypsa
+import xarray as xr
 from _helpers import configure_logging, create_logger, override_component_attrs
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
