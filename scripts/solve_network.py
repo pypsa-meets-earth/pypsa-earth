@@ -423,7 +423,9 @@ def update_capacity_constraint(n):
     )
 
     if not ext_i.empty:
-        capacity_variable = n.model["Generator-p_nom"]
+        capacity_variable = n.model["Generator-p_nom"].rename(
+            {"Generator-ext": "Generator"}
+        )
         lhs = dispatch + reserve - capacity_variable * xr.DataArray(p_max_pu[ext_i])
 
     rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
