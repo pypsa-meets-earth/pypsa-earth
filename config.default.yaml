@@ -358,6 +358,7 @@ costs:
   year: 2030
   version: v0.6.2
   discountrate: [0.071] #, 0.086, 0.111]
+  scenario: "Moderate" # "Advanced", "Moderate", or "Conservative"
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
   rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
@@ -521,8 +522,9 @@ sector:
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
-    CC: false
-    coal_CC_techs: ["coal CC-95", "coal CC-99", "coal IGCC", "coal IGCC-90"] # coal CC with 95% capture rate, coal CC with 99% capture rate, coal integrated gas CC, coal integrated gas CC with 90% capture rate
+    coal_IGCC: false # If true, coal integrated gas combined-cycle plants are added
+    CC: false # enable coal carbon capture technologies
+    coal_CC_techs: ["coal CC-95", "coal CC-99", "coal IGCC CC-90"] # coal CC with 95% capture rate, coal CC with 99% capture rate, coal integrated gas combined-cycle with 90% capture rate
   lignite:
     spatial_lignite: false
 

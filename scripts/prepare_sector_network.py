@@ -164,8 +164,7 @@ def add_generation(
         coal_CC_names = {
             "coal CC-95": "Coal-95%-CCS",
             "coal CC-99": "Coal-99%-CCS",
-            "coal IGCC": "Coal-IGCC",
-            "coal IGCC-90": "Coal-IGCC-90%-CCS",
+            "coal IGCC CC-90": "Coal-IGCC-90%-CCS",
         }
 
         for cc_tech in coal_CC_techs:
@@ -190,6 +189,26 @@ def add_generation(
                 * costs.at[coal_CC_names[cc_tech], "capture_rate"],
                 lifetime=costs.at[coal_CC_names[cc_tech], "lifetime"],
             )
+
+    # add coal IGCC if enabled
+    if options["coal"].get("coal_IGCC", False):
+        n.madd(
+            "Link",
+            spatial.nodes + " " + "coal IGCC",
+            bus0=spatial.coal.nodes,
+            bus1=spatial.nodes,
+            bus2="co2 atmosphere",
+            marginal_cost=costs.at["Coal-IGCC", "efficiency"]
+            * costs.at["Coal-IGCC", "VOM"],  # NB: VOM is per MWel
+            # NB: fixed cost is per MWel
+            capital_cost=costs.at["Coal-IGCC", "efficiency"]
+            * costs.at["Coal-IGCC", "fixed"],
+            p_nom_extendable=True,
+            carrier="coal",
+            efficiency=costs.at["Coal-IGCC", "efficiency"],
+            efficiency2=costs.at["coal", "CO2 intensity"],
+            lifetime=costs.at["Coal-IGCC", "lifetime"],
+        )
 
     # add natural gas CC technologies
     if options["gas"].get("CC", False):
