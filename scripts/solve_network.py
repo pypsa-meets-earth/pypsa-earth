@@ -462,7 +462,6 @@ def add_battery_constraints(n):
     """
     nodes = n.buses.index[n.buses.carrier == "battery"]
     # TODO Check if the second part of the condition can make sense
-    # if nodes.empty or ("Link", "p_nom") not in n.variables.index:
     if nodes.empty:
         return
     vars_link = n.model["Link-p_nom"]
@@ -827,7 +826,7 @@ def add_chp_constraints(n):
 def add_co2_sequestration_limit(n, sns):
     co2_stores = n.stores.loc[n.stores.carrier == "co2 stored"].index
 
-    if co2_stores.empty:  # or ("Store", "e") not in n.variables.index:
+    if co2_stores.empty:
         return
 
     vars_final_co2_stored = n.model["Store-e"].loc[sns[-1], co2_stores]
