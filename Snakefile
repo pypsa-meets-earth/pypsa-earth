@@ -1153,7 +1153,7 @@ rule add_export:
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
         export_endogenous=config["export"]["endogenous"],
-        endogenous_price=config["export"]["endogenous_price"], 
+        endogenous_price=config["export"]["endogenous_price"],
         snapshots=config["snapshots"],
         costs=config["costs"],
     input:
