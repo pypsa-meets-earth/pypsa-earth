@@ -177,12 +177,10 @@ def add_generation(
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
                 marginal_cost=costs.at[nice_tech_names[cc_tech], "efficiency"]
-                * costs.at["coal", "VOM"],  # NB: VOM is per MWel
+                * costs.at[nice_tech_names[cc_tech], "VOM"],  # NB: VOM is per MWel
                 # NB: fixed cost is per MWel
                 capital_cost=costs.at[nice_tech_names[cc_tech], "efficiency"]
-                * costs.at["coal", "fixed"]
-                + costs.at["biomass CHP capture", "fixed"]
-                * costs.at["coal", "CO2 intensity"],  # NB: fixed cost is per MWel
+                * costs.at[nice_tech_names[cc_tech], "fixed"],
                 p_nom_extendable=True,
                 carrier="coal",
                 efficiency=costs.at[nice_tech_names[cc_tech], "efficiency"],
