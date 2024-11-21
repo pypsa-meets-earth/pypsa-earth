@@ -129,16 +129,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     elif snakemake.params.store == False:
         pass
 
-    if snakemake.params.export_endogenous == False:
-        # add load
-        n.add(
-            "Load",
-            "H2 export load",
-            bus="H2 export bus",
-            carrier="H2",
-            p_set=export_profile,
-        )
-    elif snakemake.params.export_endogenous == True:
+    if snakemake.params.export_endogenous:
         # add endogenous export by implementing a negative generation
         n.add(
             "Generator",
@@ -151,8 +142,13 @@ def add_export(n, hydrogen_buses_ports, export_profile):
         )
 
     else:
-        logger.error(
-            f"Value {snakemake.params.export_endogenous} for ['export']['export_endogenous'] is not valid"
+        # add exogenous export by implementing a load
+        n.add(
+            "Load",
+            "H2 export load",
+            bus="H2 export bus",
+            carrier="H2",
+            p_set=export_profile,
         )
 
     return
