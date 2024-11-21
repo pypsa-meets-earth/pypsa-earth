@@ -1,4 +1,4 @@
-name: CI
+name: Test workflows
 
 on:
   push:
@@ -10,21 +10,29 @@ on:
   schedule:
   - cron: "0 5 * * TUE"
 
+# Cancel any in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CACHE_NUMBER: 1  # Change this value to manually reset the environment cache
 
 jobs:
-  build:
+  run-tests:
+    name: OS
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
-      max-parallel: 3
       matrix:
-        os:
-        - ubuntu-latest
-        - macos-latest
-        # - windows-latest
-
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu, macos, windows]
+        include:
+        - os: ubuntu
+          env_file: envs/linux-pinned.yaml
+        - os: macos
+          env_file: envs/macos-pinned.yaml
+        # - os: windows
+        #   env_file: envs/windows-pinned.yaml
 
     defaults:
       run:
@@ -38,7 +46,7 @@ jobs:
       uses: mamba-org/setup-micromamba@v2
       with:
         micromamba-version: '1.5.9-1'
-        environment-file: envs/environment.yaml
+        environment-file: ${{ matrix.env_file }}
         log-level: debug
         init-shell: bash
         cache-environment: true
@@ -63,6 +71,17 @@ jobs:
 
     - name: Run Test
       run: make test
+
+    - name: Upload artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: results-${{ matrix.os }}
+        path: |
+          logs
+          .snakemake/log
+          results
+        retention-days: 3
 
       # - name: Test plotting and summaries
       #   run: |
