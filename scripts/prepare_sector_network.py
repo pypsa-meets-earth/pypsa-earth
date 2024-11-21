@@ -161,7 +161,7 @@ def add_generation(
     if options["coal"].get("CC", False):
         coal_CC_techs = options["coal"].get("coal_CC_techs", list())
 
-        nice_tech_names = {
+        coal_CC_names = {
             "coal CC-95": "Coal-95%-CCS",
             "coal CC-99": "Coal-99%-CCS",
             "coal IGCC": "Coal-IGCC",
@@ -176,19 +176,52 @@ def add_generation(
                 bus1=spatial.nodes,
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
-                marginal_cost=costs.at[nice_tech_names[cc_tech], "efficiency"]
-                * costs.at[nice_tech_names[cc_tech], "VOM"],  # NB: VOM is per MWel
+                marginal_cost=costs.at[coal_CC_names[cc_tech], "efficiency"]
+                * costs.at[coal_CC_names[cc_tech], "VOM"],  # NB: VOM is per MWel
                 # NB: fixed cost is per MWel
-                capital_cost=costs.at[nice_tech_names[cc_tech], "efficiency"]
-                * costs.at[nice_tech_names[cc_tech], "fixed"],
+                capital_cost=costs.at[coal_CC_names[cc_tech], "efficiency"]
+                * costs.at[coal_CC_names[cc_tech], "fixed"],
                 p_nom_extendable=True,
                 carrier="coal",
-                efficiency=costs.at[nice_tech_names[cc_tech], "efficiency"],
+                efficiency=costs.at[coal_CC_names[cc_tech], "efficiency"],
                 efficiency2=costs.at["coal", "CO2 intensity"]
-                * (1 - costs.at[nice_tech_names[cc_tech], "capture_rate"]),
+                * (1 - costs.at[coal_CC_names[cc_tech], "capture_rate"]),
                 efficiency3=costs.at["coal", "CO2 intensity"]
-                * costs.at[nice_tech_names[cc_tech], "capture_rate"],
-                lifetime=costs.at[nice_tech_names[cc_tech], "lifetime"],
+                * costs.at[coal_CC_names[cc_tech], "capture_rate"],
+                lifetime=costs.at[coal_CC_names[cc_tech], "lifetime"],
+            )
+
+    # add natural gas CC technologies
+    if options["gas"].get("CC", False):
+        gas_CC_techs = options["gas"].get("gas_CC_techs", list())
+
+        gas_CC_names = {
+            "gas CC": "NG 2-on-1 Combined Cycle (F-Frame)",
+            "gas CC-95": "NG 2-on-1 Combined Cycle (F-Frame) 95% CCS",
+            "gas CC-97": "NG 2-on-1 Combined Cycle (F-Frame) 97% CCS",
+        }
+
+        for cc_tech in gas_CC_techs:
+            n.madd(
+                "Link",
+                spatial.nodes + " " + cc_tech,
+                bus0=spatial.gas.nodes,
+                bus1=spatial.nodes,
+                bus2="co2 atmosphere",
+                bus3=spatial.co2.nodes,
+                marginal_cost=costs.at[gas_CC_names[cc_tech], "efficiency"]
+                * costs.at[gas_CC_names[cc_tech], "VOM"],  # NB: VOM is per MWel
+                # NB: fixed cost is per MWel
+                capital_cost=costs.at[gas_CC_names[cc_tech], "efficiency"]
+                * costs.at[gas_CC_names[cc_tech], "fixed"],
+                p_nom_extendable=True,
+                carrier="gas",
+                efficiency=costs.at[gas_CC_names[cc_tech], "efficiency"],
+                efficiency2=costs.at["gas", "CO2 intensity"]
+                * (1 - costs.at[gas_CC_names[cc_tech], "capture_rate"]),
+                efficiency3=costs.at["gas", "CO2 intensity"]
+                * costs.at[gas_CC_names[cc_tech], "capture_rate"],
+                lifetime=costs.at[gas_CC_names[cc_tech], "lifetime"],
             )
 
 
