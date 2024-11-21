@@ -629,7 +629,7 @@ def add_h2_network_cap(n, cap):
     diff_index = h2_network_cap_index.difference(subset_index)
     if len(diff_index) > 0:
         logger.warning(
-            f"Impossible to set H2 cap for the following links: {diff_index}"
+            f"Impossible to set a limit for H2 pipelines extension for the following links: {diff_index}"
         )
     lhs = (
         h2_network_cap.loc[subset_index] * h2_network.loc[subset_index, "length"]
