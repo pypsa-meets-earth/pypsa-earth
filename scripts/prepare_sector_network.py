@@ -215,9 +215,8 @@ def add_generation(
         gas_CC_techs = options["gas"].get("gas_CC_techs", list())
 
         gas_CC_names = {
-            "gas CC": "NG 2-on-1 Combined Cycle (F-Frame)",
-            "gas CC-95": "NG 2-on-1 Combined Cycle (F-Frame) 95% CCS",
-            "gas CC-97": "NG 2-on-1 Combined Cycle (F-Frame) 97% CCS",
+            "gas NGCC CC-95": "NG 2-on-1 Combined Cycle (F-Frame) 95% CCS",
+            "gas NGCC CC-97": "NG 2-on-1 Combined Cycle (F-Frame) 97% CCS",
         }
 
         for cc_tech in gas_CC_techs:
@@ -242,6 +241,28 @@ def add_generation(
                 * costs.at[gas_CC_names[cc_tech], "capture_rate"],
                 lifetime=costs.at[gas_CC_names[cc_tech], "lifetime"],
             )
+
+    # add Natural Gas Combined Cycle plants if enabled
+    if options["gas"].get("gas_NGCC", False):
+        n.madd(
+            "Link",
+            spatial.nodes + " " + "gas NGCC",
+            bus0=spatial.gas.nodes,
+            bus1=spatial.nodes,
+            bus2="co2 atmosphere",
+            marginal_cost=costs.at["NG 2-on-1 Combined Cycle (F-Frame)", "efficiency"]
+            * costs.at[
+                "NG 2-on-1 Combined Cycle (F-Frame)", "VOM"
+            ],  # NB: VOM is per MWel
+            # NB: fixed cost is per MWel
+            capital_cost=costs.at["NG 2-on-1 Combined Cycle (F-Frame)", "efficiency"]
+            * costs.at["NG 2-on-1 Combined Cycle (F-Frame)", "fixed"],
+            p_nom_extendable=True,
+            carrier="gas",
+            efficiency=costs.at["NG 2-on-1 Combined Cycle (F-Frame)", "efficiency"],
+            efficiency2=costs.at["gas", "CO2 intensity"],
+            lifetime=costs.at["NG 2-on-1 Combined Cycle (F-Frame)", "lifetime"],
+        )
 
 
 def H2_liquid_fossil_conversions(n, costs):

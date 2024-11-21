@@ -506,8 +506,9 @@ sector:
     network: false # ALWAYS FALSE for now (NOT USED)
     network_data: GGIT # Global dataset -> 'GGIT' , European dataset -> 'IGGIELGN'
     network_data_GGIT_status: ["Construction", "Operating", "Idle", "Shelved", "Mothballed", "Proposed"]
-    CC: false
-    gas_CC_techs: ["gas CC", "gas CC-95", "gas CC-97"]
+    gas_NGCC: false # if true, Natural Gas 2-on-1 Combined Cycle (F-Frame) plant is added
+    CC: false # enable gas carbon capture technologies
+    gas_CC_techs: ["gas NGCC CC-95", "gas NGCC CC-97"] # Natural Gas 2-on-1 Combined Cycle (F-Frame) plants with 95% and 97% capture rate
   hydrogen:
     network: true
     H2_retrofit_capacity_per_CH4: 0.6
