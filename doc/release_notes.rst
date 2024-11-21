@@ -51,9 +51,9 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Drop entries that contain non-string elements in country column of `CO2_emissions_csv` data in `prepare_transport_data_input.py` script `PR #1166 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1166>`_
 
-* Adds `Dependabot <https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide>`__ to keep GitHub actions up to date. `PR #1184 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1184>`__ 
+* Adds `Dependabot <https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide>`__ to keep GitHub actions up to date. `PR #1184 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1184>`__
 
-* Adds code security scans via `CodeQL <https://codeql.github.com/>`__ to CI. `PR #1185 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1185>`__ 
+* Adds code security scans via `CodeQL <https://codeql.github.com/>`__ to CI. `PR #1185 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1185>`__
 
 * Adds CI to update keep pinned environment files up to date. `PR #1183 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1183>`__
 

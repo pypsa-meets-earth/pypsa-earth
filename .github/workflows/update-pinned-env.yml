@@ -39,7 +39,7 @@ jobs:
     - name: Update pinned environment per OS
       run: |
         conda env export --name ${{ github.event.repository.name }} --no-builds > envs/${{ matrix.suffix }}-pinned.yaml
-    
+
     - name: Add SPDX header
       if: ${{ matrix.suffix != 'windows' }}
       run: |
