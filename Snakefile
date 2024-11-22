@@ -1002,7 +1002,7 @@ rule solve_sector_networks:
 
 rule prepare_ports:
     params:
-        custom_export=config["custom_data"]["export_data"],
+        custom_export=config["custom_data"]["export_ports"],
     output:
         ports="data/ports.csv",  # TODO move from data to resources
         export_ports="resources/" + SECDIR + "export_ports.csv",
