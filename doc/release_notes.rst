@@ -48,7 +48,7 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Drop entries that contain non-string elements in country column of `CO2_emissions_csv` data in `prepare_transport_data_input.py` script `PR #1166 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1166>`_
 
-* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of loosing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
+* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 PyPSA-Earth 0.4.1
 =================
