@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
 import os
+import shutil
 from pathlib import Path
 
 import country_converter as coco
@@ -67,6 +68,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("prepare_ports")
 
+    config = snakemake.config
     # configure_logging(snakemake)
 
     # run = snakemake.config.get("run", {})
@@ -132,6 +134,11 @@ if __name__ == "__main__":
     ports["fraction"] = ports["Harbor_size_nr"] / ports["Total_Harbor_size_nr"]
 
     ports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
-    filter_ports(ports).to_csv(
-        snakemake.output[1], sep=",", encoding="utf-8", header="true"
-    )
+
+    if snakemake.params.custom_ports:
+        custom_export_path = Path.joinpath("data", "custom", "export_ports.csv")
+        shutil.move(custom_export_path, snakemake.output[1])
+    else:
+        filter_ports(ports).to_csv(
+            snakemake.output[1], sep=",", encoding="utf-8", header="true"
+        )

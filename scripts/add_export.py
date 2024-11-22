@@ -33,13 +33,8 @@ def select_ports(n):
     This function selects the buses where ports are located.
     """
 
-    if snakemake.params.custom_export:
-        input_port_data = snakemake.input.custom_export_ports
-    else:
-        input_port_data = snakemake.input.export_ports
-
     ports = pd.read_csv(
-        input_port_data,
+        snakemake.input.export_ports,
         index_col=None,
         keep_default_na=False,
     ).squeeze()
@@ -155,7 +150,8 @@ def create_export_profile():
     and resamples it to temp resolution obtained from the wildcard.
     """
 
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
+    # convert TWh to MWh
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6
 
     if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760
