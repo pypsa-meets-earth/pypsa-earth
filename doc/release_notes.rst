@@ -30,6 +30,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Enable sector rules import in subworkflow `PR #1178 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1178>`__
 
+* Include option of endogenous export, which optimizes the export quantity based on price signals `PR #1201 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1201>`__
+
 **Minor Changes and bug-fixing**
 
 * The default configuration for `electricity:estimate_renewable_capacities:year` was updated from 2020 to 2023. `PR #1106 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1106>`__
