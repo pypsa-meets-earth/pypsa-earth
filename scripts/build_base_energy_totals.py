@@ -6,20 +6,14 @@
 # -*- coding: utf-8 -*-
 import glob
 import logging
-import os
-import sys
 from io import BytesIO
-from pathlib import Path
 from urllib.request import urlopen
 from zipfile import ZipFile
 
 import country_converter as coco
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import py7zr
-import requests
-from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors
+from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors, get_path, mock_snakemake, modify_commodity
 
 _logger = logging.getLogger(__name__)
 
@@ -352,8 +346,6 @@ def calc_sector(sector):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "build_base_energy_totals",
             simpl="",
@@ -372,12 +364,15 @@ if __name__ == "__main__":
     df = df.to_dict("dict")
     d = df["Link"]
 
+    demand_base_path = get_path(BASE_DIR, "data", "demand", "unsd", "data")
+    demand_path = get_path(demand_base_path, "*.txt")
+
     if snakemake.params.update_data:
         # Delete and existing files to avoid duplication and double counting
 
-        files = glob.glob(os.path.join(BASE_DIR, "data/demand/unsd/data/*.txt"))
+        files = glob.glob(str(demand_path))
         for f in files:
-            os.remove(f)
+            get_path(f).unlink(missing_ok=True)
 
         # Feed the dictionary of links to the for loop, download and unzip all files
         for key, value in d.items():
@@ -385,14 +380,10 @@ if __name__ == "__main__":
 
             with urlopen(zipurl) as zipresp:
                 with ZipFile(BytesIO(zipresp.read())) as zfile:
-                    zfile.extractall(os.path.join(BASE_DIR, "data/demand/unsd/data"))
-
-                    path = os.path.join(BASE_DIR, "data/demand/unsd/data")
+                    zfile.extractall(str(demand_base_path))
 
     # Get the files from the path provided in the OP
-    all_files = list(
-        Path(os.path.join(BASE_DIR, "data/demand/unsd/data")).glob("*.txt")
-    )
+    all_files = list(demand_base_path.glob("*.txt"))
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
@@ -403,6 +394,9 @@ if __name__ == "__main__":
     df[["Commodity", "Transaction", "extra"]] = df["Commodity - Transaction"].str.split(
         " - ", expand=True
     )
+
+    # Modify the commodity column, replacing typos and case-folding the strings
+    df["Commodity"] = df["Commodity"].map(modify_commodity)
 
     # Remove Foootnote and Estimate from 'Commodity - Transaction' column
     df = df.loc[df["Commodity - Transaction"] != "Footnote"]
@@ -435,9 +429,7 @@ if __name__ == "__main__":
     df_yr = df_yr[df_yr.country.isin(countries)]
 
     # Create an empty dataframe for energy_totals_base
-    energy_totals_cols = pd.read_csv(
-        os.path.join(BASE_DIR, "data/energy_totals_DF_2030.csv")
-    ).columns
+    energy_totals_cols = pd.read_csv(get_path(BASE_DIR, "data", "energy_totals_DF_2030.csv")).columns
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
     # Lists that combine the different fuels in the dataset to the model's carriers

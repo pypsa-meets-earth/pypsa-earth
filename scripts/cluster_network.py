@@ -121,7 +121,6 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
-import os
 from functools import reduce
 
 import geopandas as gpd
@@ -134,6 +133,9 @@ from _helpers import (
     configure_logging,
     create_logger,
     get_aggregation_strategies,
+    get_path,
+    mock_snakemake,
+    normed,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -144,15 +146,12 @@ from pypsa.clustering.spatial import (
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
+from scipy.sparse import csgraph
 from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-
-
-def normed(x):
-    return (x / x.sum()).fillna(0.0)
 
 
 def weighting_for_country(n, x):
@@ -378,7 +377,7 @@ def distribute_clusters(
     )
 
 
-def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
+def busmap_for_gadm_clusters(inputs, n, gadm_level):
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
@@ -426,7 +425,6 @@ def busmap_for_n_clusters(
         algorithm_kwds.setdefault("random_state", 0)
 
     def fix_country_assignment_for_hac(n):
-        from scipy.sparse import csgraph
 
         # overwrite country of nodes that are disconnected from their country-topology
         for country in n.buses.country.unique():
@@ -561,7 +559,6 @@ def clustering_for_n_clusters(
     n_clusters,
     alternative_clustering,
     gadm_layer_id,
-    geo_crs,
     country_list,
     distribution_cluster,
     build_shape_options,
@@ -581,9 +578,7 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
-            busmap = busmap_for_gadm_clusters(
-                inputs, n, gadm_layer_id, geo_crs, country_list
-            )
+            busmap = busmap_for_gadm_clusters(inputs, n, gadm_layer_id)
         else:
             busmap = busmap_for_n_clusters(
                 inputs,
@@ -631,8 +626,7 @@ def clustering_for_n_clusters(
 
 
 def save_to_geojson(s, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)
+    get_path(fn).unlink(missing_ok=True)
     df = s.reset_index()
     schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
     df.to_file(fn, driver="GeoJSON", schema=schema)
@@ -654,8 +648,6 @@ def cluster_regions(busmaps, inputs, output):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "cluster_network", network="elec", simpl="", clusters="min"
         )
@@ -670,7 +662,6 @@ if __name__ == "__main__":
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     focus_weights = snakemake.params.get("focus_weights", None)
     country_list = snakemake.params.countries
-    geo_crs = snakemake.params.geo_crs
 
     renewable_carriers = pd.Index(
         [
@@ -752,7 +743,6 @@ if __name__ == "__main__":
             n_clusters,
             alternative_clustering,
             gadm_layer_id,
-            geo_crs,
             country_list,
             distribution_cluster,
             snakemake.params.build_shape_options,

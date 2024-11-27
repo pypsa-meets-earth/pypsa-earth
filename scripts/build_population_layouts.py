@@ -6,29 +6,23 @@
 Build mapping between grid cells and population (total, urban, rural)
 """
 import multiprocessing as mp
-import os
 
 import atlite
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from _helpers import read_csv_nafix
+from _helpers import mock_snakemake, read_csv_nafix
 from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "build_population_layouts",
             planning_horizons=2030,
         )
 
-    cutout_path = (
-        snakemake.input.cutout
-    )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
+    cutout_path = snakemake.input.cutout
     cutout = atlite.Cutout(cutout_path)
 
     grid_cells = cutout.grid.geometry.to_list()

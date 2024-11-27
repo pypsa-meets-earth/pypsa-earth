@@ -78,14 +78,18 @@ Details (and errors made through this heuristic) are discussed in the paper
     the rule :mod:`solve_network`.
 """
 import logging
-import os
 import re
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger, override_component_attrs
+from _helpers import (
+    build_directory,
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+    override_component_attrs,
+)
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.linopf import (
     define_constraints,
@@ -966,8 +970,6 @@ def solve_network(n, config, solving={}, opts="", **kwargs):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "solve_network",
             simpl="",
@@ -980,7 +982,7 @@ if __name__ == "__main__":
 
     tmpdir = snakemake.params.solving.get("tmpdir")
     if tmpdir is not None:
-        Path(tmpdir).mkdir(parents=True, exist_ok=True)
+        build_directory(tmpdir, just_parent_directory=False)
     opts = snakemake.wildcards.opts.split("-")
     solving = snakemake.params.solving
 

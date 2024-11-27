@@ -40,8 +40,8 @@ It creates the load paths for GEGIS outputs by combining the input parameters of
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
-import os
-import os.path
+
+import pathlib
 from itertools import product
 
 import geopandas as gpd
@@ -54,6 +54,9 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
+    get_path,
+    mock_snakemake,
+    normed,
     read_csv_nafix,
     read_osm_config,
 )
@@ -61,10 +64,6 @@ from shapely.prepared import prep
 from shapely.validation import make_valid
 
 logger = create_logger(__name__)
-
-
-def normed(s):
-    return s / s.sum()
 
 
 def get_gegis_regions(countries):
@@ -113,10 +112,8 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     prediction_year = config.get("load_options")["prediction_year"]
     ssp = config.get("load_options")["ssp"]
 
-    scenario_path = os.path.join(ssp_parentfolder, ssp)
-
     load_paths = []
-    load_dir = os.path.join(
+    load_dir = get_path(
         ssp_parentfolder,
         str(ssp),
         str(prediction_year),
@@ -127,12 +124,12 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         sel_ext = ".nc"
         for ext in [".nc", ".csv"]:
-            load_path = os.path.join(BASE_DIR, str(load_dir), str(continent) + str(ext))
-            if os.path.exists(load_path):
+            load_path = get_path(BASE_DIR, str(load_dir), str(continent) + str(ext))
+            if get_path(load_path).exists():
                 sel_ext = ext
                 break
         file_name = str(continent) + str(sel_ext)
-        load_path = os.path.join(str(load_dir), file_name)
+        load_path = get_path(str(load_dir), file_name)
         load_paths.append(load_path)
         file_names.append(file_name)
 
@@ -298,10 +295,7 @@ def build_demand_profiles(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("build_demand_profiles")
-
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)

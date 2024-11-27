@@ -26,11 +26,16 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-import os
 import shutil
-from pathlib import Path
 
-from _helpers import BASE_DIR, configure_logging, create_logger, read_osm_config
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    get_path,
+    mock_snakemake,
+    read_osm_config,
+)
 from earth_osm import eo
 
 logger = create_logger(__name__)
@@ -92,17 +97,15 @@ def convert_iso_to_geofk(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("download_osm_data")
     configure_logging(snakemake)
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = Path.joinpath(
-        Path(BASE_DIR), "resources", RDIR, "osm", "raw"
+    store_path_resources = get_path(
+        BASE_DIR, "resources", RDIR, "osm", "raw"
     )
-    store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm")
+    store_path_data = get_path(BASE_DIR, "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.save_osm_data(
@@ -118,10 +121,9 @@ if __name__ == "__main__":
         progress_bar=snakemake.config["enable"]["progress_bar"],
     )
 
-    out_path = Path.joinpath(store_path_resources, "out")
+    out_path = get_path(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]
     out_formats = ["csv", "geojson"]
-    new_files = os.listdir(out_path)  # list downloaded osm files
 
     # earth-osm (eo) only outputs files with content
     # If the file is empty, it is not created
@@ -130,9 +132,9 @@ if __name__ == "__main__":
     # Rename and move osm files to the resources folder output
     for name in names:
         for f in out_formats:
-            new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
-            old_files = list(Path(out_path).glob(f"*{name}.{f}"))
-            # if file is missing, create empty file, otherwise rename it an move it
+            new_file_name = get_path(store_path_resources, f"all_raw_{name}s.{f}")
+            old_files = list(get_path(out_path).glob(f"*{name}.{f}"))
+            # if file is missing, create empty file, otherwise rename it and move it
             if not old_files:
                 with open(new_file_name, "w") as f:
                     pass

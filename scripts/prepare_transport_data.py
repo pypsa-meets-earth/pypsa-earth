@@ -2,13 +2,13 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import os
 
 import numpy as np
 import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
+from _helpers import mock_snakemake
 
 
 def transport_degree_factor(
@@ -93,7 +93,6 @@ def prepare_transport_data(n):
         weekly_profile=traffic.values,
     )
 
-    nodal_transport_shape = transport_shape / transport_shape.sum().sum()
     transport_shape = transport_shape / transport_shape.sum()
 
     transport_data = pd.read_csv(
@@ -204,8 +203,6 @@ def prepare_transport_data(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "prepare_transport_data",
             simpl="",

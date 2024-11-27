@@ -5,8 +5,6 @@
 
 # -*- coding: utf-8 -*-
 
-import os
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -15,6 +13,8 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
+    get_path_size,
+    mock_snakemake,
     save_to_geojson,
     to_csv_nafix,
 )
@@ -900,7 +900,7 @@ def clean_data(
 ):
     logger.info("Process OSM lines")
 
-    if os.path.getsize(input_files["lines"]) > 0:
+    if get_path_size(input_files["lines"]) > 0:
         # Load raw data lines
         df_lines = load_network_data("lines", data_options)
 
@@ -915,7 +915,7 @@ def clean_data(
     df_all_lines = df_lines
 
     # load cables only if data are stored
-    if os.path.getsize(input_files["cables"]) > 0:
+    if get_path_size(input_files["cables"]) > 0:
         logger.info("Add OSM cables to data")
         # Load raw data lines
         df_cables = load_network_data("cables", data_options)
@@ -965,7 +965,7 @@ def clean_data(
 
     logger.info("Process OSM substations")
 
-    if os.path.getsize(input_files["substations"]) > 0:
+    if get_path_size(input_files["substations"]) > 0:
         df_all_substations = load_network_data("substations", data_options)
 
         # prepare dataset for substations
@@ -1025,7 +1025,7 @@ def clean_data(
 
     logger.info("Process OSM generators")
 
-    if os.path.getsize(input_files["generators"]) > 0:
+    if get_path_size(input_files["generators"]) > 0:
         df_all_generators = gpd.read_file(input_files["generators"])
 
         # prepare the generator dataset
@@ -1060,9 +1060,8 @@ def clean_data(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("clean_osm_data")
+
     configure_logging(snakemake)
 
     tag_substation = snakemake.params.clean_osm_data_options["tag_substation"]

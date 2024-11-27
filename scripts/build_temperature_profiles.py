@@ -5,17 +5,15 @@
 """
 Build temperature profiles.
 """
-import os
-
 import atlite
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
+from _helpers import mock_snakemake
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_temperature_profiles",

@@ -56,7 +56,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
-import os
+import pathlib
 import re
 from zipfile import ZipFile
 
@@ -65,7 +65,15 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    get_current_directory_path,
+    get_path,
+    mock_snakemake,
+    two_2_three_digits_country,
+)
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -85,19 +93,18 @@ def download_emission_data():
     try:
         url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
         with requests.get(url) as rq:
-            with open(os.path.join(BASE_DIR, "data/co2.zip"), "wb") as file:
+            with open(get_path(BASE_DIR, "data", "co2.zip"), "wb") as file:
                 file.write(rq.content)
-        file_path = os.path.join(BASE_DIR, "data/co2.zip")
+        file_path = get_path(BASE_DIR, "data", "co2.zip")
         with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
-                os.path.join(BASE_DIR, "data"),
-            )
-        os.remove(file_path)
+            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", get_path(BASE_DIR, "data"))
+        pathlib.Path(file_path).unlink(missing_ok=True)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
-    except:
-        logger.error(f"Failed download resource from '{url}'.")
-        return False
+    except requests.exceptions.RequestException as e:
+        logger.error(
+            f"Failed download resource from '{url}' with exception message '{e}'."
+        )
+        raise SystemExit(e)
 
 
 def emission_extractor(filename, emission_year, country_names):
@@ -112,7 +119,7 @@ def emission_extractor(filename, emission_year, country_names):
     emission_year : int
         Year of CO2 emissions
     country_names : numpy.ndarray
-        Two letter country codes of analysed countries.
+        Two-letter country codes of analysed countries.
 
     Returns
     -------
@@ -120,8 +127,8 @@ def emission_extractor(filename, emission_year, country_names):
     """
 
     # data reading process
-    datapath = os.path.join(BASE_DIR, "data", filename)
-    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
+    data_path = get_path(BASE_DIR, "data", filename)
+    df = pd.read_excel(data_path, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
     df = df.set_index("Country_code_A3")
     df = df.loc[
@@ -129,9 +136,10 @@ def emission_extractor(filename, emission_year, country_names):
     ]
     df = df.loc[:, "Y_1970":"Y_2018"].astype(float).ffill(axis=1)
     df = df.loc[:, "Y_1970":"Y_2018"].astype(float).bfill(axis=1)
-    cc_iso3 = cc.convert(names=country_names, to="ISO3")
-    if len(country_names) == 1:
-        cc_iso3 = [cc_iso3]
+    cc_iso3 = [
+        two_2_three_digits_country(two_code_country)
+        for two_code_country in country_names
+    ]
     emission_by_country = df.loc[
         df.index.intersection(cc_iso3), "Y_" + str(emission_year)
     ]
@@ -184,7 +192,7 @@ def set_line_s_max_pu(n, s_max_pu):
     logger.info(f"N-1 security margin of lines set to {s_max_pu}")
 
 
-def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
+def set_transmission_limit(n, ll_type, factor, costs):
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
 
     _lines_s_nom = (
@@ -317,8 +325,6 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
@@ -326,7 +332,6 @@ if __name__ == "__main__":
             ll="v0.3",
             opts="Co2L-24H",
         )
-
     configure_logging(snakemake)
 
     opts = snakemake.wildcards.opts.split("-")
@@ -360,7 +365,7 @@ if __name__ == "__main__":
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
             if snakemake.params.electricity["automatic_emission"]:
-                country_names = n.buses.country.unique()
+                country_names = n.buses.country.unique().tolist()
                 emission_year = snakemake.params.electricity[
                     "automatic_emission_base_year"
                 ]
@@ -424,7 +429,7 @@ if __name__ == "__main__":
                 break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
-    set_transmission_limit(n, ll_type, factor, costs, Nyears)
+    set_transmission_limit(n, ll_type, factor, costs)
 
     set_line_nom_max(
         n,

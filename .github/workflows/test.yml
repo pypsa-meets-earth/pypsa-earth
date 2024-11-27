@@ -70,7 +70,7 @@ jobs:
       run: micromamba list
 
     - name: Run Test
-      run: make test
+      run: make checks
 
     - name: Upload artifacts
       if: always()

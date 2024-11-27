@@ -84,23 +84,24 @@ It further adds extendable ``generators`` with **zero** capacity for
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
-import os
-
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    create_logger,
+    mock_snakemake,
+    normed,
+    read_csv_nafix,
+    update_p_nom_max,
+)
 from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-
-
-def normed(s):
-    return s / s.sum()
 
 
 def calculate_annuity(n, r):
@@ -148,7 +149,6 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
         overwrites = config.get(attr)
         if overwrites is not None:
-            breakpoint()
             overwrites = pd.Series(overwrites)
             costs.loc[overwrites.index, attr] = overwrites
             logger.info(
@@ -817,8 +817,6 @@ def add_nice_carrier_names(n, config):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("add_electricity")
 
     configure_logging(snakemake)

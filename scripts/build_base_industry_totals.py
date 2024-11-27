@@ -8,17 +8,16 @@ Created on Thu Jul 14 19:01:13 2022.
 @author: user
 """
 
-
-import os
-import re
-from pathlib import Path
-
 import country_converter as coco
 import pandas as pd
-from _helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
-from prepare_sector_network import get
-
-# def calc_industry_base(df):
+from _helpers import (
+    aggregate_fuels,
+    get_conv_factors,
+    get_path,
+    mock_snakemake,
+    modify_commodity,
+    read_csv_nafix,
+)
 
 
 def calculate_end_values(df):
@@ -89,8 +88,6 @@ def create_industry_base_totals(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "build_base_industry_totals",
             planning_horizons=2030,
@@ -117,12 +114,12 @@ if __name__ == "__main__":
     renaming_dit = transaction.set_index("Transaction")["clean_name"].to_dict()
     clean_industry_list = list(transaction.clean_name.unique())
 
-    unsd_path = (
-        os.path.dirname(snakemake.input["energy_totals_base"]) + "/demand/unsd/data/"
+    unsd_path = get_path(
+        get_path(snakemake.input["energy_totals_base"]).parent, "demand/unsd/data/"
     )
 
     # Get the files from the path provided in the OP
-    all_files = list(Path(unsd_path).glob("*.txt"))
+    all_files = list(get_path(unsd_path).glob("*.txt"))
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
@@ -133,6 +130,9 @@ if __name__ == "__main__":
     df[["Commodity", "Transaction", "extra"]] = df["Commodity - Transaction"].str.split(
         " - ", expand=True
     )
+
+    # Modify the commodity column, replacing typos and case-folding the strings
+    df["Commodity"] = df["Commodity"].map(modify_commodity)
 
     df = df[
         df.Commodity != "Other bituminous coal"

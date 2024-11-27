@@ -2,17 +2,14 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import logging
-import os
 import shutil
-from pathlib import Path
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
-from _helpers import BASE_DIR
+from _helpers import BASE_DIR, configure_logging, create_logger, get_path, mock_snakemake
 
-# logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def download_number_of_vehicles():
@@ -31,9 +28,9 @@ def download_number_of_vehicles():
         Nbr_vehicles_csv = pd.read_csv(
             fn, storage_options=storage_options, encoding="utf8"
         )
-        print("File read successfully.")
+        logger.info("File at {} read successfully.".format(fn))
     except Exception as e:
-        print("Failed to read the file:", e)
+        logger.error("Failed to read the file from {} with exception:".format(fn), e)
         return pd.DataFrame()
 
     Nbr_vehicles_csv = Nbr_vehicles_csv.rename(
@@ -109,16 +106,10 @@ def download_CO2_emissions():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("prepare_transport_data_input")
 
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
+    configure_logging(snakemake)
 
     # Downloaded and prepare vehicles_csv:
     vehicles_csv = download_number_of_vehicles().copy()

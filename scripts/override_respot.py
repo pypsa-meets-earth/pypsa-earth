@@ -3,15 +3,8 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import os
-from itertools import dropwhile
-from types import SimpleNamespace
-
-import numpy as np
 import pandas as pd
 import pypsa
-import pytz
-import xarray as xr
 from _helpers import mock_snakemake, override_component_attrs
 
 

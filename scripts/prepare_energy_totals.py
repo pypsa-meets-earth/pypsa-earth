@@ -2,22 +2,8 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import glob
 import logging
-import os
-import sys
-from io import BytesIO
-from pathlib import Path
-from urllib.request import urlopen
-from zipfile import ZipFile
-
-import country_converter as coco
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import py7zr
-import requests
-from _helpers import BASE_DIR, read_csv_nafix, three_2_two_digits_country
+from _helpers import BASE_DIR, get_path, mock_snakemake, read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -38,8 +24,6 @@ def calculate_end_values(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "prepare_energy_totals",
             simpl="",
@@ -53,9 +37,7 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
-    base_energy_totals = read_csv_nafix(
-        os.path.join(BASE_DIR, "data/energy_totals_base.csv"), index_col=0
-    )
+    base_energy_totals = read_csv_nafix(get_path(BASE_DIR, "data", "energy_totals_base.csv"), index_col=0)
     growth_factors_cagr = read_csv_nafix(
         snakemake.input.growth_factors_cagr, index_col=0
     )

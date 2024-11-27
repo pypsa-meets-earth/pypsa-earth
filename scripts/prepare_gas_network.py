@@ -10,45 +10,24 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import os
 import zipfile
-from pathlib import Path
 
-import fiona
 import geopandas as gpd
-import matplotlib.colors as colors
-import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import (
-    BASE_DIR,
-    content_retrieve,
-    progress_retrieve,
-    two_2_three_digits_country,
-)
-from build_shapes import gadm
-from matplotlib.lines import Line2D
+from _helpers import BASE_DIR, content_retrieve, get_path, mock_snakemake, progress_retrieve
+from build_shapes import get_gadm_shapes
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely.geometry import LineString, Point
+from shapely.geometry import Point
 from shapely.ops import unary_union
-from shapely.validation import make_valid
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
             clusters="10",
         )
-
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
 
 def download_IGGIELGN_gas_network():
@@ -63,8 +42,8 @@ def download_IGGIELGN_gas_network():
     url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
 
     # Save locations
-    zip_fn = Path(os.path.join(BASE_DIR, "IGGIELGN.zip"))
-    to_fn = Path(os.path.join(BASE_DIR, "data/gas_network/scigrid-gas"))
+    zip_fn = get_path(BASE_DIR, "IGGIELGN.zip")
+    to_fn = get_path(BASE_DIR, "data", "gas_network", "scigrid-gas")
 
     logger.info(f"Downloading databundle from '{url}'.")
     progress_retrieve(url, zip_fn)
@@ -186,9 +165,7 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df.loc[df["DiameterUnits"] == "in", "diameter_mm"] = (
         df.loc[df["DiameterUnits"] == "in", "Diameter"]
         .apply(correct_Diameter_col)
-        .apply(
-            lambda d: inch_to_mm(float(d))
-        )  #         .apply(lambda ds: pd.Series(ds).apply(lambda d: inch_to_mm(float(d))))
+        .apply(lambda d: inch_to_mm(float(d)))
     )
 
     # Convert Bcm/y to MW
@@ -302,225 +279,6 @@ def prepare_IGGIELGN_data(
     return df
 
 
-def get_GADM_filename(country_code):
-    """
-    Function to get the GADM filename given the country code.
-    """
-    special_codes_GADM = {
-        "XK": "XKO",  # kosovo
-        "CP": "XCL",  # clipperton island
-        "SX": "MAF",  # sint maartin
-        "TF": "ATF",  # french southern territories
-        "AX": "ALA",  # aland
-        "IO": "IOT",  # british indian ocean territory
-        "CC": "CCK",  # cocos island
-        "NF": "NFK",  # norfolk
-        "PN": "PCN",  # pitcairn islands
-        "JE": "JEY",  # jersey
-        "XS": "XSP",  # spratly
-        "GG": "GGY",  # guernsey
-        "UM": "UMI",  # united states minor outlying islands
-        "SJ": "SJM",  # svalbard
-        "CX": "CXR",  # Christmas island
-    }
-
-    if country_code in special_codes_GADM:
-        return f"gadm41_{special_codes_GADM[country_code]}"
-    else:
-        return f"gadm41_{two_2_three_digits_country(country_code)}"
-
-
-def download_GADM(country_code, update=False, out_logging=False):
-    """
-    Download gpkg file from GADM for a given country code.
-
-    Parameters
-    ----------
-    country_code : str
-        Two letter country codes of the downloaded files
-    update : bool
-        Update = true, forces re-download of files
-
-    Returns
-    -------
-    gpkg file per country
-    """
-
-    GADM_filename = get_GADM_filename(country_code)
-
-    GADM_inputfile_gpkg = os.path.join(
-        BASE_DIR,
-        "data",
-        "gadm",
-        GADM_filename,
-        GADM_filename + ".gpkg",
-    )  # Input filepath gpkg
-
-    return GADM_inputfile_gpkg, GADM_filename
-
-
-def filter_gadm(
-    geodf,
-    layer,
-    cc,
-    contended_flag,
-    output_nonstd_to_csv=False,
-):
-    # identify non standard geodf rows
-    geodf_non_std = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].copy()
-
-    if not geodf_non_std.empty:
-        logger.info(
-            f"Contended areas have been found for gadm layer {layer}. They will be treated according to {contended_flag} option"
-        )
-
-        # NOTE: in these options GID_0 is not changed because it is modified below
-        if contended_flag == "drop":
-            geodf.drop(geodf_non_std.index, inplace=True)
-        elif contended_flag != "set_by_country":
-            # "set_by_country" option is the default; if this elif applies, the desired option falls back to the default
-            logger.warning(
-                f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
-                + "Fallback to 'set_by_country'"
-            )
-
-    # force GID_0 to be the country code for the relevant countries
-    geodf["GID_0"] = cc
-
-    # country shape should have a single geometry
-    if (layer == 0) and (geodf.shape[0] > 1):
-        logger.warning(
-            f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
-        )
-        # take the first row only to re-define geometry keeping other columns
-        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
-
-    # debug output to file
-    if output_nonstd_to_csv and not geodf_non_std.empty:
-        geodf_non_std.to_csv(
-            f"resources/non_standard_gadm{layer}_{cc}_raw.csv", index=False
-        )
-
-    return geodf
-
-
-def get_GADM_layer(
-    country_list,
-    layer_id,
-    geo_crs,
-    contended_flag,
-    update=False,
-    outlogging=False,
-):
-    """
-    Function to retrieve a specific layer id of a geopackage for a selection of
-    countries.
-
-    Parameters
-    ----------
-    country_list : str
-        List of the countries
-    layer_id : int
-        Layer to consider in the format GID_{layer_id}.
-        When the requested layer_id is greater than the last available layer, then the last layer is selected.
-        When a negative value is requested, then, the last layer is requested
-    """
-    # initialization of the geoDataFrame
-    geodf_list = []
-
-    for country_code in country_list:
-        # Set the current layer id (cur_layer_id) to global layer_id
-        cur_layer_id = layer_id
-
-        # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
-
-        # get layers of a geopackage
-        list_layers = fiona.listlayers(file_gpkg)
-
-        # get layer name
-        if (cur_layer_id < 0) or (cur_layer_id >= len(list_layers)):
-            # when layer id is negative or larger than the number of layers, select the last layer
-            cur_layer_id = len(list_layers) - 1
-
-        # read gpkg file
-        geodf_temp = gpd.read_file(
-            file_gpkg, layer="ADM_ADM_" + str(cur_layer_id)
-        ).to_crs(geo_crs)
-
-        geodf_temp = filter_gadm(
-            geodf=geodf_temp,
-            layer=cur_layer_id,
-            cc=country_code,
-            contended_flag=contended_flag,
-            output_nonstd_to_csv=False,
-        )
-
-        if layer_id == 0:
-            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-                lambda x: two_2_three_digits_country(x[:2])
-            ) + pd.Series(range(1, geodf_temp.shape[0] + 1)).astype(str)
-        else:
-            # create a subindex column that is useful
-            # in the GADM processing of sub-national zones
-            # Fix issues with missing "." in selected cases
-            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-                lambda x: x if x[3] == "." else x[:3] + "." + x[3:]
-            )
-
-        # append geodataframes
-        geodf_list.append(geodf_temp)
-
-    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geo_crs)
-
-    return geodf_GADM
-
-
-def gadm(
-    countries,
-    geo_crs,
-    contended_flag,
-    layer_id=2,
-    update=False,
-    out_logging=False,
-    year=2020,
-    nprocesses=None,
-):
-    if out_logging:
-        logger.info("Stage 4/4: Creation GADM GeoDataFrame")
-
-    # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
-
-    # select and rename columns
-    df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
-
-    # drop useless columns
-    df_gadm.drop(
-        df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
-        axis=1,
-        inplace=True,
-        errors="ignore",
-    )
-
-    # renaming 3 letter to 2 letter ISO code before saving GADM file
-    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
-    # df_gadm["GADM_ID"] = (
-    #     df_gadm["GADM_ID"]
-    #     .str.split(".")
-    #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
-    # )
-    # df_gadm.set_index("GADM_ID", inplace=True)
-    # df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
-    df_gadm.geometry = df_gadm.geometry.apply(
-        lambda r: make_valid(r) if not r.is_valid else r
-    )
-    df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
-
-    return df_gadm
-
-
 def load_bus_region(onshore_path, pipelines):
     """
     Load pypsa-earth-sec onshore regions.
@@ -544,11 +302,20 @@ def load_bus_region(onshore_path, pipelines):
         nprocesses = snakemake.params.nprocesses
         contended_flag = snakemake.params.contended_flag
         geo_crs = snakemake.params.geo_crs
+        file_prefix = snakemake.params.gadm_file_prefix
+        gadm_url_prefix = snakemake.params.gadm_url_prefix
+        gadm_input_file_args = ["data", "gadm"]
 
-        bus_regions_onshore = gadm(
+        bus_regions_onshore = get_gadm_shapes(
+            False,
+            False,
             countries_list,
             geo_crs,
+            file_prefix,
+            gadm_url_prefix,
+            gadm_input_file_args,
             contended_flag,
+            None,
             layer_id,
             update,
             out_logging,
@@ -556,12 +323,7 @@ def load_bus_region(onshore_path, pipelines):
             nprocesses=nprocesses,
         )
 
-        # bus_regions_onshore = bus_regions_onshore.reset_index()
         bus_regions_onshore = bus_regions_onshore.rename(columns={"GADM_ID": "gadm_id"})
-        # Conversion of GADM id to from 3 to 2-digit
-        # bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].apply(
-        #     lambda x: two_2_three_digits_country(x[:2]) + x[2:]
-        # )
         bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
     country_borders = unary_union(bus_regions_onshore.geometry)
@@ -632,7 +394,7 @@ def parse_states(pipelines, bus_regions_onshore):
     return pipelines
 
 
-def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
+def cluster_gas_network(pipelines, bus_regions_onshore, length_factor=1.25):
     # drop innerstatal pipelines
     pipelines_interstate = pipelines.drop(
         pipelines.loc[pipelines.amount_states_passed < 2].index
@@ -690,7 +452,6 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     df_grouped = df_grouped.rename({"capacity [MW]": "capacity"}, axis=1).loc[
         :, ["bus0", "bus1", "capacity"]
     ]
-    # df_exploded = df_exploded.loc[:, ['bus0', 'bus1', 'length']] # 'capacity'
 
     # Group by buses to get average length and sum of capacites of all pipelines between any two states on the route.
     grouped = df_grouped.groupby(["bus0", "bus1"], as_index=False).agg(
@@ -737,8 +498,6 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
 
     merged_df = pd.merge(grouped, distance_df, on=["bus0", "bus1"], how="left")
 
-    length_factor = 1.25
-
     merged_df["length"] = merged_df["distance"] * length_factor
 
     merged_df = merged_df.drop("distance", axis=1)
@@ -746,143 +505,6 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     merged_df["GWKm"] = (merged_df["capacity"] / 1000) * merged_df["length"]
 
     return merged_df
-
-
-# TODO: Move it to a separate plotting rule!
-# def plot_gas_network(pipelines, country_borders, bus_regions_onshore):
-#     df = pipelines.copy()
-#     df = gpd.overlay(df, country_borders, how="intersection")
-
-#     if snakemake.params.gas_config["network_data"] == "IGGIELGN":
-#         df = df.rename({"p_nom": "capacity [MW]"}, axis=1)
-
-#     fig, ax = plt.subplots(1, 1)
-#     fig.set_size_inches(12, 7)
-#     bus_regions_onshore.to_crs(epsg=3857).plot(
-#         ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
-#     )
-#     df.loc[(df.amount_states_passed > 1)].to_crs(epsg=3857).plot(
-#         ax=ax,
-#         column="capacity [MW]",
-#         linewidth=2.5,
-#         # linewidth=df['capacity [MW]'],
-#         # alpha=0.8,
-#         categorical=False,
-#         cmap="viridis_r",
-#         # legend=True,
-#         # legend_kwds={'label':'Pipeline capacity [MW]'},
-#     )
-
-#     df.loc[(df.amount_states_passed <= 1)].to_crs(epsg=3857).plot(
-#         ax=ax,
-#         column="capacity [MW]",
-#         linewidth=2.5,
-#         # linewidth=df['capacity [MW]'],
-#         alpha=0.5,
-#         categorical=False,
-#         # color='darkgrey',
-#         ls="dotted",
-#     )
-
-#     # # Create custom legend handles for line types
-#     # line_types = [ 'solid', 'dashed', 'dotted'] # solid
-#     # legend_handles = [Line2D([0], [0], color='black', linestyle=line_type) for line_type in line_types]
-
-#     # Define line types and labels
-#     line_types = ["solid", "dotted"]
-#     line_labels = ["Operating", "Not considered \n(within-state)"]
-
-#     # Create custom legend handles for line types
-#     legend_handles = [
-#         Line2D([0], [0], color="black", linestyle=line_type, label=line_label)
-#         for line_type, line_label in zip(line_types, line_labels)
-#     ]
-
-#     # Add the line type legend
-#     ax.legend(
-#         handles=legend_handles,
-#         title="Status",
-#         borderpad=1,
-#         title_fontproperties={"weight": "bold"},
-#         fontsize=11,
-#         loc=1,
-#     )
-
-#     # # create the colorbar
-#     norm = colors.Normalize(
-#         vmin=df["capacity [MW]"].min(), vmax=df["capacity [MW]"].max()
-#     )
-#     cbar = plt.cm.ScalarMappable(norm=norm, cmap="viridis_r")
-#     # fig.colorbar(cbar, ax=ax).set_label('Capacity [MW]')
-
-#     # add colorbar
-#     ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
-#     # add label for the colorbar
-#     ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
-
-#     ax.set_axis_off()
-#     fig.savefig(snakemake.output.gas_network_fig_1, dpi=300, bbox_inches="tight")
-
-# TODO: Move it to a separate plotting rule!
-# def plot_clustered_gas_network(pipelines, bus_regions_onshore):
-#     # Create a new GeoDataFrame with centroids
-#     centroids = bus_regions_onshore.copy()
-#     centroids["geometry"] = centroids["geometry"].centroid
-#     centroids["gadm_id"] = centroids["gadm_id"].apply(
-#         lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-#     )
-#     gdf1 = pd.merge(
-#         pipelines, centroids, left_on=["bus0"], right_on=["gadm_id"], how="left"
-#     )
-#     gdf1.rename(columns={"geometry": "geometry_bus0"}, inplace=True)
-#     pipe_links = pd.merge(
-#         gdf1, centroids, left_on=["bus1"], right_on=["gadm_id"], how="left"
-#     )
-#     pipe_links.rename(columns={"geometry": "geometry_bus1"}, inplace=True)
-
-#     # Create LineString geometries from the points
-#     pipe_links["geometry"] = pipe_links.apply(
-#         lambda row: LineString([row["geometry_bus0"], row["geometry_bus1"]]), axis=1
-#     )
-
-#     clustered = gpd.GeoDataFrame(pipe_links, geometry=pipe_links["geometry"])
-
-#     # Optional: Set the coordinate reference system (CRS) if needed
-#     clustered.crs = "EPSG:3857"  # For example, WGS84
-
-#     # plot pipelines
-#     fig, ax = plt.subplots(1, 1)
-#     fig.set_size_inches(12, 7)
-#     bus_regions_onshore.to_crs(epsg=3857).plot(
-#         ax=ax, color="white", edgecolor="darkgrey", linewidth=0.5
-#     )
-#     clustered.to_crs(epsg=3857).plot(
-#         ax=ax,
-#         column="capacity",
-#         linewidth=1.5,
-#         categorical=False,
-#         cmap="plasma",
-#     )
-
-#     centroids.to_crs(epsg=3857).plot(
-#         ax=ax,
-#         color="red",
-#         markersize=35,
-#         alpha=0.5,
-#     )
-
-#     norm = colors.Normalize(
-#         vmin=pipelines["capacity"].min(), vmax=pipelines["capacity"].max()
-#     )
-#     cbar = plt.cm.ScalarMappable(norm=norm, cmap="plasma")
-
-#     # add colorbar
-#     ax_cbar = fig.colorbar(cbar, ax=ax, location="left", shrink=0.8, pad=0.01)
-#     # add label for the colorbar
-#     ax_cbar.set_label("Natural gas pipeline capacity [MW]", fontsize=15)
-
-#     ax.set_axis_off()
-#     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
 
 if not snakemake.params.custom_gas_network:
@@ -893,7 +515,7 @@ if not snakemake.params.custom_gas_network:
     elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
         download_IGGIELGN_gas_network()
 
-        gas_network = os.path.join(
+        gas_network = get_path(
             BASE_DIR, "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
         )
 
@@ -907,26 +529,12 @@ if not snakemake.params.custom_gas_network:
     pipelines = parse_states(pipelines, bus_regions_onshore)
 
     if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
-        # TODO: plotting should be a extra rule!
-        # plot_gas_network(pipelines, country_borders, bus_regions_onshore)
 
         pipelines = cluster_gas_network(
             pipelines, bus_regions_onshore, length_factor=1.25
         )
 
-        # Conversion of GADM id to from 3 to 2-digit
-        # pipelines["bus0"] = pipelines["bus0"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
-
-        # pipelines["bus1"] = pipelines["bus1"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
-
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
-
-        # TODO: plotting should be a extra rule!
-        # plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
         average_length = pipelines["length"].mean()
         print("average_length = ", average_length)

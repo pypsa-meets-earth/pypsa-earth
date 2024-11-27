@@ -51,12 +51,17 @@ The line volume/cost cap field can be set to one of the following:
 
 Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
-import os
 
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
-from add_electricity import create_logger, load_costs, update_transmission_costs
+from _helpers import (
+    build_directory,
+    configure_logging,
+    create_logger,
+    get_path,
+    mock_snakemake,
+)
+from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -496,7 +501,7 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
     for label, filename in networks_dict.items():
         print(label, filename)
-        if not os.path.exists(filename):
+        if not get_path(filename).exists():
             print("does not exist!!")
             continue
 
@@ -527,15 +532,13 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
 
 
 def to_csv(dfs, dir):
-    os.makedirs(dir, exist_ok=True)
+    build_directory(dir, just_parent_directory=False)
     for key, df in dfs.items():
-        df.to_csv(os.path.join(dir, f"{key}.csv"))
+        df.to_csv(get_path(dir, f"{key}.csv"))
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",
@@ -550,9 +553,9 @@ if __name__ == "__main__":
 
     scenario_name = snakemake.config.get("run", {}).get("name", "")
     if scenario_name:
-        network_dir = os.path.join(network_dir, "results", scenario_name, "networks")
+        network_dir = get_path(network_dir, "results", scenario_name, "networks")
     else:
-        network_dir = os.path.join(network_dir, "results", "networks")
+        network_dir = get_path(network_dir, "results", "networks")
 
     configure_logging(snakemake)
 
@@ -568,7 +571,7 @@ if __name__ == "__main__":
         ll = [snakemake.wildcards.ll]
 
     networks_dict = {
-        (simpl, clusters, l, opts): os.path.join(
+        (simpl, clusters, l, opts): get_path(
             network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"
         )
         for simpl in expand_from_wildcard("simpl")

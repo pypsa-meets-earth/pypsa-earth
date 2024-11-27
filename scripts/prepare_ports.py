@@ -2,18 +2,10 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import logging
-import os
-from pathlib import Path
 
 import country_converter as coco
-import numpy as np
 import pandas as pd
-
-# from _helpers import configure_logging
-
-
-# logger = logging.getLogger(__name__)
+from _helpers import mock_snakemake
 
 
 def download_ports():
@@ -33,16 +25,7 @@ def download_ports():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("prepare_ports")
-
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
     df = download_ports().copy()
 

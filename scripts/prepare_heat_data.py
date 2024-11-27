@@ -2,10 +2,8 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import os
 from itertools import product
 
-import numpy as np
 import pandas as pd
 import pypsa
 import pytz
@@ -132,8 +130,6 @@ def prepare_heat_data(n):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake(
             "prepare_heat_data",
             simpl="",

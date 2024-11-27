@@ -2,17 +2,12 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import os
 
 import country_converter as coco
 import pandas as pd
 import py7zr
 import requests
-
-# from _helpers import configure_logging
-
-
-# logger = logging.getLogger(__name__)
+from _helpers import get_path, mock_snakemake
 
 
 def download_urban_percent():
@@ -51,16 +46,14 @@ def download_urban_percent():
         print(f"Urban percent extracted successfully")
 
         # Read the extracted CSV file
-        csv_filename = os.path.splitext(filename)[
-            0
-        ]  # Remove the .7z extension to get the CSV filename
+        csv_filename = get_path(filename).stem  # Remove the .7z extension to get the CSV filename
         urban_percent_orig = pd.read_csv(csv_filename)
 
         print("Urban percent CSV file read successfully:")
 
         # Remove the downloaded .7z and .csv files
-        os.remove(filename)
-        os.remove(csv_filename)
+        get_path(filename).unlink(missing_ok=True)
+        get_path(csv_filename).unlink(missing_ok=True)
 
     else:
         print(f"Failed to download file: Status code {response.status_code}")
@@ -70,8 +63,6 @@ def download_urban_percent():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
         snakemake = mock_snakemake("prepare_urban_percent")
 
     df = download_urban_percent().copy()
