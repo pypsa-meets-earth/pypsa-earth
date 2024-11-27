@@ -1034,21 +1034,13 @@ def add_aviation(n, cost):
 
     gadm_level = options["gadm_level"]
 
-    airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
-        lambda airport: locate_bus(
-            airport[["x", "y"]],
-            airport["country"],
-            gadm_level,
-            snakemake.input.shapes_path,
-            snakemake.config["cluster_options"]["alternative_clustering"],
-        ),
-        axis=1,
-    )
-    # To change 3 country code to 2
-    # airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
-    # lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
-
-    airports = airports.set_index("gadm_{}".format(gadm_level))
+    airports = locate_bus(
+        airports,
+        countries,
+        gadm_level,
+        snakemake.input.shapes_path,
+        snakemake.config["cluster_options"]["alternative_clustering"],
+    ).set_index("gadm_{}".format(gadm_level))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
@@ -1317,18 +1309,13 @@ def add_shipping(n, costs):
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(
-            port[["x", "y"]],
-            port["country"],
-            gadm_level,
-            snakemake.input["shapes_path"],
-            snakemake.config["cluster_options"]["alternative_clustering"],
-        ),
-        axis=1,
-    )
-
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    ports = locate_bus(
+        ports,
+        countries,
+        gadm_level,
+        snakemake.input.shapes_path,
+        snakemake.config["cluster_options"]["alternative_clustering"],
+    ).set_index("gadm_{}".format(gadm_level))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
@@ -2769,13 +2756,14 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="19",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="72H",
+            sopts="144H",
             discountrate="0.071",
             demand="AB",
+            # configfile="test/config.test1.yaml",
         )
 
     # Load population layout
