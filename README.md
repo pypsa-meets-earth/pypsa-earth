@@ -15,7 +15,7 @@ by
 
 ## Development Status: **Stable and Active**
 
-[![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml)
+[![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
