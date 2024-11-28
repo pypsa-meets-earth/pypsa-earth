@@ -15,7 +15,7 @@ by
 
 ## Development Status: **Stable and Active**
 
-[![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml)
+[![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
@@ -394,12 +394,21 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/lkstrp">
+                    <img src="https://avatars.githubusercontent.com/u/62255395?v=4" width="100;" alt="lkstrp"/>
+                    <br />
+                    <sub><b>Lukas Trippe</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/Tooblippe">
                     <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
                     <br />
                     <sub><b>Tobias</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/asolavi">
                     <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
@@ -407,20 +416,11 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Null</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/rajesh-ieg">
                     <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
                     <br />
                     <sub><b>Null</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/lkstrp">
-                    <img src="https://avatars.githubusercontent.com/u/62255395?v=4" width="100;" alt="lkstrp"/>
-                    <br />
-                    <sub><b>Lukas Trippe</b></sub>
                 </a>
             </td>
             <td align="center">
