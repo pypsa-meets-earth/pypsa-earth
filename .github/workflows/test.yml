@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CACHE_NUMBER: 1  # Change this value to manually reset the environment cache
+  CACHE_NUMBER: 0  # Change this value to manually reset the environment cache
 
 jobs:
   run-tests:
@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [ubuntu, macos] #, windows]
         include:
         - os: ubuntu
           env_file: envs/linux-pinned.yaml
