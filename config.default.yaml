@@ -478,6 +478,7 @@ custom_data:
   add_existing: false
   custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
+  export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
 
 industry:
   reference_year: 2015

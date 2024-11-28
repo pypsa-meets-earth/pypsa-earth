@@ -39,6 +39,9 @@ def select_ports(n):
         keep_default_na=False,
     ).squeeze()
 
+    # ports = raw_ports[["name", "country", "fraction", "x", "y"]]
+    # ports.loc[:, "fraction"] = ports.fraction.round(1)
+
     ports = ports[ports.country.isin(countries)]
     if len(ports) < 1:
         logger.error(
@@ -147,7 +150,8 @@ def create_export_profile():
     and resamples it to temp resolution obtained from the wildcard.
     """
 
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
+    # convert TWh to MWh
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6
 
     if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760

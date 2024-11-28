@@ -1001,8 +1001,11 @@ rule solve_sector_networks:
 
 
 rule prepare_ports:
+    params:
+        custom_export=config["custom_data"]["export_ports"],
     output:
         ports="data/ports.csv",  # TODO move from data to resources
+        export_ports="resources/" + SECDIR + "export_ports.csv",
     script:
         "scripts/prepare_ports.py"
 
@@ -1156,7 +1159,7 @@ rule add_export:
         costs=config["costs"],
     input:
         overrides="data/override_component_attrs",
-        export_ports="data/export_ports.csv",
+        export_ports="resources/" + SECDIR + "export_ports.csv",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
