@@ -513,6 +513,8 @@ sector:
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
     hydrogen_colors: false
+    water_network: true
+    custom_water_network: false
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
@@ -968,6 +970,8 @@ plotting:
     high-temp electrolysis: magenta
     today: #D2691E
     Ambient: k
+    water network: #6495ED
+    desalination: #1818D6
 
   nice_names:
     OCGT: Open-Cycle Gas
