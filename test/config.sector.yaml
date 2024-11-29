@@ -10,7 +10,7 @@ run:
   shared_cutouts: true
 
 scenario:
-  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
+  clusters: # number of nodes
   - 4
   ll:
   - "c1"
