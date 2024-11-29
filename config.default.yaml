@@ -522,6 +522,14 @@ sector:
   lignite:
     spatial_lignite: false
 
+  # TODO: move this section to a different file
+  # efficiencies for length based link efficiencies. Copied from PyPSA-Eur.
+  transmission_efficiency:
+    H2 pipeline:
+      efficiency_static: 1
+      efficiency_per_1000km: 1 # 0.982
+      compression_per_1000km: 0.018
+
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
   oil:
