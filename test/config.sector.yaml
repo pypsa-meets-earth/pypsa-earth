@@ -6,7 +6,7 @@ version: 0.4.1
 tutorial: true
 
 run:
-  name: test1
+  name: sector
   shared_cutouts: true
 
 scenario:
