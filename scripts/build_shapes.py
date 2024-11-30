@@ -59,6 +59,7 @@ def get_GADM_filename(country_code):
         "UM": "UMI",  # united states minor outlying islands
         "SJ": "SJM",  # svalbard
         "CX": "CXR",  # Christmas island
+        "IC": "ESP",  # canary islands
     }
 
     if country_code in special_codes_GADM:
@@ -436,6 +437,11 @@ def download_WorldPop(
     size_min : int
         Minimum size of each file to download
     """
+
+    # from the administrative perspective, canary islands belong to Spain
+    if country_code == "IC":
+        country_code = "ESP"
+
     if worldpop_method == "api":
         return download_WorldPop_API(country_code, year, update, out_logging, size_min)
 
