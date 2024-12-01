@@ -269,14 +269,21 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/Eddy-JV">
+                    <img src="https://avatars.githubusercontent.com/u/75539255?v=4" width="100;" alt="Eddy-JV"/>
+                    <br />
+                    <sub><b>Eddy Jalbout</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/hazemakhalek">
                     <img src="https://avatars.githubusercontent.com/u/87850910?v=4" width="100;" alt="hazemakhalek"/>
                     <br />
                     <sub><b>Hazem</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/energyLS">
                     <img src="https://avatars.githubusercontent.com/u/89515385?v=4" width="100;" alt="energyLS"/>
@@ -299,13 +306,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/DeniseGiub">
-                    <img src="https://avatars.githubusercontent.com/u/113139589?v=4" width="100;" alt="DeniseGiub"/>
-                    <br />
-                    <sub><b>DeniseGiub</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/GbotemiB">
                     <img src="https://avatars.githubusercontent.com/u/48842684?v=4" width="100;" alt="GbotemiB"/>
                     <br />
@@ -313,10 +313,10 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/Eddy-JV">
-                    <img src="https://avatars.githubusercontent.com/u/75539255?v=4" width="100;" alt="Eddy-JV"/>
+                <a href="https://github.com/DeniseGiub">
+                    <img src="https://avatars.githubusercontent.com/u/113139589?v=4" width="100;" alt="DeniseGiub"/>
                     <br />
-                    <sub><b>Eddy Jalbout</b></sub>
+                    <sub><b>DeniseGiub</b></sub>
                 </a>
             </td>
 		</tr>
