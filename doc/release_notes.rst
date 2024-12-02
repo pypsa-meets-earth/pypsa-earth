@@ -63,6 +63,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Revise ports data for export in `add_export.py` related to sector model `PR #1175 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1175>`_
 
+* Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`_
+
 PyPSA-Earth 0.4.1
 =================
 
