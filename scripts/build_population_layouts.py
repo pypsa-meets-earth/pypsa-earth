@@ -30,7 +30,7 @@ if __name__ == "__main__":
     )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
 
-    grid_cells = cutout.grid.geometry.to_list()
+    grid_cells = cutout.grid.geometry
 
     # nuts3 has columns country, gdp, pop, geometry
     nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index("GADM_ID")
