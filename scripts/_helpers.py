@@ -922,7 +922,7 @@ def get_last_commit_message(path):
 
 
 # PYPSA-EARTH-SEC
-def annuity(n, r=discountrate):
+def annuity(n, r):
     """
     Calculate the annuity factor for an asset with lifetime n years and.
 
