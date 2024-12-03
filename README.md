@@ -15,7 +15,7 @@ by
 
 ## Development Status: **Stable and Active**
 
-[![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml)
+[![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
@@ -350,26 +350,11 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/euronion">
-                    <img src="https://avatars.githubusercontent.com/u/42553970?v=4" width="100;" alt="euronion"/>
+
+                <a href="https://github.com/lkstrp">
+                    <img src="https://avatars.githubusercontent.com/u/62255395?v=4" width="100;" alt="lkstrp"/>
                     <br />
-                    <sub><b>Euronion</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/LukasFrankenQ">
-                    <img src="https://avatars.githubusercontent.com/u/55196140?v=4" width="100;" alt="LukasFrankenQ"/>
-                    <br />
-                    <sub><b>Lukas Franken</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/AnasAlgarei">
-                    <img src="https://avatars.githubusercontent.com/u/101210563?v=4" width="100;" alt="AnasAlgarei"/>
-                    <br />
-                    <sub><b>AnasAlgarei</b></sub>
+                    <sub><b>Lukas Trippe</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -379,6 +364,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Tobias</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/asolavi">
                     <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
@@ -393,22 +380,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Null</b></sub>
                 </a>
             </td>
-            <td align="center">
-                <a href="https://github.com/lkstrp">
-                    <img src="https://avatars.githubusercontent.com/u/62255395?v=4" width="100;" alt="lkstrp"/>
-                    <br />
-                    <sub><b>Lukas Trippe</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/koen-vg">
-                    <img src="https://avatars.githubusercontent.com/u/74298901?v=4" width="100;" alt="koen-vg"/>
-                    <br />
-                    <sub><b>Koen Van Greevenbroek</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/danielelerede-oet">
                     <img src="https://avatars.githubusercontent.com/u/175011591?v=4" width="100;" alt="danielelerede-oet"/>
