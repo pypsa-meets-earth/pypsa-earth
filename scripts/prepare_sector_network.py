@@ -208,19 +208,33 @@ def add_hydrogen(n, costs):
             x=n.buses.loc[list(nodes)].x.values,
             y=n.buses.loc[list(nodes)].y.values,
         )
-
-        n.madd(
-            "Link",
-            nodes + " H2 Electrolysis",
-            bus0=nodes,
-            bus1=nodes + " grid H2",
-            p_nom_extendable=True,
-            carrier="H2 Electrolysis",
-            efficiency=costs.at["electrolysis", "efficiency"],
-            capital_cost=costs.at["electrolysis", "fixed"],
-            lifetime=costs.at["electrolysis", "lifetime"],
-        )
-
+        if snakemake.config["sector"]["hydrogen"]["water_network"]: #TODO: Adjust bus2 and efficiency2 as needed
+            n.madd(
+                "Link",
+                nodes + " H2 Electrolysis",
+                bus0=nodes,
+                bus1=nodes + " grid H2",
+                bus2=nodes + " H2O",
+                p_nom_extendable=True,
+                carrier="H2 Electrolysis",
+                efficiency=costs.at["electrolysis", "efficiency"],
+                efficiency2=costs.at["desalination", "efficiency"],
+                capital_cost=costs.at["electrolysis", "fixed"],
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
+        else:
+            n.madd(
+                "Link",
+                nodes + " H2 Electrolysis",
+                bus0=nodes,
+                bus1=nodes + " grid H2",
+                p_nom_extendable=True,
+                carrier="H2 Electrolysis",
+                efficiency=costs.at["electrolysis", "efficiency"],
+                capital_cost=costs.at["electrolysis", "fixed"],
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
+        
         n.madd(
             "Link",
             nodes + " grid H2",
@@ -233,17 +247,32 @@ def add_hydrogen(n, costs):
         )
 
     else:
-        n.madd(
-            "Link",
-            nodes + " H2 Electrolysis",
-            bus1=nodes + " H2",
-            bus0=nodes,
-            p_nom_extendable=True,
-            carrier="H2 Electrolysis",
-            efficiency=costs.at["electrolysis", "efficiency"],
-            capital_cost=costs.at["electrolysis", "fixed"],
-            lifetime=costs.at["electrolysis", "lifetime"],
-        )
+        if snakemake.config["sector"]["hydrogen"]["water_network"]: #TODO: Adjust bus2 and efficiency2 as needed
+            n.madd(
+                "Link",
+                nodes + " H2 Electrolysis",
+                bus0=nodes,
+                bus1=nodes + " H2",
+                bus2=nodes + " H2O",
+                p_nom_extendable=True,
+                carrier="H2 Electrolysis",
+                efficiency=costs.at["electrolysis", "efficiency"],
+                efficiency2=costs.at["desalination", "efficiency"],
+                capital_cost=costs.at["electrolysis", "fixed"],
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
+        else:
+            n.madd(
+                "Link",
+                nodes + " H2 Electrolysis",
+                bus0=nodes,
+                bus1=nodes + " H2",
+                p_nom_extendable=True,
+                carrier="H2 Electrolysis",
+                efficiency=costs.at["electrolysis", "efficiency"],
+                capital_cost=costs.at["electrolysis", "fixed"],
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
 
     n.madd(
         "Link",
