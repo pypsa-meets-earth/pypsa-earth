@@ -234,7 +234,7 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             ll="c1",
-            opts="Co2L",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
