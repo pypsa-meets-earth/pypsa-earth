@@ -71,6 +71,9 @@ def select_ports(n):
 
 
 def add_export(n, hydrogen_buses_ports, export_profile):
+    """
+    Adds H2 exports for ports
+    """
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
     # Find most northwestern point in country shape and get x and y coordinates
     country_shape = country_shape.to_crs(
