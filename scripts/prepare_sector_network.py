@@ -2630,7 +2630,7 @@ def add_residential(n, costs):
 
 
 def add_electricity_distribution_grid(n, costs):
-
+    logger.info("Adding electricity distribution network")
     nodes = pop_layout.index
 
     n.madd(
@@ -2689,75 +2689,79 @@ def add_electricity_distribution_grid(n, costs):
     mchp = n.links.index[n.links.carrier.str.contains("micro gas")]
     n.links.loc[mchp, "bus1"] += " low voltage"
 
-    # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
-    solar = n.generators.index[n.generators.carrier == "solar"]
-    n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "fixed"]
-    pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
+    if options.get("solar_rooftop", False):
+        logger.info("Adding solar rooftop technology")
+        # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
+        solar = n.generators.index[n.generators.carrier == "solar"]
+        n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "fixed"]
+        pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
 
-    # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
-    # i.e. 2 kW/person (population data is in thousands of people) so we get MW
-    potential = 0.1 * 20 * pop_solar
+        # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
+        # i.e. 2 kW/person (population data is in thousands of people) so we get MW
+        potential = 0.1 * 20 * pop_solar
 
-    n.madd(
-        "Generator",
-        solar,
-        suffix=" rooftop",
-        bus=n.generators.loc[solar, "bus"] + " low voltage",
-        carrier="solar rooftop",
-        p_nom_extendable=True,
-        p_nom_max=potential.loc[solar],
-        marginal_cost=n.generators.loc[solar, "marginal_cost"],
-        capital_cost=costs.at["solar-rooftop", "fixed"],
-        efficiency=n.generators.loc[solar, "efficiency"],
-        p_max_pu=n.generators_t.p_max_pu[solar],
-        lifetime=costs.at["solar-rooftop", "lifetime"],
-    )
+        n.madd(
+            "Generator",
+            solar,
+            suffix=" rooftop",
+            bus=n.generators.loc[solar, "bus"] + " low voltage",
+            carrier="solar rooftop",
+            p_nom_extendable=True,
+            p_nom_max=potential.loc[solar],
+            marginal_cost=n.generators.loc[solar, "marginal_cost"],
+            capital_cost=costs.at["solar-rooftop", "fixed"],
+            efficiency=n.generators.loc[solar, "efficiency"],
+            p_max_pu=n.generators_t.p_max_pu[solar],
+            lifetime=costs.at["solar-rooftop", "lifetime"],
+        )
 
-    n.add("Carrier", "home battery")
+    if options.get("home_battery", False):
+        logger.info("Adding home battery technology")
+        n.add("Carrier", "home battery")
 
-    n.madd(
-        "Bus",
-        nodes + " home battery",
-        location=nodes,
-        carrier="home battery",
-        unit="MWh_el",
-    )
+        n.madd(
+            "Bus",
+            nodes + " home battery",
+            location=nodes,
+            carrier="home battery",
+            unit="MWh_el",
+        )
 
-    n.madd(
-        "Store",
-        nodes + " home battery",
-        bus=nodes + " home battery",
-        location=nodes,
-        e_cyclic=True,
-        e_nom_extendable=True,
-        carrier="home battery",
-        capital_cost=costs.at["home battery storage", "fixed"],
-        lifetime=costs.at["battery storage", "lifetime"],
-    )
+        n.madd(
+            "Store",
+            nodes + " home battery",
+            bus=nodes + " home battery",
+            location=nodes,
+            e_cyclic=True,
+            e_nom_extendable=True,
+            carrier="home battery",
+            capital_cost=costs.at["home battery storage", "fixed"],
+            lifetime=costs.at["battery storage", "lifetime"],
+        )
 
-    n.madd(
-        "Link",
-        nodes + " home battery charger",
-        bus0=nodes + " low voltage",
-        bus1=nodes + " home battery",
-        carrier="home battery charger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        capital_cost=costs.at["home battery inverter", "fixed"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
+        n.madd(
+            "Link",
+            nodes + " home battery charger",
+            bus0=nodes + " low voltage",
+            bus1=nodes + " home battery",
+            carrier="home battery charger",
+            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            capital_cost=costs.at["home battery inverter", "fixed"],
+            p_nom_extendable=True,
+            lifetime=costs.at["battery inverter", "lifetime"],
+        )
 
-    n.madd(
-        "Link",
-        nodes + " home battery discharger",
-        bus0=nodes + " home battery",
-        bus1=nodes + " low voltage",
-        carrier="home battery discharger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        marginal_cost=options["marginal_cost_storage"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
+        n.madd(
+            "Link",
+            nodes + " home battery discharger",
+            bus0=nodes + " home battery",
+            bus1=nodes + " low voltage",
+            carrier="home battery discharger",
+            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            marginal_cost=options["marginal_cost_storage"],
+            p_nom_extendable=True,
+            lifetime=costs.at["battery inverter", "lifetime"],
+        )
 
 
 # def add_co2limit(n, Nyears=1.0, limit=0.0):
