@@ -217,18 +217,18 @@ def add_EQ_constraints(n, o, scaling=1e-1):
         .T.groupby(ggrouper, axis=1)
         .apply(join_exprs)
     )
-    lhs_spill = (
-        linexpr(
-            (
-                -n.snapshot_weightings.stores * scaling,
-                get_var(n, "StorageUnit", "spill").T,
-            )
-        )
-        .T.groupby(sgrouper, axis=1)
-        .apply(join_exprs)
-    )
-    lhs_spill = lhs_spill.reindex(lhs_gen.index).fillna("")
-    lhs = lhs_gen + lhs_spill
+    # lhs_spill = (
+    #     linexpr(
+    #         (
+    #             -n.snapshot_weightings.stores * scaling,
+    #             get_var(n, "StorageUnit", "spill").T,
+    #         )
+    #     )
+    #     .T.groupby(sgrouper, axis=1)
+    #     .apply(join_exprs)
+    # )
+    # lhs_spill = lhs_spill.reindex(lhs_gen.index).fillna("")
+    lhs = lhs_gen #+ lhs_spill
     define_constraints(n, lhs, ">=", rhs, "equity", "min")
 
 

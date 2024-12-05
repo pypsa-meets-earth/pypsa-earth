@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: ID_MY_2030   # use this to keep track of runs with different settings
+  base_config: config.SEA_base.yaml  # base configuration file
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
+
+scenario:
+  opts: [3H]
+
+enable:
+  download_osm_data: true
+
+countries: [ID, MY]
+
+subregion: # remove 'false' if subregion are to be specified
+  define_subregion_gadm: {}
+  drop_subregion: {}
+
+focus_weights:
+
+#TODO get load year for 2020
+load_options:
+  ssp: ssp2-2.6   # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2018  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+
+
+electricity:
+  co2base: 8.471757e+08
+  powerplants_filter: (DateOut >= 2030 or DateOut != DateOut)
+  dateout_filter: 2020
+  dateout_filter_renewable: 2030
+
+  backup_generator:
+    Generator: CCGT
+    #marginal_cost: 
+    #capital_cost:
+
+cluster_options:
+  simplify_network:
+    exclude_carriers: [coal, coal-SubC, coal-SC, coal-USC, coal-CFB, lignite]
+    p_threshold_drop_isolated: 0 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
+    p_threshold_merge_isolated: 0 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
+    s_threshold_fetch_isolated: 0 # [-] a share of the national load for merging an isolated network into a backbone network
+  cluster_network:
+    exclude_carriers: [coal, coal-SubC, coal-SC, coal-USC, coal-CFB, lignite]
+  alternative_clustering: false
+
+costs:
+  year: 2030
+
+solving:
+  options:
+    load_shedding: false

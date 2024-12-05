@@ -636,8 +636,8 @@ def save_to_geojson(s, fn):
     if os.path.exists(fn):
         os.unlink(fn)
     df = s.reset_index()
-    schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-    df.to_file(fn, driver="GeoJSON", schema=schema)
+    #schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
+    df.to_file(fn, driver="GeoJSON")#, schema=schema)
 
 
 def cluster_regions(busmaps, inputs, output):
@@ -701,7 +701,7 @@ if __name__ == "__main__":
         n_clusters = n.buses.groupby(["country", "sub_network"]).size().count()
     else:
         n_clusters = int(snakemake.wildcards.clusters)
-        aggregate_carriers = None
+        #aggregate_carriers = None
 
     if n_clusters == len(n.buses):
         # Fast-path if no clustering is necessary

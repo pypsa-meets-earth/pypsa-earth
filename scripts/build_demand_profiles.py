@@ -177,6 +177,7 @@ def build_demand_profiles(
     regions,
     admin_shapes,
     countries,
+    countries_plus,
     scale,
     substitute_country_load,
     start_date,
@@ -244,10 +245,14 @@ def build_demand_profiles(
 
             gegis_load = pd.concat([gegis_load, gegis_load_new])
 
+    removed_countries = set(countries).difference(countries_plus)
+    if removed_countries:
+        gegis_load = gegis_load[~gegis_load.region_code.isin(removed_countries)]
+
     if isinstance(scale, dict):
         logger.info(f"Using custom scaling factor for load data.")
         DEFAULT_VAL = scale.get("DEFAULT", 1.0)
-        for country in countries:
+        for country in countries_plus:
             scale.setdefault(country, DEFAULT_VAL)
 
         for country, scale_country in scale.items():
@@ -326,6 +331,7 @@ if __name__ == "__main__":
     substitute_country_load = snakemake.params.load_options.get(
         "substitute_country_load", False
     )
+    countries_plus = snakemake.params.countries_plus
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
@@ -336,6 +342,7 @@ if __name__ == "__main__":
         regions,
         admin_shapes,
         countries,
+        countries_plus,
         scale,
         substitute_country_load,
         start_date,

@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: SEA_IRENA_2050   # use this to keep track of runs with different settings
+  base_config: config.SEA_base.yaml  # base configuration file
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
+
+scenario:
+  opts: [Co2L0.500924-3H, Co2L0.050092-3H]
+
+load_options:
+  ssp: ssp2-2.6   # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2018  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2050  # Load scenarios available with different prediction year (GDP, population)
+  scale: # scales all load time-series, i.e. 2 = doubles load
+    BN: 2.1954462278414697
+    Java-Bali/ID: 3.0005517302766944
+    KH: 5.173855215005049
+    Kalimantan/ID: 0.21211312729721385
+    LA: 4.054612787368297
+    MM: 4.24709149679998
+    Maluku/ID: 0.0023884516866629238
+    Nusa-Tenggara/ID: 0.056049976621161186
+    PH: 3.6998503796046305
+    Papua/ID: 0.026915632997019462
+    Peninsular/MY: 0.9965078154328486
+    SG: 1.2615472773948582
+    Sabah/MY: 0.19901503365181666
+    Sarawak/MY: 0.2446379493456584
+    Sulawesi/ID: 0.1536381926085181
+    Sumatra/ID: 0.8419119719797624
+    TH: 1.9874258474363962
+    VN: 5.47537196363179
+
+electricity:
+  co2base: 1.008859e+09
+  powerplants_filter: (DateOut >= 2050 or DateOut != DateOut)
+  dateout_filter: 2040
+  dateout_filter_renewable: 2050
+
+costs:
+  year: 2050

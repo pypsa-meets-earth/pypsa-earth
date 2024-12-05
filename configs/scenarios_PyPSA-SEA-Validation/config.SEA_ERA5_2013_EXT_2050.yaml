@@ -1,0 +1,105 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: SEA_ERA5_2013_EXT_2050   # use this to keep track of runs with different settings
+  base_config: config.SEA_base.yaml  # base configuration file
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
+
+enable:
+  build_cutout: false
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+
+scenario:
+  opts: [3H, Co2L0.297516-3H, Co2L0.029752-3H]
+
+snapshots:
+  start: '2013-01-01'
+  end: '2014-01-01'
+  inclusive: left   # end is not inclusive
+
+load_options:
+  ssp: ssp2-2.6   # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2013  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2050  # Load scenarios available with different prediction year (GDP, population)
+  scale: # scales all load time-series, i.e. 2 = doubles load
+    BN: 2.1954462278414697
+    Java-Bali/ID: 2.6860288193102315
+    KH: 5.173855215005049
+    Kalimantan/ID: 0.31425065067463276
+    LA: 4.054612787368297
+    MM: 4.24709149679998
+    Maluku/ID: 0.02517802276658148
+    Nusa-Tenggara/ID: 0.09887540852212115
+    PH: 3.6998503796046305
+    Papua/ID: 0.1232918480081046
+    Peninsular/MY: 1.1985068049101961
+    SG: 1.2615472773948582
+    Sabah/MY: 0.12068554190499241
+    Sarawak/MY: 0.12096845161513518
+    Sulawesi/ID: 0.2314107044216817
+    Sumatra/ID: 0.8145336297636798
+    TH: 1.9874258474363962
+    VN: 5.47537196363179
+  substitute_country_load:
+    LA: KH
+    Java-Bali/ID: ID
+    Peninsular/MY: ID
+    Papua/ID: ID
+    Sarawak/MY: MY
+    Maluku/ID: ID
+    Sulawesi/ID: ID
+    Sabah/MY: MY
+    Kalimantan/ID: ID
+    Nusa-Tenggara/ID: ID
+    Sumatra/ID: ID
+
+atlite:
+  nprocesses: 4
+  cutouts:
+    # geographical bounds automatically determined from countries input
+    sea-2013-era5:
+      module: era5
+      dx: 0.3  # cutout resolution
+      dy: 0.3  # cutout resolution
+      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
+      # y: [33., 72]    # manual set cutout range
+
+electricity:
+  co2base: 1.815352e+09
+  powerplants_filter: (DateOut >= 2050 or DateOut != DateOut)
+  dateout_filter: 2040
+  dateout_filter_renewable: 2050
+
+  backup_generator:
+    Generator: CCGT
+    #marginal_cost: 
+    #capital_cost:
+
+renewable:
+  onwind:
+    cutout: sea-2013-era5
+  offwind-ac:
+    cutout: sea-2013-era5
+  offwind-dc:
+    cutout: sea-2013-era5
+  solar:
+    cutout: sea-2013-era5
+  hydro:
+    cutout: sea-2013-era5
+  csp:
+    cutout: sea-2013-era5
+
+costs:
+  year: 2050
+
+solving:
+  options:
+    load_shedding: false

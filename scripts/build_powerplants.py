@@ -415,4 +415,32 @@ if __name__ == "__main__":
             lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
         )
 
+    # WORKAROUND TODO. Also, make sure to exclude renewables on this filter
+    dateout_filter = snakemake.params.dateout_filter
+    dateout_filter_renewable = snakemake.params.dateout_filter_renewable
+    if dateout_filter and dateout_filter_renewable:
+        fossil_fuel = ['Hard Coal','Lignite'] # Note: in version 1 'CCGT','Geothermal','Oil' are part of fossil fuel
+        renewable = ['Hydro','Bioenergy','Waste','CCGT','Geothermal','Oil']
+
+        logger.info(f"Fossil Fuel only filter to {dateout_filter} year")
+        ppl = ppl.query("Fueltype in @fossil_fuel & DateOut >= @dateout_filter or Fueltype in @renewable & DateOut >= @dateout_filter_renewable")
+        ppl = ppl.query("DateIn <= @dateout_filter_renewable")
+
+    elif dateout_filter and not dateout_filter_renewable:
+        ppl = ppl.query("DateOut >= @dateout_filter")
+        ppl = ppl.query("DateIn <= @dateout_filter")
+
+    # WORKAROUND TODO. Filter the coal powerplants based on subcategory (if data is available)
+    powerplants_technology = snakemake.params.powerplants_technology
+    if powerplants_technology:
+        powerplant_tech = pd.read_csv(powerplants_technology, index_col=0)
+        ppl["unique_name"] = ppl["Name"] + " " + ppl["Capacity"].astype(int).astype(str) + " " + ppl["DateOut"].astype(int).astype(str)
+
+        for i in powerplant_tech.index:
+            ppl.loc[ppl.unique_name == i,"Technology"] = powerplant_tech.loc[i,"Technology"]
+            ppl.loc[ppl.unique_name == i,"Fueltype"] = powerplant_tech.loc[i,"Fueltype"]
+            ppl.loc[ppl.unique_name == i,"Captive"] = powerplant_tech.loc[i,"Captive"]
+
+        ppl = ppl.query("Captive.isnull()", engine='python')
+
     ppl.to_csv(snakemake.output.powerplants)

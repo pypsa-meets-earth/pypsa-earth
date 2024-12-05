@@ -11,7 +11,7 @@ from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
-from _helpers import create_country_list, get_last_commit_message
+from _helpers import create_country_list, get_last_commit_message, prepare_shared_networks
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
@@ -20,7 +20,7 @@ HTTP = HTTPRemoteProvider()
 
 if "config" not in globals() or not config:  # skip when used as sub-workflow
     if not exists("config.yaml"):
-        copyfile("config.tutorial.yaml", "config.yaml")
+        copyfile("config.SEA_base.yaml", "config.yaml")
 
     configfile: "config.yaml"
 
@@ -190,29 +190,29 @@ if config["enable"].get("download_osm_data", True):
             "scripts/download_osm_data.py"
 
 
-rule clean_osm_data:
-    params:
-        crs=config["crs"],
-        clean_osm_data_options=config["clean_osm_data_options"],
-    input:
-        cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
-        generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
-        lines="resources/" + RDIR + "osm/raw/all_raw_lines.geojson",
-        substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
-        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
-        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
-    output:
-        generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
-        generators_csv="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
-        lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
-        substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
-    log:
-        "logs/" + RDIR + "clean_osm_data.log",
-    benchmark:
-        "benchmarks/" + RDIR + "clean_osm_data"
-    script:
-        "scripts/clean_osm_data.py"
+# rule clean_osm_data: # Hash this after ID_MY
+#     params:
+#         crs=config["crs"],
+#         clean_osm_data_options=config["clean_osm_data_options"],
+#     input:
+#         cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
+#         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
+#         lines="resources/" + RDIR + "osm/raw/all_raw_lines.geojson",
+#         substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
+#         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+#         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+#         africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+#     output:
+#         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
+#         generators_csv="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
+#         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
+#         substations="resources/" + RDIR + "osm/clean/all_clean_substations.geojson",
+#     log:
+#         "logs/" + RDIR + "clean_osm_data.log",
+#     benchmark:
+#         "benchmarks/" + RDIR + "clean_osm_data"
+#     script:
+#         "scripts/clean_osm_data.py"
 
 
 rule build_osm_network:
@@ -240,7 +240,7 @@ rule build_osm_network:
         "scripts/build_osm_network.py"
 
 
-rule build_shapes:
+rule build_shapes: # Hash this after ID_MY
     params:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
@@ -427,6 +427,7 @@ rule build_demand_profiles:
         snapshots=config["snapshots"],
         load_options=config["load_options"],
         countries=config["countries"],
+        countries_plus=config["countries_plus"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
@@ -495,6 +496,9 @@ rule build_powerplants:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
+        dateout_filter=config["electricity"].get("dateout_filter", {}),
+        dateout_filter_renewable=config["electricity"].get("dateout_filter_renewable", {}),
+        powerplants_technology=config["electricity"].get("powerplants_technology", {}),
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
@@ -704,6 +708,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             countries=config["countries_plus"],
             gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
             cluster_options=config["cluster_options"],
+            focus_weights=config.get("focus_weights", None),
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -1076,8 +1081,8 @@ rule run_scenario:
         )
         # merge the default config file with the difference
         create_test_config(base_config_path, input.diff_config, "config.yaml")
-        os.system("snakemake -j all solve_all_networks --rerun-incomplete")
-        os.system("snakemake -j1 make_statistics --force")
+        os.system("snakemake -j all solve_all_networks --rerun-trigger mtime")
+        os.system("snakemake -j all make_all_summaries --rerun-trigger mtime")
         copyfile("config.yaml", output.copyconfig)
 
 

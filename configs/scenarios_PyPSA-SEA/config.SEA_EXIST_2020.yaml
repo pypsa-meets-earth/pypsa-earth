@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: SEA_EXIST_2020   # use this to keep track of runs with different settings
+  base_config: config.SEA_base.yaml  # base configuration file
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
+
+scenario:
+  opts: [Co2L1-3H]
+
+load_options:
+  ssp: ssp2-2.6   # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2018  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2030  # Load scenarios available with different prediction year (GDP, population)
+  scale: # scales all load time-series, i.e. 2 = doubles load
+    BN: 1.0542968633335554
+    Java-Bali/ID: 0.6559247268533924
+    KH: 1.4020259980625536
+    Kalimantan/ID: 0.046368220777721444
+    LA: 1.1599574468345657
+    MM: 0.7624974522535748
+    Maluku/ID: 0.0005221188171391517
+    Nusa-Tenggara/ID: 0.012252601824659745
+    PH: 0.903102737144996
+    Papua/ID: 0.00588379431806301
+    Peninsular/MY: 0.6021275658985191
+    SG: 0.7997236349361683
+    Sabah/MY: 0.12025238130011973
+    Sarawak/MY: 0.1478194658231788
+    Sulawesi/ID: 0.03358551979095465
+    Sumatra/ID: 0.18404311269931112
+    TH: 0.7408466749561274
+    VN: 1.1180048695350402
+
+electricity:
+  co2base: 5.053623e+08
+  powerplants_filter: (DateOut >= 2020 or DateOut != DateOut)
+  dateout_filter: 2020
+
+costs:
+  year: 2020

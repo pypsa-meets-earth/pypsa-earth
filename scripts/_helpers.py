@@ -15,6 +15,8 @@ import country_converter as coco
 import geopandas as gpd
 import pandas as pd
 import yaml
+from shutil import copyfile
+from distutils.dir_util import copy_tree
 
 logger = logging.getLogger(__name__)
 
@@ -821,3 +823,49 @@ def get_last_commit_message(path):
 
     os.chdir(backup_cwd)
     return last_commit_message
+
+#NOT IN USE
+def prepare_shared_networks(base_name, shared_networks, scenario_name, cost_path):
+    """
+    Prepare all the files required in multiple scenario runs by duplicating it from the base config
+
+    Parameters:
+    ------------
+    base_name : str
+        name of the referenced base run
+    shared_networks : str
+        name of the pypsa network to be shared
+    scenario_name : str
+        name of the targeted scenario run
+    cost_path : path
+        directory of the cost path
+    """
+    # create networks directory and duplicate the networks
+    networks_dir = f"networks/{scenario_name}"
+    if not os.path.exists(networks_dir):
+        os.mkdir(networks_dir)
+
+    src_network = f"networks/{base_name}/{shared_networks}"
+    dst_network = f"networks/{scenario_name}/{shared_networks}"
+    if not os.path.exists(dst_network):
+        copyfile(src_network, dst_network)
+
+    # if base.nc is the shared network, then the entire resource folder is duplicated
+    if "base" in shared_networks:
+        copy_tree(f"resources/{base_name}", f"resources/{scenario_name}", update=1)
+
+    # if elec.nc is the shared network, then the shapes and bus regions folder is duplicated
+    # but if its after the extra component is added, these file is not nessesary
+    elif "elec" in shared_networks and "_ec" not in shared_networks:
+        copy_tree(f"resources/{base_name}/shapes", f"resources/{scenario_name}/shapes", update=1)
+        copy_tree(f"resources/{base_name}/bus_regions", f"resources/{scenario_name}/bus_regions", update=1)
+
+    # most networks requires cost folder (if retrieve_cost_data: True)
+    resources_dir = f"resources/{scenario_name}"
+    if not os.path.exists(resources_dir):
+        os.mkdir(resources_dir)
+
+    if "resources" in cost_path:
+        dst_cost_path = f"resources/{scenario_name}/costs.csv"
+        if not os.path.exists(dst_cost_path):
+            copyfile(cost_path, dst_cost_path)

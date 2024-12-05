@@ -304,8 +304,8 @@ def save_to_geojson(df, fn):
     # save file if the GeoDataFrame is non-empty
     if df.shape[0] > 0:
         df = df.reset_index()
-        schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-        df.to_file(fn, driver="GeoJSON", schema=schema)
+        #schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
+        df.to_file(fn, driver="GeoJSON")#, schema=schema)
     else:
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:

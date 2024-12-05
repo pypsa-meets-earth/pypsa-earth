@@ -774,7 +774,7 @@ def transform_to_gdf(n, network_crs):
     return gdf_buses
 
 
-def merge_into_network(n, threshold, exclude_country=[], aggregation_strategies=dict()):
+def merge_into_network(n, threshold, exclude_country=[], aggregation_strategies=dict(), exclude_carriers=[]):
     """
     Find isolated AC nodes and sub-networks in the network and merge those of
     them which have load value and a number of buses below than the specified
@@ -853,13 +853,14 @@ def merge_into_network(n, threshold, exclude_country=[], aggregation_strategies=
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
     )
+    carriers = set(n.generators.carrier) - set(exclude_carriers)
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
         bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
-        aggregate_generators_carriers=None,
+        aggregate_generators_carriers=carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         generator_strategies=generator_strategies,
@@ -876,7 +877,7 @@ def merge_into_network(n, threshold, exclude_country=[], aggregation_strategies=
     return clustering.network, busmap
 
 
-def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
+def merge_isolated_nodes(n, threshold, aggregation_strategies=dict(), exclude_carriers=[]):
     """
     Find isolated nodes in the network and merge those of them which have load
     value below than a specified threshold into a single isolated node which
@@ -939,13 +940,14 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     bus_strategies, generator_strategies = get_aggregation_strategies(
         aggregation_strategies
     )
+    carriers = set(n.generators.carrier) - set(exclude_carriers)
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
         bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
-        aggregate_generators_carriers=None,
+        aggregate_generators_carriers=carriers,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         generator_strategies=generator_strategies,
@@ -1120,6 +1122,7 @@ if __name__ == "__main__":
             n,
             threshold=p_threshold_merge_isolated,
             aggregation_strategies=aggregation_strategies,
+            exclude_carriers=exclude_carriers,
         )
         busmaps.append(merged_nodes_map)
 
@@ -1129,6 +1132,7 @@ if __name__ == "__main__":
             threshold=s_threshold_fetch_isolated,
             exclude_country=exclude_isolated_country,
             aggregation_strategies=aggregation_strategies,
+            exclude_carriers=exclude_carriers,
         )
         busmaps.append(fetched_nodes_map)
 

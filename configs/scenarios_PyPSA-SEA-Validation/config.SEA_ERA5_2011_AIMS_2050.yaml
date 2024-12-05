@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: SEA_ERA5_2011_AIMS_2050   # use this to keep track of runs with different settings
+  base_config: config.SEA_base.yaml  # base configuration file
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs
+                        # Note: value false requires build_cutout to be enabled
+
+snapshots:
+  start: '2011-01-01'
+  end: '2012-01-01'
+  inclusive: left   # end is not inclusive
+
+scenario:
+  opts: [Co2L0.050092-3H]
+
+load_options:
+  ssp: ssp2-2.6   # shared socio-economic pathway (GDP and population growth) scenario to consider
+  weather_year: 2011  # Load scenarios available with different weather year (different renewable potentials)
+  prediction_year: 2050  # Load scenarios available with different prediction year (GDP, population)
+  scale: # scales all load time-series, i.e. 2 = doubles load
+    BN: 2.2193291199824396
+    Java-Bali/ID: 3.039081128517826
+    KH: 5.147164383833034
+    Kalimantan/ID: 0.214836823433275
+    LA: 4.03369589254262
+    MM: 4.341918300233717
+    Maluku/ID: 0.002419121248292728
+    Nusa-Tenggara/ID: 0.05676970154669803
+    PH: 3.701153683993994
+    Papua/ID: 0.027261250482027353
+    Peninsular/MY: 1.001717224330859
+    SG: 1.263940091742682
+    Sabah/MY: 0.20005541755155887
+    Sarawak/MY: 0.2459168345589758
+    Sulawesi/ID: 0.15561102548732852
+    Sumatra/ID: 0.8527227709821823
+    TH: 2.0108958075748085
+    VN: 5.609597996879402
+
+atlite:
+  nprocesses: 4
+  cutouts:
+    # geographical bounds automatically determined from countries input
+    sea-2011-era5:
+      module: era5
+      dx: 0.3  # cutout resolution
+      dy: 0.3  # cutout resolution
+
+electricity:
+  co2base: 1.008859e+09
+  powerplants_filter: (DateOut >= 2050 or DateOut != DateOut)
+  dateout_filter: 2040
+  dateout_filter_renewable: 2050
+
+renewable:
+  onwind:
+    cutout: sea-2011-era5
+  offwind-ac:
+    cutout: sea-2011-era5
+  offwind-dc:
+    cutout: sea-2011-era5
+  solar:
+    cutout: sea-2011-era5
+  hydro:
+    cutout: sea-2011-era5
+  csp:
+    cutout: sea-2011-era5
+
+costs:
+  year: 2050

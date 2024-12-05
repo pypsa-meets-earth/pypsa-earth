@@ -314,6 +314,11 @@ def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
     n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
     n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
 
+def set_brownfied_ppl_optional(n,optional_ppl_brownfield):
+    #n.generators.loc[n.generators.carrier.isin(optional_ppl_brownfield),"p_nom_extendable"] = True
+    #n.generators.loc[n.generators.carrier.isin(optional_ppl_brownfield),"p_nom_max"] = n.generators.p_nom_min
+    #n.generators.loc[n.generators.carrier.isin(optional_ppl_brownfield),"p_nom_min"] = 0
+    n.generators.loc[n.generators.carrier.isin(optional_ppl_brownfield),"p_nom"] = 0
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -436,6 +441,12 @@ if __name__ == "__main__":
         enforce_autarky(n)
     elif "ATKc" in opts:
         enforce_autarky(n, only_crossborder=True)
+
+
+    optional_ppl_brownfield = snakemake.params.electricity.get("optional_ppl_brownfield", False)
+    if optional_ppl_brownfield:
+        set_brownfied_ppl_optional(n,optional_ppl_brownfield)
+
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

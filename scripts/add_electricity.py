@@ -218,6 +218,10 @@ def load_powerplants(ppl_fn):
         "bioenergy": "biomass",
         "ccgt, thermal": "CCGT",
         "hard coal": "coal",
+        "hard coal subcritical": "coal-SubC",
+        "hard coal supercritical": "coal-SC",
+        "hard coal ultra-supercritical": "coal-USC",
+        "hard coal cfb": "coal-CFB",
     }
     ppl = (
         read_csv_nafix(ppl_fn, index_col=0, dtype={"bus": "str"})
@@ -754,7 +758,7 @@ def estimate_renewable_capacities_irena(
 
         capacities = pd.concat([capacities, custom_capacities_df])
 
-    if all(country in n.buses.country.unique().tolist() for country in countries):
+    if not all(country in n.buses.country.unique().tolist() for country in countries):
         countries = n.buses.country.unique().tolist()
         capacities = capacities.query("Country == @countries")
 
@@ -821,6 +825,16 @@ def add_nice_carrier_names(n, config):
             f"tech_colors for carriers {missing_i} not defined " "in config."
         )
     n.carriers["color"] = colors
+
+def add_coal_unit_committment(n, carrier_uc):
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "committable"] = True
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "p_min_pu"] = 0.325  # [2] mean of Minimum load Most commonly used power plants
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "start_up_cost"] =  108 * 0.33 # [4] p.41
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "min_up_time"] = 5  # mean of "Cold start-up time" [2] Most commonly used power plants
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "min_down_time"] = 6   # [3] Minimum offtime [hours], large plant
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "ramp_limit_up"] = 1  # [2] 1.5-4% per minute
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "ramp_limit_start_up"] = 0.38 # [4] p.41
+    n.generators.loc[n.generators.carrier.isin(carrier_uc), "ramp_limit_shut_down"] = 0.38 # [4] p.41
 
 
 if __name__ == "__main__":
@@ -905,6 +919,14 @@ if __name__ == "__main__":
             "Unexpected missing 'weight' column, which has been manually added. It may be due to missing generators."
         )
         n.generators["weight"] = pd.Series()
+
+    coal_unit_committment = snakemake.params.electricity.get("coal_unit_committment", False)
+    if coal_unit_committment:
+        logger.info(
+            "Coal unti committment is activated"
+        )
+        carrier_uc = snakemake.params.electricity.get("carrier_uc", ["coal"])
+        add_coal_unit_committment(n, carrier_uc)
 
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])
