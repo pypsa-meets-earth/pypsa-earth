@@ -19,7 +19,13 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import content_retrieve, progress_retrieve, two_2_three_digits_country
+from _helpers import (
+    BASE_DIR,
+    content_retrieve,
+    progress_retrieve,
+    three_2_two_digits_country,
+    two_2_three_digits_country,
+)
 from build_shapes import gadm
 from matplotlib.lines import Line2D
 from pyproj import CRS
@@ -58,8 +64,8 @@ def download_IGGIELGN_gas_network():
     url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
 
     # Save locations
-    zip_fn = Path("IGGIELGN.zip")
-    to_fn = Path("data/gas_network/scigrid-gas")
+    zip_fn = Path(os.path.join(BASE_DIR, "IGGIELGN.zip"))
+    to_fn = Path(os.path.join(BASE_DIR, "data/gas_network/scigrid-gas"))
 
     logger.info(f"Downloading databundle from '{url}'.")
     progress_retrieve(url, zip_fn)
@@ -344,6 +350,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_filename = get_GADM_filename(country_code)
 
     GADM_inputfile_gpkg = os.path.join(
+        BASE_DIR,
         "data",
         "gadm",
         GADM_filename,
@@ -887,7 +894,9 @@ if not snakemake.params.custom_gas_network:
     elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
         download_IGGIELGN_gas_network()
 
-        gas_network = "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
+        gas_network = os.path.join(
+            BASE_DIR, "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
+        )
 
         pipelines = load_IGGIELGN_data(gas_network)
         pipelines = prepare_IGGIELGN_data(pipelines)
@@ -907,13 +916,13 @@ if not snakemake.params.custom_gas_network:
         )
 
         # Conversion of GADM id to from 3 to 2-digit
-        # pipelines["bus0"] = pipelines["bus0"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
+        pipelines["bus0"] = pipelines["bus0"].apply(
+            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        )
 
-        # pipelines["bus1"] = pipelines["bus1"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
+        pipelines["bus1"] = pipelines["bus1"].apply(
+            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        )
 
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 

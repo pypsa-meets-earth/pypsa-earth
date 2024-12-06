@@ -14,17 +14,9 @@ Welcome to the PyPSA-Earth documentation!
 .. image:: https://img.shields.io/github/v/release/pypsa-meets-earth/pypsa-earth?include_prereleases
     :alt: GitHub release (latest by date including pre-releases)
 
-.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-linux.yaml/badge.svg
-    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
-    :alt: CI Linux
-
-.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-mac.yaml/badge.svg
-    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
-    :alt: CI Mac
-
-.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci-windows.yaml/badge.svg
-    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions
-    :alt: CI Windows
+.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml
+    :alt: CI
 
 .. image:: https://readthedocs.org/projects/pypsa-earth/badge/?version=latest
     :target: https://pypsa-earth.readthedocs.io/en/latest/?badge=latest
