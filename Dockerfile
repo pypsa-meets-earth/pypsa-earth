@@ -10,7 +10,7 @@ WORKDIR /pypsa-earth
 
 COPY ./envs ./temp
 
-RUN conda env create -n pypsa-earth -f temp/environment.yaml
+RUN conda env create -n pypsa-earth -f temp/linux-pinned.yaml
 
 RUN conda init bash
 
@@ -26,8 +26,6 @@ RUN rm -r temp
 
 RUN conda clean -afy && \
     rm -rf /tmp/*
-
-ENV LD_PRELOAD=/opt/conda/envs/pypsa-earth/lib/python3.10/site-packages/sklearn/utils/../../../../libgomp.so.1
 
 CMD ["bash"]
 
