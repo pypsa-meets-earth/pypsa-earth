@@ -4,7 +4,7 @@ RUN conda update -n base conda
 RUN conda install -n base conda-libmamba-solver
 RUN conda config --set solver libmamba
 
-RUN apt-get update && apt-get install -y bash git
+RUN apt-get update && apt-get install -y bash git && apt-get install gcc -y
 
 WORKDIR /pypsa-earth
 
