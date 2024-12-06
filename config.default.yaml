@@ -519,6 +519,11 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
+    production:
+      h2_electrolyzer: true # regular H2 electrolyzer
+      SMR: true # regular steam methane reforming
+      SMR_CC: true # regular steam methane reforming with carbon capture
+
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
@@ -669,8 +674,6 @@ sector:
   methanation: true
   helmeth: true
   dac: true
-  SMR: true
-  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.

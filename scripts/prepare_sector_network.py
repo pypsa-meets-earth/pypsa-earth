@@ -199,51 +199,164 @@ def add_hydrogen(n, costs):
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
 
-    if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-        n.madd(
-            "Bus",
-            nodes + " grid H2",
-            location=nodes,
-            carrier="grid H2",
-            x=n.buses.loc[list(nodes)].x.values,
-            y=n.buses.loc[list(nodes)].y.values,
-        )
+    # Add hydrogen production technologies
+    h2_options = options.get("hydrogen", {})
 
-        n.madd(
-            "Link",
-            nodes + " H2 Electrolysis",
-            bus0=nodes,
-            bus1=nodes + " grid H2",
-            p_nom_extendable=True,
-            carrier="H2 Electrolysis",
-            efficiency=costs.at["electrolysis", "efficiency"],
-            capital_cost=costs.at["electrolysis", "fixed"],
-            lifetime=costs.at["electrolysis", "lifetime"],
-        )
+    if h2_options.get("hydrogen_colors", False):
+        if h2_options.get("production", {}).get("h2_electrolyzer", False):
+            n.madd(
+                "Bus",
+                nodes + " grid H2",
+                location=nodes,
+                carrier="grid H2",
+                x=n.buses.loc[list(nodes)].x.values,
+                y=n.buses.loc[list(nodes)].y.values,
+            )
 
-        n.madd(
-            "Link",
-            nodes + " grid H2",
-            bus0=nodes + " grid H2",
-            bus1=nodes + " H2",
-            p_nom_extendable=True,
-            carrier="grid H2",
-            efficiency=1,
-            capital_cost=0,
-        )
+            n.madd(
+                "Link",
+                nodes + " H2 Electrolysis",
+                bus0=nodes,
+                bus1=nodes + " grid H2",
+                p_nom_extendable=True,
+                carrier="H2 Electrolysis",
+                efficiency=costs.at["electrolysis", "efficiency"],
+                capital_cost=costs.at["electrolysis", "fixed"],
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
+
+            n.madd(
+                "Link",
+                nodes + " grid H2",
+                bus0=nodes + " grid H2",
+                bus1=nodes + " H2",
+                p_nom_extendable=True,
+                carrier="grid H2",
+                efficiency=1,
+                capital_cost=0,
+            )
+
+        if h2_options.get("production", {}).get("SMR", False):
+            n.madd(
+                "Bus",
+                spatial.nodes + " grey H2",
+                location=spatial.nodes,
+                carrier="grey H2",
+                x=n.buses.loc[list(spatial.nodes)].x.values,
+                y=n.buses.loc[list(spatial.nodes)].y.values,
+            )
+
+            n.madd(
+                "Link",
+                spatial.nodes + " SMR",
+                bus0=spatial.gas.nodes,
+                bus1=spatial.nodes + " grey H2",
+                bus2="co2 atmosphere",
+                p_nom_extendable=True,
+                carrier="SMR",
+                efficiency=costs.at["SMR", "efficiency"],
+                efficiency2=costs.at["gas", "CO2 intensity"],
+                capital_cost=costs.at["SMR", "fixed"],
+                lifetime=costs.at["SMR", "lifetime"],
+            )
+
+            n.madd(
+                "Link",
+                spatial.nodes + " grey H2",
+                bus0=spatial.nodes + " grey H2",
+                bus1=spatial.nodes + " H2",
+                carrier="grey H2",
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
+            )
+
+        if h2_options.get("production", {}).get("SMR_CC", False):
+            n.madd(
+                "Bus",
+                spatial.nodes + " blue H2",
+                location=spatial.nodes,
+                carrier="blue H2",
+                x=n.buses.loc[list(spatial.nodes)].x.values,
+                y=n.buses.loc[list(spatial.nodes)].y.values,
+            )
+
+            n.madd(
+                "Link",
+                spatial.nodes,
+                suffix=" SMR CC",
+                bus0=spatial.gas.nodes,
+                bus1=spatial.nodes + " blue H2",
+                bus2="co2 atmosphere",
+                bus3=spatial.co2.nodes,
+                p_nom_extendable=True,
+                carrier="SMR CC",
+                efficiency=costs.at["SMR CC", "efficiency"],
+                efficiency2=costs.at["gas", "CO2 intensity"]
+                * (1 - options["cc_fraction"]),
+                efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
+                capital_cost=costs.at["SMR CC", "fixed"],
+                lifetime=costs.at["SMR CC", "lifetime"],
+            )
+
+            n.madd(
+                "Link",
+                spatial.nodes + " blue H2",
+                bus0=spatial.nodes + " blue H2",
+                bus1=spatial.nodes + " H2",
+                carrier="blue H2",
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
+            )
 
     else:
-        n.madd(
-            "Link",
-            nodes + " H2 Electrolysis",
-            bus1=nodes + " H2",
-            bus0=nodes,
-            p_nom_extendable=True,
-            carrier="H2 Electrolysis",
-            efficiency=costs.at["electrolysis", "efficiency"],
-            capital_cost=costs.at["electrolysis", "fixed"],
-            lifetime=costs.at["electrolysis", "lifetime"],
-        )
+        if h2_options.get("production", {}).get("h2_electrolyzer", False):
+            n.madd(
+                "Link",
+                nodes + " H2 Electrolysis",
+                bus1=nodes + " H2",
+                bus0=nodes,
+                p_nom_extendable=True,
+                carrier="H2 Electrolysis",
+                efficiency=costs.at["electrolysis", "efficiency"],
+                capital_cost=costs.at["electrolysis", "fixed"],
+                lifetime=costs.at["electrolysis", "lifetime"],
+            )
+
+        if h2_options.get("production", {}).get("SMR", False):
+            n.madd(
+                "Link",
+                spatial.nodes + " SMR",
+                bus0=spatial.gas.nodes,
+                bus1=spatial.nodes + " H2",
+                bus2="co2 atmosphere",
+                p_nom_extendable=True,
+                carrier="SMR",
+                efficiency=costs.at["SMR", "efficiency"],
+                efficiency2=costs.at["gas", "CO2 intensity"],
+                capital_cost=costs.at["SMR", "fixed"],
+                lifetime=costs.at["SMR", "lifetime"],
+            )
+
+        if h2_options.get("production", {}).get("SMR_CC", False):
+            n.madd(
+                "Link",
+                spatial.nodes,
+                suffix=" SMR CC",
+                bus0=spatial.gas.nodes,
+                bus1=spatial.nodes + " H2",
+                bus2="co2 atmosphere",
+                bus3=spatial.co2.nodes,
+                p_nom_extendable=True,
+                carrier="SMR CC",
+                efficiency=costs.at["SMR CC", "efficiency"],
+                efficiency2=costs.at["gas", "CO2 intensity"]
+                * (1 - options["cc_fraction"]),
+                efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
+                capital_cost=costs.at["SMR CC", "fixed"],
+                lifetime=costs.at["SMR CC", "lifetime"],
+            )
 
     n.madd(
         "Link",
@@ -1169,116 +1282,6 @@ def h2_hc_conversions(n, costs):
             capital_cost=costs.at["helmeth", "fixed"],
             lifetime=costs.at["helmeth", "lifetime"],
         )
-
-    if options["SMR CC"]:
-        if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-            n.madd(
-                "Bus",
-                spatial.nodes + " blue H2",
-                location=spatial.nodes,
-                carrier="blue H2",
-                x=n.buses.loc[list(spatial.nodes)].x.values,
-                y=n.buses.loc[list(spatial.nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes,
-                suffix=" SMR CC",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " blue H2",
-                bus2="co2 atmosphere",
-                bus3=spatial.co2.nodes,
-                p_nom_extendable=True,
-                carrier="SMR CC",
-                efficiency=costs.at["SMR CC", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"]
-                * (1 - options["cc_fraction"]),
-                efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-                capital_cost=costs.at["SMR CC", "fixed"],
-                lifetime=costs.at["SMR CC", "lifetime"],
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes + " blue H2",
-                bus0=spatial.nodes + " blue H2",
-                bus1=spatial.nodes + " H2",
-                carrier="blue H2",
-                capital_cost=0,
-                p_nom_extendable=True,
-                # lifetime=costs.at["battery inverter", "lifetime"],
-            )
-
-        else:
-            n.madd(
-                "Link",
-                spatial.nodes,
-                suffix=" SMR CC",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " H2",
-                bus2="co2 atmosphere",
-                bus3=spatial.co2.nodes,
-                p_nom_extendable=True,
-                carrier="SMR CC",
-                efficiency=costs.at["SMR CC", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"]
-                * (1 - options["cc_fraction"]),
-                efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-                capital_cost=costs.at["SMR CC", "fixed"],
-                lifetime=costs.at["SMR CC", "lifetime"],
-            )
-
-    if options["SMR"]:
-        if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
-            n.madd(
-                "Bus",
-                spatial.nodes + " grey H2",
-                location=spatial.nodes,
-                carrier="grey H2",
-                x=n.buses.loc[list(spatial.nodes)].x.values,
-                y=n.buses.loc[list(spatial.nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes + " SMR",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " grey H2",
-                bus2="co2 atmosphere",
-                p_nom_extendable=True,
-                carrier="SMR",
-                efficiency=costs.at["SMR", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"],
-                capital_cost=costs.at["SMR", "fixed"],
-                lifetime=costs.at["SMR", "lifetime"],
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes + " grey H2",
-                bus0=spatial.nodes + " grey H2",
-                bus1=spatial.nodes + " H2",
-                carrier="grey H2",
-                capital_cost=0,
-                p_nom_extendable=True,
-                # lifetime=costs.at["battery inverter", "lifetime"],
-            )
-
-        else:
-            n.madd(
-                "Link",
-                spatial.nodes + " SMR",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " H2",
-                bus2="co2 atmosphere",
-                p_nom_extendable=True,
-                carrier="SMR",
-                efficiency=costs.at["SMR", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"],
-                capital_cost=costs.at["SMR", "fixed"],
-                lifetime=costs.at["SMR", "lifetime"],
-            )
 
 
 def add_shipping(n, costs):
