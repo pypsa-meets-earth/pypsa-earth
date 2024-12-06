@@ -171,13 +171,13 @@ def H2_liquid_fossil_conversions(n, costs):
         bus1=spatial.oil.nodes,
         bus2=spatial.co2.nodes,
         carrier="Fischer-Tropsch",
-        efficiency=costs.at["Fischer-Tropsch", "efficiency"],
+        efficiency=1 / costs.at["Fischer-Tropsch", "electricity-input"],
+        efficiency2=costs.at["Fischer-Tropsch", "hydrogen-input"]
+        / costs.at["Fischer-Tropsch", "electricity-input"],
         capital_cost=costs.at["Fischer-Tropsch", "fixed"]
-        * costs.at[
-            "Fischer-Tropsch", "efficiency"
-        ],  # Use efficiency to convert from EUR/MW_FT/a to EUR/MW_H2/a
-        efficiency2=-costs.at["oil", "CO2 intensity"]
-        * costs.at["Fischer-Tropsch", "efficiency"],
+        / costs.at["Fischer-Tropsch", "electricity-input"],
+        marginal_cost=costs.at["Fischer-Tropsch", "VOM"]
+        / costs.at["Fischer-Tropsch", "electricity-input"],
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
