@@ -86,7 +86,6 @@ dependencies:
 - pip:
   - earth-osm>=2.2 # until conda release it out for earth-osm
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
-  - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent
