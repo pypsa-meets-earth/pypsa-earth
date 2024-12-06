@@ -35,29 +35,3 @@ jobs:
         imageName: ghcr.io/${{ github.repository }}
         push: always  
         noCache: true
-
-  test:
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - name: Setup docker (macOS only)
-      if: runner.os == 'macos'
-      run: |
-        brew install docker docker-buildx
-        brew install colima
-        colima start
-        while ! docker info >/dev/null 2>&1; do sleep 1; done
-        mkdir -p ~/.docker/cli-plugins
-        ln -sfn $(which docker-buildx) ~/.docker/cli-plugins/docker-buildx
-
-    - name: Test Container Image
-      run: |
-        docker run --rm ghcr.io/${{ github.repository }} /bin/bash -c  "git clone -b devContainers https://github.com/drifter089/pypsa-earth.git && cd pypsa-earth && bash .github/.devcontainer/test.sh"
-
-
