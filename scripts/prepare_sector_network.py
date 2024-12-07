@@ -199,11 +199,95 @@ def add_hydrogen(n, costs):
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
 
-    # Add hydrogen production technologies
+    # Read hydrogen production options
     h2_options = options.get("hydrogen", {})
+    h2_techs = h2_options.get("production", [])
+    # H2 production technologies by color
+    green_h2_techs = [
+        "H2 Electrolysis",
+        "Alkaline electrolyzer",
+        "PEM electrolyzer",
+        "SOEC electrolyzer",
+        "Solid biomass steam reforming",
+        "Biomass gasification",
+        "Biomass gasification CC",
+    ]
+    grey_h2_techs = [
+        "SMR",
+        "Natural gas steam reforming",
+        "Coal gasification",
+        "Heavy oil partial oxidation",
+    ]
+    blue_h2_techs = ["SMR CC", "Natural gas steam reforming CC", "Coal gasification CC"]
+
+    # Dictionary containing distinct parameters of H2 production technologies
+    tech_params = {
+        "Solid biomass steam reforming": {
+            "bus0": spatial.biomass.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency2": costs.at["solid biomass", "CO2 intensity"],
+        },
+        "Biomass gasification": {
+            "bus0": spatial.biomass.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency2": costs.at["solid biomass", "CO2 intensity"],
+        },
+        "Biomass gasification CC": {
+            "bus0": spatial.biomass.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "bus3": spatial.co2.nodes,
+            "efficiency2": costs.at["solid biomass", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency3": costs.at["solid biomass", "CO2 intensity"]
+            * options["cc_fraction"],
+        },
+        "SMR": {
+            "bus0": spatial.gas.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "efficiency2": costs.at["gas", "CO2 intensity"],
+        },
+        "SMR CC": {
+            "bus0": spatial.gas.nodes,
+            "bus1": spatial.nodes + " blue H2",
+            "efficiency2": costs.at["gas", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency3": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
+        },
+        "Natural gas steam reforming": {
+            "bus0": spatial.gas.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "efficiency2": costs.at["gas", "CO2 intensity"],
+        },
+        "Natural gas steam reforming CC": {
+            "bus0": spatial.gas.nodes,
+            "bus1": spatial.nodes + " blue H2",
+            "efficiency2": costs.at["gas", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency3": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
+        },
+        "Coal gasification": {
+            "bus0": spatial.coal.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "efficiency2": costs.at["coal", "CO2 intensity"],
+        },
+        "Coal gasification CC": {
+            "bus0": spatial.coal.nodes,
+            "bus1": spatial.nodes + " blue H2",
+            "bus3": spatial.co2.nodes,
+            "efficiency2": costs.at["coal", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency3": costs.at["coal", "CO2 intensity"] * options["cc_fraction"],
+        },
+        "Heavy oil partial oxidation": {
+            "bus0": spatial.oil.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "efficiency2": costs.at["oil", "CO2 intensity"],
+        },
+    }
 
     if h2_options.get("hydrogen_colors", False):
-        if h2_options.get("production", {}).get("h2_electrolyzer", False):
+        # Add infrastructure for green hydrogen
+        if set(h2_techs) & set(green_h2_techs):
             n.madd(
                 "Bus",
                 nodes + " grid H2",
@@ -211,18 +295,6 @@ def add_hydrogen(n, costs):
                 carrier="grid H2",
                 x=n.buses.loc[list(nodes)].x.values,
                 y=n.buses.loc[list(nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                nodes + " H2 Electrolysis",
-                bus0=nodes,
-                bus1=nodes + " grid H2",
-                p_nom_extendable=True,
-                carrier="H2 Electrolysis",
-                efficiency=costs.at["electrolysis", "efficiency"],
-                capital_cost=costs.at["electrolysis", "fixed"],
-                lifetime=costs.at["electrolysis", "lifetime"],
             )
 
             n.madd(
@@ -236,7 +308,8 @@ def add_hydrogen(n, costs):
                 capital_cost=0,
             )
 
-        if h2_options.get("production", {}).get("SMR", False):
+        # Add infrastructure for grey hydrogen
+        if set(h2_techs) & set(grey_h2_techs):
             n.madd(
                 "Bus",
                 spatial.nodes + " grey H2",
@@ -244,20 +317,6 @@ def add_hydrogen(n, costs):
                 carrier="grey H2",
                 x=n.buses.loc[list(spatial.nodes)].x.values,
                 y=n.buses.loc[list(spatial.nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes + " SMR",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " grey H2",
-                bus2="co2 atmosphere",
-                p_nom_extendable=True,
-                carrier="SMR",
-                efficiency=costs.at["SMR", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"],
-                capital_cost=costs.at["SMR", "fixed"],
-                lifetime=costs.at["SMR", "lifetime"],
             )
 
             n.madd(
@@ -271,7 +330,8 @@ def add_hydrogen(n, costs):
                 # lifetime=costs.at["battery inverter", "lifetime"],
             )
 
-        if h2_options.get("production", {}).get("SMR_CC", False):
+        # Add infrastructure for blue hydrogen
+        if set(h2_techs) & set(blue_h2_techs):
             n.madd(
                 "Bus",
                 spatial.nodes + " blue H2",
@@ -279,24 +339,6 @@ def add_hydrogen(n, costs):
                 carrier="blue H2",
                 x=n.buses.loc[list(spatial.nodes)].x.values,
                 y=n.buses.loc[list(spatial.nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes,
-                suffix=" SMR CC",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " blue H2",
-                bus2="co2 atmosphere",
-                bus3=spatial.co2.nodes,
-                p_nom_extendable=True,
-                carrier="SMR CC",
-                efficiency=costs.at["SMR CC", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"]
-                * (1 - options["cc_fraction"]),
-                efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-                capital_cost=costs.at["SMR CC", "fixed"],
-                lifetime=costs.at["SMR CC", "lifetime"],
             )
 
             n.madd(
@@ -310,52 +352,79 @@ def add_hydrogen(n, costs):
                 # lifetime=costs.at["battery inverter", "lifetime"],
             )
 
-    else:
-        if h2_options.get("production", {}).get("h2_electrolyzer", False):
-            n.madd(
-                "Link",
-                nodes + " H2 Electrolysis",
-                bus1=nodes + " H2",
-                bus0=nodes,
-                p_nom_extendable=True,
-                carrier="H2 Electrolysis",
-                efficiency=costs.at["electrolysis", "efficiency"],
-                capital_cost=costs.at["electrolysis", "fixed"],
-                lifetime=costs.at["electrolysis", "lifetime"],
-            )
+    # Add hydrogen production technologies
+    for h2_tech in h2_techs:
+        # Set H2 buses as production output if colors are not used
+        if not h2_options.get("hydrogen_colors", False):
+            tech_params[h2_tech]["bus1"] = spatial.nodes + " H2"
 
-        if h2_options.get("production", {}).get("SMR", False):
+        # Add electrolysis based green H2 production technologies (links with 2 buses)
+        if h2_tech in [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer",
+            "PEM electrolyzer",
+            "SOEC electrolyzer",
+        ]:
+            # H2 production technology name in costs file
+            costs_name = "electrolysis" if h2_tech == "H2 Electrolysis" else h2_tech
+
             n.madd(
                 "Link",
-                spatial.nodes + " SMR",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " H2",
+                nodes + " " + h2_tech,
+                bus0=spatial.nodes,
+                bus1=(
+                    spatial.nodes + " grid H2"
+                    if h2_options.get("hydrogen_colors", False)
+                    else spatial.nodes + " H2"
+                ),
+                p_nom_extendable=True,
+                carrier=h2_tech,
+                efficiency=costs.at[costs_name, "efficiency"],
+                capital_cost=costs.at[costs_name, "fixed"],
+                lifetime=costs.at[costs_name, "lifetime"],
+            )
+        # Add H2 production technologies without carbon capture technologies (links with 3 buses)
+        if h2_tech in [
+            "Solid biomass steam reforming",
+            "Biomass gasification",
+            "SMR",
+            "Natural gas steam reforming",
+            "Coal gasification",
+            "Heavy oil partial oxidation",
+        ]:
+            n.madd(
+                "Link",
+                spatial.nodes + " " + h2_tech,
+                bus0=tech_params[h2_tech]["bus0"],
+                bus1=tech_params[h2_tech]["bus1"],
                 bus2="co2 atmosphere",
                 p_nom_extendable=True,
-                carrier="SMR",
-                efficiency=costs.at["SMR", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"],
-                capital_cost=costs.at["SMR", "fixed"],
-                lifetime=costs.at["SMR", "lifetime"],
+                carrier=h2_tech,
+                efficiency=costs.at[h2_tech, "efficiency"],
+                efficiency2=tech_params[h2_tech]["efficiency2"],
+                capital_cost=costs.at[h2_tech, "fixed"],
+                lifetime=costs.at[h2_tech, "lifetime"],
             )
-
-        if h2_options.get("production", {}).get("SMR_CC", False):
+        # Add H2 production technologies with carbon capture technologies (links with 4 buses)
+        if h2_tech in [
+            "Biomass gasification CC",
+            "Natural gas steam reforming CC",
+            "Coal gasification CC",
+        ]:
             n.madd(
                 "Link",
-                spatial.nodes,
-                suffix=" SMR CC",
-                bus0=spatial.gas.nodes,
-                bus1=spatial.nodes + " H2",
+                spatial.nodes + " " + h2_tech,
+                bus0=tech_params[h2_tech]["bus0"],
+                bus1=tech_params[h2_tech]["bus1"],
                 bus2="co2 atmosphere",
                 bus3=spatial.co2.nodes,
                 p_nom_extendable=True,
-                carrier="SMR CC",
-                efficiency=costs.at["SMR CC", "efficiency"],
-                efficiency2=costs.at["gas", "CO2 intensity"]
-                * (1 - options["cc_fraction"]),
-                efficiency3=costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-                capital_cost=costs.at["SMR CC", "fixed"],
-                lifetime=costs.at["SMR CC", "lifetime"],
+                carrier=h2_tech,
+                efficiency=costs.at[h2_tech, "efficiency"],
+                efficiency2=tech_params[h2_tech]["efficiency2"],
+                efficiency3=tech_params[h2_tech]["efficiency3"],
+                capital_cost=costs.at[h2_tech, "fixed"],
+                lifetime=costs.at[h2_tech, "lifetime"],
             )
 
     n.madd(

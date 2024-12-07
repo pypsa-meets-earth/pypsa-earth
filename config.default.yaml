@@ -519,10 +519,7 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
-    production:
-      h2_electrolyzer: true # regular H2 electrolyzer
-      SMR: true # regular steam methane reforming
-      SMR_CC: true # regular steam methane reforming with carbon capture
+    production: ["Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer"]
 
   coal:
     spatial_coal: true
