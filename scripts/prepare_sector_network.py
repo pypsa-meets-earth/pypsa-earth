@@ -2853,13 +2853,12 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
             "prepare_sector_network",
-            configfile="../../configs/calibration/config.NG_AC.yaml",
             simpl="",
-            clusters="10",
-            ll="copt",
-            opts="Co2L-24H",
+            clusters="19",
+            ll="c1.0",
+            opts="Co2L",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="72H",
             discountrate="0.071",
             demand="AB",
         )
