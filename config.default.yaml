@@ -519,7 +519,7 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
-    production: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer", "PEM electrolyzer", "SOEC electrolyzer", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"]
+    production: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"]
 
   coal:
     spatial_coal: true

@@ -207,7 +207,7 @@ def add_hydrogen(n, costs):
         "H2 Electrolysis",
         "Alkaline electrolyzer",
         "PEM electrolyzer",
-        "SOEC electrolyzer",
+        "SOEC",
         "Solid biomass steam reforming",
         "Biomass gasification",
         "Biomass gasification CC",
@@ -225,7 +225,7 @@ def add_hydrogen(n, costs):
         "H2 Electrolysis": {"bus1": spatial.nodes + " grid H2"},
         "Alkaline electrolyzer": {"bus1": spatial.nodes + " grid H2"},
         "PEM electrolyzer": {"bus1": spatial.nodes + " grid H2"},
-        "SOEC electrolyzer": {"bus1": spatial.nodes + " grid H2"},
+        "SOEC": {"bus1": spatial.nodes + " grid H2"},
         "Solid biomass steam reforming": {
             "bus0": spatial.biomass.nodes,
             "bus1": spatial.nodes + " grid H2",
@@ -367,7 +367,7 @@ def add_hydrogen(n, costs):
             "H2 Electrolysis",
             "Alkaline electrolyzer",
             "PEM electrolyzer",
-            "SOEC electrolyzer",
+            "SOEC",
         ]:
             # H2 production technology name in costs file
             costs_name = "electrolysis" if h2_tech == "H2 Electrolysis" else h2_tech
