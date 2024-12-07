@@ -65,6 +65,10 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`_
 
+* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
+
+* Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`_
+
 PyPSA-Earth 0.4.1
 =================
 
