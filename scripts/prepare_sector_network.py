@@ -222,6 +222,10 @@ def add_hydrogen(n, costs):
 
     # Dictionary containing distinct parameters of H2 production technologies
     tech_params = {
+        "H2 Electrolysis": {"bus1": spatial.nodes + " grid H2"},
+        "Alkaline electrolyzer": {"bus1": spatial.nodes + " grid H2"},
+        "PEM electrolyzer": {"bus1": spatial.nodes + " grid H2"},
+        "SOEC electrolyzer": {"bus1": spatial.nodes + " grid H2"},
         "Solid biomass steam reforming": {
             "bus0": spatial.biomass.nodes,
             "bus1": spatial.nodes + " grid H2",
@@ -372,11 +376,7 @@ def add_hydrogen(n, costs):
                 "Link",
                 nodes + " " + h2_tech,
                 bus0=spatial.nodes,
-                bus1=(
-                    spatial.nodes + " grid H2"
-                    if h2_options.get("hydrogen_colors", False)
-                    else spatial.nodes + " H2"
-                ),
+                bus1=tech_params[h2_tech]["bus1"],
                 p_nom_extendable=True,
                 carrier=h2_tech,
                 efficiency=costs.at[costs_name, "efficiency"],
@@ -407,6 +407,7 @@ def add_hydrogen(n, costs):
             )
         # Add H2 production technologies with carbon capture technologies (links with 4 buses)
         if h2_tech in [
+            "SMR CC",
             "Biomass gasification CC",
             "Natural gas steam reforming CC",
             "Coal gasification CC",
@@ -2852,12 +2853,13 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
             "prepare_sector_network",
+            configfile="../../configs/calibration/config.NG_AC.yaml",
             simpl="",
-            clusters="19",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-24H",
             planning_horizons="2030",
-            sopts="72H",
+            sopts="144H",
             discountrate="0.071",
             demand="AB",
         )
