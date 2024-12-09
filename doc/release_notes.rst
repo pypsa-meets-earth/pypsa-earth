@@ -65,6 +65,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`_
 
+* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
+
 PyPSA-Earth 0.4.1
 =================
 
