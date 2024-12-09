@@ -74,24 +74,6 @@ if __name__ == "__main__":
     pop_cells = pd.Series(I.dot(nuts3["pop"]))
     gdp_cells = pd.Series(I.dot(nuts3["gdp"]))
 
-    # ------------------------------------------------------------------------
-    # old implementation
-    # ------------------------------------------------------------------------
-    # from functools import partial
-    # from shapely.ops import transform, cascaded_union
-
-    # def area(geom):
-    # return reproject(geom).area
-
-    # def reproject(geom, fr=pyproj.Proj(proj='longlat'), to=pyproj.Proj(proj='aea', lat_1=33., lat_2=72.)):
-    #     reproject_pts = partial(pyproj.transform, fr, to)
-    #     return transform(reproject_pts, geom)
-
-    # in km^2
-    # with mp.Pool(processes=snakemake.threads) as pool:
-    #     cell_areas = pd.Series(pool.map(vshapes.area, grid_cells)) / 1e6
-    # ------------------------------------------------------------------------
-
     area_crs = snakemake.config["crs"]["area_crs"]
     cell_areas = grid_cells.to_crs(area_crs).area / 1e6
 
