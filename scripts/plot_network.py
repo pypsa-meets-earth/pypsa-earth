@@ -1077,9 +1077,9 @@ if __name__ == "__main__":
             "plot_network",
             network="elec",
             simpl="",
-            clusters="100",
-            ll="copt",
-            opts="Co2L-3H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             attr="p_nom",
             ext="pdf",
         )

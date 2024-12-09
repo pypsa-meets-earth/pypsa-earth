@@ -41,7 +41,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
-            clusters="10",
+            clusters="4",
         )
 
     # configure_logging(snakemake)

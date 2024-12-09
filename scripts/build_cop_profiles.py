@@ -31,7 +31,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_cop_profiles",
             simpl="",
-            clusters=15,
+            clusters=4,
         )
 
     for area in ["total", "urban", "rural"]:
