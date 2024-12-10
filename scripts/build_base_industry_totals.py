@@ -117,8 +117,9 @@ if __name__ == "__main__":
     renaming_dit = transaction.set_index("Transaction")["clean_name"].to_dict()
     clean_industry_list = list(transaction.clean_name.unique())
 
+    # TODO Check with the sector-coupled modelling experts
     unsd_path = (
-        os.path.dirname(snakemake.input["energy_totals_base"]) + "/demand/unsd/data/"
+        os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
     )
 
     # Get the files from the path provided in the OP
