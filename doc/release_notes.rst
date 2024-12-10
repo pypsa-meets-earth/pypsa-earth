@@ -37,6 +37,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Remove elec-based H2 and battery technologies before addition in `prepare_sector_network.py` script and fix bus names for links that models H2 repuspose network `PR #1198 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1198>`__
 
+* Drop vrestil depenedncy `PR #1220 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1220>`__
+
 **Minor Changes and bug-fixing**
 
 * The default configuration for `electricity:estimate_renewable_capacities:year` was updated from 2020 to 2023. `PR #1106 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1106>`__
@@ -62,6 +64,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 * Adds CI to update keep pinned environment files up to date. `PR #1183 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1183>`__ and  `PR #1210 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1210>`__
 
 * Revise ports data for export in `add_export.py` related to sector model `PR #1175 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1175>`_
+
+* Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`_
 
 PyPSA-Earth 0.4.1
 =================
