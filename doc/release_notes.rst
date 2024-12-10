@@ -67,6 +67,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`_
 
+* Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`_
+
 PyPSA-Earth 0.4.1
 =================
 
