@@ -538,7 +538,9 @@ if __name__ == "__main__":
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
-        hydrobasins = gpd.read_file(os.path.join(BASE_DIR, resource["hydrobasins"]))
+        hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
+        resource["hydrobasins"] = hydrobasins_path
+        hydrobasins = gpd.read_file(hydrobasins_path)
         ppls = load_powerplants(snakemake.input.powerplants)
 
         hydro_ppls = ppls[ppls.carrier == "hydro"]
