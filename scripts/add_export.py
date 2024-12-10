@@ -66,6 +66,9 @@ def select_ports(n):
     hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
     hydrogen_buses_ports.index.name = "Bus"
 
+    # drop duplicate ports if exists
+    hydrogen_buses_ports = hydrogen_buses_ports.drop_duplicates()
+
     return hydrogen_buses_ports
 
 
