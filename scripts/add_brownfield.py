@@ -232,9 +232,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_brownfield",
             simpl="",
-            clusters="10",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
