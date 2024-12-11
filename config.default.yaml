@@ -474,6 +474,7 @@ custom_data:
   industry_database: false
   transport_demand: false
   water_costs: false
+  h2_water_network: false
   h2_underground: false
   add_existing: false
   custom_sectors: false
@@ -512,6 +513,7 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+    water_network: true
     hydrogen_colors: false
     set_color_shares: false
     blue_share: 0.40
