@@ -31,7 +31,7 @@ dependencies:
 - ruamel.yaml<=0.17.26
 - pytables
 - lxml
-- numpy<=1.26.4
+- numpy
 - pandas
 - geopandas>=0.11.0, <=0.14.3
 - fiona<1.10.0
@@ -85,6 +85,8 @@ dependencies:
 
 - pip:
   - earth-osm>=2.2 # until conda release it out for earth-osm
+  - highspy<1.8
+  - tsam>=2.3.1  
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
