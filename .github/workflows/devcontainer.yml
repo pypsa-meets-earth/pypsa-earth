@@ -3,13 +3,8 @@ name: Dev Container Build and Push Image
 on:
   workflow_dispatch:
   push:
-    branches:
-    - "main"
-    tags:
-    - "v*.*.*"
-  pull_request:
-    branches: [main]
-
+    paths:
+    - envs/linux-pinned.yaml
 
 jobs:
   build:
