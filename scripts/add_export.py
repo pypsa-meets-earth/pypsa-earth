@@ -60,14 +60,14 @@ def select_ports(n):
         axis=1,
     )
 
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    # TODO: revise if ports quantity and property by shape become relevant
+    # drop duplicated entries
+    gcol = "gadm_{}".format(gadm_level)
+    ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports
-    hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
+    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
     hydrogen_buses_ports.index.name = "Bus"
-
-    # drop duplicate ports if exists
-    hydrogen_buses_ports = hydrogen_buses_ports.drop_duplicates()
 
     return hydrogen_buses_ports
 
