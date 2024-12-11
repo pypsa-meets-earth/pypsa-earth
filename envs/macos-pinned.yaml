@@ -324,7 +324,6 @@ dependencies:
 - nss=3.107
 - numba=0.60.0
 - numexpr=2.10.2
-- numpy==1.26.4
 - openjpeg=2.5.2
 - openldap=2.6.9
 - openpyxl=3.1.5
@@ -502,6 +501,7 @@ dependencies:
   - googledrivedownloader==0.4
   - highspy==1.8.1
   - numpoly==1.3.6
+  - numpy==1.26.4
   - protobuf==5.29.1
   - tsam==2.3.6
 prefix: /Users/runner/miniconda3/envs/pypsa-earth
