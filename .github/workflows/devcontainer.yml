@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "main"
+    - "main"
     tags:
-      - "v*.*.*"
+    - "v*.*.*"
   pull_request:
-    branches: [main]    
+    branches: [main]
 
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,5 +33,5 @@ jobs:
         subFolder: .github
         cacheFrom: ghcr.io/${{ github.repository }}
         imageName: ghcr.io/${{ github.repository }}
-        push: always  
+        push: always
         noCache: true

@@ -1,4 +1,4 @@
-// For format details, see https://aka.ms/devcontainer.json. 
+// For format details, see https://aka.ms/devcontainer.json.
 {
   "name": "pypsa earth dev",
   "image": "ghcr.io/drifter089/pypsa-earth:latest",

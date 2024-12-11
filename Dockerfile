@@ -28,4 +28,3 @@ RUN conda clean -afy && \
     rm -rf /tmp/*
 
 CMD ["bash"]
-
