@@ -44,5 +44,3 @@ Steps:
     * Wait for the container to build and open the repository in the container.
 
     The environment will be ready for use. You can now run PyPSA-Earth in the container.
-
-
