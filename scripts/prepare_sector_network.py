@@ -186,9 +186,9 @@ def H2_liquid_fossil_conversions(n, costs):
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
+    logger.info("Adding hydrogen")
 
-    if not "H2" in n.carriers.index:
-        n.add("Carrier", "H2")
+    n.add("Carrier", "H2")
 
     n.madd(
         "Bus",
@@ -488,22 +488,9 @@ def add_hydrogen(n, costs):
         # Order buses to detect equal pairs for bidirectional pipelines
         buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-        if snakemake.config["build_osm_network"]["force_ac"]:
-            # Appending string for carrier specification '_AC'
-            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-            # # Conversion of GADM id to from 3 to 2-digit
-            # h2_links["bus0"] = (
-            #     h2_links["bus0"]
-            #     .str.split(".")
-            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            # )
-            # h2_links["bus1"] = (
-            #     h2_links["bus1"]
-            #     .str.split(".")
-            #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + id[1])
-            # )
+        # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
+        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
         # Create index column
         h2_links["buses_idx"] = (
@@ -517,7 +504,7 @@ def add_hydrogen(n, costs):
 
         if len(h2_links) > 0:
             if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
-                add_links_elec_routing_new_H2_pipelines()
+                add_links_repurposed_H2_pipelines()
             if snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
                 add_links_elec_routing_new_H2_pipelines()
             else:
@@ -1096,9 +1083,9 @@ def add_aviation(n, cost):
 
 def add_storage(n, costs):
     "function to add the different types of storage systems"
+    logger.info("Add battery storage")
 
-    if not "battery" in n.carriers.index:
-        n.add("Carrier", "battery")
+    n.add("Carrier", "battery")
 
     n.madd(
         "Bus",
@@ -2763,6 +2750,31 @@ def remove_elec_base_techs(n):
     n.carriers.drop(to_remove, inplace=True, errors="ignore")
 
 
+def remove_carrier_related_components(n, carriers_to_drop):
+    """
+    Removes carrier related components, such as "Carrier", "Generator", "Link", "Store", and "Storage Unit"
+    """
+    # remove carriers
+    n.carriers.drop(carriers_to_drop, inplace=True, errors="ignore")
+
+    # remove buses, generators, stores, and storage units with carrier to remote
+    for c in n.iterate_components(["Bus", "Generator", "Store", "StorageUnit"]):
+        logger.info(f"Removing {c.list_name} with carrier {list(carriers_to_drop)}")
+        names = c.df.index[c.df.carrier.isin(carriers_to_drop)]
+        if c.name == "Bus":
+            buses_to_remove = names
+        n.mremove(c.name, names)
+
+    # remove links connected to buses that were removed
+    links_to_remove = n.links.query(
+        "bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove"
+    ).index
+    logger.info(
+        f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
+    )
+    n.mremove("Link", links_to_remove)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         # from helper import mock_snakemake #TODO remove func from here to helper script
@@ -2905,6 +2917,9 @@ if __name__ == "__main__":
     remove_elec_base_techs(n)
 
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
+
+    # remove H2 and battery technologies added in elec-only model
+    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
     add_hydrogen(n, costs)  # TODO add costs
 
