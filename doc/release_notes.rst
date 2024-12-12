@@ -71,6 +71,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`_
 
+* Fix the environment placing a version limit to numpoly `PR #1237 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1237>`_
+
 PyPSA-Earth 0.4.1
 =================
 
