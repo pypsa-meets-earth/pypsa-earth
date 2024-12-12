@@ -9,8 +9,7 @@ Release Notes
 Upcoming release
 ================
 
-Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
-E.g. if a new rule becomes available describe how to use it `make test` and in one sentence what it does.
+This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
 
@@ -23,6 +22,10 @@ PyPSA-Earth 0.5.0
 
 **New Features and Major Changes (13th December 2024)**
 
+* Added capabilities of cross-sectoral modeling by merging with PyPSA-Earth-Sec model `https://github.com/pypsa-meets-earth/pypsa-earth-sec`__
+
+* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. One can think of the new `config.yaml` as of a list of arguments in a python function that already have a default. So in principle the `config.yaml` could now be empty, and the workflow would still run. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`__
+
 * Include option of endogenous export, which optimizes the export quantity based on price signals `PR #1201 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1201>`__
 
 * Remove elec-based H2 and battery technologies before addition in `prepare_sector_network.py` script and fix bus names for links that models H2 repuspose network `PR #1198 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1198>`__
@@ -34,8 +37,6 @@ PyPSA-Earth 0.5.0
 * Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`__
 
 * Include a dedicated cutout for Oceania in bundle_config.yaml `PR #1157 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1157>`__
-
-* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. One can think of the new `config.yaml` as of a list of arguments in a python function that already have a default. So in principle the `config.yaml` could now be empty, and the workflow would still run. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`__
 
 * Integrate RDIR into sector rules to store intermediate data in scenario folders `PR #1154 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1154>`__
 
