@@ -18,7 +18,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="10")
+        snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="4")
 
     time = pd.date_range(freq="h", **snakemake.params.snapshots)
     cutout_config = snakemake.input.cutout

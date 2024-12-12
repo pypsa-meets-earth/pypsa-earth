@@ -54,7 +54,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=10,
+            clusters="4",
             planning_horizons=2030,
             demand="AB",
         )
