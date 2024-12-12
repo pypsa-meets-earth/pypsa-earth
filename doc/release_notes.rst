@@ -37,6 +37,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 
 * Remove elec-based H2 and battery technologies before addition in `prepare_sector_network.py` script and fix bus names for links that models H2 repuspose network `PR #1198 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1198>`__
 
+* Drop vrestil depenedncy `PR #1220 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1220>`__
+
 * Add electricity distribution grid with solar rooftop and home battery technologies `PR #1221 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1221>`__
 
 **Minor Changes and bug-fixing**
@@ -66,6 +68,8 @@ E.g. if a new rule becomes available describe how to use it `make test` and in o
 * Revise ports data for export in `add_export.py` related to sector model `PR #1175 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1175>`_
 
 * Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`_
+
+* Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`_
 
 PyPSA-Earth 0.4.1
 =================
