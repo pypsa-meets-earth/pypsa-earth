@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 # PyPSA-Earth Development Environment Setup with Docker
 
 This guide provides an alternative way to set up a development environment for **PyPSA-Earth** using Docker containers. This method is particularly useful for users who are not familiar with programming or Python, or who prefer not to install Python directly on their local machine. Using Docker simplifies setup by creating a self-contained environment for PyPSA-Earth.

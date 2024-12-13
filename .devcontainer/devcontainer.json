@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+//
+// SPDX-License-Identifier: CC-BY-4.0
 // For format details, see https://aka.ms/devcontainer.json.
 {
   "name": "pypsa earth dev",
