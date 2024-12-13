@@ -1539,6 +1539,15 @@ rule build_heat_demand:
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_urban="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_rural="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_total="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
