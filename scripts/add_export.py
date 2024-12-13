@@ -43,10 +43,11 @@ def select_ports(n):
     # ports.loc[:, "fraction"] = ports.fraction.round(1)
 
     ports = ports[ports.country.isin(countries)]
-    if len(ports) < 1:
-        logger.error(
+    if ports.empty:
+        logger.warning(
             "No export ports chosen, please add ports to the file data/export_ports.csv"
         )
+        return ports
     gadm_level = snakemake.params.gadm_level
 
     ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
@@ -73,6 +74,9 @@ def select_ports(n):
 
 
 def add_export(n, hydrogen_buses_ports, export_profile):
+    """
+    Adds H2 exports for ports
+    """
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
     # Find most northwestern point in country shape and get x and y coordinates
     country_shape = country_shape.to_crs(
@@ -241,8 +245,10 @@ if __name__ == "__main__":
     # get hydrogen export buses/ports
     hydrogen_buses_ports = select_ports(n)
 
-    # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_profile)
+    # depending on the region, there may be hydrogen ports available (or not)
+    if not hydrogen_buses_ports.empty:
+        # add export value and components to network
+        add_export(n, hydrogen_buses_ports, export_profile)
 
     n.export_to_netcdf(snakemake.output[0])
 
