@@ -3,6 +3,7 @@ name: Dev Container Build and Push Image
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
     - envs/linux-pinned.yaml
 
@@ -26,7 +27,7 @@ jobs:
       uses: devcontainers/ci@v0.3
       with:
         subFolder: .github
-        cacheFrom: ghcr.io/${{ github.repository }}
-        imageName: ghcr.io/${{ github.repository }}
+        cacheFrom: ghcr.io/${{ github.repository }}-dev-env
+        imageName: ghcr.io/${{ github.repository }}-dev-env
         push: always
-        noCache: true
+        # noCache: true
