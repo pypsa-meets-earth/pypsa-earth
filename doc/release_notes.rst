@@ -20,7 +20,7 @@ This part of documentation collects descriptive release notes to capture the mai
 PyPSA-Earth 0.5.0
 =================
 
-**New Features and Major Changes (13th December 2024)**
+**New Features and Major Changes (14th December 2024)**
 
 * Added capabilities of cross-sectoral modeling by merging with PyPSA-Earth-Sec model `https://github.com/pypsa-meets-earth/pypsa-earth-sec`__
 
