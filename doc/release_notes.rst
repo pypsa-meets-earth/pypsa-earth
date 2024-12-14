@@ -511,9 +511,7 @@ Release Process
 
 * Finalise release notes at ``doc/release_notes.rst``.
 
-* Update ``envs/environment.fixed.yaml`` via
-  ``conda env export -n pypsa-earth -f envs/environment.fixed.yaml --no-builds``
-  from an up-to-date `pypsa-earth` environment. Add license note at the top of the new yaml.
+* Make sure thah pinned versions of the environments ``*-pinned.yaml`` in ``envs`` folder are up-to-date.
 
 * Update version number in ``doc/conf.py`` and ``*config.*.yaml``.
 
