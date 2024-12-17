@@ -10,6 +10,7 @@ from pathlib import Path
 import country_converter as coco
 import numpy as np
 import pandas as pd
+from _helpers import BASE_DIR
 
 # from _helpers import configure_logging
 
@@ -77,7 +78,9 @@ if __name__ == "__main__":
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
     if snakemake.params.custom_export:
-        custom_export_path = Path("data", "custom", "export_ports.csv")
+        custom_export_path = Path(BASE_DIR).joinpath(
+            "data", "custom", "export_ports.csv"
+        )
         shutil.copy(custom_export_path, snakemake.output[1])
     else:
 
