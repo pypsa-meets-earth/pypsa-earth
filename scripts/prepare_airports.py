@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
     if snakemake.params.airport_custom_data:
-        custom_airports = Path.joinpath("data", "custom", "airports.csv")
+        custom_airports = Path("data", "custom", "airports.csv")
         shutil.move(custom_airports, snakemake.output[0])
     else:
         # Prepare downloaded data
