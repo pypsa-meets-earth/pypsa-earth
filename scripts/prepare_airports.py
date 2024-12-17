@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     if snakemake.params.airport_custom_data:
         custom_airports = Path("data", "custom", "airports.csv")
-        shutil.move(custom_airports, snakemake.output[0])
+        shutil.copy(custom_airports, snakemake.output[0])
     else:
         # Prepare downloaded data
         download_data = download_airports()

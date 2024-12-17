@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     if snakemake.params.custom_export:
         custom_export_path = Path("data", "custom", "export_ports.csv")
-        shutil.move(custom_export_path, snakemake.output[1])
+        shutil.copy(custom_export_path, snakemake.output[1])
     else:
         filter_ports(ports).to_csv(
             snakemake.output[1], sep=",", encoding="utf-8", header="true"
