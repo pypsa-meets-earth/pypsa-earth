@@ -177,6 +177,76 @@ def load_demand_csv(path):
     return gegis_load
 
 
+import numpy as np
+import pandas as pd
+
+
+def calculate_scale(gegis_load, file_path_temba):
+    """
+    Calcola i fattori di scala per i paesi in base ai dati di domanda di elettricità e altre variabili.
+
+    Parameters:
+    -----------
+    file_path_pypsa : str
+        Percorso al file CSV contenente i dati di PyPSA.
+    file_path_temba : str
+        Percorso al file Excel contenente i dati TEMBA.
+
+    Returns:
+    --------
+    dict
+        Dizionario contenente i paesi come chiavi e i relativi fattori di scala come valori.
+
+    #fulmicotone
+    """
+    # Somma la domanda di elettricità per regione
+    electricity_demand_sum = gegis_load.groupby("region_code")[
+        "Electricity demand"
+    ].sum()
+
+    # Rinomina l'indice 'region_code' in 'Country'
+    electricity_demand_sum.index.name = "Country"
+    print(electricity_demand_sum)
+
+    # Leggi la pagina "SpecifiedAnnualDemand" del file Excel
+    df_temba = pd.read_excel(file_path_temba, sheet_name="SpecifiedAnnualDemand")
+
+    # Rimuovi eventuali spazi all'inizio e alla fine dei nomi delle colonne
+    df_temba.columns = df_temba.columns.astype(str).str.strip()
+
+    # Crea una nuova colonna chiamata 'Country' contenente solo le prime due lettere della colonna 'FUEL'
+    df_temba["Country"] = df_temba["FUEL"].str[:2]
+
+    # Rimuovi la colonna originale 'FUEL'
+    df_temba = df_temba.drop(columns=["FUEL"])
+
+    # Seleziona la colonna 'Country' e la colonna '2030'
+    demand_2030 = df_temba[["Country", "2030"]]
+
+    # Trasforma i dati di '2030' da Pj/anno a MWh/anno (1 Pj = 277.78 GWh = 277780 MWh)
+    demand_2030["2030_MWh"] = demand_2030["2030"] * 277780
+    demand_2030.loc[demand_2030["Country"] == "NM", "Country"] = "NA"
+    print(demand_2030)
+
+    # Unisci i due dataframe sulle colonne 'Country'
+    merged_df = pd.merge(demand_2030, electricity_demand_sum, on="Country", how="inner")
+    print(merged_df)
+
+    # Calcola il rapporto della domanda tra '2030_MWh' e 'Electricity demand'
+    merged_df["scale_country"] = merged_df["2030_MWh"] / merged_df["Electricity demand"]
+
+    # Sostituisci i valori infiniti con NaN
+    merged_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # Crea un dizionario {Country: scale_country}
+    scale = merged_df.set_index("Country")["scale_country"].to_dict()
+
+    print("scale")
+    print(scale)
+
+    return scale
+
+
 def build_demand_profiles(
     n,
     load_paths,
@@ -187,6 +257,7 @@ def build_demand_profiles(
     start_date,
     end_date,
     out_path,
+    file_path_temba,  # fulmicotone
 ):
     """
     Create csv file of electric demand time series.
@@ -216,6 +287,7 @@ def build_demand_profiles(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     load_paths = load_paths
+    file_path_temba = file_path_temba  # fulmicotone
 
     gegis_load_list = []
 
@@ -233,6 +305,10 @@ def build_demand_profiles(
 
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+
+    # fulmicotone
+    # Calcola i fattori di scala
+    scale = calculate_scale(gegis_load, file_path_temba)
 
     if isinstance(scale, dict):
         logger.info(f"Using custom scaling factor for load data.")
@@ -315,6 +391,9 @@ if __name__ == "__main__":
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
+    # fulmicotone
+    file_path_temba = r"C:\Users\Davide\Downloads\temba\TEMBA_SSP1-26.xlsx"
+    # year = 2030
 
     build_demand_profiles(
         n,
@@ -326,4 +405,5 @@ if __name__ == "__main__":
         start_date,
         end_date,
         out_path,
+        file_path_temba,  # fulmicotone
     )
