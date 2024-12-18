@@ -461,6 +461,114 @@ def attach_conventional_generators(
                 # Single value affecting all generators of technology k indiscriminantely of country
                 n.generators.loc[idx, attr] = values
 
+def process_hydropower_data(excel_path, hydro, sheet_name):
+    """
+    Processa i dati del file Excel e li combina con il DataFrame 'hydro'.
+    #fulmicotone
+
+    """
+    
+    # Legge il file Excel dal foglio specifico senza intestazione per debug
+    excel_data = pd.read_excel(excel_path, sheet_name=sheet_name, header=0)
+    
+    # Normalizza i nomi delle colonne
+    excel_data.columns = excel_data.columns.str.lower()
+    hydro.columns = hydro.columns.str.lower()
+
+    # Verifica se 'name' esiste
+    if 'name' not in excel_data.columns:
+        raise KeyError(f"La colonna 'name' non è presente nei dati Excel. Colonne trovate: {list(excel_data.columns)}")
+
+    # Filtra le righe con lo stesso 'name'
+    filtered_excel = excel_data[excel_data['name'].isin(hydro['name'])]
+    
+    print("Nomi presenti in 'hydro' ma mancanti in Excel:")
+    missing_names = hydro['name'][~hydro['name'].isin(excel_data['name'])]
+    print(missing_names)
+
+    # Reindicizza filtered_excel per mantenere lo stesso ordine di hydro
+    hydro_index = hydro.set_index('name').index
+    print("Indici di Hydro:", hydro_index)
+
+    filtered_excel = filtered_excel.set_index('name')
+    print("Indici di Filtered Excel prima del reindex:", filtered_excel.index)
+
+    filtered_excel = filtered_excel.reindex(hydro_index)
+    print("Filtered Excel dopo il reindex:")
+    print(filtered_excel.head())
+
+    # Filtra le colonne del file Excel che non contengono "wet" o "dry"
+    excel_columns_to_keep = [
+        col for col in filtered_excel.columns 
+        if 'wet' not in col.lower() and 'dry' not in col.lower()
+    ]
+
+    # Mantieni solo le colonne desiderate e rimuovi le colonne di hydro
+    final_data = filtered_excel[excel_columns_to_keep]
+    
+    return final_data
+
+def create_time_series(final_data, hydro):
+    """
+    Crea una serie temporale di 8760 valori per ogni riga di final_data basata
+    sui fattori di capacità mensili.
+    
+    Args:
+        final_data (pd.DataFrame): DataFrame con le colonne `*_capacity_factor_normal`
+                                   per i 12 mesi.
+    
+    Returns:
+        pd.DataFrame: DataFrame con una serie temporale di 8760 valori per ogni riga di final_data.
+    
+    #fulmicotone
+    """
+    # Ordina final_data nello stesso ordine di hydro.index
+    #final_data = final_data.loc[hydro.index]
+    
+    # Giorni per mese in un anno normale
+    days_in_month = {
+        "January": 31,
+        "February": 28,
+        "March": 31,
+        "April": 30,
+        "May": 31,
+        "June": 30,
+        "July": 31,
+        "August": 31,
+        "September": 30,
+        "October": 31,
+        "November": 30,
+        "December": 31
+    }
+
+    # Colonne dei fattori di capacità mensili in final_data
+    monthly_columns = [f"{month.lower()}_capacity_factor_normal" for month in days_in_month.keys()]
+
+    # Controlla che tutte le colonne esistano in final_data
+    missing_columns = [col for col in monthly_columns if col not in final_data.columns]
+    if missing_columns:
+        raise ValueError(f"Le seguenti colonne mancano in final_data: {missing_columns}")
+
+    # Crea la serie temporale
+    time_series_data = []
+    for _, row in final_data.iterrows():
+        row_series = []
+        for month, days in days_in_month.items():
+            col_name = f"{month.lower()}_capacity_factor_normal"
+            value = row[col_name]
+            # Ripeti il valore per il numero di ore nel mese
+            row_series.extend([value] * (days * 24))
+        time_series_data.append(row_series)
+
+    # Crea un DataFrame con le serie temporali
+    time_series_array = np.array(time_series_data)  # Forma: (n_bus, 8760)
+    time_index = pd.date_range(start="2013-01-01", periods=8760, freq="H")
+    p_max_pu_df = pd.DataFrame(
+    data=time_series_array.T,  # Array bidimensionale: una riga per ogni bus
+    columns=hydro.index,  # Nome dei bus dall'indice di hydro
+    index=time_index  # Indice temporale
+ )
+    return p_max_pu_df
 
 def attach_hydro(n, costs, ppl):
     if "hydro" not in snakemake.params.renewable:
@@ -484,6 +592,9 @@ def attach_hydro(n, costs, ppl):
             "Initialized to 'Run-Of-River'"
         )
         ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
+        
+    # Modifica specifica per la centrale 'Inga'
+    #ppl.loc[ppl['name'] == "Inga", "technology"] = "Run-Of-River"
 
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
@@ -518,7 +629,7 @@ def attach_hydro(n, costs, ppl):
                 loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
 
                 logger.warning(
-                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(map(str, missing_plants))}."
                     f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
                 )
 
@@ -540,8 +651,25 @@ def attach_hydro(n, costs, ppl):
                     .to_pandas()
                     * hydro_inflow_factor
                 )
+    
+    #fulmicotone            
+    excel_path = r"C:\Users\Davide\pypsa-earth-project\pypsa-earth\data\African_Hydropower_Atlas_v2-0_PoliTechM.xlsx" 
+    sheet_name = "4b - HydrofleetAll SSP1-RCP26"
+    result_ror = process_hydropower_data(excel_path, ror, sheet_name)
+    # Mostra il risultato
+    print(result_ror)
+    p_max_pu_ror = create_time_series(result_ror, ror)
+    print(p_max_pu_ror.shape)  # (numero_di_righe_di_final_data, 8760)
+    print(p_max_pu_ror.head())  # Anteprima dei dati
 
     if "ror" in carriers and not ror.empty:
+        #fulmicotone
+        p_max_pu=(inflow_t[ror.index].divide(ror["p_nom"], axis=1).where(lambda df: df <= 1.0, other=1.0))
+        # Sostituisci i NaN di p_max_pu_ror con i valori corrispondenti di p_max_pu
+        p_max_pu_ror_filled = p_max_pu_ror.fillna(p_max_pu)
+        # Stampa il risultato per verificare
+        print(p_max_pu_ror_filled.head())
+
         n.madd(
             "Generator",
             ror.index,
@@ -551,12 +679,8 @@ def attach_hydro(n, costs, ppl):
             efficiency=costs.at["ror", "efficiency"],
             capital_cost=costs.at["ror", "capital_cost"],
             weight=ror["p_nom"],
-            p_max_pu=(
-                inflow_t[ror.index]
-                .divide(ror["p_nom"], axis=1)
-                .where(lambda df: df <= 1.0, other=1.0)
-            ),
-        )
+            p_max_pu = p_max_pu_ror_filled #fulmicotone
+        )   
 
     if "PHS" in carriers and not phs.empty:
         # fill missing max hours to config value and
@@ -574,7 +698,80 @@ def attach_hydro(n, costs, ppl):
             efficiency_dispatch=np.sqrt(costs.at["PHS", "efficiency"]),
             cyclic_state_of_charge=True,
         )
+    if "hydro" in carriers and not hydro.empty:
 
+      hydro_max_hours = c.get("hydro_max_hours")
+      hydro_stats = (
+        pd.read_csv(
+            snakemake.input.hydro_capacities,
+            comment="#",
+            na_values=["-"],
+            index_col=0,
+        )
+        .groupby("Country")
+        .sum()
+        )
+      e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
+      e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
+      e_missing = e_target - e_installed
+      missing_mh_i = hydro.query("max_hours.isnull()").index
+
+      if hydro_max_hours == "energy_capacity_totals_by_country":
+        max_hours_country = (
+            e_missing / hydro.loc[missing_mh_i].groupby("country").p_nom.sum()
+        )
+
+      elif hydro_max_hours == "estimate_by_large_installations":
+        max_hours_country = (
+            hydro_stats["E_store[TWh]"] * 1e3 / hydro_stats["p_nom_discharge[GW]"]
+        )
+      
+      max_hours_country.clip(lower=0, inplace=True)  
+
+      missing_countries = pd.Index(hydro["country"].unique()).difference(
+        max_hours_country.dropna().index
+      )
+      if not missing_countries.empty:
+        logger.warning(
+            "Assuming max_hours=6 for hydro reservoirs in the countries: {}".format(
+                ", ".join(missing_countries)
+            )
+        )
+      hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
+      hydro_max_hours = hydro.max_hours.where(
+        hydro.max_hours > 0, hydro.country.map(max_hours_country)
+      ).fillna(hydro_max_hours_default)
+      
+      #fulmicotone
+      result = process_hydropower_data(excel_path, hydro, sheet_name)
+      # Mostra il risultato
+      print(result)
+      p_max_pu_df = create_time_series(result, hydro)
+      print(p_max_pu_df.shape)  # (numero_di_righe_di_final_data, 8760)
+      print(p_max_pu_df.head())  # Anteprima dei dati
+      
+      n.madd(
+        "StorageUnit",
+        hydro.index,
+        carrier="hydro",
+        bus=hydro["bus"],
+        p_nom=hydro["p_nom"],
+        max_hours=hydro_max_hours,
+        capital_cost=(
+            costs.at["hydro", "capital_cost"]
+            if c.get("hydro_capital_cost")
+            else 0.0
+        ),
+        marginal_cost=costs.at["hydro", "marginal_cost"],
+        p_max_pu=p_max_pu_df,  # dispatch #fulmicotone
+        p_min_pu=0.0,  # store
+        efficiency_dispatch=costs.at["hydro", "efficiency"],
+        efficiency_store=0.0,
+        cyclic_state_of_charge=True,
+        inflow=inflow_t.loc[:, hydro.index],
+    )
+
+'''
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = (
@@ -638,6 +835,7 @@ def attach_hydro(n, costs, ppl):
             cyclic_state_of_charge=True,
             inflow=inflow_t.loc[:, hydro.index],
         )
+'''
 
 
 def attach_extendable_generators(n, costs, ppl):
@@ -899,3 +1097,5 @@ if __name__ == "__main__":
 
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])
+    
+    
