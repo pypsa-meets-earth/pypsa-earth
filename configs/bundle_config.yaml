@@ -82,55 +82,55 @@ databundles:
     output:
     - data/hydrobasins/hybas_world.shp
 
-  # tutorial bundle specific for Nigeria and Benin only
-  bundle_cutouts_tutorial_NGBJ:
-    countries: [NG, BJ]
-    tutorial: true
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
-      gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
-    output: [cutouts/cutout-2013-era5-tutorial.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # tutorial bundle specific for Botswana only
-  bundle_cutouts_tutorial_BW:
-    countries: [BW]
-    tutorial: true
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_BW.zip?download=1
-      gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
-    output: [cutouts/cutout-2013-era5-tutorial.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # tutorial bundle specific for Morocco only
-  bundle_cutouts_tutorial_MA:
-    countries: [MA]
-    tutorial: true
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
-    output: [cutouts/cutout-2013-era5-tutorial.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # Cutout of Kazakhstan for CI test of pypsa-kz-data repo, only 5 MB
-  bundle_cutouts_test_KZ:
-    countries: [KZ]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      zenodo: https://sandbox.zenodo.org/records/69756/files/bundle_tutorial_cutouts_KZ.zip?download=1
-    output: [cutouts/cutout-2013-era5-tutorial.nc]
-    disable_by_opt:
-      build_cutout: [all]
+#  # tutorial bundle specific for Nigeria and Benin only
+#  bundle_cutouts_tutorial_NGBJ:
+#    countries: [NG, BJ]
+#    tutorial: true
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
+#      gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
+#    output: [cutouts/cutout-2013-era5-tutorial.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # tutorial bundle specific for Botswana only
+#  bundle_cutouts_tutorial_BW:
+#    countries: [BW]
+#    tutorial: true
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_BW.zip?download=1
+#      gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
+#    output: [cutouts/cutout-2013-era5-tutorial.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # tutorial bundle specific for Morocco only
+#  bundle_cutouts_tutorial_MA:
+#    countries: [MA]
+#    tutorial: true
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_MA.zip?download=1
+#      gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
+#    output: [cutouts/cutout-2013-era5-tutorial.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # Cutout of Kazakhstan for CI test of pypsa-kz-data repo, only 5 MB
+#  bundle_cutouts_test_KZ:
+#    countries: [KZ]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      zenodo: https://sandbox.zenodo.org/records/69756/files/bundle_tutorial_cutouts_KZ.zip?download=1
+#    output: [cutouts/cutout-2013-era5-tutorial.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
 
   # tutorial bundle for all African countries
   bundle_tutorial_data_common:
@@ -229,18 +229,18 @@ databundles:
   #       agree: 1
   #   output: [data/gebco/GEBCO_2021_TID.nc]
 
-  # cutouts bundle of the cutouts folder for the mainland African continent
-  # Note: some offshore countries e.g. CV or SC are not covered. Size: about 10GB (zipped)
-  bundle_cutouts_mainland_africa:
-    countries: [Africa]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_cutouts_africa.zip?download=1
-      gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
+#  # cutouts bundle of the cutouts folder for the mainland African continent
+#  # Note: some offshore countries e.g. CV or SC are not covered. Size: about 10GB (zipped)
+#  bundle_cutouts_mainland_africa:
+#    countries: [Africa]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_cutouts_africa.zip?download=1
+#      gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
 
   # # cutouts bundle of the cutouts folder for the whole African continent,
   # # including UN countries offshore mainland Africa. Size about 20GB (zipped)
@@ -255,106 +255,106 @@ databundles:
   #   disable_by_opt:
   #     build_cutout: [all]
 
-  # cutouts bundle of the cutouts folder for the North American continent
-  # Coordinate bounds: [long -172 to -47, lat 1.5-74]
-  # Size about 25 GB (zipped)
-  bundle_cutouts_northamerica:
-    countries: [NorthAmerica]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      gdrive: https://drive.google.com/file/d/1W0rEa7SrAUjqREycKSbl1dkylj_-xmpT/view?usp=drive_link
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # cutouts bundle of the cutouts folder for the European continent
-  # Coordinate bounds: [long -32 to 60, lat 1.5-74]
-  # Size about 17 GB (zipped)
-  bundle_cutouts_europe:
-    countries: [Europe]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      gdrive: https://drive.google.com/file/d/17QS7qkuCiyj95Pr-ZQRl3qgp5CQE6HTy/view?usp=drive_link
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # cutouts bundle of the cutouts folder for Oceania continent
-  # Coordinate bounds: [min_x = 80, max_x = 180.0, min_y = -50, max_y = 20.]
-  # Size about 19 GB (zipped)
-  bundle_cutouts_oceania:
-    countries: [Oceania]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # cutouts bundle of the cutouts folder for the northern hemisphere
-  # Note: this includes nearly the entire northern emisphere [long +-180, lat 1-85]. Size about 81GB (zipped)
-  #bundle_cutouts_northern_hemisphere:
-  #  countries: [NorthAmerica, Europe]
-  #  category: cutouts
-  #  destination: "cutouts"
-  #  urls:
-  #    gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
-  #  output: [cutouts/cutout-2013-era5.nc]
-  #  disable_by_opt:
-  #    build_cutout: [all]
-
-  # cutouts bundle of the cutouts folder for the Asian continent, except Russia
-  # Size about 30GB (zipped)
-  bundle_cutouts_asia:
-    countries: ["KVR", "WAS", "FEAR", "SEAR", "CASR", "SASR", "ASEAN", "MEAR"]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      # zenodo:
-      gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # # cutouts bundle of the cutouts folder for the entire globe [long +-180, lat +-89.9]
-  # # commented by default to avoid downloading by mistake. Size about 170GB (zipped)
-  # bundle_cutouts_earth:
-  #   countries: [Earth]
-  #   category: cutouts
-  #   destination: "cutouts"
-  #   urls:
-  #     # zenodo:
-  #     gdrive: https://drive.google.com/file/d/1C9Q5qU_Wu_gj78H5G3TT2thGA-hKheVf/view?usp=drive_link
-  #   output: [cutouts/cutout-2013-era5.nc]
-  #   disable_by_opt:
-  #     build_cutout: [all]
-
-  # Cutout for South America, approx 18 GB
-  bundle_cutouts_southamerica:
-    countries: [SouthAmerica]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      # zenodo:
-      gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
-
-  # cutouts bundle of the cutouts folder for Western Asia
-  # Size about 3.8 GB (zipped)
-  bundle_cutouts_westernasia:
-    countries: [WAS]
-    category: cutouts
-    destination: "cutouts"
-    urls:
-      gdrive: https://drive.google.com/file/d/1as-fZS4Z70CfDf3bR4i9t9S5-5pBqURP/view?usp=sharing
-    output: [cutouts/cutout-2013-era5.nc]
-    disable_by_opt:
-      build_cutout: [all]
+#  # cutouts bundle of the cutouts folder for the North American continent
+#  # Coordinate bounds: [long -172 to -47, lat 1.5-74]
+#  # Size about 25 GB (zipped)
+#  bundle_cutouts_northamerica:
+#    countries: [NorthAmerica]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      gdrive: https://drive.google.com/file/d/1W0rEa7SrAUjqREycKSbl1dkylj_-xmpT/view?usp=drive_link
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # cutouts bundle of the cutouts folder for the European continent
+#  # Coordinate bounds: [long -32 to 60, lat 1.5-74]
+#  # Size about 17 GB (zipped)
+#  bundle_cutouts_europe:
+#    countries: [Europe]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      gdrive: https://drive.google.com/file/d/17QS7qkuCiyj95Pr-ZQRl3qgp5CQE6HTy/view?usp=drive_link
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # cutouts bundle of the cutouts folder for Oceania continent
+#  # Coordinate bounds: [min_x = 80, max_x = 180.0, min_y = -50, max_y = 20.]
+#  # Size about 19 GB (zipped)
+#  bundle_cutouts_oceania:
+#    countries: [Oceania]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # cutouts bundle of the cutouts folder for the northern hemisphere
+#  # Note: this includes nearly the entire northern emisphere [long +-180, lat 1-85]. Size about 81GB (zipped)
+#  #bundle_cutouts_northern_hemisphere:
+#  #  countries: [NorthAmerica, Europe]
+#  #  category: cutouts
+#  #  destination: "cutouts"
+#  #  urls:
+#  #    gdrive: https://drive.google.com/file/d/1Ew7rQT0VNBqJW1AUrOrOP2IJKSJS7Uoy/view?usp=sharing
+#  #  output: [cutouts/cutout-2013-era5.nc]
+#  #  disable_by_opt:
+#  #    build_cutout: [all]
+#
+#  # cutouts bundle of the cutouts folder for the Asian continent, except Russia
+#  # Size about 30GB (zipped)
+#  bundle_cutouts_asia:
+#    countries: ["KVR", "WAS", "FEAR", "SEAR", "CASR", "SASR", "ASEAN", "MEAR"]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      # zenodo:
+#      gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # # cutouts bundle of the cutouts folder for the entire globe [long +-180, lat +-89.9]
+#  # # commented by default to avoid downloading by mistake. Size about 170GB (zipped)
+#  # bundle_cutouts_earth:
+#  #   countries: [Earth]
+#  #   category: cutouts
+#  #   destination: "cutouts"
+#  #   urls:
+#  #     # zenodo:
+#  #     gdrive: https://drive.google.com/file/d/1C9Q5qU_Wu_gj78H5G3TT2thGA-hKheVf/view?usp=drive_link
+#  #   output: [cutouts/cutout-2013-era5.nc]
+#  #   disable_by_opt:
+#  #     build_cutout: [all]
+#
+#  # Cutout for South America, approx 18 GB
+#  bundle_cutouts_southamerica:
+#    countries: [SouthAmerica]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      # zenodo:
+#      gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
+#
+#  # cutouts bundle of the cutouts folder for Western Asia
+#  # Size about 3.8 GB (zipped)
+#  bundle_cutouts_westernasia:
+#    countries: [WAS]
+#    category: cutouts
+#    destination: "cutouts"
+#    urls:
+#      gdrive: https://drive.google.com/file/d/1as-fZS4Z70CfDf3bR4i9t9S5-5pBqURP/view?usp=sharing
+#    output: [cutouts/cutout-2013-era5.nc]
+#    disable_by_opt:
+#      build_cutout: [all]
 
   # data bundle containing the protected data for the whole world
   bundle_landcover_earth:
