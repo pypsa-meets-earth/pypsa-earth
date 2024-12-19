@@ -82,6 +82,8 @@ PyPSA-Earth 0.5.0
 
 * Fix the environment placing a version limit to numpoly `PR #1237 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1237>`_
 
+* Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`_
+
 PyPSA-Earth 0.4.1
 =================
 
