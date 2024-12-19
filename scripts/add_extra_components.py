@@ -264,25 +264,24 @@ def attach_hydrogen_pipelines(n, costs, config):
         carrier="H2 pipeline",
     )
 
-    # TODO: when using the lossy_bidirectional_links fix, move this line AFTER lossy_bidirectional_links()
+    # TODO: when using the lossy_bidirectional_links fix, move this line AFTER lossy_bidirectional_links() 
     # set the pipelines's efficiency
-    set_length_based_efficiency(n, "H2 pipeline", " H2", config)
+    set_length_based_efficiency(n, "H2 pipeline", " H2",config)
 
 
-def set_length_based_efficiency(
-    n: pypsa.components.Network, carrier: str, bus_suffix: str, config: dict
-) -> None:
-    """
+def set_length_based_efficiency(n: pypsa.components.Network, carrier: str, bus_suffix: str, config: dict) -> None:
+
+    '''
     Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
     Additionally add the length based electricity demand, required for compression (if applicable).
-    """
+    '''
 
     # get the links length based efficiency and required compression
     efficiencies = config["sector"]["transmission_efficiency"][carrier]
     efficiency_static = efficiencies.get("efficiency_static", 1)
     efficiency_per_1000km = efficiencies.get("efficiency_per_1000km", 1)
     compression_per_1000km = efficiencies.get("compression_per_1000km", 0)
-
+ 
     # indetify all links of type carrier
     carrier_i = n.links.loc[n.links.carrier == carrier].index
 
@@ -294,19 +293,15 @@ def set_length_based_efficiency(
 
     # set the links's electricity demand for compression
     if compression_per_1000km > 0:
-        n.links.loc[carrier_i, "bus2"] = n.links.loc[
-            carrier_i, "bus0"
-        ].str.removesuffix(bus_suffix)
+        n.links.loc[carrier_i, "bus2"] = n.links.loc[carrier_i, "bus0"].str.removesuffix(bus_suffix)
         # TODO: use these lines to set bus 2 instead, once n.buses.location is functional and remove bus_suffix.
-        """
+        '''
         n.links.loc[carrier_i, "bus2"] = n.links.loc[carrier_i, "bus0"].map(
             n.buses.location
         )  # electricity
-        """
+        '''
         n.links.loc[carrier_i, "efficiency2"] = (
-            -compression_per_1000km
-            * n.links.loc[carrier_i, "length"]
-            / 1e3  # TODO: change to length_original when using the lossy_bidirectional_links fix
+            -compression_per_1000km * n.links.loc[carrier_i, "length"] / 1e3 # TODO: change to length_original when using the lossy_bidirectional_links fix
         )
 
 
