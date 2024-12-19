@@ -6,9 +6,10 @@ version: 0.5.0
 tutorial: true
 
 
-countries: ["NG", "BJ"]
+countries: ["NG"]
 
 enable:
+  retrieve_databundle: true
   build_natura_raster: true
   progress_bar: false
 
