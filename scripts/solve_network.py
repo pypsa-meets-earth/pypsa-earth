@@ -477,6 +477,17 @@ def add_battery_constraints(n):
 
 
 def add_RES_constraints(n, res_share, config):
+    """
+    The constraint ensures that a predefined share of power is generated
+    by renewable sources
+
+    Parameters
+    ----------
+        n : pypsa.Network
+        res_share: float
+        config : dict
+    """
+
     logger.warning(
         "The add_RES_constraints() is still work in progress. "
         "Unexpected results might be incurred, particularly if "
