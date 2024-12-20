@@ -349,7 +349,7 @@ def add_SAFE_constraints(n, config):
     p_nom = n.model["Generator-p_nom"].loc[ext_gens_i]
     lhs = p_nom.sum()
     exist_conv_caps = n.generators.query(
-        "~p_nom_extendable & carrier in @entional_carriers"
+        "~p_nom_extendable & carrier in @conventional_carriers"
     ).p_nom.sum()
     rhs = reserve_margin - exist_conv_caps
     n.model.add_constraints(lhs >= rhs, name="safe_mintotalcap")
