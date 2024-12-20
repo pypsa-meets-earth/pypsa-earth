@@ -281,6 +281,19 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # cutouts bundle of the cutouts folder for Oceania continent
+  # Coordinate bounds: [min_x = 80, max_x = 180.0, min_y = -50, max_y = 20.]
+  # Size about 19 GB (zipped)
+  bundle_cutouts_oceania:
+    countries: [Oceania]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
   # cutouts bundle of the cutouts folder for the northern hemisphere
   # Note: this includes nearly the entire northern emisphere [long +-180, lat 1-85]. Size about 81GB (zipped)
   #bundle_cutouts_northern_hemisphere:
