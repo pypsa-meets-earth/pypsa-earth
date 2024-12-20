@@ -3,8 +3,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+import shutil
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+from _helpers import BASE_DIR
 
 # from _helpers import configure_logging
 
@@ -36,52 +40,10 @@ def download_airports():
     return (airports_csv, runways_csv)
 
 
-if __name__ == "__main__":
-    if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        snakemake = mock_snakemake("prepare_airports")
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
-
-    # Prepare downloaded data
-    airports_csv = download_airports()[0].copy()
-    airports_csv = airports_csv[
-        [
-            "ident",
-            "type",
-            "name",
-            "latitude_deg",
-            "longitude_deg",
-            "elevation_ft",
-            "continent",
-            "iso_country",
-            "iso_region",
-            "municipality",
-            "scheduled_service",
-            "iata_code",
-        ]
-    ]
-    airports_csv.loc[airports_csv["iso_country"].isnull(), "iso_country"] = "NA"
-    airports_csv = airports_csv.rename(columns={"latitude_deg": "y"})
-    airports_csv = airports_csv.rename(columns={"longitude_deg": "x"})
-
-    runways_csv = download_airports()[1].copy()
-    runways_csv = runways_csv[
-        ["airport_ident", "length_ft", "width_ft", "surface", "lighted", "closed"]
-    ]
-    runways_csv = runways_csv.drop_duplicates(subset=["airport_ident"])
-
-    airports_original = pd.merge(
-        airports_csv, runways_csv, how="left", left_on="ident", right_on="airport_ident"
-    )
-    airports_original = airports_original.drop("airport_ident", axis=1)
-
-    df = airports_original.copy()
+def preprocess_airports(df):
+    """
+    Preprocess the airports data
+    """
 
     # Keep only airports that are of type medium and large
     df = df.loc[df["type"].isin(["large_airport", "medium_airport"])]
@@ -117,5 +79,67 @@ if __name__ == "__main__":
     # Rename columns
     airports = airports.rename(columns={"iso_country": "country"})
 
-    # Save
-    airports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
+    return airports
+
+
+if __name__ == "__main__":
+    if "snakemake" not in globals():
+        from _helpers import mock_snakemake
+
+        snakemake = mock_snakemake("prepare_airports")
+    # configure_logging(snakemake)
+
+    # run = snakemake.config.get("run", {})
+    # RDIR = run["name"] + "/" if run.get("name") else ""
+    # store_path_data = Path.joinpath(Path().cwd(), "data")
+    # country_list = country_list_to_geofk(snakemake.config["countries"])'
+
+    if snakemake.params.airport_custom_data:
+        custom_airports = Path(BASE_DIR).joinpath("data", "custom", "airports.csv")
+        shutil.copy(custom_airports, snakemake.output[0])
+    else:
+        # Prepare downloaded data
+        download_data = download_airports()
+
+        airports_csv = download_data[0].copy()
+        airports_csv = airports_csv[
+            [
+                "ident",
+                "type",
+                "name",
+                "latitude_deg",
+                "longitude_deg",
+                "elevation_ft",
+                "continent",
+                "iso_country",
+                "iso_region",
+                "municipality",
+                "scheduled_service",
+                "iata_code",
+            ]
+        ]
+        airports_csv.loc[airports_csv["iso_country"].isnull(), "iso_country"] = "NA"
+        airports_csv = airports_csv.rename(columns={"latitude_deg": "y"})
+        airports_csv = airports_csv.rename(columns={"longitude_deg": "x"})
+
+        runways_csv = download_data[1].copy()
+        runways_csv = runways_csv[
+            ["airport_ident", "length_ft", "width_ft", "surface", "lighted", "closed"]
+        ]
+        runways_csv = runways_csv.drop_duplicates(subset=["airport_ident"])
+
+        airports_original = pd.merge(
+            airports_csv,
+            runways_csv,
+            how="left",
+            left_on="ident",
+            right_on="airport_ident",
+        )
+        airports_original = airports_original.drop("airport_ident", axis=1)
+
+        df = airports_original.copy()
+
+        airports = preprocess_airports(df)
+
+        # Save
+        airports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")

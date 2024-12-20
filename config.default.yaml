@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.4.2
+version: 0.5.0
 tutorial: false
 
 logging:
@@ -107,6 +107,7 @@ cluster_options:
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  simplify_gadm: true # When true, shape polygons are simplified else no
   update_file: false # When true, all the input files are downloaded again and replace the existing files
   out_logging: true # When true, logging is printed to console
   year: 2020 # reference year used to derive shapes, info on population and info on GDP
@@ -481,6 +482,7 @@ custom_data:
   custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
   export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
+  airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.
 
 industry:
   reference_year: 2015
@@ -593,6 +595,13 @@ sector:
   efficiency_heat_oil_to_elec: 0.9
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
+
+  electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
+  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
+  transmission_efficiency:
+    electricity distribution grid:
+      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
 
   dynamic_transport:
     enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")

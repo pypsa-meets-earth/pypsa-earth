@@ -32,6 +32,8 @@ dependencies:
 - pytables
 - lxml
 - numpy
+# starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
+- numpoly<=1.3.4
 - pandas
 - geopandas>=0.11.0, <=0.14.3
 - fiona<1.10.0
@@ -84,7 +86,7 @@ dependencies:
 - gurobi
 
 - pip:
-  - earth-osm>=2.2 # until conda release it out for earth-osm
+  - earth-osm==2.2 # until conda release it out for earth-osm
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
