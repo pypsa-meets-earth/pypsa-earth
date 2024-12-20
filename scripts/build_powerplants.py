@@ -300,7 +300,7 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    with open(snakemake.input.pm_config, "r") as f:
+    with open(snakemake.input.pm_config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     filepath_osm_ppl = snakemake.input.osm_powerplants
