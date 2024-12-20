@@ -15,6 +15,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`__
 
+* Implement changes in processing network topology to use the updated PyPSA version. `PR #1065 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1065>`__
 
 **Minor Changes and bug-fixing**
 
@@ -115,7 +116,6 @@ PyPSA-Earth 0.4.0
 
 * Add an option to use csv format for custom demand imports. `PR #995 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/995>`__
 
-* Implement changes in processing network topology to use the updated PyPSA version. `PR #1065 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1065>`__
 
 **Minor Changes and bug-fixing**
 
