@@ -13,6 +13,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add wikipedia source to transport_data `PR #1244 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1244>`__
 
 **Minor Changes and bug-fixing**
 
