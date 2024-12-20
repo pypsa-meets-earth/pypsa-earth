@@ -15,6 +15,10 @@ from _helpers import BASE_DIR
 logger = logging.getLogger(__name__)
 
 def _add_iso2_code_per_country_and_clean_data(df):
+    """
+    Converts 'Country' names to ISO2 codes in a new 'country' column.
+    Cleans DataFrame by removing rows with invalid 'country' values.
+    """
     
     cc = coco.CountryConverter()
     df["country"] = cc.pandas_convert(
@@ -24,8 +28,6 @@ def _add_iso2_code_per_country_and_clean_data(df):
     
     # Drop region names where country column contains list of countries
     df = df[df.country.apply(lambda x: isinstance(x, str))]
-    
-    df = df.drop_duplicates(subset=["country"])
     
     return df
 
@@ -70,18 +72,20 @@ def download_number_of_vehicles():
         nbr_vehicles = pd.concat([_download_vehicles_data_from_gho(),
                                   _download_vehicles_data_from_wiki()],
                                  ignore_index=True)
-        
-        nbr_vehicles["number cars"] = nbr_vehicles["number cars"].astype(int)
-    
-        nbr_vehicles = _add_iso2_code_per_country_and_clean_data(nbr_vehicles)
-
-        return nbr_vehicles
-    
     except Exception as e:
         logger.warning("Failed to read the file:", e,
                        "\nReturning an empty df and falling back on the hard-coded data.")
         return pd.DataFrame()
+    
+    nbr_vehicles["number cars"] = nbr_vehicles["number cars"].astype(int)
 
+    nbr_vehicles = _add_iso2_code_per_country_and_clean_data(nbr_vehicles)
+
+    # Drops duplicates and keeps WHO-GHO data in case of duplicates
+    nbr_vehicles = nbr_vehicles.drop_duplicates(subset=["country"],keep="first")
+
+    return nbr_vehicles
+    
 
 def download_CO2_emissions():
     """
@@ -91,39 +95,40 @@ def download_CO2_emissions():
     It is until the year 2014. # TODO: Maybe search for more recent years.
     """
     
+    url = (
+        "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+    )
+
+    # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
-        url = (
-            "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
-        )
-        
         CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
-        
-        CO2_emissions = CO2_emissions[
-            ["Country Name", "Country Code", "Indicator Name", "2014"]
-        ]
-
-        # Calculate efficiency based on CO2 emissions from transport (% of total fuel combustion)
-        CO2_emissions["average fuel efficiency"] = (100 - CO2_emissions["2014"]) / 100
-        
-        CO2_emissions = CO2_emissions.dropna(subset=["average fuel efficiency"])
-
-        CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
-
-        CO2_emissions = _add_iso2_code_per_country_and_clean_data(CO2_emissions)
-        
-        CO2_emissions["average fuel efficiency"] = CO2_emissions[
-            "average fuel efficiency"
-        ].astype(float)
-
-        CO2_emissions.loc[:, "average fuel efficiency"] = CO2_emissions[
-            "average fuel efficiency"
-        ].round(3)
-
-        return CO2_emissions[['country', 'average fuel efficiency']]
-    
+        print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file:", e)
+        print("Failed to read the file:", e)
         return pd.DataFrame()
+
+    CO2_emissions = CO2_emissions[
+        ["Country Name", "Country Code", "Indicator Name", "2014"]
+    ]
+
+    # Calculate efficiency based on CO2 emissions from transport (% of total fuel combustion)
+    CO2_emissions["average fuel efficiency"] = (100 - CO2_emissions["2014"]) / 100
+    
+    CO2_emissions = CO2_emissions.dropna(subset=["average fuel efficiency"])
+
+    CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
+
+    CO2_emissions = _add_iso2_code_per_country_and_clean_data(CO2_emissions)
+    
+    CO2_emissions["average fuel efficiency"] = CO2_emissions[
+        "average fuel efficiency"
+    ].astype(float)
+
+    CO2_emissions.loc[:, "average fuel efficiency"] = CO2_emissions[
+        "average fuel efficiency"
+    ].round(3)
+
+    return CO2_emissions[['country', 'average fuel efficiency']]
 
 
 
