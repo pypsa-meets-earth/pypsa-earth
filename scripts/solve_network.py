@@ -266,7 +266,9 @@ def add_EQ_constraints(n, o, scaling=1e-1):
         .sum()
         .sum("snapshot")
     )
-    # TODO: double check that this is really needed, why do have to subtract the spillage
+    # the current formulation implies that the available hydro power is (inflow - spillage)
+    # it implies efficiency_dispatch is 1 which is not quite general
+    # see https://github.com/pypsa-meets-earth/pypsa-earth/issues/1245 for possible improvements
     if not n.storage_units_t.inflow.empty:
         spillage_variable = n.model["StorageUnit-spill"]
         lhs_spill = (
@@ -1053,7 +1055,6 @@ if __name__ == "__main__":
     else:
         n = pypsa.Network(snakemake.input.network)
 
-    # TODO Double-check handling the augmented case
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
             snakemake.params.augmented_line_connection.get("min_expansion")
