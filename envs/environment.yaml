@@ -17,11 +17,11 @@ dependencies:
 - dask
 # currently the packages are being installed with pip
 # need to move back to conda once the issues will be resolved
-# - powerplantmatching
+- powerplantmatching>=0.5.19
 # - earth-osm>=2.1
 # until the release will incorporate all the fixes needed
 # to work with CDS beta
-# - atlite
+- atlite>=0.3
 
   # Dependencies of the workflow itself
 - xlrd
@@ -34,6 +34,8 @@ dependencies:
 - pyscipopt # added to compy with the quadratic objective requirement of the clustering script
 - lxml
 - numpy
+# starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
+- numpoly<=1.3.4
 - pandas
 - geopandas>=0.11.0, <=0.14.3
 - fiona<1.10.0
@@ -86,11 +88,7 @@ dependencies:
 
 - pip:
   - earth-osm>=2.2 # until conda release it out for earth-osm
-  - powerplantmatching>=0.5.19 # until conda release it out for powerplantmatching
-  - git+https://github.com/pypsa/atlite@master
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
-  - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
-  - git+https://github.com/vincentarelbundock/pycountrycode@main # until the fix will be available via https://github.com/vincentarelbundock/pycountrycode/pull/13
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent

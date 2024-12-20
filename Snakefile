@@ -1004,8 +1004,11 @@ rule solve_sector_networks:
 
 
 rule prepare_ports:
+    params:
+        custom_export=config["custom_data"]["export_ports"],
     output:
         ports="data/ports.csv",  # TODO move from data to resources
+        export_ports="resources/" + SECDIR + "export_ports.csv",
     script:
         "scripts/prepare_ports.py"
 
@@ -1013,6 +1016,7 @@ rule prepare_ports:
 rule prepare_airports:
     params:
         airport_sizing_factor=config["sector"]["airport_sizing_factor"],
+        airport_custom_data=config["custom_data"]["airports"],
     output:
         ports="data/airports.csv",  # TODO move from data to resources
     script:
@@ -1155,11 +1159,13 @@ rule add_export:
         store=config["export"]["store"],
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
+        export_endogenous=config["export"]["endogenous"],
+        endogenous_price=config["export"]["endogenous_price"],
         snapshots=config["snapshots"],
         costs=config["costs"],
     input:
         overrides="data/override_component_attrs",
-        export_ports="data/export_ports.csv",
+        export_ports="resources/" + SECDIR + "export_ports.csv",
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR

@@ -24,7 +24,6 @@ import yaml
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
 from shapely.geometry import Point
-from vresutils.costdata import annuity
 
 logger = logging.getLogger(__name__)
 
@@ -933,6 +932,21 @@ def update_config_dictionary(
 
 
 # PYPSA-EARTH-SEC
+def annuity(n, r):
+    """
+    Calculate the annuity factor for an asset with lifetime n years and.
+
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    """
+
+    if isinstance(r, pd.Series):
+        return pd.Series(1 / n, index=r.index).where(
+            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
+        )
+    elif r > 0:
+        return r / (1.0 - 1.0 / (1.0 + r) ** n)
+    else:
+        return 1 / n
 
 
 def prepare_costs(
