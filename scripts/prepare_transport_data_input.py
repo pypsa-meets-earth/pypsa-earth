@@ -14,60 +14,71 @@ from _helpers import BASE_DIR
 
 logger = logging.getLogger(__name__)
 
+
 def _add_iso2_code_per_country_and_clean_data(df):
     """
     Converts 'Country' names to ISO2 codes in a new 'country' column.
     Cleans DataFrame by removing rows with invalid 'country' values.
     """
-    
+
     cc = coco.CountryConverter()
     df["country"] = cc.pandas_convert(
-        series=pd.Series(df["Country"]), to="ISO2", not_found="not found")
-    
+        series=pd.Series(df["Country"]), to="ISO2", not_found="not found"
+    )
+
     df = df[df.country != "not found"]
-    
+
     # Drop region names where country column contains list of countries
     df = df[df.country.apply(lambda x: isinstance(x, str))]
     
+
+    df = df.drop_duplicates(subset=["country"])
+
     return df
+
 
 def download_number_of_vehicles():
     """
-    Downloads and returns the number of registered vehicles 
+    Downloads and returns the number of registered vehicles
     as tabular data from WHO and Wikipedia.
-    
-    The csv data from the WHO website is imported 
-    from 'https://apps.who.int/gho/data/node.main.A995'. 
-    A few countries are missing in the WHO list (e.g. South Africa, Algeria). 
-    Therefore, the number of vehicles per country table from Wikipedia 
+
+    The csv data from the WHO website is imported
+    from 'https://apps.who.int/gho/data/node.main.A995'.
+    A few countries are missing in the WHO list (e.g. South Africa, Algeria).
+    Therefore, the number of vehicles per country table from Wikipedia
     is also imported for completion (prio 2):
     'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita'.
     """
-    
+
     def _download_vehicles_data_from_gho():
-        url = ("https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv")
+        url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
         storage_options = {"User-Agent": "Mozilla/5.0"}
         df = pd.read_csv(url, storage_options=storage_options, encoding="utf8")
-        
-        df.rename(columns={"Countries, territories and areas": "Country",
-                           "Number of registered vehicles": "number cars"},
-                  inplace=True)
-        
+
+        df.rename(
+            columns={
+                "Countries, territories and areas": "Country",
+                "Number of registered vehicles": "number cars",
+            },
+            inplace=True,
+        )
+
         df["number cars"] = df["number cars"].str.replace(" ", "").replace("", np.nan)
-        
+
         df = df.dropna(subset=["number cars"])
-        
+
         return df[["Country", "number cars"]]
 
     def _download_vehicles_data_from_wiki():
-        url = ("https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita")
+        url = "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita"
         df = pd.read_html(url)[0]
-        
-        df.rename(columns={"Location": "Country", "Vehicles": "number cars"},
-                  inplace=True)
-        
+
+        df.rename(
+            columns={"Location": "Country", "Vehicles": "number cars"}, inplace=True
+        )
+
         return df[["Country", "number cars"]]
-    
+
     try:
         nbr_vehicles = pd.concat([_download_vehicles_data_from_gho(),
                                   _download_vehicles_data_from_wiki()],
