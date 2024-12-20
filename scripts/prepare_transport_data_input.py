@@ -30,7 +30,6 @@ def _add_iso2_code_per_country_and_clean_data(df):
 
     # Drop region names where country column contains list of countries
     df = df[df.country.apply(lambda x: isinstance(x, str))]
-    
 
     df = df.drop_duplicates(subset=["country"])
 
@@ -74,15 +73,18 @@ def download_number_of_vehicles():
         df = pd.read_html(url)[0]
 
         df.rename(
-            columns={"Location": "Country", "Vehicles": "number cars"}, inplace=True
+            columns={
+                "Location": "Country", 
+                "Vehicles": "number cars"}, 
+            inplace=True
         )
 
         return df[["Country", "number cars"]]
 
     try:
-        nbr_vehicles = pd.concat([_download_vehicles_data_from_gho(),
-                                  _download_vehicles_data_from_wiki()],
-                                 ignore_index=True)
+        nbr_vehicles = pd.concat(
+            [_download_vehicles_data_from_gho(), _download_vehicles_data_from_wiki()],
+            ignore_index=True)
     except Exception as e:
         logger.warning("Failed to read the file:", e,
                        "\nReturning an empty df and falling back on the hard-coded data.")
@@ -106,9 +108,7 @@ def download_CO2_emissions():
     It is until the year 2014. # TODO: Maybe search for more recent years.
     """
     
-    url = (
-        "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
-    )
+    url = "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 
     # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
