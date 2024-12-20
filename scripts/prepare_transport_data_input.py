@@ -73,10 +73,7 @@ def download_number_of_vehicles():
         df = pd.read_html(url)[0]
 
         df.rename(
-            columns={
-                "Location": "Country", 
-                "Vehicles": "number cars"}, 
-            inplace=True
+            columns={"Location": "Country", "Vehicles": "number cars"}, inplace=True
         )
 
         return df[["Country", "number cars"]]
@@ -84,21 +81,25 @@ def download_number_of_vehicles():
     try:
         nbr_vehicles = pd.concat(
             [_download_vehicles_data_from_gho(), _download_vehicles_data_from_wiki()],
-            ignore_index=True)
+            ignore_index=True,
+        )
     except Exception as e:
-        logger.warning("Failed to read the file:", e,
-                       "\nReturning an empty df and falling back on the hard-coded data.")
+        logger.warning(
+            "Failed to read the file:",
+            e,
+            "\nReturning an empty df and falling back on the hard-coded data.",
+        )
         return pd.DataFrame()
-    
+
     nbr_vehicles["number cars"] = nbr_vehicles["number cars"].astype(int)
 
     nbr_vehicles = _add_iso2_code_per_country_and_clean_data(nbr_vehicles)
 
     # Drops duplicates and keeps WHO-GHO data in case of duplicates
-    nbr_vehicles = nbr_vehicles.drop_duplicates(subset=["country"],keep="first")
+    nbr_vehicles = nbr_vehicles.drop_duplicates(subset=["country"], keep="first")
 
     return nbr_vehicles
-    
+
 
 def download_CO2_emissions():
     """
@@ -107,8 +108,10 @@ def download_CO2_emissions():
     The dataset is downloaded from the following link: https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
     It is until the year 2014. # TODO: Maybe search for more recent years.
     """
-    
-    url = "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+
+    url = (
+        "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+    )
 
     # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
@@ -124,13 +127,13 @@ def download_CO2_emissions():
 
     # Calculate efficiency based on CO2 emissions from transport (% of total fuel combustion)
     CO2_emissions["average fuel efficiency"] = (100 - CO2_emissions["2014"]) / 100
-    
+
     CO2_emissions = CO2_emissions.dropna(subset=["average fuel efficiency"])
 
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
 
     CO2_emissions = _add_iso2_code_per_country_and_clean_data(CO2_emissions)
-    
+
     CO2_emissions["average fuel efficiency"] = CO2_emissions[
         "average fuel efficiency"
     ].astype(float)
@@ -139,8 +142,7 @@ def download_CO2_emissions():
         "average fuel efficiency"
     ].round(3)
 
-    return CO2_emissions[['country', 'average fuel efficiency']]
-
+    return CO2_emissions[["country", "average fuel efficiency"]]
 
 
 if __name__ == "__main__":
