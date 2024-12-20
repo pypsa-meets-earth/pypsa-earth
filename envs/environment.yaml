@@ -92,4 +92,3 @@ dependencies:
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent
-  #- countrycode==0.4.0 # a sub-dependency; the restriction is needed to deal with an encoding error for windows
