@@ -19,6 +19,7 @@ import rasterio
 import requests
 import xarray as xr
 from _helpers import (
+    BASE_DIR,
     configure_logging,
     create_logger,
     three_2_two_digits_country,
@@ -85,7 +86,7 @@ def download_GADM(country_code, update=False, out_logging=False):
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 
     GADM_inputfile_gpkg = os.path.join(
-        os.getcwd(),
+        BASE_DIR,
         "data",
         "gadm",
         GADM_filename,
@@ -362,6 +363,7 @@ def eez(
     distance=0.01,
     minarea=0.01,
     tolerance=0.01,
+    simplify_gadm=True,
 ):
     """
     Creates offshore shapes by buffer smooth countryshape (=offset country
@@ -386,22 +388,26 @@ def eez(
         }
     ).set_index("name")
 
-    ret_df = ret_df.geometry.map(
-        lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
-    )
+    if simplify_gadm:
+        ret_df = ret_df.geometry.map(
+            lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+        )
 
-    ret_df = ret_df.apply(lambda x: make_valid(x))
+        ret_df = ret_df.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
 
-    # repeat to simplify after the buffer correction
-    ret_df_new = ret_df_new.map(
-        lambda x: (
-            x if x is None else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+    if simplify_gadm:
+        # repeat to simplify after the buffer correction
+        ret_df_new = ret_df_new.map(
+            lambda x: (
+                x
+                if x is None
+                else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+            )
         )
-    )
-    ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
+        ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
@@ -489,7 +495,7 @@ def download_WorldPop_standard(
         ]
 
     WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "WorldPop", WorldPop_filename
+        BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
 
     if not os.path.exists(WorldPop_inputfile) or update is True:
@@ -543,7 +549,7 @@ def download_WorldPop_API(
     WorldPop_filename = f"{two_2_three_digits_country(country_code).lower()}_ppp_{year}_UNadj_constrained.tif"
     # Request to get the file
     WorldPop_inputfile = os.path.join(
-        os.getcwd(), "data", "WorldPop", WorldPop_filename
+        BASE_DIR, "data", "WorldPop", WorldPop_filename
     )  # Input filepath tif
     os.makedirs(os.path.dirname(WorldPop_inputfile), exist_ok=True)
     year_api = int(str(year)[2:])
@@ -580,12 +586,10 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
     name_file_tif = name_file_nc[:-2] + "tif"
 
     # path of the nc file
-    GDP_nc = os.path.join(os.getcwd(), "data", "GDP", name_file_nc)  # Input filepath nc
+    GDP_nc = os.path.join(BASE_DIR, "data", "GDP", name_file_nc)  # Input filepath nc
 
     # path of the tif file
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath nc
+    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath nc
 
     # Check if file exists, otherwise throw exception
     if not os.path.exists(GDP_nc):
@@ -628,9 +632,7 @@ def load_GDP(
 
     # path of the nc file
     name_file_tif = name_file_nc[:-2] + "tif"
-    GDP_tif = os.path.join(
-        os.getcwd(), "data", "GDP", name_file_tif
-    )  # Input filepath tif
+    GDP_tif = os.path.join(BASE_DIR, "data", "GDP", name_file_tif)  # Input filepath tif
 
     if update | (not os.path.exists(GDP_tif)):
         if out_logging:
@@ -1256,6 +1258,7 @@ def gadm(
     out_logging=False,
     year=2020,
     nprocesses=None,
+    simplify_gadm=True,
 ):
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
@@ -1305,7 +1308,9 @@ def gadm(
         lambda x: x if x.find(".") == 0 else "." + x
     )
     df_gadm.set_index("GADM_ID", inplace=True)
-    df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+
+    if simplify_gadm:
+        df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
     )
@@ -1338,6 +1343,7 @@ if __name__ == "__main__":
     contended_flag = snakemake.params.build_shape_options["contended_flag"]
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
+    simplify_gadm = snakemake.params.build_shape_options["simplify_gadm"]
 
     country_shapes = countries(
         countries_list,
@@ -1349,7 +1355,7 @@ if __name__ == "__main__":
     country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
-        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
+        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging, simplify_gadm
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
@@ -1371,5 +1377,6 @@ if __name__ == "__main__":
         out_logging,
         year,
         nprocesses=nprocesses,
+        simplify_gadm=simplify_gadm,
     )
     save_to_geojson(gadm_shapes, out.gadm_shapes)

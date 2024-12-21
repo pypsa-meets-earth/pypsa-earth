@@ -24,7 +24,6 @@ import yaml
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
 from shapely.geometry import Point
-from vresutils.costdata import annuity
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +35,14 @@ REGION_COLS = ["geometry", "name", "x", "y", "country"]
 # filename of the regions definition config file
 REGIONS_CONFIG = "regions_definition_config.yaml"
 
+# prefix when running pypsa-earth rules in different directories (if running in pypsa-earth as subworkflow)
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
-def check_config_version(config, fp_config="config.default.yaml"):
+# absolute path to config.default.yaml
+CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+
+
+def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
@@ -87,7 +92,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 def copy_default_files():
-    fn = Path("config.yaml")
+    fn = Path(os.path.join(BASE_DIR, "config.yaml"))
     if not fn.exists():
         fn.write_text(
             "# Write down config entries differing from config.default.yaml\n\nrun: {}"
@@ -917,6 +922,21 @@ def get_last_commit_message(path):
 
 
 # PYPSA-EARTH-SEC
+def annuity(n, r):
+    """
+    Calculate the annuity factor for an asset with lifetime n years and.
+
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    """
+
+    if isinstance(r, pd.Series):
+        return pd.Series(1 / n, index=r.index).where(
+            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
+        )
+    elif r > 0:
+        return r / (1.0 - 1.0 / (1.0 + r) ** n)
+    else:
+        return 1 / n
 
 
 def prepare_costs(
@@ -1293,6 +1313,9 @@ def locate_bus(
     # in strings - conditional formatting
     # insert any variable into that place using .format - extract string and filter for those containing co (MA)
     point = Point(coords["x"], coords["y"])  # point object
+
+    if gdf_co.empty:
+        return None
 
     try:
         return gdf_co[gdf_co.contains(point)][
