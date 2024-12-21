@@ -82,6 +82,10 @@ PyPSA-Earth 0.5.0
 
 * Drop vrestil dependency `PR #1220 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1220>`__
 
+* Include a configuration option to simplify / not simplify shapefiles based on a boolean value specified under `build_shape_options:simplify_gadm` option in the config file `PR 1138 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1138>`_
+
+* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
+
 * Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`__
 
 * Fix the environment placing a version limit to numpoly `PR #1237 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1237>`__
