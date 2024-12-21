@@ -50,7 +50,13 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, read_osm_config
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+    read_osm_config,
+)
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -121,7 +127,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         sel_ext = ".nc"
         for ext in [".nc", ".csv"]:
-            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            load_path = os.path.join(BASE_DIR, str(load_dir), str(continent) + str(ext))
             if os.path.exists(load_path):
                 sel_ext = ext
                 break
@@ -292,11 +298,10 @@ def build_demand_profiles(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_demand_profiles")
-        sets_path_to_root("pypsa-earth")
+
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)

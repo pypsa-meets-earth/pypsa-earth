@@ -285,10 +285,8 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     unique_tech_with_ng = df.loc[fueltype, "Technology"].unique()
     unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
     if len(unknown_techs) > 0:
-        df.Technology.where(
-            fueltype,
-            df["Technology"].map({t: "CCGT" for t in unknown_techs}),
-            inplace=True,
+        df.loc[fueltype, "Technology"] = df.loc[fueltype, "Technology"].replace(
+            {t: "CCGT" for t in unknown_techs}
         )
     df["Fueltype"] = np.where(fueltype, df["Technology"], df["Fueltype"])
     return df
@@ -298,12 +296,11 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_powerplants")
 
     configure_logging(snakemake)
 
-    with open(snakemake.input.pm_config, "r") as f:
+    with open(snakemake.input.pm_config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     filepath_osm_ppl = snakemake.input.osm_powerplants

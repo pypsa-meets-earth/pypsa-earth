@@ -536,13 +536,12 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "make_summary",
             simpl="",
-            clusters="5",
+            clusters="4",
             ll="copt",
-            opts="Co2L-3H",
+            opts="Co2L-4H",
             country="all",
         )
         network_dir = ".."

@@ -1,0 +1,91 @@
+name: Test workflows
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  schedule:
+  - cron: "0 5 * * TUE"
+
+# Cancel any in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CACHE_NUMBER: 0  # Change this value to manually reset the environment cache
+
+jobs:
+  run-tests:
+    name: OS
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos] #, windows]
+        include:
+        - os: ubuntu
+          env_file: envs/linux-pinned.yaml
+        - os: macos
+          env_file: envs/macos-pinned.yaml
+        # - os: windows
+        #   env_file: envs/windows-pinned.yaml
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v4
+
+
+    - name: Setup micromamba
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        micromamba-version: '1.5.9-1'
+        environment-file: ${{ matrix.env_file }}
+        log-level: debug
+        init-shell: bash
+        cache-environment: true
+        cache-downloads: true
+
+
+    - name: Set cache dates
+      run: |
+        echo "WEEK=$(date +'%Y%U')" >> $GITHUB_ENV
+
+    - name: Cache data and cutouts folders
+      uses: actions/cache@v4
+      with:
+        path: |
+          data
+          cutouts
+        key: data-cutouts-${{ env.WEEK }}-${{ env.CACHE_NUMBER }}
+
+
+    - name: Micromamba list
+      run: micromamba list
+
+    - name: Run Test
+      run: make test
+
+    - name: Upload artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: results-${{ matrix.os }}
+        path: |
+          logs
+          .snakemake/log
+          results
+        retention-days: 3
+
+      # - name: Test plotting and summaries
+      #   run: |
+      #     snakemake --cores all plot_all_p_nom
+      #     snakemake --cores all plot_all_summaries
+      #     snakemake --cores all make_all_summaries
+      #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results

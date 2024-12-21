@@ -551,12 +551,10 @@ def fill_circuits(df):
         return len_f, len_c, isna_c, len_cab, isna_cab
 
     def _parse_float(x, ret_def=0.0):
-        if isinstance(x, (int, float)):
+        try:
             return float(x)
-        str_x = str(x)
-        if str_x.isnumeric():
-            return float(str_x)
-        return ret_def
+        except:
+            return ret_def
 
     # cables requirement for circuits calculation
     cables_req = {
@@ -1064,7 +1062,6 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("clean_osm_data")
     configure_logging(snakemake)
 
