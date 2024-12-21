@@ -488,7 +488,10 @@ def attach_hydro(n, costs, ppl):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
-    bus_id = ppl["bus"]
+    if snakemake.params.alternative_clustering:
+        bus_id = ppl["region_id"]
+    else:
+        bus_id = ppl["bus"]
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:

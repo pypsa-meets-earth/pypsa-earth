@@ -356,6 +356,9 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         logger.info("No bus has installed hydro plants, ignoring normalization.")
         return runoff
 
+    if snakemake.params.alternative_clustering:
+        plants = plants.set_index("shape_id")
+
     years_statistics = normalize_using_yearly.index
     if isinstance(years_statistics, pd.DatetimeIndex):
         years_statistics = years_statistics.year
@@ -530,6 +533,24 @@ if __name__ == "__main__":
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
         cutout = filter_cutout_region(cutout, regions)
 
+    if snakemake.params.alternative_clustering:
+        regions = gpd.GeoDataFrame(
+            regions.reset_index()
+            .groupby("shape_id")
+            .agg(
+                {
+                    "x": "mean",
+                    "y": "mean",
+                    "country": "first",
+                    "geometry": "first",
+                    "bus": "first",
+                }
+            )
+            .reset_index()
+            .set_index("bus"),
+            crs=regions.crs,
+        )
+
     buses = regions.index
 
     func = getattr(cutout, resource.pop("method"))
@@ -556,10 +577,17 @@ if __name__ == "__main__":
         # select busbar whose location (p) belongs to at least one hydrobasin geometry
         # if extendable option is true, all buses are included
         # otherwise only where hydro powerplants are available are considered
-        filter_bus_to_consider = regions.index.map(
-            lambda bus_id: config.get("extendable", False)
-            | (bus_id in hydro_ppls.bus.values)
-        )
+        if snakemake.params.alternative_clustering:
+            filter_bus_to_consider = regions.index.map(
+                lambda bus_id: config.get("extendable", False)
+                | (bus_id in hydro_ppls.region_id.values)
+            )
+        ### TODO: quickfix. above case and the below case should by unified
+        if snakemake.params.alternative_clustering == False:
+            filter_bus_to_consider = regions.index.map(
+                lambda bus_id: config.get("extendable", False)
+                | (bus_id in hydro_ppls.bus.values)
+            )
         bus_to_consider = regions.index[filter_bus_to_consider]
 
         # identify subset of buses within the hydrobasins
@@ -577,10 +605,17 @@ if __name__ == "__main__":
             columns={"x": "lon", "y": "lat", "country": "countries"}
         ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
-        resource["plants"]["installed_hydro"] = [
-            True if (bus_id in hydro_ppls.bus.values) else False
-            for bus_id in resource["plants"].index
-        ]
+        # TODO: these cases shall be fixed by restructuring the alternative clustering procedure
+        if snakemake.params.alternative_clustering == False:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.bus.values) else False
+                for bus_id in resource["plants"].index
+            ]
+        else:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.region_id.values) else False
+                for bus_id in resource["plants"].shape_id.values
+            ]
 
         # get normalization before executing runoff
         normalization = None
@@ -596,6 +631,8 @@ if __name__ == "__main__":
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
+            if snakemake.params.alternative_clustering:
+                inflow["plant"] = regions.shape_id.loc[inflow["plant"]].values
 
             if "clip_min_inflow" in config:
                 inflow = inflow.where(inflow >= config["clip_min_inflow"], 0)
