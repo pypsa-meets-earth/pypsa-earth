@@ -11,7 +11,6 @@ logging:
 
 results_dir: results/
 summary_dir: results/
-costs_dir: data/ # TODO change to the equivalent of technology data
 
 foresight: overnight
 
@@ -357,7 +356,7 @@ renewable:
 # TODO: Needs to be adjusted for Africa.
 costs:
   year: 2030
-  version: v0.6.2
+  version: v0.10.0
   discountrate: [0.071] #, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html

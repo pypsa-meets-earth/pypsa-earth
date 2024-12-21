@@ -15,6 +15,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`__
 
+* Drop duplication of retrieve_data and COST_DIR, add params and update technology-data version `PR #1120 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1120>`__
 
 **Minor Changes and bug-fixing**
 

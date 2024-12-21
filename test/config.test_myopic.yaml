@@ -8,7 +8,6 @@ tutorial: true
 
 results_dir: results/
 summary_dir: results/
-costs_dir: data/ #TODO change to the equivalent of technology data
 
 run:
   name: "test_myopic" # use this to keep track of runs with different settings
@@ -99,7 +98,7 @@ custom_data:
 
 
 costs: # Costs used in PyPSA-Earth-Sec. Year depends on the wildcard planning_horizon in the scenario section
-  version: v0.6.2
+  version: v0.10.0
   lifetime: 25 #default lifetime
   # From a Lion Hirth paper, also reflects average of Noothout et al 2016
   discountrate: [0.071] #, 0.086, 0.111]
