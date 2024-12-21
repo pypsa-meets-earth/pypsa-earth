@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from _helpers import read_csv_nafix, three_2_two_digits_country
+from _helpers import BASE_DIR, read_csv_nafix, three_2_two_digits_country
 
 _logger = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_energy_totals",
             simpl="",
-            clusters=32,
-            demand="EG",
+            clusters="4",
+            demand="AB",
             planning_horizons=2030,
         )
 
@@ -53,7 +53,9 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
-    base_energy_totals = read_csv_nafix("data/energy_totals_base.csv", index_col=0)
+    base_energy_totals = read_csv_nafix(
+        os.path.join(BASE_DIR, "data/energy_totals_base.csv"), index_col=0
+    )
     growth_factors_cagr = read_csv_nafix(
         snakemake.input.growth_factors_cagr, index_col=0
     )
