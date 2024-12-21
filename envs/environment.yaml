@@ -87,7 +87,7 @@ dependencies:
 - gurobi
 
 - pip:
-  - earth-osm>=2.2 # until conda release it out for earth-osm
+  - earth-osm==2.2 # until conda release it out for earth-osm
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip

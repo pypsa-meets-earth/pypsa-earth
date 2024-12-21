@@ -2916,12 +2916,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="19",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="72H",
-            discountrate="0.071",
+            sopts="144H",
+            discountrate=0.071,
             demand="AB",
         )
 
