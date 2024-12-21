@@ -91,7 +91,6 @@ from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
-from vresutils.benchmark import memory_logger
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
