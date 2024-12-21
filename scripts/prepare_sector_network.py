@@ -172,7 +172,7 @@ def H2_liquid_fossil_conversions(n, costs):
         bus2=spatial.co2.nodes,
         bus3=spatial.nodes,
         carrier="Fischer-Tropsch",
-        efficiency=1 / costs.at["Fischer-Tropsch", "hydrogen-input"],
+        efficiency=costs.at["Fischer-Tropsch", "efficiency"],
         capital_cost=costs.at["Fischer-Tropsch", "fixed"]
         * costs.at[
             "Fischer-Tropsch", "efficiency"
