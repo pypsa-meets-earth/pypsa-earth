@@ -120,6 +120,7 @@ Documentation
 
 * :doc:`introduction`
 * :doc:`installation`
+* :doc:`docker_containers`
 * :doc:`short_tutorial`
 * :doc:`tutorial`
 * :doc:`data_workflow`
@@ -132,6 +133,7 @@ Documentation
 
    introduction
    installation
+   docker_containers
    short_tutorial
    tutorial
    data_workflow

@@ -9,6 +9,7 @@ tutorial: true
 countries: ["NG", "BJ"]
 
 enable:
+  retrieve_databundle: true
   build_natura_raster: true
   progress_bar: false
 
