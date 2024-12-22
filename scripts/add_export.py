@@ -38,7 +38,7 @@ def select_ports(n):
         index_col=None,
         keep_default_na=False,
     ).squeeze()
-    
+
     gadm_level = snakemake.params.gadm_level
 
     ports = locate_bus(
