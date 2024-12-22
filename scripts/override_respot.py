@@ -73,13 +73,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "override_respot",
             simpl="",
-            clusters="16",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="3H",
-            demand="AP",
+            sopts="144H",
             discountrate=0.071,
+            demand="AB",
         )
 
     overrides = override_component_attrs(snakemake.input.overrides)

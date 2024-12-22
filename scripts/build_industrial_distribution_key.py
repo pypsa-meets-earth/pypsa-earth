@@ -113,11 +113,9 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
-            simpl="",
-            clusters=4,
-            demand="AB",
+            clusters="4",
             planning_horizons=2050,
-            # configfile="test/config.test1.yaml",
+            demand="AB",
         )
 
     regions = gpd.read_file(snakemake.input.regions_onshore)

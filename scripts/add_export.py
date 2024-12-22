@@ -38,6 +38,7 @@ def select_ports(n):
         index_col=None,
         keep_default_na=False,
     ).squeeze()
+    
     gadm_level = snakemake.params.gadm_level
 
     ports = locate_bus(
@@ -46,10 +47,15 @@ def select_ports(n):
         gadm_level,
         snakemake.input.shapes_path,
         snakemake.params.alternative_clustering,
-    ).set_index("gadm_{}".format(gadm_level))
+    )
+
+    # TODO: revise if ports quantity and property by shape become relevant
+    # drop duplicated entries
+    gcol = "gadm_{}".format(gadm_level)
+    ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports
-    hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
+    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
@@ -118,14 +124,27 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     elif snakemake.params.store == False:
         pass
 
-    # add load
-    n.add(
-        "Load",
-        "H2 export load",
-        bus="H2 export bus",
-        carrier="H2",
-        p_set=export_profile,
-    )
+    if snakemake.params.export_endogenous:
+        # add endogenous export by implementing a negative generation
+        n.add(
+            "Generator",
+            "H2 export load",
+            bus="H2 export bus",
+            carrier="H2",
+            sign=-1,
+            p_nom_extendable=True,
+            marginal_cost=snakemake.params.endogenous_price * (-1),
+        )
+
+    else:
+        # add exogenous export by implementing a load
+        n.add(
+            "Load",
+            "H2 export load",
+            bus="H2 export bus",
+            carrier="H2",
+            p_set=export_profile,
+        )
 
     return
 
@@ -136,7 +155,8 @@ def create_export_profile():
     and resamples it to temp resolution obtained from the wildcard.
     """
 
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
+    # convert TWh to MWh
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6
 
     if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760

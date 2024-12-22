@@ -499,12 +499,12 @@ if __name__ == "__main__":
             "build_industrial_database",
             simpl="",
             clusters="4",
-            ll="c1.0",
-            opts="Co2L",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
-            discountrate="0.071",
-            demand="DF",
+            discountrate=0.071,
+            demand="AB",
         )
 
     industrial_database_steel = create_steel_db()
