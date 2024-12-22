@@ -5,7 +5,7 @@
 .. _users_list:
 
 ##########################################
-PyPSA-Earth Applications
+PyPSA-Earth Usage Examples
 ##########################################
 
 Power system modeling for **Korea** to support development of the national energy strategy, considering ESS Capacity expansion, LMP & Cost analysis according to ESS combination, and coal phase-out scenario (`Energy Innovation Lab <https://energyinnovation.korea.ac.kr/>`_ at `Korea University <https://www.korea.ac.kr/sites/ko/index.do>`_)
