@@ -2,12 +2,11 @@
 ..
 .. SPDX-License-Identifier: CC-BY-4.0
 
-.. PyPSA meets Earth documentation master file, created by
-   sphinx-quickstart on Sat May 15 22:52:54 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _users_list:
 
-Power system modeling for Korea to support development of the national energy strategy, considering ESS Capacity expansion, LMP & Cost analysis according to ESS combination, and coal phase-out scenario (`Energy Innovation Lab <https://energyinnovation.korea.ac.kr/>`_ at `Korea University <https://www.korea.ac.kr/sites/ko/index.do>`_)
+##########################################
+PyPSA-Earth Applications
+##########################################
 
 Development a model for the Pakistan Power Systemb (Soon available on GitHub in PyPSA-Earth's repository) cross-referenced and validated with national reports. The model has been used to develop the Net-Zero scenario by 2050 utilizing Pakistan's eligible Wind and Solar potential.
 
