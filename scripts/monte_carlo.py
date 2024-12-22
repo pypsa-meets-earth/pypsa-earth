@@ -353,9 +353,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "monte_carlo",
             simpl="",
-            clusters="10",
+            clusters="4",
             ll="copt",
-            opts="Co2L-24H",
+            opts="Co2L-4H",
             unc="m0",
         )
     configure_logging(snakemake)

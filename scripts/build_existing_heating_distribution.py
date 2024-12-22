@@ -170,9 +170,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_existing_heating_distribution",
             simpl="",
-            clusters=4,
+            clusters="4",
             planning_horizons=2030,
-            demand="DF",
+            demand="AB",
         )
 
     build_existing_heating()
