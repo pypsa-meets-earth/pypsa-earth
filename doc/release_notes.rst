@@ -18,6 +18,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update BW, NG and BJ tutorial databundles to include gadm-like sources from geoboundaries `PR #1257 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1257>`__
 
 
 PyPSA-Earth 0.5.0
