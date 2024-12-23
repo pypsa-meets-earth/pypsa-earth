@@ -34,7 +34,7 @@ You will also need GitHub Desktop to clone the PyPSA-Earth repository. Install G
 3. Paste the following URL in the URL field:
 
     ```bash
-    https://github.com/drifter089/pypsa-earth.git
+    https://github.com/pypsa-meets-earth/pypsa-earth.git
     ```
 
 4. Click on **Clone**.
