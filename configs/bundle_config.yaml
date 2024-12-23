@@ -41,10 +41,10 @@ databundles:
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/gadm/gadm41_NGA/gadm41_NGA.gpkg
-    - data/gadm/gadm41_BEN/gadm41_BEN.gpkg
-    - data/gadm/gadm36_NGA/gadm36_NGA.gpkg
-    - data/gadm/gadm36_BEN/gadm36_BEN.gpkg
+    - data/gadm/gadm41_NGA/gadm41_NGA.gpkg  # needed in build_shapes
+    - data/gadm/gadm41_BEN/gadm41_BEN.gpkg  # needed in build_shapes
+    - data/gadm/gadm36_NGA/gadm36_NGA.gpkg  # needed in sector-coupled model
+    - data/gadm/gadm36_BEN/gadm36_BEN.gpkg  # needed in sector-coupled model
 
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
@@ -58,8 +58,8 @@ databundles:
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/gadm/gadm41_BWA/gadm41_BWA.gpkg
-    - data/gadm/gadm36_BWA/gadm36_BWA.gpkg
+    - data/gadm/gadm41_BWA/gadm41_BWA.gpkg  # needed in build_shapes
+    - data/gadm/gadm36_BWA/gadm36_BWA.gpkg  # needed in sector-coupled model
 
   # tutorial bundle specific for Morocco only
   bundle_tutorial_MA:
@@ -371,6 +371,9 @@ databundles:
       protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
     output: [data/landcover/world_protected_areas/*]
 
+  # Backup tutorial bundles with no gadm-like data; for reference:
+  # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1258
+  #
   # # tutorial bundle specific for Nigeria and Benin only, without gadm-like data
   # bundle_tutorial_NGBJ:
   #   countries: [NG, BJ]
