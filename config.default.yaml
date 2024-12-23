@@ -355,6 +355,7 @@ renewable:
     csp_model: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa.
+# Costs Configuration
 costs:
   year: 2030
   version: v0.6.2
