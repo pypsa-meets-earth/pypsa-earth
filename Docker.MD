@@ -17,7 +17,11 @@ Ensure Docker is installed on your system. Follow the instructions for your oper
 - **Linux**: [Docker for Linux](https://docs.docker.com/desktop/install/linux/)
 - **MacOS**: [Docker for MacOS](https://docs.docker.com/desktop/install/mac-install/)
 
-### 2. Install GitHub Desktop
+### 2. Install Visual Studio Code(VSC)
+
+You can use the link [here](https://code.visualstudio.com/download) to install Visual Studio Code on your operating system. Ensure to select the most compatible file for your operating system.
+
+### 3. Install GitHub Desktop
 
 You will also need GitHub Desktop to clone the PyPSA-Earth repository. Install GitHub Desktop for your operating system from [here](https://desktop.github.com/download/).
 
