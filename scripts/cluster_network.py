@@ -639,7 +639,7 @@ def save_to_geojson(s, fn):
         os.unlink(fn)
     df = s.reset_index()
     schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-    df.to_file(fn, driver="GeoJSON", schema=schema)
+    df.to_file(fn, driver="GeoJSON", schema=schema, engine="fiona")
 
 
 def cluster_regions(busmaps, inputs, output):
